@@ -69,6 +69,14 @@ unit_interpret = {"ppm": "1e-6",
                   "ppq": "1e-15",
                   "else": "unknown"}
 
+# GJ - comments below come from original file
+# Default calibration scales
+# TODO: Remove this? seems dangerous
+scales = {"CO2": "NOAA-2007",
+            "CH4": "NOAA-2004A",
+            "N2O": "SIO-98",
+            "CO": "Unknown"}
+
 
 
 def site_info_attributes(site):
