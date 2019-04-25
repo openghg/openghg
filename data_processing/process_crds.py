@@ -153,8 +153,9 @@ def process_data(data_files, inlets, site):
         # Create the pandas dataframe
         ds, species = read_data_file(data_files[i])
 
-        # Write a NetCDF file for each species
+        # Create a dataset for each species
         for sp in species:
+            print("Processing species : " + sp)
             # Species specific dataset
             species_ds = ds[[sp, sp + " variability", sp + " number_of_observations"]]
             species_ds = species_ds.dropna("time")
@@ -178,7 +179,53 @@ def process_data(data_files, inlets, site):
 
     return species_datasets
 
+def parse_filenames(file_list):
+    """ Returns a prettified list of filenames from the path
+
+        Not sure if this is necessarily needed but may be handy for
+        processing and feedback to the user
+
+        Include some kind of MD5 for saving and recording 
+        of already uploaded data?
+    """
+
+    pretty_filenames = [x.split("/")[-1] for x in file_list]
+
+    return pretty_filenames
+
+
+def process_raw_data(folder_path, site, search_string):
+    """ Process data in folder_path into
+        xarray.Datasets 
+
+        Args:
+            Example: ".*.1minute.*.dat"
+            folder_path (str): Path for folder containing data
+            site (str): Site of data
+            Example: ".*.1minute.*.dat"
+            search_string (str): Search string to find files
+            Example: ".*.1minute.*.dat"
+        Returns:
+            list: List of xarray.Datasets for each species found in
+            the folder
+    """
+
+    file_list = search_data_files(data_folder=folder_path, site=site,
+                                           search_string=search_string)
     
+    print("\nFiles found : ", parse_filenames(file_list))
+
+    inlets = find_inlets(file_list)
+
+    print("\nInlets found : ", inlets)
+
+    species_data = process_data(data_files=file_list, 
+                                        inlets=inlets, site="BSD")
+
+    return species_data
+
+
+
 def write_files(data_list, output_folder):
     """ Writes the data in data_list to file
 
