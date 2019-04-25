@@ -8,28 +8,6 @@ import datetime
 from data_processing import utils
 import pandas as pd
 
-# Currently a class, not sure it needs to be as it's just an assortment
-# of related functions and not really an object
-
-# class proc_CRDS:
-    # def __init__(self):
-    #     # Load in parameters data
-    #     self.metadata_folder = "metadata"
-    #     self.site_info_file = "acrg_site_info.json"
-
-    #     # TODO - this seems clunky - pytest?
-    #     # os.path.dirname(__file__)
-
-        
-
-    #     try:   
-    #         with open(site_info_file, "r") as f:
-    #             self.site_params = json.load(f)
-    #     except FileNotFoundError as err:
-    #         print("Cannot open ", site_info_file, err)
-
-# def crds_data_read(data_file)
-# From process_gcwerks.py
 def read_data_file(data_file):
     """ This function reads in a single CRDS datafile
         and creates a Pandas dataframe to store the data
@@ -102,11 +80,10 @@ def search_data_files(data_folder, site, search_string):
 
     file_search = os.path.join(data_folder, site.lower() + search_string)
 
-    print("Data folder : " + data_folder)
-    print("Filesearch : " + file_search)
     data_files = glob.glob(file_search)
 
     return data_files
+    
 
 def find_inlets(data_files):
     """ Creates a list of inlets from the current data files
@@ -119,30 +96,8 @@ def find_inlets(data_files):
     # Find the inlets
     return [f.split(".")[-2] for f in data_files]
 
-# def populate_data_list(self, data_folder, site, search_string):
-#     """ This function populates a list of data files to use and
-#         a list of inlets
 
-#         Args:
-#             data_folder (str): The directory holding data files
-#             search_string (str): Search string to find files
-#             Example: ".*.1minute.*.dat"
-#         Returns:
-#             None           
-#     """
-
-#     # self.params = self.params["CRDS"]
-
-#     # site_string = self.params[site]["gcwerks_site_name"]
-
-#     # 2019-04-24
-#     # I'll get rid of this for now, I don't like this being hard coded in
-#     # data_dir = self.params["directory"].replace("%site, site_string")
-
-#     # search_string = ".*.1minute.*.dat"
-#     self.data_files = self.search_data_files(data_folder, site, search_string)
-
-def load_from_JSON(filename, path):
+def load_from_JSON(path, filename):
     """ Reads in from a JSON file
 
         Args:
@@ -158,12 +113,12 @@ def load_from_JSON(filename, path):
 
     # Load the JSON file in as a dictionary
     with open(params_file, "r") as f:
-        params = json.load(f)
+        d = json.load(f)
 
-    return params
+    return d
 
 
-def process_data(data_files, inlets):
+def process_data(data_files, inlets, site):
     """ Process the list of data files in data_files
         and create a list of Pandas dataframes
 
@@ -178,7 +133,17 @@ def process_data(data_files, inlets):
     gcwerks_param_file = "process_gcwerks_parameters.json"
     metadata_folder = "metadata"
 
-    params = load_from_JSON(metadata_folder, gcwerks_param_file)
+    params = load_from_JSON(path=metadata_folder, filename=gcwerks_param_file)
+
+    params = params["CRDS"]
+
+    # GJ - comments below come from original file
+    # Default calibration scales
+    # TODO: Remove this? seems dangerous
+    scales = {"CO2": "NOAA-2007",
+              "CH4": "NOAA-2004A",
+              "N2O": "SIO-98",
+              "CO": "Unknown"}
 
     # A dataset for each species
     species_datasets = []
@@ -202,7 +167,7 @@ def process_data(data_files, inlets):
                             global_attributes=global_attributes,
                             scale=scales[sp],
                             sampling_period=60,
-                            date_range=date_range)
+                            date_range=None)
 
             # TODO - sort this out
             if len(species_ds.time.values) == 0:
@@ -231,14 +196,10 @@ def write_files(data_list, output_folder):
     network = "test_network"
     site = "test"
 
-
     for d in data_list:
-        if not isinstance(d, xarray.Dataset):
-            raise TypeError("Passed list must contain only xarray.Dataset objects")
-        else:
-            # Create the filename
-            nc_filename = utils.output_filename(output_folder, network, "CRDS", site.upper(),
-                                            d.time.to_pandas().index.to_pydatetime()[0],
-                                            d.species, inlet=inlet, version=version)
-            # Write to file
-            d.to_netcdf(nc_filename)
+        # Create the filename
+        nc_filename = utils.output_filename(output_folder, network, "CRDS", site.upper(),
+                                        d.time.to_pandas().index.to_pydatetime()[0],
+                                        d.species, inlet=inlet, version=version)
+        # Write to file
+        d.to_netcdf(nc_filename)

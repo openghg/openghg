@@ -1,11 +1,85 @@
 """
     Helper functions for processing data
 """
+import os
+import json
+import datetime
+
+# TODO - Maybe these can be saved as JSONs and be loaded in instead of hanging 
+# around in the code?
+
+# For species which need more than just a hyphen removing or changing to lower case
+# First element of list is the output variable name,
+# second is the long name for variable standard_name and long_name
+# Keys are upper case
+species_translator = {"CO2": ["co2", "carbon_dioxide"],
+                      "CH4": ["ch4", "methane"],
+                      "ETHANE": ["c2h6", "ethane"],
+                      "PROPANE": ["c3h8", "propane"],
+                      "C-PROPANE": ["cc3h8", "cpropane"],
+                      "BENZENE": ["c6h6", "benzene"],
+                      "TOLUENE": ["c6h5ch3", "methylbenzene"],
+                      "ETHENE": ["c2f4", "ethene"],
+                      "ETHYNE": ["c2h2", "ethyne"],
+                      "N2O": ["n2o", "nitrous_oxide"],
+                      "CO": ["co", "carbon_monoxide"],
+                      "H-1211": ["halon1211", "halon1211"],
+                      "H-1301": ["halon1301", "halon1301"],
+                      "H-2402": ["halon2402", "halon2402"],
+                      "PCE": ["c2cl4", "tetrachloroethylene"],
+                      "TCE": ["c2hcl3", "trichloroethylene"],
+                      "PFC-116": ["c2f6", "hexafluoroethane"],
+                      "PFC-218": ["c3f8", "octafluoropropane"],
+                      "PFC-318": ["c4f8", "cyclooctafluorobutane"],
+                      "F-113": ["cfc113", "cfc113"],
+                      "H2_PDD": ["h2", "hydrogen"],
+                      "NE_PDD": ["Ne", "neon"],                      
+                      "DO2N2": ["do2n2", "ratio_of_oxygen_to_nitrogen"],
+                      "DCH4C13": ["dch4c13", "delta_ch4_c13"],
+                      "DCH4D": ["dch4d", "delta_ch4_d"],
+                      "DCO2C13": ["dco2c13", "delta_co2_c13"],
+                      "DCO2C14": ["dco2c14", "delta_co2_c14"],
+                      "APO": ["apo", "atmospheric_potential_oxygen"]
+                      }
+
+                      # Output unit strings (upper case for matching)
+unit_species = {"CO2": "1e-6",
+                "CH4": "1e-9",
+                "C2H6": "1e-9",
+                "N2O": "1e-9",
+                "CO": "1e-9",
+                "DCH4C13": "1",
+                "DCH4D": "1",
+                "DCO2C13": "1",
+                "DCO2C14": "1",
+                "DO2N2" : "1",
+                "APO" : "1"}
+
+# If units are non-standard, this attribute can be used
+unit_species_long = {"DCH4C13": "permil",
+                     "DCH4D": "permil",
+                     "DCO2C13": "permil",
+                     "DCO2C14": "permil",
+                     "DO2N2" : "per meg",
+                     "APO" : "per meg"}
+
+unit_interpret = {"ppm": "1e-6",
+                  "ppb": "1e-9",
+                  "ppt": "1e-12",
+                  "ppq": "1e-15",
+                  "else": "unknown"}
+
+
 
 def site_info_attributes(site):
 
     # Read site info file
-    site_info_file = join(acrg_path, "acrg_site_info.json")
+    metadata_dir = "metadata"
+    file_path = os.path.dirname(__file__)
+
+    metadata_path = os.path.join(file_path, metadata_dir)
+
+    site_info_file = os.path.join(metadata_path, "acrg_site_info.json")
     with open(site_info_file) as sf:
         site_params = json.load(sf)
         
@@ -107,10 +181,12 @@ def attributes(ds, species, site,
             global_attributes[key] = global_attributes_default[key]
 
     # Add some defaults
-    global_attributes["File created"] = str(dt.now())
+    global_attributes["File created"] = str(datetime.datetime.now())
 
     # Add user
-    global_attributes["Processed by"] = "%s@bristol.ac.uk" % getpass.getuser()    
+    # global_attributes["Processed by"] = "%s@bristol.ac.uk" % getpass.getuser()    
+
+    global_attributes["Processed by"] = "HUGS_project@bristol.ac.uk"    
 
 
     for key, values in global_attributes.items():
@@ -251,8 +327,8 @@ def output_filename(output_directory,
     """
 
     # Check if directory exists. If not, create it
-    if not os.path.exists(join(output_directory, site)):
-        os.makedirs(join(output_directory, site))
+    if not os.path.exists(os.path.join(output_directory, site)):
+        os.makedirs(os.path.join(output_directory, site))
 
     # Create suffix. If inlet is specified, append to species name
     suffix = species
@@ -264,7 +340,7 @@ def output_filename(output_directory,
         suffix += "-" + time.strftime("%Y%m%d")
 
     # Return output filename
-    return join(output_directory,
+    return os.path.join(output_directory,
                 "%s/%s-%s_%s_%04i%02i%02i_%s.nc" % (site,
                                                     network,
                                                     instrument,
