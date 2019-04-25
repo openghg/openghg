@@ -185,8 +185,13 @@ def parse_filenames(file_list):
         Not sure if this is necessarily needed but may be handy for
         processing and feedback to the user
 
-        Include some kind of MD5 for saving and recording 
+        Include some kind of MD5 for saving and recording
         of already uploaded data?
+
+        Args:
+            file_list (list): A list of filepaths to be prettified
+        Returns:
+            list: List of filenames
     """
 
     pretty_filenames = [x.split("/")[-1] for x in file_list]
@@ -202,7 +207,6 @@ def process_raw_data(folder_path, site, search_string):
             Example: ".*.1minute.*.dat"
             folder_path (str): Path for folder containing data
             site (str): Site of data
-            Example: ".*.1minute.*.dat"
             search_string (str): Search string to find files
             Example: ".*.1minute.*.dat"
         Returns:
@@ -234,10 +238,6 @@ def write_files(data_list, output_folder):
             output_folder (str): Folder to write NetCDFs
         Returns:
             None
-        Raises:
-            TypeError: If the list contains an object that
-            is not an xarray.Datset
-
     """
 
     network = "test_network"
