@@ -5,8 +5,3 @@ in the object store
 
 
 """
-
-
-
-
-

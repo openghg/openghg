@@ -87,18 +87,18 @@ def test_processing_data():
     assert isinstance(species_data[0], xarray.Dataset)
 
 
-def test_process_raw():
-    # Test reading in of a folder of data and the handling of it
-    site = "BSD"
-    search_string = ".*.1minute.*.dat"
-    data_path = os.path.abspath("data/bilsdale-picarro")
+# def test_process_raw():
+#     # Test reading in of a folder of data and the handling of it
+#     site = "BSD"
+#     search_string = ".*.1minute.*.dat"
+#     data_path = os.path.abspath("data/bilsdale-picarro")
 
-    datas = procCRDS.process_raw_data(
-        folder_path=data_path, site=site, search_string=search_string)
+#     datas = procCRDS.process_raw_data(
+#         folder_path=data_path, site=site, search_string=search_string)
 
-    print(len(datas))
+#     print(len(datas))
 
-    assert True
+#     assert True
 
 
 
