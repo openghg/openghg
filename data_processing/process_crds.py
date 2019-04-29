@@ -31,22 +31,39 @@ def read_data_file(data_file):
     crds_header_string_interpret = {"C": "",
                                     "stdev": " variability",
                                     "N": " number_of_observations"}
-    
+
+    # Here assign a UID to this sensor
+
+    # Split different gases?
+
+    # Store dates
+    # UUID for height
+    # UUID for gas
+
     # Create header list
     for i in df_header.columns:
+        #  Ignore the metadata
+        # column - row
+        print("df_header[i][0]: ", df_header[i][0])
+        print("df_header[i][1]: ", df_header[i][1])
+
         if df_header[i][0] != '-':
             header.append(df_header[i][0].upper() +
                         crds_header_string_interpret[df_header[i][1]])
 
+            # This takes in the readings
             if df_header[i][1] == "C":
                 species.append(df_header[i][0].upper())
         else:
             header.append(df_header[i][1].upper())
 
     # Read in the data
+    # Once the header data is parsed create a pandas dataframe for the 
+    # data in the file
     df = pd.read_csv(data_file, skiprows=4, header=None, sep=r"\s+", 
                     names=header, dtype={"DATE": str, "TIME": str})
                     
+    print(header)
 
     # TODO - GJ - I don't like this - tidy it up somehow?
     # Interpret time
@@ -116,6 +133,19 @@ def load_from_JSON(path, filename):
         d = json.load(f)
 
     return d
+
+
+def process_metadata(file):
+    """ Extracts the metadata from a datafile
+
+        Args:
+            file (str): Name of file to open and process
+        Returns:
+            None
+
+    """
+
+
 
 
 def process_data(data_files, inlets, site):

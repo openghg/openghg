@@ -88,8 +88,16 @@ def test_get_raw_data(bucket):
 
     data = hugs_objstore.get_raw_data(test_bucket, get_filename(filepath))
 
-    print(data)
+    with open("test.txt", "wb") as test_file:
+        test_file.write(data)
 
-    assert False
+    new_md5 = hugs_objstore.get_md5_bytes(data)
+    # new_md5 = hugs_objstore.get_md5("test.txt")
+
+    assert new_md5 == md5
+
+    # print(data)
+# 
+    # assert False
 
 

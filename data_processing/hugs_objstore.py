@@ -34,6 +34,25 @@ def get_md5(filename):
     return md5.hexdigest()
 
 
+def get_md5_bytes(data):
+    BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
+    md5 = hashlib.md5()
+
+    # if len(data) < BUF_SIZE:
+
+    print(len(data))
+
+    md5.update(data)
+
+    # while True:
+    #     buf = data.read(BUF_SIZE)
+    #     if not buf:
+    #         break
+    #     md5.update(buf)
+    
+    return md5.hexdigest()
+
+
 def hash_files(file_list):
     ''' Helper function to hash all the files in
         file_list using MD5
