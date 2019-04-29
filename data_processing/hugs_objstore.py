@@ -48,6 +48,11 @@ def hash_files(file_list):
 
     return hashes
 
+def bucket_handler():
+    """ How to handle buckets for raw data that's being uploaded?
+        Store a certain number or size of data in each bucket?
+
+    """
 
 def store_raw_data(bucket, filepath):
     """ Store the raw uploaded data with related metadata
@@ -61,6 +66,8 @@ def store_raw_data(bucket, filepath):
             tuple (str, int, str): Filename stored, 
             size in bytes and the MD5 hash of the file
 
+            Some kind of UUID?
+
     """
     # Get the size and MD5 of the file
     md5_hash = get_md5(filepath)
@@ -68,16 +75,24 @@ def store_raw_data(bucket, filepath):
     filename = filepath.split("/")[-1]
 
     # Add to object store
-    ObjectStore.set_object_from_file(bucket, filename, filepath)
+    ObjectStore.set_object_from_file(bucket=bucket, key=filename, filename=filepath)
 
     return filename, size, md5_hash
 
+    
+def get_raw_data(bucket, filename):
+    """ Get the raw data described by the passed filename,
+        from the object store
 
-def get_raw_data(args):
-    """ Get the raw data described by the passed args, 
-        this could be the UID of the data
+        Args:
+            bucket (dict): Bucket containing raw data
+            filename (str): Filename of requested file
+        Returns:
+            bytes: Binary data contained in object
 
     """
+
+    return ObjectStore.get_object(bucket=bucket, key=filename)    
 
 
 def get_by_user():
