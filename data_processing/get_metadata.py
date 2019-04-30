@@ -55,20 +55,74 @@ def calc_time_delta(start, end):
 
     return False
 
+def parse_filename(filename):
+    """ Extracts the resolution from the passed string
 
-def parse_file():
-    """ This function controls the parsing of the datafile. It calls
-        other functions that help to break the datafile apart and 
-
+        Args:
+            resolution_str (str): Resolution extracted from the filename
+        Returns:
+            tuple (str, str, str, str): Site, instrument, resolution
+            and height (m)
 
     """
-    # Read everything
-    data = pd.read_csv("bsd.picarro.1minute.248m.dat", header=None, skiprows=1, sep=r"\s+")
-        
+    # Split the filename to get the site and resolution
+    split_filename = filename.split(".")
+
+    site = split_filename[0]
+    instrument = split_filename[1]
+    resolution_str = split_filename[2]
+    height = split_filename[3]
+
+    if(resolution_str == "1minute"):
+        resolution = "1m"
+    elif(resolution_str == "hourly"):
+        resolution = "1h"
+    
+    return site, instrument, resolution, height
+
+
+def find_gases(data):
+    """ Find the gases measured in the dataframe
+    
+        Args:
+            data (Pandas.DataFrame): Measurement data
+        Returns:
+            dict: Dictionary containing measured gases
+
+    """
+
+    # Get the first row
+    first_row = data.head(1)                            
+
+    gases = {}
+    gas_row = 1
+    # Loop over the gases and find each unique value
+    for column in first_row.columns:
+        s = first_row[column][gas_row]
+        if s != "-":
+            gases[s] += 1
+
+    print(dict)
+
+
+def parse_metadata(filename, data):
+    """ Extracts the metadata from the datafile and creates a dictionary
+        that can then be saved to JSON
+
+        Args:
+            filename (str): Filename for parsing
+            dataframe (Pandas.DataFrame): Dataframe containing the
+            experinmental data
+        Returns:
+            dict: Dictionary containing metadata
+    """
+    # Dict for storage of metadata
+    metadata = {}
+
     # Not a huge fan of these hardcoded values
     # TODO - will these change at some point?
     start_date = data[0][2]
-    start_time = data[1][2]    
+    start_time = data[1][2]
     end_date = data.iloc[-1][0]
     end_time = data.iloc[-1][1]
 
@@ -78,10 +132,43 @@ def parse_file():
     # Start and end datetime objects
     start, end = get_date_range(start=start_data, end=end_data)
 
- 
+    site, instrument, resolution, height = parse_filename(filename=filename)
+
+    gases = find_gases(data)
+
+    metadata["site"] = site
+    metadata["instrument"] =
+    metadata["resolution"] = resolution
+    metadata["height"] = height
+    metadata["start_datetime"] = start
+    metadata["end_datetime"] = end
+    metadata["gases"] = gases
+    
+
+    return metadata
+
+    
+
+# def parse_file(filename):
+def parse_file(filename):
+    """ This function controls the parsing of the datafile. It calls
+        other functions that help to break the datafile apart and
+        
+        Args:
+            filename (str): Name of file to parse
+
+        Returns:
+            ?
+    """
+
+    # Read everything
+    data = pd.read_csv(filename, header=None, skiprows=1, sep=r"\s+")
+
+    metadata = parse_metadata(filename, data)
 
 
 
+    
 
 parse_file()
 
