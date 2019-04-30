@@ -1,7 +1,27 @@
 import pandas as pd
+import uuid
 import datetime
 
 # def get_metadata(data_file):
+
+def unanimous(seq):
+    """ Checks that all values in an iterable object
+        are the same
+
+        Args:
+            seq: Iterable object
+        Returns
+            bool: True if all values are the same
+
+    """
+    it = iter(seq.values())
+    try:
+        first = next(it)
+    except StopIteration:
+        return True
+    else:
+        return all(i == first for i in it)
+
 
 def parse_date_time(date, time):
     """ This function takes two strings and creates a datetime object 
@@ -55,6 +75,7 @@ def calc_time_delta(start, end):
 
     return False
 
+
 def parse_filename(filename):
     """ Extracts the resolution from the passed string
 
@@ -87,23 +108,31 @@ def find_gases(data):
         Args:
             data (Pandas.DataFrame): Measurement data
         Returns:
-            dict: Dictionary containing measured gases
+            list: List containing measured gases
 
     """
-
-    # Get the first row
-    first_row = data.head(1)                            
+    # Slice the dataframe
+    head_row = data.head(1)
 
     gases = {}
-    gas_row = 1
+    # Take the first row of the DataFrame
+    gas_row = 0
     # Loop over the gases and find each unique value
-    for column in first_row.columns:
-        s = first_row[column][gas_row]
+    for column in head_row.columns:
+        s = head_row[column][gas_row]
         if s != "-":
-            gases[s] += 1
+            gases[s] = gases.get(s, 0) + 1
 
-    print(dict)
+    # Check that we have the same number of columns for each gas
+    if not unanimous(gases):
+        raise ValueError(
+            "Each gas does not have the same number reading of columns")
 
+    n_cols = list(gases.values())[0]
+
+    return n_cols, list(gases.keys())
+
+    
 
 def parse_metadata(filename, data):
     """ Extracts the metadata from the datafile and creates a dictionary
@@ -129,11 +158,17 @@ def parse_metadata(filename, data):
     start_data = start_date, start_time
     end_data = end_date, end_time
 
+    # Find gas measured and port used
+    type_meas = data[2][2]
+    port = data[3][2]
+
     # Start and end datetime objects
     start, end = get_date_range(start=start_data, end=end_data)
 
+    # Extract data from the filename
     site, instrument, resolution, height = parse_filename(filename=filename)
 
+    # Parse the dataframe to find the gases - this might be excessive
     gases = find_gases(data)
 
     metadata["site"] = site
@@ -142,14 +177,22 @@ def parse_metadata(filename, data):
     metadata["height"] = height
     metadata["start_datetime"] = start
     metadata["end_datetime"] = end
+    metadata["port"] = port
+    metadata["type"] = type_meas
     metadata["gases"] = gases
     
-
     return metadata
 
-    
 
-# def parse_file(filename):
+def get_uuid():
+    """ Returns a random UUID
+
+        Returns:
+            str: Random UUID
+    """
+    return uuid.uuid4()
+
+
 def parse_file(filename):
     """ This function controls the parsing of the datafile. It calls
         other functions that help to break the datafile apart and
@@ -158,14 +201,58 @@ def parse_file(filename):
             filename (str): Name of file to parse
 
         Returns:
-            ?
+            list: List 
     """
 
     # Read everything
     data = pd.read_csv(filename, header=None, skiprows=1, sep=r"\s+")
 
-    metadata = parse_metadata(filename, data)
+    header = data.head(2)
 
+    metadata = parse_metadata(filename, data)
+    
+    # Now split the datafile into separate gases
+
+    # Number of columns before the get to the measurement data
+    skip_cols = sum([header[column][0] == "-" for column in header.columns])
+    # Expect 3 columns for each gas
+    gas_width = 3
+
+    
+
+    # Make dataframes for each gas
+    gas1 = data.iloc[:, skip_cols: skip_cols + gas_width]
+    gas2 = data.iloc[:, skip_cols + gas_width: skip_cols + 2*gas_width]
+    gas3 = data.iloc[:, skip_cols + 2*gas_width: skip_cols + 3*gas_width]
+
+    # Package each gas
+    for gas in gases:
+        
+
+
+    # UUIDS for
+    # Daterange
+    # Each gas
+    # Site
+    # 
+    
+    # UUIDs for these pieces of data
+    # Package each into a dict with its own UUID and data
+    # Is this sensible?
+
+    # UUID
+    # Data description - hwo to automate this?
+    # data
+
+
+
+
+
+    
+
+
+
+    
 
 
     
