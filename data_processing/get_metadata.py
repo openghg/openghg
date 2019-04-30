@@ -108,7 +108,11 @@ def find_gases(data):
         Args:
             data (Pandas.DataFrame): Measurement data
         Returns:
-            list: List containing measured gases
+            tuple (dict, int): A tuple containing
+            a list of the gases and the number of columns
+            of data for each gas. 
+            
+            Note: this list may have no meaningful order
 
     """
     # Slice the dataframe
@@ -130,8 +134,12 @@ def find_gases(data):
 
     n_cols = list(gases.values())[0]
 
-    return n_cols, list(gases.keys())
+    return gases, n_cols
 
+    # Finding the gases and returning their names a list of the number of columns for each gas
+    # Then splitting the gases up using the number of columns for each gas
+    # Gas name can be read from the top of the gas dataframe and saved as part of the dictionary the
+    # dataframe is put in
     
 
 def parse_metadata(filename, data):
@@ -169,8 +177,9 @@ def parse_metadata(filename, data):
     site, instrument, resolution, height = parse_filename(filename=filename)
 
     # Parse the dataframe to find the gases - this might be excessive
-    gases = find_gases(data)
+    gases, _ = find_gases(data)
 
+    metadata["ID"] = get_uuid()
     metadata["site"] = site
     metadata["instrument"] =
     metadata["resolution"] = resolution
@@ -192,142 +201,41 @@ def get_uuid():
     """
     return uuid.uuid4()
 
-
 def parse_file(filename):
     """ This function controls the parsing of the datafile. It calls
         other functions that help to break the datafile apart and
         
         Args:
             filename (str): Name of file to parse
-
         Returns:
-            list: List 
+            list: List of gases
     """
 
     # Read everything
     data = pd.read_csv(filename, header=None, skiprows=1, sep=r"\s+")
 
     header = data.head(2)
-
-    metadata = parse_metadata(filename, data)
-    
-    # Now split the datafile into separate gases
-
     # Number of columns before the get to the measurement data
     skip_cols = sum([header[column][0] == "-" for column in header.columns])
-    # Expect 3 columns for each gas
-    gas_width = 3
 
-    
-
-    # Make dataframes for each gas
-    gas1 = data.iloc[:, skip_cols: skip_cols + gas_width]
-    gas2 = data.iloc[:, skip_cols + gas_width: skip_cols + 2*gas_width]
-    gas3 = data.iloc[:, skip_cols + 2*gas_width: skip_cols + 3*gas_width]
-
-    # Package each gas
-    for gas in gases:
+    # Get the metadata dictionary
+    metadata = parse_metadata(filename, data)
         
-
-
-    # UUIDS for
-    # Daterange
-    # Each gas
-    # Site
-    # 
+    # Get the number of columns of data are present for each gas
+    gases, n_cols = find_gases(data)
     
-    # UUIDs for these pieces of data
-    # Package each into a dict with its own UUID and data
-    # Is this sensible?
+    gas_list = []
+    for n, g in enumerate(gases):
+        print("Creating gas : ", n)
+        gas = {}
+        # Slice the columns
+        gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
+        # Reset the column numbers
+        gas_data.columns = pd.RangeIndex(gas_data.columns.size)
+        gas["name"] = gas_data[0][0]
+        gas["metadata_ID"] = metadata["UUID"]
+        gas["ID"] = get_uuid()
+        gas["data"] = gas_data
+        gas_list.append(gas)
 
-    # UUID
-    # Data description - hwo to automate this?
-    # data
-
-
-
-
-
-    
-
-
-
-    
-
-
-    
-
-parse_file()
-
-# def get_metadata(metadata_frame, daterange):
-#     """ This function takes a Pandas dataframe containing the raw meta data
-
-#     """
-
-    # Work through the gases and add them to a set ?
-
-    # info_columns = 0
-    # # Count the number of columns we can skip
-    # for column in metadata.columns:
-    #     if metadata[column][0] == "-":
-    #         info_columns += 1
-
-        
-
-
-    # # Iterate through the columns and read the data
-    # for column in metadata.columns:
-    #     if metadata[column][0] == "-":
-            
-
-
-
-
-
-    # No need to reinterpret the header string
-    # Create header list
-
-    # Meta data
-    # --------------------
-    # File creation date - is this necessary? Can it harm?
-    # daterange in file
-    # Type and port?
-    # Take the 3 gases from the file and create an xarray from them?
-    # Store the metadata as JSON?
-    # Make a dict of the header file
-
-    # Either have the data for each gas containing the daterange as well or
-    # 
-
-    # site
-    # daterange
-    # resolution - 1 minute etc accuracy - not this! better word
-    # height - 248m etc
-    # gases - subkeys 
-
-    # Store the data separately
-    # Use the metadata to read the data file that's associated by UID to it
-
-    # Create UIDs
-    # store these in some kind of database? 
-
-
-    # Query the gases in the file
-
-    # Gas data
-    # Each gas gets its own UID
-    # Within one piece of data take c, stdev and count number
-    # This will contain the 
-    
-    # for i in df_header.columns:
-    #     # Here i is an integer starting at 1
-    #     # Ignore the metadata - 
-    #     if df_header[i][0] != '-':
-    #         metadata.append(df_header[i][0].upper() + df_header[i][1])
-
-    #         # This takes in the readings 
-    #         if df_header[i][1] == "C":
-    #             species.append(df_header[i][0].upper())
-    #     else:
-    #         header.append(df_header[i][1].upper())
-
+    return gas_list
