@@ -12,6 +12,15 @@ from Acquire.Service import get_service_account_bucket, \
 
 
 def get_abs_filepaths(directory):
+    """ Returns the absolute paths of all the files in
+        the directory
+
+        Args:
+            directory (str): Directory to walk
+        Returns:
+            list: List of absolute filepaths
+
+    """
     full_filepaths = []
     for dirpath, _, filenames in os.walk(directory):
         for f in filenames:
@@ -21,9 +30,19 @@ def get_abs_filepaths(directory):
 
 
 def get_md5(filename):
-    BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
+    """ Calculates the MD5 sum of the passed file
+
+        Args:
+            filename (str): File to hash
+        Returns:
+
+
+    """
+    # Size of buffer in bytes
+    BUF_SIZE = 65536
     md5 = hashlib.md5()
 
+    # Read the file in 64 kB blocks
     with open(filename, 'rb') as f:
         while True:
             data = f.read(BUF_SIZE)
@@ -35,27 +54,28 @@ def get_md5(filename):
 
 
 def get_md5_bytes(data):
-    BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
-    md5 = hashlib.md5()
+    """ Gets the MD5 hash of a bytes object holding data
 
-    # if len(data) < BUF_SIZE:
+        Args:
+            data (bytes): Data as a bytes object
+        Returns:
+            str: MD5 hash of data
 
-    print(len(data))
+    """
+    return hashlib.md5(data).hexdigest()
 
-    md5.update(data)
 
-    # while True:
-    #     buf = data.read(BUF_SIZE)
-    #     if not buf:
-    #         break
-    #     md5.update(buf)
-    
-    return md5.hexdigest()
 
 
 def hash_files(file_list):
     ''' Helper function to hash all the files in
         file_list using MD5
+
+        Args:
+            file_list (str): List of files to hash
+        Returns:
+            list: Returns a list of tuples in the form filename, md5_hash
+            
     '''
     # Create a list of tuples for the original files
     hashes = []
@@ -67,11 +87,6 @@ def hash_files(file_list):
 
     return hashes
 
-def bucket_handler():
-    """ How to handle buckets for raw data that's being uploaded?
-        Store a certain number or size of data in each bucket?
-
-    """
 
 def store_raw_data(bucket, filepath):
     """ Store the raw uploaded data with related metadata
