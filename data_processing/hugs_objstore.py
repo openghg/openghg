@@ -6,6 +6,8 @@ Query the object store for data uploaded by a certain user etc
 import hashlib
 import os
 
+import data_processing.local_bucket as local_bucket
+
 from Acquire.ObjectStore import ObjectStore, ObjectStoreError
 from Acquire.Service import get_service_account_bucket, \
     push_is_running_service, pop_is_running_service
@@ -35,7 +37,7 @@ def get_md5(filename):
         Args:
             filename (str): File to hash
         Returns:
-
+            str: MD5 hash of file
 
     """
     # Size of buffer in bytes
@@ -65,8 +67,6 @@ def get_md5_bytes(data):
     return hashlib.md5(data).hexdigest()
 
 
-
-
 def hash_files(file_list):
     ''' Helper function to hash all the files in
         file_list using MD5
@@ -88,48 +88,92 @@ def hash_files(file_list):
     return hashes
 
 
-def store_raw_data(bucket, filepath):
-    """ Store the raw uploaded data with related metadata
-        such as the uploader, upload date, file format provided
-        by user etc
+def write_dataframe(dataframe):
+    """ Write the passed dataframe to the object store
+
+    TODO - at the moment this just writes the dataframe to
+    a load of
+
+        Args:  
+            dataframe: Pandas dataframe to write
+        Returns:
+            None
+    """
+    
+    # Write dataframe to file
+    filename = "file_buffer.hdf"
+    # Write to the dataframe to a blosc:lz4 compressed HDF5 file
+    dataframe.to_hdf(path=filename, key=filename, mode="w", complib=blosc:lz4)
+
+
+
+
+
+# TODO - How to write the HDF5 file to an HDF5 object instead of a HDF5 file 
+# on the drive?
+
+
+
+def write_object(bucket, filepath):
+    """ Write file to the object store
 
         Args:
-            raw_bucket (bytes): The bucket to
-
+            filepath (str): Path of file to write
+            to object store
         Returns:
-            tuple (str, int, str): Filename stored, 
-            size in bytes and the MD5 hash of the file
-
-            Some kind of UUID?
+            None
 
     """
-    # Get the size and MD5 of the file
+    # Get the filename from the filepath
+    filepath = file.split("/")[-1]
     md5_hash = get_md5(filepath)
     size = os.path.getsize(filepath)
     filename = filepath.split("/")[-1]
+#     # Add to object store
+    ObjectStore.set_object_from_file(
+        bucket=bucket, key=filename, filename=filepath)
 
-    # Add to object store
-    ObjectStore.set_object_from_file(bucket=bucket, key=filename, filename=filepath)
-
+    # Unsure if this or just no return value?
     return filename, size, md5_hash
 
     
-def get_raw_data(bucket, filename):
-    """ Get the raw data described by the passed filename,
-        from the object store
+def read_file(bucket, filename):
+    """ Reads a file from the object store and returns it
+        as a bytes object for downloading or writing
+        to file
 
         Args:
-            bucket (dict): Bucket containing raw data
-            filename (str): Filename of requested file
+            bucket (dict): Bucket containing the data
+            file (str): Filename to use as a key to get
+            the data from the bucket
         Returns:
             bytes: Binary data contained in object
 
     """
+    return ObjectStore.get_object(bucket=bucket, key=filename)
 
-    return ObjectStore.get_object(bucket=bucket, key=filename)    
 
+# def store_raw_data(bucket, filepath):
+#     """ Store the raw uploaded data with related metadata
+#         such as the uploader, upload date, file format provided
+#         by user etc
 
-def get_by_user():
-    """ Get files uploaded by a specific user
-    
-    """
+#         Args:
+#             raw_bucket (bytes): The bucket to
+
+#         Returns:
+#             tuple (str, int, str): Filename stored, 
+#             size in bytes and the MD5 hash of the file
+
+#             Some kind of UUID?
+
+#     """
+#     # Get the size and MD5 of the file
+#     md5_hash = get_md5(filepath)
+#     size = os.path.getsize(filepath)
+#     filename = filepath.split("/")[-1]
+
+#     # Add to object store
+#     ObjectStore.set_object_from_file(bucket=bucket, key=filename, filename=filepath)
+
+# #     return filename, size, md5_

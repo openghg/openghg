@@ -196,7 +196,7 @@ def parse_file(filename):
     # Count the number of columns before measurement data
     skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
-    # Get the metadata dictionaryn_cols
+    # Get the metadata dictionary
     metadata = parse_metadata(filename, data)
         
     # Get the number of columns of data are present for each gas
