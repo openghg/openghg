@@ -88,7 +88,7 @@ def hash_files(file_list):
     return hashes
 
 
-def write_dataframe(bucket, dataframe):
+def write_dataframe(bucket, key, dataframe):
     """ Write the passed dataframe to the object store
 
     TODO - at the moment this creates a compressred HDF5 file
@@ -121,7 +121,7 @@ def write_dataframe(bucket, dataframe):
 # TODO - How to write the HDF5 file to an HDF5 object instead of a HDF5 file 
 # on the drive?
 
-def get_dataframe(bucket, filename):
+def get_dataframe(bucket, key, filename):
     """ Gets a dataframe stored as an HDF5 file from the object
         store
 

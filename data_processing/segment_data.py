@@ -1,6 +1,7 @@
 import pandas as pd
 import uuid
 import datetime
+import urllib.parse
 
 # def get_metadata(data_file):
 
@@ -86,14 +87,15 @@ def parse_filename(filename):
     return site, instrument, resolution, height
 
 
-def get_gas_columns(data):
+def gas_info(data):
     """ Returns the number of columns of data for each gas
         that is present in the dataframe
     
         Args:
             data (Pandas.DataFrame): Measurement data
         Returns:
-            int: Number of columns of readings for each gas
+            tuple (int, int): Number of gases, number of
+            columns of data for each gas
             
     """
     # Slice the dataframe
@@ -113,7 +115,7 @@ def get_gas_columns(data):
         raise ValueError(
             "Each gas does not have the same number of columns")
 
-    return list(gases.values())[0]
+    return len(gases), list(gases.values())[0]
 
 
 def parse_metadata(data, filename):
@@ -151,7 +153,7 @@ def parse_metadata(data, filename):
     # Parse the dataframe to find the gases - this might be excessive
     # gases, _ = find_gases(data=data)
 
-    metadata["ID"] = get_uuid()
+    metadata["UUID"] = get_uuid()
     metadata["site"] = site
     metadata["instrument"] = instrument
     metadata["resolution"] = resolution
@@ -184,7 +186,7 @@ def get_uuid():
     return uuid.uuid4()
 
 
-def parse_gases(data, n_cols, skip_cols):
+def parse_gases(data_cols, skip_cols):
     """ Separates the gases stored in the dataframe in 
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -196,9 +198,12 @@ def parse_gases(data, n_cols, skip_cols):
             skip_cols (int): Number of columns before gas data
 
     """
-    gas_list = []
-    gas_dict = {}
-    for n, g in enumerate(gases):
+    # Get the number of gases in dataframe and number of columns
+    # of data present for each gas
+    n_gases, n_cols = gas_info(data=data)
+    gases = {}
+
+    for n in range(n_gases)
         # Slice the columns
         gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
         # Get the name of the gas
@@ -206,12 +211,9 @@ def parse_gases(data, n_cols, skip_cols):
         # Reset the column numbers
         gas_data.columns = pd.RangeIndex(gas_data.columns.size)
         # Store the name and UUID for dataframe to be stored in the metadata dict
-        gases[gas_name] = get_uuid()
+        gases[gas_name] = {"UUID": get_uuid(), "data": gas_data}
 
-        # Create a tuple with an UUID and the data
-        gas_list.append(gas_data)
-
-    return gas_dict, gas_list
+    return gases
 
 
 def parse_file(filename):
@@ -233,41 +235,84 @@ def parse_file(filename):
     skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
     # Create a dataframe of the time and supplementary data
-    timeframe = data.iloc[:, 0:sup_cols]
-    metadata["time_frame"] = get_uuid()
-
-    n_cols = get_gas_columns(data=data)
+    metadata["time_frame"] = data.iloc[:, 0:sup_cols]
 
     # Get the metadata dictionary - this will be saved as a JSON
     metadata = parse_metadata(data=date, filename=filename)
 
-    # Get gas names and UUIDs in gas_info
-    # Raw data in gas_dataframes
-    gas_info, gas_dataframes = parse_gases(data=data, n_cols=n_cols, skip_cols=skip_cols)
-    
+    # Dictionary of gases for saving to object store
+    gases = parse_gases(data=data, skip_cols=skip_cols)
 
-    metadata["gases"] = gas_info
+    # Dictionary of gas_name:UUID pairs
+    gas_metadata = {g: gases[g]["UUID"] for g in gases.keys()}
+
+    metadata["gases"] = gas_metadata
+
+    # Save as part of gases dictionary
+    gases["metadata"] = metadata
+
+    # Dictionary of {metadata: ..., gases: {gas: UUID, gas: UUID ...} }
+    return gases
+
+    # # Extract the gas name and UUID from the gases dictionary
+    # gas_metadata = {}
+    # for g in gases.keys():
+    #     gas_metadata[g] = gases[g]["UUID"]
+
+    # gas_info = {x for x in gases.keys()}
+
 
     # Daterange can just be in the format of
-    # YYYYMMDD_YYYYMMDD/
+    # YYYYMMDD_YYYYMMDD
 
 
-def store_data(metadata, data):
+def store_data(gas_data):
     """ This function writes the objects to the object
-        store and creates a unique key for their storage 
+        store and creates a unique key for their storage
 
         Args:
             metadata (dict): Dictionary containing
             metadata for the upload
             data (Pandas.DataFrame): Data contained within
-            dataframes to be saved as HDF files in the object
-            store
+            dataframes to be saved as HDF files in the object store
         Returns:
             None
 
     """
+    metadata = gas_data["metadata"]
+    key = key_creator(metadata=metadata)
 
+    # How best to identify the metadata - UUID for this in keypath as well?
+
+    for gas in gas_data["gases"].keys():
+        key urllib.parse.urljoin(key, gas_data[gas]["UUID"])
     
+
+def key_creator(metadata):
+    """ Creates a key to be used as an identifier for
+        data in the object store
+
+        Args:
+            metadata (dict): Metadata
+        Returns:
+            str: Key for use in object store
+    """
+    # Key could be something like
+    # /site/instrument/height/daterange/gas/UID_of_reading
+
+    site = metadata["site"]
+    instrument = metadata["instrument"]
+    height = None
+    if "height" in metadata:
+        height = metadata["height"]
+    date_range = get_daterange_str(start=metadata["start_datetime"],
+                                    end=metadata["end_datetime"])
+    gas = metadata[gases]
+
+    if height:
+        return urllib.parse.urljoin(site, instrument, height, date_range)
+    else:
+        return urllib.parse.urljoin(site, instrument, date_range)
 
 
 def get_daterange_str(start, end):
