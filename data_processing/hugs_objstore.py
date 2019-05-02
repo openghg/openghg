@@ -99,7 +99,9 @@ def write_dataframe(bucket, key, dataframe):
     writing to disk, should have plenty of memory?
 
         Args:  
-            dataframe: Pandas dataframe to write
+            bucket (dict): Bucket to store data
+            key (str): Key to data in object store
+            dataframe (Pandas.Dataframe): Pandas dataframe to write
         Returns:
             None
     
@@ -110,9 +112,9 @@ def write_dataframe(bucket, key, dataframe):
     temp_path = os.path.join(home_path, hugs_test_folder, filename)
     
     # Write to the dataframe to a blosc:lz4 compressed HDF5 file
-    dataframe.to_hdf(path=temp_path, key=filename, mode="w", complib=blosc:lz4)
+    dataframe.to_hdf(path=temp_path, key=filename, mode="w", complib="blosc:lz4")
     # Write this HDF5 file to the object store
-    filename, size, md5 = write_object(bucket, filename)
+    filename, size, md5 = store_file(bucket, filename)
 
     print(filename, size, md5)
     
@@ -164,7 +166,7 @@ def combine_sections():
 
 
 
-def write_object(bucket, filepath):
+def store_file(bucket, filepath):
     """ Write file to the object store
 
         Args:

@@ -21,23 +21,23 @@ def bucket(tmpdir_factory):
     return bucket
 
 
-def test_store_raw_data(bucket):
-    """Can we store data in the object store?"""
+# def test_store_raw_data(bucket):
+#     """Can we store data in the object store?"""
 
-    test_bucket = ObjectStore.create_bucket(bucket, "test_bucket")
+#     test_bucket = ObjectStore.create_bucket(bucket, "test_bucket")
 
-    dirname = os.path.dirname(__file__)
-    filename = "data/test.dat"
-    filepath = os.path.join(dirname, filename)
+#     dirname = os.path.dirname(__file__)
+#     filename = "data/test.dat"
+#     filepath = os.path.join(dirname, filename)
 
-    name, size, md5 = hugs_objstore.store_raw_data(test_bucket, filepath)
+#     name, size, md5 = hugs_objstore.store_raw_data(test_bucket, filepath)
 
-    # print("Filename  : " + name,  "\nFile size: " + str(size) + " bytes", "\nMD5 : " + md5)
+#     # print("Filename  : " + name,  "\nFile size: " + str(size) + " bytes", "\nMD5 : " + md5)
 
-    assert md5 == "aca19f43ba0f49102546425308443538"
-    assert size == 23
+#     assert md5 == "aca19f43ba0f49102546425308443538"
+#     assert size == 23
 
-    # assert True
+#     # assert True
 
 def test_hash_files():
     """ Ensure 3 files are hashed and returned correctly """
@@ -73,28 +73,28 @@ def get_filename(filepath):
     return filepath.split("/")[-1]
 
 
-def test_get_raw_data(bucket):
-    """ Ensure we can get the raw dat we uploaded back when we
-        provide its filename
-    """
+# def test_get_raw_data(bucket):
+#     """ Ensure we can get the raw dat we uploaded back when we
+#         provide its filename
+#     """
 
-    test_bucket = ObjectStore.create_bucket(bucket, "test_bucket2")
+#     test_bucket = ObjectStore.create_bucket(bucket, "test_bucket2")
 
-    dirname = os.path.dirname(__file__)
-    filename = "data/test.dat"
-    filepath = os.path.join(dirname, filename)
+#     dirname = os.path.dirname(__file__)
+#     filename = "data/test.dat"
+#     filepath = os.path.join(dirname, filename)
 
-    name, size, md5 = hugs_objstore.store_raw_data(test_bucket, filepath)
+#     name, size, md5 = hugs_objstore.store_raw_data(test_bucket, filepath)
 
-    data = hugs_objstore.get_raw_data(test_bucket, get_filename(filepath))
+#     data = hugs_objstore.get_raw_data(test_bucket, get_filename(filepath))
 
-    with open("test.txt", "wb") as test_file:
-        test_file.write(data)
+#     with open("test.txt", "wb") as test_file:
+#         test_file.write(data)
 
-    new_md5 = hugs_objstore.get_md5_bytes(data)
-    # new_md5 = hugs_objstore.get_md5("test.txt")
+#     new_md5 = hugs_objstore.get_md5_bytes(data)
+#     # new_md5 = hugs_objstore.get_md5("test.txt")
 
-    assert new_md5 == md5
+#     assert new_md5 == md5
 
     # print(data)
 # 

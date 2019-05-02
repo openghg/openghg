@@ -186,7 +186,7 @@ def get_uuid():
     return uuid.uuid4()
 
 
-def parse_gases(data_cols, skip_cols):
+def parse_gases(data, skip_cols):
     """ Separates the gases stored in the dataframe in 
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -203,20 +203,20 @@ def parse_gases(data_cols, skip_cols):
     n_gases, n_cols = gas_info(data=data)
     gases = {}
 
-    for n in range(n_gases)
+    for n in range(n_gases):
         # Slice the columns
-        gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
-        # Get the name of the gas
-        gas_name = gas_data[0][0]
+        gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]        
         # Reset the column numbers
         gas_data.columns = pd.RangeIndex(gas_data.columns.size)
+
+        gas_name = gas_data[0][0]
         # Store the name and UUID for dataframe to be stored in the metadata dict
         gases[gas_name] = {"UUID": get_uuid(), "data": gas_data}
 
     return gases
 
 
-def parse_file(filename):
+def parse_file(filepath):
     """ This function controls the parsing of the datafile. It calls
         other functions that help to break the datafile apart and
         
@@ -227,7 +227,7 @@ def parse_file(filename):
     """
 
     # Read everything
-    data = pd.read_csv(filename, header=None, skiprows=1, sep=r"\s+")
+    data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
 
     header = data.head(2)
 
@@ -235,10 +235,10 @@ def parse_file(filename):
     skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
     # Create a dataframe of the time and supplementary data
-    metadata["time_frame"] = data.iloc[:, 0:sup_cols]
-
+    # metadata["time_frame"] = data.iloc[:, 0:skip_cols]
+    filename = filepath.split("/")[-1]
     # Get the metadata dictionary - this will be saved as a JSON
-    metadata = parse_metadata(data=date, filename=filename)
+    metadata = parse_metadata(data=data, filename=filename)
 
     # Dictionary of gases for saving to object store
     gases = parse_gases(data=data, skip_cols=skip_cols)
@@ -278,15 +278,31 @@ def store_data(gas_data):
         Returns:
             None
 
+        TODO - add return value so we know it's been stored successfully
+
     """
     metadata = gas_data["metadata"]
     key = key_creator(metadata=metadata)
 
     # How best to identify the metadata - UUID for this in keypath as well?
-
     for gas in gas_data["gases"].keys():
-        key urllib.parse.urljoin(key, gas_data[gas]["UUID"])
+        # Append the UID for each gas to the metadata key
+        key = urllib.parse.urljoin(key, gas_data[gas]["UUID"])
+        # Store it in the object store
+        write_dataframe(bucket=bucket, key=key, dataframe=gas_data["data"])
     
+def url_join(*args):
+    """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
+        stripped for each argument.
+
+        Args:
+            *args (str): Strings to concatenate into a key to use
+            in the object store
+        Returns:
+            str: A url style key string with arguments separated by forward slashes
+    """
+
+    return "/".join(map(lambda x: str(x).rstrip('/'), args))       
 
 def key_creator(metadata):
     """ Creates a key to be used as an identifier for
@@ -307,12 +323,13 @@ def key_creator(metadata):
         height = metadata["height"]
     date_range = get_daterange_str(start=metadata["start_datetime"],
                                     end=metadata["end_datetime"])
-    gas = metadata[gases]
+    uuid = metadata["UUID"]
 
     if height:
-        return urllib.parse.urljoin(site, instrument, height, date_range)
+        # return urllib.parse.urljoin(site, instrument, height, date_range, uuid)
+        return url_join(site, instrument, height, date_range, uuid)
     else:
-        return urllib.parse.urljoin(site, instrument, date_range)
+        return url_join(site, instrument, date_range, uuid)
 
 
 def get_daterange_str(start, end):
