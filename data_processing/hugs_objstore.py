@@ -88,29 +88,79 @@ def hash_files(file_list):
     return hashes
 
 
-def write_dataframe(dataframe):
+def write_dataframe(bucket, dataframe):
     """ Write the passed dataframe to the object store
 
-    TODO - at the moment this just writes the dataframe to
-    a load of
+    TODO - at the moment this creates a compressred HDF5 file
+    from the passed dataframe and then writes that to the
+    object store. I feel like it'd be best to get an HDF5 object back
+    from Pandas and keep it in memory before passing it to
+    the object store for writings. That'd save a lot of reading and
+    writing to disk, should have plenty of memory?
 
         Args:  
             dataframe: Pandas dataframe to write
         Returns:
             None
-    """
     
-    # Write dataframe to file
-    filename = "file_buffer.hdf"
+    """
+    home_path = os.path.expanduser("~")
+    hugs_test_folder = "hugs_tmp/test_hdf5s"
+    filename = "testing_dframe.hdf"
+    temp_path = os.path.join(home_path, hugs_test_folder, filename)
+    
     # Write to the dataframe to a blosc:lz4 compressed HDF5 file
-    dataframe.to_hdf(path=filename, key=filename, mode="w", complib=blosc:lz4)
+    dataframe.to_hdf(path=temp_path, key=filename, mode="w", complib=blosc:lz4)
+    # Write this HDF5 file to the object store
+    filename, size, md5 = write_object(bucket, filename)
 
-
-
+    print(filename, size, md5)
+    
 
 
 # TODO - How to write the HDF5 file to an HDF5 object instead of a HDF5 file 
 # on the drive?
+
+def get_dataframe(bucket, filename):
+    """ Gets a dataframe stored as an HDF5 file from the object
+        store
+
+        Args:
+            bucket (dict): Bucket containing data
+            key (str): Key to access datatframe in store
+        Returns:
+            Pandas.Dataframe: Dataframe from HDF5 file
+        """
+
+    # Get the file from the object store
+    hdf_file = read_file(bucket=bucket, filename=filename)
+
+    # At the moment write this to a temporary file
+    # TODO - must be a better way of doing this
+    home_path = os.path.expanduser("~")
+    hugs_test_folder = "hugs_tmp/tmp_hdf5s"
+    tmp_file = "tmp.hdf"
+
+    temp_path = os.path.join(home_path, hugs_test_folder, tmp_file)
+    
+    with open(temp_path, "wb") as f:
+        f.write(hdf_file)
+
+    # Get the dataframe from file
+    return pd.from_hdf(temp_path, key=filename)
+
+
+def combine_sections():
+    """ Combines separate dataframes into a single dataframe for
+        processing to NetCDF for output
+
+        Args:
+            
+        Returns:
+            Pandas.Dataframe: Combined dataframes
+
+    """
+
 
 
 

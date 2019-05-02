@@ -5,7 +5,6 @@ import os
 
 from Acquire.ObjectStore import ObjectStore, use_testing_object_store_backend
 
-
 def bucket_time():
     """ Returns a prettified (maybe) string of the current
         time and date
