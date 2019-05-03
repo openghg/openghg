@@ -3,8 +3,6 @@ import uuid
 import datetime
 import urllib.parse
 
-# def get_metadata(data_file):
-
 def unanimous(seq):
     """ Checks that all values in an iterable object
         are the same
