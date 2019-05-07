@@ -16,6 +16,10 @@ class Instrument:
         """
         self._uid = None
         self._instrument_root = "instruments"
+        self._name = None
+        self._site = None
+        self._network = None
+        self._datasources = None
     
     @staticmethod
     def create(self, name, site, network):
@@ -30,13 +34,15 @@ class Instrument:
         """
         from Acquire.ObjectStore import create_uuid as _create_uuid
 
-        inst = Instrument()
+        i = Instrument()
+        i._uid = _create_uuid()
+        i._name = name
+        i._site = site
+        i._network = network
+        # To hold UIDs of all DataSources associated with this Instrument
+        i._datasources = {}
 
-        inst._uid = _create_uuid()
-        inst._site = site
-        inst._network = network
-
-        return inst
+        return i
 
     def is_null(self):
         """ Check if this is a null Instrument
@@ -88,20 +94,56 @@ class Instrument:
                 Instrument: Instrument object
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from hugs_objstore import get_bucket as _get_bucket
 
         if uid is None and name is None:
             raise ValueError("Both uid and name cannot be None")
 
         if bucket is None:
-            bucket = DataSource._get_bucket(bucket)
+            bucket = _get_bucket()
         if uid is None:
-            uid = DataSource._get_uid_from_name(bucket=bucket, name=name)
+            uid = Instrument._get_uid_from_name(bucket=bucket, name=name)
 
         key = "%s/uid/%s" % (self._instrument_root, uid)
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
-        return DataSource.from_data(data)
+        return Instrument.from_data(data)
 
+    def to_data(self):
+        """ Creates a JSON serialisable dictionary to store this object
+            in the object store
+
+            Returns:
+                dict: Dictionary created from this object
+        """
+        data = {}
+
+        data["UUID"] = self._uid
+        data["name"] = self._name
+        data["site"] = self._site
+        data["network"] = self._network
+
+        return data
+
+    @staticmethod
+    def from_data(data):
+        """ Creates an Instrument object from a JSON file
+
+            Args:
+                data (dict): JSON data from which to create object
+            Returns:
+                Instrument: Instrument object from data
+        """
+        if data is None or len(data) == 0:
+            return Instrument()
+
+        i = Instrument()
+        i._uid = data["UUID"]
+        i._name = data["name"]
+        i._site = data["site"]
+        i._network = data["network"]
+
+        return i
 
     # Need the DataSources associated with this Instrument
     def get_datasources(self):
@@ -110,11 +152,32 @@ class Instrument:
             Returns:
                 list: List of UIDs of DataSources
         """        
-        import Acquire.ObjectStore as _ObjectStore
+        return self._datasources
+
         
-        prefix = "%s/uid/%s/datasources" % (self._instrument_root, self._uid)
-        # Get all keys that start with the prefix
-        return _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
+    @staticmethod
+    def _get_uid_from_name(bucket, name):
+        """ Gets the UID of this instrument from its name
+
+            Args:
+                bucket (dict): Bucket holding data
+                name (str): Name of Instrument
+            Returns:
+                str: UID of Instrument
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+
+        encoded_name = _string_to_encoded(name)
+
+        prefix = "%s/name/%s" % (Instrument._instrument_root, encoded_name)
+
+        uid = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
+
+        if(len(uid) > 1):
+            raise ValueError("There should only be one instrument with this name")
+
+        return uid[0]
 
 
 
