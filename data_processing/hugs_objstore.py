@@ -123,48 +123,35 @@ def write_dataframe(bucket, key, dataframe):
 # TODO - How to write the HDF5 file to an HDF5 object instead of a HDF5 file 
 # on the drive?
 
-def get_dataframe(bucket, key, filename):
+def get_dataframe(bucket, key):
     """ Gets a dataframe stored as an HDF5 file from the object
         store
 
         Args:
             bucket (dict): Bucket containing data
-            key (str): Key to access datatframe in store
+            key (str): Key to access dataframe in store
         Returns:
             Pandas.Dataframe: Dataframe from HDF5 file
-        """
+    """
+    import pandas as _pd
+    import os as _os
 
     # Get the file from the object store
-    hdf_file = read_file(bucket=bucket, filename=filename)
+    hdf_file = read_object(bucket=bucket, key=key)
 
     # At the moment write this to a temporary file
     # TODO - must be a better way of doing this
-    home_path = os.path.expanduser("~")
+    home_path = _os.path.expanduser("~")
     hugs_test_folder = "hugs_tmp/tmp_hdf5s"
     tmp_file = "tmp.hdf"
 
-    temp_path = os.path.join(home_path, hugs_test_folder, tmp_file)
+    temp_path = _os.path.join(home_path, hugs_test_folder, tmp_file)
     
     with open(temp_path, "wb") as f:
         f.write(hdf_file)
 
     # Get the dataframe from file
-    return pd.from_hdf(temp_path, key=filename)
-
-
-def combine_sections():
-    """ Combines separate dataframes into a single dataframe for
-        processing to NetCDF for output
-
-        Args:
-            
-        Returns:
-            Pandas.Dataframe: Combined dataframes
-
-    """
-
-
-
+    return _pd.from_hdf(temp_path, key=filename)
 
 def store_file(bucket, filepath):
     """ Write file to the object store
@@ -174,7 +161,6 @@ def store_file(bucket, filepath):
             to object store
         Returns:
             None
-
     """
     # Get the filename from the filepath
     filepath = file.split("/")[-1]
@@ -188,21 +174,54 @@ def store_file(bucket, filepath):
     # Unsure if this or just no return value?
     return filename, size, md5_hash
 
-    
-def read_file(bucket, filename):
+
+def get_bucket():
+    """ Returns the HUGS bucket
+
+        Returns:
+            dict: Bucket
+    """
+    from local_bucket import get_local_bucket
+
+    return get_local_bucket()
+
+
+@staticmethod
+def read_object(bucket, key):
     """ Reads a file from the object store and returns it
         as a bytes object for downloading or writing
         to file
 
         Args:
             bucket (dict): Bucket containing the data
-            file (str): Filename to use as a key to get
-            the data from the bucket
+            key (str): Key to access data in bucket
         Returns:
             bytes: Binary data contained in object
-
     """
-    return ObjectStore.get_object(bucket=bucket, key=filename)
+    from Acquire.ObjectStore import get_object as _get_object
+
+    return _get_object(bucket=bucket, key=key)
+
+@staticmethod
+def write_object(bucket, key, data):
+    """  Writes a file or object to the object store
+
+        Args:
+            bucket (dict): Bucket to store object
+            key (str): Key to store data in bucket
+            data (bytes): Binary data to store in the object store
+        Returns:
+            None
+    """
+    from Acquire.ObjectStore import set_object as _set_object
+
+    _set_object(bucket=bucket, key=key, data=data)
+
+
+
+
+
+
 
 
 # def store_raw_data(bucket, filepath):

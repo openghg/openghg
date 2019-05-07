@@ -5,6 +5,7 @@ import os
 
 from Acquire.ObjectStore import ObjectStore, use_testing_object_store_backend
 
+
 def bucket_time():
     """ Returns a prettified (maybe) string of the current
         time and date
@@ -16,7 +17,7 @@ def bucket_time():
     return datetime.datetime.now().strftime("%Y%m%d_%H:%M")
 
 
-def get_bucket():
+def get_local_bucket():
     """ Creates and returns a local bucket
         that's created in the user's home directory
 
