@@ -15,14 +15,20 @@ class DataSource:
         self._name = None
         self._site = None
         self._network = None
+        self._height = None
 
     @staticmethod
-    def create(name=None, instrument, site, network):
+    def create(name=None, instrument, site, network, height=None):
         """Create a new datasource
         
             Args:
                 name (str, default=None): Name for DataSource
             Returns:
+                DataSource
+
+            TODO - add kwargs to this to allow extra (safely parsed)
+            arguments to be added to the dictionary?
+            This would allow some elasticity to the datasources
                 
         """        
         from Acquire.ObjectStore import create_uuid as _create_uuid
@@ -36,6 +42,14 @@ class DataSource:
         d._creation_datetime = _get_datetime_now()
 
         return d
+
+    def get_site():
+        """ Returns the site with which this datasource is 
+
+            Returns:
+                str: Name of site
+        """
+        return self._site()
 
     def is_null(self):
         """Return whether this object is null
@@ -99,16 +113,14 @@ class DataSource:
         if bucket is None:
             bucket = _get_bucket(bucket)
 
-        key = "%s/uid/%s" % (_datasource_root, self._uid)
-        _ObjectStore.set_object_from_json(
-            bucket=bucket, key=key, data=self.to_data())
-
+        datasource_key = "%s/uid/%s" % (_datasource_root, self._uid)
+        _ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
+        
         encoded_name = _string_to_encoded(self._name)
+        name_key = "%s/name/%s/%s" % (_datasource_root, encoded_name, self._uid)
+        _ObjectStore.set_string_object(bucket=bucket, key=name_key, string_data=self._uid)
 
-        key = "%s/name/%s/%s" % (_datasource_root, encoded_name, self._uid)
 
-        _ObjectStore.set_string_object(
-            bucket=bucket, key=key, string_data=self._uid)
 
     @staticmethod
     def load(bucket=None, uid=None, name=None):

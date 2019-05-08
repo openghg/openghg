@@ -5,17 +5,20 @@
 
 """
 
+__all__ = ["Instrument"]
+
 class Instrument:
     """
 
 
     """
+    _instrument_root = "instruments"
+
     def __init__(self):
         """ This only creates a null Instrument
             Create should be used to create Instrument objects
         """
         self._uid = None
-        self._instrument_root = "instruments"
         self._name = None
         self._site = None
         self._network = None
@@ -104,7 +107,7 @@ class Instrument:
         if uid is None:
             uid = Instrument._get_uid_from_name(bucket=bucket, name=name)
 
-        key = "%s/uid/%s" % (self._instrument_root, uid)
+        key = "%s/uid/%s" % (Instrument._instrument_root, uid)
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
         return Instrument.from_data(data)
@@ -147,13 +150,13 @@ class Instrument:
 
     # Need the DataSources associated with this Instrument
     def get_datasources(self):
-        """ Get all the DataSources associated with this Instrument
+        """ Returns a JSON serialisable dictionary of the DataSources
+            associated with this Instrument
 
             Returns:
-                list: List of UIDs of DataSources
+                dict: Dictionary of DataSources and related information
         """        
         return self._datasources
-
         
     @staticmethod
     def _get_uid_from_name(bucket, name):
@@ -179,7 +182,29 @@ class Instrument:
 
         return uid[0]
 
+    def create_datasource(self, name):
+        """ Creates a DataSource object and adds its information to the list of
+            DataSources. Instrument, site and network data is taken from this
+            Instrument instance.
 
+            Args:
+                name (str): Name for DataSource
+        """
+        from _datasource import DataSource
+
+        datasource = DataSource.create(name=name, instrument=self._name, 
+                                        site=self._site, network=self._network)
+
+        self._datasources[datasource._uid] = {"name": name, "created": datasource._creation_datetime}
+
+        return datasource
+
+
+
+
+
+
+        
 
 
 
