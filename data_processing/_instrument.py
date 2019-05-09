@@ -8,8 +8,12 @@
 __all__ = ["Instrument"]
 
 class Instrument:
-    """
+    """ This class holds information regarding an instrument.
+        An instrument may be a set of Datasources or a single
+        Datasource at a Site.
 
+        Instrument instances should be created with the
+        Instrument.create() function
 
     """
     _instrument_root = "instruments"
@@ -18,8 +22,9 @@ class Instrument:
         """ This only creates a null Instrument
             Create should be used to create Instrument objects
         """
-        self._uid = None
+        self._uuid = None
         self._name = None
+        self._creation_datetime = None
         self._site = None
         self._network = None
         self._datasources = None
@@ -36,10 +41,12 @@ class Instrument:
                 Instrument: Instrument object
         """
         from Acquire.ObjectStore import create_uuid as _create_uuid
+        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
         i = Instrument()
-        i._uid = _create_uuid()
+        i._uuid = _create_uuid()
         i._name = name
+        i._creation_datetime = _get_datetime_now()
         i._site = site
         i._network = network
         # To hold UIDs of all DataSources associated with this Instrument
@@ -53,7 +60,7 @@ class Instrument:
             Returns:
                 bool: True if null
         """
-        return self._uid is None
+        return self._uuid is None
 
     def save(self, bucket=None):
         """ Save this Instrument as a JSON object on the object store
@@ -78,36 +85,40 @@ class Instrument:
         if bucket is None:
             bucket = _get_bucket()
 
-        key = "%s/uid/%s", (self._instrument_root, self._uid)
+        instrument_key = "%s/uuid/%s" % (Instrument._instrument_root, self._uuid)
 
-        _ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
+        _ObjectStore.set_object_from_json(bucket=bucket, key=instrument_key, data=self.to_data())
 
         encoded_name = _string_to_encoded(self._name)
 
-        key = "%s/name/%s/%s" % (self._instrument_root, encoded_name, self._uid)
+        string_key = "%s/name/%s/%s" % (Instrument._instrument_root, encoded_name, self._uuid)
 
-        _ObjectStore.set_string_object(bucket=bucket, key=key, string_data=self._uid)
+        _ObjectStore.set_string_object(bucket=bucket, key=string_key, string_data=self._uuid)
 
     @staticmethod
-    def load(bucket=None, uid=None, name=None):
+    def load(bucket=None, uuid=None, name=None):
         """ Load instance of Instrument from JSON serialised data
             in the object store
 
+            Args:
+                bucket (dict, default=None): Bucket to hold data
+                uuid (str, default=None): UUID of Instrument
+                name (str, default=None): Name of Instrument
             Returns:
                 Instrument: Instrument object
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from hugs_objstore import get_bucket as _get_bucket
 
-        if uid is None and name is None:
-            raise ValueError("Both uid and name cannot be None")
+        if uuid is None and name is None:
+            raise ValueError("Both uuid and name cannot be None")
 
         if bucket is None:
             bucket = _get_bucket()
-        if uid is None:
-            uid = Instrument._get_uid_from_name(bucket=bucket, name=name)
+        if uuid is None:
+            uuid = Instrument._get_uid_from_name(bucket=bucket, name=name)
 
-        key = "%s/uid/%s" % (Instrument._instrument_root, uid)
+        key = "%s/uuid/%s" % (Instrument._instrument_root, uuid)
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
         return Instrument.from_data(data)
@@ -119,14 +130,16 @@ class Instrument:
             Returns:
                 dict: Dictionary created from this object
         """
-        data = {}
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-        data["UUID"] = self._uid
-        data["name"] = self._name
-        data["site"] = self._site
-        data["network"] = self._network
+        d = {}
+        d["UUID"] = self._uuid
+        d["name"] = self._name
+        d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        d["site"] = self._site
+        d["network"] = self._network
 
-        return data
+        return d
 
     @staticmethod
     def from_data(data):
@@ -140,9 +153,12 @@ class Instrument:
         if data is None or len(data) == 0:
             return Instrument()
 
+        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+
         i = Instrument()
-        i._uid = data["UUID"]
+        i._uuid = data["UUID"]
         i._name = data["name"]
+        i._creation_datetime = _string_to_datetime(data["creation_datetime"])
         i._site = data["site"]
         i._network = data["network"]
 
@@ -175,12 +191,12 @@ class Instrument:
 
         prefix = "%s/name/%s" % (Instrument._instrument_root, encoded_name)
 
-        uid = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
+        uuid = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
 
-        if(len(uid) > 1):
+        if(len(uuid) > 1):
             raise ValueError("There should only be one instrument with this name")
 
-        return uid[0]
+        return uuid[0]
 
     def create_datasource(self, name):
         """ Creates a DataSource object and adds its information to the list of
@@ -195,7 +211,7 @@ class Instrument:
         datasource = DataSource.create(name=name, instrument=self._name, 
                                         site=self._site, network=self._network)
 
-        self._datasources[datasource._uid] = {"name": name, "created": datasource._creation_datetime}
+        self._datasources[datasource._uuid] = {"name": name, "created": datasource._creation_datetime}
 
         return datasource
 

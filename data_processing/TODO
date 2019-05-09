@@ -1,0 +1,9 @@
+TODO
+
+Fix latitude and longitude saving for Sites and from Network to Site
+
+Ensure classes are uniform
+
+Create a test suite
+
+Create search functions for each of the classes
