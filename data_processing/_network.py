@@ -2,6 +2,7 @@
 
 """
 
+__all__ = ["Network"]
 
 class Network:
     """ A Network has Sites
@@ -32,10 +33,10 @@ class Network:
 
         n = Network()
         
-        n._name = name
         n._uuid = _create_uuid()
-        n._description = description
+        n._name = name
         n._creation_datetime = _get_datetime_now()
+        n._description = description
         n._sites = {}
 
         return n
@@ -58,9 +59,9 @@ class Network:
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         d = {}
-        d["name"] = self.name
-        d["UUID"] = self.uuid
-        d["description"] = self.description
+        d["name"] = self._name
+        d["UUID"] = self._uuid
+        d["description"] = self._description
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         d["sites"] = self._sites
 
@@ -82,8 +83,8 @@ class Network:
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
 
         n = Network()
-        n._name = data["name"]
         n._uuid = data["UUID"]
+        n._name = data["name"]
         n._description = data["description"]
         n._creation_datetime = _string_to_datetime(data["creation_datetime"])
         n._sites = data["sites"]
@@ -110,13 +111,10 @@ class Network:
             bucket = _get_bucket()
         
         network_key = "%s/uuid/%s" % (Network._network_root, self._uuid)
-
         _ObjectStore.set_object_from_json(bucket=bucket, key=network_key, data=self.to_data())
 
         encoded_name = _string_to_encoded(self._name)
-         
-        string_key = "%s/name/%s/%s" % (Network._network_root, self._name, self._uuid)
-
+        string_key = "%s/name/%s/%s" % (Network._network_root, encoded_name, self._uuid)
         _ObjectStore.set_string_object(bucket=bucket, key=string_key, string_data=self._uuid)
             
     @staticmethod
@@ -140,7 +138,7 @@ class Network:
         if bucket is None:
             bucket = _get_bucket()
         if uuid is None:
-            uuid = Site._get_uid_from_name(bucket=bucket, prefix=prefix)
+            uuid = Network._get_uid_from_name(bucket=bucket, name=name)
 
         key = "%as/uuid/%s" % (Network._network_root, uuid)
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
@@ -161,9 +159,7 @@ class Network:
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
 
         encoded_name = _string_to_encoded(name)
-
         prefix = "%s/name/%s" % (Network._network_root, encoded_name)
-
         uuid = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
 
         if len(uuid) > 1:
@@ -171,7 +167,7 @@ class Network:
 
         return uuid[0]
 
-    def create_Site(self, name, location, latlong):
+    def create_site(self, name, location, latlong):
         """ Used to create a Site on this Network
 
             Args:
@@ -187,6 +183,7 @@ class Network:
 
         self._sites[site._uuid] = {"name": name, "created": site._creation_datetime}
 
+        return site
 
 
         

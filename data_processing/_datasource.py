@@ -1,8 +1,5 @@
 __all___ = ["Datasource"]
 
-
-
-
 class Datasource:
     """ This class handles all data sources such as sensors
 
@@ -20,7 +17,7 @@ class Datasource:
         self._height = None
 
     @staticmethod
-    def create(name=None, instrument, site, network, height=None):
+    def create(name=None, instrument, site, network):
         """Create a new datasource
         
             Args:
@@ -39,19 +36,11 @@ class Datasource:
         d = Datasource()
         d._uuid = _create_uuid()
         d._name = name
+        d._creation_datetime = _get_datetime_now()
         d._site = site
         d._network = network
-        d._creation_datetime = _get_datetime_now()
 
         return d
-
-    def get_site():
-        """ Returns the site with which this datasource is 
-
-            Returns:
-                str: Name of site
-        """
-        return self._site()
 
     def is_null(self):
         """Return whether this object is null
@@ -60,6 +49,14 @@ class Datasource:
                 bool: True if object is null
         """
         return self._uuid is None
+        
+    def get_site():
+        """ Returns the site with which this datasource is 
+
+            Returns:
+                str: Name of site
+        """
+        return self._site()
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -87,8 +84,8 @@ class Datasource:
             return Datasource()
 
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
-        d = Datasource()
 
+        d = Datasource()
         d._uuid = data["UUID"]
         d._name = data["name"]
         d._creation_datetime = _string_to_datetime(data["creation_datetime"])
@@ -117,19 +114,18 @@ class Datasource:
         _ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
         
         encoded_name = _string_to_encoded(self._name)
-        name_key = "%s/name/%s/%s" % (Datasource._datasource_root,
-                                      encoded_name, self._uuid)
+        name_key = "%s/name/%s/%s" % (Datasource._datasource_root, encoded_name, self._uuid)
         _ObjectStore.set_string_object(bucket=bucket, key=name_key, string_data=self._uuid)
-
-
 
     @staticmethod
     def load(bucket=None, uuid=None, name=None):
-        """ Load a Datasource from the object store either by name or UID
+        """ Load a Datasource from the object store either by name or UUID
+
+            uuid or name must be passed to the function
 
             Args:
                 bucket (dict, default=None): Bucket to store object
-                uuid (str, default=None): UID of Datasource to load
+                uuid (str, default=None): UID of Datasource
                 name (str, default=None): Name of Datasource
             Returns:
                 Datasource: Datasource object created from JSON
@@ -149,49 +145,6 @@ class Datasource:
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
         return Datasource.from_data(data)
-
-    def get_values(self, bucket, datetime_begin, datetime_end):
-        """ Get all values for this Datasource stored in the object store
-
-            Args:  
-                bucket (dict): Bucket holding data
-                datetime_begin (datetime): Start of datetime range
-                datetime_end (datetime): End of datetime range
-            Returns:
-                list: A list of Pandas.Dataframes
-
-        """
-        from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
-
-        # Ensure that datetime is valid
-        datetime_begin = _datetime_to_datetime(datetime_begin)
-        datetime_end = _datetime_to_datetime(datetime_end)
-
-        year_begin = datetime_begin.year
-        year_end = datetime_end.year
-
-        keys = []
-
-        # Find the keys that are valid
-        for year in range(year_begin, year_end+1):
-            prefix = "%s/%s/%s" % (Datasource._datavalues_root, self._uuid, year)
-            
-            datakeys = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
-               
-            # Check the end date of the data
-            for datakey in datakeys:
-                start, end = _string_to_daterange(datakey.split("_")[-1])
-
-                if end.year < year_end:
-                    keys.append(datakey)
-
-        # List to store dataframes
-        values = []
-
-        for key in keys:
-            values.append(get_dataframe(bucket=bucket, key=key))
-
-        return values
 
     @staticmethod
     def get_name_from_uid(bucket, uuid):

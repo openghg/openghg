@@ -1,6 +1,7 @@
 """ At each site there are instruments, possibly multiple instruments
 
 """
+__all__ = ["Site"]
 
 class Site:
     """ Holds the data about a site at which
@@ -10,14 +11,10 @@ class Site:
         Site.create() function
 
     """
-    _site_root = "site"\
-    
+    _site_root = "site"
 
     def __init__(self):
-        """ This just creates a null Site
-
-        """
-
+        """ This creates a null Site """
         self._name = None
         self._uuid = None
         self._creation_datetime = None
@@ -97,14 +94,13 @@ class Site:
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
 
         s = Site()
-
-        s._name = d["name"]
-        s._uuid = d["UUID"]
-        s._creation_datetime = _string_to_datetime(d["creation_datetime"])
-        s._location = d["location"]
-        s._latlong = d["latlong"]
-        s._network = d["network"]
-        s._instruments = d["instruments"]
+        s._name = data["name"]
+        s._uuid = data["UUID"]
+        s._creation_datetime = _string_to_datetime(data["creation_datetime"])
+        s._location = data["location"]
+        s._latlong = data["latlong"]
+        s._network = data["network"]
+        s._instruments = data["instruments"]
 
         return s
         
@@ -155,7 +151,7 @@ class Site:
         if bucket is None:
             bucket = _get_bucket()
         if uuid is None:
-            uuid = Site._get_uid_from_name(bucket=bucket, prefix=prefix)
+            uuid = Site._get_uid_from_name(bucket=bucket, name=name)
 
         key = "%s/uuid/%s" % (Site._site_root, uuid)
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
@@ -186,7 +182,7 @@ class Site:
         
         return uuid[0]
         
-    def create_Instrument(self, name):
+    def create_Instrument(self, name, height=None):
         """ This function is used to create an Instrument at this Site
 
             Returns:
@@ -194,8 +190,8 @@ class Site:
         """
         from _instrument import Instrument
 
-        instrument = Instrument.create(name=name, site=self._name, network=self._network)
+        instrument = Instrument.create(name=name, site=self._name, network=self._network, height=height)
 
-        self._instruments[instrument._uuid] = {"name": name, "created": instrument._create_uuid}
+        self._instruments[instrument._uuid] = {"name": name, "created": instrument._creation_datetime}
 
         

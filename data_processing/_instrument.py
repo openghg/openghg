@@ -25,12 +25,13 @@ class Instrument:
         self._uuid = None
         self._name = None
         self._creation_datetime = None
+        self._height = None
         self._site = None
         self._network = None
         self._datasources = None
     
     @staticmethod
-    def create(self, name, site, network):
+    def create(name, site, network, height=None):
         """ Creates an Instrument object
 
             Args:
@@ -49,6 +50,8 @@ class Instrument:
         i._creation_datetime = _get_datetime_now()
         i._site = site
         i._network = network
+        if height:
+            i._height = height
         # To hold UIDs of all DataSources associated with this Instrument
         i._datasources = {}
 
@@ -61,67 +64,6 @@ class Instrument:
                 bool: True if null
         """
         return self._uuid is None
-
-    def save(self, bucket=None):
-        """ Save this Instrument as a JSON object on the object store
-    
-            This function also saves the name and UID of the Instrument
-            to the object store with a key
-
-            {instrument_root}/name/{instrument_name}/{instrumen_uid}
-            
-            Args:
-                bucket (dict): Bucket to hold data
-            Returns:
-                None
-        """
-        if self.is_null():
-            return
-        
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from hugs_objstore import get_bucket as _get_bucket
-
-        if bucket is None:
-            bucket = _get_bucket()
-
-        instrument_key = "%s/uuid/%s" % (Instrument._instrument_root, self._uuid)
-
-        _ObjectStore.set_object_from_json(bucket=bucket, key=instrument_key, data=self.to_data())
-
-        encoded_name = _string_to_encoded(self._name)
-
-        string_key = "%s/name/%s/%s" % (Instrument._instrument_root, encoded_name, self._uuid)
-
-        _ObjectStore.set_string_object(bucket=bucket, key=string_key, string_data=self._uuid)
-
-    @staticmethod
-    def load(bucket=None, uuid=None, name=None):
-        """ Load instance of Instrument from JSON serialised data
-            in the object store
-
-            Args:
-                bucket (dict, default=None): Bucket to hold data
-                uuid (str, default=None): UUID of Instrument
-                name (str, default=None): Name of Instrument
-            Returns:
-                Instrument: Instrument object
-        """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from hugs_objstore import get_bucket as _get_bucket
-
-        if uuid is None and name is None:
-            raise ValueError("Both uuid and name cannot be None")
-
-        if bucket is None:
-            bucket = _get_bucket()
-        if uuid is None:
-            uuid = Instrument._get_uid_from_name(bucket=bucket, name=name)
-
-        key = "%s/uuid/%s" % (Instrument._instrument_root, uuid)
-        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
-
-        return Instrument.from_data(data)
 
     def to_data(self):
         """ Creates a JSON serialisable dictionary to store this object
@@ -138,6 +80,10 @@ class Instrument:
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         d["site"] = self._site
         d["network"] = self._network
+        # TODO - should this just be able to be added as part of some kwargs
+        # Have a dict containing extra data about the instrument?
+        if d._height:
+            d["height"] = self._height
 
         return d
 
@@ -161,8 +107,69 @@ class Instrument:
         i._creation_datetime = _string_to_datetime(data["creation_datetime"])
         i._site = data["site"]
         i._network = data["network"]
+        if "height" in data:
+            i._height = data["height"]
 
         return i
+
+    def save(self, bucket=None):
+        """ Save this Instrument as a JSON object on the object store
+    
+            This function also saves the name and UID of the Instrument
+            to the object store with a key
+
+            {instrument_root}/name/{instrument_name}/{instrument_uid}
+            
+            Args:
+                bucket (dict): Bucket to hold data
+            Returns:
+                None
+        """
+        if self.is_null():
+            return
+        
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+        from hugs_objstore import get_bucket as _get_bucket
+
+        if bucket is None:
+            bucket = _get_bucket()
+
+        instrument_key = "%s/uuid/%s" % (Instrument._instrument_root, self._uuid)
+        _ObjectStore.set_object_from_json(bucket=bucket, key=instrument_key, data=self.to_data())
+
+        encoded_name = _string_to_encoded(self._name)
+        string_key = "%s/name/%s/%s" % (Instrument._instrument_root, encoded_name, self._uuid)
+        _ObjectStore.set_string_object(bucket=bucket, key=string_key, string_data=self._uuid)
+
+    @staticmethod
+    def load(bucket=None, uuid=None, name=None):
+        """ Load an Instrument from the object store either by name or UUID
+
+            uuid or name must be passed to the function
+
+            Args:
+                bucket (dict, default=None): Bucket to hold data
+                uuid (str, default=None): UUID of Instrument
+                name (str, default=None): Name of Instrument
+            Returns:
+                Instrument: Instrument object
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from hugs_objstore import get_bucket as _get_bucket
+
+        if uuid is None and name is None:
+            raise ValueError("Both uuid and name cannot be None")
+
+        if bucket is None:
+            bucket = _get_bucket()
+        if uuid is None:
+            uuid = Instrument._get_uid_from_name(bucket=bucket, name=name)
+
+        key = "%s/uuid/%s" % (Instrument._instrument_root, uuid)
+        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
+
+        return Instrument.from_data(data)
 
     # Need the DataSources associated with this Instrument
     def get_datasources(self):
