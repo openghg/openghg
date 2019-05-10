@@ -18,7 +18,7 @@ class Datasource:
 
     @staticmethod
     def create(name=None, instrument, site, network):
-        """Create a new datasource
+        """ Create a new datasource
         
             Args:
                 name (str, default=None): Name for Datasource

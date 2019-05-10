@@ -4,14 +4,14 @@ import pytest
 import pandas as pd
 import uuid
 
-import data_processing.segment_data as segment_data
+from processing import segment_data
 
 @pytest.fixture(scope="session")
 def data():
 
     filename = "bsd.picarro.1minute.248m.dat"
     dir_path = os.path.dirname(__file__)
-    test_data = "data/proc_test_data/CRDS"
+    test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
 
     return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
@@ -27,7 +27,6 @@ def data():
     
 
 def test_unanimous():
-
     true_dict = {"key1": 6, "key2": 6, "key3": 6}
     false_dict = {"key1": 3, "key2": 6, "key3": 9}
 
@@ -35,7 +34,6 @@ def test_unanimous():
     assert segment_data.unanimous(false_dict) == False
 
 def test_parse_time():
-
     date = "190101"
     time = "153000"
 
@@ -45,9 +43,8 @@ def test_parse_time():
     assert parsed_time == correct_datetime
 
 def test_parse_filename():
-
     filename = "bsd.picarro.1minute.248m.dat"
-
+    
     site, instrument, resolution, height = segment_data.parse_filename(filename)
 
     assert site == "bsd"
@@ -57,7 +54,6 @@ def test_parse_filename():
 
 
 def test_gas_info(data):
-
     n_gases, n_cols = segment_data.gas_info(data=data)
 
     assert n_gases == 3
@@ -65,9 +61,8 @@ def test_gas_info(data):
 
 
 def test_parse_metadata(data):
-
     filename = "bsd.picarro.1minute.248m.dat"
-
+    
     metadata = segment_data.parse_metadata(data=data, filename=filename)
 
     start_datetime = datetime.datetime(2014, 1, 30, 10, 49, 30)
@@ -111,7 +106,7 @@ def test_parse_file(monkeypatch):
 
     filename = "bsd.picarro.1minute.248m.dat"
     dir_path = os.path.dirname(__file__)
-    test_data = "data/proc_test_data/CRDS"
+    test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
 
     gas_data = segment_data.parse_file(filepath=filepath)
@@ -134,7 +129,7 @@ def test_parse_file(monkeypatch):
 def test_store_data():
     filename = "bsd.picarro.1minute.248m.dat"
     dir_path = os.path.dirname(__file__)
-    test_data = "data/proc_test_data/CRDS"
+    test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
 
     gases = segment_data.parse_file(filepath=filepath)
@@ -153,7 +148,7 @@ def test_key_creator(monkeypatch):
     
     filename = "bsd.picarro.1minute.248m.dat"
     dir_path = os.path.dirname(__file__)
-    test_data = "data/proc_test_data/CRDS"
+    test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
 
     gases = segment_data.parse_file(filepath=filepath)

@@ -6,7 +6,7 @@ Query the object store for data uploaded by a certain user etc
 import hashlib
 import os
 
-import data_processing.local_bucket as local_bucket
+from objectstore import local_bucket
 
 from Acquire.ObjectStore import ObjectStore, ObjectStoreError
 from Acquire.Service import get_service_account_bucket, \

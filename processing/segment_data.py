@@ -77,6 +77,8 @@ def parse_filename(filename):
     resolution_str = split_filename[2]
     height = split_filename[3]
 
+    print("Yahyahyah", filename)
+
     if(resolution_str == "1minute"):
         resolution = "1m"
     elif(resolution_str == "hourly"):
@@ -146,6 +148,7 @@ def parse_metadata(data, filename):
 
 
     # Extract data from the filename
+    
     site, instrument, resolution, height = parse_filename(filename=filename)
 
     # Parse the dataframe to find the gases - this might be excessive
@@ -234,8 +237,8 @@ def parse_file(filepath):
 
     # Create a dataframe of the time and supplementary data
     # metadata["time_frame"] = data.iloc[:, 0:skip_cols]
-    filename = filepath.split("/")[-1]
     # Get the metadata dictionary - this will be saved as a JSON
+    filename = filepath.split("/")[-1]
     metadata = parse_metadata(data=data, filename=filename)
 
     # Dictionary of gases for saving to object store
