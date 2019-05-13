@@ -1,5 +1,6 @@
 __all___ = ["Datasource"]
 
+
 class Datasource:
     """ This class handles all data sources such as sensors
 
@@ -12,12 +13,13 @@ class Datasource:
         """ Construct a null Datasource """
         self._uuid = None
         self._name = None
+        self._creation_datetime = None
+        self._instrument = None
         self._site = None
         self._network = None
-        self._height = None
 
     @staticmethod
-    def create(name=None, instrument, site, network):
+    def create(name, instrument, site, network):
         """ Create a new datasource
         
             Args:
@@ -37,6 +39,7 @@ class Datasource:
         d._uuid = _create_uuid()
         d._name = name
         d._creation_datetime = _get_datetime_now()
+        d._instrument = instrument
         d._site = site
         d._network = network
 
@@ -50,6 +53,7 @@ class Datasource:
         """
         return self._uuid is None
         
+
     def get_site():
         """ Returns the site with which this datasource is 
 
@@ -57,6 +61,7 @@ class Datasource:
                 str: Name of site
         """
         return self._site()
+
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -74,6 +79,9 @@ class Datasource:
         data["UUID"] = self._uuid
         data["name"] = self._name
         data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        data["instrument"] = self._instrument
+        data["site"] = self._site
+        data["network"] = self._network
 
         return data
 
@@ -89,6 +97,9 @@ class Datasource:
         d._uuid = data["UUID"]
         d._name = data["name"]
         d._creation_datetime = _string_to_datetime(data["creation_datetime"])
+        d._instrument = data["instrument"]
+        d._site = data["site"]
+        d._network = data["network"]
 
         return d
 
@@ -105,7 +116,7 @@ class Datasource:
 
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from hugs_objstore import get_bucket as _get_bucket
+        from objectstore.hugs_objstore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -131,7 +142,7 @@ class Datasource:
                 Datasource: Datasource object created from JSON
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from hugs_objstore import get_bucket as _get_bucket
+        from objectstore.hugs_objstore import get_bucket as _get_bucket
 
         if uuid is None and name is None:
             raise ValueError("Both uuid and name cannot be None")
@@ -176,19 +187,18 @@ class Datasource:
             Returns:
                 str: UUID for the Datasource
         """
-
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
 
         encoded_name = _string_to_encoded(name)
 
-        prefix = "%s/name/%s", (Datasource._datasource_root, encoded_name)
+        prefix = "%s/name/%s" % (Datasource._datasource_root, encoded_name)
 
         uuid = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
 
         if len(uuid) > 1:
             raise ValueError("There should only be one Datasource associated with this name")
         
-        return uuid[0]
+        return uuid[0].split("/")[-1]
 
     

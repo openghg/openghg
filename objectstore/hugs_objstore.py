@@ -116,7 +116,7 @@ def write_dataframe(bucket, key, dataframe):
     # Write this HDF5 file to the object store
     filename, size, md5 = store_file(bucket, filename)
 
-    print(filename, size, md5)
+    # print(filename, size, md5)
     
 
 

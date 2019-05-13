@@ -77,8 +77,6 @@ def parse_filename(filename):
     resolution_str = split_filename[2]
     height = split_filename[3]
 
-    print("Yahyahyah", filename)
-
     if(resolution_str == "1minute"):
         resolution = "1m"
     elif(resolution_str == "hourly"):
@@ -292,6 +290,7 @@ def store_data(gas_data):
         # Store it in the object store
         write_dataframe(bucket=bucket, key=key, dataframe=gas_data["data"])
     
+
 def url_join(*args):
     """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
         stripped for each argument.
@@ -304,6 +303,7 @@ def url_join(*args):
     """
 
     return "/".join(map(lambda x: str(x).rstrip('/'), args))       
+
 
 def key_creator(metadata):
     """ Creates a key to be used as an identifier for

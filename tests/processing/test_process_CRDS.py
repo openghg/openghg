@@ -18,8 +18,6 @@ def test_read_datafile():
     folder = "../data/proc_test_data/CRDS"
     filename = "bsd.picarro.1minute.248m.dat"
 
-    print(os.path.dirname(__file__))
-
     file_path = os.path.join(test_path, folder, filename)
     test_dataset, species = crds.read_data_file(data_file=file_path)
 

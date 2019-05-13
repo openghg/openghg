@@ -45,8 +45,8 @@ def read_data_file(data_file):
     for i in df_header.columns:
         #  Ignore the metadata
         # column - row
-        print("df_header[i][0]: ", df_header[i][0])
-        print("df_header[i][1]: ", df_header[i][1])
+        # print("df_header[i][0]: ", df_header[i][0])
+        # print("df_header[i][1]: ", df_header[i][1])
 
         if df_header[i][0] != '-':
             header.append(df_header[i][0].upper() +
@@ -64,7 +64,7 @@ def read_data_file(data_file):
     df = pd.read_csv(data_file, skiprows=4, header=None, sep=r"\s+", 
                     names=header, dtype={"DATE": str, "TIME": str})
                     
-    print(header)
+    # print(header)
 
     # TODO - GJ - I don't like this - tidy it up somehow?
     # Interpret time
@@ -186,7 +186,7 @@ def process_data(data_files, inlets, site):
 
         # Create a dataset for each species
         for sp in species:
-            print("Processing species : " + sp)
+            # print("Processing species : " + sp)
             # Species specific dataset
             species_ds = ds[[sp, sp + " variability", sp + " number_of_observations"]]
             species_ds = species_ds.dropna("time")
@@ -248,11 +248,11 @@ def process_raw_data(folder_path, site, search_string):
     file_list = search_data_files(data_folder=folder_path, site=site,
                                            search_string=search_string)
     
-    print("\nFiles found : ", parse_filenames(file_list))
+    # print("\nFiles found : ", parse_filenames(file_list))
 
     inlets = find_inlets(file_list)
 
-    print("\nInlets found : ", inlets)
+    # print("\nInlets found : ", inlets)
 
     species_data = process_data(data_files=file_list, 
                                         inlets=inlets, site="BSD")

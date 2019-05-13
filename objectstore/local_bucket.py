@@ -14,7 +14,7 @@ def bucket_time():
             str: A formatted version of datetime.now()
     """
 
-    return datetime.datetime.now().strftime("%Y%m%d_%H:%M")
+    return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
 def get_local_bucket():
@@ -31,7 +31,7 @@ def get_local_bucket():
 
     local_buckets_dir = os.path.join(home_path, hugs_test_buckets)
 
-    print("Creating a bucket at : {}".format(local_buckets_dir))
+#     print("Creating a bucket at : {}".format(local_buckets_dir))
 
     root_bucket = use_testing_object_store_backend(local_buckets_dir)
 
