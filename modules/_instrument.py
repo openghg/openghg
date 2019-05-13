@@ -82,7 +82,7 @@ class Instrument:
         d["network"] = self._network
         # TODO - should this just be able to be added as part of some kwargs
         # Have a dict containing extra data about the instrument?
-        if d._height:
+        if self._height:
             d["height"] = self._height
 
         return d

@@ -4,9 +4,8 @@ import pytest
 
 from Acquire.ObjectStore import ObjectStore
 from Acquire.ObjectStore import string_to_encoded
-# from objectstore.hugs_objstore import get_bucket
 
-from modules import _datasource as Datasource
+from modules._datasource import Datasource
 from objectstore import local_bucket
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
@@ -21,7 +20,7 @@ def mock_uuid(monkeypatch):
 
 
 def test_creation(mock_uuid):
-    datasource = Datasource.Datasource.create(name="test_name", instrument="test_instrument",
+    datasource = Datasource.create(name="test_name", instrument="test_instrument",
                                                 site="test_site", network="test_network")
 
     assert datasource._name == "test_name"
@@ -32,7 +31,7 @@ def test_creation(mock_uuid):
 
 
 def test_to_data(mock_uuid):
-    datasource = Datasource.Datasource.create(name="test_name", instrument="test_instrument",
+    datasource = Datasource.create(name="test_name", instrument="test_instrument",
                                               site="test_site", network="test_network")
 
     data = datasource.to_data()
@@ -45,10 +44,10 @@ def test_to_data(mock_uuid):
 
     
 def test_from_data(mock_uuid):
-    datasource = Datasource.Datasource.create(name="test_name_two", instrument="test_instrument_two",
+    datasource = Datasource.create(name="test_name_two", instrument="test_instrument_two",
                                               site="test_site_two", network="test_network_two")
 
-    new_datasource = Datasource.Datasource.from_data(datasource.to_data())
+    new_datasource = Datasource.from_data(datasource.to_data())
 
     assert new_datasource._name == "test_name_two"
     assert new_datasource._uuid == mocked_uuid
@@ -58,7 +57,7 @@ def test_from_data(mock_uuid):
 
 
 def test_save(mock_uuid):
-    datasource = Datasource.Datasource.create(name="test_name", instrument="test_instrument",
+    datasource = Datasource.create(name="test_name", instrument="test_instrument",
                                               site="test_site", network="test_network")
 
     bucket = local_bucket.get_local_bucket()
@@ -77,14 +76,14 @@ def test_save(mock_uuid):
 
     
 def test_load(mock_uuid):
-    datasource = Datasource.Datasource.create(name="test_name_load", instrument="test_instrument_load",
+    datasource = Datasource.create(name="test_name_load", instrument="test_instrument_load",
                                               site="test_site_load", network="test_network_load")
 
     bucket = local_bucket.get_local_bucket()
     # Save to the HUGS bucket in the object store
     datasource.save(bucket)
 
-    loaded_datasource = Datasource.Datasource.load(bucket=bucket, uuid=mocked_uuid)
+    loaded_datasource = Datasource.load(bucket=bucket, uuid=mocked_uuid)
 
     assert loaded_datasource._name == "test_name_load"
     assert loaded_datasource._uuid == mocked_uuid
@@ -95,7 +94,7 @@ def test_load(mock_uuid):
 
 def test_get_uid_from_name(mock_uuid):
     name = 'test_name_getuid'
-    datasource = Datasource.Datasource.create(name=name, instrument="test_instrument_load",
+    datasource = Datasource.create(name=name, instrument="test_instrument_load",
                                               site="test_site_load", network="test_network_load")
 
     from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
@@ -104,7 +103,7 @@ def test_get_uid_from_name(mock_uuid):
 
     datasource.save(bucket)
 
-    found_uuid = Datasource.Datasource._get_uid_from_name(bucket, name)
+    found_uuid = Datasource._get_uid_from_name(bucket, name)
 
     assert found_uuid == mocked_uuid
 
