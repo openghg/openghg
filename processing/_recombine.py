@@ -9,3 +9,7 @@ def combine_sections():
             Pandas.Dataframe: Combined dataframes
 
     """
+
+        #  Here save each datasource separately and combine
+        #  each with the timeframe? Then each is an independent
+        # dataframe

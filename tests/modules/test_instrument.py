@@ -12,7 +12,6 @@ mocked_uuid = "00000000-0000-0000-00000-000000000000"
 
 @pytest.fixture
 def mock_uuid(monkeypatch):
-
     def mock_uuid():
         return mocked_uuid
 
@@ -25,9 +24,6 @@ def instrument(mock_uuid):
 
 
 def test_creation(mock_uuid, instrument):
-    # instrument = Instrument.create(name="test_name", site="test_site", 
-    #                                 network="test_network", height="50m")
-
     assert instrument._name == "test_name"
     assert instrument._uuid == mocked_uuid
     assert instrument._site == "test_site"
@@ -47,8 +43,6 @@ def test_creation_no_height(mock_uuid):
 
 
 def test_to_data(mock_uuid, instrument):
-    # instrument = Instrument.create(name="test_name", site="test_site",
-    #                                network="test_network")
     data = instrument.to_data()
 
     assert data["name"] == "test_name"

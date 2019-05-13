@@ -11,3 +11,7 @@ Create search functions for each of the classes
 Tidy the module - sort into sensible folders for further development
 
 What kind of resolution will be needed for dateranges?
+
+- Fix Segment and metadata files
+- Tidy segment and meteadata files and fix imports to be in line with fn-local imports
+- Metadata is currently being imported as meta, check naming

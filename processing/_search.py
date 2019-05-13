@@ -32,6 +32,7 @@ def string_to_daterange(s):
 
     return start, end
 
+
 def daterange_to_string(start, end):
     """ Creates a string from the start and end datetime
     objects. Used for production of the key
@@ -50,6 +51,7 @@ def daterange_to_string(start, end):
     end_fmt = end.strftime("%Y%m%d")
 
     return start_fmt + "_" + end_fmt
+
 
 def parse_date_time(date, time):
     """ This function takes two strings and creates a datetime object 

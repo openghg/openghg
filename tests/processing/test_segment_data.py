@@ -4,7 +4,9 @@ import pytest
 import pandas as pd
 import uuid
 
-from processing import segment_data
+from processing import _segment as segment
+from processing import _metadata as meta
+# from processing._segment import 
 
 @pytest.fixture(scope="session")
 def data():
@@ -23,21 +25,21 @@ def data():
 #     test_data = "data/proc_test_data/CRDS"
 #     filepath = os.path.join(dir_path, test_data, filename)
 
-#     return segment_data.parse_file(filepath=filepath)
+#     return segment.parse_file(filepath=filepath)
     
 
 def test_unanimous():
     true_dict = {"key1": 6, "key2": 6, "key3": 6}
     false_dict = {"key1": 3, "key2": 6, "key3": 9}
 
-    assert segment_data.unanimous(true_dict) == True
-    assert segment_data.unanimous(false_dict) == False
+    assert meta.unanimous(true_dict) == True
+    assert meta.unanimous(false_dict) == False
 
 def test_parse_time():
     date = "190101"
     time = "153000"
 
-    parsed_time = segment_data.parse_date_time(date, time)
+    parsed_time = meta.parse_date_time(date, time)
     correct_datetime = datetime.datetime(2019, 1, 1, 15, 30, 0)
 
     assert parsed_time == correct_datetime
@@ -45,7 +47,7 @@ def test_parse_time():
 def test_parse_filename():
     filename = "bsd.picarro.1minute.248m.dat"
     
-    site, instrument, resolution, height = segment_data.parse_filename(filename)
+    site, instrument, resolution, height = meta.parse_filename(filename)
 
     assert site == "bsd"
     assert instrument == "picarro"
@@ -54,28 +56,11 @@ def test_parse_filename():
 
 
 def test_gas_info(data):
-    n_gases, n_cols = segment_data.gas_info(data=data)
+    n_gases, n_cols = meta.gas_info(data=data)
 
     assert n_gases == 3
     assert n_cols == 3
 
-
-def test_parse_metadata(data):
-    filename = "bsd.picarro.1minute.248m.dat"
-    
-    metadata = segment_data.parse_metadata(data=data, filename=filename)
-
-    start_datetime = datetime.datetime(2014, 1, 30, 10, 49, 30)
-    end_datetime = datetime.datetime(2014, 1, 30, 14, 20, 30)
-
-    assert metadata["site"] == "bsd"
-    assert metadata["instrument"] == "picarro"
-    assert metadata["resolution"] == "1m"
-    assert metadata["height"] == "248m"
-    assert metadata["start_datetime"] == start_datetime
-    assert metadata["end_datetime"] == end_datetime
-    assert metadata["port"] == "8"
-    assert metadata["type"] == "air"
 
 
 def test_parse_gases(data):
@@ -84,7 +69,7 @@ def test_parse_gases(data):
     # Count the number of columns before measurement data
     skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
-    gases = segment_data.parse_gases(data=data, skip_cols=4)
+    gases = segment.parse_gases(data=data, skip_cols=4)
 
     assert sorted(gases.keys()) == ['ch4', 'co', 'co2']
     assert gases["ch4"]["data"][0][0] == "ch4"
@@ -109,7 +94,7 @@ def test_parse_file(monkeypatch):
     test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
 
-    gas_data = segment_data.parse_file(filepath=filepath)
+    gas_data = segment.parse_file(filepath=filepath)
 
     start_datetime = datetime.datetime(2014, 1, 30, 10, 49, 30)
     end_datetime = datetime.datetime(2014, 1, 30, 14, 20, 30)
@@ -132,7 +117,7 @@ def test_store_data():
     test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
 
-    gases = segment_data.parse_file(filepath=filepath)
+    gases = segment.parse_file(filepath=filepath)
 
     # TODO
 
@@ -151,15 +136,15 @@ def test_key_creator(monkeypatch):
     test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
 
-    gases = segment_data.parse_file(filepath=filepath)
+    gases = segment.parse_file(filepath=filepath)
 
     metadata = gases["metadata"]
 
-    key = segment_data.key_creator(metadata)
+    key = segment.key_creator(metadata)
 
     metadata.pop("height", None)
 
-    key_no_height = segment_data.key_creator(metadata)
+    key_no_height = segment.key_creator(metadata)
 
     assert key == "bsd/picarro/248m/20140130_20140130/00000000-0000-0000-00000-000000000000"    
     assert key_no_height == "bsd/picarro/20140130_20140130/00000000-0000-0000-00000-000000000000"
