@@ -14,16 +14,26 @@ class Datasource:
         self._uuid = None
         self._name = None
         self._creation_datetime = None
+        self._parent = None
+        # These may be unnecessary?
         self._instrument = None
         self._site = None
         self._network = None
+        # Store of data
+        self._data = None
+        self._start_datetime = None
+        self._end_datetime = None
 
     @staticmethod
-    def create(name, instrument, site, network):
+    def create(name, instrument, site, network, data=None):
         """ Create a new datasource
         
             Args:
-                name (str, default=None): Name for Datasource
+                name (str): Name for Datasource
+                instrument (str): Name of instrument
+                site (str): Name of site
+                network (str): Name of network
+                data (Pandas.Dataframe, default=None): Data from source
             Returns:
                 Datasource
 
@@ -34,14 +44,20 @@ class Datasource:
         """        
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
+        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
 
         d = Datasource()
         d._uuid = _create_uuid()
-        d._name = name
+        d._name = nameparent
         d._creation_datetime = _get_datetime_now()
+        # Now unsure about these
         d._instrument = instrument
         d._site = site
         d._network = network
+        
+        d._data = data
+        d._start_datetime = _string_to_datetime(data[0][0])
+        d._end_datetime = _string_to_datetime(data[-1][0])
 
         return d
 
@@ -52,7 +68,22 @@ class Datasource:
                 bool: True if object is null
         """
         return self._uuid is None
-        
+
+    def get_start_datetime():
+        """ Returns the starting datetime for the data in this Datasource
+
+            Returns:
+                datetime: Datetime for start of data
+        """        
+        return self._start_datetime
+
+    def get_end_datetime():
+        """ Returns the end datetime for the data in this Datasource
+
+            Returns:
+                datetime: Datetime for end of data
+        """
+        return self._end_datetime
 
     def get_site():
         """ Returns the site with which this datasource is 
@@ -201,4 +232,22 @@ class Datasource:
         
         return uuid[0].split("/")[-1]
 
+    def save_data(self, data):
+        """ Store the passed data within the Datasource
+
+            Args:
+                data (Pandas.Dataframe): Data to save
+            Returns:
+                None
+        """
+        self._data = data
     
+    def get_data(self):
+        """ Returns the data stored within the Datasource
+        
+            Returns:
+                Pandas.Dataframe: Data stored within the Datasource
+        """
+        return self._data
+
+        

@@ -1,7 +1,6 @@
 """ Segment the data into Datasources
 
 """
-
 import pandas as pd
 import uuid
 import datetime
@@ -9,6 +8,28 @@ import urllib.parse
 import datetime
 
 from processing import _metadata as meta
+
+
+def get_datasources(data):
+    """ Create a Datasource for each gas in the file
+
+        Returns:
+            list: List of Datasources
+    """
+    from modules._datasource import Datasource
+    
+    # This can save the parent instrument as a name,UUID tuple within the object
+    # Look up the parent instrument by name and find its UUID. If it doesn't exist, create it?
+    gas_data = _parse_gases(data)
+    
+    datasources = []
+    for gas_name, data in gas_data:
+        d = Datasource.create(name=gas_name, instrument="test", site="test",
+                                network="test", data=data)
+        datasources.append(d)
+    
+    return datasources
+    
 
 
 def calc_time_delta(start, end):
@@ -27,7 +48,7 @@ def calc_time_delta(start, end):
 
 # def save_timeframe(data, sup_cols):
 #     """ Creates a Pandas.Dataframe of the time and supplementary
-#         columns 
+#         columns
 
 #         Returns:
 #             Pandas.Dataframe: Time and supplementary data
@@ -35,16 +56,32 @@ def calc_time_delta(start, end):
 #     """
 #     return data.iloc[:, 0:sup_cols]
 
-def get_uuid():
-    """ Returns a random UUID
 
+def parse_timecols(time_data):
+    """ Takes a dataframe that contains the date and time 
+        and creates a single columned dataframe containing a 
+        UTC datetime
+
+        Args:
+            time_data (Pandas.Dataframe): Dataframe containing
         Returns:
-            str: Random UUID
+            timeframe (Pandas.Dataframe): Dataframe containing datetimes set to UTC
     """
-    return uuid.uuid4()
+    import datetime as _datetime
+    from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+    from Acquire.ObjectStore import date_to_string as _date_to_string
+
+    timeframe = pd.DataFrame(index=range(len(time_data)), columns=1)
+    
+    for x, _ in enumerate(timeframe):
+        combined = time_data[x][0] + time_data[x][0]
+        timeframe[x] = _date_to_string(_datetime_to_datetime(
+            _datetime.datetime.strptime(combined, "%y%m%d%H%M%S")))
+                                                            
+    return timeframe
 
 
-def parse_gases(data, skip_cols):
+def _parse_gases(data):
     """ Separates the gases stored in the dataframe in 
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -52,28 +89,80 @@ def parse_gases(data, skip_cols):
 
         Args:
             data (Pandas.Dataframe): Dataframe containing all data
-            n_cols (int): Number of columns of data for each gas
-            skip_cols (int): Number of columns before gas data
+        Returns:
+            list: List of separate Pandas.Dataframes starting with the time dataframe
 
     """
-    # Get the number of gases in dataframe and number of columns
-    # of data present for each gas
-    from metadata import Metadata
+    # Get the number of gases in dataframe and number of columns of data present for each gas
+    n_gases, n_cols = gas_info(data=data)
 
-    n_gases, n_cols = Metadata.gas_info(data=data)
-    gases = {}
+    header = data.head(2)
+    skip_cols = sum([header[column][0] == "-" for column in header.columns])
+    
+    time_cols = 2
+    # Dataframe containing the time data for this data input
+    time_data = data.iloc[:, 0:time_cols]
+    timeframe = parse_timecols(time_data=time_data)
 
+    data_list = []
     for n in range(n_gases):
         # Slice the columns
         gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]        
         # Reset the column numbers
         gas_data.columns = pd.RangeIndex(gas_data.columns.size)
-
         gas_name = gas_data[0][0]
-        # Store the name and UUID for dataframe to be stored in the metadata dict
-        gases[gas_name] = {"UUID": get_uuid(), "data": gas_data}
+        gas_data = pd.concat([timeframe, gas_data], axis=1)
+        data_list.append(gas_name, gas_data)
 
-    return gases
+    return data_list
+
+
+def gas_info(data):
+        """ Returns the number of columns of data for each gas
+            that is present in the dataframe
+        
+            Args:
+                data (Pandas.DataFrame): Measurement data
+            Returns:
+                tuple (int, int): Number of gases, number of
+                columns of data for each gas
+        """
+        # Slice the dataframe
+        head_row = data.head(1)
+
+        gases = {}
+        # Take the first row of the DataFrame
+        gas_row = 0
+        # Loop over the gases and find each unique value
+        for column in head_row.columns:
+            s = head_row[column][gas_row]
+            if s != "-":
+                gases[s] = gases.get(s, 0) + 1
+
+        # Check that we have the same number of columns for each gas
+        if not _unanimous(gases):
+            raise ValueError("Each gas does not have the same number of columns")
+
+        return len(gases), list(gases.values())[0]
+
+
+def _unanimous(self, seq):
+        """ Checks that all values in an iterable object
+            are the same
+
+            Args:
+                seq: Iterable object
+            Returns
+                bool: True if all values are the same
+
+        """
+        it = iter(seq.values())
+        try:
+            first = next(it)
+        except StopIteration:
+            return True
+        else:
+            return all(i == first for i in it)
 
 
 def parse_file(filepath):
@@ -88,10 +177,10 @@ def parse_file(filepath):
     # Read everything
     data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
 
-    header = data.head(2)
+    # header = data.head(2)
 
-    # Count the number of columns before measurement data
-    skip_cols = sum([header[column][0] == "-" for column in header.columns])
+    # # Count the number of columns before measurement data
+    # skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
     # Create a dataframe of the time and supplementary data
     # metadata["time_frame"] = data.iloc[:, 0:skip_cols]
@@ -100,7 +189,7 @@ def parse_file(filepath):
     metadata = meta.parse_metadata(data=data, filename=filename)
 
     # Dictionary of gases for saving to object store
-    gases = parse_gases(data=data, skip_cols=skip_cols)
+    gases = _parse_gases(data=data, skip_cols=skip_cols)
 
     # Dictionary of gas_name:UUID pairs
     gas_metadata = {g: gases[g]["UUID"] for g in gases.keys()}

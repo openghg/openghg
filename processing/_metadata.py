@@ -80,6 +80,13 @@ class Metadata:
                 dict: Metadata dictionary
         """
         return self._data
+
+    # need these to save to the Object store?
+    # def save():
+    #     pass
+    
+    # def load():
+    #     pass
         
 
     def _parse_date_time(self, date, time):
@@ -129,52 +136,3 @@ class Metadata:
             resolution = "1h"
 
         return site, instrument, resolution, height
-
-
-    def gas_info(self, data):
-        """ Returns the number of columns of data for each gas
-            that is present in the dataframe
-        
-            Args:
-                data (Pandas.DataFrame): Measurement data
-            Returns:
-                tuple (int, int): Number of gases, number of
-                columns of data for each gas
-        """
-        # Slice the dataframe
-        head_row = data.head(1)
-
-        gases = {}
-        # Take the first row of the DataFrame
-        gas_row = 0
-        # Loop over the gases and find each unique value
-        for column in head_row.columns:
-            s = head_row[column][gas_row]
-            if s != "-":
-                gases[s] = gases.get(s, 0) + 1
-
-        # Check that we have the same number of columns for each gas
-        if not self._unanimous(gases):
-            raise ValueError(
-                "Each gas does not have the same number of columns")
-
-        return len(gases), list(gases.values())[0]
-
-
-    def _unanimous(self, seq):
-        """ Checks that all values in an iterable object
-            are the same
-
-            Args:
-                seq: Iterable object
-            Returns
-                bool: True if all values are the same
-
-        """
-        it = iter(seq.values())
-        try:
-            first = next(it)
-        except StopIteration:
-            return True
-        else:
-            return all(i == first for i in it)

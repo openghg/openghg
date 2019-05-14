@@ -1,62 +1,81 @@
 class CRDS:
+    """ Holds CRDS data within a set of Datasources
+
+        Instances of CRDS should be created using the
+        CRDS.create() function
+        
+    """
     def __init__(self):
         self._metadata = None
+        self._uuid = None
         self._datasources = None
-    
+        self._start_datetime = None
+        self._end_datetime = None
+
     @staticmethod
-    # def create(metadata, datasources, start_datetime, end_datetime): <- Which one of these?
-    def create(datasources, start_datetime, end_datetime):
+    def create(metadata, datasources, start_datetime, end_datetime):
+        """ This function should be used to create CRDS objects
+
+        """
         c = CRDS()
-        # Get the metadata - is this from the datasources?
-        # Create a CRDS object from some datasources and the
-        # start and end datetimes contained within the data
+
+        c._metadata = metadata
+        c._datasources = datasources
+        c._start_datetime = start_datetime
+        c._end_datetime = end_datetime
 
     @staticmethod
     def read_file(filename):
-        from _metadata import Metadata
-        # Load the data in and create a dataframe
-        data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
-        
-        # Get a metadata object containing the processed metadata
-        metadata = Metadata.create(filename, data)
-        
-        # Get datasources
-        # as Pandas dataframes
-        metadata = _get_metadata(filename)
+        """ Creates a CRDS object holding data stored within Datasources
+
+        """
+        from Acquire.ObjectStore import create_uuid as _create_uuid
+        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
+        from _metadata import Metadata as _Metadata
+        from _segment import get_datasources as _get_datasources
+
+        data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")        
+        # Get a Metadata object containing the processed metadata
+        # Does this need to be an object? Just a dict?
+        metadata = _Metadata.create(filename, data)
         # Data will be contained within the Datasources
-        datasources = _get_datasources(filename)
+        datasources = _get_datasources(data)
 
         c = CRDS()
+        c._uuid = _create_uuid()
+        c._creation_datetime = _get_datetime_now()
         c._datasources = datasources
         # Metadata dict
         c._metadata = metadata
 
-        # Insert metadata parse stuff here
-        # Columns of data -  get on with it!
-        data = _read_file(filename)
-
-        if(len(data) != len(datasources):
-            raise IOError("Something is terribly wrong...")
-        
-        # Save the data for each datasource into the Datasource object
-        for i in range(0, len(data)):
-            # This add_data function adds it to the object store
-            datasources[i].add_data(data[i])
-
         # Ensure the CRDS object knows the datetimes it has
-        c._start_datetime = data[0].earliest_datetime()
-        c._end_datetime = data[0].latest_datetime()
+        c._start_datetime = datasources[0].get_start_datetime()
+        c._end_datetime = data[0].get_end_datetime()
 
         return c
 
-
     def write_file(self, filename):
+        """ Collects the data stored in this object and writes it
+            to file at filename
+
+            TODO - add control of daterange being written to file from
+            data in Datasources
+
+            Args:
+                filename (str): Filename to write data to
+            Returns:
+                None
+        """
         data = [] 
-        datetimes = {}
+        
+        # 
+        # 
+        # datetimes = {}
+
         for datasource in self._datasources:
-            # Get datas
-            d = datasource.get_data(start=self._start_datetime, end=self._end_datetime)
-            data.append(d)
+            # Get datas - for now just get the data that's there
+            # Can either get the daterange here or in the Datasource.get_data fn
+            data.append(datasource.get_data())
 
             for datetime in d.datetimes_in_data():
                 datetimes[datetime] = 1
@@ -71,5 +90,9 @@ class CRDS:
             # If no data for that datetime set as NaN
             # Write these combined tables to the file
 
+    @staticmethod
+    def load(name=None, uuid=None, bucket=None):
+        pass
 
-        
+    def save(self):
+        pass
