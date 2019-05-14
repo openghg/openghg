@@ -13,9 +13,12 @@ class CRDS:
 
     @staticmethod
     def read_file(filename):
+        from _metadata import Metadata
         # Load the data in and create a dataframe
-        data = 
-        # Parse filename data
+        data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
+        
+        # Get a metadata object containing the processed metadata
+        metadata = Metadata.create(filename, data)
         
         # Get datasources
         # as Pandas dataframes

@@ -58,7 +58,9 @@ def parse_gases(data, skip_cols):
     """
     # Get the number of gases in dataframe and number of columns
     # of data present for each gas
-    n_gases, n_cols = meta.gas_info(data=data)
+    from metadata import Metadata
+
+    n_gases, n_cols = Metadata.gas_info(data=data)
     gases = {}
 
     for n in range(n_gases):

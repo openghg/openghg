@@ -1,163 +1,180 @@
-""" Process the metadata
 
-"""
-import datetime
-import uuid
+__all__ = ["Metadata"]
 
+class Metadata:
+    """ Processes and holds metadata for raw data
 
-def _get_metadata(filename):
-    """ Parse the filename and the metadata in the header of the 
-        datafile
-
-    """ 
-
-
-def parse_metadata(data, filename):
-    """ Extracts the metadata from the datafile and creates a dictionary
-        that can then be saved to JSON
-
-        Args:
-            dataframe (Pandas.DataFrame): Dataframe containing the
-            experimental data
-            filename (str): Filename for parsing
-        Returns:
-            dict: Dictionary containing metadata
+        Metadata objects should be created using the
+        Metadata.create() function
     """
+    def __init__(self):
+        self._data = None
+        self._uuid = None
+        self._creation_datetime = None
 
+    @staticmethod
+    def create(filename, data):
+        """ Process the metadata and create a JSON serialisable 
+            dictionary for saving to object store
 
+            Args:
+                filename (str): Filename to process
+                data (Pandas.Dataframe): Raw data
+            Returns:
+                dict: Dictionary of metadata
+        """
+        from Acquire.ObjectStore import create_uuid as _create_uuid
+        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
-    # Dict for storage of metadata
-    metadata = {}
+        m = Metadata()
 
-    # Not a huge fan of these hardcoded values
-    # TODO - will these change at some point?
-    start_date = data[0][2]
-    start_time = data[1][2]
-    end_date = data.iloc[-1][0]
-    end_time = data.iloc[-1][1]
+        # Dict for storage of metadata
+        m._data = {}
 
-    # Find gas measured and port used
-    type_meas = data[2][2]
-    port = data[3][2]
+        # Not a huge fan of these hardcoded values
+        # TODO - will these change at some point?
+        start_date = data[0][2]
+        start_time = data[1][2]
+        end_date = data.iloc[-1][0]
+        end_time = data.iloc[-1][1]
 
-    start = parse_date_time(date=start_date, time=start_time)
-    end = parse_date_time(date=end_date, time=end_time)
+        # Find gas measured and port used
+        type_meas = data[2][2]
+        port = data[3][2]
 
-    # Extract data from the filename
+        start = m._parse_date_time(date=start_date, time=start_time)
+        end = m._parse_date_time(date=end_date, time=end_time)
 
-    site, instrument, resolution, height = parse_filename(filename=filename)
+        # Extract data from the filename
+        site, instrument, resolution, height = m._parse_filename(filename=filename)
 
-    # Parse the dataframe to find the gases - this might be excessive
-    # gases, _ = find_gases(data=data)
+        # Parse the dataframe to find the gases - this might be excessive
+        # gases, _ = find_gases(data=data)
+        m._uuid = _create_uuid()
+        m._creation_datetime = _get_datetime_now()
+        m._data["site"] = site
+        m._data["instrument"] = instrument
+        m._data["resolution"] = resolution
+        m._data["height"] = height
+        m._data["start_datetime"] = start
+        m._data["end_datetime"] = end
+        m._data["port"] = port
+        m._data["type"] = type_meas
+        # This will be added later
+        # metadata["gases"] = gases
 
-    # TODO - replace this with correct Acquire
-    metadata["UUID"] = uuid.uuid4()
-    metadata["site"] = site
-    metadata["instrument"] = instrument
-    metadata["resolution"] = resolution
-    metadata["height"] = height
-    metadata["start_datetime"] = start
-    metadata["end_datetime"] = end
-    metadata["port"] = port
-    metadata["type"] = type_meas
-    # This will be added later
-    # metadata["gases"] = gases
+        return m
 
-    return metadata
-
-
-def parse_date_time(date, time):
-    """ This function takes two strings and creates a datetime object 
+    def is_null(self):
+        """Return whether this object is null
         
-        Args:
-            date (str): The date in a YYMMDD format
-            time (str): The time in the format hhmmss
-            Example: 104930 for 10:49:30
-        Returns:
-            datetime: Datetime object
+            Returns:
+                bool: True if object is null
+        """
+        return self._uuid is None
 
-    """
-    if len(date) != 6:
-        raise ValueError("Incorrect date format, should be YYMMDD")
-    if len(time) != 6:
-        raise ValueError("Incorrect time format, should be hhmmss")
+    def data(self):
+        """ Return the dictionary containing metadata
 
-    combined = date + time
+            Returns:
+                dict: Metadata dictionary
+        """
+        return self._data
+        
 
-    return datetime.datetime.strptime(combined, "%y%m%d%H%M%S")
-
-
-def parse_filename(filename):
-    """ Extracts the resolution from the passed string
-
-        Args:
-            resolution_str (str): Resolution extracted from the filename
-        Returns:
-            tuple (str, str, str, str): Site, instrument, resolution
-            and height (m)
-
-    """
-    # Split the filename to get the site and resolution
-    split_filename = filename.split(".")
-
-    site = split_filename[0]
-    instrument = split_filename[1]
-    resolution_str = split_filename[2]
-    height = split_filename[3]
-
-    if(resolution_str == "1minute"):
-        resolution = "1m"
-    elif(resolution_str == "hourly"):
-        resolution = "1h"
-
-    return site, instrument, resolution, height
-
-
-def gas_info(data):
-    """ Returns the number of columns of data for each gas
-        that is present in the dataframe
-    
-        Args:
-            data (Pandas.DataFrame): Measurement data
-        Returns:
-            tuple (int, int): Number of gases, number of
-            columns of data for each gas
+    def _parse_date_time(self, date, time):
+        """ This function takes two strings and creates a datetime object 
             
-    """
-    # Slice the dataframe
-    head_row = data.head(1)
+            Args:
+                date (str): The date in a YYMMDD format
+                time (str): The time in the format hhmmss
+                Example: 104930 for 10:49:30
+            Returns:
+                datetime: Datetime object
 
-    gases = {}
-    # Take the first row of the DataFrame
-    gas_row = 0
-    # Loop over the gases and find each unique value
-    for column in head_row.columns:
-        s = head_row[column][gas_row]
-        if s != "-":
-            gases[s] = gases.get(s, 0) + 1
+        """
+        import datetime as _datetime
 
-    # Check that we have the same number of columns for each gas
-    if not unanimous(gases):
-        raise ValueError(
-            "Each gas does not have the same number of columns")
+        if len(date) != 6:
+            raise ValueError("Incorrect date format, should be YYMMDD")
+        if len(time) != 6:
+            raise ValueError("Incorrect time format, should be hhmmss")
 
-    return len(gases), list(gases.values())[0]
+        combined = date + time
+
+        return _datetime.datetime.strptime(combined, "%y%m%d%H%M%S")
 
 
-def unanimous(seq):
-    """ Checks that all values in an iterable object
-        are the same
+    def _parse_filename(self, filename):
+        """ Extracts the resolution from the passed string
 
-        Args:
-            seq: Iterable object
-        Returns
-            bool: True if all values are the same
+            Args:
+                resolution_str (str): Resolution extracted from the filename
+            Returns:
+                tuple (str, str, str, str): Site, instrument, resolution
+                and height (m)
 
-    """
-    it = iter(seq.values())
-    try:
-        first = next(it)
-    except StopIteration:
-        return True
-    else:
-        return all(i == first for i in it)
+        """
+        # Split the filename to get the site and resolution
+        split_filename = filename.split(".")
+
+        site = split_filename[0]
+        instrument = split_filename[1]
+        resolution_str = split_filename[2]
+        height = split_filename[3]
+
+        if(resolution_str == "1minute"):
+            resolution = "1m"
+        elif(resolution_str == "hourly"):
+            resolution = "1h"
+
+        return site, instrument, resolution, height
+
+
+    def gas_info(self, data):
+        """ Returns the number of columns of data for each gas
+            that is present in the dataframe
+        
+            Args:
+                data (Pandas.DataFrame): Measurement data
+            Returns:
+                tuple (int, int): Number of gases, number of
+                columns of data for each gas
+        """
+        # Slice the dataframe
+        head_row = data.head(1)
+
+        gases = {}
+        # Take the first row of the DataFrame
+        gas_row = 0
+        # Loop over the gases and find each unique value
+        for column in head_row.columns:
+            s = head_row[column][gas_row]
+            if s != "-":
+                gases[s] = gases.get(s, 0) + 1
+
+        # Check that we have the same number of columns for each gas
+        if not self._unanimous(gases):
+            raise ValueError(
+                "Each gas does not have the same number of columns")
+
+        return len(gases), list(gases.values())[0]
+
+
+    def _unanimous(self, seq):
+        """ Checks that all values in an iterable object
+            are the same
+
+            Args:
+                seq: Iterable object
+            Returns
+                bool: True if all values are the same
+
+        """
+        it = iter(seq.values())
+        try:
+            first = next(it)
+        except StopIteration:
+            return True
+        else:
+            return all(i == first for i in it)

@@ -2,7 +2,8 @@ import pytest
 import xarray
 import os
 
-from processing import crds
+# from processing import _crds_segmentation
+from processing import _crds_segmentation
 
 """
 This is a very limited test bench for the processing functions
@@ -19,7 +20,7 @@ def test_read_datafile():
     filename = "bsd.picarro.1minute.248m.dat"
 
     file_path = os.path.join(test_path, folder, filename)
-    test_dataset, species = crds.read_data_file(data_file=file_path)
+    test_dataset, species = _crds_segmentation.read_data_file(data_file=file_path)
 
     assert isinstance(test_dataset, xarray.Dataset)
     assert isinstance(species, list)
@@ -31,7 +32,7 @@ def test_search_data_files():
     folder_path = os.path.join(test_path, folder)
     search_string = ".*.1minute.*.dat"
 
-    file_list = crds.search_data_files(data_folder=folder_path, site=site,
+    file_list = _crds_segmentation.search_data_files(data_folder=folder_path, site=site,
                                             search_string=search_string)
 
     test_filename = "bsd.picarro.1minute.248m.dat"
@@ -47,10 +48,10 @@ def test_find_inlets():
     folder_path = os.path.join(test_path, folder)
     search_string = ".*.1minute.*.dat"
 
-    file_list = crds.search_data_files(data_folder=folder_path, site=site,
+    file_list = _crds_segmentation.search_data_files(data_folder=folder_path, site=site,
                                           search_string=search_string)
 
-    inlets = crds.find_inlets(file_list)
+    inlets = _crds_segmentation.find_inlets(file_list)
     
     test_inlet_type = "248m"
 
@@ -62,7 +63,7 @@ def test_load_from_JSON():
 
     folder_path = os.path.join(test_path, metadata_folder)
     
-    test_dict = crds.load_from_JSON(folder_path, test_file)
+    test_dict = _crds_segmentation.load_from_JSON(folder_path, test_file)
 
     assert test_dict["ACRONYM"]["directory"] == "test_dir"
 
@@ -72,11 +73,11 @@ def test_processing_data():
     folder_path = os.path.join(test_path, folder)
     search_string = ".*.1minute.*.dat"
 
-    file_list = crds.search_data_files(data_folder=folder_path, site=site,
+    file_list = _crds_segmentation.search_data_files(data_folder=folder_path, site=site,
                                             search_string=search_string)
-    inlets = crds.find_inlets(file_list)
+    inlets = _crds_segmentation.find_inlets(file_list)
 
-    species_data = crds.process_data(data_files=file_list, inlets=inlets, site="BSD")
+    species_data = _crds_segmentation.process_data(data_files=file_list, inlets=inlets, site="BSD")
 
     assert isinstance(species_data[0], xarray.Dataset)
 
@@ -86,7 +87,7 @@ def test_processing_data():
 #     search_string = ".*.1minute.*.dat"
 #     data_path = os.path.abspath("data/bilsdale-picarro")
 
-#     datas = crds.process_raw_data(
+#     datas = _crds_segmentation.process_raw_data(
 #         folder_path=data_path, site=site, search_string=search_string)
 
 #     print(len(datas))

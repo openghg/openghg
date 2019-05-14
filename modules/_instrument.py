@@ -7,6 +7,7 @@
 
 __all__ = ["Instrument"]
 
+
 class Instrument:
     """ This class holds information regarding an instrument.
         An instrument may be a set of Datasources or a single
@@ -213,7 +214,7 @@ class Instrument:
             Args:
                 name (str): Name for DataSource
         """
-        from _datasource import DataSource
+        from modules._datasource import Datasource
 
         datasource = DataSource.create(name=name, instrument=self._name, 
                                         site=self._site, network=self._network)
