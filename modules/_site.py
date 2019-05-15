@@ -23,6 +23,10 @@ class Site:
         self._network = None
         self._instruments = None
 
+        # Type of site plane, boat etc
+        # This can be used for output or reading in and processing of datsources
+        self._type
+
     @staticmethod
     def create(name, location, latlong, network):
         """ Returns a Site object
@@ -194,4 +198,10 @@ class Site:
 
         self._instruments[instrument._uuid] = {"name": name, "created": instrument._creation_datetime}
 
-        
+    def type_fn(self):
+        """ Implement a type variable so we know what type of site this is? 
+            Can be boat, land, satellite etc
+
+        """
+
+        pass

@@ -37,7 +37,7 @@ def test_get_datasources():
     data =  pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
     datasources = segment.get_datasources(data)
 
-    print("\n\nDatasources : ", datasources)
+    # print("\n\nDatasources : ", datasources)
     
 
 def test_unanimous():

@@ -5,6 +5,8 @@ class CRDS:
         CRDS.create() function
         
     """
+    crds_root = "CRDS"
+
     def __init__(self):
         self._metadata = None
         self._uuid = None
@@ -36,7 +38,6 @@ class CRDS:
 
         data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")        
         
-        # print("Size of original dataframe : ", data.shape)
         # Get a Metadata object containing the processed metadata
         # Does this need to be an object? Just a dict?
         metadata = _Metadata.create(filename, data)
@@ -52,9 +53,51 @@ class CRDS:
 
         # Ensure the CRDS object knows the datetimes it has
         c._start_datetime = datasources[0].get_start_datetime()
-        c._end_datetime = data[0].get_end_datetime()
+        c._end_datetime = datasources[0].get_end_datetime()
 
         return c
+
+    def save(self, bucket=None):
+        """ Save the object to the object store
+
+            Save the object at a CRDS key
+            Then save the datasources stored within the object
+            as HDF5 files. 
+            How to save the objects containing dataframes as HDF objects
+
+        """
+
+        # Save the object in parts in the datastore and recreate
+        # from pieces? Otherwise how to store dataframes
+        if self.is_null():
+            return
+
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+        from objectstore.hugs_objstore import get_bucket as _get_bucket
+
+        if bucket is None:
+            bucket = _get_bucket()
+
+        crds_key = "%s/uuid/%s" % (CRDS.crds_root, self._uuid)
+        _ObjectStore.set_object
+
+        Datasources contain the data
+
+        Datasources can save the dataframes separately at /data
+        Datasources themselves at /datasources/
+
+        # Get the UUIDS for the individual datasources in the object store
+
+
+
+
+
+
+
+
+
+
 
     def write_file(self, filename):
         """ Collects the data stored in this object and writes it
@@ -69,10 +112,6 @@ class CRDS:
                 None
         """
         data = [] 
-        
-        # 
-        # 
-        # datetimes = {}
 
         for datasource in self._datasources:
             # Get datas - for now just get the data that's there

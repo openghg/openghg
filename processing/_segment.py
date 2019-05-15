@@ -22,15 +22,14 @@ def get_datasources(data):
     # Look up the parent instrument by name and find its UUID. If it doesn't exist, create it?
     gas_data = parse_gases(data)
 
-    print(gas_data)
+    datasources = []
+
+    for gas_name, d in gas_data:
+        d = Datasource.create(name=gas_name, instrument="test", site="test",
+                                network="test", data=d)
+        datasources.append(d)
     
-    # datasources = []
-    # for gas_name, d in gas_data:
-    #     d = Datasource.create(name=gas_name, instrument="test", site="test",
-    #                             network="test", data=d)
-    #     datasources.append(d)
-    
-    return True
+    return datasources
     
 
 
@@ -83,7 +82,7 @@ def parse_timecols(time_data):
     timeframe = pd.DataFrame(data=time_list, columns=["Datetime"])
 
     # Check how these data work when read back out
-    timeframe["Datetime"] = pd.to_datetime(timeframe["Datetime"])
+    # timeframe["Datetime"] = pd.to_datetime(timeframe["Datetime"])
                                                             
     return timeframe
 
@@ -115,7 +114,10 @@ def parse_gases(data):
     data_list = []
     for n in range(n_gases):
         # Slice the columns
-        gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]        
+        gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
+
+        # TODO - name columns?
+
         # Reset the column numbers
         gas_data.columns = pd.RangeIndex(gas_data.columns.size)
         gas_name = gas_data[0][0]
@@ -127,6 +129,7 @@ def parse_gases(data):
         gas_data = pd.concat([timeframe, gas_data], axis=1)
         # Drop any rows with NaNs
         gas_data = gas_data.dropna(axis=0, how="any")
+        gas_data.index = pd.RangeIndex(gas_data.index.size)
 
         data_list.append((gas_name, gas_data))
 

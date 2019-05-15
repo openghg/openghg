@@ -20,3 +20,23 @@ CRDS.py
 
  TODO - add control of daterange being written to file from
             data in Datasources
+
+
+
+2019-05-15
+
+segment.py
+
+Column naming in gas tables?
+
+JSON file for the processing and segmentation functions
+
+Flag for upload of data -> segmentation functions
+
+Interpretation layer
+
+How to go from the selection of the file format to the processing function?
+
+_datasource.py 
+
+- Get the in-memory saving and storing of HDF files working

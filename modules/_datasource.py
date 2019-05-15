@@ -8,6 +8,7 @@ class Datasource:
     """
     _datasource_root = "datasource"
     _datavalues_root = "values"
+    _data_root = "data"
 
     def __init__(self):
         """ Construct a null Datasource """
@@ -48,7 +49,7 @@ class Datasource:
 
         d = Datasource()
         d._uuid = _create_uuid()
-        d._name = nameparent
+        d._name = name
         d._creation_datetime = _get_datetime_now()
         # Now unsure about these
         d._instrument = instrument
@@ -56,8 +57,8 @@ class Datasource:
         d._network = network
         
         d._data = data
-        d._start_datetime = _string_to_datetime(data[0][0])
-        d._end_datetime = _string_to_datetime(data[-1][0])
+        d._start_datetime = _string_to_datetime(data.iloc[0]["Datetime"])
+        d._end_datetime = _string_to_datetime(data.iloc[-1]["Datetime"])
 
         return d
 
@@ -94,10 +95,13 @@ class Datasource:
         return self._site()
 
 
-    def to_data(self):
+    def to_data(self, store=False, bucket=None):
         """ Return a JSON-serialisable dictionary of object
             for storage in object store
 
+            Args:
+                store (bool, default=False): True if we are storing this
+                in the object store
             Returns:
                 dict: Dictionary version of object
         """
@@ -116,9 +120,82 @@ class Datasource:
 
         return data
 
+    def store_data(self, bucket):
+        """ Returns the UUID for the data to be saved in the object store
+            as a HDF file
+
+            Returns:
+                str: UUID for data stored in object store
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+        import pandas as _pd
+        
+        # Store the data in the object store and assign a UUID to it
+        data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
+        
+        filename = "tmp_hdf_%s" % self._uuid
+        # Store the HDF file in the object store
+        self._data.to_hdf(filename, mode="w", complevel=5,
+                          complib="blosc:blosclz")
+        
+        # Save this HDF file to the object store
+        _ObjectStore.set_object(bucket, data_key, )
+
+        # TODO - get im memory saving of HDF file working
+        
+        # Taken from
+        # https: // github.com/pandas-dev/pandas/issues/9246
+        # Where frames is a dictionary of dataframes
+        # def write_hdf_to_buffer(dataframe):
+        #     import pandas as _pd
+        #     # Where get_store has been deprecated for
+        #     # pd.HDFStore(...)
+        #     with _pd.HDFStore("data.h5", mode="a", driver="H5FD_CORE", driver_core_backing_store=0) as out:
+        #         out["data"] = dataframe
+
+        #         for key, df in frames.items():
+        #             out[key] = df
+        #         return out._handle.get_file_image()
+
+        # def read_hdf_from_buffer(buffer):
+        #     from pandas import get_store
+        #     return get_store(
+        #             "data.h5",
+        #             mode="r",
+        #             driver="H5FD_CORE",
+        #             driver_core_backing_store=0,
+        #             driver_core_image=buffer.read()
+        #             )
+
+
+    @staticmethod
+    def get_data(bucket, uuid):
+        """ Get this Datasource's data from the object store
+            This data is stored in a HDF format.
+
+            Args:
+                bucket (dict): Bucket containing data
+                uuid (str): UUID for data
+            Returns:
+                Pandas.Dataframe: Dataframe from HDF file in object store
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        import pandas as _pd
+
+        key = "%s/uuid/%s" % (Datasource._data_root, uuid)
+        # Get the HDF file from the object store
+        data = _ObjectStore.get_object(bucket, key)
+
+        return _pd.read_hdf(data)
+
     @staticmethod
     def from_data(data):
-        """Construct from a JSON-deserialised dictionary"""
+        """ Construct from a JSON-deserialised dictionary
+
+            Returns:
+                Datasource: Datasource created from JSON
+        """
         if data is None or len(data) == 0:
             return Datasource()
 
@@ -131,6 +208,7 @@ class Datasource:
         d._instrument = data["instrument"]
         d._site = data["site"]
         d._network = data["network"]
+
 
         return d
 
