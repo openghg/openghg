@@ -35,6 +35,8 @@ class CRDS:
         from _segment import get_datasources as _get_datasources
 
         data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")        
+        
+        # print("Size of original dataframe : ", data.shape)
         # Get a Metadata object containing the processed metadata
         # Does this need to be an object? Just a dict?
         metadata = _Metadata.create(filename, data)

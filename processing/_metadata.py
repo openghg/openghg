@@ -89,7 +89,7 @@ class Metadata:
     #     pass
         
 
-    def _parse_date_time(self, date, time):
+    def parse_date_time(self, date, time):
         """ This function takes two strings and creates a datetime object 
             
             Args:
@@ -112,7 +112,7 @@ class Metadata:
         return _datetime.datetime.strptime(combined, "%y%m%d%H%M%S")
 
 
-    def _parse_filename(self, filename):
+    def parse_filename(self, filename):
         """ Extracts the resolution from the passed string
 
             Args:
