@@ -156,7 +156,7 @@ class Datasource:
         with _HDFStore("data.h5", mode="a", driver="H5FD_CORE", driver_core_backing_store=0,
                         complevel=6, complib="blosc:blosclz") as out:
 
-            out["data"] = dataframe
+            out["data"] = self._data
             return out._handle.get_file_image()
 
     @staticmethod
@@ -204,7 +204,7 @@ class Datasource:
 
     def save(self, bucket=None):
         """ Save this Datasource object as JSON to the object store
-        
+    
             Args:
                 bucket (dict): Bucket to hold data
             Returns:

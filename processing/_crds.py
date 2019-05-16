@@ -57,6 +57,22 @@ class CRDS:
 
         return c
 
+
+    def to_data(self):
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+
+        datasource_uuids = {key: d._uuid for key, d in enumerate(self._datasources)}
+
+        d = {}
+        d["UUID"] = self._uuid
+        d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        d["datasources"] = datasource_uuids
+        d["metadata"] = self._metadata.data()
+        d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
+        d["data_end_datetime"] = _datetime_to_string(self._end_datetime)
+
+        return d
+
     def save(self, bucket=None):
         """ Save the object to the object store
 
@@ -80,14 +96,13 @@ class CRDS:
             bucket = _get_bucket()
 
         crds_key = "%s/uuid/%s" % (CRDS.crds_root, self._uuid)
-        _ObjectStore.set_object
+        # Need to get the stored Datasources to save themselves
+        for d in self._datasources:
+            d.save(bucket)
 
-        Datasources contain the data
+        _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
-        Datasources can save the dataframes separately at /data
-        Datasources themselves at /datasources/
-
-        # Get the UUIDS for the individual datasources in the object store
+        
 
 
 
