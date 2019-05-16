@@ -120,79 +120,69 @@ class Datasource:
 
         return data
 
-    def store_data(self, bucket):
-        """ Returns the UUID for the data to be saved in the object store
-            as a HDF file
-
-            Returns:
-                str: UUID for data stored in object store
-        """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        import pandas as _pd
-        
-        # Store the data in the object store and assign a UUID to it
-        data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
-        
-        filename = "tmp_hdf_%s" % self._uuid
-        # Store the HDF file in the object store
-        self._data.to_hdf(filename, mode="w", complevel=5,
-                          complib="blosc:blosclz")
-        
-        # Save this HDF file to the object store
-        _ObjectStore.set_object(bucket, data_key, )
-
-        # TODO - get im memory saving of HDF file working
-        
-        # Taken from
-        # https: // github.com/pandas-dev/pandas/issues/9246
-        # Where frames is a dictionary of dataframes
-        # def write_hdf_to_buffer(dataframe):
-        #     import pandas as _pd
-        #     # Where get_store has been deprecated for
-        #     # pd.HDFStore(...)
-        #     with _pd.HDFStore("data.h5", mode="a", driver="H5FD_CORE", driver_core_backing_store=0) as out:
-        #         out["data"] = dataframe
-
-        #         for key, df in frames.items():
-        #             out[key] = df
-        #         return out._handle.get_file_image()
-
-        # def read_hdf_from_buffer(buffer):
-        #     from pandas import get_store
-        #     return get_store(
-        #             "data.h5",
-        #             mode="r",
-        #             driver="H5FD_CORE",
-        #             driver_core_backing_store=0,
-        #             driver_core_image=buffer.read()
-        #             )
-
-
-    @staticmethod
-    def get_data(bucket, uuid):
-        """ Get this Datasource's data from the object store
-            This data is stored in a HDF format.
+    def load_dataframe(bucket, uuid):
+        """ Loads data from the object store for creation of a Datasource object
 
             Args:
                 bucket (dict): Bucket containing data
-                uuid (str): UUID for data
+                uuid (str): UUID for Datasource 
             Returns:
-                Pandas.Dataframe: Dataframe from HDF file in object store
+                Pandas.Dataframe: Dataframe from stored HDF file
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        import pandas as _pd
 
-        key = "%s/uuid/%s" % (Datasource._data_root, uuid)
-        # Get the HDF file from the object store
+        data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
+
         data = _ObjectStore.get_object(bucket, key)
 
-        return _pd.read_hdf(data)
+        return dataframe_from_hdf(data)
+
+    # The save_dataframe function was moved to be part of save()
+
+    # Modified from
+    # https://github.com/pandas-dev/pandas/issues/9246
+    def dataframe_to_hdf(self):
+        """ Writes this Datasource's data to a compressed in-memory HDF5 file
+
+            This function is partnered with dataframe_from_hdf()
+            which reads a datframe from the in-memory HDF5 bytes object
+
+            Args:
+                dataframe (Pandas.Dataframe): Dataframe containing raw data
+            Returns:
+                bytes: HDF5 file as bytes object
+        """
+        from pandas import HDFStore as _HDFStore
+        with _HDFStore("data.h5", mode="a", driver="H5FD_CORE", driver_core_backing_store=0,
+                        complevel=6, complib="blosc:blosclz") as out:
+
+            out["data"] = dataframe
+            return out._handle.get_file_image()
 
     @staticmethod
-    def from_data(data):
+    def dataframe_from_hdf(data):
+        """ Reads a dataframe from the passed HDF5 bytes object buffer
+
+            This function is partnered with dataframe_to_hdf()
+            which writes a dataframe to an in-memory HDF5 file
+
+            Args:
+                data (bytes): Bytes object containing HDF5 file
+            Returns:
+                Pandas.Dataframe: Dataframe read from HDF5 file buffer
+        """
+        from pandas import HDFStore as _HDFStore
+        from pandas import read_hdf as _read_hdf
+        return _read_hdf(_HDFStore("data.h5", mode="r", driver="H5FD_CORE",
+                        driver_core_backing_store=0, driver_core_image=buffer))
+
+    @staticmethod
+    def from_data(bucket, data):
         """ Construct from a JSON-deserialised dictionary
 
+            Args:
+                bucket (dict): Bucket containing data
+                data (dict): JSON data
             Returns:
                 Datasource: Datasource created from JSON
         """
@@ -208,7 +198,7 @@ class Datasource:
         d._instrument = data["instrument"]
         d._site = data["site"]
         d._network = data["network"]
-
+        d._data = d.load_data(bucket, d._uuid)
 
         return d
 
@@ -237,6 +227,9 @@ class Datasource:
         name_key = "%s/name/%s/%s" % (Datasource._datasource_root, encoded_name, self._uuid)
         _ObjectStore.set_string_object(bucket=bucket, key=name_key, string_data=self._uuid)
 
+        data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
+        _ObjectStore.set_object(bucket, data_key, self.dataframe_to_hdf())
+
     @staticmethod
     def load(bucket=None, uuid=None, name=None):
         """ Load a Datasource from the object store either by name or UUID
@@ -264,7 +257,7 @@ class Datasource:
         key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
-        return Datasource.from_data(data)
+        return Datasource.from_data(bucket=bucket, data=data)
 
     @staticmethod
     def get_name_from_uid(bucket, uuid):
@@ -310,22 +303,5 @@ class Datasource:
         
         return uuid[0].split("/")[-1]
 
-    def save_data(self, data):
-        """ Store the passed data within the Datasource
-
-            Args:
-                data (Pandas.Dataframe): Data to save
-            Returns:
-                None
-        """
-        self._data = data
-    
-    def get_data(self):
-        """ Returns the data stored within the Datasource
-        
-            Returns:
-                Pandas.Dataframe: Data stored within the Datasource
-        """
-        return self._data
 
         
