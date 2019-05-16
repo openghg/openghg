@@ -138,7 +138,7 @@ class Datasource:
 
         data = _ObjectStore.get_object(bucket, data_key)
 
-        return dataframe_from_hdf(data)
+        return Datasource.dataframe_from_hdf(data)
 
     # The save_dataframe function was moved to be part of save()
 
@@ -163,7 +163,7 @@ class Datasource:
             return out._handle.get_file_image()
 
     @staticmethod
-    def dataframe_from_hdf(data):
+    def dataframe_from_hdf(hdf_data):
         """ Reads a dataframe from the passed HDF5 bytes object buffer
 
             This function is partnered with dataframe_to_hdf()
@@ -177,7 +177,7 @@ class Datasource:
         from pandas import HDFStore as _HDFStore
         from pandas import read_hdf as _read_hdf
         return _read_hdf(_HDFStore("data.h5", mode="r", driver="H5FD_CORE",
-                        driver_core_backing_store=0, driver_core_image=buffer))
+                        driver_core_backing_store=0, driver_core_image=hdf_data))
 
     @staticmethod
     def from_data(bucket, data):
@@ -227,7 +227,7 @@ class Datasource:
         if bucket is None:
             bucket = _get_bucket()
 
-        if self._data:
+        if self._data is not None:
             data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
             _ObjectStore.set_object(bucket, data_key, self.dataframe_to_hdf())
             self._stored = True

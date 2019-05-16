@@ -77,7 +77,7 @@ def test_save_with_data(mock_uuid, data):
     
     datasource = get_datasources(data=data)[0]
 
-    original_header = data._data.head(1)
+    original_slice = datasource._data.head(1)
 
     data = Datasource.create(name="test", instrument="test_instrument", site="site", 
                                 network="test_network", data=datasource._data)
@@ -86,12 +86,9 @@ def test_save_with_data(mock_uuid, data):
 
     new_datasource = Datasource.load(bucket, name="test")
 
-    new_header = new_datasource._data.head(1)
+    new_slice = new_datasource._data.head(1)
 
-    assert original_header == new_header
-
-
-
+    assert new_slice.equals(original_slice)
     
 def test_from_data(mock_uuid):
     
