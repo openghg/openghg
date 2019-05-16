@@ -5,7 +5,7 @@ class CRDS:
         CRDS.create() function
         
     """
-    crds_root = "CRDS"
+    _crds_root = "CRDS"
 
     def __init__(self):
         self._metadata = None
@@ -57,7 +57,6 @@ class CRDS:
 
         return c
 
-
     def to_data(self):
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
@@ -73,8 +72,45 @@ class CRDS:
 
         return d
 
+    @staticmethod
+    def from_data(bucket=None, data):
+        """ Create a CRDS object from data
+
+            Args:
+                data (str): JSON data
+            Returns:
+                CRDS: CRDS object created from data
+        """
+        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+        from objectstore.hugs_objstore import get_bucket as _get_bucket
+
+        if data is None or len(data) == 0:
+            return CRDS()
+
+        if bucket is None:
+            bucket = _get_bucket()
+        
+        c = CRDS()
+        c._uuid = data["UUID"]
+        c._creation_datetime = _string_to_datetime(data["creation_datetime"])
+
+        datasource_uuids = data["datasources"]
+        c._datasources = []
+        for _, uuid in datasource_uuids:
+            c._datasources.append(Datasource.load(bucket=bucket, uuid=uuid))
+
+        c._metadata = data["metadata"]
+        c._start_datetime = 
+        c._start_datetime = _string_to_datetime(data["data_start_datetime"])
+        c._end_datetime = _string_to_datetime(data["data_end_datetime"])
+
     def save(self, bucket=None):
         """ Save the object to the object store
+
+            Args:
+                bucket (dict, default=None): Bucket for data
+            Returns:
+                None
 
             Save the object at a CRDS key
             Then save the datasources stored within the object
@@ -82,9 +118,6 @@ class CRDS:
             How to save the objects containing dataframes as HDF objects
 
         """
-
-        # Save the object in parts in the datastore and recreate
-        # from pieces? Otherwise how to store dataframes
         if self.is_null():
             return
 
@@ -95,24 +128,35 @@ class CRDS:
         if bucket is None:
             bucket = _get_bucket()
 
-        crds_key = "%s/uuid/%s" % (CRDS.crds_root, self._uuid)
-        # Need to get the stored Datasources to save themselves
+        crds_key = "%s/uuid/%s" % (CRDS._crds_root, self._uuid)
+        # Get the datasources to save themselves to the object store
         for d in self._datasources:
             d.save(bucket)
 
         _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
+    @staticmethod
+    def load(bucket=None, uuid):
+        """ Load a CRDS object from the datastore using the passed
+            bucket and UUID
+
+            Args:
+                bucket (dict, default=None): Bucket to store object
+                uuid (str, default=None): UID of Datasource
+            Returns:
+                Datasource: Datasource object created from JSON
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from objectstore.hugs_objstore import get_bucket as _get_bucket
+
+        if bucket is None:
+            bucket = _get_bucket()
+
+        key = "%s/uuid/%s" % (CRDS._crds_root, uuid)
         
+        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
-
-
-
-
-
-
-
-
-
+        return CRDS.from_data(data)
 
     def write_file(self, filename):
         """ Collects the data stored in this object and writes it
@@ -128,23 +172,24 @@ class CRDS:
         """
         data = [] 
 
-        for datasource in self._datasources:
-            # Get datas - for now just get the data that's there
-            # Can either get the daterange here or in the Datasource.get_data fn
-            data.append(datasource.get_data())
+        return False
+        # for datasource in self._datasources:
+        #     # Get datas - for now just get the data that's there
+        #     # Can either get the daterange here or in the Datasource.get_data fn
+        #     data.append(datasource.get_data())
 
-            for datetime in d.datetimes_in_data():
-                datetimes[datetime] = 1
+        #     for datetime in d.datetimes_in_data():
+        #         datetimes[datetime] = 1
         
-        datetimes = list(datetimes.keys())
+        # datetimes = list(datetimes.keys())
 
-        datetimes.sort()
+        # datetimes.sort()
 
-        with open(filename, "w") as FILE:
-            FILE.write(metadata)
-            # Merge the dataframes
-            # If no data for that datetime set as NaN
-            # Write these combined tables to the file
+        # with open(filename, "w") as FILE:
+        #     FILE.write(metadata)
+        #     # Merge the dataframes
+        #     # If no data for that datetime set as NaN
+        #     # Write these combined tables to the file
 
     @staticmethod
     def load(name=None, uuid=None, bucket=None):
