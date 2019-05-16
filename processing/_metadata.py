@@ -42,11 +42,11 @@ class Metadata:
         type_meas = data[2][2]
         port = data[3][2]
 
-        start = m._parse_date_time(date=start_date, time=start_time)
-        end = m._parse_date_time(date=end_date, time=end_time)
+        start = m.parse_date_time(date=start_date, time=start_time)
+        end = m.parse_date_time(date=end_date, time=end_time)
 
         # Extract data from the filename
-        site, instrument, resolution, height = m._parse_filename(filename=filename)
+        site, instrument, resolution, height = m.parse_filename(filename=filename)
 
         # Parse the dataframe to find the gases - this might be excessive
         # gases, _ = find_gases(data=data)

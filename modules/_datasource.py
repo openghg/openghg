@@ -24,6 +24,7 @@ class Datasource:
         self._data = None
         self._start_datetime = None
         self._end_datetime = None
+        self._stored = False
 
     @staticmethod
     def create(name, instrument, site, network, data=None):
@@ -56,9 +57,11 @@ class Datasource:
         d._site = site
         d._network = network
         
-        d._data = data
-        d._start_datetime = _string_to_datetime(data.iloc[0]["Datetime"])
-        d._end_datetime = _string_to_datetime(data.iloc[-1]["Datetime"])
+        if data is not None:
+            d._data = data
+            d._start_datetime = _string_to_datetime(data.iloc[0]["Datetime"])
+            d._end_datetime = _string_to_datetime(data.iloc[-1]["Datetime"])
+        
 
         return d
 
@@ -117,10 +120,11 @@ class Datasource:
         data["instrument"] = self._instrument
         data["site"] = self._site
         data["network"] = self._network
+        data["stored"] = self._stored
 
         return data
 
-    def load_dataframe(bucket, uuid):
+    def load_dataframe(self, bucket, uuid):
         """ Loads data from the object store for creation of a Datasource object
 
             Args:
@@ -133,7 +137,7 @@ class Datasource:
 
         data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
 
-        data = _ObjectStore.get_object(bucket, key)
+        data = _ObjectStore.get_object(bucket, data_key)
 
         return dataframe_from_hdf(data)
 
@@ -198,7 +202,11 @@ class Datasource:
         d._instrument = data["instrument"]
         d._site = data["site"]
         d._network = data["network"]
-        d._data = d.load_data(bucket, d._uuid)
+        d._stored = data["stored"]
+        # If the object hasn't been saved to the object store then this
+        # won't work - what do?
+        if d._stored:
+            d._data = d.load_dataframe(bucket, d._uuid)
 
         return d
 
@@ -220,6 +228,11 @@ class Datasource:
         if bucket is None:
             bucket = _get_bucket()
 
+        if self._data:
+            data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
+            _ObjectStore.set_object(bucket, data_key, self.dataframe_to_hdf())
+            self._stored = True
+
         datasource_key = "%s/uuid/%s" % (Datasource._datasource_root, self._uuid)
         _ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
         
@@ -227,8 +240,6 @@ class Datasource:
         name_key = "%s/name/%s/%s" % (Datasource._datasource_root, encoded_name, self._uuid)
         _ObjectStore.set_string_object(bucket=bucket, key=name_key, string_data=self._uuid)
 
-        data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
-        _ObjectStore.set_object(bucket, data_key, self.dataframe_to_hdf())
 
     @staticmethod
     def load(bucket=None, uuid=None, name=None):

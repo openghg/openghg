@@ -40,3 +40,11 @@ How to go from the selection of the file format to the processing function?
 _datasource.py 
 
 - Get the in-memory saving and storing of HDF files working
+
+
+2019-05-16
+
+Currently if a Datasource is create using from_data() it tries loading the data
+from the object store - unsure if this is the best method
+
+Could have a flag stating whether or not the object has been stored but this feels a bit crude

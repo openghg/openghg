@@ -41,20 +41,6 @@ def test_to_data(mock_uuid, datasource):
     assert data["site"] == "test_site"
     assert data["network"] == "test_network"
 
-    
-def test_from_data(mock_uuid):
-    datasource = Datasource.create(name="test_name_two", instrument="test_instrument_two",
-                                              site="test_site_two", network="test_network_two")
-
-    new_datasource = Datasource.from_data(datasource.to_data())
-
-    assert new_datasource._name == "test_name_two"
-    assert new_datasource._uuid == mocked_uuid
-    assert new_datasource._instrument == "test_instrument_two"
-    assert new_datasource._site == "test_site_two"
-    assert new_datasource._network == "test_network_two"
-
-
 def test_save(mock_uuid, datasource):
     bucket = local_bucket.get_local_bucket()
     # Save to the HUGS bucket in the object store
@@ -69,6 +55,24 @@ def test_save(mock_uuid, datasource):
     assert data["instrument"] == "test_instrument"
     assert data["site"] == "test_site"
     assert data["network"] == "test_network"
+    
+def test_from_data(mock_uuid):
+    from objectstore.local_bucket import get_local_bucket
+    datasource = Datasource.create(name="test_name_two", instrument="test_instrument_two",
+                                              site="test_site_two", network="test_network_two")
+
+    bucket = get_local_bucket()
+
+    data = datasource.to_data()
+    new_datasource = Datasource.from_data(bucket=bucket, data=datasource.to_data())
+
+    assert new_datasource._name == "test_name_two"
+    assert new_datasource._uuid == mocked_uuid
+    assert new_datasource._instrument == "test_instrument_two"
+    assert new_datasource._site == "test_site_two"
+    assert new_datasource._network == "test_network_two"
+
+
 
     
 def test_load(mock_uuid, datasource):
