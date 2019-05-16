@@ -62,7 +62,6 @@ class Datasource:
             d._start_datetime = _string_to_datetime(data.iloc[0]["Datetime"])
             d._end_datetime = _string_to_datetime(data.iloc[-1]["Datetime"])
         
-
         return d
 
     def is_null(self):

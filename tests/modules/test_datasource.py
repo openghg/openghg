@@ -1,14 +1,28 @@
 import datetime
-import uuid
+import os
 import pytest
+import uuid
+import pandas as pd
 
 from Acquire.ObjectStore import ObjectStore
 from Acquire.ObjectStore import string_to_encoded
 
 from modules._datasource import Datasource
+from processing._metadata import Metadata
 from objectstore import local_bucket
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
+
+
+@pytest.fixture(scope="session")
+def data():
+
+    filename = "bsd.picarro.1minute.248m.dat"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
 
 @pytest.fixture
 def datasource():
@@ -55,13 +69,36 @@ def test_save(mock_uuid, datasource):
     assert data["instrument"] == "test_instrument"
     assert data["site"] == "test_site"
     assert data["network"] == "test_network"
+
+def test_save_with_data(mock_uuid, data):
+    from processing._segment import get_datasources
+
+    bucket = local_bucket.get_local_bucket()
+    
+    datasource = get_datasources(data=data)[0]
+
+    original_header = data._data.head(1)
+
+    data = Datasource.create(name="test", instrument="test_instrument", site="site", 
+                                network="test_network", data=datasource._data)
+
+    data.save(bucket)
+
+    new_datasource = Datasource.load(bucket, name="test")
+
+    new_header = new_datasource._data.head(1)
+
+    assert original_header == new_header
+
+
+
     
 def test_from_data(mock_uuid):
-    from objectstore.local_bucket import get_local_bucket
+    
     datasource = Datasource.create(name="test_name_two", instrument="test_instrument_two",
                                               site="test_site_two", network="test_network_two")
 
-    bucket = get_local_bucket()
+    bucket = local_bucket.get_local_bucket()
 
     data = datasource.to_data()
     new_datasource = Datasource.from_data(bucket=bucket, data=datasource.to_data())
