@@ -8,6 +8,7 @@ __all__ = ["string_to_daterange", "daterange_to_string",
            "parse_date_time", "get_objects"]
 
 class RootPaths(_Enum):
+    DATA = "data"
     DATASOURCE = "datasource"
     INSTRUMENT = "instrument"
     SITE = "site"
@@ -92,7 +93,7 @@ def get_objects(self, bucket, root_path, datetime_begin, datetime_end):
     """
     from Acquire.ObjectStore import ObjectStore as _ObjectStore
     from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
-    from hugs_objstore import get_dataframe as _get_dataframe
+    from objectstore.hugs_objstore import get_dataframe as _get_dataframe
 
     datetime_begin = _datetime_to_datetime(datetime_begin)
     datetime_end = _datetime_to_datetime(datetime_end)

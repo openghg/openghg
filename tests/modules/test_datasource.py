@@ -90,7 +90,7 @@ def test_save_with_data(mock_uuid, data):
 
     assert new_slice.equals(original_slice)
     
-def test_from_data(mock_uuid):
+def test_from_data_no_data(mock_uuid):
     
     datasource = Datasource.create(name="test_name_two", instrument="test_instrument_two",
                                               site="test_site_two", network="test_network_two")
@@ -107,6 +107,9 @@ def test_from_data(mock_uuid):
     assert new_datasource._network == "test_network_two"
 
 
+# def test_from_data_with_data(mock_uuid):
+
+#     data
 
     
 def test_load(mock_uuid, datasource):

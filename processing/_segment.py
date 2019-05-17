@@ -110,6 +110,11 @@ def parse_gases(data):
     # Dataframe containing the time data for this data input
     time_data = data.iloc[header_rows:, 0:time_cols]
     timeframe = parse_timecols(time_data=time_data)
+    
+    # Drop any rows with NaNs
+    data = data.dropna(axis=0, how="any")
+    # Reset the index
+    data.index = pd.RangeIndex(data.index.size)
 
     data_list = []
     for n in range(n_gases):
@@ -127,8 +132,7 @@ def parse_gases(data):
 
         # Concatenate the timeframe and the data
         gas_data = pd.concat([timeframe, gas_data], axis=1)
-        # Drop any rows with NaNs
-        gas_data = gas_data.dropna(axis=0, how="any")
+        # Reset the index
         gas_data.index = pd.RangeIndex(gas_data.index.size)
 
         data_list.append((gas_name, gas_data))

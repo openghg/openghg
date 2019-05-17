@@ -59,6 +59,8 @@ class Datasource:
         
         if data is not None:
             d._data = data
+            print(data.iloc[0]["Datetime"])
+            print(data.iloc[-1]["Datetime"])
             d._start_datetime = _string_to_datetime(data.iloc[0]["Datetime"])
             d._end_datetime = _string_to_datetime(data.iloc[-1]["Datetime"])
         
