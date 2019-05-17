@@ -48,3 +48,17 @@ Currently if a Datasource is create using from_data() it tries loading the data
 from the object store - unsure if this is the best method
 
 Could have a flag stating whether or not the object has been stored but this feels a bit crude
+
+
+2019-05-17
+
+Check the performance warning
+
+/home/gar/Documents/Devel/hugs/modules/_datasource.py:167: PerformanceWarning: 
+  your performance may suffer as PyTables will pickle object types that it cannot
+  map directly to c-types [inferred_type->mixed-integer,key->axis0] [items->None]
+  
+    out["data"] = self._data
+
+Check the conversion of a Pandas Timestamp object to string and then to python datetime object 
+by the Acquire functions

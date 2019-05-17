@@ -27,17 +27,20 @@ class CRDS:
         c._end_datetime = end_datetime
 
     @staticmethod
-    def read_file(filename):
+    def read_file(filepath):
         """ Creates a CRDS object holding data stored within Datasources
 
         """
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
-        from _metadata import Metadata as _Metadata
-        from _segment import get_datasources as _get_datasources
+        from processing._metadata import Metadata as _Metadata
+        from processing._segment import get_datasources as _get_datasources
 
-        data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")        
+        import pandas as _pd
+
+        data = _pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")        
         
+        filename = filepath.split("/")[-1]
         # Get a Metadata object containing the processed metadata
         # Does this need to be an object? Just a dict?
         metadata = _Metadata.create(filename, data)
@@ -73,7 +76,7 @@ class CRDS:
         return d
 
     @staticmethod
-    def from_data(bucket=None, data):
+    def from_data(data, bucket=None):
         """ Create a CRDS object from data
 
             Args:
@@ -100,7 +103,6 @@ class CRDS:
             c._datasources.append(Datasource.load(bucket=bucket, uuid=uuid))
 
         c._metadata = data["metadata"]
-        c._start_datetime = 
         c._start_datetime = _string_to_datetime(data["data_start_datetime"])
         c._end_datetime = _string_to_datetime(data["data_end_datetime"])
 
@@ -136,7 +138,7 @@ class CRDS:
         _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
     @staticmethod
-    def load(bucket=None, uuid):
+    def load(uuid, bucket=None):
         """ Load a CRDS object from the datastore using the passed
             bucket and UUID
 
@@ -156,7 +158,7 @@ class CRDS:
         
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
-        return CRDS.from_data(data)
+        return CRDS.from_data(data=data, bucket=bucket)
 
     def write_file(self, filename):
         """ Collects the data stored in this object and writes it
@@ -190,10 +192,3 @@ class CRDS:
         #     # Merge the dataframes
         #     # If no data for that datetime set as NaN
         #     # Write these combined tables to the file
-
-    @staticmethod
-    def load(name=None, uuid=None, bucket=None):
-        pass
-
-    def save(self):
-        pass

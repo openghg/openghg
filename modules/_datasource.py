@@ -59,8 +59,6 @@ class Datasource:
         
         if data is not None:
             d._data = data
-            print(data.iloc[0]["Datetime"])
-            print(data.iloc[-1]["Datetime"])
             d._start_datetime = _string_to_datetime(data.iloc[0]["Datetime"])
             d._end_datetime = _string_to_datetime(data.iloc[-1]["Datetime"])
         
@@ -74,7 +72,7 @@ class Datasource:
         """
         return self._uuid is None
 
-    def get_start_datetime():
+    def get_start_datetime(self):
         """ Returns the starting datetime for the data in this Datasource
 
             Returns:
@@ -82,7 +80,7 @@ class Datasource:
         """        
         return self._start_datetime
 
-    def get_end_datetime():
+    def get_end_datetime(self):
         """ Returns the end datetime for the data in this Datasource
 
             Returns:
@@ -102,6 +100,9 @@ class Datasource:
     def to_data(self, store=False, bucket=None):
         """ Return a JSON-serialisable dictionary of object
             for storage in object store
+
+            Storing of the data within the Datasource is done in
+            the save function
 
             Args:
                 store (bool, default=False): True if we are storing this
@@ -147,7 +148,7 @@ class Datasource:
     # Modified from
     # https://github.com/pandas-dev/pandas/issues/9246
     def dataframe_to_hdf(self):
-        """ Writes this Datasource's data to a compressed in-memory HDF5 file
+        """ Writes this Datasource's data to a com  essed in-memory HDF5 file
 
             This function is partnered with dataframe_from_hdf()
             which reads a datframe from the in-memory HDF5 bytes object
@@ -160,7 +161,7 @@ class Datasource:
         from pandas import HDFStore as _HDFStore
         with _HDFStore("data.h5", mode="a", driver="H5FD_CORE", driver_core_backing_store=0,
                         complevel=6, complib="blosc:blosclz") as out:
-
+            
             out["data"] = self._data
             return out._handle.get_file_image()
 
@@ -204,8 +205,7 @@ class Datasource:
         d._site = data["site"]
         d._network = data["network"]
         d._stored = data["stored"]
-        # If the object hasn't been saved to the object store then this
-        # won't work - what do?
+        
         if d._stored:
             d._data = d.load_dataframe(bucket, d._uuid)
 
@@ -272,7 +272,7 @@ class Datasource:
         return Datasource.from_data(bucket=bucket, data=data)
 
     @staticmethod
-    def get_name_from_uid(bucket, uuid):
+    def _get_name_from_uid(bucket, uuid):
         """ Returns the name of the Datasource associated with
             the passed UID
 

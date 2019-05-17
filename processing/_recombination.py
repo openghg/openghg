@@ -33,7 +33,9 @@ def convert_to_netcdf(dataframe):
         Returns:
             bytes: NetCDF file as a bytes array
     """
-    from xarray import Dataset as _Dataset
+    # from netCDF4 import Dataset as _Dataset
+
+    # Get bytes array version of Pandas dataframe
 
     pass
 

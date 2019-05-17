@@ -90,7 +90,7 @@ def test_save_with_data(mock_uuid, data):
 
     assert new_slice.equals(original_slice)
     
-def test_from_data_no_data(mock_uuid):
+def test_from_data(mock_uuid):
     
     datasource = Datasource.create(name="test_name_two", instrument="test_instrument_two",
                                               site="test_site_two", network="test_network_two")
@@ -107,11 +107,6 @@ def test_from_data_no_data(mock_uuid):
     assert new_datasource._network == "test_network_two"
 
 
-# def test_from_data_with_data(mock_uuid):
-
-#     data
-
-    
 def test_load(mock_uuid, datasource):
     bucket = local_bucket.get_local_bucket()
     # Save to the HUGS bucket in the object store
@@ -142,7 +137,20 @@ def test_get_uid_from_name(mock_uuid):
 
     assert found_uuid == mocked_uuid
 
- 
+
+def test_get_name_from_uid(mock_uuid):
+    bucket = local_bucket.get_local_bucket()
+
+    name = "Bob"
+    
+    datasource = Datasource.create(name=name, instrument="test_instrument_load",
+                                   site="test_site_load", network="test_network_load")
+
+    datasource.save(bucket)
+
+    name = Datasource._get_name_from_uid(bucket, mocked_uuid)
+
+    assert name == "Bob"
 
 
 

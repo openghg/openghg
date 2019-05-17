@@ -82,7 +82,7 @@ def parse_timecols(time_data):
     timeframe = pd.DataFrame(data=time_list, columns=["Datetime"])
 
     # Check how these data work when read back out
-    # timeframe["Datetime"] = pd.to_datetime(timeframe["Datetime"])
+    timeframe["Datetime"] = pd.to_datetime(timeframe["Datetime"])
                                                             
     return timeframe
 
@@ -99,6 +99,11 @@ def parse_gases(data):
             list: List of separate Pandas.Dataframes starting with the time dataframe
 
     """
+    # Drop any rows with NaNs
+    # Reset the index
+    data = data.dropna(axis=0, how="any")
+    data.index = pd.RangeIndex(data.index.size)
+
     # Get the number of gases in dataframe and number of columns of data present for each gas
     n_gases, n_cols = gas_info(data=data)
 
@@ -108,13 +113,11 @@ def parse_gases(data):
     time_cols = 2
     header_rows = 2
     # Dataframe containing the time data for this data input
-    time_data = data.iloc[header_rows:, 0:time_cols]
+    time_data = data.iloc[2:, 0:time_cols]
     timeframe = parse_timecols(time_data=time_data)
+    timeframe.index = pd.RangeIndex(timeframe.index.size)
     
-    # Drop any rows with NaNs
-    data = data.dropna(axis=0, how="any")
-    # Reset the index
-    data.index = pd.RangeIndex(data.index.size)
+
 
     data_list = []
     for n in range(n_gases):
@@ -122,18 +125,19 @@ def parse_gases(data):
         gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
 
         # TODO - name columns?
-
         # Reset the column numbers
         gas_data.columns = pd.RangeIndex(gas_data.columns.size)
         gas_name = gas_data[0][0]
 
         # Drop the first two rows now we have the name
-        gas_data.drop(index=gas_data.head(2).index, inplace=True)
-
+        gas_data.drop(index=gas_data.head(header_rows).index, inplace=True)
+        gas_data.index = pd.RangeIndex(gas_data.index.size)
+        # Cast data to float64 / double
+        gas_data = gas_data.astype("float64")
+        # Set the type of the data to doubles
+        # print("Timeframe shape: ", timeframe.shape, "Gasdata shape : ", gas_data.shape)
         # Concatenate the timeframe and the data
         gas_data = pd.concat([timeframe, gas_data], axis=1)
-        # Reset the index
-        gas_data.index = pd.RangeIndex(gas_data.index.size)
 
         data_list.append((gas_name, gas_data))
 
