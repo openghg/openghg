@@ -1,3 +1,5 @@
+# from _paths import RootPaths
+
 class CRDS:
     """ Holds CRDS data within a set of Datasources
 
@@ -168,7 +170,7 @@ class CRDS:
 
         return CRDS.from_data(data=data, bucket=bucket)
 
-    def key_to_daterange(key):
+    def key_to_daterange(self, key):
         """ Takes a dated key and returns two datetimes for the start and 
             end datetimes for the data
 
@@ -183,7 +185,7 @@ class CRDS:
         end_key = key.split("/")[-1]
         dates = end_key.split("_")
 
-        if len(dates > 2):
+        if len(dates) > 2:
             raise ValueError("Invalid date string")
 
         start = _string_to_datetime(dates[0])
@@ -202,7 +204,7 @@ class CRDS:
                 datetime_begin (datetime): Start of datetime range
                 datetime_end (datetime): End of datetime range
             Returns:
-                list: A list of Pandas.Dataframes
+                list: A list of keys for the found data
 
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
@@ -214,27 +216,29 @@ class CRDS:
         datetime_end = _datetime_to_datetime(datetime_end)
 
         # Something like this?
-        freq = "YS"
+        # freq = "YS"
         resolution = "%Y"
-        if start_datetime.month != 0 and end_datetime.month != 0:
-            resolution += "%m"
-            freq = "MS"
-        if start_datetime.day != 0 and end_datetime.day != 0:
-            resolution += "%d"
-            freq = "D"
-        if start_datetime.hour != 0 and end_datetime.hour != 0:
-            resolution += "%h"
-            freq = "H"
+        # if start_datetime.month != 0 and end_datetime.month != 0:
+        #     resolution += "%m"
+        #     freq = "MS"
+        # if start_datetime.day != 0 and end_datetime.day != 0:
+        #     resolution += "%d"
+        #     freq = "D"
+        # if start_datetime.hour != 0 and end_datetime.hour != 0:
+        #     resolution += "%h"
+        #     freq = "H"
 
         # At the moment just have years
-        daterange = _pd_daterange(start=datetime_begin, end=datetime_end, freq="Y")
+        daterange = _pd_daterange(start=datetime_begin, end=datetime_end)
 
-        keys = []
-
-        path = RootPaths[root_path.upper()]
+        root_path = "datasource"
+        # path = RootPaths[root_path.upper()]
+        
+        # TODO - Change this to work with enums?
+        path = "datasource"
 
         # Get the UUIDs for the data
-        data_uuids = [k for k,_ in self._datasources.items()]
+        data_uuids = [d._uuid for d in self._datasources]
 
         # TODO - Tidy me
         keys = []
@@ -242,18 +246,17 @@ class CRDS:
             for date in daterange:
                 date_string = date.strftime(resolution)
                 # Prefix with the year
-                prefix = "%s/%s/%s" % (path, uuid, date_string)
+                prefix = "%s/uuid/%s/%s" % (path, uuid, date_string)
 
                 datakeys = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
 
                 for key in datakeys:
-                    _, end = key_to_daterange(key)
+                    _, end = self.key_to_daterange(key)
 
                     if end.year <= date.year:
                         keys.append(key)
 
-        
-        print(keys)
+        return keys
 
         # datasources = []
         # from objectstore.hugs_objstore import get_dated_object_json as _get_dated_object_json
@@ -262,38 +265,6 @@ class CRDS:
         #     # Get Datasource objects from the object store
         #     # These then in turn can get the dataframes
         #     datasources.append(_get_dated_object_json(key))
-
-        
-
-
-        
-
-
-
-    
-
-    # # Find the keys that are valid
-    # for year in range(year_begin, year_end+1):
-    #     prefix = "%s/%s/%s" % (path, self._uuid, year)
-
-    #     datakeys = _ObjectStore.get_all_object_names(
-    #         bucket=bucket, prefix=prefix)
-
-    #     # Check the end date of the data
-    #     for datakey in datakeys:
-    #         _, end = string_to_daterange(datakey.split("_")[-1])
-
-    #         if end.year < year_end:
-    #             keys.append(datakey)
-
-    # # List to store dataframes
-    # values = []
-
-    # for key in keys:
-    #     values.append(_get_dataframe(bucket=bucket, key=key))
-
-    # return values
-
 
 
     def write_file(self, filename):

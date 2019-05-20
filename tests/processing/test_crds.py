@@ -1,3 +1,4 @@
+import datetime
 import os
 import pandas as pd
 import pytest
@@ -34,18 +35,29 @@ def test_create(mock_uuid):
 
     crds = CRDS.read_file(filepath)
 
+    print(crds._start_datetime, crds._end_datetime)
+
     first_datetime = crds._datasources[0]._data["Datetime"][0]
 
-    # TODO - check timestamp str and conversion to datetime
-    
+    # TODO - check timestamp str and conversion to datetime    
     assert crds._uuid == mocked_uuid
     assert first_datetime == pd.Timestamp("2014-01-30 10:52:30")
     
 
 def test_search_store(crds):
-    bucket = get_local_bucket()
+    bucket = get_local_bucket("crds")
     # Create and store data
     crds.save(bucket=bucket)
+
+    start = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
+    end = datetime.datetime.strptime("2014-01-30","%Y-%m-%d")
+
+    keys = crds.search_store(bucket=bucket, root_path="datasource", datetime_begin=start, datetime_end=end)
+
+    #     print(data)
+
+    assert False
+
     
     # start = 
 

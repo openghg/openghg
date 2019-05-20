@@ -17,7 +17,7 @@ def bucket_time():
     return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
-def get_local_bucket():
+def get_local_bucket(name=None):
     """ Creates and returns a local bucket
         that's created in the user's home directory
 
@@ -28,6 +28,9 @@ def get_local_bucket():
     # Get the path of the user's home directory
     home_path = os.path.expanduser("~")
     hugs_test_buckets = "hugs_tmp/test_buckets"
+
+    if name:
+        hugs_test_buckets += "/%s" % name
 
     local_buckets_dir = os.path.join(home_path, hugs_test_buckets)
 
