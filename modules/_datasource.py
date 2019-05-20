@@ -57,7 +57,6 @@ class Datasource:
         d._network = network
         
         if data is not None:
-            print("We're setting datetimes")
             d._data = data
             d._start_datetime = _string_to_datetime(data.iloc[0]["Datetime"])
             d._end_datetime = _string_to_datetime(data.iloc[-1]["Datetime"])
@@ -159,7 +158,7 @@ class Datasource:
                 bytes: HDF5 file as bytes object
         """
         from pandas import HDFStore as _HDFStore
-        with _HDFStore("data.h5", mode="a", driver="H5FD_CORE", driver_core_backing_store=0,
+        with _HDFStore("write.h5", mode="a", driver="H5FD_CORE", driver_core_backing_store=0,
                         complevel=6, complib="blosc:blosclz") as out:
             
             out["data"] = self._data
@@ -179,7 +178,7 @@ class Datasource:
         """
         from pandas import HDFStore as _HDFStore
         from pandas import read_hdf as _read_hdf
-        return _read_hdf(_HDFStore("data.h5", mode="r", driver="H5FD_CORE",
+        return _read_hdf(_HDFStore("read.h5", mode="r", driver="H5FD_CORE",
                         driver_core_backing_store=0, driver_core_image=hdf_data))
 
     @staticmethod

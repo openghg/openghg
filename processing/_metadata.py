@@ -25,6 +25,7 @@ class Metadata:
         """
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         m = Metadata()
 
@@ -51,13 +52,13 @@ class Metadata:
         # Parse the dataframe to find the gases - this might be excessive
         # gases, _ = find_gases(data=data)
         m._uuid = _create_uuid()
-        m._creation_datetime = _get_datetime_now()
+        m._creation_datetime = _datetime_to_string(_get_datetime_now())
         m._data["site"] = site
         m._data["instrument"] = instrument
         m._data["resolution"] = resolution
         m._data["height"] = height
-        m._data["start_datetime"] = start
-        m._data["end_datetime"] = end
+        m._data["start_datetime"] = _datetime_to_string(start)
+        m._data["end_datetime"] = _datetime_to_string(end)
         m._data["port"] = port
         m._data["type"] = type_meas
         # This will be added later

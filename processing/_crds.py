@@ -14,6 +14,14 @@ class CRDS:
         self._start_datetime = None
         self._end_datetime = None
 
+    def is_null(self):
+        """ Check if this is a null object
+
+            Returns:
+                bool: True if object is null
+        """
+        return self._uuid is None
+
     @staticmethod
     def create(metadata, datasources, start_datetime, end_datetime):
         """ This function should be used to create CRDS objects
@@ -70,8 +78,8 @@ class CRDS:
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         d["datasources"] = datasource_uuids
         d["metadata"] = self._metadata.data()
-        d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
-        d["data_end_datetime"] = _datetime_to_string(self._end_datetime)
+        # d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
+        # d["data_end_datetime"] = _datetime_to_string(self._end_datetime)
 
         return d
 
@@ -183,7 +191,7 @@ class CRDS:
 
         return start, end
 
-    def get_objects(self, bucket, root_path, datetime_begin, datetime_end):
+    def search_store(self, bucket, root_path, datetime_begin, datetime_end):
         """ Get all values stored in the object store
 
             Args:  
@@ -244,13 +252,18 @@ class CRDS:
                     if end.year <= date.year:
                         keys.append(key)
 
-        datasources = []
-        from objectstore.hugs_objstore import get_dated_object_json as _get_dated_object_json
-        # Get the data
-        for key in keys:
-            # Get Datasource objects from the object store
-            # These then in turn can get the dataframes
-            datasources.append(_get_dated_object_json(key))
+        
+        print(keys)
+
+        # datasources = []
+        # from objectstore.hugs_objstore import get_dated_object_json as _get_dated_object_json
+        # # Get the data
+        # for key in keys:
+        #     # Get Datasource objects from the object store
+        #     # These then in turn can get the dataframes
+        #     datasources.append(_get_dated_object_json(key))
+
+        
 
 
         
