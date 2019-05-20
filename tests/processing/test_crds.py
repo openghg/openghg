@@ -53,19 +53,10 @@ def test_search_store(crds):
     end = datetime.datetime.strptime("2014-01-30","%Y-%m-%d")
 
     keys = crds.search_store(bucket=bucket, root_path="datasource", datetime_begin=start, datetime_end=end)
-
-    #     print(data)
-
-    assert False
-
     
-    # start = 
 
-    # crds.search_store(bucket=bucket, root_path="data", 
+    print(keys)
 
-    #
-
-
-    # Load datasources into the object store
-
+    # TODO - better test for this - mock the 
+    assert len(keys) == 3
 

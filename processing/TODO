@@ -62,3 +62,10 @@ Check the performance warning
 
 Check the conversion of a Pandas Timestamp object to string and then to python datetime object 
 by the Acquire functions
+
+
+2019-05-20
+
+Tests sometimes fail due to key errors - I think this is due to the buckets being named by time
+
+Write further tests for the recombination functions

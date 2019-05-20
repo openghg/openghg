@@ -241,7 +241,7 @@ class CRDS:
         data_uuids = [d._uuid for d in self._datasources]
 
         # TODO - Tidy me
-        keys = []
+        uuids = []
         for uuid in data_uuids:
             for date in daterange:
                 date_string = date.strftime(resolution)
@@ -254,9 +254,9 @@ class CRDS:
                     _, end = self.key_to_daterange(key)
 
                     if end.year <= date.year:
-                        keys.append(key)
+                        uuids.append(uuid)
 
-        return keys
+        return uuids
 
         # datasources = []
         # from objectstore.hugs_objstore import get_dated_object_json as _get_dated_object_json
