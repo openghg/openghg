@@ -117,8 +117,6 @@ def parse_gases(data):
     timeframe = parse_timecols(time_data=time_data)
     timeframe.index = pd.RangeIndex(timeframe.index.size)
     
-
-
     data_list = []
     for n in range(n_gases):
         # Slice the columns

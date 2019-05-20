@@ -1,6 +1,4 @@
-"""
-
-Query the object store for data uploaded by a certain user etc
+""" Query the object store for data uploaded by a certain user etc
 
 """
 import hashlib
@@ -11,6 +9,84 @@ from objectstore import local_bucket
 from Acquire.ObjectStore import ObjectStore, ObjectStoreError
 from Acquire.Service import get_service_account_bucket, \
     push_is_running_service, pop_is_running_service
+
+# dateless_key = "/".join(key.split("/")[:-1])
+
+
+def get_dated_object(bucket, key):
+    """ Removes the daterange from the passed key and uses the reduced
+        key to get an object from the object store.
+    
+        Wraps the Acquire get_object function
+            
+        Args:
+            bucket (dict): Bucket containing data
+            key (str): Key for data in bucket
+        Returns:
+            Object: Object from store
+    """
+    from Acquire.ObjectStore import ObjectStore as _ObjectStore
+
+    # Get the object and use the key as a prefix
+    name = ObjectStore.get_all_object_names(bucket, prefix=key)
+
+    if len(name) > 1:
+        raise ValueError("There should only be one object")
+
+    return ObjectStore.get_object(bucket, name[0])
+
+
+def get_object(bucket, key):
+    """ Gets the object at key in the passed bucket
+
+        Wraps the Acquire get_object function
+
+        Args:  
+            bucket (dict): Bucket containing data
+            key (str): Key for data in bucket
+        Returns:
+            Object: Object from store
+    """
+    from Acquire.ObjectStore import ObjectStore as _ObjectStore
+
+    return _ObjectStore.get_object(bucket, key)
+
+
+def get_dated_object_json(bucket, key):
+    """ Removes the daterange from the passed key and uses the reduced
+        key to get an object from the object store.
+        
+        Wraps the Acquire get_object_from_json function
+
+        Args:  
+            bucket (dict): Bucket containing data
+            key (str): Key for data in bucket
+        Returns:
+            Object: Object from store
+    """
+    from Acquire.ObjectStore import ObjectStore as _ObjectStore
+
+    # Get the object and use the key as a prefix
+    name = ObjectStore.get_all_object_names(bucket, prefix=key)
+
+    if len(name) > 1:
+        raise ValueError("There should only be one object")
+
+    return ObjectStore.get_object_from_json(bucket, name[0])
+
+
+def get_object_json(bucket, key):
+    """ Gets the object at key in the passed bucket
+
+        Wraps the Acquire get_object_from_json function
+
+        Args:
+            bucket(dict): Bucket containing data
+            key(str): Key for data in bucket
+        Returns:
+            Object: Object from store
+    """
+    return _ObjectStore.get_object_from_json(bucket, key)
 
 
 def get_abs_filepaths(directory):

@@ -77,7 +77,7 @@ def parse_date_time(date, time):
     return _datetime.datetime.strptime(combined, "%y%m%d%H%M%S")
 
 
-def get_objects(self, bucket, root_path, datetime_begin, datetime_end):
+def get_objects(bucket, root_path, datetime_begin, datetime_end):
     """ Get all values stored in the object store
 
         Args:  
@@ -94,16 +94,37 @@ def get_objects(self, bucket, root_path, datetime_begin, datetime_end):
     from Acquire.ObjectStore import ObjectStore as _ObjectStore
     from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
     from objectstore.hugs_objstore import get_dataframe as _get_dataframe
+    from pandas import date_range as _pd_daterange
 
     datetime_begin = _datetime_to_datetime(datetime_begin)
     datetime_end = _datetime_to_datetime(datetime_end)
 
-    year_begin = datetime_begin.year
-    year_end = datetime_end.year
+    daterange = _pd_daterange(datetime_begin, datetime_end)
+
+    freq = "YS"
+    resolution = "%Y"
+    if start_datetime.month != 0 and end_datetime.month != 0:
+        resolution += "%m"
+        freq = "MS"
+    if start_datetime.day != 0 and end_datetime.day != 0:
+        resolution += "%d"
+        freq = "D"
+    if start_datetime.hour != 0 and end_datetime.hour != 0:
+        resolution += "%h"
+        freq = "H"
 
     keys = []
 
     path = RootPaths[root_path.upper()]
+
+    for date in daterange:
+        date_string = date.strftime(resolution)
+        prefix = "%s/%s/%s" % (path, uuid, date_string)
+
+        datakeys = 
+
+
+
     # Find the keys that are valid
     for year in range(year_begin, year_end+1):
         prefix = "%s/%s/%s" % (path, self._uuid, year)

@@ -1,6 +1,5 @@
 __all___ = ["Datasource"]
 
-
 class Datasource:
     """ This class handles all data sources such as sensors
 
@@ -58,6 +57,7 @@ class Datasource:
         d._network = network
         
         if data is not None:
+            print("We're setting datetimes")
             d._data = data
             d._start_datetime = _string_to_datetime(data.iloc[0]["Datetime"])
             d._end_datetime = _string_to_datetime(data.iloc[-1]["Datetime"])
@@ -95,7 +95,6 @@ class Datasource:
                 str: Name of site
         """
         return self._site()
-
 
     def to_data(self, store=False, bucket=None):
         """ Return a JSON-serialisable dictionary of object
@@ -136,10 +135,11 @@ class Datasource:
                 Pandas.Dataframe: Dataframe from stored HDF file
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from objectstore.hugs_objstore import get_dated_object as _get_dated_object
 
         data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
 
-        data = _ObjectStore.get_object(bucket, data_key)
+        data = _get_dated_object(bucket, data_key)
 
         return Datasource.dataframe_from_hdf(data)
 
@@ -192,10 +192,10 @@ class Datasource:
             Returns:
                 Datasource: Datasource created from JSON
         """
+        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+
         if data is None or len(data) == 0:
             return Datasource()
-
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
 
         d = Datasource()
         d._uuid = data["UUID"]
@@ -224,21 +224,26 @@ class Datasource:
 
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
         from objectstore.hugs_objstore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
 
+        daterange_str = "".join([_datetime_to_string(self._start_datetime), "_", _datetime_to_string(self._end_datetime)])
+
         if self._data is not None:
-            data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
+            data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
             _ObjectStore.set_object(bucket, data_key, self.dataframe_to_hdf())
             self._stored = True
 
-        datasource_key = "%s/uuid/%s" % (Datasource._datasource_root, self._uuid)
+        datasource_key = "%s/uuid/%s/%s" % (
+            Datasource._datasource_root, self._uuid, daterange_str)
         _ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
         
         encoded_name = _string_to_encoded(self._name)
-        name_key = "%s/name/%s/%s" % (Datasource._datasource_root, encoded_name, self._uuid)
+        name_key = "%s/name/%s/%s/%s" % (Datasource._datasource_root,
+                                         encoded_name, self._uuid, daterange_str)
         _ObjectStore.set_string_object(bucket=bucket, key=name_key, string_data=self._uuid)
 
 
@@ -256,7 +261,8 @@ class Datasource:
                 Datasource: Datasource object created from JSON
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from objectstore.hugs_objstore import get_bucket as _get_bucket
+        from objectstore.hugs_objstore import get_dated_object as _get_dated_object
+        from objectstore.hugs_objstore import get_dated_object_json as _get_dated_object_json
 
         if uuid is None and name is None:
             raise ValueError("Both uuid and name cannot be None")
@@ -267,7 +273,7 @@ class Datasource:
             uuid = Datasource._get_uid_from_name(bucket=bucket, name=name)
 
         key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
-        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
+        data = _get_dated_object_json(bucket=bucket, key=key)
 
         return Datasource.from_data(bucket=bucket, data=data)
 
@@ -282,12 +288,12 @@ class Datasource:
             Returns:
                 str: UUID for the Datasource
         """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+        # from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+        from objectstore.hugs_objstore import get_dated_object_json as _get_dated_object_json
 
         key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
 
-        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
+        data = _get_dated_object_json(bucket=bucket, key=key)
 
         return data["name"]
 
@@ -313,7 +319,7 @@ class Datasource:
         if len(uuid) > 1:
             raise ValueError("There should only be one Datasource associated with this name")
         
-        return uuid[0].split("/")[-1]
+        return uuid[0].split("/")[-2]
 
 
         

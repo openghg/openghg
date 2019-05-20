@@ -160,6 +160,129 @@ class CRDS:
 
         return CRDS.from_data(data=data, bucket=bucket)
 
+    def key_to_daterange(key):
+        """ Takes a dated key and returns two datetimes for the start and 
+            end datetimes for the data
+
+            Args:
+                key (str): Key for data in the object store
+            Returns:
+                tuple (datetime, datetime): Datetimes for start and end of data
+
+        """
+        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+
+        end_key = key.split("/")[-1]
+        dates = end_key.split("_")
+
+        if len(dates > 2):
+            raise ValueError("Invalid date string")
+
+        start = _string_to_datetime(dates[0])
+        end = _string_to_datetime(dates[1])
+
+        return start, end
+
+    def get_objects(self, bucket, root_path, datetime_begin, datetime_end):
+        """ Get all values stored in the object store
+
+            Args:  
+                bucket (dict): Bucket holding data
+                root_path (str): Select from the enum RootPaths
+                For DataSources: datasource
+                For Instruments: instrument etc
+                datetime_begin (datetime): Start of datetime range
+                datetime_end (datetime): End of datetime range
+            Returns:
+                list: A list of Pandas.Dataframes
+
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+        from objectstore.hugs_objstore import get_dataframe as _get_dataframe
+        from pandas import date_range as _pd_daterange
+
+        datetime_begin = _datetime_to_datetime(datetime_begin)
+        datetime_end = _datetime_to_datetime(datetime_end)
+
+        # Something like this?
+        freq = "YS"
+        resolution = "%Y"
+        if start_datetime.month != 0 and end_datetime.month != 0:
+            resolution += "%m"
+            freq = "MS"
+        if start_datetime.day != 0 and end_datetime.day != 0:
+            resolution += "%d"
+            freq = "D"
+        if start_datetime.hour != 0 and end_datetime.hour != 0:
+            resolution += "%h"
+            freq = "H"
+
+        # At the moment just have years
+        daterange = _pd_daterange(start=datetime_begin, end=datetime_end, freq="Y")
+
+        keys = []
+
+        path = RootPaths[root_path.upper()]
+
+        # Get the UUIDs for the data
+        data_uuids = [k for k,_ in self._datasources.items()]
+
+        # TODO - Tidy me
+        keys = []
+        for uuid in data_uuids:
+            for date in daterange:
+                date_string = date.strftime(resolution)
+                # Prefix with the year
+                prefix = "%s/%s/%s" % (path, uuid, date_string)
+
+                datakeys = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
+
+                for key in datakeys:
+                    _, end = key_to_daterange(key)
+
+                    if end.year <= date.year:
+                        keys.append(key)
+
+        datasources = []
+        from objectstore.hugs_objstore import get_dated_object_json as _get_dated_object_json
+        # Get the data
+        for key in keys:
+            # Get Datasource objects from the object store
+            # These then in turn can get the dataframes
+            datasources.append(_get_dated_object_json(key))
+
+
+        
+
+
+
+    
+
+    # # Find the keys that are valid
+    # for year in range(year_begin, year_end+1):
+    #     prefix = "%s/%s/%s" % (path, self._uuid, year)
+
+    #     datakeys = _ObjectStore.get_all_object_names(
+    #         bucket=bucket, prefix=prefix)
+
+    #     # Check the end date of the data
+    #     for datakey in datakeys:
+    #         _, end = string_to_daterange(datakey.split("_")[-1])
+
+    #         if end.year < year_end:
+    #             keys.append(datakey)
+
+    # # List to store dataframes
+    # values = []
+
+    # for key in keys:
+    #     values.append(_get_dataframe(bucket=bucket, key=key))
+
+    # return values
+
+
+
     def write_file(self, filename):
         """ Collects the data stored in this object and writes it
             to file at filename
