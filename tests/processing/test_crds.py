@@ -35,8 +35,6 @@ def test_create(mock_uuid):
 
     crds = CRDS.read_file(filepath)
 
-    print(crds._start_datetime, crds._end_datetime)
-
     first_datetime = crds._datasources[0]._data["Datetime"][0]
 
     # TODO - check timestamp str and conversion to datetime    
@@ -54,9 +52,6 @@ def test_search_store(crds):
 
     keys = crds.search_store(bucket=bucket, root_path="datasource", datetime_begin=start, datetime_end=end)
     
-
-    print(keys)
-
     # TODO - better test for this - mock the 
     assert len(keys) == 3
 

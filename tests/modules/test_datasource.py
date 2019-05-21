@@ -43,7 +43,7 @@ def mock_uuid(monkeypatch):
 @pytest.fixture(scope="session")
 def save_data_in_store(mock_uuid):
     bucket = local_bucket.get_local_bucket()
-    datasource = get_datasources(data=data)[0]
+    datasource = get_datasources(raw_data=data)[0]
     original_slice = datasource._data.head(1)
 
     data = Datasource.create(name="test_name", instrument="test_instrument", site="test_site",
@@ -74,7 +74,7 @@ def test_save_with_data(mock_uuid, data):
 
     bucket = local_bucket.get_local_bucket()
     
-    datasource = get_datasources(data=data)[0]
+    datasource = get_datasources(raw_data=data)[0]
 
     original_slice = datasource._data.head(1)
 

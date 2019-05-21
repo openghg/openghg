@@ -10,9 +10,11 @@ import datetime
 from processing import _metadata as meta
 
 
-def get_datasources(data):
+def get_datasources(raw_data):
     """ Create a Datasource for each gas in the file
-
+        
+        Args:
+            raw_data (list): List of Pandas.Dataframes
         Returns:
             list: List of Datasources
     """
@@ -20,17 +22,16 @@ def get_datasources(data):
     
     # This can save the parent instrument as a name,UUID tuple within the object
     # Look up the parent instrument by name and find its UUID. If it doesn't exist, create it?
-    gas_data = parse_gases(data)
+    gas_data = parse_gases(raw_data)
 
     datasources = []
 
-    for gas_name, d in gas_data:
+    for gas_name, data in gas_data:
         d = Datasource.create(name=gas_name, instrument="test", site="test",
-                                network="test", data=d)
+                                network="test", data=data)
         datasources.append(d)
-    
+
     return datasources
-    
 
 
 def calc_time_delta(start, end):
@@ -132,8 +133,6 @@ def parse_gases(data):
         gas_data.index = pd.RangeIndex(gas_data.index.size)
         # Cast data to float64 / double
         gas_data = gas_data.astype("float64")
-        # Set the type of the data to doubles
-        # print("Timeframe shape: ", timeframe.shape, "Gasdata shape : ", gas_data.shape)
         # Concatenate the timeframe and the data
         gas_data = pd.concat([timeframe, gas_data], axis=1)
 

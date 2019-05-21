@@ -1,5 +1,6 @@
 import datetime
 import os
+import pandas as pd
 import pytest
 
 from objectstore.local_bucket import get_local_bucket
@@ -34,8 +35,37 @@ def test_get_sections(keylist):
     gas_names = ["co", "co2", "ch4"]
     recorded_gas_names = [datasources[0]._name, datasources[1]._name, datasources[2]._name]
 
-    assert sorted(gas_names) == sorted(recorded_gas_names) 
+    assert sorted(gas_names) == sorted(recorded_gas_names)
     assert len(datasources) == 3
+
+
+def test_combine_sections(keylist):
+    bucket = get_local_bucket("crds")
+
+    datasources = _recombination.get_sections(bucket, keylist)
+
+    dataframes = [datasource._data for datasource in datasources]
+
+    # print(dataframes)
+
+    assert isinstance(dataframes[0], pd.DataFrame)
+
+    combined = _recombination.combine_sections(dataframes)
+
+    # The same 3 dataframes are being returned each time - fix this
+    
+    assert False
+
+    # print(combined)
+
+    
+
+
+
+    
+
+
+
 
 
 
