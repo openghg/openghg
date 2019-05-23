@@ -236,13 +236,11 @@ class Datasource:
             _ObjectStore.set_object(bucket, data_key, self.dataframe_to_hdf())
             self._stored = True
 
-        datasource_key = "%s/uuid/%s/%s" % (
-            Datasource._datasource_root, self._uuid, daterange_str)
+        datasource_key = "%s/uuid/%s" % (Datasource._datasource_root, self._uuid)
         _ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
         
         encoded_name = _string_to_encoded(self._name)
-        name_key = "%s/name/%s/%s/%s" % (Datasource._datasource_root,
-                                         encoded_name, self._uuid, daterange_str)
+        name_key = "%s/name/%s/%s" % (Datasource._datasource_root, encoded_name, self._uuid)
         _ObjectStore.set_string_object(bucket=bucket, key=name_key, string_data=self._uuid)
 
 
@@ -261,7 +259,7 @@ class Datasource:
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from objectstore.hugs_objstore import get_dated_object as _get_dated_object
-        from objectstore.hugs_objstore import get_dated_object_json as _get_dated_object_json
+        from objectstore.hugs_objstore import get_object_json as _get_object_json
 
         if uuid is None and name is None:
             raise ValueError("Both uuid and name cannot be None")
@@ -272,7 +270,8 @@ class Datasource:
             uuid = Datasource._get_uid_from_name(bucket=bucket, name=name)
 
         key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
-        data = _get_dated_object_json(bucket=bucket, key=key)
+        
+        data = _get_object_json(bucket=bucket, key=key)
 
         return Datasource.from_data(bucket=bucket, data=data)
 
@@ -318,7 +317,7 @@ class Datasource:
         if len(uuid) > 1:
             raise ValueError("There should only be one Datasource associated with this name")
         
-        return uuid[0].split("/")[-2]
+        return uuid[0].split("/")[-1]
 
 
         

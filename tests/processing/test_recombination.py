@@ -16,7 +16,7 @@ def keylist():
 
     crds = CRDS.read_file(filepath)
     # Get the keylist
-    bucket = get_local_bucket("crds")
+    bucket = get_local_bucket()
     # Create and store data
     crds.save(bucket=bucket)
 
@@ -28,7 +28,7 @@ def keylist():
     return keys
 
 def test_get_sections(keylist):
-    bucket = get_local_bucket("crds")
+    bucket = get_local_bucket()
 
     datasources = _recombination.get_sections(bucket, keylist)
 
@@ -40,20 +40,19 @@ def test_get_sections(keylist):
 
 
 def test_combine_sections(keylist):
-    bucket = get_local_bucket("crds")
+    bucket = get_local_bucket()
 
     datasources = _recombination.get_sections(bucket, keylist)
 
     dataframes = [datasource._data for datasource in datasources]
 
-    # print(dataframes)
-
     assert isinstance(dataframes[0], pd.DataFrame)
 
     combined = _recombination.combine_sections(dataframes)
 
+    # print(combined)
+
     # The same 3 dataframes are being returned each time - fix this
-    
     assert False
 
     # print(combined)

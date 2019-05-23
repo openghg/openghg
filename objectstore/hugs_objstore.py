@@ -6,9 +6,9 @@ import os
 
 from objectstore import local_bucket
 
-from Acquire.ObjectStore import ObjectStore, ObjectStoreError
-from Acquire.Service import get_service_account_bucket, \
-    push_is_running_service, pop_is_running_service
+# from Acquire.ObjectStore import ObjectStore, ObjectStoreError
+# from Acquire.Service import get_service_account_bucket, \
+#     push_is_running_service, pop_is_running_service
 
 # dateless_key = "/".join(key.split("/")[:-1])
 
@@ -28,12 +28,12 @@ def get_dated_object(bucket, key):
     from Acquire.ObjectStore import ObjectStore as _ObjectStore
 
     # Get the object and use the key as a prefix
-    name = ObjectStore.get_all_object_names(bucket, prefix=key)
+    name = _ObjectStore.get_all_object_names(bucket, prefix=key)
 
     if len(name) > 1:
         raise ValueError("There should only be one object")
 
-    return ObjectStore.get_object(bucket, name[0])
+    return _ObjectStore.get_object(bucket, name[0])
 
 
 def get_object(bucket, key):
@@ -67,12 +67,12 @@ def get_dated_object_json(bucket, key):
     from Acquire.ObjectStore import ObjectStore as _ObjectStore
 
     # Get the object and use the key as a prefix
-    name = ObjectStore.get_all_object_names(bucket, prefix=key)
+    name = _ObjectStore.get_all_object_names(bucket, prefix=key)
 
     if len(name) > 1:
         raise ValueError("There should only be one object")
 
-    return ObjectStore.get_object_from_json(bucket, name[0])
+    return _ObjectStore.get_object_from_json(bucket, name[0])
 
 
 def get_object_json(bucket, key):
@@ -86,7 +86,11 @@ def get_object_json(bucket, key):
         Returns:
             Object: Object from store
     """
+    from Acquire.ObjectStore import ObjectStore as _ObjectStore
+
     return _ObjectStore.get_object_from_json(bucket, key)
+
+    _ObjectStore.get_obj
 
 
 def get_abs_filepaths(directory):

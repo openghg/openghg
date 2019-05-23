@@ -27,8 +27,7 @@ def get_datasources(raw_data):
     datasources = []
 
     for gas_name, data in gas_data:
-        d = Datasource.create(name=gas_name, instrument="test", site="test",
-                                network="test", data=data)
+        d = Datasource.create(name=gas_name, instrument="test", site="test", network="test", data=data)
         datasources.append(d)
 
     return datasources

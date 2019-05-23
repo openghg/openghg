@@ -27,7 +27,7 @@ def crds():
     return CRDS.read_file(filepath)
 
 
-def test_create(mock_uuid):
+def test_create():
     filename = "bsd.picarro.1minute.248m.dat"
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
@@ -38,9 +38,33 @@ def test_create(mock_uuid):
     first_datetime = crds._datasources[0]._data["Datetime"][0]
 
     # TODO - check timestamp str and conversion to datetime    
-    assert crds._uuid == mocked_uuid
+    # assert crds._uuid == mocked_uuid
     assert first_datetime == pd.Timestamp("2014-01-30 10:52:30")
     
+def test_save_and_load(crds):
+    filename = "bsd.picarro.1minute.248m.dat"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    crds = CRDS.read_file(filepath)
+
+    uuid_to_load = crds._uuid
+
+    bucket = get_local_bucket("crds_new")
+
+    crds.save(bucket)
+
+    new_crds = CRDS.load(bucket=bucket, uuid=uuid_to_load)
+
+    gas_names = [d._name for d in new_crds._datasources]
+
+    valid_gases = ["ch4", "co", "co2"]
+
+    objects = _ObjectStore.get_all_object_names(bucket=bucket)
+
+    assert sorted(gas_names) == sorted(valid_gases)
+
 
 def test_search_store(crds):
     bucket = get_local_bucket("crds")

@@ -28,7 +28,10 @@ def get_dataframes(datasources):
         Returns:
             list: List of Pandas.Dataframes
     """
-    x =  [datasource._data for datasource in datasources]
+    x = [datasource._data for datasource in datasources]
+
+    return False
+
 
 
 def combine_sections(dataframes):

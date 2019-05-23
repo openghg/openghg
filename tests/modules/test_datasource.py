@@ -51,7 +51,6 @@ def save_data_in_store(mock_uuid):
 
     data.save(bucket)
 
-
 def test_creation(mock_uuid, datasource):
     assert datasource._name == "test_name"
     assert datasource._uuid == mocked_uuid

@@ -73,15 +73,15 @@ class CRDS:
     def to_data(self):
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-        datasource_uuids = {key: d._uuid for key, d in enumerate(self._datasources)}
+        datasource_uuids = {d._name: d._uuid for d in self._datasources}
 
         d = {}
         d["UUID"] = self._uuid
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         d["datasources"] = datasource_uuids
         d["metadata"] = self._metadata.data()
-        # d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
-        # d["data_end_datetime"] = _datetime_to_string(self._end_datetime)
+        d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
+        d["data_end_datetime"] = _datetime_to_string(self._end_datetime)
 
         return d
 
@@ -95,6 +95,7 @@ class CRDS:
                 CRDS: CRDS object created from data
         """
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+        from modules._datasource import Datasource
         from objectstore.hugs_objstore import get_bucket as _get_bucket
 
         if data is None or len(data) == 0:
@@ -109,12 +110,15 @@ class CRDS:
 
         datasource_uuids = data["datasources"]
         c._datasources = []
-        for _, uuid in datasource_uuids:
+
+        for _, uuid in datasource_uuids.items():
             c._datasources.append(Datasource.load(bucket=bucket, uuid=uuid))
 
         c._metadata = data["metadata"]
         c._start_datetime = _string_to_datetime(data["data_start_datetime"])
         c._end_datetime = _string_to_datetime(data["data_end_datetime"])
+
+        return c
 
     def save(self, bucket=None):
         """ Save the object to the object store
@@ -159,16 +163,18 @@ class CRDS:
                 Datasource: Datasource object created from JSON
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from modules._datasource import Datasource
         from objectstore.hugs_objstore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
 
         key = "%s/uuid/%s" % (CRDS._crds_root, uuid)
-        
+
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
         return CRDS.from_data(data=data, bucket=bucket)
+
 
     def key_to_daterange(self, key):
         """ Takes a dated key and returns two datetimes for the start and 
@@ -231,11 +237,10 @@ class CRDS:
         # At the moment just have years
         daterange = _pd_daterange(start=datetime_begin, end=datetime_end)
 
-        root_path = "datasource"
         # path = RootPaths[root_path.upper()]
         
         # TODO - Change this to work with enums?
-        path = "datasource"
+        path = "data"
 
         # Get the UUIDs for the data
         data_uuids = [d._uuid for d in self._datasources]
