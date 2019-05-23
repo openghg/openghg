@@ -40,7 +40,7 @@ def test_create():
     # TODO - check timestamp str and conversion to datetime    
     # assert crds._uuid == mocked_uuid
     assert first_datetime == pd.Timestamp("2014-01-30 10:52:30")
-    
+
 def test_save_and_load(crds):
     filename = "bsd.picarro.1minute.248m.dat"
     dir_path = os.path.dirname(__file__)
@@ -49,6 +49,8 @@ def test_save_and_load(crds):
 
     crds = CRDS.read_file(filepath)
 
+    print(crds._datasources[0])
+
     uuid_to_load = crds._uuid
 
     bucket = get_local_bucket("crds_new")
@@ -56,6 +58,8 @@ def test_save_and_load(crds):
     crds.save(bucket)
 
     new_crds = CRDS.load(bucket=bucket, uuid=uuid_to_load)
+
+    print(new_crds._datasources[0])
 
     gas_names = [d._name for d in new_crds._datasources]
 

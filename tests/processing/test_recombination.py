@@ -39,16 +39,30 @@ def test_get_sections(keylist):
     assert len(datasources) == 3
 
 
-def test_combine_sections(keylist):
+def test_combine_sections():
+    from modules._datasource import Datasource
+    from objectstore.hugs_objstore import get_object
+
     bucket = get_local_bucket()
+
+    filename = "bsd.picarro.1minute.248m.dat"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    crds = CRDS.read_file(filepath)
+    # Create and store data
+    crds.save(bucket=bucket)
+
+    keylist = [d._uuid for d in crds._datasources]
 
     datasources = _recombination.get_sections(bucket, keylist)
 
-    dataframes = [datasource._data for datasource in datasources]
+    # dataframes = [datasource._data for datasource in datasources]
 
-    assert isinstance(dataframes[0], pd.DataFrame)
+    # assert isinstance(dataframes[0], pd.DataFrame)
 
-    combined = _recombination.combine_sections(dataframes)
+    # combined = _recombination.combine_sections(dataframes)
 
     # print(combined)
 
