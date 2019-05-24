@@ -74,3 +74,11 @@ Write further tests for the recombination functions
 
 Fix the naming of the Datasources in get_datasources()
 
+
+2019-05-24
+
+- Add pandas to NetCDF file conversion (in memory)
+- Deletion of NaNs by row currently deletes all the data in that row regardless of other data 
+possibly being in that row for another gas. When recombining with other dataframes we could just put in NaNs
+where the data was previously deleted?
+

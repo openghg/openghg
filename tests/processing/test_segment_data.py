@@ -29,26 +29,50 @@ def data():
 #     return segment.parse_file(filepath=filepath)
     
 
+def test_get_datasources(data):
+    # filename = "bsd.picarro.1minute.248m.dat"
+    # dir_path = os.path.dirname(__file__)
+    # test_data = "../data/proc_test_data/CRDS"
+    # filepath = os.path.join(dir_path, test_data, filename)
 
-
-def test_get_datasources():
-    filename = "bsd.picarro.1minute.248m.dat"
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/CRDS"
-    filepath = os.path.join(dir_path, test_data, filename)
-
-    data =  pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
+    # data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
+    
     datasources = segment.get_datasources(data)
 
-    # print("\n\nDatasources : ", datasources)
-    
+    assert len(datasources) == 3
+
+    assert datasources[0]._start_datetime == pd.Timestamp("2014-01-30 10:52:30")
+    assert datasources[1]._start_datetime == pd.Timestamp("2014-01-30 10:52:30")
+    assert datasources[2]._start_datetime == pd.Timestamp("2014-01-30 10:52:30")
+
+    assert datasources[0]._end_datetime == pd.Timestamp("2014-01-30 14:20:30")
+    assert datasources[1]._end_datetime == pd.Timestamp("2014-01-30 14:20:30")
+    assert datasources[2]._end_datetime == pd.Timestamp("2014-01-30 14:20:30")
+
+
+def test_parse_timecols(data):
+    time_data = data.iloc[2:, 0:2]
+    timeframe = segment.parse_timecols(time_data=time_data)
+
+    assert timeframe.head(1)["Datetime"].iloc[0] == pd.to_datetime("2014-01-30 10:49:30")
+    assert timeframe.tail(1)["Datetime"].iloc[0] == pd.to_datetime("2014-01-30 14:20:30")
+
+
+def test_parse_gases(data):
+    gas_info = segment.parse_gases(data)
+
+    # Unpack the list of tuples into two lists 
+    gas_names, gas_data = zip(*gas_info)
+
+    assert sorted(gas_names) == sorted(['ch4', 'co', 'co2'])
+
 
 def test_unanimous():
     true_dict = {"key1": 6, "key2": 6, "key3": 6}
     false_dict = {"key1": 3, "key2": 6, "key3": 9}
 
-    assert segment.unanimous(true_dict) == True
-    assert segment.unanimous(false_dict) == False
+    assert segment.unanimous(true_dict) is True
+    assert segment.unanimous(false_dict) is False
 
 
 def test_gas_info(data):

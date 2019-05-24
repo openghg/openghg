@@ -75,7 +75,6 @@ def parse_timecols(time_data):
     def t_calc(row, col): return _datetime_to_string(_datetime_to_datetime(
                             _datetime.datetime.strptime(row+col, "%y%m%d%H%M%S")))
 
-
     time_gen = (t_calc(row,col) for row,col in time_data.itertuples(index=False))
     time_list = list(time_gen)
 
