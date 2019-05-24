@@ -234,32 +234,6 @@ def unanimous(seq):
 
 #     # Daterange can just be in the format of
 #     # YYYYMMDD_YYYYMMDD
-
-
-def store_data(gas_data):
-    """ This function writes the objects to the object
-        store and creates a unique key for their storage
-
-        Args:
-            metadata (dict): Dictionary containing
-            metadata for the upload
-            data (Pandas.DataFrame): Data contained within
-            dataframes to be saved as HDF files in the object store
-        Returns:
-            None
-
-        TODO - add return value so we know it's been stored successfully
-
-    """
-    metadata = gas_data["metadata"]
-    key = key_creator(metadata=metadata)
-
-    # How best to identify the metadata - UUID for this in keypath as well?
-    for gas in gas_data["gases"].keys():
-        # Append the UID for each gas to the metadata key
-        key = urllib.parse.urljoin(key, gas_data[gas]["UUID"])
-        # Store it in the object store
-        write_dataframe(bucket=bucket, key=key, dataframe=gas_data["data"])
     
 
 def url_join(*args):
@@ -274,41 +248,12 @@ def url_join(*args):
     """
     return "/".join(map(lambda x: str(x).rstrip('/'), args))       
 
-
-def key_creator(metadata):
-    """ Creates a key to be used as an identifier for
-        data in the object store
-
-        Args:
-            metadata (dict): Metadata
-        Returns:
-            str: Key for use in object store
-    """
-    # Key could be something like
-    # /site/instrument/height/daterange/gas/UID_of_reading
-
-    site = metadata["site"]
-    instrument = metadata["instrument"]
-    height = None
-    if "height" in metadata:
-        height = metadata["height"]
-    date_range = get_daterange_str(start=metadata["start_datetime"],
-                                    end=metadata["end_datetime"])
-    uuid = metadata["UUID"]
-
-    if height:
-        # return urllib.parse.urljoin(site, instrument, height, date_range, uuid)
-        return url_join(site, instrument, height, date_range, uuid)
-    else:
-        return url_join(site, instrument, date_range, uuid)
-
-
 def get_daterange_str(start, end):
     """ Creates a string from the start and end datetime
         objects. Used for production of the key
         to store segmented data in the object store.
 
-        Args:  
+        Args:
             start (datetime): Start datetime
             end (datetime): End datetime
         Returns:
@@ -321,23 +266,3 @@ def get_daterange_str(start, end):
     end_fmt = end.strftime("%Y%m%d")
     
     return start_fmt + "_" + end_fmt
-
-
-
-
-    # Now to save the metadata and the data to the object store using their
-    # associated IDs - or the /site/instrument/height/daterange/gas/UID_of_reading ?
-    # That could be the key
-    # 
-    #  method
-    # that method is far more readable
-
-    # Write the gas data to the d
-
-
-
-    # Key like /site/instrument/height/daterange ?
-    # Or just a UUID for this block of data?
-
-
-    # return gas_list

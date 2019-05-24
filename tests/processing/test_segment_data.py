@@ -61,10 +61,29 @@ def test_parse_timecols(data):
 def test_parse_gases(data):
     gas_info = segment.parse_gases(data)
 
-    # Unpack the list of tuples into two lists 
+    # Unpack the list of tuples into two different tuples
     gas_names, gas_data = zip(*gas_info)
 
     assert sorted(gas_names) == sorted(['ch4', 'co', 'co2'])
+    
+    head_zero = gas_data[0].head(1)
+    head_one = gas_data[1].head(1)
+    head_two = gas_data[2].head(1)
+
+    assert head_zero["Datetime"].iloc[0] == pd.to_datetime("2014-01-30 10:52:30")
+    assert head_zero[0].iloc[0] == 1960.24
+    assert head_zero[1].iloc[0] == 0.236
+    assert head_zero[2].iloc[0] == 26.0
+
+    assert head_one["Datetime"].iloc[0] == pd.to_datetime("2014-01-30 10:52:30")
+    assert head_one[0].iloc[0] == 409.66
+    assert head_one[1].iloc[0] == 0.028
+    assert head_one[2].iloc[0] == 26.0
+
+    assert head_two["Datetime"].iloc[0] == pd.to_datetime("2014-01-30 10:52:30")
+    assert head_two[0].iloc[0] == 204.62
+    assert head_two[1].iloc[0] == 6.232
+    assert head_two[2].iloc[0] == 26.0
 
 
 def test_unanimous():
