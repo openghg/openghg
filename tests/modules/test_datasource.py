@@ -17,6 +17,8 @@ from objectstore import local_bucket
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 
+mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
+
 @pytest.fixture(scope="session")
 def data():
     filename = "bsd.picarro.1minute.248m.dat"
@@ -40,20 +42,46 @@ def mock_uuid(monkeypatch):
     monkeypatch.setattr(uuid, 'uuid4', mock_uuid)
 
 
+@pytest.fixture
+def mock_uuid2(monkeypatch):
+
+    def mock_uuid():
+        return mocked_uuid2
+
+    monkeypatch.setattr(uuid, 'uuid4', mock_uuid)
+
+
 @pytest.fixture(scope="session")
 def save_data_in_store(mock_uuid):
     bucket = local_bucket.get_local_bucket()
     datasource = get_datasources(raw_data=data)[0]
     original_slice = datasource._data.head(1)
 
-    data = Datasource.create(name="test_name", instrument="test_instrument", site="test_site",
-                             network="test_network", data=datasource._data)
+    # data = Datasource.create(name="test_name", instrument="test_instrument", site="test_site",
+    #                          network="test_network", data=datasource._data)
+    # data.save(bucket)
 
-    data.save(bucket)
+    print("Save data in store uuid : ", datasource._uuid)
+
+    datasource.save(bucket)
+
+def test_save(mock_uuid2):
+    bucket = local_bucket.get_local_bucket()
+
+    datasource = Datasource.create(name="test_name", instrument="test_instrument", site="test_site", network="test_network")
+
+    datasource.save(bucket)
+
+    prefix = "%s/uuid/%s" % (Datasource._datasource_root, datasource._uuid)
+    # Check it's in the store
+    objs = ObjectStore.get_all_object_names(bucket, prefix)
+
+    assert objs[0].split("/")[-1] == mocked_uuid2
+
 
 def test_creation(mock_uuid, datasource):
-    assert datasource._name == "test_name"
     assert datasource._uuid == mocked_uuid
+    assert datasource._name == "test_name"
     assert datasource._instrument == "test_instrument"
     assert datasource._site == "test_site"
     assert datasource._network == "test_network"
@@ -77,12 +105,11 @@ def test_save_with_data(mock_uuid, data):
 
     original_slice = datasource._data.head(1)
 
-    data = Datasource.create(name="test_name", instrument="test_instrument", site="test_site", 
-                                network="test_network", data=datasource._data)
+    datasource.save(bucket)
 
-    data.save(bucket)
+    old_uuid = datasource._uuid
 
-    new_datasource = Datasource.load(bucket, name="test_name")
+    new_datasource = Datasource.load(bucket, uuid=old_uuid)
 
     new_slice = new_datasource._data.head(1)
 
@@ -106,19 +133,19 @@ def test_from_data(mock_uuid):
     assert new_datasource._network == "test_network_two"
 
 
-def test_load(mock_uuid, datasource):
-    bucket = local_bucket.get_local_bucket()
+# def test_load(mock_uuid, datasource):
+#     bucket = local_bucket.get_local_bucket()
 
-    loaded_datasource = Datasource.load(bucket=bucket, uuid=mocked_uuid)
+#     loaded_datasource = Datasource.load(bucket=bucket, uuid=mocked_uuid)
 
-    assert loaded_datasource._name == "test_name"
-    assert loaded_datasource._uuid == mocked_uuid
-    assert loaded_datasource._instrument == "test_instrument"
-    assert loaded_datasource._site == "test_site"
-    assert loaded_datasource._network == "test_network"
+#     assert loaded_datasource._name == "test_name"
+#     assert loaded_datasource._uuid == mocked_uuid
+#     assert loaded_datasource._instrument == "test_instrument"
+#     assert loaded_datasource._site == "test_site"
+#     assert loaded_datasource._network == "test_network"
 
 
-def test_get_uid_from_name(mock_uuid):
+def test_get_uid_from_name(mock_uuid2):
     from Acquire.ObjectStore import string_to_encoded
 
     bucket = local_bucket.get_local_bucket()
@@ -127,13 +154,12 @@ def test_get_uid_from_name(mock_uuid):
 
     found_uuid = Datasource._get_uid_from_name(bucket, name)
 
-    assert found_uuid == mocked_uuid
-
+    assert found_uuid == mocked_uuid2
 
 def test_get_name_from_uid(mock_uuid):
     bucket = local_bucket.get_local_bucket()
 
-    name = Datasource._get_name_from_uid(bucket, mocked_uuid)
+    name = Datasource._get_name_from_uid(bucket, mocked_uuid2)
 
     assert name == "test_name"
 

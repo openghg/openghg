@@ -57,8 +57,8 @@ class CRDS:
         # Data will be contained within the Datasources
         datasources = _get_datasources(data)
 
-        for d in datasources:
-            print(d._data)
+        # for d in datasources:
+        #     print(d._data)
 
         c = CRDS()
         c._uuid = _create_uuid()

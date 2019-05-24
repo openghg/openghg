@@ -34,11 +34,9 @@ def get_local_bucket(name=None):
 
     local_buckets_dir = os.path.join(home_path, hugs_test_buckets)
 
-#     print("Creating a bucket at : {}".format(local_buckets_dir))
-
     root_bucket = use_testing_object_store_backend(local_buckets_dir)
 
-    bucket = ObjectStore.create_bucket(bucket=root_bucket, bucket_name=bucket_time())
+    bucket = ObjectStore.create_bucket(bucket=root_bucket, bucket_name="hugs_test")
 
     return bucket
 

@@ -49,7 +49,7 @@ def test_save_and_load(crds):
 
     crds = CRDS.read_file(filepath)
 
-    print(crds._datasources[0])
+    # print(crds._datasources[0])
 
     uuid_to_load = crds._uuid
 
@@ -59,7 +59,7 @@ def test_save_and_load(crds):
 
     new_crds = CRDS.load(bucket=bucket, uuid=uuid_to_load)
 
-    print(new_crds._datasources[0])
+    # print(new_crds._datasources[0])
 
     gas_names = [d._name for d in new_crds._datasources]
 

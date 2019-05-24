@@ -63,6 +63,14 @@ class Datasource:
         
         return d
 
+    # def get_data_datetimes(self, data):
+    #     """ Returns the start and end datetimes for the data stored within this Datasource object
+
+    #         Returns:
+    #             tuple (datetime, datetime): Start and end datetimes
+
+    #     """
+
     def is_null(self):
         """Return whether this object is null
         
@@ -229,9 +237,8 @@ class Datasource:
         if bucket is None:
             bucket = _get_bucket()
 
-        daterange_str = "".join([_datetime_to_string(self._start_datetime), "_", _datetime_to_string(self._end_datetime)])
-
         if self._data is not None:
+            daterange_str = "".join([_datetime_to_string(self._start_datetime), "_", _datetime_to_string(self._end_datetime)])
             data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
             _ObjectStore.set_object(bucket, data_key, self.dataframe_to_hdf())
             self._stored = True
