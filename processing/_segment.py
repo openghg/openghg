@@ -273,7 +273,6 @@ def url_join(*args):
         Returns:
             str: A url style key string with arguments separated by forward slashes
     """
-
     return "/".join(map(lambda x: str(x).rstrip('/'), args))       
 
 

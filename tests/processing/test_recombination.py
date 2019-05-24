@@ -42,6 +42,8 @@ def test_get_sections(keylist):
 def test_combine_sections():
     from modules._datasource import Datasource
     from objectstore.hugs_objstore import get_object
+    from processing._segment import parse_gases
+    from processing._recombination import combine_sections
 
     bucket = get_local_bucket()
 
@@ -50,33 +52,19 @@ def test_combine_sections():
     test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
 
+    # Split and combine without passing through the object store
+    raw_data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
+    gas_data = parse_gases(raw_data)
+    dataframes = [data for _, data in gas_data]
+    complete = combine_sections(dataframes)
+    
+    # Parse through the object store
     crds = CRDS.read_file(filepath)
     # Create and store data
     crds.save(bucket=bucket)
-
     keylist = [d._uuid for d in crds._datasources]
-
     datasources = _recombination.get_sections(bucket, keylist)
-
     dataframes = [datasource._data for datasource in datasources]
-
     combined = _recombination.combine_sections(dataframes)
 
-    # The same 3 dataframes are being returned each time - fix this
-    assert False
-
-    # print(combined)
-
-    
-
-
-
-    
-
-
-
-
-
-
-    
-
+    assert combined.equals(complete)

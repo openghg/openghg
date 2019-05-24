@@ -52,16 +52,16 @@ def combine_sections(dataframes):
     # Check that the the first dataframe is a timeframe
     # if dataframes[0]
     # Get the first column for timeframe comparison
-    timeframe = dataframes[0].iloc[:, :1]
+    complete = dataframes[0].iloc[:, :1]
     
     for d in dataframes:
-        if len(d.index) != len(timeframe.index):
+        if len(d.index) != len(complete.index):
             raise ValueError("Mismatch in timeframe and dataframes index length")
         # Drop the time column
         d.drop(columns="Datetime", axis="columns", inplace=True)
-        timeframe = _pd.concat([timeframe, d], axis=1)
+        complete = _pd.concat([complete, d], axis=1)
 
-    return timeframe
+    return complete
 
 def convert_to_netcdf(dataframe):
     """ Converts the passed dataframe to netcdf, performs checks
