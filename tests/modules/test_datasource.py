@@ -100,7 +100,7 @@ def test_save_with_data(mock_uuid, data):
     from processing._segment import get_datasources
 
     bucket = local_bucket.get_local_bucket()
-    
+
     datasource = get_datasources(raw_data=data)[0]
 
     original_slice = datasource._data.head(1)
@@ -115,6 +115,27 @@ def test_save_with_data(mock_uuid, data):
 
     assert new_slice.equals(original_slice)
     
+
+def test_save_multiple_with_data(data):
+    from processing._segment import get_datasources
+
+    bucket = local_bucket.get_local_bucket()
+
+    datasources = get_datasources(raw_data=data)
+
+    for d in datasources:
+        d.save(bucket=bucket)
+        print(d._data)
+
+
+
+    # old_uuid = datasource._uuid
+
+    # new_datasource = Datasource.load(bucket, uuid=old_uuid)
+
+    # new_slice = new_datasource._data.head(1)
+
+    assert False
 
 def test_from_data(mock_uuid):
     
