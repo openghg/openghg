@@ -155,7 +155,7 @@ class Datasource:
     # Modified from
     # https://github.com/pandas-dev/pandas/issues/9246
     def dataframe_to_hdf(self):
-        """ Writes this Datasource's data to a com  essed in-memory HDF5 file
+        """ Writes this Datasource's data to a compressed in-memory HDF5 file
 
             This function is partnered with dataframe_from_hdf()
             which reads a datframe from the in-memory HDF5 bytes object
@@ -166,10 +166,15 @@ class Datasource:
                 bytes: HDF5 file as bytes object
         """
         from pandas import HDFStore as _HDFStore
-        with _HDFStore("write.h5", mode="a", driver="H5FD_CORE", driver_core_backing_store=0,
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+
+        from Acquire.ObjectStore import get_datetime_now_to_string
+
+        with _HDFStore("write.hdf", mode="w", driver="H5FD_CORE", driver_core_backing_store=0,
                         complevel=6, complib="blosc:blosclz") as out:
             
             out["data"] = self._data
+            # Copy the data and close the file to check if this works
             return out._handle.get_file_image()
 
     @staticmethod
@@ -186,8 +191,11 @@ class Datasource:
         """
         from pandas import HDFStore as _HDFStore
         from pandas import read_hdf as _read_hdf
-        return _read_hdf(_HDFStore("read.h5", mode="r", driver="H5FD_CORE",
-                        driver_core_backing_store=0, driver_core_image=hdf_data))
+        from Acquire.ObjectStore import get_datetime_now_to_string
+
+        with _HDFStore("read.hdf", mode="r", driver="H5FD_CORE", driver_core_backing_store=0,
+                        driver_core_image=hdf_data) as data:
+            return _read_hdf(data)
 
     @staticmethod
     def from_data(bucket, data):

@@ -58,14 +58,9 @@ def test_combine_sections():
 
     datasources = _recombination.get_sections(bucket, keylist)
 
+    dataframes = [datasource._data for datasource in datasources]
 
-    # dataframes = [datasource._data for datasource in datasources]
-
-    # assert isinstance(dataframes[0], pd.DataFrame)
-
-    # combined = _recombination.combine_sections(dataframes)
-
-    # print(combined)
+    combined = _recombination.combine_sections(dataframes)
 
     # The same 3 dataframes are being returned each time - fix this
     assert False

@@ -116,26 +116,35 @@ def test_save_with_data(mock_uuid, data):
     assert new_slice.equals(original_slice)
     
 
-def test_save_multiple_with_data(data):
-    from processing._segment import get_datasources
+# def test_save_multiple_with_data(data):
+#     from processing._segment import get_datasources
 
-    bucket = local_bucket.get_local_bucket()
+#     bucket = local_bucket.get_local_bucket()
 
-    datasources = get_datasources(raw_data=data)
+#     datasources = get_datasources(raw_data=data)
+    
+#     datasource_uuids = []
+#     for d in datasources:
+#         d.save(bucket=bucket)
+#         datasource_uuids.append(d._uuid)
+        
+#     new_datasources = [Datasource.load(bucket=bucket, uuid=i) for i in datasource_uuids]
 
-    for d in datasources:
-        d.save(bucket=bucket)
-        print(d._data)
+#     from objectstore.hugs_objstore import get_dated_object
+#     dataframes = []
+#     # for u in datasource_uuids:
+#     #     key = "%s/uuid/%s" % (Datasource._data_root, u)
+#     #     obj = get_dated_object(bucket=bucket, key=key)
+#     #     dat = Datasource.dataframe_from_hdf(obj)
 
 
+#     # old_uuid = datasource._uuid
 
-    # old_uuid = datasource._uuid
+#     # new_datasource = Datasource.load(bucket, uuid=old_uuid)
 
-    # new_datasource = Datasource.load(bucket, uuid=old_uuid)
+#     # new_slice = new_datasource._data.head(1)
 
-    # new_slice = new_datasource._data.head(1)
-
-    assert False
+#     assert False
 
 def test_from_data(mock_uuid):
     
