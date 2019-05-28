@@ -65,6 +65,7 @@ class CRDS:
         from processing._metadata import Metadata as _Metadata
         from processing._segment import get_datasources as _get_datasources
 
+
         import pandas as _pd
 
         data = _pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")        
@@ -276,13 +277,13 @@ class CRDS:
 
         return uuids
 
-        # datasources = []
-        # from objectstore.hugs_objstore import get_dated_object_json as _get_dated_object_json
-        # # Get the data
-        # for key in keys:
-        #     # Get Datasource objects from the object store
-        #     # These then in turn can get the dataframes
-        #     datasources.append(_get_dated_object_json(key))
+    def get_daterange(self):
+        """ Returns the daterange of the data in this object
+
+            Returns:
+                tuple (datetime, datetime): Start and end datetime
+        """
+        return self._start_datetime, self._end_datetime 
 
 
     def write_file(self, filename):

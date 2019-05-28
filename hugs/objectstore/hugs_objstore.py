@@ -13,6 +13,20 @@ from objectstore import local_bucket
 # dateless_key = "/".join(key.split("/")[:-1])
 
 
+def list_object_names(bucket):
+    """ List all the keys in the object store
+
+        TODO - temp function, remove
+
+        Args:
+            bucket (dict): Bucket containing data
+        Returns:
+            list: List of keys in object store
+    """
+    from Acquire.ObjectStore import ObjectStore as _ObjectStore
+
+    return _ObjectStore.get_all_object_names(bucket)
+
 def get_dated_object(bucket, key):
     """ Removes the daterange from the passed key and uses the reduced
         key to get an object from the object store.
