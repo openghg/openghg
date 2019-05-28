@@ -334,5 +334,14 @@ class Datasource:
         
         return uuid[0].split("/")[-1]
 
+    def get_data(self):
+        """ Get the data stored in this Datasource
+
+            Returns:
+                Pandas.Dataframe: Dataframe stored in this object
+        """
+        return self._data
+
+
 
         

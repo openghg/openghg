@@ -90,6 +90,8 @@ class CRDS:
 
         return c
 
+    
+
     def to_data(self):
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
@@ -285,6 +287,13 @@ class CRDS:
         """
         return self._start_datetime, self._end_datetime 
 
+    def get_datasources(self):
+        """ Return this object's Datasource
+
+            Returns:
+                list: List of datasources
+        """
+        return self._datasources
 
     def write_file(self, filename):
         """ Collects the data stored in this object and writes it
