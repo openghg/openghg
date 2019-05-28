@@ -1,8 +1,0 @@
-{
-    "ACRONYM": {
-        "directory" : "test_dir",
-        "test_net" : {
-            "test_site": "test_town"
-        }
-    }    
-}

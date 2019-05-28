@@ -1,0 +1,44 @@
+# Keying for the object store
+
+DataSource - can be a particular site/instrument/height
+
+These can then be identified by Site, instrument etc
+
+/data/uid/{datasource_uid}
+
+Can then key the data 
+
+/data/uid/{datasource_uid}/{datestart_dateend}
+
+
+/datasource/uid/{uid}
+
+This returns information regarding that datasource
+
+
+Then for instruments
+
+/instruments/uid/{instrument_uid}
+
+This returns a JSON containing the UIDs of all the DataSources provided by the instrument
+
+Then for sites
+
+/site/uid/{site_uid}
+
+
+This returns a JSON of all the UIDs of the instruments provided by the instrument
+
+
+Then for networks
+
+/networks/uid/{network_uid}
+
+This gives the JSOON that describes the network, including all the Instruments for that network
+
+
+We should also be able to lookup the networks and instruments by name
+
+/instruments/name/{encdoded_name}
+
+This would then return a JSON containing information regarding that instrument including its UID, full name, location, network etc
