@@ -57,9 +57,6 @@ class CRDS:
         # Data will be contained within the Datasources
         datasources = _get_datasources(data)
 
-        # for d in datasources:
-        #     print(d._data)
-
         c = CRDS()
         c._uuid = _create_uuid()
         c._creation_datetime = _get_datetime_now()
@@ -114,6 +111,7 @@ class CRDS:
         datasource_uuids = data["datasources"]
         c._datasources = []
 
+        # Load the Datasources associated with this object
         for _, uuid in datasource_uuids.items():
             c._datasources.append(Datasource.load(bucket=bucket, uuid=uuid))
 
@@ -130,12 +128,6 @@ class CRDS:
                 bucket (dict, default=None): Bucket for data
             Returns:
                 None
-
-            Save the object at a CRDS key
-            Then save the datasources stored within the object
-            as HDF5 files. 
-            How to save the objects containing dataframes as HDF objects
-
         """
         if self.is_null():
             return
@@ -177,7 +169,6 @@ class CRDS:
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
         return CRDS.from_data(data=data, bucket=bucket)
-
 
     def key_to_daterange(self, key):
         """ Takes a dated key and returns two datetimes for the start and 

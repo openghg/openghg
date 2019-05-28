@@ -50,6 +50,18 @@ def test_get_datasources(data):
     assert datasources[2]._end_datetime == pd.Timestamp("2014-01-30 14:20:30")
 
 
+def test_column_naming(data):
+    # Get the
+    gas_data = segment.parse_gases(data)
+
+    column_names = ["Datetime", "count", "stdev", "n_meas"]
+    
+    for gas_name, data in gas_data:
+        # Check the name of each in the first dataframe
+        for i, col in enumerate(data.columns):
+            assert column_names[i] in col
+
+
 def test_parse_timecols(data):
     time_data = data.iloc[2:, 0:2]
     timeframe = segment.parse_timecols(time_data=time_data)
@@ -70,20 +82,21 @@ def test_parse_gases(data):
     head_one = gas_data[1].head(1)
     head_two = gas_data[2].head(1)
 
+    # Here iloc is index, column
     assert head_zero["Datetime"].iloc[0] == pd.to_datetime("2014-01-30 10:52:30")
-    assert head_zero[0].iloc[0] == 1960.24
-    assert head_zero[1].iloc[0] == 0.236
-    assert head_zero[2].iloc[0] == 26.0
+    assert head_zero.iloc[0, 1] == 1960.24
+    assert head_zero.iloc[0, 2] == 0.236
+    assert head_zero.iloc[0, 3] == 26.0
 
     assert head_one["Datetime"].iloc[0] == pd.to_datetime("2014-01-30 10:52:30")
-    assert head_one[0].iloc[0] == 409.66
-    assert head_one[1].iloc[0] == 0.028
-    assert head_one[2].iloc[0] == 26.0
+    assert head_one.iloc[0, 1] == 409.66
+    assert head_one.iloc[0, 2] == 0.028
+    assert head_one.iloc[0, 3] == 26.0
 
     assert head_two["Datetime"].iloc[0] == pd.to_datetime("2014-01-30 10:52:30")
-    assert head_two[0].iloc[0] == 204.62
-    assert head_two[1].iloc[0] == 6.232
-    assert head_two[2].iloc[0] == 26.0
+    assert head_two.iloc[0, 1] == 204.62
+    assert head_two.iloc[0, 2] == 6.232
+    assert head_two.iloc[0, 3] == 26.0
 
 
 def test_unanimous():

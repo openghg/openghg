@@ -120,11 +120,16 @@ def parse_gases(data):
     for n in range(n_gases):
         # Slice the columns
         gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
-
-        # TODO - name columns?
+        
         # Reset the column numbers
         gas_data.columns = pd.RangeIndex(gas_data.columns.size)
         gas_name = gas_data[0][0]
+
+        column_names = ["count", "stdev", "n_meas"]
+        column_labels = ["%s %s" % (gas_name, l) for l in column_names]
+
+        # Name columns
+        gas_data.set_axis(column_labels, axis='columns', inplace=True)
 
         # Drop the first two rows now we have the name
         gas_data.drop(index=gas_data.head(header_rows).index, inplace=True)
@@ -153,11 +158,10 @@ def gas_info(data):
         head_row = data.head(1)
 
         gases = {}
-        # Take the first row of the DataFrame
-        gas_row = 0
+        
         # Loop over the gases and find each unique value
         for column in head_row.columns:
-            s = head_row[column][gas_row]
+            s = head_row[column][0]
             if s != "-":
                 gases[s] = gases.get(s, 0) + 1
 
