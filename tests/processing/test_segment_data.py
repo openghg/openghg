@@ -30,13 +30,6 @@ def data():
     
 
 def test_get_datasources(data):
-    # filename = "bsd.picarro.1minute.248m.dat"
-    # dir_path = os.path.dirname(__file__)
-    # test_data = "../data/proc_test_data/CRDS"
-    # filepath = os.path.join(dir_path, test_data, filename)
-
-    # data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
-    
     datasources = segment.get_datasources(data)
 
     assert len(datasources) == 3
@@ -51,7 +44,6 @@ def test_get_datasources(data):
 
 
 def test_column_naming(data):
-    # Get the
     gas_data = segment.parse_gases(data)
 
     column_names = ["Datetime", "count", "stdev", "n_meas"]

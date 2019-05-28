@@ -2,10 +2,14 @@ import datetime
 import os
 import pandas as pd
 import pytest
+import xarray
 
 from objectstore.local_bucket import get_local_bucket
 from processing._crds import CRDS
 from processing import _recombination
+
+from processing._segment import parse_gases
+from processing._recombination import combine_sections
 
 @pytest.fixture(scope="session")
 def keylist():
@@ -42,9 +46,7 @@ def test_get_sections(keylist):
 def test_combine_sections():
     from modules._datasource import Datasource
     from objectstore.hugs_objstore import get_object
-    from processing._segment import parse_gases
-    from processing._recombination import combine_sections
-
+    
     bucket = get_local_bucket()
 
     filename = "bsd.picarro.1minute.248m.dat"
@@ -68,3 +70,26 @@ def test_combine_sections():
     combined = _recombination.combine_sections(dataframes)
 
     assert combined.equals(complete)
+
+
+def test_convert_to_netcdf():
+    filename = "bsd.picarro.1minute.248m.dat"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    raw_data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
+    gas_data = parse_gases(raw_data)
+    dataframes = [data for _, data in gas_data]
+    complete = combine_sections(dataframes)
+
+    filename = _recombination.convert_to_netcdf(complete)
+    # Open the NetCDF and check it's valid?
+
+    x_dataset = complete.to_xarray()
+
+    ds = xarray.open_dataset(filename)
+
+    assert ds.equals(x_dataset)
+
+

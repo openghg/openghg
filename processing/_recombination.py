@@ -20,7 +20,6 @@ def get_sections(bucket, uuid_list):
     return [Datasource.load(bucket=bucket, uuid=uid) for uid in uuid_list]
 
 
-
 # This might be unnecessary
 def get_dataframes(datasources):
     """ Get the data from the Datasources and return the dataframes
@@ -33,7 +32,6 @@ def get_dataframes(datasources):
     x = [datasource._data for datasource in datasources]
 
     return False
-
 
 
 def combine_sections(dataframes):
@@ -49,8 +47,6 @@ def combine_sections(dataframes):
     """
     import pandas as _pd
 
-    # Check that the the first dataframe is a timeframe
-    # if dataframes[0]
     # Get the first column for timeframe comparison
     complete = dataframes[0].iloc[:, :1]
     
@@ -63,31 +59,26 @@ def combine_sections(dataframes):
 
     return complete
 
+
 def convert_to_netcdf(dataframe):
     """ Converts the passed dataframe to netcdf, performs checks
         and returns
+
+        TODO - in memory return of a NetCDF file as a bytes object
 
         Args:
             dataframe (Pandas.Dataframe): Dataframe for convesion
         Returns:
             bytes: NetCDF file as a bytes array
-    """
-    # from netCDF4 import Dataset as _Dataset
-
-    # Get bytes array version of Pandas dataframe
-
-    pass
-
-    # Dataset('inmemory.nc', diskless=True, mode='w')
-
-    # _Dataset.to_netcdf
-
-    
-
-    
-
-    
-
-
 
         
+    """
+    from Acquire.ObjectStore import get_datetime_now_to_string as _get_datetime_now_to_string
+    import xarray
+
+    filename = "crds_output_%s.nc" % _get_datetime_now_to_string()
+
+    ds = dataframe.to_xarray().to_netcdf(filename)
+
+    return filename
+
