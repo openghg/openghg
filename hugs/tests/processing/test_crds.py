@@ -53,7 +53,7 @@ def test_save_and_load(crds):
 
     uuid_to_load = crds._uuid
 
-    bucket = get_local_bucket("crds_new")
+    bucket = get_local_bucket()
 
     crds.save(bucket)
 
@@ -71,7 +71,7 @@ def test_save_and_load(crds):
 
 
 def test_search_store(crds):
-    bucket = get_local_bucket("crds")
+    bucket = get_local_bucket()
     # Create and store data
     crds.save(bucket=bucket)
 
@@ -81,5 +81,20 @@ def test_search_store(crds):
     keys = crds.search_store(bucket=bucket, root_path="datasource", datetime_begin=start, datetime_end=end)
     
     # TODO - better test for this - mock the 
+    assert len(keys) == 3
+
+
+def test_search_store_two(crds):
+    bucket = get_local_bucket()
+    # Create and store data
+    crds.save(bucket=bucket)
+
+    start = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
+    end = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
+
+    keys = crds.search_store(
+        bucket=bucket, root_path="datasource", datetime_begin=start, datetime_end=end)
+
+    # TODO - better test for this - mock the
     assert len(keys) == 3
 
