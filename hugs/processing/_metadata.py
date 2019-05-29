@@ -1,6 +1,7 @@
 
 __all__ = ["Metadata"]
 
+
 class Metadata:
     """ Processes and holds metadata for raw data
 
@@ -65,6 +66,7 @@ class Metadata:
         # metadata["gases"] = gases
 
         return m
+
 
     def is_null(self):
         """Return whether this object is null

@@ -65,7 +65,6 @@ class CRDS:
         from processing._metadata import Metadata as _Metadata
         from processing._segment import get_datasources as _get_datasources
 
-
         import pandas as _pd
 
         data = _pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")        

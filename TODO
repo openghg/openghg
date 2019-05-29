@@ -91,3 +91,17 @@ Improve search functionality for selection of available data
 - Order data within dataframe
 
 Create a lookup of sites by their short code for metadata
+
+Index by datetime ?
+
+Filter down Metadata to Datasource
+
+
+Remove column titles and make Data completely generic / universal
+
+Metadata within the CRDS object leads to hierarchy - store metadata within the
+objects themselves so they're not reliant on other objects
+
+Object tags vs metadata in object store
+
+
