@@ -215,6 +215,22 @@ class CRDS:
 
         return start, end
 
+    @staticmethod
+    def to_datetime(date_string):
+        """ Convert a string of the format 2014-01-30
+            to datetime
+
+            TODO - make this more general
+
+            Args:
+                date_string (str): String of the format 2014-01-30
+            Returns:
+                Datetime: Datetime of string
+
+        """
+        import datetime as _datetime
+        return _datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
+
     def search_store(self, bucket, root_path, datetime_begin, datetime_end):
         """ Get all values stored in the object store
 
@@ -294,6 +310,14 @@ class CRDS:
                 list: List of datasources
         """
         return self._datasources
+
+    def get_metadata(self):
+        """ Get the metadata relating to this CRDS object
+
+            Returns:
+                dict: Metadata as dictionary
+        """
+        return self._metadata.data()
 
     def write_file(self, filename):
         """ Collects the data stored in this object and writes it

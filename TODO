@@ -79,3 +79,15 @@ Fix the naming of the Datasources in get_datasources()
 possibly being in that row for another gas. When recombining with other dataframes we could just put in NaNs
 where the data was previously deleted?
 
+
+
+2019-05-29
+
+Make CRDS to_string function more general and accept longer date strings
+
+Improve search functionality for selection of available data
+- Select per gas
+- Show dateranges available for certain data?
+- Order data within dataframe
+
+Create a lookup of sites by their short code for metadata
