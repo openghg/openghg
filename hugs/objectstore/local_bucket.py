@@ -13,26 +13,30 @@ def bucket_time():
         Returns:
             str: A formatted version of datetime.now()
     """
-
     return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
-
-def get_local_bucket(name=None):
+def get_local_bucket(name=None, empty=False):
     """ Creates and returns a local bucket
         that's created in the user's home directory
 
+        Args:
+            name (str, default=None): Extra string to add to bucket name
+            empty (bool, default=False): If True return an empty bucket
         Returns:
             dict: Local bucket
     """
-
     # Get the path of the user's home directory
     home_path = os.path.expanduser("~")
     hugs_test_buckets = "hugs_tmp/test_buckets"
+    
+    local_buckets_dir = os.path.join(home_path, hugs_test_buckets)
 
     if name:
         hugs_test_buckets += "/%s" % name
 
-    local_buckets_dir = os.path.join(home_path, hugs_test_buckets)
+    if empty:
+        import shutil as _shutil
+        _shutil.rmtree(local_buckets_dir)
 
     root_bucket = use_testing_object_store_backend(local_buckets_dir)
 
