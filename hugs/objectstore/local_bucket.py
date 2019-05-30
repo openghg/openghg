@@ -34,14 +34,15 @@ def get_local_bucket(name=None, empty=False):
     if name:
         hugs_test_buckets += "/%s" % name
 
-    # Check folder exists, if it does, empty it
-    # else create
-
     if empty:
         import shutil as _shutil
-        _shutil.rmtree(local_buckets_dir)
-
-    
+        import os as _os
+        # Remove the directory and recreate
+        if os.path.isdir(local_buckets_dir):
+            _shutil.rmtree(local_buckets_dir)
+            os.makedirs(local_buckets_dir)
+        else:
+            os.makedirs(local_buckets_dir)
 
     root_bucket = use_testing_object_store_backend(local_buckets_dir)
 
