@@ -1,10 +1,10 @@
 """ Query the object store for data uploaded by a certain user etc
 
 """
-import hashlib
-import os
+import sys as _sys
 
-from objectstore import local_bucket
+if _sys.version_info.major < 3:
+    raise ImportError("HUGS requires Python 3.6 minimum")
 
 # from Acquire.ObjectStore import ObjectStore, ObjectStoreError
 # from Acquire.Service import get_service_account_bucket, \
@@ -117,10 +117,12 @@ def get_abs_filepaths(directory):
             list: List of absolute filepaths
 
     """
+    import os as _os
+
     full_filepaths = []
-    for dirpath, _, filenames in os.walk(directory):
+    for dirpath, _, filenames in _os.walk(directory):
         for f in filenames:
-            full_filepaths.append(os.path.abspath(os.path.join(dirpath, f)))
+            full_filepaths.append(_os.path.abspath(_os.path.join(dirpath, f)))
 
     return full_filepaths
 
@@ -134,9 +136,10 @@ def get_md5(filename):
             str: MD5 hash of file
 
     """
+    import hashlib as _hashlib
     # Size of buffer in bytes
     BUF_SIZE = 65536
-    md5 = hashlib.md5()
+    md5 = _hashlib.md5()
 
     # Read the file in 64 kB blocks
     with open(filename, 'rb') as f:
@@ -158,7 +161,9 @@ def get_md5_bytes(data):
             str: MD5 hash of data
 
     """
-    return hashlib.md5(data).hexdigest()
+    import hashlib as _hashlib
+
+    return _hashlib.md5(data).hexdigest()
 
 
 def hash_files(file_list):
@@ -200,10 +205,12 @@ def write_dataframe(bucket, key, dataframe):
             None
     
     """
-    home_path = os.path.expanduser("~")
+    import os as _os
+
+    home_path = _os.path.expanduser("~")
     hugs_test_folder = "hugs_tmp/test_hdf5s"
     filename = "testing_dframe.hdf"
-    temp_path = os.path.join(home_path, hugs_test_folder, filename)
+    temp_path = _os.path.join(home_path, hugs_test_folder, filename)
     
     # Write to the dataframe to a blosc:lz4 compressed HDF5 file
     dataframe.to_hdf(path=temp_path, key=filename, mode="w", complib="blosc:lz4")
@@ -256,10 +263,11 @@ def store_file(bucket, filepath):
         Returns:
             None
     """
+    import os as _os
     # Get the filename from the filepath
     filepath = file.split("/")[-1]
     md5_hash = get_md5(filepath)
-    size = os.path.getsize(filepath)
+    size = _os.path.getsize(filepath)
     filename = filepath.split("/")[-1]
 #     # Add to object store
     ObjectStore.set_object_from_file(
