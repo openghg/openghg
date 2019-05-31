@@ -6,6 +6,7 @@ import uuid
 
 from Acquire.ObjectStore import ObjectStore as _ObjectStore
 from objectstore.local_bucket import get_local_bucket
+from objectstore.hugs_objstore import list_object_names
 
 from processing._crds import CRDS
 
@@ -84,17 +85,30 @@ def test_search_store(crds):
     assert len(keys) == 3
 
 
-def test_search_store_two(crds):
-    bucket = get_local_bucket()
+def test_search_store_two():
+    # Load in the new data
+    filename = "hfd.picarro.1minute.100m_min.dat"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    crds = CRDS.read_file(filepath)
+
+    bucket = get_local_bucket(empty=True)
     # Create and store data
     crds.save(bucket=bucket)
 
-    start = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
-    end = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
+    print(list_object_names(bucket=bucket))
+
+    start = datetime.datetime.strptime("2014-01-01", "%Y-%m-%d")
+    end = datetime.datetime.strptime("2015-01-01", "%Y-%m-%d")
 
     keys = crds.search_store(
         bucket=bucket, root_path="datasource", datetime_begin=start, datetime_end=end)
 
+    print(keys)
+
     # TODO - better test for this - mock the
-    assert len(keys) == 3
+    # assert len(keys) == 3
+    assert False
 

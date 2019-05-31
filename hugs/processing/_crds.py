@@ -67,8 +67,12 @@ class CRDS:
 
         import pandas as _pd
 
-        data = _pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")        
-        
+        data = _pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")     
+
+        # Drop NaNs here
+        data = data.dropna(axis=0, how="any")
+        data.index = _pd.RangeIndex(data.index.size)
+
         filename = filepath.split("/")[-1]
         # Get a Metadata object containing the processed metadata
         # Does this need to be an object? Just a dict?
@@ -80,7 +84,6 @@ class CRDS:
         c._uuid = _create_uuid()
         c._creation_datetime = _get_datetime_now()
         c._datasources = datasources
-        # Metadata dict
         c._metadata = metadata
 
         # Ensure the CRDS object knows the datetimes it has
@@ -249,6 +252,8 @@ class CRDS:
         from objectstore.hugs_objstore import get_dataframe as _get_dataframe
         from pandas import date_range as _pd_daterange
 
+        from objectstore.hugs_objstore import hugs_objstore as _hugs_objstore
+
         datetime_begin = _datetime_to_datetime(datetime_begin)
         datetime_end = _datetime_to_datetime(datetime_end)
 
@@ -266,7 +271,9 @@ class CRDS:
         #     freq = "H"
 
         # At the moment just have years
-        daterange = _pd_daterange(start=datetime_begin, end=datetime_end)
+        # daterange = _pd_daterange(start=datetime_begin, end=datetime_end, freq="Y")
+
+        print(len(daterange))
 
         # path = RootPaths[root_path.upper()]
         
@@ -276,6 +283,43 @@ class CRDS:
         # Get the UUIDs for the data
         data_uuids = [d._uuid for d in self._datasources]
 
+        # If we know the UUIDs we have read the dateranges from the metadata stored
+        # and return the data
+        # This will have to be changed again when the dataframes are split up
+
+        keys = []
+        for uuid in data_uuids:
+            prefix = "%s/uuid/%s" % ("data", uuid)
+            # Get the keys that start with this and read the daterange from the returned value
+            datakeys = _hugs_objstore.get_object_names(bucket=bucket, prefix=prefix)
+            keys.append(datakeys[0])
+
+        # Get the daterange
+        for key in keys:
+            start, end = self.key_to_daterange(key)
+            # TODO - at the moment this will only get data that's older
+            # than this date 
+            if end.year <= datetime_end.year:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         # TODO - Tidy me
         uuids = []
         for uuid in data_uuids:
@@ -284,7 +328,17 @@ class CRDS:
                 # Prefix with the year
                 prefix = "%s/uuid/%s/%s" % (path, uuid, date_string)
 
+                print(prefix)
+
                 datakeys = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
+
+                # For now just get all the data
+
+
+                # If the start date and end date are within the daterange of the
+                # data in the object store then return the data's UUID
+
+                # If looking for 2013-2015
 
                 for key in datakeys:
                     _, end = self.key_to_daterange(key)

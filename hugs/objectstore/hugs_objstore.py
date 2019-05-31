@@ -11,9 +11,7 @@ if _sys.version_info.major < 3:
 #     push_is_running_service, pop_is_running_service
 
 # dateless_key = "/".join(key.split("/")[:-1])
-
-
-def list_object_names(bucket):
+def get_object_names(bucket, prefix=None):
     """ List all the keys in the object store
 
         TODO - temp function, remove
@@ -25,7 +23,7 @@ def list_object_names(bucket):
     """
     from Acquire.ObjectStore import ObjectStore as _ObjectStore
 
-    return _ObjectStore.get_all_object_names(bucket)
+    return _ObjectStore.get_all_object_names(bucket, prefix)
 
 def get_dated_object(bucket, key):
     """ Removes the daterange from the passed key and uses the reduced

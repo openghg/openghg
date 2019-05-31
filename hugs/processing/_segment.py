@@ -100,8 +100,10 @@ def parse_gases(data):
     """
     # Drop any rows with NaNs
     # Reset the index
-    data = data.dropna(axis=0, how="any")
-    data.index = pd.RangeIndex(data.index.size)
+    # This is now done before creating metadata
+
+    # data = data.dropna(axis=0, how="any")
+    # data.index = pd.RangeIndex(data.index.size)
 
     # Get the number of gases in dataframe and number of columns of data present for each gas
     n_gases, n_cols = gas_info(data=data)
@@ -113,6 +115,7 @@ def parse_gases(data):
     header_rows = 2
     # Dataframe containing the time data for this data input
     time_data = data.iloc[2:, 0:time_cols]
+
     timeframe = parse_timecols(time_data=time_data)
     timeframe.index = pd.RangeIndex(timeframe.index.size)
     

@@ -33,12 +33,19 @@ class Metadata:
         # Dict for storage of metadata
         m._data = {}
 
+        # Where to drop NaNs?
+        # Creating metadata here is limited due to some columns possibly having
+        # Nans and others not
+        # Where to create?
+
+        # Create metadata for each individual datasource? 
+
         # Not a huge fan of these hardcoded values
         # TODO - will these change at some point?
-        start_date = data[0][2]
-        start_time = data[1][2]
-        end_date = data.iloc[-1][0]
-        end_time = data.iloc[-1][1]
+        start_date = str(data[0][2])
+        start_time = str(data[1][2])
+        end_date = str(data.iloc[-1][0])
+        end_time = str(data.iloc[-1][1])
 
         # Find gas measured and port used
         type_meas = data[2][2]
@@ -49,7 +56,7 @@ class Metadata:
 
         # Extract data from the filename
         site, instrument, resolution, height = m.parse_filename(filename=filename)
-
+ 
         # Parse the dataframe to find the gases - this might be excessive
         # gases, _ = find_gases(data=data)
         m._uuid = _create_uuid()
