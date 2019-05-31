@@ -27,7 +27,7 @@ def keylist():
     start = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
     end = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
 
-    keys = crds.search_store(bucket=bucket, root_path="datasource", datetime_begin=start, datetime_end=end)
+    keys = crds.search_store(bucket=bucket, root_path="datasource", start_datetime=start, end_datetime=end)
 
     return keys
 

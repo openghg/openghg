@@ -6,7 +6,7 @@ import uuid
 
 from Acquire.ObjectStore import ObjectStore as _ObjectStore
 from objectstore.local_bucket import get_local_bucket
-from objectstore.hugs_objstore import list_object_names
+from objectstore.hugs_objstore import get_object_names
 
 from processing._crds import CRDS
 
@@ -79,7 +79,7 @@ def test_search_store(crds):
     start = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
     end = datetime.datetime.strptime("2014-01-30","%Y-%m-%d")
 
-    keys = crds.search_store(bucket=bucket, root_path="datasource", datetime_begin=start, datetime_end=end)
+    keys = crds.search_store(bucket=bucket, root_path="datasource", start_datetime=start, end_datetime=end)
     
     # TODO - better test for this - mock the 
     assert len(keys) == 3
@@ -98,13 +98,10 @@ def test_search_store_two():
     # Create and store data
     crds.save(bucket=bucket)
 
-    print(list_object_names(bucket=bucket))
-
     start = datetime.datetime.strptime("2014-01-01", "%Y-%m-%d")
     end = datetime.datetime.strptime("2015-01-01", "%Y-%m-%d")
 
-    keys = crds.search_store(
-        bucket=bucket, root_path="datasource", datetime_begin=start, datetime_end=end)
+    keys = crds.search_store(bucket=bucket, root_path="datasource", start_datetime=start, end_datetime=end)
 
     print(keys)
 
