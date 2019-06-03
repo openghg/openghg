@@ -24,6 +24,7 @@ class Datasource:
         self._start_datetime = None
         self._end_datetime = None
         self._stored = False
+        self._data_keys = []
 
     @staticmethod
     def create(name, instrument, site, network, data=None):
@@ -34,7 +35,7 @@ class Datasource:
                 instrument (str): Name of instrument
                 site (str): Name of site
                 network (str): Name of network
-                data (Pandas.Dataframe, default=None): Data from source
+                data (list, default=None): List of Pandas.Dataframes
             Returns:
                 Datasource
 
@@ -56,25 +57,18 @@ class Datasource:
         d._site = site
         d._network = network
 
+
         # DataFrame.first_valid_index()[source]
         # last_valid_index()[source]
-
-
         if data is not None:
+            # This could be a list of dataframes
             d._data = data
             # Just store these as time stamps?
-            d._start_datetime = _string_to_datetime(data.first_valid_index())
-            d._end_datetime = _string_to_datetime(data.last_valid_index())
+            # Get the first and last datetime from the list of dataframes
+            d._start_datetime = _string_to_datetime(data[0].first_valid_index())
+            d._end_datetime = _string_to_datetime(data[-1].last_valid_index())
         
         return d
-
-    # def get_data_datetimes(self, data):
-    #     """ Returns the start and end datetimes for the data stored within this Datasource object
-
-    #         Returns:
-    #             tuple (datetime, datetime): Start and end datetimes
-
-    #     """
 
     def is_null(self):
         """Return whether this object is null
@@ -134,10 +128,12 @@ class Datasource:
         data["site"] = self._site
         data["network"] = self._network
         data["stored"] = self._stored
+        data["data_keys"] = self._data_keys
 
         return data
 
-    def load_dataframe(self, bucket, uuid):
+    # def load_dataframe(self, bucket, uuid=None):
+    def load_dataframe(self, bucket, key):
         """ Loads data from the object store for creation of a Datasource object
 
             Args:
@@ -149,20 +145,21 @@ class Datasource:
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from objectstore.hugs_objstore import get_dated_object as _get_dated_object
 
-        data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
+        # data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
 
-        data = _get_dated_object(bucket, data_key)
+        data = _get_dated_object(bucket, key)
 
-        return Datasource.dataframe_from_hdf(data)
+        return Datasource.hdf_to_dataframe(data)
 
     # The save_dataframe function was moved to be part of save()
 
     # Modified from
     # https://github.com/pandas-dev/pandas/issues/9246
-    def dataframe_to_hdf(self):
+    @staticmethod
+    def dataframe_to_hdf(data):
         """ Writes this Datasource's data to a compressed in-memory HDF5 file
 
-            This function is partnered with dataframe_from_hdf()
+            This function is partnered with hdf_to_dataframe()
             which reads a datframe from the in-memory HDF5 bytes object
 
             Args:
@@ -178,12 +175,12 @@ class Datasource:
         with _HDFStore("write.hdf", mode="w", driver="H5FD_CORE", driver_core_backing_store=0,
                         complevel=6, complib="blosc:blosclz") as out:
             
-            out["data"] = self._data
+            out["data"] = data
             # Copy the data and close the file to check if this works
             return out._handle.get_file_image()
 
     @staticmethod
-    def dataframe_from_hdf(hdf_data):
+    def hdf_to_dataframe(hdf_data):
         """ Reads a dataframe from the passed HDF5 bytes object buffer
 
             This function is partnered with dataframe_to_hdf()
@@ -225,9 +222,12 @@ class Datasource:
         d._site = data["site"]
         d._network = data["network"]
         d._stored = data["stored"]
+        d._data_keys = data["data_keys"]
+        d._data = []
         
         if d._stored:
-            d._data = d.load_dataframe(bucket, d._uuid)
+            for key in d._data_keys:
+                d._data.append(d.load_dataframe(bucket, key))
 
         return d
 
@@ -251,9 +251,14 @@ class Datasource:
             bucket = _get_bucket()
 
         if self._data is not None:
-            daterange_str = "".join([_datetime_to_string(self._start_datetime), "_", _datetime_to_string(self._end_datetime)])
-            data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
-            _ObjectStore.set_object(bucket, data_key, self.dataframe_to_hdf())
+            for data in self._data:
+                # Save each dataframe in the list of dataframes as a separate data entity with its own key
+                # Save the key of each dataframe associated with this Datasource for loading back in
+                daterange_str = "".join([_datetime_to_string(data.first_valid_index()), "_", _datetime_to_string(data.last_valid_index())])
+                data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
+                self._data_keys.append(data_key)
+                _ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
+
             self._stored = True
 
         datasource_key = "%s/uuid/%s" % (Datasource._datasource_root, self._uuid)

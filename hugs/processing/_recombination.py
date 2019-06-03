@@ -31,28 +31,32 @@ def get_dataframes(datasources):
     return False
 
 
-def combine_sections(dataframes):
+def combine_sections(sections):
     """ Combines separate dataframes into a single dataframe for
         processing to NetCDF for output
 
         TODO - An order for recombination of sections
 
         Args:
-            dataframes (list): List of dataframes for recombination
+            sections (list): List of list of dataframes for each segment 
+            for recombination
         Returns:
             Pandas.Dataframe: Combined dataframes
     """
     import pandas as _pd
 
-    # Get the first column for timeframe comparison
-    complete = dataframes[0].iloc[:, :1]
-    
-    for d in dataframes:
+    combined = []
+    # Combine the dataframes and create a frame of their indices
+    for section in sections:
+        combo = _pd.concat(section, axis="rows")
+        combined.append(combo)
+
+    complete = combined[0].iloc[:, :1]
+
+    for d in combined:
         if len(d.index) != len(complete.index):
             raise ValueError("Mismatch in timeframe and dataframes index length")
-        # Drop the time column
-        d.drop(columns="Datetime", axis="columns", inplace=True)
-        complete = _pd.concat([complete, d], axis=1)
+        complete = _pd.concat([complete, d], axis="columns")
 
     return complete
 

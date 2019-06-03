@@ -88,8 +88,8 @@ def test_convert_to_netcdf():
     complete = combine_sections(dataframes)
 
     filename = _recombination.convert_to_netcdf(complete)
-    # Open the NetCDF and check it's valid?
 
+    # Open the NetCDF and check it's valid?
     x_dataset = complete.to_xarray()
 
     ds = xarray.open_dataset(filename)

@@ -36,7 +36,7 @@ def test_create():
 
     crds = CRDS.read_file(filepath)
 
-    first_datetime = crds._datasources[0]._data.first_valid_index()
+    first_datetime = crds._datasources[0]._data[0].first_valid_index()
 
     # TODO - check timestamp str and conversion to datetime    
     assert first_datetime == pd.Timestamp("2014-01-30 10:52:30")
@@ -101,5 +101,6 @@ def test_search_store_two():
     keys = crds.search_store(bucket=bucket, root_path="datasource", start_datetime=start, end_datetime=end)
 
     # TODO - better test for this
-    assert len(keys) == 3
+    # 21 as 7 years * 3 gases
+    assert len(keys) == 21
 

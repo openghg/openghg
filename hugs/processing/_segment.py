@@ -96,6 +96,7 @@ def parse_gases(data):
     """
     from pandas import RangeIndex as _RangeIndex
     from pandas import concat as _concat
+    
     # Drop any rows with NaNs
     # Reset the index
     # This is now done before creating metadata
@@ -117,26 +118,6 @@ def parse_gases(data):
     timeframe = parse_timecols(time_data=time_data)
     timeframe.index = _RangeIndex(timeframe.index.size)
 
-    # timeframe = timeframe.set_index("Datetime")
-    # timeframe.drop("Datetime", axis=1, inplace=True)
-
-    # print(timeframe)
-
-    # Here change the index to be DatetimeIndex for use of
-    #  groupby etc
-    # df.groupby(pd.Grouper(freq='M'))
-
-    # # # How many years of data?
-    # delta = timeframe.iloc[-1,0] - timeframe.iloc[0,0]
-    # n_years = delta.days
-
-    # print(n_years)
-
-    # split_date = pd.datetime(2016, 12, 20)
-    # df_training = df.loc[df['Date'] <= split_date]
-    # df_test = df.loc[df['Date'] > split_date]
-
-    
     data_list = []
     for n in range(n_gases):
         # Slice the columns
