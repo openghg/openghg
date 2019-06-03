@@ -2,21 +2,18 @@
     into the data requested by the user
 
 """
-def get_sections(bucket, uuid_list):
+def get_datasources(bucket, uuid_list):
     """ Get the Datasources containing the data from the object 
         store for recombination of data
 
-        WIP
-
         Args:
-            uuid_list (list): List of keys for data in the object store
+            key_list (list): List of keys for data in the object store
         Returns:
             list: List of Datasource objects
     """
     from modules._datasource import Datasource
     from objectstore.hugs_objstore import get_object as _get_object_json
 
-    # TODO - the same 3 dataframes are being returned each time - fix this
     return [Datasource.load(bucket=bucket, uuid=uid) for uid in uuid_list]
 
 

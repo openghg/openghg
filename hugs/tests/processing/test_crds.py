@@ -77,11 +77,11 @@ def test_search_store(crds):
     crds.save(bucket=bucket)
 
     start = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
-    end = datetime.datetime.strptime("2014-01-30","%Y-%m-%d")
+    end = datetime.datetime.strptime("2014-01-31","%Y-%m-%d")
 
     keys = crds.search_store(bucket=bucket, root_path="datasource", start_datetime=start, end_datetime=end)
     
-    # TODO - better test for this - mock the 
+    # TODO - better test for this
     assert len(keys) == 3
 
 
@@ -98,14 +98,11 @@ def test_search_store_two():
     # Create and store data
     crds.save(bucket=bucket)
 
-    start = datetime.datetime.strptime("2014-01-01", "%Y-%m-%d")
-    end = datetime.datetime.strptime("2015-01-01", "%Y-%m-%d")
+    start = datetime.datetime.strptime("2013-01-01", "%Y-%m-%d")
+    end = datetime.datetime.strptime("2019-06-01", "%Y-%m-%d")
 
     keys = crds.search_store(bucket=bucket, root_path="datasource", start_datetime=start, end_datetime=end)
 
-    print(keys)
-
-    # TODO - better test for this - mock the
-    # assert len(keys) == 3
-    assert False
+    # TODO - better test for this
+    assert len(keys) == 3
 

@@ -69,16 +69,13 @@ class CRDS:
 
         data = _pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")     
 
-        # Drop NaNs here
-        data = data.dropna(axis=0, how="any")
-        data.index = _pd.RangeIndex(data.index.size)
+        # Data will be contained within the Datasources
+        datasources = _get_datasources(data)
 
         filename = filepath.split("/")[-1]
         # Get a Metadata object containing the processed metadata
         # Does this need to be an object? Just a dict?
         metadata = _Metadata.create(filename, data)
-        # Data will be contained within the Datasources
-        datasources = _get_datasources(data)
 
         c = CRDS()
         c._uuid = _create_uuid()
@@ -297,12 +294,11 @@ class CRDS:
         data_uuids = []
         # Get the daterange
         for key in keys:
-            # if end.year <= datetime_end.year:
             if self.in_daterange(key, start_datetime, end_datetime):
                 data_uuids.append(key)
 
-                # If we have 2013-2019 data but want 2014-2015
-                # Just return all data we have for the moment
+        # If we have 2013-2019 data but want 2014-2015
+        # Just return all data we have for the moment
 
         # Daterange 1 = we want
         # Daterange 2 = data we have

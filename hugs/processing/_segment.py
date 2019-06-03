@@ -85,7 +85,6 @@ def parse_timecols(time_data):
                                                             
     return timeframe
 
-
 def parse_gases(data):
     """ Separates the gases stored in the dataframe in 
         separate dataframes and returns a dictionary of gases
@@ -101,9 +100,9 @@ def parse_gases(data):
     # Drop any rows with NaNs
     # Reset the index
     # This is now done before creating metadata
-
-    # data = data.dropna(axis=0, how="any")
-    # data.index = pd.RangeIndex(data.index.size)
+    
+    data = data.dropna(axis=0, how="any")
+    data.index = pd.RangeIndex(data.index.size)
 
     # Get the number of gases in dataframe and number of columns of data present for each gas
     n_gases, n_cols = gas_info(data=data)
@@ -118,6 +117,17 @@ def parse_gases(data):
 
     timeframe = parse_timecols(time_data=time_data)
     timeframe.index = pd.RangeIndex(timeframe.index.size)
+
+    # # How many years of data?
+    # delta = timeframe.iloc(-1) - timeframe.iloc(0)
+    # n_years = delta.dt.days
+
+    # print(n_years)
+
+    # split_date = pd.datetime(2016, 12, 20)
+    # df_training = df.loc[df['Date'] <= split_date]
+    # df_test = df.loc[df['Date'] > split_date]
+
     
     data_list = []
     for n in range(n_gases):
@@ -131,12 +141,17 @@ def parse_gases(data):
         column_names = ["count", "stdev", "n_meas"]
         column_labels = ["%s %s" % (gas_name, l) for l in column_names]
 
+        # Split into years here
+
+      
+
         # Name columns
         gas_data.set_axis(column_labels, axis='columns', inplace=True)
 
         # Drop the first two rows now we have the name
         gas_data.drop(index=gas_data.head(header_rows).index, inplace=True)
         gas_data.index = pd.RangeIndex(gas_data.index.size)
+        
         # Cast data to float64 / double
         gas_data = gas_data.astype("float64")
         # Concatenate the timeframe and the data

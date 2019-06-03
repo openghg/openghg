@@ -25,23 +25,22 @@ def keylist():
     crds.save(bucket=bucket)
 
     start = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
-    end = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
+    end = datetime.datetime.strptime("2014-01-31", "%Y-%m-%d")
 
     keys = crds.search_store(bucket=bucket, root_path="datasource", start_datetime=start, end_datetime=end)
 
     return keys
 
+# def test_get_datasources(keylist):
+#     bucket = get_local_bucket()
 
-def test_get_sections(keylist):
-    bucket = get_local_bucket()
+#     datasources = _recombination.get_sections(bucket, keylist)
 
-    datasources = _recombination.get_sections(bucket, keylist)
+#     gas_names = ["co", "co2", "ch4"]
+#     recorded_gas_names = [datasources[0]._name, datasources[1]._name, datasources[2]._name]
 
-    gas_names = ["co", "co2", "ch4"]
-    recorded_gas_names = [datasources[0]._name, datasources[1]._name, datasources[2]._name]
-
-    assert sorted(gas_names) == sorted(recorded_gas_names)
-    assert len(datasources) == 3
+#     assert sorted(gas_names) == sorted(recorded_gas_names)
+#     assert len(datasources) == 3
 
 
 def test_combine_sections():
@@ -57,6 +56,10 @@ def test_combine_sections():
 
     # Split and combine without passing through the object store
     raw_data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
+
+    # raw_data = raw_data.dropna(axis=0, how="any")
+    # raw_data.index = pd.RangeIndex(raw_data.index.size)
+
     gas_data = parse_gases(raw_data)
     dataframes = [data for _, data in gas_data]
     complete = combine_sections(dataframes)
@@ -65,8 +68,8 @@ def test_combine_sections():
     crds = CRDS.read_file(filepath)
     # Create and store data
     crds.save(bucket=bucket)
-    keylist = [d._uuid for d in crds._datasources]
-    datasources = _recombination.get_sections(bucket, keylist)
+    uuid_list = [d._uuid for d in crds._datasources]
+    datasources = _recombination.get_datasources(bucket, uuid_list)
     dataframes = [datasource._data for datasource in datasources]
     combined = _recombination.combine_sections(dataframes)
 
