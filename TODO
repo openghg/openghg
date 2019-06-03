@@ -105,3 +105,9 @@ objects themselves so they're not reliant on other objects
 Object tags vs metadata in object store
 
 
+
+2019-06-03
+
+We're testing the integrity of the dataframe after reindexing in parse_gases, is this necessary?
+
+See segment line 164

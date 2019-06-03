@@ -36,10 +36,9 @@ def test_create():
 
     crds = CRDS.read_file(filepath)
 
-    first_datetime = crds._datasources[0]._data["Datetime"][0]
+    first_datetime = crds._datasources[0]._data.first_valid_index()
 
     # TODO - check timestamp str and conversion to datetime    
-    # assert crds._uuid == mocked_uuid
     assert first_datetime == pd.Timestamp("2014-01-30 10:52:30")
 
 def test_save_and_load(crds):
@@ -49,8 +48,6 @@ def test_save_and_load(crds):
     filepath = os.path.join(dir_path, test_data, filename)
 
     crds = CRDS.read_file(filepath)
-
-    # print(crds._datasources[0])
 
     uuid_to_load = crds._uuid
 

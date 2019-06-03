@@ -55,11 +55,16 @@ class Datasource:
         d._instrument = instrument
         d._site = site
         d._network = network
-        
+
+        # DataFrame.first_valid_index()[source]
+        # last_valid_index()[source]
+
+
         if data is not None:
             d._data = data
-            d._start_datetime = _string_to_datetime(data.iloc[0]["Datetime"])
-            d._end_datetime = _string_to_datetime(data.iloc[-1]["Datetime"])
+            # Just store these as time stamps?
+            d._start_datetime = _string_to_datetime(data.first_valid_index())
+            d._end_datetime = _string_to_datetime(data.last_valid_index())
         
         return d
 

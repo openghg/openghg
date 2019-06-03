@@ -76,7 +76,7 @@ def test_combine_sections():
     assert combined.equals(complete)
 
 
-def test_convert_to_netcdf():
+def test_convert_to_netcdf(): 
     filename = "bsd.picarro.1minute.248m.dat"
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"

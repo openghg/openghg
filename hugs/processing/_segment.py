@@ -2,13 +2,6 @@
 
 """
 import pandas as pd
-import uuid
-import datetime
-import urllib.parse
-import datetime
-
-from processing import _metadata as meta
-
 
 def get_datasources(raw_data):
     """ Create a Datasource for each gas in the file
@@ -69,6 +62,9 @@ def parse_timecols(time_data):
             timeframe (Pandas.Dataframe): Dataframe containing datetimes set to UTC
     """
     import datetime as _datetime
+    from pandas import DataFrame as _DataFrame
+    from pandas import to_datetime as _to_datetime
+    
     from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
     from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
@@ -78,10 +74,10 @@ def parse_timecols(time_data):
     time_gen = (t_calc(row,col) for row,col in time_data.itertuples(index=False))
     time_list = list(time_gen)
 
-    timeframe = pd.DataFrame(data=time_list, columns=["Datetime"])
+    timeframe = _DataFrame(data=time_list, columns=["Datetime"])
 
     # Check how these data work when read back out
-    timeframe["Datetime"] = pd.to_datetime(timeframe["Datetime"])
+    timeframe["Datetime"] = _to_datetime(timeframe["Datetime"])
                                                             
     return timeframe
 
@@ -94,15 +90,18 @@ def parse_gases(data):
         Args:
             data (Pandas.Dataframe): Dataframe containing all data
         Returns:
-            list: List of separate Pandas.Dataframes starting with the time dataframe
+            list (tuple): List of tuples containing the name of the gas and a second element
+            containing a list of sections of the gas dataframe split into sections based on datetime
 
     """
+    from pandas import RangeIndex as _RangeIndex
+    from pandas import concat as _concat
     # Drop any rows with NaNs
     # Reset the index
     # This is now done before creating metadata
-    
+
     data = data.dropna(axis=0, how="any")
-    data.index = pd.RangeIndex(data.index.size)
+    data.index = _RangeIndex(data.index.size)
 
     # Get the number of gases in dataframe and number of columns of data present for each gas
     n_gases, n_cols = gas_info(data=data)
@@ -116,11 +115,20 @@ def parse_gases(data):
     time_data = data.iloc[2:, 0:time_cols]
 
     timeframe = parse_timecols(time_data=time_data)
-    timeframe.index = pd.RangeIndex(timeframe.index.size)
+    timeframe.index = _RangeIndex(timeframe.index.size)
 
-    # # How many years of data?
-    # delta = timeframe.iloc(-1) - timeframe.iloc(0)
-    # n_years = delta.dt.days
+    # timeframe = timeframe.set_index("Datetime")
+    # timeframe.drop("Datetime", axis=1, inplace=True)
+
+    # print(timeframe)
+
+    # Here change the index to be DatetimeIndex for use of
+    #  groupby etc
+    # df.groupby(pd.Grouper(freq='M'))
+
+    # # # How many years of data?
+    # delta = timeframe.iloc[-1,0] - timeframe.iloc[0,0]
+    # n_years = delta.days
 
     # print(n_years)
 
@@ -135,29 +143,34 @@ def parse_gases(data):
         gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
         
         # Reset the column numbers
-        gas_data.columns = pd.RangeIndex(gas_data.columns.size)
+        gas_data.columns = _RangeIndex(gas_data.columns.size)
         gas_name = gas_data[0][0]
 
         column_names = ["count", "stdev", "n_meas"]
         column_labels = ["%s %s" % (gas_name, l) for l in column_names]
 
         # Split into years here
-
-      
-
         # Name columns
         gas_data.set_axis(column_labels, axis='columns', inplace=True)
 
         # Drop the first two rows now we have the name
         gas_data.drop(index=gas_data.head(header_rows).index, inplace=True)
-        gas_data.index = pd.RangeIndex(gas_data.index.size)
+        gas_data.index = _RangeIndex(gas_data.index.size)
         
         # Cast data to float64 / double
         gas_data = gas_data.astype("float64")
         # Concatenate the timeframe and the data
-        gas_data = pd.concat([timeframe, gas_data], axis=1)
+        gas_data = _concat([timeframe, gas_data], axis="columns")
 
-        data_list.append((gas_name, gas_data))
+        # TODO - Verify integrity here? Test at some point
+        gas_data.set_index('Datetime', drop=True, inplace=True, verify_integrity=True)
+        
+        # Split into sections by year
+        group = gas_data.groupby(pd.Grouper(freq='Y'))
+        split_frames = [g for _, g in group]
+
+        # data_list.append((gas_name, gas_data))
+        data_list.append((gas_name, split_frames))
 
     return data_list
 
