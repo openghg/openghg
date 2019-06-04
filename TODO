@@ -111,3 +111,11 @@ Object tags vs metadata in object store
 We're testing the integrity of the dataframe after reindexing in parse_gases, is this necessary?
 
 See segment line 164
+
+
+2019-06-04
+
+Redo conversion to NetCDF test - error
+Column names are different, check what it's testing for within the Pandas code
+
+ValueError: cannot convert DataFrame with non-unique columns
