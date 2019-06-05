@@ -93,7 +93,7 @@ def get_objects(bucket, root_path, datetime_begin, datetime_end):
     """
     from Acquire.ObjectStore import ObjectStore as _ObjectStore
     from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
-    from objectstore.hugs_objstore import get_dataframe as _get_dataframe
+    from objectstore._hugs_objstore import get_dataframe as _get_dataframe
     from pandas import date_range as _pd_daterange
 
     datetime_begin = _datetime_to_datetime(datetime_begin)

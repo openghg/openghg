@@ -12,7 +12,7 @@ def get_datasources(bucket, uuid_list):
             list: List of Datasource objects
     """
     from modules._datasource import Datasource
-    from objectstore.hugs_objstore import get_object as _get_object_json
+    from objectstore._hugs_objstore import get_object as _get_object_json
 
     return [Datasource.load(bucket=bucket, uuid=uid) for uid in uuid_list]
 

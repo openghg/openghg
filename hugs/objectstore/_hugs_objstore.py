@@ -281,7 +281,7 @@ def get_bucket():
         Returns:
             dict: Bucket
     """
-    from objectstore.local_bucket import get_local_bucket
+    from objectstore._local_bucket import get_local_bucket
 
     return get_local_bucket()
 

@@ -116,7 +116,7 @@ class CRDS:
         """
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
         from modules._datasource import Datasource
-        from objectstore.hugs_objstore import get_bucket as _get_bucket
+        from objectstore._hugs_objstore import get_bucket as _get_bucket
 
         if data is None or len(data) == 0:
             return CRDS()
@@ -154,7 +154,7 @@ class CRDS:
 
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from objectstore.hugs_objstore import get_bucket as _get_bucket
+        from objectstore._hugs_objstore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -179,7 +179,7 @@ class CRDS:
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from modules._datasource import Datasource
-        from objectstore.hugs_objstore import get_bucket as _get_bucket
+        from objectstore._hugs_objstore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -245,8 +245,8 @@ class CRDS:
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
-        from objectstore.hugs_objstore import get_dataframe as _get_dataframe
-        from objectstore.hugs_objstore import get_object_names as _get_object_names
+        from objectstore._hugs_objstore import get_dataframe as _get_dataframe
+        from objectstore._hugs_objstore import get_object_names as _get_object_names
         from pandas import date_range as _pd_daterange
 
         start_datetime = _datetime_to_datetime(start_datetime)

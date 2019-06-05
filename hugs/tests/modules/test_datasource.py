@@ -8,12 +8,14 @@ import pandas as pd
 from Acquire.ObjectStore import ObjectStore
 from Acquire.ObjectStore import string_to_encoded
 
-from objectstore.hugs_objstore import get_dated_object
-from objectstore.hugs_objstore import get_dated_object_json
+# from objectstore._hugs_objstore
+
+from objectstore._hugs_objstore import get_dated_object
+from objectstore._hugs_objstore import get_dated_object_json
 
 from modules._datasource import Datasource
 from processing._metadata import Metadata
-from objectstore import local_bucket
+from objectstore import _local_bucket as local_bucket
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 
@@ -130,7 +132,7 @@ def test_save_with_data(mock_uuid, data):
         
 #     new_datasources = [Datasource.load(bucket=bucket, uuid=i) for i in datasource_uuids]
 
-#     from objectstore.hugs_objstore import get_dated_object
+#     from objectstore._hugs_objstore import get_dated_object
 #     dataframes = []
 #     # for u in datasource_uuids:
 #     #     key = "%s/uuid/%s" % (Datasource._data_root, u)

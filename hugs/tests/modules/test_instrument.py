@@ -6,7 +6,7 @@ from Acquire.ObjectStore import ObjectStore
 from Acquire.ObjectStore import string_to_encoded
 
 from modules._instrument import Instrument
-from objectstore import local_bucket
+from objectstore import _local_bucket as local_bucket
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 

@@ -143,7 +143,7 @@ class Datasource:
                 Pandas.Dataframe: Dataframe from stored HDF file
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from objectstore.hugs_objstore import get_dated_object as _get_dated_object
+        from objectstore._hugs_objstore import get_dated_object as _get_dated_object
 
         # data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
 
@@ -245,7 +245,7 @@ class Datasource:
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        from objectstore.hugs_objstore import get_bucket as _get_bucket
+        from objectstore._hugs_objstore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -283,8 +283,8 @@ class Datasource:
                 Datasource: Datasource object created from JSON
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from objectstore.hugs_objstore import get_dated_object as _get_dated_object
-        from objectstore.hugs_objstore import get_object_json as _get_object_json
+        from objectstore._hugs_objstore import get_dated_object as _get_dated_object
+        from objectstore._hugs_objstore import get_object_json as _get_object_json
 
         if uuid is None and name is None:
             raise ValueError("Both uuid and name cannot be None")
@@ -312,7 +312,7 @@ class Datasource:
                 str: UUID for the Datasource
         """
         # from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from objectstore.hugs_objstore import get_dated_object_json as _get_dated_object_json
+        from objectstore._hugs_objstore import get_dated_object_json as _get_dated_object_json
 
         key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
 

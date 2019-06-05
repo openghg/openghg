@@ -4,8 +4,8 @@ import pandas as pd
 import pytest
 import xarray
 
-from objectstore.local_bucket import get_local_bucket
-from processing._crds import CRDS
+from objectstore._local_bucket import get_local_bucket
+from modules._crds import CRDS
 from processing import _recombination
 
 from processing._segment import parse_gases
@@ -45,7 +45,7 @@ def keylist():
 
 def test_combine_sections():
     from modules._datasource import Datasource
-    from objectstore.hugs_objstore import get_object
+    from objectstore._hugs_objstore import get_object
     
     bucket = get_local_bucket()
 
