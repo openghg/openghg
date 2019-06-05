@@ -143,12 +143,13 @@ def parse_gases(data):
         # Concatenate the timeframe and the data
         gas_data = _concat([timeframe, gas_data], axis="columns")
 
-        # TODO - Verify integrity here? Test at some point
+        # TODO - Verify integrity here? Test if this is required
         gas_data.set_index('Datetime', drop=True, inplace=True, verify_integrity=True)
         
         # Split into sections by year
         group = gas_data.groupby(pd.Grouper(freq='Y'))
-        split_frames = [g for _, g in group]
+        # As some months may be empty we don't want those dataframes
+        split_frames = [g for _, g in group if len(g) > 0]
 
         # data_list.append((gas_name, gas_data))
         data_list.append((gas_name, split_frames))

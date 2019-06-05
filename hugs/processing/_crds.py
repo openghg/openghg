@@ -90,7 +90,6 @@ class CRDS:
         return c
 
     
-
     def to_data(self):
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
@@ -296,16 +295,6 @@ class CRDS:
         for key in keys:
             if self.in_daterange(key, start_datetime, end_datetime):
                 data_uuids.append(key)
-
-        # If we have 2013-2019 data but want 2014-2015
-        # Just return all data we have for the moment
-
-        # Daterange 1 = we want
-        # Daterange 2 = data we have
-        # No segmentation  - data we have and data we want will be the same
-        # Segmentation - check if the data in this key is for dates within this range   
-        # Need to have a fn or Pandas 'in daterange' for checking inclusion in daterange
-
         return data_uuids
 
         # # TODO - Tidy me
