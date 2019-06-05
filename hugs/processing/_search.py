@@ -121,7 +121,7 @@ def get_objects(bucket, root_path, datetime_begin, datetime_end):
         date_string = date.strftime(resolution)
         prefix = "%s/%s/%s" % (path, uuid, date_string)
 
-        datakeys = 
+        # datakeys = 
 
 
 

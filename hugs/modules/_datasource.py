@@ -245,7 +245,9 @@ class Datasource:
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        from objectstore._hugs_objstore import get_bucket as _get_bucket
+        # from objectstore._hugs_objstore import get_bucket as _get_bucket
+
+        # from hugs.objectstore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
