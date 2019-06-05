@@ -1,7 +1,7 @@
 """ Segment the data into Datasources
 
 """
-import pandas as pd
+# import pandas as pd
 
 def get_datasources(raw_data):
     """ Create a Datasource for each gas in the file
@@ -11,7 +11,7 @@ def get_datasources(raw_data):
         Returns:
             list: List of Datasources
     """
-    from modules._datasource import Datasource
+    from modules import Datasource
     
     # This can save the parent instrument as a name,UUID tuple within the object
     # Look up the parent instrument by name and find its UUID. If it doesn't exist, create it?
@@ -81,6 +81,7 @@ def parse_timecols(time_data):
                                                             
     return timeframe
 
+
 def parse_gases(data):
     """ Separates the gases stored in the dataframe in 
         separate dataframes and returns a dictionary of gases
@@ -96,11 +97,11 @@ def parse_gases(data):
     """
     from pandas import RangeIndex as _RangeIndex
     from pandas import concat as _concat
+    from pandas import Grouper as _Grouper
     
     # Drop any rows with NaNs
     # Reset the index
     # This is now done before creating metadata
-
     data = data.dropna(axis=0, how="any")
     data.index = _RangeIndex(data.index.size)
 
@@ -146,8 +147,8 @@ def parse_gases(data):
         # TODO - Verify integrity here? Test if this is required
         gas_data.set_index('Datetime', drop=True, inplace=True, verify_integrity=True)
         
-        # Split into sections by year
-        group = gas_data.groupby(pd.Grouper(freq='Y'))
+        # Split into sections by year  
+        group = gas_data.groupby(_Grouper(freq='Y'))
         # As some months may be empty we don't want those dataframes
         split_frames = [g for _, g in group if len(g) > 0]
 
