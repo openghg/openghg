@@ -1,4 +1,5 @@
 import datetime
+import numpy as np
 import os
 import pytest
 import pandas as pd
@@ -6,6 +7,7 @@ import uuid
 
 from processing import _segment as segment
 from processing import _metadata as meta
+
 
 # from processing._segment import 
 
@@ -16,7 +18,7 @@ def data():
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
-
+  
     return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
 
 # @pytest.fixture()
@@ -28,6 +30,17 @@ def data():
 
 #     return segment.parse_file(filepath=filepath)
     
+
+def test_get_split_frequency():
+
+    long_time = pd.date_range("2010-01-01", "2019-01-01", freq="min")
+
+    # Crates a ~ 1 GB dataframe
+    df = pd.DataFrame(np.random.randint(0, 100, size=(len(long_time), 32)), index=long_time)
+
+    split = segment.get_split_frequency(df)
+
+    assert split == "W"
 
 def test_get_datasources(data):
     datasources = segment.get_datasources(data)

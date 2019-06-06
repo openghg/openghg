@@ -25,52 +25,48 @@ def get_datasources(raw_data):
 
     return datasources
 
-def set_split_frequency(data):
+
+def get_split_frequency(data):
     """ Analyses raw data for size and sets a frequency to split the data
         depending on how big the resulting dataframe will be
 
         Args:
             data (Pandas.Dataframe): Raw data in dataframe
         Returns:
-            bool or str: Returns false if the data doesn't need to be split otherwise
-            returns a string selecting frequency for data splitting by
+            str: String selecting frequency for data splitting by
             Groupby
-
     """
+
     data_size = data.memory_usage(deep=True).sum()
-    
     # If the data is larger than this it will be split into
     # separate parts
     # For now use 5 MB chunks
     segment_size = 5_242_880  # bytes
-    
-    freq = "Y"
-
-    # No need to split
-    if data_size < segment_size:
-        return False
     
     # Get time delta for the first and last date
     start_data = data.first_valid_index()
     end_data = data.last_valid_index()
 
     num_years = int((end_data - start_data).days / 365.25)
+    if num_years < 1:
+        num_years = 1
 
     n_months = 12
     n_weeks = 52
     n_days = 365
     n_hours = 24
 
+    freq = "Y"
     # Try splitting into years
     if data_size / num_years <= segment_size:
         return freq
-    elif datasize / (num_years * n_months) <= segment_size:
+    elif data_size / (num_years * n_months) <= segment_size:
         freq = "M"
         return freq
-    elif datasize / (num_years * n_months * n_weeks) <= segment_size:
+    elif data_size / (num_years * n_months * n_weeks) <= segment_size:
         freq = "W"
         return freq
-    elif datasize / (num_years * n_months * n_weeks * n_days) <= segment_size:
+    elif data_size / (num_years * n_months * n_weeks * n_days) <= segment_size:
         freq = "D"
         return freq
     elif data_size / (num_years * n_months * n_weeks * n_days * n_hours) <= segment_size:
@@ -144,8 +140,9 @@ def parse_gases(data):
         gas_data.set_index('Datetime', drop=True,
                            inplace=True, verify_integrity=True)
 
+        freq = get_split_frequency(gas_data)
         # Split into sections by year
-        group = gas_data.groupby(_Grouper(freq='Y'))
+        group = gas_data.groupby(_Grouper(freq=freq))
         # As some months may be empty we don't want those dataframes
         split_frames = [g for _, g in group if len(g) > 0]
 
