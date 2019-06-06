@@ -102,6 +102,30 @@ class Datasource:
         """
         return self._site()
 
+    def add_data(self, data):
+        """ Add data to this Datasource, data will be keyed independently with
+            the daterange it covers part of its key
+
+            Args:
+                data (Pandas.DataFrame): Data
+            Returns:
+                None
+        """
+        self._data.append(data)
+
+    @staticmethod
+    def exists(some_id):
+        """ Uses an ID of some kind to query whether or not this is a new
+            Datasource and should be created
+
+            WIP
+
+            TODO - update this when I have a clearer ID of how to ID datasources
+
+            Args:
+                some_id: 
+        """
+
     def to_data(self, store=False, bucket=None):
         """ Return a JSON-serialisable dictionary of object
             for storage in object store

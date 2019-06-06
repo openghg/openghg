@@ -42,7 +42,7 @@ def get_split_frequency(data):
     # separate parts
     # For now use 5 MB chunks
     segment_size = 5_242_880  # bytes
-    
+
     # Get time delta for the first and last date
     start_data = data.first_valid_index()
     end_data = data.last_valid_index()
@@ -137,8 +137,7 @@ def parse_gases(data):
         gas_data = _concat([timeframe, gas_data], axis="columns")
 
         # TODO - Verify integrity here? Test if this is required
-        gas_data.set_index('Datetime', drop=True,
-                           inplace=True, verify_integrity=True)
+        gas_data.set_index('Datetime', drop=True, inplace=True, verify_integrity=True)
 
         freq = get_split_frequency(gas_data)
         # Split into sections by year
