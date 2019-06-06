@@ -25,61 +25,57 @@ def get_datasources(raw_data):
 
     return datasources
 
-
-def calc_time_delta(start, end):
-    """ Calculates the time delta between the first and last
-        reading
-
-        Unsure if this is needed
-    
-        Args:
-            start (datetime): First measurement
-            end (datetime): Last measurement
-        Returns:
-            timedelta: Timedelta            
-    """
-    return False
-
-# def save_timeframe(data, sup_cols):
-#     """ Creates a Pandas.Dataframe of the time and supplementary
-#         columns
-
-#         Returns:
-#             Pandas.Dataframe: Time and supplementary data
-
-#     """
-#     return data.iloc[:, 0:sup_cols]
-
-
-def parse_timecols(time_data):
-    """ Takes a dataframe that contains the date and time 
-        and creates a single columned dataframe containing a 
-        UTC datetime
+def set_split_frequency(data):
+    """ Analyses raw data for size and sets a frequency to split the data
+        depending on how big the resulting dataframe will be
 
         Args:
-            time_data (Pandas.Dataframe): Dataframe containing
+            data (Pandas.Dataframe): Raw data in dataframe
         Returns:
-            timeframe (Pandas.Dataframe): Dataframe containing datetimes set to UTC
+            bool or str: Returns false if the data doesn't need to be split otherwise
+            returns a string selecting frequency for data splitting by
+            Groupby
+
     """
-    import datetime as _datetime
-    from pandas import DataFrame as _DataFrame
-    from pandas import to_datetime as _to_datetime
+    data_size = data.memory_usage(deep=True).sum()
     
-    from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
-    from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+    # If the data is larger than this it will be split into
+    # separate parts
+    # For now use 5 MB chunks
+    segment_size = 5_242_880  # bytes
+    
+    freq = "Y"
 
-    def t_calc(row, col): return _datetime_to_string(_datetime_to_datetime(
-                            _datetime.datetime.strptime(row+col, "%y%m%d%H%M%S")))
+    # No need to split
+    if data_size < segment_size:
+        return False
+    
+    # Get time delta for the first and last date
+    start_data = data.first_valid_index()
+    end_data = data.last_valid_index()
 
-    time_gen = (t_calc(row,col) for row,col in time_data.itertuples(index=False))
-    time_list = list(time_gen)
+    num_years = int((end_data - start_data).days / 365.25)
 
-    timeframe = _DataFrame(data=time_list, columns=["Datetime"])
+    n_months = 12
+    n_weeks = 52
+    n_days = 365
+    n_hours = 24
 
-    # Check how these data work when read back out
-    timeframe["Datetime"] = _to_datetime(timeframe["Datetime"])
-                                                            
-    return timeframe
+    # Try splitting into years
+    if data_size / num_years <= segment_size:
+        return freq
+    elif datasize / (num_years * n_months) <= segment_size:
+        freq = "M"
+        return freq
+    elif datasize / (num_years * n_months * n_weeks) <= segment_size:
+        freq = "W"
+        return freq
+    elif datasize / (num_years * n_months * n_weeks * n_days) <= segment_size:
+        freq = "D"
+        return freq
+    elif data_size / (num_years * n_months * n_weeks * n_days * n_hours) <= segment_size:
+        freq = "H"
+        return freq
 
 
 def parse_gases(data):
@@ -98,7 +94,7 @@ def parse_gases(data):
     from pandas import RangeIndex as _RangeIndex
     from pandas import concat as _concat
     from pandas import Grouper as _Grouper
-    
+
     # Drop any rows with NaNs
     # Reset the index
     # This is now done before creating metadata
@@ -110,7 +106,7 @@ def parse_gases(data):
 
     header = data.head(2)
     skip_cols = sum([header[column][0] == "-" for column in header.columns])
-    
+
     time_cols = 2
     header_rows = 2
     # Dataframe containing the time data for this data input
@@ -123,7 +119,7 @@ def parse_gases(data):
     for n in range(n_gases):
         # Slice the columns
         gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
-        
+
         # Reset the column numbers
         gas_data.columns = _RangeIndex(gas_data.columns.size)
         gas_name = gas_data[0][0]
@@ -138,16 +134,17 @@ def parse_gases(data):
         # Drop the first two rows now we have the name
         gas_data.drop(index=gas_data.head(header_rows).index, inplace=True)
         gas_data.index = _RangeIndex(gas_data.index.size)
-        
+
         # Cast data to float64 / double
         gas_data = gas_data.astype("float64")
         # Concatenate the timeframe and the data
         gas_data = _concat([timeframe, gas_data], axis="columns")
 
         # TODO - Verify integrity here? Test if this is required
-        gas_data.set_index('Datetime', drop=True, inplace=True, verify_integrity=True)
-        
-        # Split into sections by year  
+        gas_data.set_index('Datetime', drop=True,
+                           inplace=True, verify_integrity=True)
+
+        # Split into sections by year
         group = gas_data.groupby(_Grouper(freq='Y'))
         # As some months may be empty we don't want those dataframes
         split_frames = [g for _, g in group if len(g) > 0]
@@ -156,6 +153,38 @@ def parse_gases(data):
         data_list.append((gas_name, split_frames))
 
     return data_list
+
+
+def parse_timecols(time_data):
+    """ Takes a dataframe that contains the date and time 
+        and creates a single columned dataframe containing a 
+        UTC datetime
+
+        Args:
+            time_data (Pandas.Dataframe): Dataframe containing
+        Returns:
+            timeframe (Pandas.Dataframe): Dataframe containing datetimes set to UTC
+    """
+    import datetime as _datetime
+    from pandas import DataFrame as _DataFrame
+    from pandas import to_datetime as _to_datetime
+
+    from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+    from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+
+    def t_calc(row, col): return _datetime_to_string(_datetime_to_datetime(
+        _datetime.datetime.strptime(row+col, "%y%m%d%H%M%S")))
+
+    time_gen = (t_calc(row, col)
+                for row, col in time_data.itertuples(index=False))
+    time_list = list(time_gen)
+
+    timeframe = _DataFrame(data=time_list, columns=["Datetime"])
+
+    # Check how these data work when read back out
+    timeframe["Datetime"] = _to_datetime(timeframe["Datetime"])
+
+    return timeframe
 
 
 def gas_info(data):
@@ -172,7 +201,7 @@ def gas_info(data):
         head_row = data.head(1)
 
         gases = {}
-        
+
         # Loop over the gases and find each unique value
         for column in head_row.columns:
             s = head_row[column][0]
@@ -181,7 +210,8 @@ def gas_info(data):
 
         # Check that we have the same number of columns for each gas
         if not unanimous(gases):
-            raise ValueError("Each gas does not have the same number of columns")
+            raise ValueError(
+                "Each gas does not have the same number of columns")
 
         return len(gases), list(gases.values())[0]
 
