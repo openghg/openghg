@@ -190,28 +190,6 @@ class CRDS:
 
         return CRDS.from_data(data=data, bucket=bucket)
 
-    def key_to_daterange(self, key):
-        """ Takes a dated key and returns two datetimes for the start and 
-            end datetimes for the data
-
-            Args:
-                key (str): Key for data in the object store
-            Returns:
-                tuple (datetime, datetime): Datetimes for start and end of data
-
-        """
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
-
-        end_key = key.split("/")[-1]
-        dates = end_key.split("_")
-
-        if len(dates) > 2:
-            raise ValueError("Invalid date string")
-
-        start = _string_to_datetime(dates[0])
-        end = _string_to_datetime(dates[1])
-
-        return start, end
 
     @staticmethod
     def to_datetime(date_string):
@@ -229,119 +207,7 @@ class CRDS:
         import datetime as _datetime
         return _datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
 
-    def search_store(self, bucket, root_path, start_datetime, end_datetime):
-        """ Get all values stored in the object store
-
-            Args:  
-                bucket (dict): Bucket holding data
-                root_path (str): Select from the enum RootPaths
-                For DataSources: datasource
-                For Instruments: instrument etc
-                datetime_begin (datetime): Start of datetime range
-                datetime_end (datetime): End of datetime range
-            Returns:
-                list: A list of keys for the found data
-
-        """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
-        from objectstore._hugs_objstore import get_dataframe as _get_dataframe
-        from objectstore._hugs_objstore import get_object_names as _get_object_names
-        from pandas import date_range as _pd_daterange
-
-        start_datetime = _datetime_to_datetime(start_datetime)
-        end_datetime = _datetime_to_datetime(end_datetime)
-
-        # Something like this?
-        # freq = "YS"
-        # resolution = "%Y"
-        # if start_datetime.month != 0 and end_datetime.month != 0:
-        #     resolution += "%m"
-        #     freq = "MS"
-        # if start_datetime.day != 0 and end_datetime.day != 0:
-        #     resolution += "%d"
-        #     freq = "D"
-        # if start_datetime.hour != 0 and end_datetime.hour != 0:
-        #     resolution += "%h"
-        #     freq = "H"
-
-        # At the moment just have years
-        # daterange = _pd_daterange(start=start_datetime, end=end_datetime, freq="Y")
-
-        # path = RootPaths[root_path.upper()]
-        
-        # TODO - Change this to work with enums?
-        path = "data"
-
-        # Get the UUIDs for the data
-        data_uuids = [d._uuid for d in self._datasources]
-
-        # If we know the UUIDs we have read the dateranges from the metadata stored
-        # and return the data
-        # This will have to be changed again when the dataframes are split up
-
-        # Where to look
-        keys = []
-        for uuid in data_uuids:
-            prefix = "%s/uuid/%s" % ("data", uuid)
-            # Get the keys that start with this and read the daterange from the returned value
-            keys.extend(_get_object_names(bucket=bucket, prefix=prefix))
-
-        # The data to get
-        # TODO - once segmentation by date is functional this
-        # can be extended to include the dateranges properly
-        data_uuids = []
-        # Get the daterange
-        for key in keys:
-            if self.in_daterange(key, start_datetime, end_datetime):
-                data_uuids.append(key)
-        return data_uuids
-
-        # # TODO - Tidy me
-        # uuids = []
-        # for uuid in data_uuids:
-        #     for date in daterange:
-        #         date_string = date.strftime(resolution)
-        #         # Prefix with the year
-        #         prefix = "%s/uuid/%s/%s" % (path, uuid, date_string)
-
-        #         print(prefix)
-
-        #         datakeys = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
-
-        #         # For now just get all the data
-
-
-        #         # If the start date and end date are within the daterange of the
-        #         # data in the object store then return the data's UUID
-
-        #         # If looking for 2013-2015
-
-        #         for key in datakeys:
-        #             _, end = self.key_to_daterange(key)
-
-        #             if end.year <= date.year:
-        #                 uuids.append(uuid)
-
-        # return uuids
-
-    def in_daterange(self, key, start_search, end_search):
-        """ Does this key contain data in the daterange we want?
-
-            Args:
-                key (str): Key for data
-                daterange (tuple (datetime, datetime)): Daterange as start and end datetime objects
-            Return:
-                bool: True if key within daterange
-        """
-        start_key, end_key = self.key_to_daterange(key)
-
-        if start_key >= start_search and end_key <= end_search:
-            return True
-        else:
-            return False
-
-
+    
     def get_daterange(self):
         """ Returns the daterange of the data in this object
 

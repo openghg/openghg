@@ -30,7 +30,7 @@ def data():
 
 #     return segment.parse_file(filepath=filepath)
     
-
+@pytest.mark.slow
 def test_get_split_frequency_large():
 
     date_range = pd.date_range("2010-01-01", "2019-01-01", freq="min")
@@ -50,7 +50,6 @@ def test_get_split_frequency_small():
 
     split = segment.get_split_frequency(df)
     assert split == "Y"
-
 
 
 def test_get_datasources(data):

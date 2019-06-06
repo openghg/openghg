@@ -4,8 +4,8 @@
 """
 from enum import Enum as _Enum
 
-__all__ = ["string_to_daterange", "daterange_to_string",
-           "parse_date_time", "get_objects"]
+# __all__ = ["string_to_daterange", "daterange_to_string",
+#            "parse_date_time", "get_objects"]
 
 class RootPaths(_Enum):
     DATA = "data"
@@ -13,6 +13,118 @@ class RootPaths(_Enum):
     INSTRUMENT = "instrument"
     SITE = "site"
     NETWORK = "network"
+
+
+def search_store(bucket, data_uuids, root_path, start_datetime, end_datetime):
+        """ Get all values stored in the object store
+
+            Args:
+                bucket (dict): Bucket holding data
+                data_uuids (list): List of UUIDs to search
+                root_path (str): Select from the enum RootPaths
+                For DataSources: datasource
+                For Instruments: instrument etc
+                datetime_begin (datetime): Start of datetime range
+                datetime_end (datetime): End of datetime range
+            Returns:
+                list: A list of keys for the found data
+
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+        from objectstore._hugs_objstore import get_dataframe as _get_dataframe
+        from objectstore._hugs_objstore import get_object_names as _get_object_names
+        from pandas import date_range as _pd_daterange
+
+        start_datetime = _datetime_to_datetime(start_datetime)
+        end_datetime = _datetime_to_datetime(end_datetime)
+
+        # Something like this?
+        # freq = "YS"
+        # resolution = "%Y"
+        # if start_datetime.month != 0 and end_datetime.month != 0:
+        #     resolution += "%m"
+        #     freq = "MS"
+        # if start_datetime.day != 0 and end_datetime.day != 0:
+        #     resolution += "%d"
+        #     freq = "D"
+        # if start_datetime.hour != 0 and end_datetime.hour != 0:
+        #     resolution += "%h"
+        #     freq = "H"
+
+        # At the moment just have years
+        # daterange = _pd_daterange(start=start_datetime, end=end_datetime, freq="Y")
+
+        # path = RootPaths[root_path.upper()]
+
+        # TODO - Change this to work with enums?
+        path = "data"
+
+        # Get the UUIDs for the data
+        # data_uuids = [d._uuid for d in self._datasources]
+
+        # If we know the UUIDs we have read the dateranges from the metadata stored
+        # and return the data
+        # This will have to be changed again when the dataframes are split up
+
+        # Where to look
+        keys = []
+        for uuid in data_uuids:
+            prefix = "%s/uuid/%s" % ("data", uuid)
+            # Get the keys that start with this and read the daterange from the returned value
+            keys.extend(_get_object_names(bucket=bucket, prefix=prefix))
+
+        # The data to get
+        # TODO - once segmentation by date is functional this
+        # can be extended to include the dateranges properly
+        data_uuids = []
+        # Get the daterange
+        for key in keys:
+            if in_daterange(key, start_datetime, end_datetime):
+                data_uuids.append(key)
+        return data_uuids
+
+
+def in_daterange(key, start_search, end_search):
+    """ Does this key contain data in the daterange we want?
+
+        Args:
+            key (str): Key for data
+            daterange (tuple (datetime, datetime)): Daterange as start and end datetime objects
+        Return:
+            bool: True if key within daterange
+    """
+    start_key, end_key = key_to_daterange(key)
+
+    if start_key >= start_search and end_key <= end_search:
+        return True
+    else:
+        return False
+
+
+def key_to_daterange(key):
+    """ Takes a dated key and returns two datetimes for the start and 
+        end datetimes for the data
+
+        Args:
+            key (str): Key for data in the object store
+        Returns:
+            tuple (datetime, datetime): Datetimes for start and end of data
+
+    """
+    from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+
+    end_key = key.split("/")[-1]
+    dates = end_key.split("_")
+
+    if len(dates) > 2:
+        raise ValueError("Invalid date string")
+
+    start = _string_to_datetime(dates[0])
+    end = _string_to_datetime(dates[1])
+
+    return start, end
+
 
 def string_to_daterange(s):
     """ Converts a daterange string from the type used with the
@@ -77,71 +189,71 @@ def parse_date_time(date, time):
     return _datetime.datetime.strptime(combined, "%y%m%d%H%M%S")
 
 
-def get_objects(bucket, root_path, datetime_begin, datetime_end):
-    """ Get all values stored in the object store
+# def get_objects(bucket, root_path, datetime_begin, datetime_end):
+#     """ Get all values stored in the object store
 
-        Args:  
-            bucket (dict): Bucket holding data
-            root_path (str): Select from the enum RootPaths
-            For DataSources: datasource
-            For Instruments: instrument etc
-            datetime_begin (datetime): Start of datetime range
-            datetime_end (datetime): End of datetime range
-        Returns:
-            list: A list of Pandas.Dataframes
+#         Args:  
+#             bucket (dict): Bucket holding data
+#             root_path (str): Select from the enum RootPaths
+#             For DataSources: datasource
+#             For Instruments: instrument etc
+#             datetime_begin (datetime): Start of datetime range
+#             datetime_end (datetime): End of datetime range
+#         Returns:
+#             list: A list of Pandas.Dataframes
 
-    """
-    from Acquire.ObjectStore import ObjectStore as _ObjectStore
-    from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
-    from objectstore._hugs_objstore import get_dataframe as _get_dataframe
-    from pandas import date_range as _pd_daterange
+#     """
+#     from Acquire.ObjectStore import ObjectStore as _ObjectStore
+#     from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+#     from objectstore._hugs_objstore import get_dataframe as _get_dataframe
+#     from pandas import date_range as _pd_daterange
 
-    datetime_begin = _datetime_to_datetime(datetime_begin)
-    datetime_end = _datetime_to_datetime(datetime_end)
+#     datetime_begin = _datetime_to_datetime(datetime_begin)
+#     datetime_end = _datetime_to_datetime(datetime_end)
 
-    daterange = _pd_daterange(datetime_begin, datetime_end)
+#     daterange = _pd_daterange(datetime_begin, datetime_end)
 
-    freq = "YS"
-    resolution = "%Y"
-    if start_datetime.month != 0 and end_datetime.month != 0:
-        resolution += "%m"
-        freq = "MS"
-    if start_datetime.day != 0 and end_datetime.day != 0:
-        resolution += "%d"
-        freq = "D"
-    if start_datetime.hour != 0 and end_datetime.hour != 0:
-        resolution += "%h"
-        freq = "H"
+#     freq = "YS"
+#     resolution = "%Y"
+#     if start_datetime.month != 0 and end_datetime.month != 0:
+#         resolution += "%m"
+#         freq = "MS"
+#     if start_datetime.day != 0 and end_datetime.day != 0:
+#         resolution += "%d"
+#         freq = "D"
+#     if start_datetime.hour != 0 and end_datetime.hour != 0:
+#         resolution += "%h"
+#         freq = "H"
 
-    keys = []
+#     keys = []
 
-    path = RootPaths[root_path.upper()]
+#     path = RootPaths[root_path.upper()]
 
-    for date in daterange:
-        date_string = date.strftime(resolution)
-        prefix = "%s/%s/%s" % (path, uuid, date_string)
+#     for date in daterange:
+#         date_string = date.strftime(resolution)
+#         prefix = "%s/%s/%s" % (path, uuid, date_string)
 
-        # datakeys = 
+#         # datakeys = 
 
 
 
-    # Find the keys that are valid
-    for year in range(year_begin, year_end+1):
-        prefix = "%s/%s/%s" % (path, self._uuid, year)
+#     # Find the keys that are valid
+#     for year in range(year_begin, year_end+1):
+#         prefix = "%s/%s/%s" % (path, self._uuid, year)
 
-        datakeys = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
+#         datakeys = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
 
-        # Check the end date of the data
-        for datakey in datakeys:
-            _, end = string_to_daterange(datakey.split("_")[-1])
+#         # Check the end date of the data
+#         for datakey in datakeys:
+#             _, end = string_to_daterange(datakey.split("_")[-1])
 
-            if end.year < year_end:
-                keys.append(datakey)
+#             if end.year < year_end:
+#                 keys.append(datakey)
 
-    # List to store dataframes
-    values = []
+#     # List to store dataframes
+#     values = []
 
-    for key in keys:
-        values.append(_get_dataframe(bucket=bucket, key=key))
+#     for key in keys:
+#         values.append(_get_dataframe(bucket=bucket, key=key))
 
-    return values
+#     return values
