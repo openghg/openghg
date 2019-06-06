@@ -31,16 +31,27 @@ def data():
 #     return segment.parse_file(filepath=filepath)
     
 
-def test_get_split_frequency():
+def test_get_split_frequency_large():
 
-    long_time = pd.date_range("2010-01-01", "2019-01-01", freq="min")
+    date_range = pd.date_range("2010-01-01", "2019-01-01", freq="min")
 
     # Crates a ~ 1 GB dataframe
-    df = pd.DataFrame(np.random.randint(0, 100, size=(len(long_time), 32)), index=long_time)
+    df = pd.DataFrame(np.random.randint(0, 100, size=(len(date_range), 32)), index=date_range)
 
     split = segment.get_split_frequency(df)
-
     assert split == "W"
+
+
+def test_get_split_frequency_small():
+    date_range = pd.date_range("2010-01-01", "2019-01-01", freq="W")
+
+    # Crates a small
+    df = pd.DataFrame(np.random.randint(0, 100, size=(len(date_range), 32)), index=date_range)
+
+    split = segment.get_split_frequency(df)
+    assert split == "Y"
+
+
 
 def test_get_datasources(data):
     datasources = segment.get_datasources(data)
