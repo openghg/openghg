@@ -57,9 +57,12 @@ class Datasource:
         d._uuid = _create_uuid()
         d._creation_datetime = _get_datetime_now()
 
-        for key, value in kwargs.items():
-            d._labels[key] = value
+        # for key, value in kwargs.items():
+        #     d._labels[key] = value
 
+        d._labels = kwargs
+
+        
         if data is not None:
             # This could be a list of dataframes
             d._data = data
@@ -162,9 +165,7 @@ class Datasource:
         data["UUID"] = self._uuid
         data["name"] = self._name
         data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
-        data["instrument"] = self._instrument
-        data["site"] = self._site
-        data["network"] = self._network
+        data["labels"] = self._labels
         data["stored"] = self._stored
         data["data_keys"] = self._data_keys
 
@@ -256,9 +257,7 @@ class Datasource:
         d._uuid = data["UUID"]
         d._name = data["name"]
         d._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        d._instrument = data["instrument"]
-        d._site = data["site"]
-        d._network = data["network"]
+        d._labels = data["labels"]
         d._stored = data["stored"]
         d._data_keys = data["data_keys"]
         d._data = []

@@ -160,9 +160,30 @@ def test_from_data(mock_uuid):
 
     assert new_datasource._name == "test_name_two"
     assert new_datasource._uuid == mocked_uuid
-    # assert new_datasource._instrument == "test_instrument_two"
-    # assert new_datasource._site == "test_site_two"
-    # assert new_datasource._network == "test_network_two"
+
+    assert new_datasource._labels["instrument"] == "test_instrument_two"
+    assert new_datasource._labels["site"] == "test_site_two"
+    assert new_datasource._labels["network"] == "test_network_two"
+
+def test_get_uid_from_name(mock_uuid2):
+    from Acquire.ObjectStore import string_to_encoded
+
+    bucket = local_bucket.get_local_bucket()
+
+    name = "test_name"
+
+    found_uuid = Datasource._get_uid_from_name(bucket, name)
+
+    assert found_uuid == mocked_uuid2
+
+
+def test_get_name_from_uid(mock_uuid):
+    bucket = local_bucket.get_local_bucket()
+
+    name = Datasource._get_name_from_uid(bucket, mocked_uuid2)
+
+    assert name == "test_name"
+
 
 
 # def test_load(mock_uuid, datasource):
@@ -177,23 +198,8 @@ def test_from_data(mock_uuid):
 #     assert loaded_datasource._network == "test_network"
 
 
-def test_get_uid_from_name(mock_uuid2):
-    from Acquire.ObjectStore import string_to_encoded
 
-    bucket = local_bucket.get_local_bucket()
-    
-    name = "test_name"
 
-    found_uuid = Datasource._get_uid_from_name(bucket, name)
-
-    assert found_uuid == mocked_uuid2
-
-def test_get_name_from_uid(mock_uuid):
-    bucket = local_bucket.get_local_bucket()
-
-    name = Datasource._get_name_from_uid(bucket, mocked_uuid2)
-
-    assert name == "test_name"
 
 
 
