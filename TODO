@@ -119,3 +119,8 @@ Redo conversion to NetCDF test - error
 Column names are different, check what it's testing for within the Pandas code
 
 ValueError: cannot convert DataFrame with non-unique columns
+
+2019-06-07
+
+Update the way the start and end datetimes of data is recorded. Currently only the first dataframe is checked, as there will be many
+need to improve this.

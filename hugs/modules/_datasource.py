@@ -14,6 +14,8 @@ class Datasource:
         self._uuid = None
         self._name = None
         self._creation_datetime = None
+        self._labels = {}
+
         self._parent = None
         # These may be unnecessary?
         self._instrument = None
@@ -27,7 +29,7 @@ class Datasource:
         self._data_keys = []
 
     @staticmethod
-    def create(name, instrument, site, network, data=None):
+    def create(name, data=None, **kwargs):
         """ Create a new datasource
         
             Args:
@@ -48,23 +50,22 @@ class Datasource:
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
 
+        # kwargs is a dict of the keyword args passed to the function
+
         d = Datasource()
-        d._uuid = _create_uuid()
         d._name = name
+        d._uuid = _create_uuid()
         d._creation_datetime = _get_datetime_now()
-        # Now unsure about these
-        d._instrument = instrument
-        d._site = site
-        d._network = network
 
+        for key, value in kwargs.items():
+            d._labels[key] = value
 
-        # DataFrame.first_valid_index()[source]
-        # last_valid_index()[source]
         if data is not None:
             # This could be a list of dataframes
             d._data = data
             # Just store these as time stamps?
             # Get the first and last datetime from the list of dataframes
+            # TODO - update this as each dataframe may have different start and end dates
             d._start_datetime = _string_to_datetime(data[0].first_valid_index())
             d._end_datetime = _string_to_datetime(data[-1].last_valid_index())
         
@@ -114,17 +115,30 @@ class Datasource:
         self._data.append(data)
 
     @staticmethod
-    def exists(some_id):
+    def exists(datasource_id, bucket=None):
         """ Uses an ID of some kind to query whether or not this is a new
             Datasource and should be created
 
+            Check if a datasource with this ID is already stored in the object store
+
             WIP
 
-            TODO - update this when I have a clearer ID of how to ID datasources
+            TODO - update this when I have a clearer idea of how to ID datasources
 
             Args:
-                some_id: 
+                sodatasource_idme_id (str): ID of datasource created from Data / given in data
+            Returns:
+                bool: True if Datasource exists 
         """
+        from objectstore import exists as _exists
+        from objectstore import get_bucket as _get_bucket
+
+        if bucket is None:
+            bucket = _get_bucket()
+
+        # Query object store for Datasource
+        return _exists(bucket=bucket, uuid=datasource_id)
+
 
     def to_data(self, store=False, bucket=None):
         """ Return a JSON-serialisable dictionary of object

@@ -67,7 +67,7 @@ def test_get_datasources(data):
 
 
 def test_column_naming(data):
-    gas_data = segment.parse_gases(data)
+    _, gas_data = segment.parse_gases(data)
 
     column_names = ["count", "stdev", "n_meas"]
     
@@ -87,7 +87,7 @@ def test_parse_timecols(data):
 
 
 def test_parse_gases(data):
-    gas_info = segment.parse_gases(data)
+    _, gas_info = segment.parse_gases(data)
 
     # Unpack the list of tuples into two different tuples
     gas_names, gas_data = zip(*gas_info)

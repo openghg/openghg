@@ -84,9 +84,9 @@ def test_save(mock_uuid2):
 def test_creation(mock_uuid, datasource):
     assert datasource._uuid == mocked_uuid
     assert datasource._name == "test_name"
-    assert datasource._instrument == "test_instrument"
-    assert datasource._site == "test_site"
-    assert datasource._network == "test_network"
+    # assert datasource._instrument == "test_instrument"
+    # assert datasource._site == "test_site"
+    # assert datasource._network == "test_network"
 
 
 def test_to_data(mock_uuid, datasource):
@@ -94,9 +94,9 @@ def test_to_data(mock_uuid, datasource):
 
     assert data["UUID"] == mocked_uuid
     assert data["name"] == "test_name"
-    assert data["instrument"] == "test_instrument"
-    assert data["site"] == "test_site"
-    assert data["network"] == "test_network"
+    # assert data["instrument"] == "test_instrument"
+    # assert data["site"] == "test_site"
+    # assert data["network"] == "test_network"
 
 def test_save_with_data(mock_uuid, data):
     from processing._segment import get_datasources
@@ -160,9 +160,9 @@ def test_from_data(mock_uuid):
 
     assert new_datasource._name == "test_name_two"
     assert new_datasource._uuid == mocked_uuid
-    assert new_datasource._instrument == "test_instrument_two"
-    assert new_datasource._site == "test_site_two"
-    assert new_datasource._network == "test_network_two"
+    # assert new_datasource._instrument == "test_instrument_two"
+    # assert new_datasource._site == "test_site_two"
+    # assert new_datasource._network == "test_network_two"
 
 
 # def test_load(mock_uuid, datasource):

@@ -60,7 +60,7 @@ def test_combine_sections():
     # raw_data = raw_data.dropna(axis=0, how="any")
     # raw_data.index = pd.RangeIndex(raw_data.index.size)
 
-    gas_data = parse_gases(raw_data)
+    datasource_id, gas_data = parse_gases(raw_data)
     dataframes = [data for _, data in gas_data]
     complete = combine_sections(dataframes)
     

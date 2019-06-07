@@ -25,6 +25,7 @@ def get_object_names(bucket, prefix=None):
 
     return _ObjectStore.get_all_object_names(bucket, prefix)
 
+
 def get_dated_object(bucket, key):
     """ Removes the daterange from the passed key and uses the reduced
         key to get an object from the object store.
@@ -85,6 +86,25 @@ def get_dated_object_json(bucket, key):
         raise ValueError("There should only be one object")
 
     return _ObjectStore.get_object_from_json(bucket, name[0])
+
+
+def exists(bucket, uuid):
+    """ Checks if there is an object in the object store with the given key
+
+        Args:
+            bucket (dict): Bucket containing data
+            key (str): Prefix for key in object store
+        Returns:
+            bool: True if exists in store
+    """
+    from Acquire.ObjectStore import ObjectStore as _ObjectStore
+
+    prefix = "datasource/uuid/%s" % uuid
+
+    # Get the object and use the key as a prefix
+    name = _ObjectStore.get_all_object_names(bucket, prefix=prefix)
+
+    return len(name) > 0
 
 
 def get_object_json(bucket, key):

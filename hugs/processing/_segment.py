@@ -15,12 +15,18 @@ def get_datasources(raw_data):
     
     # This can save the parent instrument as a name,UUID tuple within the object
     # Look up the parent instrument by name and find its UUID. If it doesn't exist, create it?
-    gas_data = parse_gases(raw_data)
+    datasource_id, gas_data = parse_gases(raw_data)
 
     datasources = []
 
     for gas_name, data in gas_data:
-        d = Datasource.create(name=gas_name, instrument="test", site="test", network="test", data=data)
+        if Datasource.exists(datasource_id):
+            # Add the data to the exisiting datasource
+            d = Datasource.load(datasource_id)
+            d.add_data(data)
+        else:
+            d = Datasource.create(name=gas_name, instrument="test", site="test", network="test", data=data)
+        
         datasources.append(d)
 
     return datasources
@@ -91,6 +97,10 @@ def parse_gases(data):
     from pandas import concat as _concat
     from pandas import Grouper as _Grouper
 
+    # Create an ID for the Datasource
+    # Currently just give it a fixed ID
+    datasource_id = "2e628682-094f-4ffb-949f-83e12e87a603"
+
     # Drop any rows with NaNs
     # Reset the index
     # This is now done before creating metadata
@@ -142,13 +152,12 @@ def parse_gases(data):
         freq = get_split_frequency(gas_data)
         # Split into sections by year
         group = gas_data.groupby(_Grouper(freq=freq))
-        # As some months may be empty we don't want those dataframes
+        # As some (years, months, weeks) may be empty we don't want those dataframes
         split_frames = [g for _, g in group if len(g) > 0]
 
-        # data_list.append((gas_name, gas_data))
         data_list.append((gas_name, split_frames))
 
-    return data_list
+    return datasource_id, data_list
 
 
 def parse_timecols(time_data):
