@@ -21,7 +21,7 @@ def get_datasource(raw_data):
     if Datasource.exists(datasource_id=datasource_id):
         datasource = Datasource.load(uuid=datasource_id)
     else:
-        datasource = Datasource.create(name="name", data=data)
+        datasource = Datasource.create(name="name")
 
     for _, dataframes in gas_data:
         for dataframe in dataframes:
@@ -95,7 +95,8 @@ def parse_gases(data):
 
     # Create an ID for the Datasource
     # Currently just give it a fixed ID
-    datasource_id = "2e628682-094f-4ffb-949f-83e12e87a603"
+    datasource_ids = ["2e628682-094f-4ffb-949f-83e12e87a603", "2e628682-094f-4ffb-949f-83e12e87a604", 
+                        "2e628682-094f-4ffb-949f-83e12e87a605"]
 
     # Drop any rows with NaNs
     # Reset the index
@@ -154,7 +155,9 @@ def parse_gases(data):
         data_list.append((gas_name, split_frames))
 
     # TODO - this return might be getting a bit complicated - how to simplify it?
-    return datasource_id, data_list
+    # return datasource_id, data_list
+    # TODO - get this to return a datasource uuid for each gas and then the data 
+    return False
 
 
 def parse_timecols(time_data):

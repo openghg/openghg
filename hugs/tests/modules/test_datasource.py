@@ -119,8 +119,6 @@ def test_save_with_data(mock_uuid, data):
 
     print(new_datasource._data[0].head(1))
 
-
-
     assert new_slice.equals(original_slice)
     
 
