@@ -124,3 +124,9 @@ ValueError: cannot convert DataFrame with non-unique columns
 
 Update the way the start and end datetimes of data is recorded. Currently only the first dataframe is checked, as there will be many
 need to improve this.
+
+parse_gases now returns a tuple of a str and a list of tuples, this feels a bit over complicated, tidy it up if possible
+
+get_datasources only takes data from a  single Datasource 
+
+CRDS read_file also creates just a single Datasource

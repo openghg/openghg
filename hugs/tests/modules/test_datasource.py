@@ -1,4 +1,3 @@
-from processing._segment import get_datasources
 import datetime
 import os
 import pytest
@@ -10,6 +9,7 @@ from Acquire.ObjectStore import string_to_encoded
 
 # from objectstore._hugs_objstore
 
+from processing._segment import get_datasource
 from objectstore._hugs_objstore import get_dated_object
 from objectstore._hugs_objstore import get_dated_object_json
 
@@ -56,7 +56,7 @@ def mock_uuid2(monkeypatch):
 @pytest.fixture(scope="session")
 def save_data_in_store(mock_uuid):
     bucket = local_bucket.get_local_bucket()
-    datasource = get_datasources(raw_data=data)[0]
+    datasource = get_datasource(raw_data=data)
     original_slice = datasource._data.head(1)
 
     # data = Datasource.create(name="test_name", instrument="test_instrument", site="test_site",
@@ -99,13 +99,15 @@ def test_to_data(mock_uuid, datasource):
     # assert data["network"] == "test_network"
 
 def test_save_with_data(mock_uuid, data):
-    from processing._segment import get_datasources
+    from processing._segment import get_datasource
 
     bucket = local_bucket.get_local_bucket()
 
-    datasource = get_datasources(raw_data=data)[0]
-
+    datasource = get_datasource(raw_data=data)
+        
     original_slice = datasource._data[0].head(1)
+
+    print(datasource._data[0].head(1))
 
     datasource.save(bucket)
 
@@ -114,6 +116,10 @@ def test_save_with_data(mock_uuid, data):
     new_datasource = Datasource.load(bucket, uuid=old_uuid)
 
     new_slice = new_datasource._data[0].head(1)
+
+    print(new_datasource._data[0].head(1))
+
+
 
     assert new_slice.equals(original_slice)
     
@@ -183,6 +189,8 @@ def test_get_name_from_uid(mock_uuid):
     name = Datasource._get_name_from_uid(bucket, mocked_uuid2)
 
     assert name == "test_name"
+
+
 
 
 

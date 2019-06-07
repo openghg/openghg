@@ -34,10 +34,8 @@ class Datasource:
         
             Args:
                 name (str): Name for Datasource
-                instrument (str): Name of instrument
-                site (str): Name of site
-                network (str): Name of network
                 data (list, default=None): List of Pandas.Dataframes
+                **kwargs (dict): Dictionary saved as the labels for this object
             Returns:
                 Datasource
 
@@ -50,18 +48,13 @@ class Datasource:
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
 
-        # kwargs is a dict of the keyword args passed to the function
-
         d = Datasource()
         d._name = name
         d._uuid = _create_uuid()
         d._creation_datetime = _get_datetime_now()
-
-        # for key, value in kwargs.items():
-        #     d._labels[key] = value
-
+        
+        # Any need to parse these for safety?
         d._labels = kwargs
-
         
         if data is not None:
             # This could be a list of dataframes
@@ -98,13 +91,17 @@ class Datasource:
         """
         return self._end_datetime
 
-    def get_site():
-        """ Returns the site with which this datasource is 
+    def add_label(self, key, value):
+        """ Add a label to the label dictionary with the key value pair
+            This will overwrite any previous entry stored at that key.
 
+            Args:
+                key (str): Key for dictionary
+                value (str): Value for dictionary
             Returns:
-                str: Name of site
+                None
         """
-        return self._site()
+        self._labels[key] = value
 
     def add_data(self, data):
         """ Add data to this Datasource, data will be keyed independently with
@@ -115,6 +112,11 @@ class Datasource:
             Returns:
                 None
         """
+        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+
+        self._start_datetime = _string_to_datetime(data.first_valid_index())
+        self._end_datetime = _string_to_datetime(data.last_valid_index())
+
         self._data.append(data)
 
     @staticmethod
@@ -129,7 +131,7 @@ class Datasource:
             TODO - update this when I have a clearer idea of how to ID datasources
 
             Args:
-                sodatasource_idme_id (str): ID of datasource created from Data / given in data
+                datasource_id (str): ID of datasource created from Data / given in data
             Returns:
                 bool: True if Datasource exists 
         """
@@ -324,6 +326,7 @@ class Datasource:
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from objectstore._hugs_objstore import get_dated_object as _get_dated_object
         from objectstore._hugs_objstore import get_object_json as _get_object_json
+        from objectstore import get_bucket as _get_bucket
 
         if uuid is None and name is None:
             raise ValueError("Both uuid and name cannot be None")

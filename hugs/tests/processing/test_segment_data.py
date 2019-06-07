@@ -8,8 +8,13 @@ import uuid
 from processing import _segment as segment
 from processing import _metadata as meta
 
+from modules import Datasource
+from objectstore import get_bucket
+from Acquire.ObjectStore import ObjectStore
 
 # from processing._segment import 
+
+mocked_uuid = "00000000-0000-1111-00000-000000000000"
 
 @pytest.fixture(scope="session")
 def data():
@@ -21,14 +26,13 @@ def data():
   
     return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
 
-# @pytest.fixture()
-# def segmented_data():
-#     filename = "bsd.picarro.1minute.248m.dat"
-#     dir_path = os.path.dirname(__file__)
-#     test_data = "data/proc_test_data/CRDS"
-#     filepath = os.path.join(dir_path, test_data, filename)
+@pytest.fixture
+def mock_uuid(monkeypatch):
+    def mock_uuid():
+        return mocked_uuid
 
-#     return segment.parse_file(filepath=filepath)
+    monkeypatch.setattr(uuid, 'uuid4', mock_uuid)
+
     
 @pytest.mark.slow
 def test_get_split_frequency_large():
@@ -52,18 +56,33 @@ def test_get_split_frequency_small():
     assert split == "Y"
 
 
-def test_get_datasources(data):
-    datasources = segment.get_datasources(data)
+def test_get_datasources_correct_datetimes(data):
+    datasource = segment.get_datasource(data)
 
-    assert len(datasources) == 3
+    assert len(datasource._data) == 3
+    assert datasource._start_datetime == pd.Timestamp("2014-01-30 10:52:30")
+    assert datasource._end_datetime == pd.Timestamp("2014-01-30 14:20:30")
+    
 
-    assert datasources[0]._start_datetime == pd.Timestamp("2014-01-30 10:52:30")
-    assert datasources[1]._start_datetime == pd.Timestamp("2014-01-30 10:52:30")
-    assert datasources[2]._start_datetime == pd.Timestamp("2014-01-30 10:52:30")
+def test_get_datasource_already_exists(data):
+    # Test get datasources when the Datasource object already exists
+    uuid = "2e628682-094f-4ffb-949f-83e12e87a603"
+    # Create a Datasource object and save it at key with this UUID
+    d = Datasource.create(name="exists")
+    d._uuid = uuid
 
-    assert datasources[0]._end_datetime == pd.Timestamp("2014-01-30 14:20:30")
-    assert datasources[1]._end_datetime == pd.Timestamp("2014-01-30 14:20:30")
-    assert datasources[2]._end_datetime == pd.Timestamp("2014-01-30 14:20:30")
+    assert d._data is None
+
+    bucket = get_bucket()
+    datasource_key = "datasource/uuid/%s" % uuid
+    ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=d.to_data())
+
+    datasource = segment.get_datasource(data)
+
+    assert datasource._uuid == uuid
+    assert len(datasource._data) == 3
+    assert datasource._start_datetime == pd.Timestamp("2014-01-30 10:52:30")
+    assert datasource._end_datetime == pd.Timestamp("2014-01-30 14:20:30")
 
 
 def test_column_naming(data):
@@ -86,7 +105,7 @@ def test_parse_timecols(data):
     assert timeframe.tail(1)["Datetime"].iloc[0] == pd.to_datetime("2014-01-30 14:20:30")
 
 
-def test_parse_gases(data):
+def test_parse_gases_correct_data(data):
     _, gas_info = segment.parse_gases(data)
 
     # Unpack the list of tuples into two different tuples
@@ -113,7 +132,6 @@ def test_parse_gases(data):
     assert head_two.iloc[0, 0] == 204.62
     assert head_two.iloc[0, 1] == 6.232
     assert head_two.iloc[0, 2] == 26.0
-
 
 def test_unanimous():
     true_dict = {"key1": 6, "key2": 6, "key3": 6}

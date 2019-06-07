@@ -55,6 +55,8 @@ class CRDS:
     def read_file(filepath):
         """ Creates a CRDS object holding data stored within Datasources
 
+            TODO - currently only works with a single Datasource
+
             Args:
                 filepath (str): Path of file to load
             Returns:
@@ -63,14 +65,14 @@ class CRDS:
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
         from processing._metadata import Metadata as _Metadata
-        from processing._segment import get_datasources as _get_datasources
+        from processing._segment import get_datasource as _get_datasource
 
-        import pandas as _pd
+        from pandas import read_csv as _read_csv
 
-        data = _pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")     
+        data = _read_csv(filepath, header=None, skiprows=1, sep=r"\s+")     
 
         # Data will be contained within the Datasources
-        datasources = _get_datasources(data)
+        datasource = _get_datasource(data)
 
         filename = filepath.split("/")[-1]
         # Get a Metadata object containing the processed metadata
@@ -80,12 +82,12 @@ class CRDS:
         c = CRDS()
         c._uuid = _create_uuid()
         c._creation_datetime = _get_datetime_now()
-        c._datasources = datasources
+        c._datasources = [datasource]
         c._metadata = metadata
 
         # Ensure the CRDS object knows the datetimes it has
-        c._start_datetime = datasources[0].get_start_datetime()
-        c._end_datetime = datasources[0].get_end_datetime()
+        c._start_datetime = datasource.get_start_datetime()
+        c._end_datetime = datasource.get_end_datetime()
 
         return c
 

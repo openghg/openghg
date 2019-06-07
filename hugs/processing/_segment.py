@@ -1,15 +1,16 @@
 """ Segment the data into Datasources
 
 """
-# import pandas as pd
 
-def get_datasources(raw_data):
+def get_datasource(raw_data):
     """ Create a Datasource for each gas in the file
+
+        TODO - currently this function will only take data from a single Datasource
         
         Args:
             raw_data (list): List of Pandas.Dataframes
         Returns:
-            list: List of Datasources
+            Datasource: Datasource containing data
     """
     from modules import Datasource
     
@@ -17,19 +18,16 @@ def get_datasources(raw_data):
     # Look up the parent instrument by name and find its UUID. If it doesn't exist, create it?
     datasource_id, gas_data = parse_gases(raw_data)
 
-    datasources = []
+    if Datasource.exists(datasource_id=datasource_id):
+        datasource = Datasource.load(uuid=datasource_id)
+    else:
+        datasource = Datasource.create(name="name", data=data)
 
-    for gas_name, data in gas_data:
-        if Datasource.exists(datasource_id):
-            # Add the data to the exisiting datasource
-            d = Datasource.load(datasource_id)
-            d.add_data(data)
-        else:
-            d = Datasource.create(name=gas_name, instrument="test", site="test", network="test", data=data)
-        
-        datasources.append(d)
+    for _, dataframes in gas_data:
+        for dataframe in dataframes:
+            datasource.add_data(dataframe)
 
-    return datasources
+    return datasource
 
 
 def get_split_frequency(data):
@@ -39,8 +37,7 @@ def get_split_frequency(data):
         Args:
             data (Pandas.Dataframe): Raw data in dataframe
         Returns:
-            str: String selecting frequency for data splitting by
-            Groupby
+            str: String selecting frequency for data splitting by Groupby
     """
 
     data_size = data.memory_usage(deep=True).sum()
@@ -89,9 +86,8 @@ def parse_gases(data):
         Args:
             data (Pandas.Dataframe): Dataframe containing all data
         Returns:
-            list (tuple): List of tuples containing the name of the gas and a second element
-            containing a list of sections of the gas dataframe split into sections based on datetime
-
+            tuple (str, list): ID of Datasource of this data and a list of tuples containing the name of the gas 
+            and a list of sections of the gas dataframe split into sections based on datetime
     """
     from pandas import RangeIndex as _RangeIndex
     from pandas import concat as _concat
@@ -157,6 +153,7 @@ def parse_gases(data):
 
         data_list.append((gas_name, split_frames))
 
+    # TODO - this return might be getting a bit complicated - how to simplify it?
     return datasource_id, data_list
 
 
