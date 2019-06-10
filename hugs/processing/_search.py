@@ -82,7 +82,7 @@ def search_store(bucket, data_uuids, root_path, start_datetime, end_datetime):
         for key in keys:
             if in_daterange(key, start_datetime, end_datetime):
                 data_uuids.append(key)
-                
+
         return data_uuids
 
 
@@ -127,26 +127,6 @@ def key_to_daterange(key):
     return start, end
 
 
-def string_to_daterange(s):
-    """ Converts a daterange string from the type used with the
-        object store to a datetime
-        Start_end
-        YYYYMMDD_YYYYMMDD
-
-        Args:
-            s (str): String containing daterange
-        Returns:
-            tuple (datetime, datetime): Datetime objects for daterange
-    """
-    import datetime as _datetime
-
-    parts = s.split("_")
-    start = _datetime.datetime.strptime(parts[0], "%Y%m%d")
-    end = _datetime.datetime.strptime(parts[1], "%Y%m%d")
-
-    return start, end
-
-
 def daterange_to_string(start, end):
     """ Creates a string from the start and end datetime
     objects. Used for production of the key
@@ -166,28 +146,6 @@ def daterange_to_string(start, end):
 
     return start_fmt + "_" + end_fmt
 
-
-def parse_date_time(date, time):
-    """ This function takes two strings and creates a datetime object 
-        
-        Args:
-            date (str): The date in a YYMMDD format
-            time (str): The time in the format hhmmss
-            Example: 104930 for 10:49:30
-        Returns:
-            datetime: Datetime object
-
-    """
-    import datetime as _datetime
-
-    if len(date) != 6:
-        raise ValueError("Incorrect date format, should be YYMMDD")
-    if len(time) != 6:
-        raise ValueError("Incorrect time format, should be hhmmss")
-
-    combined = date + time
-
-    return _datetime.datetime.strptime(combined, "%y%m%d%H%M%S")
 
 
 # def get_objects(bucket, root_path, datetime_begin, datetime_end):

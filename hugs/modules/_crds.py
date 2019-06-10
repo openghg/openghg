@@ -15,6 +15,7 @@ class CRDS:
         self._datasources = None
         self._start_datetime = None
         self._end_datetime = None
+        self._stored = False
 
     def is_null(self):
         """ Check if this is a null object
@@ -28,6 +29,13 @@ class CRDS:
     def create(metadata, datasources, start_datetime, end_datetime):
         """ This function should be used to create CRDS objects
 
+            Args:   
+                metadata (Metadata): Metadata for data to be stored
+                datasources (list): List of Datasources
+                start_datetime (datetime): Start datetime for Datasource objects
+                end_datetime (datetime): End datetime for Datasource objects
+            Returns:
+                CRDS: CRDS object 
         """
         c = CRDS()
 
@@ -35,6 +43,8 @@ class CRDS:
         c._datasources = datasources
         c._start_datetime = start_datetime
         c._end_datetime = end_datetime
+
+        return c
 
     @staticmethod
     def read_filelist(filelist):
@@ -77,6 +87,10 @@ class CRDS:
         filename = filepath.split("/")[-1]
         # Get a Metadata object containing the processed metadata
         # Does this need to be an object? Just a dict?
+
+        # I'm not sure this is needed here, this can be stored
+        # as labels in the objects that are created ? 
+
         metadata = _Metadata.create(filename, data)
 
         c = CRDS()
@@ -111,6 +125,8 @@ class CRDS:
         d["metadata"] = self._metadata.data()
         d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
         d["data_end_datetime"] = _datetime_to_string(self._end_datetime)
+        # This is only set as True when saving this object in the object store
+        d["stored"] = self._stored
 
         return d
 
@@ -137,16 +153,21 @@ class CRDS:
         c._uuid = data["UUID"]
         c._creation_datetime = _string_to_datetime(data["creation_datetime"])
 
+        stored = data["stored"]
+
         datasource_uuids = data["datasources"]
         c._datasources = []
 
         # Load the Datasources associated with this object
-        for _, uuid in datasource_uuids.items():
-            c._datasources.append(Datasource.load(bucket=bucket, uuid=uuid))
+        if stored:
+            for _, uuid in datasource_uuids.items():
+                c._datasources.append(Datasource.load(bucket=bucket, uuid=uuid))
 
         c._metadata = data["metadata"]
         c._start_datetime = _string_to_datetime(data["data_start_datetime"])
         c._end_datetime = _string_to_datetime(data["data_end_datetime"])
+        # Now we're loading it in again 
+        c._stored = False
 
         return c
 
@@ -173,6 +194,7 @@ class CRDS:
         for d in self._datasources:
             d.save(bucket)
 
+        self.stored = True
         _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
     @staticmethod
@@ -200,23 +222,6 @@ class CRDS:
         return CRDS.from_data(data=data, bucket=bucket)
 
 
-    @staticmethod
-    def to_datetime(date_string):
-        """ Convert a string of the format 2014-01-30
-            to datetime
-
-            TODO - make this more general
-
-            Args:
-                date_string (str): String of the format 2014-01-30
-            Returns:
-                Datetime: Datetime of string
-
-        """
-        import datetime as _datetime
-        return _datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
-
-    
     def get_daterange(self):
         """ Returns the daterange of the data in this object
 

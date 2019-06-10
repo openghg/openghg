@@ -137,3 +137,11 @@ Where to get Datasource IDs from?
 How to add to parse_gases?
 
 Currently just creating random UUIDs for each Datasource
+
+CRDS creation - start and end time in the Metadata is different compared to that stored in the CRDS object.
+The metadata has the data before the NaNs are removed.
+
+
+CRDS, GC objects can become the first line for assessment of where the data being read in should go.
+
+CRDS object -> Instruments -> Datasources
