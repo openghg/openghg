@@ -4,7 +4,9 @@ import pytest
 import uuid
 
 from modules import CRDS
+from objectstore import get_local_bucket
 from processing import Metadata
+
 from Acquire.ObjectStore import string_to_datetime
 from Acquire.ObjectStore import datetime_to_datetime
 
@@ -55,7 +57,6 @@ def test_to_data(crds):
 
 def test_from_data(crds):
     data = crds.to_data()
-
     new_crds = CRDS.from_data(data)
 
     start = datetime_to_datetime(datetime.datetime(2014, 1, 30, 10, 52, 30))
@@ -63,6 +64,21 @@ def test_from_data(crds):
 
     assert new_crds._start_datetime == start
     assert new_crds._end_datetime == end
+
+def test_save_and_load(crds):
+    bucket = get_local_bucket(empty=True)
+    # Save to object store
+    crds.save(bucket=bucket)
+
+    uuid = crds._uuid
+
+    loaded_crds = CRDS.load(uuid=uuid, bucket=bucket)
+
+    assert loaded_crds._uuid == mocked_uuid
+
+
+
+
 
 
 
