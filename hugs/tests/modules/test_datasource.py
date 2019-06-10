@@ -108,8 +108,6 @@ def test_save_with_data(mock_uuid, data):
         
     original_slice = datasource._data[0].head(1)
 
-    print(datasource._data[0].head(1))
-
     datasource.save(bucket)
 
     old_uuid = datasource._uuid
@@ -117,8 +115,6 @@ def test_save_with_data(mock_uuid, data):
     new_datasource = Datasource.load(bucket, uuid=old_uuid)
 
     new_slice = new_datasource._data[0].head(1)
-
-    print(new_datasource._data[0].head(1))
 
     assert new_slice.equals(original_slice)
     

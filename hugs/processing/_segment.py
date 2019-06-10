@@ -97,10 +97,12 @@ def parse_gases(data):
     from pandas import concat as _concat
     from pandas import Grouper as _Grouper
 
+    from uuid import uuid4 as _uuid4
+
     # Create an ID for the Datasource
     # Currently just give it a fixed ID
-    datasource_ids = ["2e628682-094f-4ffb-949f-83e12e87a603", "2e628682-094f-4ffb-949f-83e12e87a604", 
-                        "2e628682-094f-4ffb-949f-83e12e87a605"]
+    # datasource_ids = ["2e628682-094f-4ffb-949f-83e12e87a603", "2e628682-094f-4ffb-949f-83e12e87a604", 
+    #                     "2e628682-094f-4ffb-949f-83e12e87a605"]
 
     # Drop any rows with NaNs
     # Reset the index
@@ -110,6 +112,9 @@ def parse_gases(data):
 
     # Get the number of gases in dataframe and number of columns of data present for each gas
     n_gases, n_cols = gas_info(data=data)
+
+    # TODO - at the moment just create a new UUID for each gas
+    datasource_ids = [_uuid4() for gas in range(n_gases)]
 
     header = data.head(2)
     skip_cols = sum([header[column][0] == "-" for column in header.columns])

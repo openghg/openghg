@@ -265,7 +265,6 @@ class Datasource:
         
         if d._stored:
             for key in d._data_keys:
-                print(key)
                 d._data.append(d.load_dataframe(bucket, key))
 
         return d
@@ -290,7 +289,6 @@ class Datasource:
 
         if bucket is None:
             bucket = _get_bucket()
-        print("Saving.....\n")
         if self._data is not None:
             for data in self._data:
                 # Save each dataframe in the list of dataframes as a separate data entity with its own key
@@ -298,7 +296,6 @@ class Datasource:
                 daterange_str = "".join([_datetime_to_string(data.first_valid_index()), "_", _datetime_to_string(data.last_valid_index())])
                 data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
                 self._data_keys.append(data_key)
-                print(data_key)
                 _ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
 
             self._stored = True
