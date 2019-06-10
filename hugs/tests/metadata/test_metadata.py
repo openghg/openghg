@@ -22,8 +22,7 @@ def data():
 def metadata():
     return Metadata()
 
-
-def test_parse_metadata(data):
+def test_create(data):
     filename = "bsd.picarro.1minute.248m.dat"
 
     metadata = Metadata.create(filename=filename, data=data)

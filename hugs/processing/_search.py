@@ -82,6 +82,7 @@ def search_store(bucket, data_uuids, root_path, start_datetime, end_datetime):
         for key in keys:
             if in_daterange(key, start_datetime, end_datetime):
                 data_uuids.append(key)
+                
         return data_uuids
 
 

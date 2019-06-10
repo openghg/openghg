@@ -74,7 +74,6 @@ class Metadata:
 
         return m
 
-
     def is_null(self):
         """Return whether this object is null
         
@@ -90,14 +89,6 @@ class Metadata:
                 dict: Metadata dictionary
         """
         return self._data
-
-    # need these to save to the Object store?
-    # def save():
-    #     pass
-    
-    # def load():
-    #     pass
-        
 
     def parse_date_time(self, date, time):
         """ This function takes two strings and creates a datetime object 

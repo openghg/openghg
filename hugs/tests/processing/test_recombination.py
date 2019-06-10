@@ -11,6 +11,8 @@ from processing import _recombination
 from processing._segment import parse_gases
 from processing._recombination import combine_sections
 
+from processing import search_store
+
 @pytest.fixture(scope="session")
 def keylist():
     filename = "bsd.picarro.1minute.248m.dat"
@@ -24,10 +26,15 @@ def keylist():
     # Create and store data
     crds.save(bucket=bucket)
 
+    # uuids = [
+
+             
+    #  crds._datasources._uuid for CRDS
+
     start = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
     end = datetime.datetime.strptime("2014-01-31", "%Y-%m-%d")
 
-    keys = crds.search_store(bucket=bucket, root_path="datasource", start_datetime=start, end_datetime=end)
+    keys = search_store(bucket=bucket, root_path="datasource", start_datetime=start, end_datetime=end)
 
     return keys
 

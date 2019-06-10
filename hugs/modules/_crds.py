@@ -91,8 +91,15 @@ class CRDS:
 
         return c
 
-    
+
     def to_data(self):
+        """ Return a JSON-serialisable dictionary of object
+            for storage in object store
+
+            Returns:
+                dict: Dictionary version of object
+        """
+
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         datasource_uuids = {d._name: d._uuid for d in self._datasources}
