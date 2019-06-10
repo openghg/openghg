@@ -8,7 +8,7 @@ from Acquire.ObjectStore import string_to_encoded
 from modules._instrument import Instrument
 from objectstore import _local_bucket as local_bucket
 
-mocked_uuid = "00000000-0000-0000-00000-000000000000"
+mocked_uuid = "10000000-0000-0000-00000-000000000001"
 
 @pytest.fixture
 def mock_uuid(monkeypatch):
@@ -26,9 +26,9 @@ def instrument(mock_uuid):
 def test_creation(mock_uuid, instrument):
     assert instrument._name == "test_name"
     assert instrument._uuid == mocked_uuid
-    assert instrument._site == "test_site"
-    assert instrument._network == "test_network"
-    assert instrument._height == "50m"
+    assert instrument._labels["site"] == "test_site"
+    assert instrument._labels["network"] == "test_network"
+    assert instrument._labels["height"] == "50m"
 
 
 def test_creation_no_height(mock_uuid):
@@ -37,9 +37,11 @@ def test_creation_no_height(mock_uuid):
 
     assert instrument._name == "test_name"
     assert instrument._uuid == mocked_uuid
-    assert instrument._site == "test_site"
-    assert instrument._network == "test_network"
-    assert instrument._height is None
+    assert instrument._labels["site"] == "test_site"
+    assert instrument._labels["network"] == "test_network"
+    
+    with pytest.raises(KeyError):
+        assert instrument._labels["height"] is None
 
 
 def test_to_data(mock_uuid, instrument):
@@ -47,9 +49,9 @@ def test_to_data(mock_uuid, instrument):
 
     assert data["name"] == "test_name"
     assert data["UUID"] == mocked_uuid
-    assert data["site"] == "test_site"
-    assert data["network"] == "test_network"
-    assert data["height"] == "50m"
+    assert data["labels"]["site"] == "test_site"
+    assert data["labels"]["network"] == "test_network"
+    assert data["labels"]["height"] == "50m"
 
 
 def test_from_data(mock_uuid, instrument):
@@ -58,9 +60,9 @@ def test_from_data(mock_uuid, instrument):
 
     assert new_instrument._name == "test_name"
     assert new_instrument._uuid == mocked_uuid
-    assert new_instrument._site == "test_site"
-    assert new_instrument._network == "test_network"
-    assert new_instrument._height == "50m"
+    assert new_instrument._labels["site"] == "test_site"
+    assert new_instrument._labels["network"] == "test_network"
+    assert new_instrument._labels["height"] == "50m"
 
 
 def test_save(instrument):
@@ -74,9 +76,9 @@ def test_save(instrument):
 
     assert data["name"] == "test_name"
     assert data["UUID"] == mocked_uuid
-    assert data["site"] == "test_site"
-    assert data["network"] == "test_network"
-    assert data["height"] == "50m"
+    assert data["labels"]["site"] == "test_site"
+    assert data["labels"]["network"] == "test_network"
+    assert data["labels"]["height"] == "50m"
 
 
 def test_load(instrument):
@@ -87,9 +89,9 @@ def test_load(instrument):
 
     assert loaded_instrument._name == "test_name"
     assert loaded_instrument._uuid == mocked_uuid
-    assert loaded_instrument._site == "test_site"
-    assert loaded_instrument._network == "test_network"
-    assert loaded_instrument._height == "50m"
+    assert loaded_instrument._labels["site"] == "test_site"
+    assert loaded_instrument._labels["network"] == "test_network"
+    assert loaded_instrument._labels["height"] == "50m"
 
 
 def test_get_uid_from_name(instrument):

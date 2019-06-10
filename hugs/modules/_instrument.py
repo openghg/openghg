@@ -26,13 +26,14 @@ class Instrument:
         self._uuid = None
         self._name = None
         self._creation_datetime = None
-        self._height = None
-        self._site = None
-        self._network = None
+        self._labels = None
+        # self._height = None
+        # self._site = None
+        # self._network = None
         self._datasources = None
     
     @staticmethod
-    def create(name, site, network, height=None):
+    def create(name, **kwargs):
         """ Creates an Instrument object
 
             Args:
@@ -45,14 +46,14 @@ class Instrument:
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
+
         i = Instrument()
         i._uuid = _create_uuid()
-        i._name = name
         i._creation_datetime = _get_datetime_now()
-        i._site = site
-        i._network = network
-        if height:
-            i._height = height
+        i._name = name
+        # Save the passed keywords as 
+        i._labels = kwargs
+        
         # To hold UIDs of all DataSources associated with this Instrument
         i._datasources = {}
 
@@ -79,12 +80,7 @@ class Instrument:
         d["UUID"] = self._uuid
         d["name"] = self._name
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
-        d["site"] = self._site
-        d["network"] = self._network
-        # TODO - should this just be able to be added as part of some kwargs
-        # Have a dict containing extra data about the instrument?
-        if self._height:
-            d["height"] = self._height
+        d["labels"] = self._labels
 
         return d
 
@@ -106,10 +102,7 @@ class Instrument:
         i._uuid = data["UUID"]
         i._name = data["name"]
         i._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        i._site = data["site"]
-        i._network = data["network"]
-        if "height" in data:
-            i._height = data["height"]
+        i._labels = data["labels"]
 
         return i
 
@@ -184,7 +177,7 @@ class Instrument:
         
     @staticmethod
     def _get_uid_from_name(bucket, name):
-        """ Gets the UID of this instrument from its name
+        """ Gets the UID of an instrument from its name
 
             Args:
                 bucket (dict): Bucket holding data
@@ -206,23 +199,44 @@ class Instrument:
 
         return uuid[0].split("/")[-1]
 
-    def create_datasource(self, name):
-        """ Creates a DataSource object and adds its information to the list of
-            DataSources. Instrument, site and network data is taken from this
-            Instrument instance.
+    # def create_datasource(self, name):
+    #     """ Creates a DataSource object and adds its information to the list of
+    #         DataSources. Instrument, site and network data is taken from this
+    #         Instrument instance.
+
+    #         Args:
+    #             name (str): Name for DataSource
+    #     """
+    #     from modules._datasource import Datasource
+
+    #     datasource = DataSource.create(name=name, instrument=self._name, 
+    #                                     site=self._site, network=self._network)
+
+    #     self._datasources[datasource._uuid] = {"name": name, "created": datasource._creation_datetime}
+
+    #     return datasource
+
+
+    def search_labels(self, search_term):
+            """ Search the labels of this Instruemnt
+
+                WIP
+
+            """
+            return False
+
+    def add_label(self, key, value):
+        """ Add a label to the labels dictionary.
+
+            Note: this may overwrite existing data
 
             Args:
-                name (str): Name for DataSource
+                key (str): Key for label
+                value (str): Value for label
+            Returns:
+                None
         """
-        from modules._datasource import Datasource
-
-        datasource = DataSource.create(name=name, instrument=self._name, 
-                                        site=self._site, network=self._network)
-
-        self._datasources[datasource._uuid] = {"name": name, "created": datasource._creation_datetime}
-
-        return datasource
-
+        self._labels[key] = value
 
 
 

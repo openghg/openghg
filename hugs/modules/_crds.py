@@ -29,7 +29,7 @@ class CRDS:
     def create(metadata, datasources, start_datetime, end_datetime):
         """ This function should be used to create CRDS objects
 
-            Args:   
+            Args:
                 metadata (Metadata): Metadata for data to be stored
                 datasources (list): List of Datasources
                 start_datetime (datetime): Start datetime for Datasource objects
