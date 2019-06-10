@@ -116,7 +116,8 @@ class CRDS:
 
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-        datasource_uuids = {d._name: d._uuid for d in self._datasources}
+        # datasource_uuids = {d._name: d._uuid for d in self._datasources}
+        datasource_uuids = [d._uuid for d in self._datasources]
 
         d = {}
         d["UUID"] = self._uuid
@@ -160,7 +161,7 @@ class CRDS:
 
         # Load the Datasources associated with this object
         if stored:
-            for _, uuid in datasource_uuids.items():
+            for uuid in datasource_uuids:
                 c._datasources.append(Datasource.load(bucket=bucket, uuid=uuid))
 
         c._metadata = data["metadata"]
@@ -192,9 +193,9 @@ class CRDS:
         crds_key = "%s/uuid/%s" % (CRDS._crds_root, self._uuid)
         # Get the datasources to save themselves to the object store
         for d in self._datasources:
-            d.save(bucket)
+            d.save(bucket=bucket)
 
-        self.stored = True
+        self._stored = True
         _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
     @staticmethod

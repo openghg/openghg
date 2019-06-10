@@ -50,7 +50,7 @@ def test_to_data(crds):
     crds_dict = crds.to_data()
 
     assert crds_dict["UUID"] == "10000000-0000-0000-00000-000000000001"
-    assert crds_dict["datasources"]["name"] == "10000000-0000-0000-00000-000000000001"
+    assert crds_dict["datasources"][0] == "10000000-0000-0000-00000-000000000001"
     assert crds_dict["metadata"]["site"] == "bsd"
     assert crds_dict["metadata"]["instrument"] == "picarro"
 
@@ -65,16 +65,38 @@ def test_from_data(crds):
     assert new_crds._start_datetime == start
     assert new_crds._end_datetime == end
 
-def test_save_and_load(crds):
+def test_save_and_load():
+    filename = "bsd.picarro.1minute.248m.dat"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    crds = CRDS.read_file(filepath=filepath)
+
     bucket = get_local_bucket(empty=True)
-    # Save to object store
     crds.save(bucket=bucket)
 
-    uuid = crds._uuid
+    # Get slice of data
+    one = crds._datasources[0]._data[0].head(1)
+    two = crds._datasources[1]._data[0].head(1)
+    three = crds._datasources[2]._data[0].head(1)
 
+    uuid = crds._uuid
     loaded_crds = CRDS.load(uuid=uuid, bucket=bucket)
 
-    assert loaded_crds._uuid == mocked_uuid
+    start = datetime_to_datetime(datetime.datetime(2014, 1, 30, 10, 52, 30))
+    end = datetime_to_datetime(datetime.datetime(2014, 1, 30, 14, 20, 30))
+
+    loaded_one = loaded_crds._datasources[0]._data[0].head(1)
+    loaded_two = loaded_crds._datasources[1]._data[0].head(1)
+    loaded_three = loaded_crds._datasources[2]._data[0].head(1)
+
+    assert loaded_crds._start_datetime == start
+    assert loaded_crds._end_datetime == end
+    assert loaded_one.equals(one)
+    assert loaded_two.equals(two)
+    assert loaded_three.equals(three)
+    
 
 
 
