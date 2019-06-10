@@ -299,7 +299,7 @@ class Datasource:
                 data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
                 self._data_keys.append(data_key)
                 print(data_key)
-                _ObjectStore.set_objects(bucket, data_key, Datasource.dataframe_to_hdf(data))
+                _ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
 
             self._stored = True
 

@@ -65,14 +65,14 @@ class CRDS:
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
         from processing._metadata import Metadata as _Metadata
-        from processing._segment import get_datasource as _get_datasource
+        from processing._segment import get_datasources as _get_datasources
 
         from pandas import read_csv as _read_csv
 
         data = _read_csv(filepath, header=None, skiprows=1, sep=r"\s+")     
 
         # Data will be contained within the Datasources
-        datasource = _get_datasource(data)
+        datasources = _get_datasources(data)
 
         filename = filepath.split("/")[-1]
         # Get a Metadata object containing the processed metadata
@@ -82,12 +82,12 @@ class CRDS:
         c = CRDS()
         c._uuid = _create_uuid()
         c._creation_datetime = _get_datetime_now()
-        c._datasources = [datasource]
+        c._datasources = datasources
         c._metadata = metadata
 
         # Ensure the CRDS object knows the datetimes it has
-        c._start_datetime = datasource.get_start_datetime()
-        c._end_datetime = datasource.get_end_datetime()
+        c._start_datetime = datasources[0].get_start_datetime()
+        c._end_datetime = datasources[0].get_end_datetime()
 
         return c
 

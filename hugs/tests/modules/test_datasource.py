@@ -9,7 +9,7 @@ from Acquire.ObjectStore import string_to_encoded
 
 # from objectstore._hugs_objstore
 
-from processing._segment import get_datasource
+from processing._segment import get_datasources
 from objectstore._hugs_objstore import get_dated_object
 from objectstore._hugs_objstore import get_dated_object_json
 
@@ -56,7 +56,7 @@ def mock_uuid2(monkeypatch):
 @pytest.fixture(scope="session")
 def save_data_in_store(mock_uuid):
     bucket = local_bucket.get_local_bucket()
-    datasource = get_datasource(raw_data=data)
+    datasource = get_datasources(raw_data=data)[0]
     original_slice = datasource._data.head(1)
 
     # data = Datasource.create(name="test_name", instrument="test_instrument", site="test_site",
@@ -99,11 +99,12 @@ def test_to_data(mock_uuid, datasource):
     # assert data["network"] == "test_network"
 
 def test_save_with_data(mock_uuid, data):
-    from processing._segment import get_datasource
+    from processing._segment import get_datasources
 
     bucket = local_bucket.get_local_bucket()
 
-    datasource = get_datasource(raw_data=data)
+    datasources = get_datasources(raw_data=data)
+    datasource  = datasources[0]
         
     original_slice = datasource._data[0].head(1)
 

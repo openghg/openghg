@@ -130,3 +130,9 @@ parse_gases now returns a tuple of a str and a list of tuples, this feels a bit 
 get_datasources only takes data from a  single Datasource 
 
 CRDS read_file also creates just a single Datasource
+
+2019-06-10
+
+Where to get Datasource IDs from?
+How to add to parse_gases?
+

@@ -2,8 +2,8 @@
 
 """
 
-def get_datasource(raw_data):
-    """ Create a Datasource for each gas in the file
+def get_datasources(raw_data):
+    """ Create or get an exisiting Datasource for each gas in the file
 
         TODO - currently this function will only take data from a single Datasource
         
@@ -12,22 +12,26 @@ def get_datasource(raw_data):
         Returns:
             Datasource: Datasource containing data
     """
-    from modules import Datasource
+    from modules import Datasource as _Datasource
     
-    # This can save the parent instrument as a name,UUID tuple within the object
-    # Look up the parent instrument by name and find its UUID. If it doesn't exist, create it?
-    datasource_id, gas_data = parse_gases(raw_data)
+    # Where gas_data is a list of tuples
+    gas_data = parse_gases(raw_data)
 
-    if Datasource.exists(datasource_id=datasource_id):
-        datasource = Datasource.load(uuid=datasource_id)
-    else:
-        datasource = Datasource.create(name="name")
+    datasources = []
 
-    for _, dataframes in gas_data:
-        for dataframe in dataframes:
+    for datasource_id, data in gas_data:
+        if _Datasource.exists(datasource_id=datasource_id):
+            datasource = _Datasource.load(uuid=datasource_id)
+        else:
+            datasource = _Datasource.create(name="name")
+
+        # Add the dataframes to the datasource
+        for dataframe in data:
             datasource.add_data(dataframe)
+        
+        datasources.append(datasource)
 
-    return datasource
+    return datasources
 
 
 def get_split_frequency(data):
@@ -86,8 +90,8 @@ def parse_gases(data):
         Args:
             data (Pandas.Dataframe): Dataframe containing all data
         Returns:
-            tuple (str, list): ID of Datasource of this data and a list of tuples containing the name of the gas 
-            and a list of sections of the gas dataframe split into sections based on datetime
+            tuple (str, list): ID of Datasource of this data and a list Pandas DataFrames for the 
+            date-split gas data
     """
     from pandas import RangeIndex as _RangeIndex
     from pandas import concat as _concat
@@ -152,12 +156,15 @@ def parse_gases(data):
         # As some (years, months, weeks) may be empty we don't want those dataframes
         split_frames = [g for _, g in group if len(g) > 0]
 
-        data_list.append((gas_name, split_frames))
+        data_tuple = datasource_ids[n], split_frames
 
-    # TODO - this return might be getting a bit complicated - how to simplify it?
-    # return datasource_id, data_list
-    # TODO - get this to return a datasource uuid for each gas and then the data 
-    return False
+        data_list.append(data_tuple)
+
+        # TODO - improve this
+        # data_list.append((datasource_ids[n], split_frames))
+        # data_list.append((split_frames))
+
+    return data_list
 
 
 def parse_timecols(time_data):

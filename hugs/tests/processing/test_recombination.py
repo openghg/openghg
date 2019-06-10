@@ -59,9 +59,11 @@ def test_combine_sections():
 
     # raw_data = raw_data.dropna(axis=0, how="any")
     # raw_data.index = pd.RangeIndex(raw_data.index.size)
+    # datasource_ids, dataframes = parse_gases(raw_data)
 
-    datasource_id, gas_data = parse_gases(raw_data)
-    dataframes = [data for _, data in gas_data]
+    gas_data = parse_gases(raw_data)
+
+    _, dataframes = zip(*gas_data)
     complete = combine_sections(dataframes)
     
     # Parse through the object store
@@ -70,7 +72,6 @@ def test_combine_sections():
     crds.save(bucket=bucket)
     uuid_list = [d._uuid for d in crds._datasources]
     datasources = _recombination.get_datasources(bucket, uuid_list)
-    dataframes = [datasource._data for datasource in datasources]
     combined = _recombination.combine_sections(dataframes)
 
     assert combined.equals(complete)
