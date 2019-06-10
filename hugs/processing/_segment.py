@@ -161,13 +161,7 @@ def parse_gases(data):
         # As some (years, months, weeks) may be empty we don't want those dataframes
         split_frames = [g for _, g in group if len(g) > 0]
 
-        data_tuple = datasource_ids[n], split_frames
-
-        data_list.append(data_tuple)
-
-        # TODO - improve this
-        # data_list.append((datasource_ids[n], split_frames))
-        # data_list.append((split_frames))
+        data_list.append((datasource_ids[n], split_frames))
 
     return data_list
 
@@ -252,82 +246,3 @@ def unanimous(seq):
             return all(i == first for i in it)
 
 
-# def parse_file(filepath):
-#     """ This function controls the parsing of the datafile. It calls
-#         other functions that help to break the datafile apart and
-        
-#         Args:
-#             filename (str): Name of file to parse
-#         Returns:
-#             list: List of gases
-#     """
-#     # Read everything
-#     data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
-
-#     # header = data.head(2)
-
-#     # # Count the number of columns before measurement data
-#     # skip_cols = sum([header[column][0] == "-" for column in header.columns])
-
-#     # Create a dataframe of the time and supplementary data
-#     # metadata["time_frame"] = data.iloc[:, 0:skip_cols]
-#     # Get the metadata dictionary - this will be saved as a JSON
-#     filename = filepath.split("/")[-1]
-#     metadata = meta.parse_metadata(data=data, filename=filename)
-
-#     # Dictionary of gases for saving to object store
-#     gases = _parse_gases(data=data, skip_cols=skip_cols)
-
-#     # Dictionary of gas_name:UUID pairs
-#     gas_metadata = {g: gases[g]["UUID"] for g in gases.keys()}
-
-#     metadata["gases"] = gas_metadata
-
-#     # Save as part of gases dictionary
-#     gases["metadata"] = metadata
-
-#     # Dictionary of {metadata: ..., gases: {gas: UUID, gas: UUID ...} }
-#     return gases
-
-#     # # Extract the gas name and UUID from the gases dictionary
-#     # gas_metadata = {}
-#     # for g in gases.keys():
-#     #     gas_metadata[g] = gases[g]["UUID"]
-
-#     # gas_info = {x for x in gases.keys()}
-
-
-#     # Daterange can just be in the format of
-#     # YYYYMMDD_YYYYMMDD
-    
-
-def url_join(*args):
-    """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
-        stripped for each argument.
-
-        Args:
-            *args (str): Strings to concatenate into a key to use
-            in the object store
-        Returns:
-            str: A url style key string with arguments separated by forward slashes
-    """
-    return "/".join(map(lambda x: str(x).rstrip('/'), args))       
-
-def get_daterange_str(start, end):
-    """ Creates a string from the start and end datetime
-        objects. Used for production of the key
-        to store segmented data in the object store.
-
-        Args:
-            start (datetime): Start datetime
-            end (datetime): End datetime
-        Returns:
-            str: Daterange formatted as start_end
-            YYYYMMDD_YYYYMMDD
-            Example: 20190101_20190201
-    """
-
-    start_fmt = start.strftime("%Y%m%d")
-    end_fmt = end.strftime("%Y%m%d")
-    
-    return start_fmt + "_" + end_fmt
