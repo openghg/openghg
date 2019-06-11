@@ -145,3 +145,10 @@ The metadata has the data before the NaNs are removed.
 CRDS, GC objects can become the first line for assessment of where the data being read in should go.
 
 CRDS object -> Instruments -> Datasources
+
+Todo for 2019-06-12
+
+- Finish search functionality for gas searching
+- Tests for Instrument
+- Search for SettingWithCopy warning source
+- GC file processing
