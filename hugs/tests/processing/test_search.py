@@ -8,6 +8,8 @@ from processing import in_daterange
 from processing import search_store
 from processing import key_to_daterange
 
+from modules import Instrument
+
 from Acquire.ObjectStore import datetime_to_string
 from Acquire.ObjectStore import datetime_to_datetime
 
@@ -26,7 +28,13 @@ def test_search_store(crds):
     # Create and store data
     crds.save(bucket=bucket)
 
-    data_uuids = [d._uuid for d in crds._datasources]
+    # Get the instrument
+    instrument_uuids = list(crds._instruments)
+
+    # Get UUID from Instrument
+    instrument = Instrument.load(bucket=bucket, uuid=instrument_uuids[0])
+    # Get Datasource IDs from Instrument
+    data_uuids = [d._uuid for d in instrument._datasources]
 
     start = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
     end = datetime.datetime.strptime("2014-01-31", "%Y-%m-%d")
@@ -47,11 +55,17 @@ def test_search_store_two():
 
     crds = CRDS.read_file(filepath)
 
-    bucket = get_local_bucket(empty=True)
+    bucket = get_local_bucket()
     # Create and store data
     crds.save(bucket=bucket)
 
-    data_uuids = [d._uuid for d in crds._datasources]
+    # Get the instrument
+    instrument_uuids = list(crds._instruments)
+
+    # Get UUID from Instrument
+    instrument = Instrument.load(bucket=bucket, uuid=instrument_uuids[0])
+    # Get Datasource IDs from Instrument
+    data_uuids = [d._uuid for d in instrument._datasources]
 
     start = datetime.datetime.strptime("2013-01-01", "%Y-%m-%d")
     end = datetime.datetime.strptime("2019-06-01", "%Y-%m-%d")

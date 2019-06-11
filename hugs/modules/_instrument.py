@@ -110,6 +110,7 @@ class Instrument:
         if stored:
             datasource_uuids = data["datasources"]
             for uuid in datasource_uuids:
+                print("Loading Datasource at UUID : ", uuid)
                 i._datasources.append(_Datasource.load(uuid=uuid))
 
         i._creation_datetime = _string_to_datetime(data["creation_datetime"])
@@ -141,14 +142,13 @@ class Instrument:
         if bucket is None:
             bucket = _get_bucket()
 
+        self._stored = True
         instrument_key = "%s/uuid/%s" % (Instrument._instrument_root, self._uuid)
         _ObjectStore.set_object_from_json(bucket=bucket, key=instrument_key, data=self.to_data())
 
         # Get the datasources to save themselves to the object store
         for d in self._datasources:
             d.save(bucket=bucket)
-
-        self._stored = True
 
         encoded_name = _string_to_encoded(self._name)
         string_key = "%s/name/%s/%s" % (Instrument._instrument_root, encoded_name, self._uuid)
@@ -294,15 +294,13 @@ class Instrument:
                 raw_data (list): List of Pandas.Dataframes
                 metadata (Metadata): Metadata object
             Returns:
-                Datasource: Datasource containing data
+                None
         """
         from modules import Datasource as _Datasource
         from processing import parse_gases as _parse_gases
 
         # Where gas_data is a list of tuples
         gas_data = _parse_gases(raw_data)
-
-        datasources = []
 
         for gas_name, datasource_id, data in gas_data:
             if _Datasource.exists(datasource_id=datasource_id):
@@ -316,9 +314,7 @@ class Instrument:
             for dataframe in data:
                 datasource.add_data(dataframe)
 
-            datasources.append(datasource)
-
-        return datasources
+            self._datasources.append(datasource)
 
 
     def search_labels(self, search_term):

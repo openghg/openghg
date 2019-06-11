@@ -75,14 +75,16 @@ def test_combine_sections():
     complete = combine_sections(dataframes)
 
     # Load in from object store
-
     crds = CRDS.read_file(filepath)
 
     # Get the instrument
-    uuids = crds._instruments.keys()
-    # Get UUID from Instrument
+    instrument_uuids = list(crds._instruments)
 
-    uuid_list = [d._uuid for d in crds._datasources]
+    # Get UUID from Instrument
+    instrument =  Instrument.load(bucket=bucket, uuid=instrument_uuids[0])
+
+    # Get Datasource IDs from Instrument
+    uuid_list = [d._uuid for d in instrument._datasources]
     datasources = _recombination.get_datasources(bucket, uuid_list)
     combined = combine_sections(dataframes)
 
