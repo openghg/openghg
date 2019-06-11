@@ -26,13 +26,12 @@ class Instrument:
         self._uuid = None
         self._name = None
         self._creation_datetime = None
-        self._labels = None
         self._stored = False
         # self._height = None
         # self._site = None
         # self._network = None
+        self._labels = {}
         self._datasources = []
-        self._datasources_metadata = {}
     
     @staticmethod
     def create(name, **kwargs):
@@ -53,6 +52,8 @@ class Instrument:
         i._uuid = _create_uuid()
         i._creation_datetime = _get_datetime_now()
         i._name = name
+        # Here labels will be the metadata associated with each Datasource
+        # associated with this Instrument
         # Save the passed keywords as 
         i._labels = kwargs
 
@@ -88,11 +89,12 @@ class Instrument:
         return d
 
     @staticmethod
-    def from_data(data):
+    def from_data(data, shallow):
         """ Creates an Instrument object from a JSON file
 
             Args:
                 data (dict): JSON data from which to create object
+                shallow (bool): If True don't load related Datasources
             Returns:
                 Instrument: Instrument object from data
         """
@@ -107,13 +109,16 @@ class Instrument:
         i._name = data["name"]
         stored = data["stored"]
 
-        if stored:
+        if stored and not shallow:
             datasource_uuids = data["datasources"]
             for uuid in datasource_uuids:
-                print("Loading Datasource at UUID : ", uuid)
                 i._datasources.append(_Datasource.load(uuid=uuid))
+        else:
+            i._datasources = data["datasources"]
+
 
         i._creation_datetime = _string_to_datetime(data["creation_datetime"])
+        
         i._labels = data["labels"]
         i._stored = False
 
@@ -155,7 +160,7 @@ class Instrument:
         _ObjectStore.set_string_object(bucket=bucket, key=string_key, string_data=self._uuid)
 
     @staticmethod
-    def load(bucket=None, uuid=None, name=None):
+    def load(bucket=None, uuid=None, name=None, shallow=False):
         """ Load an Instrument from the object store either by name or UUID
 
             uuid or name must be passed to the function
@@ -164,6 +169,7 @@ class Instrument:
                 bucket (dict, default=None): Bucket to hold data
                 uuid (str, default=None): UUID of Instrument
                 name (str, default=None): Name of Instrument
+                shallow (bool, default=False): If True don't load related Datasources
             Returns:
                 Instrument: Instrument object
         """
@@ -248,40 +254,26 @@ class Instrument:
         """
         return self._labels
 
-    # def create_datasource(self, name):
-    #     """ Creates a DataSource object and adds its information to the list of
-    #         DataSources. Instrument, site and network data is taken from this
-    #         Instrument instance.
-
-    #         Args:
-    #             name (str): Name for DataSource
-    #     """
-    #     from modules._datasource import Datasource
-
-    #     datasource = DataSource.create(name=name, instrument=self._name, 
-    #                                     site=self._site, network=self._network)
-
-    #     self._datasources[datasource._uuid] = {"name": name, "created": datasource._creation_datetime}
-
-    #     return datasource
 
     def add_datasource(self, datasource):
-        """ Add a Datasource to this Instrument
+        """ Add a Datasource to this Instrument along with accompanying metadata
+            on the Datasource.
 
             Args:
                 datsource (Datasource): Datasource object to add
             Returns:
                 None
         """
-        datasource_dict = {}
+        metadata = {}
         
         # TODO - how to properly get the gas name?
-        datasource_dict["gas_type"] = datasource._name
-        datasource_dict["date_range"] = datasource._labels[datasource.get_daterange()]
-        datasource_dict["gas_type"] = datasource._labels["gas_type"]
+        # metadata["gas_type"] = datasource._name
+        metadata["date_range"] = datasource.get_daterange()
+        metadata["gas"] = datasource._labels["gas"]
         # More datas?
 
-        self._datasources_metadata[datasource._uuid] = datasource_dict
+        self.add_label(datasource._uuid, metadata)
+
         self._datasources.append(datasource)
 
 
@@ -305,7 +297,7 @@ class Instrument:
         for gas_name, datasource_id, data in gas_data:
             if _Datasource.exists(datasource_id=datasource_id):
                 datasource = _Datasource.load(uuid=datasource_id)
-                # TODO - add metadata in here - append to current?
+                # TODO - add metadata in here - append to existing?
             else:
                 datasource = _Datasource.create(name=gas_name)
                 datasource.add_metadata(metadata)
@@ -314,7 +306,7 @@ class Instrument:
             for dataframe in data:
                 datasource.add_data(dataframe)
 
-            self._datasources.append(datasource)
+            self.add_datasource(datasource)
 
 
     def search_labels(self, search_term):

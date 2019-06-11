@@ -17,7 +17,6 @@ class Datasource:
         self._labels = {}
 
         self._metadata = None
-
         self._parent = None
         # These may be unnecessary?
         self._instrument = None
@@ -54,9 +53,11 @@ class Datasource:
         d._name = name
         d._uuid = _create_uuid()
         d._creation_datetime = _get_datetime_now()
-        
+                
         # Any need to parse these for safety?
         d._labels = kwargs
+        d._labels["gas"] = name
+
         
         if data is not None:
             # This could be a list of dataframes
@@ -251,7 +252,7 @@ class Datasource:
             return _read_hdf(data)
 
     @staticmethod
-    def from_data(bucket, data):
+    def from_data(bucket, data, shallow):
         """ Construct from a JSON-deserialised dictionary
 
             Args:
@@ -274,7 +275,7 @@ class Datasource:
         d._data_keys = data["data_keys"]
         d._data = []
         
-        if d._stored:
+        if d._stored and not shallow:
             for key in d._data_keys:
                 d._data.append(d.load_dataframe(bucket, key))
 
@@ -316,7 +317,7 @@ class Datasource:
 
 
     @staticmethod
-    def load(bucket=None, uuid=None, name=None):
+    def load(bucket=None, uuid=None, name=None, shallow=False):
         """ Load a Datasource from the object store either by name or UUID
 
             uuid or name must be passed to the function
@@ -345,7 +346,7 @@ class Datasource:
         
         data = _get_object_json(bucket=bucket, key=key)
 
-        return Datasource.from_data(bucket=bucket, data=data)
+        return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
 
     @staticmethod
     def _get_name_from_uid(bucket, uuid):

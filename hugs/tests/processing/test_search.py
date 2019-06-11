@@ -7,6 +7,7 @@ from objectstore import get_local_bucket
 from processing import in_daterange
 from processing import search_store
 from processing import key_to_daterange
+from processing import gas_search
 
 from modules import Instrument
 
@@ -106,3 +107,17 @@ def test_key_to_daterange():
     assert end_back == end_key
 
 
+def test_gas_search(crds):
+    # Create CRDS object and read it all in
+    bucket = get_local_bucket()
+    # Create and store data
+    crds.save(bucket=bucket)
+
+    gas_name = "co"
+    meas_type = "crds"
+
+    keys = gas_search(gas_name=gas_name, meas_type=meas_type)
+
+    print(keys)
+
+    assert False

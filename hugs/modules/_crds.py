@@ -113,6 +113,8 @@ class CRDS:
         d = {}
         d["UUID"] = self._uuid
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        # Save UUIDs of associated instruments
+        d["instruments"] = self._instruments
         # d["datasources"] = datasource_uuids
         # d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
         # d["data_end_datetime"] = _datetime_to_string(self._end_datetime)
@@ -143,7 +145,8 @@ class CRDS:
         c = CRDS()
         c._uuid = data["UUID"]
         c._creation_datetime = _string_to_datetime(data["creation_datetime"])
-
+        c._instruments = data["instruments"]
+        #  c._instruments[instrument._uuid] = instrument._creation_datetime
         stored = data["stored"]
 
         # Could load instruments? This could be a lot of instruments
@@ -178,7 +181,7 @@ class CRDS:
         _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
     @staticmethod
-    def load(uuid, bucket=None):
+    def load(uuid, key, bucket=None):
         """ Load a CRDS object from the datastore using the passed
             bucket and UUID
 
@@ -200,6 +203,15 @@ class CRDS:
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
         return CRDS.from_data(data=data, bucket=bucket)
+
+    def get_instruments(self):
+        """ Get the Instruments associated with this object
+
+            Returns:
+                dict: Dictionary of Instrument UUIDs
+        """
+        return self._instruments
+
 
 
     # def get_daterange(self):

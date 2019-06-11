@@ -15,75 +15,115 @@ class RootPaths(_Enum):
     NETWORK = "network"
 
 
+def gas_search(gas_name, meas_type, start_date=None, end_datetime=None):
+    """ Search for gas data (optionally within a daterange)
+    
+        Load instruments from the correct network ?
+        Read labels of the Datasources in the Instruments and record ones that match
+        Get a list of UUIDs
+
+        Return list of UUIDs of matching dataframes / datasources?
+
+    """
+    from objectstore import get_object_names as _get_object_names
+    from objectstore import get_local_bucket as _get_local_bucket
+    from modules import Instrument
+    from modules import CRDS
+
+    meas_type = "crds"
+    search_prefix = "%s/uuid/" % meas_type
+    bucket = _get_local_bucket()
+
+    crds_list = _get_object_names(bucket, search_prefix)
+    crds_uuid = crds_list[0].split("/")[-1]
+    
+    crds = CRDS.load(bucket, crds_uuid)
+    
+    # Get instrument UUIDs
+    instrument_uuids = list(crds.get_instruments())
+
+    instruments = [Instrument.load(uuid=uuid, shallow=True) for uuid in instrument_uuids]
+
+    keys = []
+    for inst in instruments:
+        if gas_name in list(inst.get_labels().values()):
+            keys.append(inst._uuid)
+
+    return keys
+
+    
+
+
+
 def search_store(bucket, data_uuids, root_path, start_datetime, end_datetime):
-        """ Get all values stored in the object store
+    """ Get all values stored in the object store
 
-            Args:
-                bucket (dict): Bucket holding data
-                data_uuids (list): List of UUIDs to search
-                root_path (str): Select from the enum RootPaths
-                For DataSources: datasource
-                For Instruments: instrument etc
-                datetime_begin (datetime): Start of datetime range
-                datetime_end (datetime): End of datetime range
-            Returns:
-                list: A list of keys for the found data
+        Args:
+            bucket (dict): Bucket holding data
+            data_uuids (list): List of UUIDs to search
+            root_path (str): Select from the enum RootPaths
+            For DataSources: datasource
+            For Instruments: instrument etc
+            datetime_begin (datetime): Start of datetime range
+            datetime_end (datetime): End of datetime range
+        Returns:
+            list: A list of keys for the found data
 
-        """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
-        from objectstore._hugs_objstore import get_dataframe as _get_dataframe
-        from objectstore._hugs_objstore import get_object_names as _get_object_names
-        from pandas import date_range as _pd_daterange
+    """
+    from Acquire.ObjectStore import ObjectStore as _ObjectStore
+    from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+    from objectstore._hugs_objstore import get_dataframe as _get_dataframe
+    from objectstore._hugs_objstore import get_object_names as _get_object_names
+    from pandas import date_range as _pd_daterange
 
-        start_datetime = _datetime_to_datetime(start_datetime)
-        end_datetime = _datetime_to_datetime(end_datetime)
+    start_datetime = _datetime_to_datetime(start_datetime)
+    end_datetime = _datetime_to_datetime(end_datetime)
 
-        # Something like this?
-        # freq = "YS"
-        # resolution = "%Y"
-        # if start_datetime.month != 0 and end_datetime.month != 0:
-        #     resolution += "%m"
-        #     freq = "MS"
-        # if start_datetime.day != 0 and end_datetime.day != 0:
-        #     resolution += "%d"
-        #     freq = "D"
-        # if start_datetime.hour != 0 and end_datetime.hour != 0:
-        #     resolution += "%h"
-        #     freq = "H"
+    # Something like this?
+    # freq = "YS"
+    # resolution = "%Y"
+    # if start_datetime.month != 0 and end_datetime.month != 0:
+    #     resolution += "%m"
+    #     freq = "MS"
+    # if start_datetime.day != 0 and end_datetime.day != 0:
+    #     resolution += "%d"
+    #     freq = "D"
+    # if start_datetime.hour != 0 and end_datetime.hour != 0:
+    #     resolution += "%h"
+    #     freq = "H"
 
-        # At the moment just have years
-        # daterange = _pd_daterange(start=start_datetime, end=end_datetime, freq="Y")
+    # At the moment just have years
+    # daterange = _pd_daterange(start=start_datetime, end=end_datetime, freq="Y")
 
-        # path = RootPaths[root_path.upper()]
+    # path = RootPaths[root_path.upper()]
 
-        # TODO - Change this to work with enums?
-        path = "data"
+    # TODO - Change this to work with enums?
+    path = "data"
 
-        # Get the UUIDs for the data
-        # data_uuids = [d._uuid for d in self._datasources]
+    # Get the UUIDs for the data
+    # data_uuids = [d._uuid for d in self._datasources]
 
-        # If we know the UUIDs we have read the dateranges from the metadata stored
-        # and return the data
-        # This will have to be changed again when the dataframes are split up
+    # If we know the UUIDs we have read the dateranges from the metadata stored
+    # and return the data
+    # This will have to be changed again when the dataframes are split up
 
-        # Where to look
-        keys = []
-        for uuid in data_uuids:
-            prefix = "%s/uuid/%s" % ("data", uuid)
-            # Get the keys that start with this and read the daterange from the returned value
-            keys.extend(_get_object_names(bucket=bucket, prefix=prefix))
+    # Where to look
+    keys = []
+    for uuid in data_uuids:
+        prefix = "%s/uuid/%s" % ("data", uuid)
+        # Get the keys that start with this and read the daterange from the returned value
+        keys.extend(_get_object_names(bucket=bucket, prefix=prefix))
 
-        # The data to get
-        # TODO - once segmentation by date is functional this
-        # can be extended to include the dateranges properly
-        data_uuids = []
-        # Get the daterange
-        for key in keys:
-            if in_daterange(key, start_datetime, end_datetime):
-                data_uuids.append(key)
+    # The data to get
+    # TODO - once segmentation by date is functional this
+    # can be extended to include the dateranges properly
+    data_uuids = []
+    # Get the daterange
+    for key in keys:
+        if in_daterange(key, start_datetime, end_datetime):
+            data_uuids.append(key)
 
-        return data_uuids
+    return data_uuids
 
 
 def in_daterange(key, start_search, end_search):
