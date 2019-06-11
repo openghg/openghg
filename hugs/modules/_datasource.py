@@ -16,6 +16,8 @@ class Datasource:
         self._creation_datetime = None
         self._labels = {}
 
+        self._metadata = None
+
         self._parent = None
         # These may be unnecessary?
         self._instrument = None
@@ -117,6 +119,15 @@ class Datasource:
         self._start_datetime = _string_to_datetime(data.first_valid_index())
         self._end_datetime = _string_to_datetime(data.last_valid_index())
         self._data.append(data)
+
+    def add_metadata(self, metadata):
+        """ Add metadata to this object
+
+            Args:
+                metadata (Metadata): Metadata object
+        """
+        self._metadata = metadata
+
 
     @staticmethod
     def exists(datasource_id, bucket=None):

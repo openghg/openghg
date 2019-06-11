@@ -32,7 +32,7 @@ def test_create(data):
 
     assert metadata._data["site"] == "bsd"
     assert metadata._data["instrument"] == "picarro"
-    assert metadata._data["resolution"] == "1m"
+    assert metadata._data["time_resolution"] == "1m"
     assert metadata._data["height"] == "248m"
     assert metadata._data["start_datetime"] == datetime_to_string(start_datetime)
     assert metadata._data["end_datetime"] == datetime_to_string(end_datetime)

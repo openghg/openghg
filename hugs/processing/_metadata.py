@@ -55,7 +55,7 @@ class Metadata:
         end = m.parse_date_time(date=end_date, time=end_time)
 
         # Extract data from the filename
-        site, instrument, resolution, height = m.parse_filename(filename=filename)
+        site, instrument, time_resolution, height = m.parse_filename(filename=filename)
  
         # Parse the dataframe to find the gases - this might be excessive
         # gases, _ = find_gases(data=data)
@@ -63,7 +63,7 @@ class Metadata:
         m._creation_datetime = _datetime_to_string(_get_datetime_now())
         m._data["site"] = site
         m._data["instrument"] = instrument
-        m._data["resolution"] = resolution
+        m._data["time_resolution"] = time_resolution
         m._data["height"] = height
         m._data["start_datetime"] = _datetime_to_string(start)
         m._data["end_datetime"] = _datetime_to_string(end)

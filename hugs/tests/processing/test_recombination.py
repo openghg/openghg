@@ -53,8 +53,9 @@ def keylist():
 def test_combine_sections():
     from modules._datasource import Datasource
     from objectstore._hugs_objstore import get_object
+    from modules import Instrument
     
-    bucket = get_local_bucket()
+    bucket = get_local_bucket(empty=True)
 
     filename = "bsd.picarro.1minute.248m.dat"
     dir_path = os.path.dirname(__file__)
@@ -72,14 +73,18 @@ def test_combine_sections():
 
     _, _, dataframes = zip(*gas_data)
     complete = combine_sections(dataframes)
-    
-    # Parse through the object store
+
+    # Load in from object store
+
     crds = CRDS.read_file(filepath)
-    # Create and store data
-    crds.save(bucket=bucket)
+
+    # Get the instrument
+    uuids = crds._instruments.keys()
+    # Get UUID from Instrument
+
     uuid_list = [d._uuid for d in crds._datasources]
     datasources = _recombination.get_datasources(bucket, uuid_list)
-    combined = _recombination.combine_sections(dataframes)
+    combined = combine_sections(dataframes)
 
     assert combined.equals(complete)
 

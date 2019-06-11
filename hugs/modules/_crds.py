@@ -1,7 +1,7 @@
 # from _paths import RootPaths
 
 class CRDS:
-    """ Holds CRDS data within a set of Datasources
+    """ Interface for uploading CRDS data
 
         Instances of CRDS should be created using the
         CRDS.create() function
@@ -10,12 +10,11 @@ class CRDS:
     _crds_root = "CRDS"
 
     def __init__(self):
-        self._metadata = None
         self._uuid = None
-        self._datasources = None
-        self._start_datetime = None
-        self._end_datetime = None
+        self._instruments = {}
+        self._labels = {}
         self._stored = False
+
 
     def is_null(self):
         """ Check if this is a null object
@@ -26,23 +25,16 @@ class CRDS:
         return self._uuid is None
 
     @staticmethod
-    def create(metadata, datasources, start_datetime, end_datetime):
+    def create():
         """ This function should be used to create CRDS objects
 
-            Args:
-                metadata (Metadata): Metadata for data to be stored
-                datasources (list): List of Datasources
-                start_datetime (datetime): Start datetime for Datasource objects
-                end_datetime (datetime): End datetime for Datasource objects
             Returns:
                 CRDS: CRDS object 
         """
-        c = CRDS()
+        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
-        c._metadata = metadata
-        c._datasources = datasources
-        c._start_datetime = start_datetime
-        c._end_datetime = end_datetime
+        c = CRDS()
+        c._creation_datetime = _get_datetime_now()
 
         return c
 
@@ -70,50 +62,40 @@ class CRDS:
             Args:
                 filepath (str): Path of file to load
             Returns:
-                CRDS: CRDS object containing data from file
+                None
         """
+        from pandas import read_csv as _read_csv
+        
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
-        from processing._metadata import Metadata as _Metadata
-        from processing._segment import get_datasources as _get_datasources
-
-        from pandas import read_csv as _read_csv
-
-        data = _read_csv(filepath, header=None, skiprows=1, sep=r"\s+")     
-
-        # Read in data
-        # Which instrument is data from?
-        # Parse gases works within the Instrument rather than CRDS
-        # Instrument gets datasources
-        # Saves their metadata etc within itself
         
+        from processing._metadata import Metadata as _Metadata
+        from modules import Instrument as _Instrument
 
+        raw_data = _read_csv(filepath, header=None, skiprows=1, sep=r"\s+")     
 
+        # TODO - ID instrument from data/user?
+        instrument_id = 12
 
-
-        #  
-
-        # Data will be contained within the Datasources
-        datasources = _get_datasources(data)
+        if _Instrument.exists(instrument_id=instrument_id):
+            instrument = _Instrument.load(uuid=instrument_id)
+        else:
+            instrument = _Instrument.create(name="name")
 
         filename = filepath.split("/")[-1]
-        # Get a Metadata object containing the processed metadata
-        # Does this need to be an object? Just a dict?
+        metadata = _Metadata.create(filename, raw_data)
 
-        # I'm not sure this is needed here, this can be stored
-        # as labels in the objects that are created ? 
-
-        metadata = _Metadata.create(filename, data)
+        instrument.parse_data(raw_data=raw_data, metadata=metadata)
+        # Save updated Instrument to object store
+        instrument.save()
 
         c = CRDS()
         c._uuid = _create_uuid()
         c._creation_datetime = _get_datetime_now()
-        c._datasources = datasources
-        c._metadata = metadata
+        # TODO - should this just be creation datetime?
+        c._instruments[instrument._uuid] = instrument._creation_datetime
 
-        # Ensure the CRDS object knows the datetimes it has
-        c._start_datetime = datasources[0].get_start_datetime()
-        c._end_datetime = datasources[0].get_end_datetime()
+        c.save()
 
         return c
 
@@ -128,16 +110,12 @@ class CRDS:
 
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-        # datasource_uuids = {d._name: d._uuid for d in self._datasources}
-        datasource_uuids = [d._uuid for d in self._datasources]
-
         d = {}
         d["UUID"] = self._uuid
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
-        d["datasources"] = datasource_uuids
-        d["metadata"] = self._metadata.data()
-        d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
-        d["data_end_datetime"] = _datetime_to_string(self._end_datetime)
+        # d["datasources"] = datasource_uuids
+        # d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
+        # d["data_end_datetime"] = _datetime_to_string(self._end_datetime)
         # This is only set as True when saving this object in the object store
         d["stored"] = self._stored
 
@@ -168,17 +146,9 @@ class CRDS:
 
         stored = data["stored"]
 
-        datasource_uuids = data["datasources"]
-        c._datasources = []
-
-        # Load the Datasources associated with this object
-        if stored:
-            for uuid in datasource_uuids:
-                c._datasources.append(Datasource.load(bucket=bucket, uuid=uuid))
-
-        c._metadata = data["metadata"]
-        c._start_datetime = _string_to_datetime(data["data_start_datetime"])
-        c._end_datetime = _string_to_datetime(data["data_end_datetime"])
+        # Could load instruments? This could be a lot of instruments
+        # c._start_datetime = _string_to_datetime(data["data_start_datetime"])
+        # c._end_datetime = _string_to_datetime(data["data_end_datetime"])
         # Now we're loading it in again 
         c._stored = False
 
@@ -203,9 +173,6 @@ class CRDS:
             bucket = _get_bucket()
 
         crds_key = "%s/uuid/%s" % (CRDS._crds_root, self._uuid)
-        # Get the datasources to save themselves to the object store
-        for d in self._datasources:
-            d.save(bucket=bucket)
 
         self._stored = True
         _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
@@ -235,29 +202,14 @@ class CRDS:
         return CRDS.from_data(data=data, bucket=bucket)
 
 
-    def get_daterange(self):
-        """ Returns the daterange of the data in this object
+    # def get_daterange(self):
+    #     """ Returns the daterange of the data in this object
 
-            Returns:
-                tuple (datetime, datetime): Start and end datetime
-        """
-        return self._start_datetime, self._end_datetime 
+    #         Returns:
+    #             tuple (datetime, datetime): Start and end datetime
+    #     """
+    #     return self._start_datetime, self._end_datetime 
 
-    def get_datasources(self):
-        """ Return this object's Datasource
-
-            Returns:
-                list: List of datasources
-        """
-        return self._datasources
-
-    def get_metadata(self):
-        """ Get the metadata relating to this CRDS object
-
-            Returns:
-                dict: Metadata as dictionary
-        """
-        return self._metadata.data()
 
     def write_file(self, filename):
         """ Collects the data stored in this object and writes it

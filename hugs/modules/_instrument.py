@@ -27,6 +27,7 @@ class Instrument:
         self._name = None
         self._creation_datetime = None
         self._labels = None
+        self._stored = False
         # self._height = None
         # self._site = None
         # self._network = None
@@ -39,8 +40,8 @@ class Instrument:
 
             Args:
                 name (str): Name of instrument
-                site (str): Site at which instrument is based
-                network (str): Network site associated with
+                **kwargs: Keyword arguments to be added to the labels
+                dictionary
             Returns:
                 Instrument: Instrument object
         """
@@ -54,9 +55,6 @@ class Instrument:
         i._name = name
         # Save the passed keywords as 
         i._labels = kwargs
-        
-        # To hold UIDs of all DataSources associated with this Instrument
-        i._datasources = {}
 
         return i
 
@@ -77,11 +75,15 @@ class Instrument:
         """
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
+        datasource_uuids = [d._uuid for d in self._datasources]
+
         d = {}
         d["UUID"] = self._uuid
         d["name"] = self._name
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        d["datasources"] = datasource_uuids
         d["labels"] = self._labels
+        d["stored"] = self._stored
 
         return d
 
@@ -98,12 +100,21 @@ class Instrument:
             return Instrument()
 
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+        from modules import Datasource as _Datasource
 
         i = Instrument()
         i._uuid = data["UUID"]
         i._name = data["name"]
+        stored = data["stored"]
+
+        if stored:
+            datasource_uuids = data["datasources"]
+            for uuid in datasource_uuids:
+                i._datasources.append(_Datasource.load(uuid=uuid))
+
         i._creation_datetime = _string_to_datetime(data["creation_datetime"])
         i._labels = data["labels"]
+        i._stored = False
 
         return i
 
@@ -132,6 +143,12 @@ class Instrument:
 
         instrument_key = "%s/uuid/%s" % (Instrument._instrument_root, self._uuid)
         _ObjectStore.set_object_from_json(bucket=bucket, key=instrument_key, data=self.to_data())
+
+        # Get the datasources to save themselves to the object store
+        for d in self._datasources:
+            d.save(bucket=bucket)
+
+        self._stored = True
 
         encoded_name = _string_to_encoded(self._name)
         string_key = "%s/name/%s/%s" % (Instrument._instrument_root, encoded_name, self._uuid)
@@ -167,14 +184,14 @@ class Instrument:
         return Instrument.from_data(data)
 
     # Need the DataSources associated with this Instrument
-    def get_datasources(self):
-        """ Returns a JSON serialisable dictionary of the DataSources
-            associated with this Instrument
+    # def get_datasources(self):
+    #     """ Returns a JSON serialisable dictionary of the DataSources
+    #         associated with this Instrument
 
-            Returns:
-                dict: Dictionary of DataSources and related information
-        """        
-        return self._datasources
+    #         Returns:
+    #             dict: Dictionary of DataSources and related information
+    #     """        
+    #     return self._datasources
         
     @staticmethod
     def _get_uid_from_name(bucket, name):
@@ -199,6 +216,37 @@ class Instrument:
             raise ValueError("There should only be one instrument with this name")
 
         return uuid[0].split("/")[-1]
+    
+
+    @staticmethod
+    def exists(instrument_id, bucket=None):
+        """ Uses an ID of some kind to query whether or not this is a new
+            Instrument and should be created
+
+            TODO - update this when I have a clearer idea of how to ID Instruments
+
+            Args:
+                instrument_id (str): ID of Instrument
+            Returns:
+                bool: True if Instrument exists 
+        """
+        from objectstore import exists as _exists
+        from objectstore import get_bucket as _get_bucket
+
+        if bucket is None:
+            bucket = _get_bucket()
+
+        # Query object store for Instrument
+        return _exists(bucket=bucket, uuid=instrument_id)
+
+
+    def get_labels(self):
+        """ Returns the labels dictionary
+
+            Returns:
+                dict: Labels dictionary for this object
+        """
+        return self._labels
 
     # def create_datasource(self, name):
     #     """ Creates a DataSource object and adds its information to the list of
@@ -237,28 +285,32 @@ class Instrument:
         self._datasources.append(datasource)
 
 
-    def get_datasources(self, raw_data):
+    def parse_data(self, raw_data, metadata):
         """ Create or get an exisiting Datasource for each gas in the file
 
             TODO - currently this function will only take data from a single Datasource
             
             Args:
                 raw_data (list): List of Pandas.Dataframes
+                metadata (Metadata): Metadata object
             Returns:
                 Datasource: Datasource containing data
         """
         from modules import Datasource as _Datasource
+        from processing import parse_gases as _parse_gases
 
         # Where gas_data is a list of tuples
-        gas_data = parse_gases(raw_data)
+        gas_data = _parse_gases(raw_data)
 
         datasources = []
 
         for gas_name, datasource_id, data in gas_data:
             if _Datasource.exists(datasource_id=datasource_id):
                 datasource = _Datasource.load(uuid=datasource_id)
+                # TODO - add metadata in here - append to current?
             else:
                 datasource = _Datasource.create(name=gas_name)
+                datasource.add_metadata(metadata)
 
             # Add the dataframes to the datasource
             for dataframe in data:
@@ -270,10 +322,9 @@ class Instrument:
 
 
     def search_labels(self, search_term):
-            """ Search the labels of this Instruemnt
+            """ Search the labels of this Instrument
 
                 WIP
-
             """
             return False
 
