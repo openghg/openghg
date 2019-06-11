@@ -30,7 +30,8 @@ class Instrument:
         # self._height = None
         # self._site = None
         # self._network = None
-        self._datasources = None
+        self._datasources = []
+        self._datasources_metadata = {}
     
     @staticmethod
     def create(name, **kwargs):
@@ -215,6 +216,57 @@ class Instrument:
     #     self._datasources[datasource._uuid] = {"name": name, "created": datasource._creation_datetime}
 
     #     return datasource
+
+    def add_datasource(self, datasource):
+        """ Add a Datasource to this Instrument
+
+            Args:
+                datsource (Datasource): Datasource object to add
+            Returns:
+                None
+        """
+        datasource_dict = {}
+        
+        # TODO - how to properly get the gas name?
+        datasource_dict["gas_type"] = datasource._name
+        datasource_dict["date_range"] = datasource._labels[datasource.get_daterange()]
+        datasource_dict["gas_type"] = datasource._labels["gas_type"]
+        # More datas?
+
+        self._datasources_metadata[datasource._uuid] = datasource_dict
+        self._datasources.append(datasource)
+
+
+    def get_datasources(self, raw_data):
+        """ Create or get an exisiting Datasource for each gas in the file
+
+            TODO - currently this function will only take data from a single Datasource
+            
+            Args:
+                raw_data (list): List of Pandas.Dataframes
+            Returns:
+                Datasource: Datasource containing data
+        """
+        from modules import Datasource as _Datasource
+
+        # Where gas_data is a list of tuples
+        gas_data = parse_gases(raw_data)
+
+        datasources = []
+
+        for gas_name, datasource_id, data in gas_data:
+            if _Datasource.exists(datasource_id=datasource_id):
+                datasource = _Datasource.load(uuid=datasource_id)
+            else:
+                datasource = _Datasource.create(name=gas_name)
+
+            # Add the dataframes to the datasource
+            for dataframe in data:
+                datasource.add_data(dataframe)
+
+            datasources.append(datasource)
+
+        return datasources
 
 
     def search_labels(self, search_term):

@@ -100,7 +100,7 @@ def test_column_naming(data):
 
     column_names = ["count", "stdev", "n_meas"]
     
-    for _, data in gas_data:
+    for _, _, data in gas_data:
         # Check the name of each in the first dataframe
         for d in data:
             for i, col in enumerate(d.columns):
@@ -119,7 +119,7 @@ def test_parse_gases_correct_data(data):
     gas_datas = segment.parse_gases(data)
 
     # Unpack the list of tuples into two different tuples
-    datasouce_uuids, gas_data = zip(*gas_datas)
+    gas_name, datasouce_uuids, gas_data = zip(*gas_datas)
 
     # assert sorted(gas_names) == sorted(['ch4', 'co', 'co2'])
     

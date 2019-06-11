@@ -95,8 +95,6 @@ def test_load(instrument):
 
 
 def test_get_uid_from_name(instrument):
-    from Acquire.ObjectStore import string_to_encoded
-
     instrument = Instrument.create(name="test_name_two", site="test_site",
                       network="test_network", height="50m")
 

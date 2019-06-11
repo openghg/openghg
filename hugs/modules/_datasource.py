@@ -283,16 +283,12 @@ class Datasource:
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        # from objectstore._hugs_objstore import get_bucket as _get_bucket
-
-        # from hugs.objectstore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
+
         if self._data is not None:
             for data in self._data:
-                # Save each dataframe in the list of dataframes as a separate data entity with its own key
-                # Save the key of each dataframe associated with this Datasource for loading back in
                 daterange_str = "".join([_datetime_to_string(data.first_valid_index()), "_", _datetime_to_string(data.last_valid_index())])
                 data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
                 self._data_keys.append(data_key)
@@ -392,6 +388,16 @@ class Datasource:
         """
         return self._data
 
+    def get_daterange(self):
+        """ Get the daterange this Datasource covers as a string
+
+            Returns:
+                str: Daterange as string 
+        """
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        
+        return "".join([_datetime_to_string(self._start_datetime), "_", _datetime_to_string(self._end_datetime)])
+        
 
 
         

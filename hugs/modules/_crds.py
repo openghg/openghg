@@ -81,6 +81,18 @@ class CRDS:
 
         data = _read_csv(filepath, header=None, skiprows=1, sep=r"\s+")     
 
+        # Read in data
+        # Which instrument is data from?
+        # Parse gases works within the Instrument rather than CRDS
+        # Instrument gets datasources
+        # Saves their metadata etc within itself
+        
+
+
+
+
+        #  
+
         # Data will be contained within the Datasources
         datasources = _get_datasources(data)
 

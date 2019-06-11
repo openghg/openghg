@@ -19,11 +19,11 @@ def get_datasources(raw_data):
 
     datasources = []
 
-    for datasource_id, data in gas_data:
+    for gas_name, datasource_id, data in gas_data:
         if _Datasource.exists(datasource_id=datasource_id):
             datasource = _Datasource.load(uuid=datasource_id)
         else:
-            datasource = _Datasource.create(name="name")
+            datasource = _Datasource.create(name=gas_name)
 
         # Add the dataframes to the datasource
         for dataframe in data:
@@ -90,7 +90,7 @@ def parse_gases(data):
         Args:
             data (Pandas.Dataframe): Dataframe containing all data
         Returns:
-            tuple (str, list): ID of Datasource of this data and a list Pandas DataFrames for the 
+            tuple (str, str, list): Name of gas, ID of Datasource of this data and a list Pandas DataFrames for the 
             date-split gas data
     """
     from pandas import RangeIndex as _RangeIndex
@@ -149,7 +149,9 @@ def parse_gases(data):
 
         # Cast data to float64 / double
         gas_data = gas_data.astype("float64")
+        
         # Concatenate the timeframe and the data
+        # Pandas concat here
         gas_data = _concat([timeframe, gas_data], axis="columns")
 
         # TODO - Verify integrity here? Test if this is required
@@ -161,7 +163,7 @@ def parse_gases(data):
         # As some (years, months, weeks) may be empty we don't want those dataframes
         split_frames = [g for _, g in group if len(g) > 0]
 
-        data_list.append((datasource_ids[n], split_frames))
+        data_list.append((gas_name, datasource_ids[n], split_frames))
 
     return data_list
 

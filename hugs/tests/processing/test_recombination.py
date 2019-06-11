@@ -70,7 +70,7 @@ def test_combine_sections():
 
     gas_data = parse_gases(raw_data)
 
-    _, dataframes = zip(*gas_data)
+    _, _, dataframes = zip(*gas_data)
     complete = combine_sections(dataframes)
     
     # Parse through the object store

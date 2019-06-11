@@ -9,7 +9,7 @@ from Acquire.ObjectStore import string_to_encoded
 
 # from objectstore._hugs_objstore
 
-from processing._segment import get_datasources
+# from processing._segment import get_datasources
 from objectstore._hugs_objstore import get_dated_object
 from objectstore._hugs_objstore import get_dated_object_json
 
@@ -53,19 +53,19 @@ def mock_uuid2(monkeypatch):
     monkeypatch.setattr(uuid, 'uuid4', mock_uuid)
 
 
-@pytest.fixture(scope="session")
-def save_data_in_store(mock_uuid):
-    bucket = local_bucket.get_local_bucket()
-    datasource = get_datasources(raw_data=data)[0]
-    original_slice = datasource._data.head(1)
+# @pytest.fixture(scope="session")
+# def save_data_in_store(mock_uuid):
+#     bucket = local_bucket.get_local_bucket()
+#     datasource = get_datasources(raw_data=data)[0]
+#     original_slice = datasource._data.head(1)
 
-    # data = Datasource.create(name="test_name", instrument="test_instrument", site="test_site",
-    #                          network="test_network", data=datasource._data)
-    # data.save(bucket)
+#     # data = Datasource.create(name="test_name", instrument="test_instrument", site="test_site",
+#     #                          network="test_network", data=datasource._data)
+#     # data.save(bucket)
 
-    print("Save data in store uuid : ", datasource._uuid)
+#     print("Save data in store uuid : ", datasource._uuid)
 
-    datasource.save(bucket)
+#     datasource.save(bucket)
 
 def test_save(mock_uuid2):
     bucket = local_bucket.get_local_bucket()
@@ -98,25 +98,25 @@ def test_to_data(mock_uuid, datasource):
     # assert data["site"] == "test_site"
     # assert data["network"] == "test_network"
 
-def test_save_with_data(mock_uuid, data):
-    from processing._segment import get_datasources
+# def test_save_with_data(mock_uuid, data):
+#     from processing._segment import get_datasources
 
-    bucket = local_bucket.get_local_bucket()
+#     bucket = local_bucket.get_local_bucket()
 
-    datasources = get_datasources(raw_data=data)
-    datasource  = datasources[0]
+#     datasources = get_datasources(raw_data=data)
+#     datasource  = datasources[0]
         
-    original_slice = datasource._data[0].head(1)
+#     original_slice = datasource._data[0].head(1)
 
-    datasource.save(bucket)
+#     datasource.save(bucket)
 
-    old_uuid = datasource._uuid
+#     old_uuid = datasource._uuid
 
-    new_datasource = Datasource.load(bucket, uuid=old_uuid)
+#     new_datasource = Datasource.load(bucket, uuid=old_uuid)
 
-    new_slice = new_datasource._data[0].head(1)
+#     new_slice = new_datasource._data[0].head(1)
 
-    assert new_slice.equals(original_slice)
+#     assert new_slice.equals(original_slice)
     
 
 # def test_save_multiple_with_data(data):
