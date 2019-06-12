@@ -24,6 +24,8 @@ def gas_search(gas_name, meas_type, start_date=None, end_datetime=None):
 
         Return list of UUIDs of matching dataframes / datasources?
 
+        WIP
+
     """
     from objectstore import get_object_names as _get_object_names
     from objectstore import get_local_bucket as _get_local_bucket
@@ -37,25 +39,35 @@ def gas_search(gas_name, meas_type, start_date=None, end_datetime=None):
     crds_uuid = crds_list[0].split("/")[-1]
 
     crds = CRDS.load(bucket=bucket, uuid=crds_uuid)
+
+    # Sort out the daterange!
     
     # Get instrument UUIDs
     instrument_uuids = list(crds.get_instruments())
-
-    print(instrument_uuids)
-
     instruments = [Instrument.load(uuid=uuid, shallow=True) for uuid in instrument_uuids]
-
-    print(instruments)
 
     keys = []
     for inst in instruments:
-        if gas_name in list(inst.get_labels().values()):
-            keys.append(inst._uuid)
+        # Search labels of Instrument for Datasources that hold the gas data we want
+        labels = inst.get_labels()
+        # Loop over the keys 
+        for k in labels.keys():
+            if gas_name in list(labels[k].values()):
+                keys.append(k)
 
     return keys
 
-    
+def get_data(key_list):
+    """ Gets data from the Datasources found by the search function
 
+        Bypass loading the Datasource? Get both then we have metadata?
+
+    """
+    # Get the data
+    # This will return a list of lists of data
+    # Maybe want to do some preprocessing on this data before it comes raw out of the object store?
+    # We only want the data in the correct daterange
+    return [Datasource.load(key=key)._data for key in key_list]
 
 
 def search_store(bucket, data_uuids, root_path, start_datetime, end_datetime):

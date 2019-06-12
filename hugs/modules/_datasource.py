@@ -317,7 +317,7 @@ class Datasource:
 
 
     @staticmethod
-    def load(bucket=None, uuid=None, name=None, shallow=False):
+    def load(bucket=None, uuid=None, key=None, shallow=False):
         """ Load a Datasource from the object store either by name or UUID
 
             uuid or name must be passed to the function
@@ -334,16 +334,15 @@ class Datasource:
         from objectstore._hugs_objstore import get_object_json as _get_object_json
         from objectstore import get_bucket as _get_bucket
 
-        if uuid is None and name is None:
-            raise ValueError("Both uuid and name cannot be None")
+        if uuid is None and key is None:
+            raise ValueError("Both uuid and key cannot be None")
 
         if bucket is None:
             bucket = _get_bucket()
-        if uuid is None:
-            uuid = Datasource._get_uid_from_name(bucket=bucket, name=name)
-
-        key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
         
+        if not key:
+            key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
+
         data = _get_object_json(bucket=bucket, key=key)
 
         return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
