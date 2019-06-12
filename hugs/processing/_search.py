@@ -30,19 +30,22 @@ def gas_search(gas_name, meas_type, start_date=None, end_datetime=None):
     from modules import Instrument
     from modules import CRDS
 
-    meas_type = "crds"
     search_prefix = "%s/uuid/" % meas_type
     bucket = _get_local_bucket()
 
     crds_list = _get_object_names(bucket, search_prefix)
     crds_uuid = crds_list[0].split("/")[-1]
-    
-    crds = CRDS.load(bucket, crds_uuid)
+
+    crds = CRDS.load(bucket=bucket, uuid=crds_uuid)
     
     # Get instrument UUIDs
     instrument_uuids = list(crds.get_instruments())
 
+    print(instrument_uuids)
+
     instruments = [Instrument.load(uuid=uuid, shallow=True) for uuid in instrument_uuids]
+
+    print(instruments)
 
     keys = []
     for inst in instruments:

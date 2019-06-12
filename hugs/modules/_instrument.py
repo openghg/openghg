@@ -187,7 +187,7 @@ class Instrument:
         key = "%s/uuid/%s" % (Instrument._instrument_root, uuid)
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
-        return Instrument.from_data(data)
+        return Instrument.from_data(data, shallow)
 
     # Need the DataSources associated with this Instrument
     # def get_datasources(self):

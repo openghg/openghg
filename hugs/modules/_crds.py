@@ -12,7 +12,7 @@ class CRDS:
     def __init__(self):
         self._uuid = None
         self._instruments = {}
-        self._labels = {}
+        # self._labels = {}
         self._stored = False
 
 
@@ -31,9 +31,11 @@ class CRDS:
             Returns:
                 CRDS: CRDS object 
         """
+        from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
         c = CRDS()
+        c._uuid  = _create_uuid()
         c._creation_datetime = _get_datetime_now()
 
         return c
@@ -68,14 +70,31 @@ class CRDS:
         
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        from Acquire.ObjectStore import create_uuid as _create_uuid
         
         from processing._metadata import Metadata as _Metadata
         from modules import Instrument as _Instrument
 
         raw_data = _read_csv(filepath, header=None, skiprows=1, sep=r"\s+")     
 
+        # First check for the CRDS object - should only be one? 
+        # Maybe this can depend on the type or something?
+
+        # Load CRDS object from object store
+        # CRDS object doesn't actually hold any of the Instrument objects
+        # it just remembers them
+        
+        # Get a random UUID for now
+        crds_id = _create_uuid()
+
+        if CRDS.exists(crds_id=crds_id):
+            crds = CRDS.load(uuid=crds_id)
+        else:
+            crds = CRDS.create()
+        
         # TODO - ID instrument from data/user?
-        instrument_id = 12
+        instrument_id = _create_uuid()
 
         if _Instrument.exists(instrument_id=instrument_id):
             instrument = _Instrument.load(uuid=instrument_id)
@@ -89,15 +108,11 @@ class CRDS:
         # Save updated Instrument to object store
         instrument.save()
 
-        c = CRDS()
-        c._uuid = _create_uuid()
-        c._creation_datetime = _get_datetime_now()
-        # TODO - should this just be creation datetime?
-        c._instruments[instrument._uuid] = instrument._creation_datetime
+        # Ensure this Instrument is saved within the object
+        crds.add_instrument(instrument._uuid, _datetime_to_string(instrument._creation_datetime))
+        crds.save()
 
-        c.save()
-
-        return c
+        return crds
 
 
     def to_data(self):
@@ -113,13 +128,13 @@ class CRDS:
         d = {}
         d["UUID"] = self._uuid
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        d["instruments"] =  self._instruments
+        d["stored"] = self._stored
         # Save UUIDs of associated instruments
-        d["instruments"] = self._instruments
         # d["datasources"] = datasource_uuids
         # d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
         # d["data_end_datetime"] = _datetime_to_string(self._end_datetime)
         # This is only set as True when saving this object in the object store
-        d["stored"] = self._stored
 
         return d
 
@@ -177,11 +192,13 @@ class CRDS:
 
         crds_key = "%s/uuid/%s" % (CRDS._crds_root, self._uuid)
 
+        # Ensure that the Instruments related to this object are stored
+
         self._stored = True
         _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
     @staticmethod
-    def load(uuid, key, bucket=None):
+    def load(uuid, key=None, bucket=None):
         """ Load a CRDS object from the datastore using the passed
             bucket and UUID
 
@@ -198,11 +215,46 @@ class CRDS:
         if bucket is None:
             bucket = _get_bucket()
 
-        key = "%s/uuid/%s" % (CRDS._crds_root, uuid)
+        if key is None:
+            key = "%s/uuid/%s" % (CRDS._crds_root, uuid)
 
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
         return CRDS.from_data(data=data, bucket=bucket)
+
+    @staticmethod
+    def exists(crds_id, bucket=None):
+        """ Uses an ID of some kind to query whether or not this is a new
+            Instrument and should be created
+
+            TODO - update this when I have a clearer idea of how to ID Instruments
+
+            Args:
+                instrument_id (str): ID of Instrument
+            Returns:
+                bool: True if Instrument exists 
+        """
+        from objectstore import exists as _exists
+        from objectstore import get_bucket as _get_bucket
+
+        if bucket is None:
+            bucket = _get_bucket()
+
+        # Query object store for Instrument
+        return _exists(bucket=bucket, uuid=crds_id)
+
+
+    def add_instrument(self, instrument_id, value):
+        """ Add an Instument to this object's dictionary of instruments
+
+            Args:
+                instrument_id (str): Instrment UUID
+                value (str): Value to describe Instrument
+            Returns:
+                None
+        """
+        self._instruments[instrument_id] = value
+
 
     def get_instruments(self):
         """ Get the Instruments associated with this object

@@ -114,7 +114,7 @@ def test_gas_search(crds):
     crds.save(bucket=bucket)
 
     gas_name = "co"
-    meas_type = "crds"
+    meas_type = "CRDS"
 
     keys = gas_search(gas_name=gas_name, meas_type=meas_type)
 
