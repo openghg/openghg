@@ -15,7 +15,7 @@ class RootPaths(_Enum):
     NETWORK = "network"
 
 
-def gas_search(gas_name, meas_type, start_date=None, end_datetime=None):
+def gas_search(gas_name, meas_type, start_datetime=None, end_datetime=None):
     """ Search for gas data (optionally within a daterange)
     
         Load instruments from the correct network ?
@@ -31,17 +31,23 @@ def gas_search(gas_name, meas_type, start_date=None, end_datetime=None):
     from objectstore import get_local_bucket as _get_local_bucket
     from modules import Instrument
     from modules import CRDS
+    from util import get_datetime_epoch as _get_datetime_epoch
+    from util import get_datetime_now as _get_datetime_now
+
+    # TODO - This feels clunky
+    if start_datetime is None:
+        start_datetime = _get_datetime_epoch()
+    if end_datetime is None:
+        end_datetime = _get_datetime_now()
 
     search_prefix = "%s/uuid/" % meas_type
     bucket = _get_local_bucket()
 
-    crds_list = _get_object_names(bucket, search_prefix)
+    crds_list = _get_object_names(bucket=bucket, prefix=search_prefix)
     crds_uuid = crds_list[0].split("/")[-1]
 
     crds = CRDS.load(bucket=bucket, uuid=crds_uuid)
 
-    # Sort out the daterange!
-    
     # Get instrument UUIDs
     instrument_uuids = list(crds.get_instruments())
     instruments = [Instrument.load(uuid=uuid, shallow=True) for uuid in instrument_uuids]
@@ -52,8 +58,16 @@ def gas_search(gas_name, meas_type, start_date=None, end_datetime=None):
         labels = inst.get_labels()
         # Loop over the keys 
         for k in labels.keys():
+            # Need to query the object store for the keys
+            # At the moment just use data? Genericise the search and pass argument somehow?
             if gas_name in list(labels[k].values()):
-                keys.append(k)
+                # Get all the data keys for this object
+                prefix = "data/uuid/%s" % k
+                data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                # Only keep the keys that are within the daterange we want
+                in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+            
+                keys.extend(in_date)
 
     return keys
 

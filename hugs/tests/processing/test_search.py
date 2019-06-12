@@ -118,6 +118,4 @@ def test_gas_search(crds):
 
     keys = gas_search(gas_name=gas_name, meas_type=meas_type)
 
-    print(keys)
-
-    assert False
+    assert len(keys) == 7

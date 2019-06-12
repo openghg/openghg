@@ -152,3 +152,7 @@ Todo for 2019-06-12
 - Tests for Instrument
 - Search for SettingWithCopy warning source
 - GC file processing
+
+Need to think about overlapping dateranges for searching the object store
+
+Improve test for gas_search

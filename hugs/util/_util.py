@@ -29,3 +29,25 @@ def get_daterange_str(start, end):
     end_fmt = end.strftime("%Y%m%d")
 
     return start_fmt + "_" + end_fmt
+
+def get_datetime_epoch():
+    """ Returns the UNIX epoch time
+        1st of January 1970
+
+        Returns:
+            datetime: Datetime object at epoch
+    """
+    import datetime as _datetime
+
+    return _datetime.datetime(1970, 1, 1, 0, 0, tzinfo=_datetime.timezone.utc)
+
+def get_datetime_now():
+    """ Returns the UNIX epoch time
+        1st of January 1970
+
+        Returns:
+            datetime: Datetime object at epoch
+    """
+    import datetime as _datetime
+
+    return _datetime.datetime.utcnow().replace(tzinfo=_datetime.timezone.utc)
