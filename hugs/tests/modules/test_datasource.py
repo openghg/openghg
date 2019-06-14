@@ -157,7 +157,7 @@ def test_from_data(mock_uuid):
     bucket = local_bucket.get_local_bucket()
 
     data = datasource.to_data()
-    new_datasource = Datasource.from_data(bucket=bucket, data=datasource.to_data())
+    new_datasource = Datasource.from_data(bucket=bucket, data=datasource.to_data(), shallow=False)
 
     assert new_datasource._name == "test_name_two"
     assert new_datasource._uuid == mocked_uuid

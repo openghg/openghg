@@ -56,7 +56,7 @@ def test_to_data(mock_uuid, instrument):
 
 def test_from_data(mock_uuid, instrument):
     data = instrument.to_data()
-    new_instrument = Instrument.from_data(data)
+    new_instrument = Instrument.from_data(data, shallow=False)
 
     assert new_instrument._name == "test_name"
     assert new_instrument._uuid == mocked_uuid
