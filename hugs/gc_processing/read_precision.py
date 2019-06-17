@@ -9,6 +9,8 @@ def precision_read(filepath=None):
     precision_header = pd.read_csv(filepath, skiprows=3, nrows=2, header=None, sep=r"\s+")
     precision_species = precision_header.values[0][1:].tolist()
 
+    
+
     # Read precisions
     precision = pd.read_csv(filepath, skiprows=5,header=None,sep=r"\s+", 
                             dtype=str,index_col=0,parse_dates=[0],date_parser=parser)
