@@ -2,8 +2,6 @@ import pandas as pd
 import datetime
 import numpy as np
 
-from old_functions import gc_data_read_original
-
 
 def read_data(filepath):
     # Read header
@@ -16,6 +14,9 @@ def read_data(filepath):
     df = pd.read_csv(filepath, skiprows=4, sep=r"\s+", index_col=["yyyy_mm_dd_hh_mi"],
                                 parse_dates=[[1, 2, 3, 4, 5]], date_parser=parser)
     df.index.name = "Datetime"
+
+    units = {}
+    scale = {}
 
     species = []
     columns_renamed = {}

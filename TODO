@@ -156,3 +156,10 @@ Todo for 2019-06-12
 Need to think about overlapping dateranges for searching the object store
 
 Improve test for gas_search
+
+
+2019-06-17
+
+Add species specific dataset stuff to the CRDS class
+
+See process_gcwerks CRDS fn

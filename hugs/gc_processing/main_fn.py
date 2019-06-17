@@ -1,83 +1,80 @@
+from enum import Enum
 import json
 import pandas as pd
 
+from read_precision import read_precision
+from read_data import read_data
 
-def read_precision(filepath=None):
-    filepath = "capegrim-medusa.18.precisions.C"
-
-    def parser(date): return pd.datetime.strptime(date, '%y%m%d')
-
-    # Read precision species
-    precision_header = pd.read_csv(
-        filepath, skiprows=3, nrows=2, header=None, sep=r"\s+")
-    precision_species = precision_header.values[0][1:].tolist()
-
-    # Read precisions
-    precision = pd.read_csv(filepath, skiprows=5, header=None, sep=r"\s+",
-                            dtype=str, index_col=0, parse_dates=[0], date_parser=parser)
-
-    precision.index.name = "Datetime"
-    precision.drop_duplicates(subset="Datetime", inplace=True)
-
-    return precision, precision_species
+# Enum or read from JSON?
+# JSON might be easier to change in the future
+class sampling_period(Enum):
+    GCMD = 75
+    GCMS = 1200
+    MEDUSA = 1200
 
 
-def read_data(filepath):
-    # Read header
-    header = pd.read_csv(filepath, skiprows=2, nrows=2,header=None, sep=r"\s+")
+class GC:
+    def __init__(self):
+        """ Some basics
 
-    # Create a function to parse the datetime in the data file
-    def parser(date): return pd.datetime.strptime(date, '%Y %m %d %H %M')
+        """
+        self.uuid = None
+        self.create_datetime = None
 
-    # Read the data in and automatically create a datetime column from the 5 columns
-    # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
-    df = pd.read_csv(filepath, skiprows=4, sep=r"\s+", index_col=["yyyy_mm_dd_hh_mi"],
-                     parse_dates=[[1, 2, 3, 4, 5]], date_parser=parser)
-    df.index.name = "Datetime"
 
-    species = []
-    # Store columns to rename
-    columns_to_rename = {}
-    # Scale
-    scale = {}
-    units = {}
+    @staticmethod
+    def create():
+        """ Used to create a GC class
 
-    for column in df.columns:
-        if "Flag" in column:
-            # Cleaner way to do this?
-            # Get name of column before this one
-            prev_col = df.columns[df.columns.get_loc(column) - 1]
-            species.append(prev_col)
-            # Add it to the dictionary for renaming later
-            columns_to_rename[column] = prev_col + "_flag"
-            # Create 2 new columns based on the flag columns
-            df[prev_col + " status_flag"] = (df[column].str[0] != "-").astype(int)
-            df[prev_col + " integration_flag"] = (df[column].str[1] != "-").astype(int)
-            # Store the scale and units from the header
-            scale[prev_col] = header[i-1][0]
-            units[prev_col] = header[i-1][1]
 
-    # Rename columns to include the gas this flag represents
-    df.rename(columns=columns_to_rename, inplace=True)
+        """
+        gc = GC()
 
-    return df, species, scale, units
 
-def gc():
-    
+    def read_file(self):
+        # Load in the parameters dictionary for processing data
+        params_file = "process_gcwerks_parameters.json"
+        with open(params_file, "r") as FILE:
+            self.params = json.load(FILE)
+
+        # Read in the parameters file just when reading in the file.
+        # Save it but don't save it to the object store as part of this object
+
+    def get_precision_json(self, instrument):
+        """ Get the precision of the instrument in seconds
+
+            Args:
+                instrument (str): Instrument name
+            Returns:
+                int: Precision of instrument in seconds
+
+        """
+        return self.params["GC"]["sampling_period"][instrument]
+
+
+    def get_inlets(site):
+        """ Get the inlets used at this site
+
+            Args:
+                site (str): Site of datasources
+            Returns:
+                list: List of inlets
+        """
+        return self.params["GC"][site]["inlets"]
+
+    def gc(self, instrument):
     """
     Process GC data per site and instrument
     Instruments can be:
         "GCMD": GC multi-detector (output will be labeled GC-FID or GC-ECD)
         "GCMS": GC ADS (output GC-ADS)
         "medusa": GC medusa (output GC-MEDUSA)
-
-    Network is the network name for output file.
     """
-    
+
     # Load in the params JSON
-    # params_file = "process_gcwerks_parameters.json"
-    # with open(params_file, "r") as FILE:
-    #     params = json.load(FILE)
+    params_file = "process_gcwerks_parameters.json"
+    with open(params_file, "r") as FILE:
+        params = json.load(FILE)
 
     data_file = "capegrim-medusa.18.C"
     precision_file = "capegrim-medusa.18.precisions.C"
@@ -85,18 +82,64 @@ def gc():
     df, species, units, scale = read_data(data_file)
     precision, precision_species = read_precision(precision_file)
 
-    # Merge precisions into dataframe
+    # TODO - tidy this ?
     for sp in species:
-        precision_index = precision_species.index(sp)*2+1
+        precision_index = precision_species.index(sp) * 2 + 1
+        df[sp + " repeatability"] = precision[precision_index].astype(
+            float).reindex_like(df, method="pad")
 
-        print(precision_index)
+    # instrument = "GCMD"
+    # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
+    df["new_time"] = df.index - \
+        pd.Timedelta(seconds=get_precision_json(instrument)/2.0)
+    df.set_index("new_time", inplace=True, drop=True)
 
-        # df[sp + " repeatability"] = precision[precision_index].astype(float).reindex_like(df, "pad")
+    get_inlets("HFD")
+
+
+    # def get_precision(instrument):
+    #     """ Get the precision in seconds of the passed instrument
+
+    #         Args:
+    #             instrument (str): Instrument precision
+    #         Returns:
+    #             int: Precision of instrument in seconds
+    #     """
+    #     return sampling_period[instrument.upper()].value
+
+    # Can split into species?
+    # Create a datasource for each species?
+
+
+# def segment(df, species):
+#     """ Segment the data by species
+#         Each gas will be a separate Datasource ?
+
+#     """ 
+#     # Check which inlet this site has
+#     # This function can call multiple functions to segment the dataframe
+
+#     for sp in species:
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
 
 
     
 if __name__ == "__main__":
-    gc()
+    instrument = "GCMD"
+    gc(instrument=instrument)
     
 
 

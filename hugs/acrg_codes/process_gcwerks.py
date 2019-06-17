@@ -437,8 +437,8 @@ def gc(site, instrument, network,
 
     # Apply timestamp correction, because GCwerks currently outputs
     #   the CENTRE of the sampling period
-    dfs["new_time"] = dfs.index - \
-            pd.Timedelta(seconds = params["GC"]["sampling_period"][instrument]/2.)
+    dfs["new_time"] = dfs.index - pd.Timedelta(seconds = params["GC"]["sampling_period"][instrument]/2.0)
+    
     dfs.set_index("new_time", inplace = True, drop = True)
     
     # Label time index
@@ -454,11 +454,13 @@ def gc(site, instrument, network,
 
     # Process each species in file
     for sp in species:
-
+        
+        # These are the details of the owner of the site
         global_attributes = params["GC"][site.upper()]["global_attributes"]
         global_attributes["comment"] = params["GC"]["comment"][instrument]
 
         # Now go through each inlet (if required)
+        # Here inlets are different heights
         for inleti, inlet in enumerate(inlets):
 
             # There is only one inlet, just use all data, and don't label inlet in filename
@@ -664,9 +666,8 @@ def crds(site, network,
         for sp in species:
 
             # Species-specific dataset
-            ds_sp = ds[[sp,
-                        sp + " variability",
-                        sp + " number_of_observations"]]
+            ds_sp = ds[[sp, sp + " variability", sp + " number_of_observations"]]
+            
             ds_sp = ds_sp.dropna("time")
 
             global_attributes = params_crds[site]["global_attributes"]
