@@ -468,21 +468,14 @@ def gc(site, instrument, network,
                 
                 print("Processing %s, assuming single inlet..." %sp)
                 
-                ds_sp = ds[[sp,
-                            sp + " repeatability",
-                            sp + " status_flag",
-                            sp + " integration_flag",
-#                            "analysis_time",
-                            "Inlet"]]
-                
+                ds_sp = ds[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "analysis_time", "Inlet"]]
                 # No inlet label in file name
                 inlet_label = None
-                
+            
+            # If there are specific heights
             else:
-                # Get specific inlet
-                
+                # Get dated inlet
                 print("Processing " + sp + ", " + inlet + "...")
-                
                 # if inlet is in the format "date_YYYYMMDD_YYYYMMDD", split by date
                 if inlet[0:4] == "date":
                     dates = inlet.split("_")[1:]
@@ -494,7 +487,8 @@ def gc(site, instrument, network,
                                        sp + " integration_flag",
 #                                       "analysis_time",
                                        "Inlet"]]
-                    
+                
+                # Get specific height inlet
                 else:
                     
                     # Use UNIX pattern matching to find matching inlets
