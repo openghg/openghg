@@ -71,7 +71,6 @@ class GC:
             "GCMS": GC ADS (output GC-ADS)
             "medusa": GC medusa (output GC-MEDUSA)
         """
-
         # Load in the params JSON
         params_file = "process_gcwerks_parameters.json"
         with open(params_file, "r") as FILE:
@@ -106,47 +105,45 @@ class GC:
             Returns:
                 list (str, Pandas.DataFrame): List of tuples of gas name and gas data
         """
+        import fnmatch as _fnmatch
+        # import re as _re
+
         gas_data = []
-        # Read the inlet from the params and from the data and make sure they match?
-        inlet_data = data["Inlet"].iloc[0]
 
-        inlets = self.get_inlets(site=site)
-
-        # TODO - this is very messy - tidy
-
-        print(data.Inlet.values)
+        # Read inlets from the parameters dictionary
+        expected_inlets = self.get_inlets(site=site)
+        # Get the inlets in the dataframe
+        data_inlets = data["Inlet"].unique()
+        # Check that each inlet in data_inlet matches one that's given by parameters file
+        for data_inlet in data_inlets:
+            match = [fnmatch.fnmatch(data_inlet, inlet) for inlet in expected_inlets]
+            if True not in match:
+                raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
+                                  data and inlet in parameters file.")
 
         for sp in species:
-            for inlet in inlets:
-                if (inlet == "any") or (inlet == "air"):
-                    inlet_label = None
-                    dataframe = data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
+            # If we've only got a single inlet
+            if len(data_inlets) == 1:
+                data_inlet = data_inlets[0]
+                # Not sure we need to save this
+                # clean_inlet_height = _re.search(r"\d+m", s).group()
+                # Split by date
+                if "date" in data_inlet:
+                    dates = inlet.split("_")[1:]
+                    slice_dict = {time: slice(dates[0], dates[1])}
+                    data_sliced = data.loc(slice_dict)
+                    dataframe = data_sliced[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
+                    gas_data.append((sp, dataframe))
                 else:
-                    if "date" in inlet:
-                        dates = inlet.split("_")[1:]
-                        slice_dict = {time: slice(dates[0], dates[1])}
-                        data_sliced = data.loc(slice_dict)
-                        dataframe = data_sliced[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
-                    else:
-                        # print(inlet)
-                        select_inlet = [fnmatch.fnmatch(i, inlet) for i in data.Inlet.values]
-                        trues = [x for x in select_inlet if x == True]
-                        print(trues)
-                        # select_ds = xray.DataArray(select_inlet, coords=[data["Datetime"]])#, dims=["Datetime"])
-                        # print(select_inlet)
-                        # dataframes = ds.where(select_ds, drop=True)[[sp, sp + " repeatability", sp + " status_flag", sp + " integration_flag", "Inlet"]]
-                        # [[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
-                        # select_ds = xray.DataArray(select_inlet, coords=[ds.time], dims=["time"])
+                    dataframe = data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
+                    gas_data.append((sp, dataframe))
+            # For multiple inlets
+            else:
+                for data_inlet in data_inlets:
+                    dataframe = data[data["Inlet"] == data_inlet]
+                    gas_data.append((sp, dataframe))
 
-        # # Check the number of inlets
-        # # inlets = self.get_inlets(site=site)
-
-        # for gas in species:
-        #     dataframe = data[[gas, gas + " repeatability", gas + " status_flag",  gas + " integration_flag", "Inlet"]]
-        #     gas_data.append((gas, dataframe))
-
-        # print(gas_data)
-
+        print(gas_data)
         return gas_data
 
 

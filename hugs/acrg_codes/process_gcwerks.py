@@ -480,6 +480,7 @@ def gc(site, instrument, network,
                 if inlet[0:4] == "date":
                     dates = inlet.split("_")[1:]
                     slice_dict = dict(time = slice(dates[0], dates[1]))
+                    
                     ds_sliced = ds.loc[slice_dict]
                     ds_sp = ds_sliced[[sp,
                                        sp + " repeatability",
