@@ -69,9 +69,7 @@ class CRDS:
         from pandas import read_csv as _read_csv
         
         from Acquire.ObjectStore import create_uuid as _create_uuid
-        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        from Acquire.ObjectStore import create_uuid as _create_uuid
         
         from processing._metadata import Metadata as _Metadata
         from modules import Instrument as _Instrument
@@ -86,14 +84,15 @@ class CRDS:
         # it just remembers them
         
         # Get a random UUID for now
-        crds_id = _create_uuid()
+        crds_uuid = _create_uuid()
 
-        if CRDS.exists(crds_id=crds_id):
-            crds = CRDS.load(uuid=crds_id)
+        if CRDS.exists(uuid=crds_uuid):
+            crds = CRDS.load(uuid=crds_uuid)
         else:
             crds = CRDS.create()
         
         # TODO - ID instrument from data/user?
+        instrument_name = 
         instrument_id = _create_uuid()
 
         if _Instrument.exists(instrument_id=instrument_id):
@@ -223,7 +222,7 @@ class CRDS:
         return CRDS.from_data(data=data, bucket=bucket)
 
     @staticmethod
-    def exists(crds_id, bucket=None):
+    def exists(uuid, bucket=None):
         """ Uses an ID of some kind to query whether or not this is a new
             Instrument and should be created
 
@@ -231,6 +230,7 @@ class CRDS:
 
             Args:
                 instrument_id (str): ID of Instrument
+                bucket (dict, default=None): Bucket for data storage
             Returns:
                 bool: True if Instrument exists 
         """
@@ -241,7 +241,7 @@ class CRDS:
             bucket = _get_bucket()
 
         # Query object store for Instrument
-        return _exists(bucket=bucket, uuid=crds_id)
+        return _exists(bucket=bucket, uuid=uuid)
 
 
     def add_instrument(self, instrument_id, value):

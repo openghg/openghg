@@ -20,27 +20,107 @@ class GC:
         """ Some basics
 
         """
-        self.uuid = None
-        self.create_datetime = None
+        self._uuid = None
+        self._create_datetime = None
+        self._instruments = {}
+        self._stored = False
+
+    def is_null(self):
+        """ Check if this is a null object
+
+            Returns:
+                bool: True if object is null
+        """
+        return self._uuid is None
 
     @staticmethod
     def create():
-        """ Used to create a GC class
+        """ This function should be used to create GC objects
+
+            Returns:
+                GC: GC object 
+        """
+        from Acquire.ObjectStore import create_uuid as _create_uuid
+        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
+
+        gc = GC()
+        gc._uuid = _create_uuid()
+        gc._create_datetime = _get_datetime_now()
+
+        return gc
+        
+    @staticmethod
+    def read_file(data_filepath, precision_filepath):
+        """ Reads a GC data file by creating a GC object and associated datasources
 
         """
-        gc = GC()
+        from Acquire.ObjectStore import create_uuid as _create_uuid
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-    def read_file(self):
+        from modules import Instrument as _Instrument
+        from processing import Metadata as _Metadata
+
         # Load in the parameters dictionary for processing data
         params_file = "process_gcwerks_parameters.json"
         with open(params_file, "r") as FILE:
             self.params = json.load(FILE)
 
-        instrument = "GCMD"
-        self.parse_data(instrument=instrument)
+        data_file = "capegrim-medusa.18.C"
+        precision_file = "capegrim-medusa.18.precisions.C"
+
+        gc_id = _create_uuid()
+
+        if GC.exists(uuid=gc_id):
+            gc = GC.load(uuid=gc_id)
+        else:
+            gc = GC.create()
+
+        # Where to get this from? User input?
+        instrument_name = "GCMD"
+        instrument_id = _create_uuid()
+
+        if _Instrument.exists(uuid=instrument_id):
+            instrument = _Instrument.load(uuid)
+        else:
+            instrument = _Instrument.create(name=instrument_name)
+
+        # Do we need this metadata?
+        # metadata = _Metadata
+        gc.parse_data(data_filepath=datafile, precision_filepath=precision_file, instrument=instrument_name)
+        # Save to object store
+        gc.save()
+
+
+     
+
+
 
         # Read in the parameters file just when reading in the file.
         # Save it but don't save it to the object store as part of this object
+
+    @staticmethod
+    def exists(uuid, bucket=None):
+        """ Check if an object with the passed UUID exists in 
+            the object store
+
+            Args:
+                uuid (str): UUID of GC object
+                bucket (dict, default=None): Bucket for data storage
+            Returns:
+                bool: True if object exists
+        """
+        from objectstore import exists as _exists
+        from objectstore import get_bucket as _get_bucket
+
+        if bucket is None:
+            bucket = _get_bucket()
+
+        # Query object store for Instrument
+        return _exists(bucket=bucket, uuid=uuid)
+        
+
+    def load(uuid, bucket=None):
+        pass
 
     def get_precision(self, instrument):
         """ Get the precision of the instrument in seconds
@@ -63,7 +143,7 @@ class GC:
         """
         return self.params["GC"][site]["inlets"]
 
-    def parse_data(self, instrument):
+    def parse_data(self, data_filepath, precision_filepath, instrument):
         """
         Process GC data per site and instrument
         Instruments can be:
@@ -76,8 +156,7 @@ class GC:
         with open(params_file, "r") as FILE:
             params = json.load(FILE)
 
-        data_file = "capegrim-medusa.18.C"
-        precision_file = "capegrim-medusa.18.precisions.C"
+
 
         df, species, units, scale = self.read_data(data_file)
         precision, precision_species = self.read_precision(precision_file)
@@ -133,17 +212,19 @@ class GC:
                     slice_dict = {time: slice(dates[0], dates[1])}
                     data_sliced = data.loc(slice_dict)
                     dataframe = data_sliced[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
+                    dataframe = dataframe.dropna(axis="index", how="any")
                     gas_data.append((sp, dataframe))
                 else:
-                    dataframe = data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
+                    dataframe = data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]                    
+                    dataframe = dataframe.dropna(axis="index", how="any")
                     gas_data.append((sp, dataframe))
             # For multiple inlets
             else:
                 for data_inlet in data_inlets:
                     dataframe = data[data["Inlet"] == data_inlet]
+                    dataframe = dataframe.dropna(axis="index", how="any")
                     gas_data.append((sp, dataframe))
 
-        print(gas_data)
         return gas_data
 
 

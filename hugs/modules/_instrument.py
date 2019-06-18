@@ -225,14 +225,14 @@ class Instrument:
     
 
     @staticmethod
-    def exists(instrument_id, bucket=None):
+    def exists(uuid, bucket=None):
         """ Uses an ID of some kind to query whether or not this is a new
             Instrument and should be created
 
             TODO - update this when I have a clearer idea of how to ID Instruments
 
             Args:
-                instrument_id (str): ID of Instrument
+                uuid (str): ID of Instrument
             Returns:
                 bool: True if Instrument exists 
         """
@@ -243,7 +243,7 @@ class Instrument:
             bucket = _get_bucket()
 
         # Query object store for Instrument
-        return _exists(bucket=bucket, uuid=instrument_id)
+        return _exists(bucket=bucket, uuid=uuid)
 
 
     def get_labels(self):

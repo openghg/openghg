@@ -1,0 +1,258 @@
+{
+    "GC": {
+        "instruments": {
+            "GCMD": "",
+            "GCMS": "",
+            "medusa": ""
+        },
+        "instruments_suffix": {
+            "GCMD": ["", "-md"],
+            "GCMS": ["", "-gcms"],
+            "medusa": ["-medusa"]
+        },
+        "instruments_out": {
+            "GCMD": {
+                "CH4": "GCFID",
+                "CO": "GCRGA",
+                "H2": "GCRGA",
+                "else": "GCECD"
+            },
+            "GCMS": {
+                "else": "GCMS"
+            },
+            "medusa": {
+                "else": "GCMSMedusa"
+            }
+        },
+        "directory" : {
+            "GCMD":   "/dagage2/agage/summary/data/",
+            "GCMS":   "/dagage2/agage/summary/data-gcms/",
+            "medusa": "/dagage2/agage/summary/data-gcms/"
+        },
+        "sampling_period": {
+            "GCMD": 75,
+            "GCMS": 1200,
+            "medusa": 1200
+        },
+        "comment": {
+            "GCMD": "Gas chromatograph measurements. Output from GCWerks.",
+            "GCMS": "Gas chromatograph-mass spectrometer measurements. Output from GCWerks.",
+            "medusa": "Medusa measurements. Output from GCWerks. See Miller et al. (2008)."
+        },
+        "directory_output" : "/data/shared/obs_2018",
+        "BSD" : {
+            "gcwerks_site_name": "bilsdale",
+            "inlets": ["108m", "42m", "248m"],
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
+        "CGO" : {
+            "gcwerks_site_name": "capegrim",
+            "inlets": ["7?m*", "10m*"],
+            "inlet_label": ["70m", "10m"],
+            "global_attributes": {
+                "data_owner": "Paul Krummel",
+                "data_owner_email": "paul.krummel@csiro.au"
+            }
+        },
+        "CPT" : {
+            "gcwerks_site_name": "capepoint",
+            "inlets": ["any"],
+            "inlet_label": ["3m"],
+            "global_attributes": {
+                "data_owner": "Brett Kuyper",
+                "data_owner_email": "brett.kuyper@gmail.com"
+            }
+        },
+        "HFD" : {
+            "gcwerks_site_name": "heathfield",
+            "inlets": ["100m", "50m"],
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
+        "GSN" : {
+            "gcwerks_site_name": "gosan",
+            "inlets": ["any"],
+            "inlet_label": ["10m"],
+            "global_attributes": {
+                "data_owner": "Sunyoung Park",
+                "data_owner_email": "sparky@kpu.ac.kr"
+            }
+        },
+        "JFJ" : {
+            "gcwerks_site_name": "jungfraujoch",
+            "inlets": ["any"],
+            "inlet_label": ["10m"],
+            "global_attributes": {
+                "data_owner": "Stefan Reimann",
+                "data_owner_email": "stefan.reimann@empa.ch"
+            }
+        },
+        "CMN" : {
+            "gcwerks_site_name": "mtecimone",
+            "inlets": ["air"],
+            "inlet_label": ["10m"],
+            "global_attributes": {
+                "data_owner": "Michela Maione",
+                "data_owner_email": "michela.maione@uniurb.it"
+            }
+        },
+        "MHD" : {
+            "gcwerks_site_name": "macehead",
+            "inlets": ["10m"],
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
+        "RGL" : {
+            "gcwerks_site_name": "ridgehill",
+            "inlets": ["90m", "45m"],
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
+        "RPB" : {
+            "gcwerks_site_name": "barbados",
+            "inlets": ["any"],
+            "inlet_label": ["10m"],
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
+        "SDZ" : {
+            "gcwerks_site_name": "shangdianzi",
+            "inlets": ["date_20000101_20150101", "date_20150101_21000101"],
+            "inlet_label": ["10m", "80m"],
+            "global_attributes": {
+                "data_owner": "Bo Yao",
+                "data_owner_email": "yaob@cams.cma.gov.cn"
+            }
+        },
+        "SIO" : {
+            "gcwerks_site_name": "sio",
+            "inlets": ["any"],
+            "inlet_label": ["10m"],
+            "global_attributes": {
+                "data_owner": "Ray Weiss",
+                "data_owner_email": "rfweiss@ucsd.edu"
+            }
+        },
+        "SMO" : {
+            "gcwerks_site_name": "samoa",
+            "inlets": ["any"],
+            "inlet_label": ["10m"],
+            "global_attributes": {
+                "data_owner": "Ray Weiss",
+                "data_owner_email": "rfweiss@ucsd.edu"
+            }
+        },
+        "TAC" : {
+            "gcwerks_site_name": "tacolneston",
+            "inlets": ["100m", "54m", "185m"],
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
+        "THD" : {
+            "gcwerks_site_name": "trinidadhead",
+            "inlets": ["any"],
+            "inlet_label": ["10m"],
+            "global_attributes": {
+                "data_owner": "Ray Weiss",
+                "data_owner_email": "rfweiss@ucsd.edu"
+            }
+        },
+        "TTA" : {
+            "gcwerks_site_name": "angus",
+            "inlets": ["222m"],
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
+        "ZEP" : {
+            "gcwerks_site_name": "zeppelin",
+            "inlets": ["air"],
+            "inlet_label": ["16m"],
+            "global_attributes": {
+                "data_owner": "Chris Lunder",
+                "data_owner_email": "chris.lunder@nilu.no"
+            }
+        }
+    },
+    "CRDS": {
+        "directory" : "/dagage2/agage/%site-picarro/results-gcwerks/",
+        "directory_output" : "/data/shared/obs_2018",
+        "comment": "Cavity ring-down measurements. Output from GCWerks",
+        "BSD" : {
+            "gcwerks_site_name": "bilsdale",
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
+        "HFD" : {
+            "gcwerks_site_name": "heathfield",
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
+        "RGL" : {
+            "gcwerks_site_name": "ridgehill",
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
+        "RPB" : {
+            "gcwerks_site_name": "barbados",
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
+        "TAC" : {
+            "gcwerks_site_name": "tacolneston",
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
+        "TTA" : {
+            "gcwerks_site_name": "angus",
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        }
+    },
+    "ICOS": {
+        "directory" : "/dagage2/agage/%site-picarro/results-icos/",
+        "directory_output" : "/data/shared/obs_2018",
+        "MHD" : {
+            "gcwerks_site_name": "macehead",
+            "inlet_rename": {"15m": "10m"},
+            "global_attributes": {
+                "data_owner": "Michael Ramonet",
+                "data_owner_email": "michel.ramonet@cea.fr"
+            }
+        },
+        "TTA" : {
+            "gcwerks_site_name": "angus",
+            "inlet_rename": {"222m": "222m"},
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        }
+    }
+}
