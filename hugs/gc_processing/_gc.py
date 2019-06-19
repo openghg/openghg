@@ -19,21 +19,10 @@ class GC:
     _gc_root = "GC"
 
     def __init__(self):
-        """ Some basics
-
-        """
         self._uuid = None
-        self._create_datetime = None
+        self._creation_datetime = None
         self._instruments = {}
         self._stored = False
-
-    def is_null(self):
-        """ Check if this is a null object
-
-            Returns:
-                bool: True if object is null
-        """
-        return self._uuid is None
 
     @staticmethod
     def create():
@@ -50,55 +39,17 @@ class GC:
         gc._creation_datetime = _get_datetime_now()
 
         return gc
-        
-    @staticmethod
-    def read_file(data_filepath, precision_filepath):
-        """ Reads a GC data file by creating a GC object and associated datasources
 
+    def is_null(self):
+        """ Check if this is a null object
+
+            Returns:
+                bool: True if object is null
         """
-        from Acquire.ObjectStore import create_uuid as _create_uuid
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        return self._uuid is None
 
-        from modules import Instrument as _Instrument
-        from processing import Metadata as _Metadata
-
-        # Load in the parameters dictionary for processing data
-        params_file = "process_gcwerks_parameters.json"
-        with open(params_file, "r") as FILE:
-            self.params = json.load(FILE)
-
-        data_file = "capegrim-medusa.18.C"
-        precision_file = "capegrim-medusa.18.precisions.C"
-
-        gc_id = _create_uuid()
-
-        if GC.exists(uuid=gc_id):
-            gc = GC.load(uuid=gc_id)
-        else:
-            gc = GC.create()
-
-        # Where to get this from? User input?
-        instrument_name = "GCMD"
-        instrument_id = _create_uuid()
-
-        if _Instrument.exists(uuid=instrument_id):
-            instrument = _Instrument.load(uuid)
-        else:
-            instrument = _Instrument.create(name=instrument_name)
-
-        # Do we need this metadata?
-        # metadata = _Metadata
-        gc.parse_data(data_filepath=datafile, precision_filepath=precision_file, instrument=instrument_name)
-        # Save to object store
-        gc.save()
-
-
-     
-
-
-
-        # Read in the parameters file just when reading in the file.
-        # Save it but don't save it to the object store as part of this object
+        
+    
 
     @staticmethod
     def exists(uuid, bucket=None):
@@ -155,10 +106,12 @@ class GC:
             return GC()
         
         gc = GC()
-        self._uuid = data["uuid"] = self._uuid
-        self._creation_datetime = data["creation_datetime"] = self._creation_datetime
-        self._instruments = data["instruments"] = self._instruments
-        self._stored = data["stored"] = self._stored
+        gc._uuid = data["uuid"]
+        gc._creation_datetime = data["creation_datetime"]
+        gc._instruments = data["instruments"]
+        stored = data["stored"]
+
+        gc._stored = False
         
         return gc
 
@@ -193,34 +146,66 @@ class GC:
             Returns:
                 None
         """
-        
+        if self.is_null():
+            return
 
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+        from objectstore._hugs_objstore import get_bucket as _get_bucket
 
+        if bucket is None:
+            bucket = _get_bucket()
 
+        self._stored = True
+        gc_key = "%s/uuid/%s" % (GC._gc_root, self._uuid)
+        _ObjectStore.set_object_from_JSON(bucket=bucket, key=gc_key, data=self.to_data())
 
-
-    def get_precision(self, instrument):
-        """ Get the precision of the instrument in seconds
-
-            Args:
-                instrument (str): Instrument name
-            Returns:
-                int: Precision of instrument in seconds
+    @staticmethod
+    def read_file(data_filepath, precision_filepath):
+        """ Reads a GC data file by creating a GC object and associated datasources
 
         """
-        return self.params["GC"]["sampling_period"][instrument]
+        from Acquire.ObjectStore import create_uuid as _create_uuid
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-    def get_inlets(self, site):
-        """ Get the inlets used at this site
+        from modules import Instrument as _Instrument
+        from processing import Metadata as _Metadata
 
-            Args:
-                site (str): Site of datasources
-            Returns:
-                list: List of inlets
-        """
-        return self.params["GC"][site]["inlets"]
+        # Load in the parameters dictionary for processing data
+        params_file = "process_gcwerks_parameters.json"
+        with open(params_file, "r") as FILE:
+            self.params = json.load(FILE)
 
-    def parse_data(self, data_filepath, precision_filepath, instrument):
+        data_file = "capegrim-medusa.18.C"
+        precision_file = "capegrim-medusa.18.precisions.C"
+
+        gc_id = _create_uuid()
+
+        if GC.exists(uuid=gc_id):
+            gc = GC.load(uuid=gc_id)
+        else:
+            gc = GC.create()
+
+        # Where to get this from? User input?
+        instrument_name = "GCMD"
+        instrument_id = _create_uuid()
+
+        if _Instrument.exists(uuid=instrument_id):
+            instrument = _Instrument.load(uuid)
+        else:
+            instrument = _Instrument.create(name=instrument_name)
+
+        # Do we need this metadata?
+        # metadata = _Metadata
+        gc.parse_data(data_filepath=datafile, precision_filepath=precision_file, instrument=instrument_name)
+        # Save to object store
+        gc.save()
+
+        # Read in the parameters file just when reading in the file.
+        # Save it but don't save it to the object store as part of this object
+
+
+   def parse_data(self, data_filepath, precision_filepath, instrument):
         """
         Process GC data per site and instrument
         Instruments can be:
@@ -232,8 +217,6 @@ class GC:
         params_file = "process_gcwerks_parameters.json"
         with open(params_file, "r") as FILE:
             params = json.load(FILE)
-
-
 
         df, species, units, scale = self.read_data(data_file)
         precision, precision_species = self.read_precision(precision_file)
@@ -371,6 +354,38 @@ class GC:
         precision = precision.loc[~precision.index.duplicated(keep="first")]
 
         return precision, precision_species
+
+    def add_instrument(self, instrument_id, value):
+       """ Add an Instument to this object's dictionary of instruments
+
+            Args:
+                instrument_id (str): Instrment UUID
+                value (str): Value to describe Instrument
+            Returns:
+                None
+        """
+        self._instruments[instrument_id] = value
+
+    def get_precision(self, instrument):
+        """ Get the precision of the instrument in seconds
+
+            Args:
+                instrument (str): Instrument name
+            Returns:
+                int: Precision of instrument in seconds
+
+        """
+        return self.params["GC"]["sampling_period"][instrument]
+
+    def get_inlets(self, site):
+        """ Get the inlets used at this site
+
+            Args:
+                site (str): Site of datasources
+            Returns:
+                list: List of inlets
+        """
+        return self.params["GC"][site]["inlets"]
 
 
     # def get_precision(instrument):

@@ -12,6 +12,7 @@ class CRDS:
     def __init__(self):
         self._uuid = None
         self._instruments = {}
+        self._creation_datetime
         # self._labels = {}
         self._stored = False
 
