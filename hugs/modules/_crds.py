@@ -93,7 +93,7 @@ class CRDS:
             crds = CRDS.create()
         
         # TODO - ID instrument from data/user?
-        instrument_name = 
+        instrument_name = "instrument_name"
         instrument_id = _create_uuid()
 
         if _Instrument.exists(instrument_id=instrument_id):

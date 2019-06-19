@@ -4,9 +4,6 @@ import json
 import pandas as pd
 import xarray as xray
 
-from read_precision import read_precision
-from read_data import read_data
-
 # Enum or read from JSON?
 # JSON might be easier to change in the future
 class sampling_period(Enum):
@@ -48,9 +45,6 @@ class GC:
         """
         return self._uuid is None
 
-        
-    
-
     @staticmethod
     def exists(uuid, bucket=None):
         """ Check if an object with the passed UUID exists in 
@@ -70,7 +64,6 @@ class GC:
 
         # Query object store for Instrument
         return _exists(bucket=bucket, uuid=uuid)
-        
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -86,7 +79,7 @@ class GC:
 
         data = {}
         data["uuid"] = self._uuid
-        data["creation_datetime"] = self._creation_datetime
+        data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         data["instruments"] = self._instruments
         data["stored"] = self._stored
 
@@ -158,7 +151,7 @@ class GC:
 
         self._stored = True
         gc_key = "%s/uuid/%s" % (GC._gc_root, self._uuid)
-        _ObjectStore.set_object_from_JSON(bucket=bucket, key=gc_key, data=self.to_data())
+        _ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
 
     @staticmethod
     def read_file(data_filepath, precision_filepath):
@@ -171,13 +164,10 @@ class GC:
         from modules import Instrument as _Instrument
         from processing import Metadata as _Metadata
 
-        # Load in the parameters dictionary for processing data
-        params_file = "process_gcwerks_parameters.json"
-        with open(params_file, "r") as FILE:
-            self.params = json.load(FILE)
+        # data_file = "capegrim-medusa.18.C"
+        # precision_file = "capegrim-medusa.18.precisions.C"
 
-        data_file = "capegrim-medusa.18.C"
-        precision_file = "capegrim-medusa.18.precisions.C"
+        print("Remember to update the instrument!")
 
         gc_id = _create_uuid()
 
@@ -197,29 +187,35 @@ class GC:
 
         # Do we need this metadata?
         # metadata = _Metadata
-        gc.parse_data(data_filepath=datafile, precision_filepath=precision_file, instrument=instrument_name)
+        gc.parse_data(data_filepath=data_filepath, precision_filepath=precision_filepath, instrument=instrument_name)
         # Save to object store
         gc.save()
+
+       
 
         # Read in the parameters file just when reading in the file.
         # Save it but don't save it to the object store as part of this object
 
+        # For now return the GC object for easier testing
+        return gc
 
-   def parse_data(self, data_filepath, precision_filepath, instrument):
+    def parse_data(self, data_filepath, precision_filepath, instrument):
         """
-        Process GC data per site and instrument
-        Instruments can be:
+            Process GC data per site and instrument
+            Instruments can be:
             "GCMD": GC multi-detector (output will be labeled GC-FID or GC-ECD)
             "GCMS": GC ADS (output GC-ADS)
             "medusa": GC medusa (output GC-MEDUSA)
         """
-        # Load in the params JSON
-        params_file = "process_gcwerks_parameters.json"
+        # Load in the params 
+        # Load in the parameters dictionary for processing data
+        
+        params_file = "/Users/wm19361/Documents/Devel/hugs/hugs/modules/process_gcwerks_parameters.json"
         with open(params_file, "r") as FILE:
-            params = json.load(FILE)
+            self.params = json.load(FILE)
 
-        df, species, units, scale = self.read_data(data_file)
-        precision, precision_species = self.read_precision(precision_file)
+        df, species, units, scale = self.read_data(data_filepath)
+        precision, precision_species = self.read_precision(precision_filepath)
 
         # TODO - tidy this ?
         for sp in species:
@@ -335,9 +331,8 @@ class GC:
         # print(df)
         return df, species, units, scale
 
-    def read_precision(self, filepath=None):
-        filepath = "capegrim-medusa.18.precisions.C"
-
+    def read_precision(self, filepath):
+        # Function for parsing datetime
         def parser(date): return pd.datetime.strptime(date, '%y%m%d')
 
         # Read precision species
@@ -356,7 +351,7 @@ class GC:
         return precision, precision_species
 
     def add_instrument(self, instrument_id, value):
-       """ Add an Instument to this object's dictionary of instruments
+        """ Add an Instument to this object's dictionary of instruments
 
             Args:
                 instrument_id (str): Instrment UUID
