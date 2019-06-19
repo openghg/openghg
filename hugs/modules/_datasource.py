@@ -156,7 +156,7 @@ class Datasource:
         return _exists(bucket=bucket, uuid=datasource_id)
 
 
-    def to_data(self, store=False, bucket=None):
+    def to_data(self):
         """ Return a JSON-serialisable dictionary of object
             for storage in object store
 

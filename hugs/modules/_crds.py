@@ -143,11 +143,11 @@ class CRDS:
 
             Args:
                 data (str): JSON data
+                bucket (dict, default=None): Bucket for data storage
             Returns:
                 CRDS: CRDS object created from data
         """
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
-        from modules._datasource import Datasource
         from objectstore._hugs_objstore import get_bucket as _get_bucket
 
         if data is None or len(data) == 0:
@@ -202,13 +202,13 @@ class CRDS:
             bucket and UUID
 
             Args:
+                uuid (str): UUID of CRDS object
+                key (str, default=None): Key of object in object store
                 bucket (dict, default=None): Bucket to store object
-                uuid (str, default=None): UID of Datasource
             Returns:
                 Datasource: Datasource object created from JSON
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from modules._datasource import Datasource
         from objectstore._hugs_objstore import get_bucket as _get_bucket
 
         if bucket is None:

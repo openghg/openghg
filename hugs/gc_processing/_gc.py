@@ -16,6 +16,8 @@ class sampling_period(Enum):
 
 
 class GC:
+    _gc_root = "GC"
+
     def __init__(self):
         """ Some basics
 
@@ -45,7 +47,7 @@ class GC:
 
         gc = GC()
         gc._uuid = _create_uuid()
-        gc._create_datetime = _get_datetime_now()
+        gc._creation_datetime = _get_datetime_now()
 
         return gc
         
@@ -119,8 +121,83 @@ class GC:
         return _exists(bucket=bucket, uuid=uuid)
         
 
-    def load(uuid, bucket=None):
-        pass
+    def to_data(self):
+        """ Return a JSON-serialisable dictionary of object
+            for storage in object store
+
+            Returns:
+                dict: Dictionary version of object
+        """
+        if self.is_null():
+            return {}
+
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+
+        data = {}
+        data["uuid"] = self._uuid
+        data["creation_datetime"] = self._creation_datetime
+        data["instruments"] = self._instruments
+        data["stored"] = self._stored
+
+        return data
+
+    @staticmethod
+    def from_data(data, bucket=None):
+        """ Create a GC object from data
+
+            Args:
+                data (dict): JSON data
+                bucket (dict, default=None): Bucket for data storage
+        """ 
+        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+
+        if data is None or len(data) == 0:
+            return GC()
+        
+        gc = GC()
+        self._uuid = data["uuid"] = self._uuid
+        self._creation_datetime = data["creation_datetime"] = self._creation_datetime
+        self._instruments = data["instruments"] = self._instruments
+        self._stored = data["stored"] = self._stored
+        
+        return gc
+
+    @staticmethod
+    def load(uuid, key=None, bucket=None):
+        """
+            Args:
+                uuid (str): UUID of GC object
+                key (str, default=None): Key of object in object store
+                bucket (dict, default=None): Bucket to store object
+            Returns:
+                Datasource: Datasource object created from JSON
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from objectstore._hugs_objstore import get_bucket as _get_bucket
+
+        if bucket is None:
+            bucket = _get_bucket()
+        
+        if key is None:
+            key = "%s/uuid/%s" % (GC._gc_root, uuid)
+            
+        data = _ObjectStore.get_object_from_json(bucket=budket, key=key)
+        
+        return GC.from_data(data=data, bucket=bucket)
+
+    def save(self, bucket=None):
+        """ Save this GC object in the object store
+
+            Args:
+                bucket (dict): Bucket for data storage
+            Returns:
+                None
+        """
+        
+
+
+
+
 
     def get_precision(self, instrument):
         """ Get the precision of the instrument in seconds
