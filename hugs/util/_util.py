@@ -51,3 +51,22 @@ def get_datetime_now():
     import datetime as _datetime
 
     return _datetime.datetime.utcnow().replace(tzinfo=_datetime.timezone.utc)
+
+
+def unanimous(seq):
+            """ Checks that all values in an iterable object
+                are the same
+
+                Args:
+                    seq: Iterable object
+                Returns
+                    bool: True if all values are the same
+
+            """
+            it = iter(seq.values())
+            try:
+                first = next(it)
+            except StopIteration:
+                return True
+            else:
+                return all(i == first for i in it)

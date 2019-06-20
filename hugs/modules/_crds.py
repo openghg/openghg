@@ -15,6 +15,8 @@ class CRDS:
         self._creation_datetime
         # self._labels = {}
         self._stored = False
+        # Processed data
+        self._proc_data = None
 
 
     def is_null(self):
@@ -57,7 +59,7 @@ class CRDS:
         return crds_list
 
     @staticmethod
-    def read_file(filepath):
+    def read_file(data_filepath):
         """ Creates a CRDS object holding data stored within Datasources
 
             TODO - currently only works with a single Datasource
@@ -74,8 +76,6 @@ class CRDS:
         
         from processing._metadata import Metadata as _Metadata
         from modules import Instrument as _Instrument
-
-        raw_data = _read_csv(filepath, header=None, skiprows=1, sep=r"\s+")     
 
         # First check for the CRDS object - should only be one? 
         # Maybe this can depend on the type or something?
@@ -104,7 +104,15 @@ class CRDS:
         filename = filepath.split("/")[-1]
         metadata = _Metadata.create(filename, raw_data)
 
-        instrument.parse_data(raw_data=raw_data, metadata=metadata)
+        # Parse the data here
+        # Parse the gases
+        # Save get gas_name datasource iD and data
+        # Pass this gas_data list to the instrument for storage in Datasources
+        gas_data = crds.parse_data(data_filepath=data_filepath)
+
+        # Add the data to the instrument after processing
+        instrument.add_data(gas_data)
+
         # Save updated Instrument to object store
         instrument.save()
 
@@ -114,6 +122,175 @@ class CRDS:
 
         return crds
 
+    def datasource_query(self, species):
+        """ Query object store for datasources in this instrument that
+            match the species past in the list species
+
+            Args:
+                species (list): List of species this data holds
+            Returns:
+                dict: Dictionary of keys for Datasources for each species keyed as species : value
+                Where value is the UUID of the Datasource for that species or False if no Datasource
+                is found
+        """
+        # Unsure of how this should be implemented at the moment
+
+        # For each instrument have the known datasources
+
+        # Can key this instrument/uuid/{uuid}/datasources ?
+        # Store dictionary of datasources
+        from modules import Instrument as _Instrument
+
+
+        # key : species
+        # value : datasource_uuid
+        found = {}
+
+        for sp in species:
+            if Instrument.exists()
+
+
+
+
+    def parse_data(self, data_filepath):
+        """ Separates the gases stored in the dataframe in 
+            separate dataframes and returns a dictionary of gases
+            with an assigned UUID as gas:UUID and a list of the processed
+            dataframes
+
+            Args:
+                data (Pandas.Dataframe): Dataframe containing all data
+            Returns:
+                tuple (str, str, list): Name of gas, ID of Datasource of this data and a list Pandas DataFrames for the 
+                date-split gas data
+        """
+        from pandas import RangeIndex as _RangeIndex
+        from pandas import concat as _concat
+        from pandas import read_csv as _read_csv
+
+        from uuid import uuid4 as _uuid4
+
+        # Create an ID for the Datasource
+        # Currently just give it a fixed ID
+        # datasource_ids = ["2e628682-094f-4ffb-949f-83e12e87a603", "2e628682-094f-4ffb-949f-83e12e87a604", 
+        #                     "2e628682-094f-4ffb-949f-83e12e87a605"]
+        data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+")
+        # Drop any rows with NaNs
+        # Reset the index
+        # This is now done before creating metadata
+        data = data.dropna(axis=0, how="any")
+        data.index = _RangeIndex(data.index.size)
+
+        # Get the number of gases in dataframe and number of columns of data present for each gas
+        n_gases, n_cols = self.gas_info(data=data)
+
+        # TODO - at the moment just create a new UUID for each gas
+        datasource_ids = [_uuid4() for gas in range(n_gases)]
+
+        header = data.head(2)
+        skip_cols = sum([header[column][0] == "-" for column in header.columns])
+
+        time_cols = 2
+        header_rows = 2
+        # Dataframe containing the time data for this data input
+        time_data = data.iloc[2:, 0:time_cols]
+
+        timeframe = self.parse_timecols(time_data=time_data)
+        timeframe.index = _RangeIndex(timeframe.index.size)
+
+        data_list = []
+        for n in range(n_gases):
+            datasource_id = datasource_ids[n]
+            # Slice the columns
+            gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
+
+            # Reset the column numbers
+            gas_data.columns = _RangeIndex(gas_data.columns.size)
+            gas_name = gas_data[0][0]
+
+            column_names = ["count", "stdev", "n_meas"]
+            column_labels = ["%s %s" % (gas_name, l) for l in column_names]
+
+            # Split into years here
+            # Name columns
+            gas_data.set_axis(column_labels, axis='columns', inplace=True)
+
+            # Drop the first two rows now we have the name
+            gas_data.drop(index=gas_data.head(header_rows).index, inplace=True)
+            gas_data.index = _RangeIndex(gas_data.index.size)
+
+            # Cast data to float64 / double
+            gas_data = gas_data.astype("float64")
+            # Concatenate the timeframe and the data
+            # Pandas concat here
+            gas_data = _concat([timeframe, gas_data], axis="columns")
+
+            # TODO - Verify integrity here? Test if this is required
+            gas_data.set_index('Datetime', drop=True, inplace=True, verify_integrity=True)
+
+            data_list.append((gas_name, datasource_id, split_frames))
+
+        return data_list
+
+    def parse_timecols(self, time_data):
+        """ Takes a dataframe that contains the date and time 
+            and creates a single columned dataframe containing a 
+            UTC datetime
+
+            Args:
+                time_data (Pandas.Dataframe): Dataframe containing
+            Returns:
+                timeframe (Pandas.Dataframe): Dataframe containing datetimes set to UTC
+        """
+        import datetime as _datetime
+        from pandas import DataFrame as _DataFrame
+        from pandas import to_datetime as _to_datetime
+
+        from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+
+        def t_calc(row, col): return _datetime_to_string(_datetime_to_datetime(
+            _datetime.datetime.strptime(row+col, "%y%m%d%H%M%S")))
+
+        time_gen = (t_calc(row, col)
+                    for row, col in time_data.itertuples(index=False))
+        time_list = list(time_gen)
+
+        timeframe = _DataFrame(data=time_list, columns=["Datetime"])
+
+        # Check how these data work when read back out
+        timeframe["Datetime"] = _to_datetime(timeframe["Datetime"])
+
+        return timeframe
+
+    def gas_info(self, data):
+            """ Returns the number of columns of data for each gas
+                that is present in the dataframe
+            
+                Args:
+                    data (Pandas.DataFrame): Measurement data
+                Returns:
+                    tuple (int, int): Number of gases, number of
+                    columns of data for each gas
+            """
+            from util import unanimous as _unanimous
+            # Slice the dataframe
+            head_row = data.head(1)
+
+            gases = {}
+
+            # Loop over the gases and find each unique value
+            for column in head_row.columns:
+                s = head_row[column][0]
+                if s != "-":
+                    gases[s] = gases.get(s, 0) + 1
+
+            # Check that we have the same number of columns for each gas
+            if not _unanimous(gases):
+                raise ValueError(
+                    "Each gas does not have the same number of columns")
+
+            return len(gases), list(gases.values())[0]
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object

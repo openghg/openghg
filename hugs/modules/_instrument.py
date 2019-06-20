@@ -32,6 +32,7 @@ class Instrument:
         # self._network = None
         self._labels = {}
         self._datasources = []
+        self._species = {}
     
     @staticmethod
     def create(name, **kwargs):
@@ -245,6 +246,28 @@ class Instrument:
         return _exists(bucket=bucket, uuid=uuid)
 
 
+    def species_query(species):
+        """ Check the list of species passed and returns the UUID of each 
+            Datasource associated with that species
+
+            Args:
+                species (list): List of species
+            Returns:
+                dict: Dictionary of keys for Datasources for each species keyed as species : value
+                Where value is the UUID of the Datasource for that species or False if no Datasource
+                is found
+        """
+        found = {}
+        for s in species:
+            if s in self._species:
+                # Species : datasource_UUID
+                found[s] = self._species[s]
+            else:
+                found[s] = False
+
+        return found
+
+
     def get_labels(self):
         """ Returns the labels dictionary
 
@@ -275,24 +298,21 @@ class Instrument:
 
         self._datasources.append(datasource)
 
-
-    def parse_data(self, raw_data, metadata):
+    def add_data(self, gas_data):
         """ Create or get an exisiting Datasource for each gas in the file
 
             TODO - currently this function will only take data from a single Datasource
             
             Args:
-                raw_data (list): List of Pandas.Dataframes
-                metadata (Metadata): Metadata object
+                gas_data (list): List of tuples of gas name, datasource ID and Pandas.DataFrame 
+                to add to the Instrument
             Returns:
                 None
         """
         from modules import Datasource as _Datasource
         from processing import parse_gases as _parse_gases
 
-        # Where gas_data is a list of tuples
-        gas_data = _parse_gases(raw_data)
-
+        # Rework this to for the segmentation of data within the Datasource
         for gas_name, datasource_id, data in gas_data:
             if _Datasource.exists(datasource_id=datasource_id):
                 datasource = _Datasource.load(uuid=datasource_id)
@@ -301,9 +321,11 @@ class Instrument:
                 datasource = _Datasource.create(name=gas_name)
                 datasource.add_metadata(metadata)
 
-            # Add the dataframes to the datasource
-            for dataframe in data:
-                datasource.add_data(dataframe)
+            # Store the name and datasource_id
+            self._species[gas_name] = datasource_id
+
+            # Add the dataframe to the datasource
+            datasource.add_data(dataframe)
 
             self.add_datasource(datasource)
 

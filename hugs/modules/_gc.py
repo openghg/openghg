@@ -187,7 +187,7 @@ class GC:
         gas_data = gc.parse_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                         site=site, instrument=instrument_name)
         # Save to object store
-
+        instrument.add_data(gas_data)
         # Pass data to Instrument for saving in Datasources
         
 
@@ -222,7 +222,7 @@ class GC:
         self.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath,
                                                     instrument=instrument)
         # Segment the processed data
-        gas_data = self.segment()
+        gas_data = self.split()
 
         return gas_data
 
@@ -310,7 +310,7 @@ class GC:
 
         return precision, precision_species
 
-    def segment(self):
+    def split(self):
         """ Splits the dataframe into sections to be stored within individual Datasources
 
             Returns:
@@ -331,6 +331,10 @@ class GC:
             if True not in match:
                 raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
                                   data and inlet in parameters file.")
+
+
+        # TODO - where to get Datasource UUIDs from?
+        
 
         for sp in self._species:
             # If we've only got a single inlet

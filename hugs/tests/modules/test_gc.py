@@ -16,6 +16,7 @@ def test_read_file():
 
     gc = GC.read_file(data_filepath=data_filepath, precision_filepath=precision_filepath)
 
+    
     print(gc._uuid)
 
     assert False

@@ -57,7 +57,6 @@ class Datasource:
         # Any need to parse these for safety?
         d._labels = kwargs
         d._labels["gas"] = name
-
         
         if data is not None:
             # This could be a list of dataframes
@@ -117,9 +116,44 @@ class Datasource:
         """
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
 
-        self._start_datetime = _string_to_datetime(data.first_valid_index())
-        self._end_datetime = _string_to_datetime(data.last_valid_index())
-        self._data.append(data)
+        # Segment the data and calculate dateranges
+        segmented_data = self.segment(data)
+
+        self._data = segmented_data
+
+    def segment_data(self, data):
+        """ Segment the data by size
+
+            Returns:
+                list: List of tuples (dataframe, daterange) of sections of data grouped by date
+                according to the splitting frequency
+        """
+        from pandas import Grouper as _Grouper
+        from processing import get_split_frequency as _get_split_frequency
+
+        freq = _get_split_frequency(data)
+        # Split into sections by year
+        group = data.groupby(_Grouper(freq=freq))
+        # Create a list tuples of the split dataframe and the daterange it covers
+        # As some (years, months, weeks) may be empty we don't want those dataframes
+        segmented_data = [g, get_dataframe_daterange(g) for _, g in group if len(g) > 0]
+
+        return segmented_data
+
+    def get_dataframe_daterange(self, dataframe):
+        """ Returns the daterange for the passed dataframe
+
+            Args:
+                dataframe (Pandas.DataFrame): Dataframe to parse
+            Returns:
+                tuple (datetime, datetime): Start and end datetimes for dataframe
+        """
+        import datetime as _datetime
+
+        start = _datetime.datetime(dataframe.first_valid_index())
+        end = _datetime.datetime(dataframe.last_valid_index())
+
+        return start, end
 
     def add_metadata(self, metadata):
         """ Add metadata to this object
@@ -300,8 +334,9 @@ class Datasource:
             bucket = _get_bucket()
 
         if self._data is not None:
-            for data in self._data:
-                daterange_str = "".join([_datetime_to_string(data.first_valid_index()), "_", _datetime_to_string(data.last_valid_index())])
+            for data, daterange in self._data:
+                start, end = daterange
+                daterange_str = "".join([_datetime_to_string(start), "_", _datetime_to_string(end)])
                 data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
                 self._data_keys.append(data_key)
                 _ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))

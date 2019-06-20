@@ -2,20 +2,17 @@
 
 """
 
-def get_datasources(raw_data):
+def get_datasources(gas_data):
     """ Create or get an exisiting Datasource for each gas in the file
 
         TODO - currently this function will only take data from a single Datasource
         
         Args:
-            raw_data (list): List of Pandas.Dataframes
+            gas_data (list): List of tuples gas name, datasource_id, Pandas.Dataframe
         Returns:
             Datasource: Datasource containing data
     """
     from modules import Datasource as _Datasource
-    
-    # Where gas_data is a list of tuples
-    gas_data = parse_gases(raw_data)
 
     datasources = []
 
