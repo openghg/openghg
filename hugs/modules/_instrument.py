@@ -246,7 +246,7 @@ class Instrument:
         return _exists(bucket=bucket, uuid=uuid)
 
 
-    def species_query(species):
+    def species_query(self, species):
         """ Check the list of species passed and returns the UUID of each 
             Datasource associated with that species
 

@@ -188,13 +188,9 @@ class GC:
                         site=site, instrument=instrument_name)
         # Save to object store
         instrument.add_data(gas_data)
-        # Pass data to Instrument for saving in Datasources
-        
-
+        # Pass data to Instrument for saving in Datasource
         gc.save()
-
-       
-
+        
         # Read in the parameters file just when reading in the file.
         # Save it but don't save it to the object store as part of this object
 
@@ -316,7 +312,8 @@ class GC:
             Returns:
                 list (str, Pandas.DataFrame): List of tuples of gas name and gas data
         """
-        import fnmatch as _fnmatch
+        from fnmatch import fnmatch as _fnmatch
+        from uuid import uuid4 as _uuid4
         # import re as _re
 
         gas_data = []
@@ -327,14 +324,16 @@ class GC:
         data_inlets = self._proc_data["Inlet"].unique()
         # Check that each inlet in data_inlet matches one that's given by parameters file
         for data_inlet in data_inlets:
-            match = [fnmatch.fnmatch(data_inlet, inlet) for inlet in expected_inlets]
+            match = [_fnmatch(data_inlet, inlet) for inlet in expected_inlets]
             if True not in match:
                 raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
                                   data and inlet in parameters file.")
 
 
         # TODO - where to get Datasource UUIDs from?
-        
+        # Also what to do in case of multiple inlets - each of these will have a unique ID
+        # But may be of the same species ?
+        datasource_uuid = 1 # [_uuid4() for s in species]
 
         for sp in self._species:
             # If we've only got a single inlet
@@ -349,17 +348,17 @@ class GC:
                     data_sliced = self._proc_data.loc(slice_dict)
                     dataframe = data_sliced[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
                     dataframe = dataframe.dropna(axis="index", how="any")
-                    gas_data.append((sp, dataframe))
                 else:
                     dataframe = self._proc_data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]                    
                     dataframe = dataframe.dropna(axis="index", how="any")
-                    gas_data.append((sp, dataframe))
+
+                gas_data.append((sp, datasource_id, dataframe))
             # For multiple inlets
             else:
                 for data_inlet in data_inlets:
                     dataframe = self._proc_data[data["Inlet"] == data_inlet]
                     dataframe = dataframe.dropna(axis="index", how="any")
-                    gas_data.append((sp, dataframe))
+                    gas_data.append((sp, datasource_id, dataframe))
 
         return gas_data
 

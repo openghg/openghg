@@ -136,7 +136,7 @@ class Datasource:
         group = data.groupby(_Grouper(freq=freq))
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
-        segmented_data = [g, get_dataframe_daterange(g) for _, g in group if len(g) > 0]
+        segmented_data = [(g, get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
 
         return segmented_data
 

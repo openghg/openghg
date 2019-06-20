@@ -122,35 +122,6 @@ class CRDS:
 
         return crds
 
-    def datasource_query(self, species):
-        """ Query object store for datasources in this instrument that
-            match the species past in the list species
-
-            Args:
-                species (list): List of species this data holds
-            Returns:
-                dict: Dictionary of keys for Datasources for each species keyed as species : value
-                Where value is the UUID of the Datasource for that species or False if no Datasource
-                is found
-        """
-        # Unsure of how this should be implemented at the moment
-
-        # For each instrument have the known datasources
-
-        # Can key this instrument/uuid/{uuid}/datasources ?
-        # Store dictionary of datasources
-        from modules import Instrument as _Instrument
-
-
-        # key : species
-        # value : datasource_uuid
-        found = {}
-
-        for sp in species:
-            if Instrument.exists()
-
-
-
 
     def parse_data(self, data_filepath):
         """ Separates the gases stored in the dataframe in 
