@@ -186,9 +186,17 @@ class GC:
         site = "CGO"
         gas_data = gc.parse_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                         site=site, instrument=instrument_name)
-        # Save to object store
         instrument.add_data(gas_data)
-        # Pass data to Instrument for saving in Datasource
+        # Save updated Instrument to object store
+        instrument.save()
+
+        # Ensure this Instrument is saved within the object
+        gc.add_instrument(instrument.get_uuid(), _datetime_to_string(instrument.get_creation_time()))
+
+        
+        
+
+
         gc.save()
         
         # Read in the parameters file just when reading in the file.
@@ -207,8 +215,7 @@ class GC:
         """
         # Load in the params 
         # Load in the parameters dictionary for processing data
-        
-        params_file = "/Users/wm19361/Documents/Devel/hugs/hugs/modules/process_gcwerks_parameters.json"
+        params_file = "data/process_gcwerks_parameters.json"
         with open(params_file, "r") as FILE:
             self.params = json.load(FILE)
 
@@ -218,7 +225,7 @@ class GC:
         self.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath,
                                                     instrument=instrument)
         # Segment the processed data
-        gas_data = self.split()
+        gas_data = self.split(site=site)
 
         return gas_data
 
@@ -306,7 +313,7 @@ class GC:
 
         return precision, precision_species
 
-    def split(self):
+    def split(self, site):
         """ Splits the dataframe into sections to be stored within individual Datasources
 
             Returns:
@@ -319,7 +326,7 @@ class GC:
         gas_data = []
 
         # Read inlets from the parameters dictionary
-        expected_inlets = self.get_inlets(site=self._site)
+        expected_inlets = self.get_inlets(site=site)
         # Get the inlets in the dataframe
         data_inlets = self._proc_data["Inlet"].unique()
         # Check that each inlet in data_inlet matches one that's given by parameters file
@@ -352,13 +359,13 @@ class GC:
                     dataframe = self._proc_data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]                    
                     dataframe = dataframe.dropna(axis="index", how="any")
 
-                gas_data.append((sp, datasource_id, dataframe))
+                gas_data.append((sp, datasource_uuid, dataframe))
             # For multiple inlets
             else:
                 for data_inlet in data_inlets:
                     dataframe = self._proc_data[data["Inlet"] == data_inlet]
                     dataframe = dataframe.dropna(axis="index", how="any")
-                    gas_data.append((sp, datasource_id, dataframe))
+                    gas_data.append((sp, datasource_uuid, dataframe))
 
         return gas_data
 
@@ -393,6 +400,17 @@ class GC:
                 list: List of inlets
         """
         return self.params["GC"][site]["inlets"]
+
+    def add_instrument(self, instrument_id, value):
+        """ Add an Instument to this object's dictionary of instruments
+
+            Args:
+                instrument_id (str): Instrment UUID
+                value (str): Value to describe Instrument
+            Returns:
+                None
+        """
+        self._instruments[instrument_id] = value
 
 
     # def get_precision(instrument):

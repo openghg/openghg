@@ -12,7 +12,7 @@ class CRDS:
     def __init__(self):
         self._uuid = None
         self._instruments = {}
-        self._creation_datetime
+        self._creation_datetime = None
         # self._labels = {}
         self._stored = False
         # Processed data
@@ -74,7 +74,7 @@ class CRDS:
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
         
-        from processing._metadata import Metadata as _Metadata
+        # from processing._metadata import Metadata as _Metadata
         from modules import Instrument as _Instrument
 
         # First check for the CRDS object - should only be one? 
@@ -96,13 +96,13 @@ class CRDS:
         instrument_name = "instrument_name"
         instrument_id = _create_uuid()
 
-        if _Instrument.exists(instrument_id=instrument_id):
+        if _Instrument.exists(uuid=instrument_id):
             instrument = _Instrument.load(uuid=instrument_id)
         else:
             instrument = _Instrument.create(name="name")
 
-        filename = filepath.split("/")[-1]
-        metadata = _Metadata.create(filename, raw_data)
+        filename = data_filepath.split("/")[-1]
+        # metadata = _Metadata.create(filename, raw_data)
 
         # Parse the data here
         # Parse the gases
@@ -117,7 +117,7 @@ class CRDS:
         instrument.save()
 
         # Ensure this Instrument is saved within the object
-        crds.add_instrument(instrument._uuid, _datetime_to_string(instrument._creation_datetime))
+        crds.add_instrument(instrument.get_uuid(), _datetime_to_string(instrument.get_creation_datetime()))
         crds.save()
 
         return crds
@@ -199,7 +199,7 @@ class CRDS:
             # TODO - Verify integrity here? Test if this is required
             gas_data.set_index('Datetime', drop=True, inplace=True, verify_integrity=True)
 
-            data_list.append((gas_name, datasource_id, split_frames))
+            data_list.append((gas_name, datasource_id, gas_data))
 
         return data_list
 

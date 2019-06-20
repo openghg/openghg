@@ -319,14 +319,13 @@ class Instrument:
                 # TODO - add metadata in here - append to existing?
             else:
                 datasource = _Datasource.create(name=gas_name)
-                datasource.add_metadata(metadata)
+                # datasource.add_metadata(metadata)
 
             # Store the name and datasource_id
             self._species[gas_name] = datasource_id
-
             # Add the dataframe to the datasource
-            datasource.add_data(dataframe)
-
+            datasource.add_data(data)
+            # Add the Datasource to this Instrument
             self.add_datasource(datasource)
 
 
@@ -350,6 +349,27 @@ class Instrument:
         """
         self._labels[key] = value
 
+    def get_uuid(self):
+        """ Return the UUID of this Instrument
+
+            Returns:
+                str: UUID of Instrument
+        """
+        return self._uuid
+
+    def get_creation_datetime(self):
+        """ Return the creation datetime of this Instrument
+
+            Returns:
+                datetime: Creation datetime
+        """
+        return self._creation_datetime
+
+
+
+        
+
+
 
 
 
@@ -361,15 +381,9 @@ class Instrument:
 
 
 
-        
-
-
-
-
-
-
 
 
 
 
         
+

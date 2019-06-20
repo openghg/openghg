@@ -106,27 +106,15 @@ class Datasource:
         self._labels[key] = value
 
     def add_data(self, data):
-        """ Add data to this Datasource, data will be keyed independently with
+        """ Segment the data by size
+
+            Add data to this Datasource, data will be keyed independently with
             the daterange it covers part of its key
 
             Args:
                 data (Pandas.DataFrame): Data
             Returns:
                 None
-        """
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
-
-        # Segment the data and calculate dateranges
-        segmented_data = self.segment(data)
-
-        self._data = segmented_data
-
-    def segment_data(self, data):
-        """ Segment the data by size
-
-            Returns:
-                list: List of tuples (dataframe, daterange) of sections of data grouped by date
-                according to the splitting frequency
         """
         from pandas import Grouper as _Grouper
         from processing import get_split_frequency as _get_split_frequency
@@ -136,9 +124,8 @@ class Datasource:
         group = data.groupby(_Grouper(freq=freq))
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
-        segmented_data = [(g, get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
-
-        return segmented_data
+        # This daterange can just be calculated from the data ? 
+        self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
 
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed dataframe
@@ -150,8 +137,8 @@ class Datasource:
         """
         import datetime as _datetime
 
-        start = _datetime.datetime(dataframe.first_valid_index())
-        end = _datetime.datetime(dataframe.last_valid_index())
+        start = dataframe.first_valid_index()
+        end = dataframe.last_valid_index()
 
         return start, end
 
@@ -441,7 +428,15 @@ class Datasource:
                 str: Daterange as string 
         """
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        
+
+        if self._start_datetime is None or self._end_datetime is None:
+            if self._data is not None:
+                # TODO - this is clunky - better way?
+                self._start_datetime = self._data[0][1][0]
+                self._end_datetime = self._data[-1][1][1]
+            else:
+                raise ValueError("Cannot get daterange with no data")
+                
         return "".join([_datetime_to_string(self._start_datetime), "_", _datetime_to_string(self._end_datetime)])
         
 
