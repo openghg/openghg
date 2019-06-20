@@ -116,7 +116,6 @@ class Instrument:
         else:
             i._datasources = data["datasources"]
 
-
         i._creation_datetime = _string_to_datetime(data["creation_datetime"])
         
         i._labels = data["labels"]

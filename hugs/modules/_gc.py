@@ -164,11 +164,6 @@ class GC:
         from modules import Instrument as _Instrument
         from processing import Metadata as _Metadata
 
-        # data_file = "capegrim-medusa.18.C"
-        # precision_file = "capegrim-medusa.18.precisions.C"
-
-        print("Remember to update the instrument!")
-
         gc_id = _create_uuid()
 
         if GC.exists(uuid=gc_id):
@@ -176,6 +171,7 @@ class GC:
         else:
             gc = GC.create()
 
+        print("Remember to update the instrument!")
         # Where to get this from? User input?
         instrument_name = "GCMD"
         instrument_id = _create_uuid()
@@ -187,8 +183,14 @@ class GC:
 
         # Do we need this metadata?
         # metadata = _Metadata
-        gc.parse_data(data_filepath=data_filepath, precision_filepath=precision_filepath, instrument=instrument_name)
+        site = "CGO"
+        gas_data = gc.parse_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
+                        site=site, instrument=instrument_name)
         # Save to object store
+
+        # Pass data to Instrument for saving in Datasources
+        
+
         gc.save()
 
        
@@ -199,7 +201,7 @@ class GC:
         # For now return the GC object for easier testing
         return gc
 
-    def parse_data(self, data_filepath, precision_filepath, instrument):
+    def parse_data(self, data_filepath, precision_filepath, site, instrument):
         """
             Process GC data per site and instrument
             Instruments can be:
@@ -214,87 +216,26 @@ class GC:
         with open(params_file, "r") as FILE:
             self.params = json.load(FILE)
 
-        df, species, units, scale = self.read_data(data_filepath)
-        precision, precision_species = self.read_precision(precision_filepath)
-
-        # TODO - tidy this ?
-        for sp in species:
-            precision_index = precision_species.index(sp) * 2 + 1
-            df[sp + " repeatability"] = precision[precision_index].astype(float).reindex_like(df, method="pad")
-
-        # instrument = "GCMD"
-        # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
-        df["new_time"] = df.index - pd.Timedelta(seconds=self.get_precision(instrument)/2.0)
-        df.set_index("new_time", inplace=True, drop=True)
-        df.index.name = "Datetime"
-
-        site = "CGO"
-        inlets = self.get_inlets(site=site)
-        self.segment(species=species, site=site, data=df)
-
-    def segment(self, species, site, data):
-        """ Splits the dataframe into sections to be stored within individual Datasources
-
-            WIP
-
-            Returns:
-                list (str, Pandas.DataFrame): List of tuples of gas name and gas data
-        """
-        import fnmatch as _fnmatch
-        # import re as _re
-
-        gas_data = []
-
-        # Read inlets from the parameters dictionary
-        expected_inlets = self.get_inlets(site=site)
-        # Get the inlets in the dataframe
-        data_inlets = data["Inlet"].unique()
-        # Check that each inlet in data_inlet matches one that's given by parameters file
-        for data_inlet in data_inlets:
-            match = [fnmatch.fnmatch(data_inlet, inlet) for inlet in expected_inlets]
-            if True not in match:
-                raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
-                                  data and inlet in parameters file.")
-
-        for sp in species:
-            # If we've only got a single inlet
-            if len(data_inlets) == 1:
-                data_inlet = data_inlets[0]
-                # Not sure we need to save this
-                # clean_inlet_height = _re.search(r"\d+m", s).group()
-                # Split by date
-                if "date" in data_inlet:
-                    dates = inlet.split("_")[1:]
-                    slice_dict = {time: slice(dates[0], dates[1])}
-                    data_sliced = data.loc(slice_dict)
-                    dataframe = data_sliced[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
-                    dataframe = dataframe.dropna(axis="index", how="any")
-                    gas_data.append((sp, dataframe))
-                else:
-                    dataframe = data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]                    
-                    dataframe = dataframe.dropna(axis="index", how="any")
-                    gas_data.append((sp, dataframe))
-            # For multiple inlets
-            else:
-                for data_inlet in data_inlets:
-                    dataframe = data[data["Inlet"] == data_inlet]
-                    dataframe = dataframe.dropna(axis="index", how="any")
-                    gas_data.append((sp, dataframe))
+        # Some of these are used on NetCDF output, it might be worth saving everything for 
+        # future processing
+        # Save these to the object instead of returning
+        self.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath,
+                                                    instrument=instrument)
+        # Segment the processed data
+        gas_data = self.segment()
 
         return gas_data
 
-
-    def read_data(self, filepath):
+    def read_data(self, data_filepath, precision_filepath, instrument):
             # Read header
-        header = pd.read_csv(filepath, skiprows=2, nrows=2,
-                            header=None, sep=r"\s+")
+        header = pd.read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
         # Create a function to parse the datetime in the data file
         def parser(date): return pd.datetime.strptime(date, '%Y %m %d %H %M')
         # Read the data in and automatically create a datetime column from the 5 columns
         # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
-        df = pd.read_csv(filepath, skiprows=4, sep=r"\s+", index_col=["yyyy_mm_dd_hh_mi"],
-                        parse_dates=[[1, 2, 3, 4, 5]], date_parser=parser)
+        df = pd.read_csv(data_filepath, skiprows=4, sep=r"\s+", index_col=["yyyy_mm_dd_hh_mi"],
+                         parse_dates=[[1, 2, 3, 4, 5]], date_parser=parser)
         df.index.name = "Datetime"
 
         units = {}
@@ -311,8 +252,10 @@ class GC:
                 # Add it to the dictionary for renaming later
                 columns_renamed[column] = gas_name + "_flag"
                 # Create 2 new columns based on the flag columns
-                df[gas_name + " status_flag"] = (df[column].str[0] != "-").astype(int)
-                df[gas_name + " integration_flag"] = (df[column].str[1] != "-").astype(int)
+                df[gas_name +
+                    " status_flag"] = (df[column].str[0] != "-").astype(int)
+                df[gas_name +
+                    " integration_flag"] = (df[column].str[1] != "-").astype(int)
 
                 col_shift = 4
                 units[gas_name] = header.iloc[1, col_loc + col_shift]
@@ -321,22 +264,39 @@ class GC:
                 # Ensure the units and scale have been read in correctly
                 # Have this in case the column shift between the header and data changes
                 if units[gas_name] == "--" or scale[gas_name] == "--":
-                    raise ValueError("Error reading units and scale, ensure columns are correct between header and dataframe")
+                    raise ValueError(
+                        "Error reading units and scale, ensure columns are correct between header and dataframe")
 
                 species.append(gas_name)
 
         # Rename columns to include the gas this flag represents
         df.rename(columns=columns_renamed, inplace=True)
 
-        # print(df)
-        return df, species, units, scale
+        # Read and parse precisions file
+        precision, precision_species = self.read_precision(precision_filepath)
+
+        for sp in species:
+            precision_index = precision_species.index(sp) * 2 + 1
+            df[sp + " repeatability"] = precision[precision_index].astype(float).reindex_like(df, method="pad")
+
+        # instrument = "GCMD"
+        # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
+        df["new_time"] = df.index - pd.Timedelta(seconds=self.get_precision(instrument)/2.0)
+        df.set_index("new_time", inplace=True, drop=True)
+        df.index.name = "Datetime"
+
+        self._proc_data = df
+        self._species = species
+        self._units = units
+        self._scale = scale
 
     def read_precision(self, filepath):
         # Function for parsing datetime
         def parser(date): return pd.datetime.strptime(date, '%y%m%d')
 
         # Read precision species
-        precision_header = pd.read_csv(filepath, skiprows=3, nrows=1, header=None, sep=r"\s+")
+        precision_header = pd.read_csv(
+            filepath, skiprows=3, nrows=1, header=None, sep=r"\s+")
 
         precision_species = precision_header.values[0][1:].tolist()
 
@@ -349,6 +309,55 @@ class GC:
         precision = precision.loc[~precision.index.duplicated(keep="first")]
 
         return precision, precision_species
+
+    def segment(self):
+        """ Splits the dataframe into sections to be stored within individual Datasources
+
+            Returns:
+                list (str, Pandas.DataFrame): List of tuples of gas name and gas data
+        """
+        import fnmatch as _fnmatch
+        # import re as _re
+
+        gas_data = []
+
+        # Read inlets from the parameters dictionary
+        expected_inlets = self.get_inlets(site=self._site)
+        # Get the inlets in the dataframe
+        data_inlets = self._proc_data["Inlet"].unique()
+        # Check that each inlet in data_inlet matches one that's given by parameters file
+        for data_inlet in data_inlets:
+            match = [fnmatch.fnmatch(data_inlet, inlet) for inlet in expected_inlets]
+            if True not in match:
+                raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
+                                  data and inlet in parameters file.")
+
+        for sp in self._species:
+            # If we've only got a single inlet
+            if len(data_inlets) == 1:
+                data_inlet = data_inlets[0]
+                # Not sure we need to save this
+                # clean_inlet_height = _re.search(r"\d+m", s).group()
+                # Split by date
+                if "date" in data_inlet:
+                    dates = inlet.split("_")[1:]
+                    slice_dict = {time: slice(dates[0], dates[1])}
+                    data_sliced = self._proc_data.loc(slice_dict)
+                    dataframe = data_sliced[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
+                    dataframe = dataframe.dropna(axis="index", how="any")
+                    gas_data.append((sp, dataframe))
+                else:
+                    dataframe = self._proc_data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]                    
+                    dataframe = dataframe.dropna(axis="index", how="any")
+                    gas_data.append((sp, dataframe))
+            # For multiple inlets
+            else:
+                for data_inlet in data_inlets:
+                    dataframe = self._proc_data[data["Inlet"] == data_inlet]
+                    dataframe = dataframe.dropna(axis="index", how="any")
+                    gas_data.append((sp, dataframe))
+
+        return gas_data
 
     def add_instrument(self, instrument_id, value):
         """ Add an Instument to this object's dictionary of instruments
