@@ -11,6 +11,9 @@ class sampling_period(Enum):
     GCMS = 1200
     MEDUSA = 1200
 
+def _testdata():
+    import os as _os
+    return _os.path.dirname(_os.path.abspath(__file__)) + _os.path.sep + "../data"
 
 class GC:
     _gc_root = "GC"
@@ -215,7 +218,7 @@ class GC:
         """
         # Load in the params 
         # Load in the parameters dictionary for processing data
-        params_file = "data/process_gcwerks_parameters.json"
+        params_file = "%s/process_gcwerks_parameters.json" % _testdata()
         with open(params_file, "r") as FILE:
             self.params = json.load(FILE)
 

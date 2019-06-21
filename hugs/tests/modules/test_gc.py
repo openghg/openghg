@@ -5,6 +5,9 @@ import os
 
 from modules import GC
 
+def _testdata():
+    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data"
+
 def test_read_file():
     datafile = "capegrim-medusa.18.C"
     datafile_precision = "capegrim-medusa.18.precisions.C"
@@ -16,7 +19,6 @@ def test_read_file():
 
     gc = GC.read_file(data_filepath=data_filepath, precision_filepath=precision_filepath)
 
-    
     print(gc._uuid)
 
     assert False
