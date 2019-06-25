@@ -242,36 +242,6 @@ def write_dataframe(bucket, key, dataframe):
 # TODO - How to write the HDF5 file to an HDF5 object instead of a HDF5 file 
 # on the drive?
 
-def get_dataframe(bucket, key):
-    """ Gets a dataframe stored as an HDF5 file from the object
-        store
-
-        Args:
-            bucket (dict): Bucket containing data
-            key (str): Key to access dataframe in store
-        Returns:
-            Pandas.Dataframe: Dataframe from HDF5 file
-    """
-    import pandas as _pd
-    import os as _os
-
-    # Get the file from the object store
-    hdf_file = read_object(bucket=bucket, key=key)
-
-    # At the moment write this to a temporary file
-    # TODO - must be a better way of doing this
-    home_path = _os.path.expanduser("~")
-    hugs_test_folder = "hugs_tmp/tmp_hdf5s"
-    tmp_file = "tmp.hdf"
-
-    temp_path = _os.path.join(home_path, hugs_test_folder, tmp_file)
-    
-    with open(temp_path, "wb") as f:
-        f.write(hdf_file)
-
-    # Get the dataframe from file
-    return _pd.from_hdf(temp_path, key=filename)
-
 def store_file(bucket, filepath):
     """ Write file to the object store
 
@@ -301,9 +271,9 @@ def get_bucket():
         Returns:
             dict: Bucket
     """
-    from objectstore._local_bucket import get_local_bucket
+    from HUGS.ObjectStore import get_local_bucket as _get_local_bucket
 
-    return get_local_bucket()
+    return _get_local_bucket()
 
 
 @staticmethod

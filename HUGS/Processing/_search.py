@@ -27,12 +27,12 @@ def gas_search(gas_name, meas_type, start_datetime=None, end_datetime=None):
         WIP
 
     """
-    from objectstore import get_object_names as _get_object_names
-    from objectstore import get_local_bucket as _get_local_bucket
-    from modules import Instrument
-    from modules import CRDS
-    from util import get_datetime_epoch as _get_datetime_epoch
-    from util import get_datetime_now as _get_datetime_now
+    from HUGS.ObjectStore import get_object_names as _get_object_names
+    from HUGS.ObjectStore import get_local_bucket as _get_local_bucket
+    from HUGS.Modules import Instrument as _Instrument
+    from HUGS.Modules import CRDS
+    from HUGS.Util import get_datetime_epoch as _get_datetime_epoch
+    from HUGS.Util import get_datetime_now as _get_datetime_now
 
     # TODO - This feels clunky
     if start_datetime is None:
@@ -50,7 +50,7 @@ def gas_search(gas_name, meas_type, start_datetime=None, end_datetime=None):
 
     # Get instrument UUIDs
     instrument_uuids = list(crds.get_instruments())
-    instruments = [Instrument.load(uuid=uuid, shallow=True) for uuid in instrument_uuids]
+    instruments = [_Instrument.load(uuid=uuid, shallow=True) for uuid in instrument_uuids]
 
     keys = []
     for inst in instruments:
@@ -77,11 +77,12 @@ def get_data(key_list):
         Bypass loading the Datasource? Get both then we have metadata?
 
     """
+    from HUGS.Modules import Datasource as _Datasource
     # Get the data
     # This will return a list of lists of data
     # Maybe want to do some preprocessing on this data before it comes raw out of the object store?
     # We only want the data in the correct daterange
-    return [Datasource.load(key=key)._data for key in key_list]
+    return [_Datasource.load(key=key)._data for key in key_list]
 
 
 def search_store(bucket, data_uuids, root_path, start_datetime, end_datetime):
@@ -101,9 +102,7 @@ def search_store(bucket, data_uuids, root_path, start_datetime, end_datetime):
     """
     from Acquire.ObjectStore import ObjectStore as _ObjectStore
     from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
-    from objectstore._hugs_objstore import get_dataframe as _get_dataframe
-    from objectstore._hugs_objstore import get_object_names as _get_object_names
-    from pandas import date_range as _pd_daterange
+    from HUGS.ObjectStore import get_object_names as _get_object_names
 
     start_datetime = _datetime_to_datetime(start_datetime)
     end_datetime = _datetime_to_datetime(end_datetime)

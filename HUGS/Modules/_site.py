@@ -121,7 +121,7 @@ class Site:
 
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from hugs_objstore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -147,7 +147,7 @@ class Site:
                 Site: Site object
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from hugs_objstore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if uuid is None and name is None:
             raise ValueError("Both uuid and name cannot be None")
@@ -186,17 +186,17 @@ class Site:
         
         return uuid[0]
         
-    def create_Instrument(self, name, height=None):
-        """ This function is used to create an Instrument at this Site
+    # def create_Instrument(self, name, height=None):
+    #     """ This function is used to create an Instrument at this Site
 
-            Returns:
-                Instrument: Instrument object at this site
-        """
-        from _instrument import Instrument
+    #         Returns:
+    #             Instrument: Instrument object at this site
+    #     """
+    #     from _instrument import Instrument
 
-        instrument = Instrument.create(name=name, site=self._name, network=self._network, height=height)
+    #     instrument = Instrument.create(name=name, site=self._name, network=self._network, height=height)
 
-        self._instruments[instrument._uuid] = {"name": name, "created": instrument._creation_datetime}
+    #     self._instruments[instrument._uuid] = {"name": name, "created": instrument._creation_datetime}
 
     def type_fn(self):
         """ Implement a type variable so we know what type of site this is? 

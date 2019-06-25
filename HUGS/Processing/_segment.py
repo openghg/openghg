@@ -12,7 +12,7 @@ def get_datasources(gas_data):
         Returns:
             Datasource: Datasource containing data
     """
-    from modules import Datasource as _Datasource
+    from HUGS.Modules import Datasource as _Datasource
 
     datasources = []
 

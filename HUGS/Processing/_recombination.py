@@ -11,10 +11,9 @@ def get_datasources(bucket, uuid_list):
         Returns:
             list: List of Datasource objects
     """
-    from modules._datasource import Datasource
-    from objectstore._hugs_objstore import get_object as _get_object_json
+    from HUGS.Modules import Datasource as _Datasource
 
-    return [Datasource.load(bucket=bucket, uuid=uid) for uid in uuid_list]
+    return [_Datasource.load(bucket=bucket, uuid=uid) for uid in uuid_list]
 
 
 # This might be unnecessary
@@ -43,12 +42,12 @@ def combine_sections(sections):
         Returns:
             Pandas.Dataframe: Combined dataframes
     """
-    import pandas as _pd
+    from pandas import concat as _concat
 
     combined = []
     # Combine the dataframes and create a frame of their indices
     for section in sections:
-        combo = _pd.concat(section, axis="rows")
+        combo = _concat(section, axis="rows")
         combined.append(combo)
 
     complete = combined[0].iloc[:, :1]
@@ -56,7 +55,7 @@ def combine_sections(sections):
     for d in combined:
         if len(d.index) != len(complete.index):
             raise ValueError("Mismatch in timeframe and dataframes index length")
-        complete = _pd.concat([complete, d], axis="columns")
+        complete = _concat([complete, d], axis="columns")
 
     return complete
 
@@ -73,7 +72,6 @@ def convert_to_netcdf(dataframe):
             str: Name of file written
     """
     from Acquire.ObjectStore import get_datetime_now_to_string as _get_datetime_now_to_string
-    import xarray
 
     filename = "crds_output_%s.nc" % _get_datetime_now_to_string()
 

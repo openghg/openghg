@@ -11,7 +11,7 @@ from HUGS.ObjectStore import get_dated_object
 from HUGS.ObjectStore import get_dated_object_json
 from HUGS.Modules import Datasource
 from HUGS.Processing import Metadata
-from HUGS.ObjectStore import _local_bucket
+from HUGS.ObjectStore import get_local_bucket
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 
@@ -64,7 +64,7 @@ def mock_uuid2(monkeypatch):
 #     datasource.save(bucket)
 
 def test_save(mock_uuid2):
-    bucket = local_bucket.get_local_bucket()
+    bucket = get_local_bucket()
 
     datasource = Datasource.create(name="test_name", instrument="test_instrument", site="test_site", network="test_network")
 
@@ -150,7 +150,7 @@ def test_from_data(mock_uuid):
     datasource = Datasource.create(name="test_name_two", instrument="test_instrument_two",
                                               site="test_site_two", network="test_network_two")
 
-    bucket = local_bucket.get_local_bucket()
+    bucket = get_local_bucket()
 
     data = datasource.to_data()
     new_datasource = Datasource.from_data(bucket=bucket, data=datasource.to_data(), shallow=False)
@@ -165,7 +165,7 @@ def test_from_data(mock_uuid):
 def test_get_uid_from_name(mock_uuid2):
     from Acquire.ObjectStore import string_to_encoded
 
-    bucket = local_bucket.get_local_bucket()
+    bucket = get_local_bucket()
 
     name = "test_name"
 
@@ -175,7 +175,7 @@ def test_get_uid_from_name(mock_uuid2):
 
 
 def test_get_name_from_uid(mock_uuid):
-    bucket = local_bucket.get_local_bucket()
+    bucket = get_local_bucket()
 
     name = Datasource._get_name_from_uid(bucket, mocked_uuid2)
 

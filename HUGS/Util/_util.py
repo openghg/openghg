@@ -52,7 +52,6 @@ def get_datetime_now():
 
     return _datetime.datetime.utcnow().replace(tzinfo=_datetime.timezone.utc)
 
-
 def unanimous(seq):
             """ Checks that all values in an iterable object
                 are the same

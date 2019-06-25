@@ -117,7 +117,7 @@ class Datasource:
                 None
         """
         from pandas import Grouper as _Grouper
-        from processing import get_split_frequency as _get_split_frequency
+        from HUGS.Processing import get_split_frequency as _get_split_frequency
 
         freq = _get_split_frequency(data)
         # Split into sections by year
@@ -167,8 +167,8 @@ class Datasource:
             Returns:
                 bool: True if Datasource exists 
         """
-        from objectstore import exists as _exists
-        from objectstore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import exists as _exists
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -216,7 +216,7 @@ class Datasource:
                 Pandas.Dataframe: Dataframe from stored HDF file
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from objectstore._hugs_objstore import get_dated_object as _get_dated_object
+        from HUGS.ObjectStore import get_dated_object as _get_dated_object
 
         # data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
 
@@ -242,7 +242,6 @@ class Datasource:
         """
         from pandas import HDFStore as _HDFStore
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-
         from Acquire.ObjectStore import get_datetime_now_to_string
 
         with _HDFStore("write.hdf", mode="w", driver="H5FD_CORE", driver_core_backing_store=0,
@@ -316,6 +315,7 @@ class Datasource:
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -352,9 +352,9 @@ class Datasource:
                 Datasource: Datasource object created from JSON
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from objectstore._hugs_objstore import get_dated_object as _get_dated_object
-        from objectstore._hugs_objstore import get_object_json as _get_object_json
-        from objectstore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import get_dated_object as _get_dated_object
+        from HUGS.ObjectStore import get_object_json as _get_object_json
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if uuid is None and key is None:
             raise ValueError("Both uuid and key cannot be None")
@@ -381,7 +381,7 @@ class Datasource:
                 str: UUID for the Datasource
         """
         # from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from objectstore._hugs_objstore import get_dated_object_json as _get_dated_object_json
+        from HUGS.ObjectStore import get_dated_object_json as _get_dated_object_json
 
         key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
 

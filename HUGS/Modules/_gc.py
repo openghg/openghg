@@ -1,6 +1,4 @@
 from enum import Enum
-import fnmatch
-import json
 import pandas as pd
 import xarray as xray
 
@@ -59,8 +57,8 @@ class GC:
             Returns:
                 bool: True if object exists
         """
-        from objectstore import exists as _exists
-        from objectstore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import exists as _exists
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -113,7 +111,8 @@ class GC:
 
     @staticmethod
     def load(uuid, key=None, bucket=None):
-        """
+        """ Load a GC object from the object store
+
             Args:
                 uuid (str): UUID of GC object
                 key (str, default=None): Key of object in object store
@@ -122,7 +121,7 @@ class GC:
                 Datasource: Datasource object created from JSON
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from objectstore._hugs_objstore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -147,7 +146,7 @@ class GC:
 
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from objectstore._hugs_objstore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -164,8 +163,8 @@ class GC:
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-        from modules import Instrument as _Instrument
-        from processing import Metadata as _Metadata
+        from HUGS.Modules import Instrument as _Instrument
+        from HUGS.Processing import Metadata as _Metadata
 
         gc_id = _create_uuid()
 
@@ -196,10 +195,6 @@ class GC:
         # Ensure this Instrument is saved within the object
         gc.add_instrument(instrument.get_uuid(), _datetime_to_string(instrument.get_creation_time()))
 
-        
-        
-
-
         gc.save()
         
         # Read in the parameters file just when reading in the file.
@@ -216,11 +211,12 @@ class GC:
             "GCMS": GC ADS (output GC-ADS)
             "medusa": GC medusa (output GC-MEDUSA)
         """
+        import json as _json
         # Load in the params 
         # Load in the parameters dictionary for processing data
         params_file = "%s/process_gcwerks_parameters.json" % _testdata()
         with open(params_file, "r") as FILE:
-            self.params = json.load(FILE)
+            self.params = _json.load(FILE)
 
         # Some of these are used on NetCDF output, it might be worth saving everything for 
         # future processing
@@ -233,8 +229,15 @@ class GC:
         return gas_data
 
     def read_data(self, data_filepath, precision_filepath, instrument):
+        """ Read data from file
+
+            Args:
+                WIP
+
+        """
+        from pandas import read_csv as _read_csv
             # Read header
-        header = pd.read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
+        header = _read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
         # Create a function to parse the datetime in the data file
         def parser(date): return pd.datetime.strptime(date, '%Y %m %d %H %M')
@@ -297,6 +300,13 @@ class GC:
         self._scale = scale
 
     def read_precision(self, filepath):
+        """ Read GC precision file
+
+            Args: 
+                WIP
+
+        """
+
         # Function for parsing datetime
         def parser(date): return pd.datetime.strptime(date, '%y%m%d')
 
@@ -439,15 +449,6 @@ class GC:
 #     # This function can call multiple functions to segment the dataframe
 
 #     for sp in species:
-
-
-    
-if __name__ == "__main__":
-    instrument = "GCMD"
-    gc = GC()
-    gc.read_file()
-
-    
 
 
     

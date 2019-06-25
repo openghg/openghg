@@ -7,7 +7,9 @@ import uuid
 
 from Acquire.ObjectStore import ObjectStore
 
-from HUGS.Processing import get_split_frequency, get_datasources
+from HUGS.Processing import get_split_frequency
+from HUGS.Processing import _segment
+
 from HUGS.Modules import Datasource
 from HUGS.ObjectStore import get_bucket
 
@@ -53,7 +55,7 @@ def test_get_split_frequency_small():
     assert split == "Y"
 
 def test_get_datasources_correct_number(data):
-    datasources = get_datasources(data)
+    datasources = _segment.get_datasources(data)
     
     assert len(datasources) == 3
 

@@ -75,7 +75,7 @@ class CRDS:
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
         
         # from processing._metadata import Metadata as _Metadata
-        from modules import Instrument as _Instrument
+        from HUGS.Modules import Instrument as _Instrument
 
         # First check for the CRDS object - should only be one? 
         # Maybe this can depend on the type or something?
@@ -244,7 +244,7 @@ class CRDS:
                     tuple (int, int): Number of gases, number of
                     columns of data for each gas
             """
-            from util import unanimous as _unanimous
+            from HUGS.Util import unanimous as _unanimous
             # Slice the dataframe
             head_row = data.head(1)
 
@@ -270,7 +270,6 @@ class CRDS:
             Returns:
                 dict: Dictionary version of object
         """
-
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         d = {}
@@ -297,7 +296,7 @@ class CRDS:
                 CRDS: CRDS object created from data
         """
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
-        from objectstore._hugs_objstore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if data is None or len(data) == 0:
             return CRDS()
@@ -333,7 +332,7 @@ class CRDS:
 
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from objectstore._hugs_objstore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -358,7 +357,7 @@ class CRDS:
                 Datasource: Datasource object created from JSON
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from objectstore._hugs_objstore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -383,9 +382,9 @@ class CRDS:
             Returns:
                 bool: True if Instrument exists 
         """
-        from objectstore import exists as _exists
-        from objectstore import get_bucket as _get_bucket
-
+        from HUGS.ObjectStore import exists as _exists
+        from HUGS.ObjectStore import get_bucket as _get_bucket
+        
         if bucket is None:
             bucket = _get_bucket()
 

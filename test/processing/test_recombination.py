@@ -4,12 +4,9 @@ import pandas as pd
 import pytest
 import xarray
 
-from HUGS.ObjectStore import get_local_bucket
-from HUGS.Modules import CRDS
-from HUGS.Processing import get_datasources
-from HUGS.Processing import parse_gases
-from HUGS.Processing import combine_sections
-from HUGS.Processing import search_store
+from HUGS.Modules import Instrument, CRDS, Datasource
+from HUGS.ObjectStore import get_object, get_local_bucket
+from HUGS.Processing import get_datasources, parse_gases, combine_sections, search_store
 
 @pytest.fixture(scope="session")
 def keylist():
@@ -49,9 +46,7 @@ def keylist():
 
 
 def test_combine_sections():
-    from modules._datasource import Datasource
-    from objectstore._hugs_objstore import get_object
-    from modules import Instrument
+
     
     bucket = get_local_bucket(empty=True)
 

@@ -76,7 +76,6 @@ class Network:
             Returns:
                 Network: Network object
         """
-
         if data is None or len(data) == 0:
             return Network()
 
@@ -105,7 +104,7 @@ class Network:
 
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from hugs_objstore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if bucket is None:
             bucket = _get_bucket()
@@ -130,7 +129,7 @@ class Network:
                 Network: Network object
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from hugs_objstore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if uuid is None and name is None:
             raise ValueError("Both uuid and name cannot be None")
