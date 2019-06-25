@@ -175,10 +175,10 @@ class Service:
            is performed automatically when the Registry confirms
            registration
         """
-        if service_type not in ["identity", "access", "compute",
-                                "registry", "accounting", "storage"]:
-            raise ServiceError("Services of type '%s' are not allowed!" %
-                               service_type)
+        #if service_type not in ["identity", "access", "compute",
+        #                        "registry", "accounting", "storage"]:
+        #    raise ServiceError("Services of type '%s' are not allowed!" %
+        #                       service_type)
 
         from Acquire.Crypto import PrivateKey as _PrivateKey
 
@@ -460,24 +460,47 @@ class Service:
             self._last_key_update = _get_datetime_now()
         else:
             from Acquire.Crypto import get_private_key as _get_private_key
+            from Acquire.Crypto import PrivateKey as _PrivateKey
             from ._function import call_function as _call_function
 
-            # if our keys are old then pull the new ones from the server
-            if self._pubcert is None:
-                # we are initialising from scratch - hope this is over https
-                response = _call_function(
-                    self.service_url(),
-                    response_key=_get_private_key("function"))
-            else:
-                # ask for an updated Service, ensuring the service responds
-                # with a signature that we know was (once) valid
-                response = _call_function(
-                    self.service_url(),
-                    response_key=_get_private_key("function"),
-                    public_cert=self._pubcert)
+            # ask the registry to return to us their latest details - use
+            # a challenge-response to make sure that the response is
+            # properly returned
+            args = {}
+            challenge = None
 
-            service = Service.from_data(response["service_info"],
-                                        verify_data=True)
+            if self._pubkey is not None:
+                # Also send a challenge to ensure that the service
+                # can decrypt something the current public key
+                from Acquire.ObjectStore import bytes_to_string \
+                    as _bytes_to_string
+                challenge = _PrivateKey.random_passphrase()
+                encrypted_challenge = _bytes_to_string(
+                                            self._pubkey.encrypt(challenge))
+
+                args = {"challenge": encrypted_challenge,
+                        "fingerprint": self._pubkey.fingerprint()}
+
+            # if our keys are old then pull the new ones from the server
+            response = _call_function(
+                              self.service_url(),
+                              function=None,
+                              args=args,
+                              args_key=self._pubkey,
+                              response_key=_get_private_key("function"),
+                              public_cert=self._pubcert)
+
+            if challenge is None:
+                # we can't verify the service data
+                service = Service.from_data(response["service_info"])
+            else:
+                service = Service.from_data(response["service_info"],
+                                            verify_data=True)
+
+                if response["response"] != challenge:
+                    raise ServiceError(
+                        "The requested service (%s) failed to respond "
+                        "to the challenge!" % str(service))
 
             if service.uid() != self.uid():
                 raise ServiceError(
@@ -1224,7 +1247,9 @@ class Service:
             service._privkey = None
             service._privcert = None
             service._lastkey = None
-            service._lastcert = _PublicKey.from_data(data["last_certificate"])
+            service._lastcert = _PublicKey.from_data(
+                                                data["last_certificate"])
+
             service._service_user_secrets = None
 
         service._uid = data["uid"]

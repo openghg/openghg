@@ -30,7 +30,7 @@ def create_decimal(value, default=0):
             Decimal: Decimal version of value
 
     """
-    
+
     from decimal import Decimal as _Decimal
 
     if value is None:

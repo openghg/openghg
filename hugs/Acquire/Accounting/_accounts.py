@@ -114,7 +114,7 @@ class Accounts:
 
     def group(self):
         """Return the name of the group that this set of accounts refers to
-        
+
             Returns:
                 string: Name of the group
         """
@@ -149,10 +149,10 @@ class Accounts:
 
             Args:
                 bucket (dict, default=None): Bucket from which to load data
-            
+
             Returns:
                 :obj:`list`: List of names of the accounts in this group
-        
+
         """
         self._assert_is_readable()
 
@@ -188,13 +188,13 @@ class Accounts:
 
     def get_account(self, name, bucket=None):
         """Return the account called 'name' from this group
-        
+
             Args:
                 name (:obj:`str`): Name of account to retrieve
                 bucket (:obj:`dict`): Bucket to load data from
 
             Returns:
-                :obj:`Account`: Account object        
+                :obj:`Account`: Account object
         """
         self._assert_is_readable()
 
@@ -225,7 +225,7 @@ class Accounts:
 
     def contains(self, account, bucket=None):
         """Return whether or not this group contains the passed account
-        
+
             Args:
                 account (:obj:`Account`): Account to check against group
                 bucket (dict, default=None): Bucket to load data from

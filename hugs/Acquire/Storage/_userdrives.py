@@ -137,7 +137,8 @@ class UserDrives:
                 from Acquire.Storage import DriveInfo as _DriveInfo
                 drive = _DriveInfo(drive_uid=drive_uid,
                                    identifiers=self._identifiers,
-                                   is_authorised=self._is_authorised)
+                                   is_authorised=self._is_authorised,
+                                   autocreate=True)
 
         return drive
 
@@ -193,9 +194,9 @@ class UserDrives:
             if self._is_authorised and autocreate:
                 # create a new UID for the drive and write this to the
                 # object store
-                from Acquire.ObjectStore import create_uuid as _create_uuid
+                from Acquire.ObjectStore import create_uid as _create_uid
 
-                drive_uid = _create_uuid()
+                drive_uid = _create_uid()
 
                 drive_uid = _ObjectStore.set_ins_string_object(
                                             bucket, drive_key, drive_uid)
@@ -203,7 +204,8 @@ class UserDrives:
                 from Acquire.Storage import DriveInfo as _DriveInfo
                 drive = _DriveInfo(drive_uid=drive_uid,
                                    identifiers=self._identifiers,
-                                   is_authorised=self._is_authorised)
+                                   is_authorised=self._is_authorised,
+                                   autocreate=True)
 
         if drive is None:
             from Acquire.Storage import MissingDriveError

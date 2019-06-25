@@ -70,10 +70,10 @@ def _get_random_sentence():
 
     import random as _random
 
-    adj = adjs[_random.randint(0, len(adjs)-1)]
-    animal = animals[_random.randint(0, len(animals)-1)]
-    verb = verbs[_random.randint(0, len(verbs)-1)]
-    adv = advs[_random.randint(0, len(advs)-1)]
+    adj = _random.choice(adjs)
+    animal = _random.choice(animals)
+    verb = _random.choice(verbs)
+    adv = _random.choice(advs)
 
     return "%s %s %s %s" % (adj, animal, verb, adv)
 
@@ -411,6 +411,9 @@ class User:
             raise LoginError("You cannot try to log in twice using the same "
                              "User object. Create another object if you want "
                              "to try to log in again.")
+
+        if self._username is None or len(self._username) == 0:
+            raise LoginError("Please supply a valid username!")
 
         # first, create a private key that will be used
         # to sign all requests and identify this login

@@ -418,6 +418,12 @@ class Wallet:
             _output("...connected to registry %s" % registry)
             _flush_output()
 
+            # ensure we cache this registry...
+            registry_file = "%s/service_%s" % (
+                self._wallet_dir,
+                _string_to_safestring(registry.canonical_url()))
+            _write_service(service=registry, filename=registry_file)
+
             if service_url is not None:
                 _output("Securely fetching keys for %s..." % service_url)
                 _flush_output()

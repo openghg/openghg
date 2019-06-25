@@ -17,7 +17,6 @@ def _get_key(root_key, filename):
             filename (str): filename to access in object store
         Returns:
             str: Location to access the file
-        
     """
     basename = _os.path.basename(filename)
 
@@ -29,13 +28,13 @@ def _get_key(root_key, filename):
 
 def _clean_key(root_key, filekey):
     """Return the cleaned key 'filekey', using 'root_key' as the root
-        
+
       Args:
             root_key (str): root_key for accessing object store
             filekey (str): filename to access in object store
         Returns:
             str: Location to access the file
-        
+
     """
     if root_key:
         return "%s/%s" % (str(root_key), str(filekey))
@@ -46,7 +45,7 @@ def _clean_key(root_key, filekey):
 def _get_filesize_and_checksum(filename):
     """Calculates the size in bytes of the file and
         the MD5 hash
-       
+
        Args:
             filename (str): name of file to calculate hash for
         Returns:
@@ -141,7 +140,7 @@ def _expand_source_destination(source, destination=None,
         Returns:
             tuple (list, list): lists of files in the source and destination
             directories
-        
+
     """
 
     if source is None:
@@ -220,7 +219,7 @@ class FileWriteRequest(_Request):
                 source (str): source directory to traverse
                 destination (str, optional): destination directory
                 root (str): root key to use in object store
-                ignore_hidden (bool): If True ignore hidden files in folders, 
+                ignore_hidden (bool): If True ignore hidden files in folders,
                 else include hidden files
                 account (Account): instance of Account class
                 testing_key (str): passed to enable testing of class
@@ -288,7 +287,7 @@ class FileWriteRequest(_Request):
 
     def is_null(self):
         """Return whether or not this is a null request
-            
+
             Returns:
                 bool: True if UID set, else False
         """
@@ -313,7 +312,7 @@ class FileWriteRequest(_Request):
         """Function to return a string that can be used as a
            summary key for this resource request
 
-           
+
             Returns:
                 None or str : None if instance is null, else string containing
                 uid and checksum
@@ -325,16 +324,16 @@ class FileWriteRequest(_Request):
 
     def uid(self):
         """Get the UID of this request
-        
+
         Returns:
             str: UID of this request
-        
+
         """
         return self._uid
 
     def authorisation(self):
         """Return the authorisation behind this request
-        
+
             Returns:
                 Authorisation: the authorisation behind this request
         """
@@ -367,17 +366,17 @@ class FileWriteRequest(_Request):
 
             Returns:
                 list: size of the files to be written
-        
+
         """
         return _copy.copy(self._file_sizes)
 
     def checksums(self):
         """Return the checksums of the files that are requested
            to be written
-           
+
            Returns:
                 list: checksums of the files to be written
-           
+
            """
         return _copy.copy(self._checksums)
 
@@ -416,7 +415,7 @@ class FileWriteRequest(_Request):
 
     def accounting_service_url(self):
         """Return the canonical URL of the service holding the account
-        
+
             Returns:
                 str or None: If _accounting_service_url valid return
                 return it else return None
@@ -431,7 +430,7 @@ class FileWriteRequest(_Request):
 
             Returns:
                 dict: a JSON-serialisable dictionary of this request
-        
+
         """
         if self.is_null():
             return {}
@@ -455,7 +454,7 @@ class FileWriteRequest(_Request):
     def from_data(data):
         """ Create a request from a JSON object
 
-            Args:  
+            Args:
                 data (str) : an object serialised as a JSON object
             Returns:
                 FileWriteRequest: a FileWriteRequest object created from

@@ -63,7 +63,7 @@ class Mutex:
 
     def is_locked(self):
         """Return whether or not this mutex is locked
-        
+
            Returns:
                 bool: True if mutex locked, else False
         """

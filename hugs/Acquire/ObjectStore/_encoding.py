@@ -40,7 +40,7 @@ __all__ = ["bytes_to_string", "string_to_bytes",
            "get_datetime_now_to_string",
            "date_and_time_to_datetime",
            "date_and_hour_to_datetime",
-           "create_uuid", "create_uid"]
+           "create_uuid", "create_uid", "validate_is_uid"]
 
 
 def create_uuid(short_uid=False, include_date=None):
@@ -70,6 +70,53 @@ def create_uid(short_uid=False, include_date=None):
     return create_uuid(short_uid=short_uid, include_date=include_date)
 
 
+def validate_is_uid(uid):
+    """Validate that the passed 'uid' is actually a UID. This checks
+       that the string is not something weird that is trying to
+       break the system
+    """
+    if uid is None:
+        raise TypeError("'None' is not a valid UID!")
+
+    uid = str(uid)
+
+    len_uid = len(uid)
+
+    import re as _re
+    from Acquire.ObjectStore import string_to_datetime \
+        as _string_to_datetime
+
+    if len_uid == 8:
+        # this is a short UID
+        if _re.match(r'[a-f0-9]{8}', uid):
+            return
+    elif len_uid == 35:
+        # this is a short UID with a datetime
+        parts = uid.split("/")
+        try:
+            dt = _string_to_datetime(parts[0])
+            if _re.match(r'[a-f0-9]{8}', parts[1]):
+                return
+        except Exception as e:
+            print(e)
+            pass
+    elif len_uid == 36:
+        # this is a long UID
+        if _re.match(r'[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}', uid):
+            return
+    elif len_uid == 63:
+        # this is a long UID with a datetime
+        parts = uid.split("/")
+        try:
+            dt = _string_to_datetime(parts[0])
+            if _re.match(r'[a-f0-9]{8}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{4}\-[a-f0-9]{12}', parts[1]):
+                return
+        except:
+            pass
+
+    raise TypeError("'%s' is not a valid UID!" % uid)
+
+
 def string_to_encoded(s):
     """Return the passed unicode string encoded to a safely
        encoded base64 utf-8 string
@@ -78,7 +125,7 @@ def string_to_encoded(s):
             s (str): String to encode
        Returns:
             str: Unicode string s encoded to UTF-8
-       
+
     """
     return bytes_to_string(s.encode("utf-8"))
 
@@ -91,7 +138,7 @@ def encoded_to_string(b):
             b (bytes): base64 utf-8 byte string
        Returns:
             str: UTF-8 string converted from byte string
-       
+
     """
     return string_to_bytes(b).decode("utf-8")
 
@@ -103,7 +150,7 @@ def url_to_encoded(url):
        Args:
             url (str): URL to encode
        Returns:
-            bytes: base64 encoded bytes object   
+            bytes: base64 encoded bytes object
 
     """
     return _base64.b64encode(url.encode("utf-8")).decode("utf-8")
@@ -128,8 +175,8 @@ def bytes_to_string(b):
        Args:
             b (bytes): binary bytes to encode
        Returns:
-            str: UTF-8 encoded string object             
-       
+            str: UTF-8 encoded string object
+
     """
     if b is None:
         return None
@@ -143,7 +190,7 @@ def string_to_bytes(s):
        this can only convert strings that were encoded using
        bytes_to_string - you cannot use this to convert
        arbitrary strings to bytes
-       
+
        Args:
             s (str): base64 byte object to decode
        Returns:
@@ -185,7 +232,7 @@ def datetime_to_string(d):
     """Return the passed datetime encoded to a string. This will be a
        standard iso-formatted time in the UTC timezone (converting
        to UTC if the passed datetime is for another timezone)
-       
+
        Args:
             d (datetime): Datetime to convert to string
        Returns:
@@ -279,9 +326,6 @@ def get_datetime_future(weeks=0, days=0, hours=0, minutes=0, seconds=0,
             minutes (int, default=0): Number of minutes in future
             seconds (int, default=0): Number of seconds in future
             timedelta (datetime.timedelta, default=0): Timedelta from now
-      Returns:
-            datetime: Datetime at a point in the future
-
     """
     delta = _datetime.timedelta(weeks=weeks, days=days, hours=hours,
                                 minutes=minutes, seconds=seconds)
@@ -511,6 +555,10 @@ def string_to_filepath(path):
     if path is None:
         return ""
 
+    # change any windows path separators into unix path separators
+    path = path.replace("\\", "/")
+
+    # now normalise the path to remove messiness
     path = _os.path.normpath(path)
 
     # remove all ".." and "." from this path

@@ -22,6 +22,7 @@ __all__ = ["push_is_running_service", "pop_is_running_service",
            "load_service_key_from_objstore",
            "get_service_private_certificate", "get_service_public_key",
            "get_service_public_certificate",
+           "refresh_service_keys_and_certs",
            "clear_serviceinfo_cache",
            "get_service_user_account_uid", "create_service_user_account"]
 
@@ -558,7 +559,7 @@ def save_service_keys_to_objstore(include_old_keys=False):
                 (_service_key, fingerprint), key)
 
 
-def _refresh_service_keys_and_certs(service):
+def refresh_service_keys_and_certs(service, force_refresh=False):
     """This function will check if any key rotation is needed, and
        if so, it will automatically refresh the keys and certificates.
        The old keys and certificates will be stored in a database of
@@ -566,7 +567,7 @@ def _refresh_service_keys_and_certs(service):
     """
     assert_running_service()
 
-    if not service.should_refresh_keys():
+    if (not force_refresh) and (not service.should_refresh_keys()):
         return service
 
     # ensure that the current keys are saved to the object store
@@ -607,7 +608,7 @@ def _refresh_service_keys_and_certs(service):
 def get_service_private_key(fingerprint=None):
     """This function returns the private key for this service"""
     s = get_this_service(need_private_access=True)
-    s = _refresh_service_keys_and_certs(s)
+    s = refresh_service_keys_and_certs(s)
     key = s.private_key()
 
     from Acquire.Service import get_service_account_bucket
@@ -637,7 +638,7 @@ def get_service_private_certificate(fingerprint=None):
        for this service
     """
     s = get_this_service(need_private_access=True)
-    s = _refresh_service_keys_and_certs(s)
+    s = refresh_service_keys_and_certs(s)
     cert = s.private_certificate()
 
     if fingerprint:

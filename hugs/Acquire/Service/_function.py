@@ -322,6 +322,7 @@ def unpack_arguments(args, key=None, public_cert=None, is_return_value=False,
                                 function=function, service=service)
 
     if payload is None:
+        from Acquire.Service import UnpackingError
         raise UnpackingError(
             "We should have been able to extract the payload from "
             "%s" % data)

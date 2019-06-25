@@ -67,9 +67,6 @@ class Testing_ObjectStore:
 
         if not _os.path.exists(full_name):
             _os.makedirs(full_name)
-            # from Acquire.ObjectStore import ObjectStoreError
-            # raise ObjectStoreError(
-            #     "CANNOT CREATE NEW BUCKET '%s': EXISTS!" % bucket_name)
 
         return full_name
 
@@ -187,23 +184,23 @@ class Testing_ObjectStore:
                 "You cannot create a Bucket PAR that has read permissions "
                 "due to a limitation in the underlying platform")
 
-        from Acquire.Client import PAR as _PAR
-        from Acquire.ObjectStore import PARRegistry as _PARRegistry
+        from Acquire.ObjectStore import OSPar as _OSPar
+        from Acquire.ObjectStore import OSParRegistry as _OSParRegistry
 
-        url_checksum = _PAR.checksum(url)
+        url_checksum = _OSPar.checksum(url)
 
         driver_details = {"driver": "testing_objstore",
                           "bucket": bucket,
                           "created_datetime": created_datetime}
 
-        par = _PAR(url=url, key=key, encrypt_key=encrypt_key,
-                   expires_datetime=expires_datetime,
-                   is_readable=readable, is_writeable=writeable,
-                   driver_details=driver_details)
+        par = _OSPar(url=url, key=key, encrypt_key=encrypt_key,
+                     expires_datetime=expires_datetime,
+                     is_readable=readable, is_writeable=writeable,
+                     driver_details=driver_details)
 
-        _PARRegistry.register(par=par, url_checksum=url_checksum,
-                              details_function=_get_driver_details_from_par,
-                              cleanup_function=cleanup_function)
+        _OSParRegistry.register(par=par, url_checksum=url_checksum,
+                                details_function=_get_driver_details_from_par,
+                                cleanup_function=cleanup_function)
 
         return par
 
@@ -212,17 +209,17 @@ class Testing_ObjectStore:
         """Close the passed PAR, which provides access to data in the
            passed bucket
         """
-        from Acquire.ObjectStore import PARRegistry as _PARRegistry
+        from Acquire.ObjectStore import OSParRegistry as _OSParRegistry
 
         if par is None:
-            par = _PARRegistry.get(
+            par = _OSParRegistry.get(
                         par_uid=par_uid,
                         url_checksum=url_checksum,
                         details_function=_get_driver_details_from_data)
 
-        from Acquire.Client import PAR as _PAR
-        if not isinstance(par, _PAR):
-            raise TypeError("The PAR must be of type PAR")
+        from Acquire.ObjectStore import OSPar as _OSPar
+        if not isinstance(par, _OSPar):
+            raise TypeError("The PAR must be of type OSPar")
 
         if par.driver() != "testing_objstore":
             raise ValueError("Cannot delete a PAR that was not created "
@@ -231,7 +228,7 @@ class Testing_ObjectStore:
         # delete the PAR (no need to do this on testing)
 
         # close the PAR - this will trigger any close_function(s)
-        _PARRegistry.close(par=par)
+        _OSParRegistry.close(par=par)
 
     @staticmethod
     def get_object(bucket, key):

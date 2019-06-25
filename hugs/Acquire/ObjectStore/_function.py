@@ -45,11 +45,11 @@ class Function:
 
     def to_data(self, args_to_data=None):
         """Return a JSON-serialisable dictionary describing this function
-        
+
            Args:
                 args_to_data (default=None): Arguments to pass
            Returns:
-                dict: JSON serialisable dict version of this function     
+                dict: JSON serialisable dict version of this function
         """
         data = {}
 
@@ -68,7 +68,7 @@ class Function:
     @staticmethod
     def from_data(data, args_from_data=None):
         """Return the function from the JSON-deserialised dictionary
-        
+
            Args:
                 data (dict): Dict to create function from
                 args_to_data (default=None): Arguments to pass

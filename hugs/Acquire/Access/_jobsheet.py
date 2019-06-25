@@ -12,20 +12,28 @@ class JobSheet:
             if not isinstance(authorisation, _Authorisation):
                 raise TypeError("You can only authorise a request with "
                                 "a valid Authorisation object")
+
+            from Acquire.Access import RunRequest as _RunRequest
+            if not isinstance(job, _RunRequest):
+                raise TypeError(
+                    "You must pass in a valid RunRequest to request a "
+                    "calculation is run. The passed request is the wrong "
+                    "type: %s" % str(job))
+
             authorisation.verify(job.fingerprint())
-            from Acquire.ObjectStore import create_uuid as _create_uuid
+            from Acquire.ObjectStore import create_uid as _create_uid
             self._job = job
             self._authorisation = authorisation
-            self._uid = _create_uuid()
+            self._uid = _create_uid()
         else:
             self._uid = None
 
     def is_null(self):
         """Return whether or not this JobSheet is null
-        
+
         Returns:
             bool: True if uid is set, False otherwise
-        
+
         """
         return self._uid is None
 
@@ -34,9 +42,21 @@ class JobSheet:
 
             Returns:
                 str: UID of the object
-        
+
         """
         return self._uid
+
+    def storage_service(self):
+        """Return the storage service that will be used to store
+           the data associated with this job
+        """
+        return None
+
+    def compute_service(self):
+        """Return the compute service that will be used to actually
+           perform the calculation associated with the job
+        """
+        return None
 
     def total_cost(self):
         """Return the total maximum quoted cost for this job. The
@@ -57,7 +77,7 @@ class JobSheet:
 
             Returns:
                 None or Request: If no uid set None, else job request
-        
+
         """
         if self.is_null():
             return None
@@ -69,7 +89,7 @@ class JobSheet:
 
             Returns:
                 None or Authorisation: If no uid set None, else Authorisation
-        
+
         """
         if self.is_null():
             return None
@@ -83,7 +103,7 @@ class JobSheet:
 
            Args:
                 cheque (Cheque): transfer method for paying for service
-            Returns:
+           Returns:
                 None
 
         """
@@ -123,10 +143,10 @@ class JobSheet:
 
            The storage service will provide (1) a file upload pre-authenticated
            request (PAR) to enable the user to upload the input,
-           and (2) a bucket write PAR to enable the compute service
+           and (2) a drive write PAR to enable the compute service
            to write the output
 
-           The compute service will be supplied with the bucket write PAR
+           The compute service will be supplied with the drive write PAR
            from the storage service and will supply a run calculation PAR
            to enable the user to trigger the start of the job
 
@@ -140,23 +160,49 @@ class JobSheet:
                 tuple (PAR, PAR, datetime) : file upload PAR, bucket write PAR
                 and a datetime object set to 1 hour in the future
         """
-        # make the requests, make the payments
+        from Acquire.Client import Cheque as _Cheque
 
-        # save so we don't lost the debit notes or any value
+        # make the requests, make the payments
+        storage_service = self.storage_service()
+        compute_service = self.compute_service()
+
+        # create cheques for payment of the storage and compute
+        # from the principal service user of the access service to
+        # the principal service users of the compute and storage
+        # services
+        storage_cheque = _Cheque()
+        compute_cheque = _Cheque()
+
+        #result = storage_service.call_function(
+        #                            function="stage_job_data",
+        #                            args={"cheque": storage_cheque.to_data(),
+        #                                  "job": self.job().to_data()})
+        #
+        #input_par = result["input_par"]
+        #output_read_par = result["output_read_par"]
+        #output_write_par = result["output_write_par"]
+
+        #result = compute_service.call_function(
+        #                    function="stage_job_compute",
+        #                    args={"cheque": compute_cheque.to_data(),
+        #                            "job": self.job().to_data(),
+        #                            "input_par": input_par.to_data(),
+        #                            "output_par": output_write_par.to_data()})
+        #
+        #compute_par = result["compute_par"]
+
+        # save so we don't lose the debit notes or any value
         self.save()
 
-        from Acquire.Client import PAR as _PAR
         from Acquire.ObjectStore import get_datetime_future \
             as _get_datetime_future
 
-        return (_PAR(), _PAR(), _get_datetime_future(hours=1))
+        return (None, None, _get_datetime_future(hours=1))
 
     def save(self):
         """Save this JobSheet to the object store
-
             Returns:
                 None
-        
         """
         from Acquire.Service import assert_running_service \
             as _assert_running_service

@@ -151,7 +151,7 @@ class OCIAccount:
            using the passed 'login_details', returning a handle to the
            bucket associated with 'bucket
         '"""
-        
+
         try:
             from oci.object_storage import ObjectStorageClient as \
                 _ObjectStorageClient

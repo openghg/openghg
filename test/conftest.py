@@ -20,4 +20,4 @@ if acquire_dir is None or len(acquire_dir) == 0:
                           "variable 'ACQUIRE_DIR'")
 
 sys.path.insert(0, os.path.abspath(acquire_dir))
-sys.path.insert(0, os.path.abspath("%s/services" % acquire_dir))
+sys.path.insert(0, os.path.abspath("%s/Acquire/services" % acquire_dir))

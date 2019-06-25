@@ -24,6 +24,9 @@ class Authorisation:
 
         self._signature = None
         self._last_validated_datetime = None
+        self._scope = None
+        self._permissions = None
+        self._pubcert = None
 
         if resource is not None:
             if user is None and testing_key is None:
@@ -285,11 +288,12 @@ class Authorisation:
         except:
             must_fetch = True
 
-        if not must_fetch:
-            try:
-                return self._pubcert
-            except:
-                pass
+        if self._pubcert is not None:
+            if not must_fetch:
+                try:
+                    return self._pubcert
+                except:
+                    pass
 
         try:
             testing_key = self._testing_key
@@ -363,6 +367,7 @@ class Authorisation:
 
         from Acquire.Crypto import PublicKey as _PublicKey
         pubcert = _PublicKey.from_data(response["public_cert"])
+
         self._pubcert = pubcert
         self._scope = scope
         self._permissions = permissions
@@ -412,8 +417,8 @@ class Authorisation:
         # small race condition here, but this would be extremely
         # challenging to exploit, and mitigating it would be a
         # significant performance problem. Ideally the object store
-        # would have a "test_and_set" to enable us to set only if
-        # the previous value is None
+        # would have a "test_and_set" to enable us to set only if
+        # the previous value is None
         _ObjectStore.set_string_object(bucket=bucket, key=authkey,
                                        string_data=now)
 
@@ -421,12 +426,17 @@ class Authorisation:
         public_cert = self._get_user_public_cert(scope=scope,
                                                  permissions=permissions)
 
+        if public_cert is None:
+            raise PermissionError(
+                "There is no public certificate for this user in "
+                "scope '%s' with permissions '%s'" % (scope, permissions))
+
         try:
             public_cert.verify(self._siguid, self._uid)
-        except:
+        except Exception as e:
             raise PermissionError(
                 "Cannot auth_once the authorisation as the signature "
-                "is invalid!")
+                "is invalid! % s" % str(e))
 
     def is_verified(self, refresh_time=3600, stale_time=7200):
         """Return whether or not this authorisation has been verified. Note

@@ -43,6 +43,6 @@ class RegistryService(_Service):
                                       args=args)
 
         from Acquire.Service import Service as _Service
-        service = _Service.from_data(response["service_data"])
+        service = _Service.from_data(response["service_info"])
 
         return service

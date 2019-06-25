@@ -7,7 +7,7 @@ def clear_service_cache():
        This is only really needed for testhing, when a single python
       interpreter will move between multiple (cached) services
     """
-    
+
     from Acquire.Service import clear_services_cache
     from Acquire.Service import clear_serviceinfo_cache, clear_login_cache
 

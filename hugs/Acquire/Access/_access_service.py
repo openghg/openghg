@@ -9,7 +9,6 @@ __all__ = ["AccessService"]
 
 class AccessService(_Service):
     """This is a specialisation of Service for Access Services
-       
        Where Service represents a service in the system. Services
        will either be identity services, access services,
        storage services or accounting services
@@ -41,7 +40,7 @@ class AccessService(_Service):
 
         from access.route import access_functions as _access_functions
         from admin.handler import create_handler as _create_handler
-        
+
         handler = _create_handler(_access_functions)
         return handler(function=function, args=args)
 

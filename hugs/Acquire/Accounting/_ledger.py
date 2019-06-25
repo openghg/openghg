@@ -25,7 +25,7 @@ class Ledger:
     @staticmethod
     def load_transaction(uid, bucket=None):
         """Load the transactionrecord with UID=uid from the ledger
-        
+
            Args:
                 uid (str): UID of transaction to load
                 bucket (dict, default=None): Bucket to load data from
@@ -54,7 +54,7 @@ class Ledger:
     @staticmethod
     def save_transaction(record, bucket=None):
         """Save the passed transaction record to the object store
-        
+
            Args:
                 record (TransactionRecord): To save
                 bucket (dict, default=None): Bucket to save data from
@@ -308,7 +308,7 @@ class Ledger:
 
             Returns:
                 list: List of TransactionRecords
-                
+
         """
         from Acquire.Accounting import Account as _Account
         from Acquire.Identity import Authorisation as _Authorisation

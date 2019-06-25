@@ -14,12 +14,12 @@ def _sanitise_bucket_name(bucket_name):
     """This function sanitises the passed bucket name. It will always
         return a valid bucket name. If "None" is passed, then a new,
         unique bucket name will be generated
-        
+
         Args:
             bucket_name (str): Bucket name to clean
         Returns:
             str: Cleaned bucket name
-        
+
         """
 
     if bucket_name is None:
@@ -52,6 +52,7 @@ def _clean_key(key):
 
     return key
 
+
 def _get_object_url_for_region(region, uri):
     """Internal function used to get the full URL to the passed PAR URI
        for the specified region. This has the format;
@@ -74,10 +75,10 @@ def _get_object_url_for_region(region, uri):
 
 def _get_driver_details_from_par(par):
     """Internal function used to get the OCI driver details from the
-       passed PAR (pre-authenticated request)
+       passed OSPar (pre-authenticated request)
 
        Args:
-            par (PAR): PAR holding details
+            par (OSPar): PAR holding details
         Args:
             dict: Dictionary holding OCI driver details
     """
@@ -135,7 +136,7 @@ class OCI_ObjectStore:
             bucket (dict): Bucket to hold data
             bucket_name (str): Name of bucket to create
             compartment (str): Compartment in which to create bucket
-           
+
            Returns:
                 dict: New bucket
         """
@@ -186,9 +187,11 @@ class OCI_ObjectStore:
            Args:
                 bucket (dict): Bucket to hold data
                 bucket_name (str): Name of bucket to create
-                compartment (str, default=None): Compartment in which to create bucket
-                create_if_needed (bool, default=None): If True, create bucket, else do 
-                not 
+                compartment (str, default=None): Compartment in which to
+                create bucket
+                create_if_needed (bool, default=None): If True, create bucket,
+                else do
+                not
 
            Returns:
                 dict: New bucket
@@ -254,7 +257,7 @@ class OCI_ObjectStore:
     @staticmethod
     def get_bucket_name(bucket):
         """Return the name of the passed bucket
-        
+
            Args:
                 bucket (dict): Bucket holding data
            Returns:
@@ -270,12 +273,16 @@ class OCI_ObjectStore:
                 bucket (dict): Bucket holding data
            Returns:
                 bool: True if bucket empty, else False
-           
+
         """
         objects = bucket["client"].list_objects(bucket["namespace"],
                                                 bucket["bucket_name"],
                                                 limit=1).data
-        return len(objects) == 0
+
+        for _obj in objects.objects:
+            return False
+
+        return True
 
     @staticmethod
     def delete_bucket(bucket, force=False):
@@ -328,26 +335,26 @@ class OCI_ObjectStore:
                    writeable=False, duration=3600, cleanup_function=None):
         """Create a pre-authenticated request for the passed bucket and
            key (if key is None then the request is for the entire bucket).
-           This will return a PAR object that will contain a URL that can
+           This will return a OSPar object that will contain a URL that can
            be used to access the object/bucket. If writeable is true, then
            the URL will also allow the object/bucket to be written to.
            PARs are time-limited. Set the lifetime in seconds by passing
            in 'duration' (by default this is one hour)
 
            Args:
-                bucket (dict): Bucket to create PAR for
-                encrypt_key (PublicKey): Public key to 
+                bucket (dict): Bucket to create OSPar for
+                encrypt_key (PublicKey): Public key to
                 encrypt PAR
                 key (str, default=None): Key
                 readable (bool, default=True): If bucket is readable
                 writeable (bool, default=False): If bucket is writeable
-                duration (int, default=3600): Duration PAR should be
+                duration (int, default=3600): Duration OSPar should be
                 valid for in seconds
                 cleanup_function (function, default=None): Cleanup
                 function to be passed to PARRegistry
 
            Returns:
-                PAR: Pre-authenticated request for the bucket
+                OSPar: Pre-authenticated request for the bucket
         """
         from Acquire.Crypto import PublicKey as _PublicKey
 
@@ -355,21 +362,21 @@ class OCI_ObjectStore:
             from Acquire.Client import PARError
             raise PARError(
                 "You must supply a valid PublicKey to encrypt the "
-                "returned PAR")
+                "returned OSPar")
 
-        # get the UTC datetime when this PAR should expire
+        # get the UTC datetime when this OSPar should expire
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
         expires_datetime = _get_datetime_now() + \
             _datetime.timedelta(seconds=duration)
 
         is_bucket = (key is None)
 
-        # Limitation of OCI - cannot have a bucket PAR with
+        # Limitation of OCI - cannot have a bucket OSPar with
         # read permissions!
         if is_bucket and readable:
             from Acquire.Client import PARError
             raise PARError(
-                "You cannot create a Bucket PAR that has read permissions "
+                "You cannot create a Bucket OSPar that has read permissions "
                 "due to a limitation in the underlying platform")
 
         try:
@@ -397,7 +404,7 @@ class OCI_ObjectStore:
         else:
             from Acquire.ObjectStore import ObjectStoreError
             raise ObjectStoreError(
-                "Unsupported permissions model for PAR!")
+                "Unsupported permissions model for OSPar!")
 
         request.name = str(_uuid.uuid4())
 
@@ -418,13 +425,13 @@ class OCI_ObjectStore:
             # couldn't create the preauthenticated request
             from Acquire.ObjectStore import ObjectStoreError
             raise ObjectStoreError(
-                "Unable to create the PAR '%s': %s" %
+                "Unable to create the OSPar '%s': %s" %
                 (str(request), str(e)))
 
         if response.status != 200:
             from Acquire.ObjectStore import ObjectStoreError
             raise ObjectStoreError(
-                "Unable to create the PAR '%s': Status %s, Error %s" %
+                "Unable to create the OSPar '%s': Status %s, Error %s" %
                 (str(request), response.status, str(response.data)))
 
         oci_par = response.data
@@ -447,9 +454,9 @@ class OCI_ObjectStore:
 
         # get the checksum for this URL - used to validate the close
         # request
-        from Acquire.Client import PAR as _PAR
-        from Acquire.ObjectStore import PARRegistry as _PARRegistry
-        url_checksum = _PAR.checksum(url)
+        from Acquire.ObjectStore import OSPar as _OSPar
+        from Acquire.ObjectStore import OSParRegistry as _OSParRegistry
+        url_checksum = _OSPar.checksum(url)
 
         driver_details = {"driver": "oci",
                           "bucket": bucket["bucket_name"],
@@ -457,47 +464,47 @@ class OCI_ObjectStore:
                           "par_id": oci_par.id,
                           "par_name": oci_par.name}
 
-        par = _PAR(url=url, encrypt_key=encrypt_key,
-                   key=oci_par.object_name,
-                   expires_datetime=expires_datetime,
-                   is_readable=readable,
-                   is_writeable=writeable,
-                   driver_details=driver_details)
+        par = _OSPar(url=url, encrypt_key=encrypt_key,
+                     key=oci_par.object_name,
+                     expires_datetime=expires_datetime,
+                     is_readable=readable,
+                     is_writeable=writeable,
+                     driver_details=driver_details)
 
-        _PARRegistry.register(par=par,
-                              url_checksum=url_checksum,
-                              details_function=_get_driver_details_from_par,
-                              cleanup_function=cleanup_function)
+        _OSParRegistry.register(par=par,
+                                url_checksum=url_checksum,
+                                details_function=_get_driver_details_from_par,
+                                cleanup_function=cleanup_function)
 
         return par
 
     @staticmethod
     def close_par(par=None, par_uid=None, url_checksum=None):
-        """Close the passed PAR, which provides access to data in the
+        """Close the passed OSPar, which provides access to data in the
            passed bucket
 
            Args:
-                par (PAR, default=None): PAR to close bucket
-                par_uid (str, default=None): UID for PAR
-                url_checksum (str, default=None): Checksum to 
+                par (OSPar, default=None): OSPar to close bucket
+                par_uid (str, default=None): UID for OSPar
+                url_checksum (str, default=None): Checksum to
                 pass to PARRegistry
            Returns:
                 None
         """
-        from Acquire.ObjectStore import PARRegistry as _PARRegistry
+        from Acquire.ObjectStore import OSParRegistry as _OSParRegistry
 
         if par is None:
-            par = _PARRegistry.get(
+            par = _OSParRegistry.get(
                             par_uid=par_uid,
                             details_function=_get_driver_details_from_data,
                             url_checksum=url_checksum)
 
-        from Acquire.Client import PAR as _PAR
-        if not isinstance(par, _PAR):
-            raise TypeError("The PAR must be of type PAR")
+        from Acquire.ObjectStore import OSPar as _OSPar
+        if not isinstance(par, _OSPar):
+            raise TypeError("The OSPar must be of type OSPar")
 
         if par.driver() != "oci":
-            raise ValueError("Cannot delete a PAR that was not created "
+            raise ValueError("Cannot delete a OSPar that was not created "
                              "by the OCI object store")
 
         # delete the PAR
@@ -509,7 +516,7 @@ class OCI_ObjectStore:
 
         bucket = _get_service_account_bucket()
 
-        # now get the bucket accessed by the PAR...
+        # now get the bucket accessed by the OSPar...
         bucket = OCI_ObjectStore.get_bucket(bucket=bucket,
                                             bucket_name=par_bucket)
 
@@ -523,17 +530,17 @@ class OCI_ObjectStore:
         except Exception as e:
             from Acquire.ObjectStore import ObjectStoreError
             raise ObjectStoreError(
-                "Unable to delete a PAR '%s' : Error %s" %
+                "Unable to delete a OSPar '%s' : Error %s" %
                 (par_id, str(e)))
 
         if response.status not in [200, 204]:
             from Acquire.ObjectStore import ObjectStoreError
             raise ObjectStoreError(
-                "Unable to delete a PAR '%s' : Status %s, Error %s" %
+                "Unable to delete a OSPar '%s' : Status %s, Error %s" %
                 (par_id, response.status, str(response.data)))
 
-        # close the PAR - this will trigger any close_function(s)
-        _PARRegistry.close(par=par)
+        # close the OSPar - this will trigger any close_function(s)
+        _OSParRegistry.close(par=par)
 
     @staticmethod
     def get_object(bucket, key):
@@ -612,7 +619,7 @@ class OCI_ObjectStore:
            Args:
                 bucket (dict): Bucket containing data
                 key (str): Key for data
-            
+
            Returns:
                 bytes: Binary data
         """
@@ -629,13 +636,13 @@ class OCI_ObjectStore:
     @staticmethod
     def get_all_object_names(bucket, prefix=None):
         """Returns the names of all objects in the passed bucket
-           
+
            Args:
                 bucket (dict): Bucket containing data
                 prefix (str): Prefix for data
            Returns:
-                list: List of all objects in bucket    
-        
+                list: List of all objects in bucket
+
         """
         if prefix is not None:
             prefix = _clean_key(prefix)
@@ -667,7 +674,7 @@ class OCI_ObjectStore:
     @staticmethod
     def set_object(bucket, key, data):
         """Set the value of 'key' in 'bucket' to binary 'data'
-        
+
            Args:
                 bucket (dict): Bucket containing data
                 key (str): Key for data in bucket
@@ -689,10 +696,10 @@ class OCI_ObjectStore:
     @staticmethod
     def delete_all_objects(bucket, prefix=None):
         """Deletes all objects...
-        
-           Args: 
+
+           Args:
                 bucket (dict): Bucket containing data
-                prefix (str, default=None): Prefix for data, 
+                prefix (str, default=None): Prefix for data,
                 currently unused
             Returns:
                 None
@@ -706,7 +713,7 @@ class OCI_ObjectStore:
     @staticmethod
     def delete_object(bucket, key):
         """Removes the object at 'key'
-        
+
            Args:
                 bucket (dict): Bucket containing data
                 key (str): Key for data

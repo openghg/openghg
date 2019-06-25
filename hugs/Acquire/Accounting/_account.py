@@ -94,7 +94,7 @@ def _get_hour_from_key(key):
 
 def _get_datetime_from_key(key):
     """Return the datetime that is encoded in the passed key
-    
+
        Args:
             key(st: obj: `str`): Key to search for datetime
        Returns:
@@ -126,12 +126,12 @@ def _sum_transactions(transactions):
     """Internal function that sums all of the transactions identified
     by the passed keys.  by the passed keys. This returns a tuple of
     (balance, liability, receivable, spent)
-        
+
         Args:
             keys (:obj:`list`): List of keys to parse
         Returns:
-            tuple (:obj:`Decimal`, Decimal, Decimal, Decimal): balance, liability, 
-            receivable, spent_today
+            tuple (:obj:`Decimal`, Decimal, Decimal, Decimal): balance,
+            liability, receivable, spent_today
 
     """
     from Acquire.Accounting import Balance as _Balance
@@ -170,7 +170,7 @@ class Account:
            access to this account. If these are not specified then
            ACLRules.inherit() will be used, with rules inherited from the
            Accounts group that contains this Account
-            
+
             Args:
                 name (:obj:`str`, default=None): Name on the account
                 description (:obj:`str`, default=None): Description of account
@@ -608,11 +608,11 @@ class Account:
 
     def name(self):
         """Return the name of this account
-        
+
             Returns:
                 str or None: Name of account if account not null, else None
 
-        
+
         """
         if self.is_null():
             return None
@@ -631,7 +631,7 @@ class Account:
 
     def description(self):
         """Return the description of this account
-        
+
             Returns:
                 str or None: Description of account if account not null,
                 else None
@@ -646,7 +646,7 @@ class Account:
 
             Returns:
                 str: UID
-        
+
         """
         return self._uid
 
@@ -654,11 +654,11 @@ class Account:
                                    accept_partial_match=False):
         """Assert that the passed authorisation is valid for this
            account
-            
+
             Args:
                 authorisation (Authorisation): authorisation
                 object to be used for account
-            
+
             Returns:
                 None
         """
@@ -995,7 +995,7 @@ class Account:
                 to this account
                 TODO - improve bucket docs
                 bucket (dict, default=None): Bucket to load data from
-            
+
             Returns:
                 tuple (str, datetime): UID and current time
         """
@@ -1089,7 +1089,7 @@ class Account:
                 should be receipted
                 TODO - improve bucket docs
                 bucket (dict, default=None): Bucket to load data from
-            
+
             Returns:
                 tuple (str, datetime, datetime): uid, now, receipt_by
 
@@ -1225,7 +1225,7 @@ class Account:
 
     def get_overdraft_limit(self):
         """Return the overdraft limit of this account
-        
+
             Returns:
                 Decimal: Overdraft limit
         """
@@ -1249,15 +1249,15 @@ class Account:
 
     def set_overdraft_limit(self, limit, bucket=None):
         """Set the overdraft limit of this account to 'limit'
-        
+
             Args:
                 limit (int): Limit to set overdraft to
                 TODO
-                bucket (dict, default=None): 
+                bucket (dict, default=None):
 
             Returns:
                 None
-        
+
         """
         if self.is_null():
             return

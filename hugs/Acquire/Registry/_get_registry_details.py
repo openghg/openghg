@@ -8,7 +8,7 @@ _testing_registry = {
     "public_certificate": None}
 
 _acquire_registry = {
-    "canonical_url": "http://fn.acquire-aaai.com:8080/t/registry",
+    "canonical_url": "https://fn.acquire-aaai.com/t/registry",
     "uid": "a0-a0",
     "public_key": None,
     "public_certificate": None}

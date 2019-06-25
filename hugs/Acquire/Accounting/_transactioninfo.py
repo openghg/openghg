@@ -145,7 +145,7 @@ class TransactionInfo:
 
            Args:
                 key: Object store key
-                
+
         """
         from Acquire.ObjectStore import string_to_datetime \
             as _string_to_datetime
@@ -233,25 +233,25 @@ class TransactionInfo:
 
     def is_debit(self):
         """Return whether or not this is a debit
-        
+
            Returns:
                 bool: True if this is a debit, else False
-        
+
         """
         return self._code == TransactionCode.DEBIT
 
     def is_liability(self):
         """Return whether or not this is a liability
-        
+
            Returns:
                 bool: True if this is a liability, else False
-                
+
         """
         return self._code == TransactionCode.CURRENT_LIABILITY
 
     def is_accounts_receivable(self):
         """Return whether or not this is accounts receivable
-        
+
            Returns:
                 bool: True if this is accounts receivable, else False
 
@@ -260,7 +260,7 @@ class TransactionInfo:
 
     def is_sent_receipt(self):
         """Return whether or not this is a sent receipt
-        
+
            Returns:
                 bool: True if this is accounts receivable, else False
 
@@ -269,7 +269,7 @@ class TransactionInfo:
 
     def is_received_receipt(self):
         """Return whether or not this is a received receipt
-        
+
            Returns:
                 bool: True if this is a received receipt, else False
         """
@@ -277,7 +277,7 @@ class TransactionInfo:
 
     def is_sent_refund(self):
         """Return whether or not this is a sent refund
-        
+
            Returns:
                 bool: True if this is a sent refund, else False
         """
@@ -285,7 +285,7 @@ class TransactionInfo:
 
     def is_received_refund(self):
         """Return whether or not this is a received refund
-        
+
            Returns:
                 bool: True if this is a received refund, else False
         """

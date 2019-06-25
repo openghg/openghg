@@ -20,7 +20,7 @@ class Credentials:
 
     def is_null(self):
         """Return whether or not these credentials are null
-        
+
            Returns:
                 bool: True if null, else False
         """
@@ -40,7 +40,7 @@ class Credentials:
 
     def short_uid(self):
         """Return the decoded session short UID
-        
+
            Returns:
                 str: Short UID of session
         """
@@ -51,7 +51,7 @@ class Credentials:
 
     def device_uid(self):
         """Return the decoded device UID
-        
+
            Returns:
                 str: UID for device
         """
@@ -62,7 +62,7 @@ class Credentials:
 
     def password(self):
         """Return the decoded password
-        
+
            Returns:
                 str: Decoded password
         """
@@ -73,7 +73,7 @@ class Credentials:
 
     def otpcode(self):
         """Return the decoded one time password code (otpcode)
-        
+
            Returns:
                 str: OTP code for session
         """
@@ -115,7 +115,7 @@ class Credentials:
                 data (str): Data to create credentials from
                 username (str): Username for credentials
                 short_uid (str): Short UID to use
-                random_sleep (int, default=150): Integer used 
+                random_sleep (int, default=150): Integer used
                 to generate a random sleep time
            Returns:
                 Credentials: Credentials object created from data
@@ -153,7 +153,7 @@ class Credentials:
                 encoded_password (str): Encoded password
                 device_uid (str): UID for device
            Returns:
-                str: Password encoded with device UID           
+                str: Password encoded with device UID
 
         """
         if device_uid is None or encoded_password is None:
@@ -174,11 +174,8 @@ class Credentials:
                 identity_uid (str): UID to use as salt
                 device_uid (str, default=None): Device UID to use
                 as additional salt
-           Returns: 
+           Returns:
                 str: Hashed and salted password
-
-
-
         """
         from Acquire.Crypto import Hash as _Hash
 

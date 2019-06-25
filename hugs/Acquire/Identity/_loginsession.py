@@ -23,6 +23,9 @@ class LoginSession:
                 raise TypeError("The public certificate must be of "
                                 "type PublicKey")
 
+            if username is None or len(username) == 0:
+                raise PermissionError("You must supply a valid username!")
+
             self._username = username
             self._pubkey = public_key
             self._pubcert = public_cert
@@ -494,6 +497,10 @@ class LoginSession:
                     "of a specific login session")
 
             status = LoginSession.get_status(uid=uid)
+        else:
+            if status not in ["approved", "pending", "denied",
+                              "suspicious", "logged_out"]:
+                raise ValueError("Cannot set an invalid status '%s'" % status)
 
         bucket = _get_service_account_bucket()
 
@@ -519,8 +526,6 @@ class LoginSession:
         short_uid = short_uid.replace(".", "")
 
         prefix = "%s/%s/%s/" % (_sessions_key, status, short_uid)
-
-        print(prefix)
 
         try:
             keys = _ObjectStore.get_all_objects_from_json(bucket=bucket,

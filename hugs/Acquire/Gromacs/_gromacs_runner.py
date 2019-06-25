@@ -16,7 +16,8 @@ from ._objstore import ObjectStore as objstore
 
 try:
     from watchdog.observers import Observer as _Observer
-    from watchdog.events import FileSystemEventHandler as _FileSystemEventHandler
+    from watchdog.events import FileSystemEventHandler as \
+        _FileSystemEventHandler
     _have_watchdog = True
 except:
     _have_watchdog = False
@@ -108,8 +109,8 @@ class _FileWatcher:
             else:
                 # nothing more to read
                 break
-    
-        # we have read in everything that has been produced - should 
+
+        # we have read in everything that has been produced - should
         # we upload it? Only upload if more than 5 seconds have passed
         # since the last update
         if force_upload:
@@ -127,13 +128,13 @@ class _FileWatcher:
         elif (_datetime.datetime.now() - self._last_upload_time).seconds \
                   > self._upload_timeout:
             self._uploadBuffer()
-        
+
 if _have_watchdog:
     class _PosixToObjstoreEventHandler(_FileSystemEventHandler):
-        """This class responds to events in the filesystem. 
+        """This class responds to events in the filesystem.
            The aim is to detect as files are created and modified,
            and to stream this data up to the object store while
-           the simulation is in progress. This is called in 
+           the simulation is in progress. This is called in
            a background thread by watchdog"""
 
         def __init__(self, bucket, rootkey=None,
@@ -146,7 +147,7 @@ if _have_watchdog:
             self._files = {}
 
         def chunkSizeTrigger(self):
-            """Return the size of buffer that will trigger a write to 
+            """Return the size of buffer that will trigger a write to
                the object store"""
             return self._sizetrigger
 
@@ -177,7 +178,7 @@ if _have_watchdog:
                 filename = filename[2:]
 
             if not filename in self._files:
-                self._files[filename] = _FileWatcher(filename, bucket=self._bucket, 
+                self._files[filename] = _FileWatcher(filename, bucket=self._bucket,
                                                      rootkey=self._rootkey,
                                                      sizetrigger=self.chunkSizeTrigger(),
                                                      timetrigger=self.chunkTimeTrigger())
@@ -203,7 +204,7 @@ class GromacsRunner:
     @staticmethod
     def run(bucket):
         """Run the gromacs simulation whose input is contained
-           in the passed bucket. Read the input from /input, 
+           in the passed bucket. Read the input from /input,
            write a log to /log and write the output to /output
         """
 
@@ -230,7 +231,7 @@ class GromacsRunner:
         log("Running a gromacs simulation in %s" % tmpdir)
 
         # get the value of the input key
-        input_tar_bz2 = objstore.get_object_as_file(bucket, "input.tar.bz2", 
+        input_tar_bz2 = objstore.get_object_as_file(bucket, "input.tar.bz2",
                                                     "/%s/input.tar.bz2" % tmpdir)
 
         # now unpack this file
@@ -272,7 +273,7 @@ class GromacsRunner:
         objstore.set_object_from_file(bucket, "output/grompp.err", "grompp.err")
 
         if status.returncode != 0:
-            raise GromppError("Grompp failed to run: Error code = %s" % 
+            raise GromppError("Grompp failed to run: Error code = %s" %
                               status.returncode)
 
         # now write a run script to run the process and output the result
@@ -325,7 +326,7 @@ class GromacsRunner:
             if not filename.endswith("tpr"):
                 log("Uploading %s" % filename)
                 objstore.set_object_from_file(bucket,
-                                              "output/%s" % filename, filename) 
+                                              "output/%s" % filename, filename)
 
         log("Simulation and data upload complete.")
 

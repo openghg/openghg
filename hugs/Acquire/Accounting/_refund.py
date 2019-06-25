@@ -52,7 +52,7 @@ class Refund:
 
     def is_null(self):
         """Return whether or not this Refund is null
-        
+
            Returns:
                 bool: True if refund is null, else False
         """
@@ -60,7 +60,7 @@ class Refund:
 
     def credit_note(self):
         """Return the credit note that this is refunding
-        
+
            Returns:
                 CreditNote: CreditNote related to this Refund
         """
@@ -82,7 +82,7 @@ class Refund:
 
     def debit_note_uid(self):
         """Return the UID of the debit note that this is refunding
-           
+
            Returns:
                 str: UID of debit note this is refunding
         """
@@ -136,7 +136,7 @@ class Refund:
 
     def value(self):
         """Return the value of the refund
-        
+
            Decimal: Value of this refund
         """
         if self.is_null():
@@ -147,7 +147,7 @@ class Refund:
 
     def authorisation(self):
         """Return the authorisation for the refund
-        
+
            Authorisation: Authorisation for this refund
         """
         return self._authorisation
@@ -176,8 +176,8 @@ class Refund:
                 dict: JSON-decoded dictionary
            Returns:
                 Refund: Refund object created from JSON
-        
-        
+
+
         """
         r = Refund()
 

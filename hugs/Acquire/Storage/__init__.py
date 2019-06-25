@@ -11,11 +11,12 @@ from Acquire.Identity import ACLRule, ACLRules
 
 from ._storage_service import *
 from ._errors import *
-from ._buckethandle import *
 from ._userdrives import *
+from ._filehandle import *
 from ._fileinfo import *
 from ._driveinfo import *
 from ._filemeta import *
+from ._parregistry import *
 from ._drivemeta import *
 
 try:

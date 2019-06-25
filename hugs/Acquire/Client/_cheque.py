@@ -133,7 +133,7 @@ class Cheque:
                 dict: Dictionary described above
 
         """
-        
+
         if self._cheque is None:
             raise PaymentError("You cannot read a null cheque")
 
@@ -373,7 +373,7 @@ class Cheque:
 
            Returns:
                 Service: Trusted accounting service
-                
+
         """
         from Acquire.Service import get_this_service as _get_this_service
         service = _get_this_service()
@@ -391,7 +391,7 @@ class Cheque:
 
     def to_data(self):
         """Return a JSON-serialisable dictionary of this object
-        
+
            Returns:
                 dict: JSON serialisable dictionary of this object
         """
@@ -407,12 +407,12 @@ class Cheque:
     def from_data(data):
         """Return a cheque constructed from the passed (JSON-deserialised
            dictionary)
-           
+
            Args:
                 data (dict): Dictionary from which to create object
            Returns:
                 Cheque: Cheque object created from JSON data
-           
+
         """
         cheque = Cheque()
 

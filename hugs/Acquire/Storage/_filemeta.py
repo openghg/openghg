@@ -21,6 +21,8 @@ class FileMeta:
         self._compression = compression
         self._acl = None
         self._aclrules = None
+        self._creds = None
+        self._drive_metadata = None
 
         if aclrules is not None:
             from Acquire.Storage import ACLRules as _ACLRules
@@ -46,6 +48,11 @@ class FileMeta:
         else:
             return False
 
+    def open(self, creds=None):
+        """Open and return the File associated with this metadata"""
+        from Acquire.Client import File as _File
+        return _File.open(metadata=self, creds=creds)
+
     def _set_denied(self):
         """Call this function to remove all information that should
            not be visible to someone who has denied access to the file
@@ -57,6 +64,8 @@ class FileMeta:
         self._datetime = None
         self._compression = None
         self._aclrules = None
+        self._creds = None
+        self._drive_metadata = None
         from Acquire.Storage import ACLRule as _ACLRule
         self._acl = _ACLRule.denied()
 
@@ -64,23 +73,88 @@ class FileMeta:
         """Return whether or not this is null"""
         return self._filename is None
 
-    def has_metadata(self):
+    def make_complete(self, creds=None):
+        """Connect to the storage service and get all of the
+            metadata for this file, returning the complete
+            file data
+        """
+        if self.is_null() or self.is_complete():
+            return self
+
+        if creds is None:
+            creds = self._creds
+
+        drive = self.drive().open(creds=creds)
+
+        filemetas = drive.list_files(filename=self.filename(),
+                                     include_metadata=True)
+
+        if len(filemetas) != 1:
+            raise PermissionError(
+                "Cannot make the filemeta complete! Incorrect filemetas "
+                "have been returned: %s" % str(filemetas))
+
+        filemeta = filemetas[0]
+
+        assert(filemeta.is_complete())
+        assert(filemeta.filename() == self.filename())
+        return filemeta
+
+    def is_complete(self):
         """Return whether or not this file includes all of the
            metadata. If not, then only the filename is available
         """
         return self._uid is not None
 
-    def _set_drive(self, drive):
-        """Internal function called by "Drive" to store the Drive
-           associated with a FileMeta
-        """
-        from Acquire.Client import Drive as _Drive
-        if not isinstance(drive, _Drive):
-            raise TypeError("You can only set a Drive object")
+    def _copy_credentials(self, other):
+        """Copy the drive metadata and credentials from 'other' to self"""
+        if not isinstance(other, FileMeta):
+            raise TypeError("other should be a FileMeta")
 
-        self._drive = drive
+        self._drive_metadata = other._drive_metadata
+        self._creds = other._creds
+
+    def _set_drive_metadata(self, metadata, creds=None):
+        """Internal function called by "Drive" to store the metadata
+           of the drive that contains the file described by this metadata
+        """
+        from Acquire.Client import DriveMeta as _DriveMeta
+        if not isinstance(metadata, _DriveMeta):
+            raise TypeError("The metadata must be type DriveMeta")
+
+        if creds is None:
+            creds = metadata._creds
+        else:
+            if creds is not metadata._creds:
+                from copy import copy as _copy
+                metadata = _copy(metadata)
+                metadata._creds = creds
+
+        self._drive_metadata = metadata
+        self._creds = metadata._creds
+
+    def location(self):
+        """Return a global location for this file. This is unique
+           for this version of this file and can be used to locate
+           this file from any other service.
+        """
+        if self.is_null():
+            return None
+        elif self._drive_metadata is None:
+            raise PermissionError(
+                "Cannot generate the location as we don't know "
+                "which drive this file has come from!")
+
+        from Acquire.Client import Location as _Location
+        return _Location(drive_guid=self._drive_metadata.guid(),
+                         filename=self.filename(),
+                         version=self.version())
 
     def filename(self):
+        """Return the name of the file"""
+        return self._filename
+
+    def name(self):
         """Return the name of the file"""
         return self._filename
 
@@ -90,6 +164,18 @@ class FileMeta:
             return None
         else:
             return self._uid
+
+    def drive(self):
+        """Return the metadata for the drive that contains this file"""
+        if self.is_null():
+            return None
+        elif self._drive_metadata is None:
+            raise PermissionError(
+                "Cannot get the drive metadata as we don't know "
+                "which drive this file has come from!")
+        else:
+            from copy import copy as _copy
+            return _copy(self._drive_metadata)
 
     def filesize(self):
         """If known, return the size of the file"""
@@ -140,6 +226,15 @@ class FileMeta:
             return None
         else:
             return self._datetime
+
+    def version(self):
+        """Return the unique string that describes the particular
+           version of this file
+        """
+        if self._uid is None:
+            return None
+        else:
+            return self._uid
 
     def aclrules(self):
         """If known, return the ACL rules that were used to generate the ACL

@@ -20,9 +20,9 @@ def _get_abspath_size_md5(basedir, key, filename, max_size=None):
             filename (str): filename
             max_size (int, optional, default=None): maximum size
             of file to process
-            
+
         Returns:
-            tuple (str, int, str): filename, filesize in bytes, MD5 
+            tuple (str, int, str): filename, filesize in bytes, MD5
             checksum of file
 
     """
@@ -65,8 +65,12 @@ class RunRequest(_Request):
        from which the output can be read. The calculation will
        start once the input has been signalled as loaded.
     """
-    def __init__(self, runfile=None):
-        """Construct the request
+    def __init__(self, runfile=None, tar_files=True):
+        """Construct the request. If tar_files is True then this
+           will tar up all of the input files before transmitting
+           them to the storage service. Otherwise this will
+           try to upload the files as individual (compressed)
+           input files
         """
         super().__init__()
 
@@ -83,10 +87,10 @@ class RunRequest(_Request):
 
     def is_null(self):
         """Return whether or not this is a null request
-        
+
         Returns:
             bool: True if UID is set, else False
-                
+
         """
         return self._uid is None
 
@@ -135,7 +139,7 @@ class RunRequest(_Request):
 
     def tarfile_size(self):
         """Return the size of the tarfile in bytes
-        
+
             Returns:
                 int: Size of tarfile in bytes
         """
@@ -147,7 +151,7 @@ class RunRequest(_Request):
 
             Returns:
                 str: MD5 checksum of tarfile
-           
+
         """
         return self._tarmd5
 
@@ -172,7 +176,7 @@ class RunRequest(_Request):
            size of the file in the tarfile and the md5 sum of the file
 
             Returns:
-                dict or None: Dictionary of input file information if 
+                dict or None: Dictionary of input file information if
                 available, else None
         """
         if self._runinfo is None:
@@ -361,14 +365,15 @@ class RunRequest(_Request):
         self._create_tarfile()
 
         # everything is ok - set the UID of this request
-        self._uid = str(_uuid.uuid4())
+        from Acquire.ObjectStore import create_uid as _create_uid
+        self._uid = _create_uid()
 
     def to_data(self):
         """Return this request as a json-serialisable dictionary
 
             Returns:
                 dict: JSON serialisable dictionary created from object
-        
+
         """
         if self.is_null():
             return {}

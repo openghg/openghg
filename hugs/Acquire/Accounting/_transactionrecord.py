@@ -84,7 +84,7 @@ class TransactionRecord:
 
     def is_null(self):
         """Return whether or not this is a null record
-        
+
            Returns:
             bool: True if this record is null, else False
         """
@@ -92,7 +92,7 @@ class TransactionRecord:
 
     def description(self):
         """Return the description of this transaction
-        
+
            Returns:
                 str: Description of this transaction
         """
@@ -103,7 +103,7 @@ class TransactionRecord:
 
     def value(self):
         """Return the value of this transaction
-        
+
            Returns:
                 Decimal: Value of this transaction
         """
@@ -114,7 +114,7 @@ class TransactionRecord:
 
     def uid(self):
         """Return the UID for this transaction record
-        
+
            Returns:
                 str: UID for this transaction record
         """
@@ -146,7 +146,7 @@ class TransactionRecord:
 
     def assert_matching_refund(self, refund):
         """Assert that the passed refund matches this transaction
-        
+
            Args:
                 refund (Refund): Refund to check
         """
@@ -214,7 +214,7 @@ class TransactionRecord:
 
     def credit_account_uid(self):
         """Return the UID of the account to which value has been credited
-        
+
            Returns:
                 str: Account UID to which value has been credited
         """
@@ -256,7 +256,7 @@ class TransactionRecord:
 
     def datetime(self):
         """Return the datetime when this transaction was applied
-        
+
            Returns:
                 datetime: Datetime at which transaction was applied
         """
@@ -276,7 +276,7 @@ class TransactionRecord:
 
     def is_receipted(self):
         """Return whether or not this transaction has been receipted
-        
+
            Returns:
                 bool: True if transaction receipted, else False
 
@@ -285,7 +285,7 @@ class TransactionRecord:
 
     def is_refunded(self):
         """Return whether or not this transaction has been refunded
-        
+
            Returns:
                 bool: True if transaction refunded, else False
         """
@@ -293,7 +293,7 @@ class TransactionRecord:
 
     def is_provisional(self):
         """Return whether or not this transaction is provisional
-        
+
            Returns:
                 bool: True if transaction is provisional, else False
         """
@@ -301,25 +301,25 @@ class TransactionRecord:
 
     def is_refund(self):
         """Return whether or not this transaction is a refund
-        
+
            Returns:
                 bool: True if transaction is a refund, else False
-        
+
         """
         return self._refund is not None
 
     def is_receipt(self):
         """Return whether or not this transaction is a receipt
-        
+
            Returns:
                 bool: True if transaction is a receipt, else False
-        
+
         """
         return self._receipt is not None
 
     def get_refund_info(self):
         """Return the reason for the refund
-        
+
            Returns:
                 Refund: Refund for this transaction
         """
@@ -327,10 +327,10 @@ class TransactionRecord:
 
     def get_receipt_info(self):
         """Return the receipt underlying this transaction
-        
+
            Returns:
                 Receipt: Receipt for this transaction
-        
+
         """
         return self._receipt
 
@@ -366,7 +366,7 @@ class TransactionRecord:
 
     def _load_transaction(self, uid, bucket=None):
         """Load this transaction from the object store
-           
+
            Args:
                 uid (str): UID of transaction to load
                 bucket (dict): Bucket to load data from
@@ -379,7 +379,7 @@ class TransactionRecord:
 
     def _save_transaction(self, bucket=None):
         """Save this transaction to the object store
-           
+
            Args:
                 bucket (dict): Bucket to load data from
            Returns:

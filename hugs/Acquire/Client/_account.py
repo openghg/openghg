@@ -12,13 +12,13 @@ def _get_accounting_url():
        Returns:
             str: Default accounting URL
     """
-    
+
     return "fn.acquire-aaai.com"
 
 
 def _get_accounting_service(accounting_url=None):
     """Function to return the accounting service for the system
-    
+
        Args:
             accounting_url (str, default=None): Accounting URL
        Returns:
@@ -96,7 +96,7 @@ def _get_account_uids(user, accounting_service=None, accounting_url=None):
             accounting_service (Service, default=None): Accounting
             service to check
             accounting_url (str, default=None): Accounting URL
-        
+
         Returns:
             list: Names and UIDs of accounts belonging to passed user
             on passed service
@@ -287,7 +287,7 @@ class Account:
            Args:
                 user (User, default=None): User to create account for
                 account_name (str, default=None): Name of account
-                accounting_service (Service, default=None): Service on which to 
+                accounting_service (Service, default=None): Service on which to
                 create account
                 accounting_url (str, default=None): Accounting URL
         """
@@ -342,7 +342,7 @@ class Account:
 
     def is_null(self):
         """Return whether or not this is a null account
-        
+
            Returns:
                 bool: True if account null, else False
         """
@@ -350,10 +350,10 @@ class Account:
 
     def uid(self):
         """Return the UID of this account
-        
+
            Returns:
                 str: Account UID
-        
+
         """
         return self._account_uid
 
@@ -380,10 +380,10 @@ class Account:
 
     def owner(self):
         """Return the user who owns this account
-        
+
            Returns:
                 str: Name of owner
-        
+
         """
         if self.is_null():
             return None
@@ -392,7 +392,7 @@ class Account:
 
     def user(self):
         """Synonym for owner
-        
+
            Returns:
                 str: Name of owner
         """
@@ -412,7 +412,7 @@ class Account:
 
     def last_update_time(self):
         """Return the time of the last update of the balance
-        
+
            Returns:
                 datetime: Datetime of last update of the account
                 balance
@@ -477,7 +477,7 @@ class Account:
 
     def accounting_service(self):
         """Return the accounting service managing this account
-        
+
            Returns:
                 Service: Accounting service managing this account
         """
@@ -485,7 +485,7 @@ class Account:
 
     def description(self):
         """Return the description of this account
-        
+
            Returns:
                 str: Description of account
         """
@@ -496,7 +496,7 @@ class Account:
 
     def balance(self, force_update=False):
         """Return the current balance of this account
-        
+
            Args:
                 force_update (bool, default=False): Force the refresh
            Returns:
@@ -508,7 +508,7 @@ class Account:
 
     def liability(self, force_update=False):
         """Return the current total liability of this account
-        
+
            Args:
                 force_update (bool, default=False): Force the refresh
            Returns:
@@ -520,24 +520,24 @@ class Account:
 
     def receivable(self, force_update=False):
         """Return the current total accounts receivable of this account
-        
+
            Args:
                 force_update (bool, default=False): Force the refresh
            Returns:
                 Decimal: Accounts receivable of the account
-        
+
         """
         self._refresh(force_update)
         return self._balance.receivable()
 
     def overdraft_limit(self, force_update=False):
         """Return the overdraft limit of this account
-        
+
            Args:
                 force_update (bool, default=False): Force the refresh
            Returns:
                 Decimal: Overdraft limit of account
-        
+
         """
         self._refresh(force_update)
         return self._overdraft_limit

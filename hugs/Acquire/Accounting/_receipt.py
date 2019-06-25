@@ -74,17 +74,17 @@ class Receipt:
         """Return whether or not this Receipt is null
 
            Returns:
-                bool: True if reecipt null, else False        
+                bool: True if reecipt null, else False
 
         """
         return self._credit_note is None
 
     def credit_note(self):
         """Return the credit note that this is a receipt for
-           
+
            Returns:
-                CreditNote: credit note related to this receipt        
-        
+                CreditNote: credit note related to this receipt
+
         """
         if self.is_null():
             from Acquire.Accounting import CreditNote as _CreditNote
@@ -156,7 +156,7 @@ class Receipt:
 
     def value(self):
         """Return the original (provisional) value of the transaction
-        
+
            Returns:
                 Decimal: Value of this receipt
         """
@@ -170,8 +170,8 @@ class Receipt:
         """Return the original (provisional) value of the transaction
 
            Returns:
-                Decimal: Value of this receipt        
-        
+                Decimal: Value of this receipt
+
         """
         return self.value()
 
@@ -190,7 +190,7 @@ class Receipt:
 
     def authorisation(self):
         """Return the authorisation for the receipt
-        
+
            Returns:
                 Authorisation: Authorisation for the receipt
         """
@@ -215,12 +215,12 @@ class Receipt:
     @staticmethod
     def from_data(data):
         """Return a Receipt from the passed JSON-decoded dictionary
-        
+
            Args:
                 data (dict): JSON dictionary to create object
            Returns:
-                Receipt: Receipt created from JSON           
-                
+                Receipt: Receipt created from JSON
+
         """
         r = Receipt()
 
@@ -250,7 +250,7 @@ class Receipt:
              receipted_value (Decimal, default=None): Total value to receipt
 
             Returns:
-                Receipt or list[Receipt]: If <= 1 credit note Receipt, else 
+                Receipt or list[Receipt]: If <= 1 credit note Receipt, else
                 list of Receipts
 
         """

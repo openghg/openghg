@@ -9,14 +9,18 @@ from ._qrcode import *
 from ._user import *
 from ._account import *
 from ._drive import *
-from ._filehandle import *
+from ._file import *
 from ._fileops import *
+from ._chunkuploader import *
+from ._chunkdownloader import *
+from ._par import *
+from ._location import *
 from ._wallet import *
 from ._errors import *
 from ._cheque import *
 from ._service import *
 from ._credentials import *
-from ._par import *
+from ._storagecreds import *
 
 # The below objects are useful for the client, so are pulled into
 # this module to discourage people using the other Acquire modules

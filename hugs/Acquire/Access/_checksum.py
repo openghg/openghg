@@ -10,7 +10,6 @@ def get_size_and_checksum(data):
         Returns:
             tuple (int,str): size of data and its md5 hash
     """
-    
     from hashlib import md5 as _md5
     md5 = _md5()
     md5.update(data)

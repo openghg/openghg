@@ -11,7 +11,7 @@ _file_root = "storage/file"
 class VersionInfo:
     """This class holds specific info about a version of a file"""
     def __init__(self, filesize=None, checksum=None,
-                 aclrules=None, compression=None,
+                 aclrules=None, is_chunked=False, compression=None,
                  identifiers=None):
         """Construct the version of the file that has the passed
            size and checksum, was uploaded by the specified user,
@@ -19,8 +19,43 @@ class VersionInfo:
            this file is stored and transmitted in a compressed
            state
         """
-        if filesize is not None:
-            from Acquire.ObjectStore import create_uuid as _create_uuid
+        if is_chunked:
+            from Acquire.ObjectStore import create_uid as _create_uid
+            from Acquire.ObjectStore import get_datetime_now \
+                as _get_datetime_now
+            from Acquire.ObjectStore import datetime_to_string \
+                as _datetime_to_string
+            from Acquire.Storage import ACLRules as _ACLRules
+
+            try:
+                user_guid = identifiers["user_guid"]
+            except:
+                user_guid = None
+
+            if user_guid is None:
+                raise PermissionError(
+                    "You must specify the user_guid of the user who is "
+                    "uploading this version of the file!")
+
+            if aclrules is None:
+                from Acquire.Identity import ACLRules as _ACLRules
+                aclrules = _ACLRules.inherit()
+            else:
+                if not isinstance(aclrules, _ACLRules):
+                    raise TypeError("The aclrules must be type ACLRules")
+
+            self._filesize = 0
+            self._nchunks = 0
+            self._checksum = None
+            self._compression = None
+            self._datetime = _get_datetime_now()
+            self._file_uid = "%s/%s" % (_datetime_to_string(self._datetime),
+                                        _create_uid(short_uid=True))
+            self._user_guid = str(user_guid)
+            self._aclrules = aclrules
+
+        elif filesize is not None:
+            from Acquire.ObjectStore import create_uid as _create_uid
             from Acquire.ObjectStore import get_datetime_now \
                 as _get_datetime_now
             from Acquire.ObjectStore import datetime_to_string \
@@ -46,14 +81,17 @@ class VersionInfo:
 
             self._filesize = filesize
             self._checksum = checksum
-            self._file_uid = _create_uuid()
+            self._datetime = _get_datetime_now()
+            self._file_uid = "%s/%s" % (_datetime_to_string(self._datetime),
+                                        _create_uid(short_uid=True))
             self._user_guid = str(user_guid)
             self._compression = compression
             self._aclrules = aclrules
-            self._datetime = _get_datetime_now()
+            self._nchunks = None
 
         else:
             self._filesize = None
+            self._nchunks = None
 
     def is_null(self):
         """Return whether or not this is null"""
@@ -72,6 +110,72 @@ class VersionInfo:
             return None
         else:
             return self._checksum
+
+    def is_chunked(self):
+        """Return whether or not this file is chunked"""
+        if self.is_null():
+            return False
+        else:
+            return self._nchunks is not None
+
+    def is_uploading(self):
+        """Return whether we are still in the process of
+           uploading the chunked file
+        """
+        if self.is_chunked():
+            return self._checksum is None
+        else:
+            return False
+
+    def close_uploader(self, file_bucket):
+        """Close the uploader. This will count the number of chunks,
+           and will also create a checksum of all of the chunk's
+           checksums
+        """
+        if not self.is_uploading():
+            return
+
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        meta_root = "%s/meta/" % self._file_key()
+
+        keys = _ObjectStore.get_all_object_names(bucket=file_bucket,
+                                                 prefix=meta_root)
+
+        meta_keys = {}
+        for key in keys:
+            idx = int(key.split("/")[-1])
+            meta_keys[idx] = key
+
+        nchunks = len(keys)
+        size = 0
+        from Acquire.Crypto import Hash as _Hash
+        from hashlib import md5 as _md5
+        md5 = _md5()
+
+        for i in range(0, nchunks):
+            key = meta_keys[i]
+            meta = _ObjectStore.get_object_from_json(
+                            bucket=file_bucket, key="%s/%d" % (meta_root, i))
+
+            size += meta["filesize"]
+            md5.update(meta["checksum"].encode("utf-8"))
+
+        self._filesize = size
+        self._checksum = md5.hexdigest()
+        self._nchunks = nchunks
+
+    def num_chunks(self):
+        """Return the number of chunks used for this file. This is
+           equal to 1 for unchunked files, or for files that
+           have only uploaded one chunk. This is zero for files
+           that are still in the process of being uploaded
+        """
+        if self.is_null():
+            return 0
+        elif self.is_chunked():
+            return self._nchunks
+        else:
+            return 1
 
     def aclrules(self):
         """Return all of the ACL rules for this version of the file"""
@@ -122,16 +226,14 @@ class VersionInfo:
 
     def _file_key(self):
         """Return the key for this actual file for this version
-           in the object store"""
+           in the object store. If this is a chunked file, then
+           the data will be stored in objects as a sub-key of this
+           key
+        """
         if self.is_null():
             return None
         else:
-            from Acquire.ObjectStore import datetime_to_string \
-                as _datetime_to_string
-
-            return "%s/%s/%s" % (_file_root,
-                                 _datetime_to_string(self._datetime),
-                                 self._file_uid)
+            return "%s/%s" % (_file_root, self._file_uid)
 
     def _key(self, drive_uid, encoded_filename):
         """Return the key for this version in the object store"""
@@ -140,9 +242,8 @@ class VersionInfo:
         else:
             from Acquire.ObjectStore import datetime_to_string \
                 as _datetime_to_string
-            return "%s/%s/%s/%s/%s" % (
-                _version_root, drive_uid, encoded_filename,
-                _datetime_to_string(self._datetime), self._file_uid)
+            return "%s/%s/%s/%s" % (
+                _version_root, drive_uid, encoded_filename, self._file_uid)
 
     def to_data(self):
         """Return a json-serialisable dictionary for this object"""
@@ -156,8 +257,10 @@ class VersionInfo:
             data["filesize"] = self._filesize
             data["checksum"] = self._checksum
             data["file_uid"] = self._file_uid
-            data["datetime"] = _datetime_to_string(self._datetime)
             data["user_guid"] = self._user_guid
+
+            if self._nchunks is not None:
+                data["nchunks"] = int(self._nchunks)
 
             if self._aclrules is not None:
                 data["aclrules"] = self._aclrules.to_data()
@@ -181,7 +284,12 @@ class VersionInfo:
             v._checksum = data["checksum"]
             v._file_uid = data["file_uid"]
             v._user_guid = data["user_guid"]
-            v._datetime = _string_to_datetime(data["datetime"])
+
+            try:
+                v._datetime = _string_to_datetime(data["datetime"])
+                v._file_uid = "%s/%s" % (data["datetime"], v._file_uid)
+            except:
+                v._datetime = _string_to_datetime(v._file_uid.split("/")[0])
 
             if "aclrules" in data:
                 from Acquire.Storage import ACLRules as _ACLRules
@@ -192,6 +300,11 @@ class VersionInfo:
             else:
                 v._compression = None
 
+            if "nchunks" in data:
+                v._nchunks = int(data["nchunks"])
+            else:
+                v._nchunks = None
+
         return v
 
 
@@ -200,20 +313,58 @@ class FileInfo:
        been uploaded to the storage service. This includes all
        versions of the file, the ACLs for different users etc.
 
-       Just as Acquire.Client.Drive provides the client-side view
-       of Acquire.Storage.DriveInfo, so to does
-       Acquire.Client.FileHandle provide the client-side view
-       of Acquire.Storage.FileInfo
+       While Acquire.Client.Drive provides a client-side view of
+       Acquire.Storage.DriveInfo, there is no equivalent client-side
+       view of Acquire.Storage.FileInfo. This is because we operate
+       on files via their drives.
+
+       The metadata of a FileInfo is presented to the user via
+       the Acquire.Client.FileMeta class (same way that DriveInfo
+       metadata is presented to the user via the Acquire.Client.DriveMeta
+       class)
     """
     def __init__(self, drive_uid=None, filehandle=None,
+                 filename=None, aclrules=None, is_chunked=False,
                  identifiers=None, upstream=None):
         """Construct from a passed filehandle of a file that will be
            uploaded
         """
         self._filename = None
 
-        if filehandle is not None:
-            from Acquire.Client import FileHandle as _FileHandle
+        if is_chunked:
+            if filename is None or len(filename) == 0:
+                raise TypeError(
+                    "The filename must be a valid string")
+
+            self._drive_uid = drive_uid
+
+            from Acquire.ObjectStore import string_to_encoded \
+                as _string_to_encoded
+            from Acquire.ObjectStore import string_to_filepath \
+                as _string_to_filepath
+
+            filename = _string_to_filepath(filename)
+
+            # remove any leading slashes
+            while filename.startswith("/"):
+                filename = filename[1:]
+
+            # remove any trailing slashes
+            while filename.endswith("/"):
+                filename = filename[0:-1]
+
+            self._filename = filename
+            self._encoded_filename = _string_to_encoded(filename)
+
+            version = VersionInfo(is_chunked=True,
+                                  identifiers=identifiers,
+                                  aclrules=aclrules)
+
+            self._latest_version = version
+            self._identifiers = identifiers
+            self._upstream = upstream
+        elif filehandle is not None:
+            from Acquire.Storage import FileHandle as _FileHandle
 
             if not isinstance(filehandle, _FileHandle):
                 raise TypeError(
@@ -229,8 +380,18 @@ class FileInfo:
             from Acquire.ObjectStore import string_to_filepath \
                 as _string_to_filepath
 
-            self._filename = _string_to_filepath(filehandle.filename())
-            self._encoded_filename = _string_to_encoded(self._filename)
+            filename = _string_to_filepath(filehandle.filename())
+
+            # remove any leading slashes
+            while filename.startswith("/"):
+                filename = filename[1:]
+
+            # remove any trailing slashes
+            while filename.endswith("/"):
+                filename = filename[0:-1]
+
+            self._filename = filename
+            self._encoded_filename = _string_to_encoded(filename)
 
             version = VersionInfo(filesize=filehandle.filesize(),
                                   checksum=filehandle.checksum(),
@@ -274,8 +435,7 @@ class FileInfo:
 
     def get_filemeta(self, version=None):
         """Return the metadata about the latest (or specified) version
-           of this file. If 'resolved_acl' is specified, then
-           return the
+           of this file.
         """
         from Acquire.Client import FileMeta as _FileMeta
 
@@ -293,14 +453,16 @@ class FileInfo:
         """
         if self.is_null():
             return VersionInfo()
-        else:
-            if version is None:
-                return self._latest_version
+        elif version is None:
+            return self._latest_version
+        elif self._latest_version.uid() == version:
+            return self._latest_version
 
-            from Acquire.Storage import MissingVersionError
-            raise MissingVersionError(
-                "Cannot find the version '%s' for file '%s'" %
-                (version, self.filename()))
+        # lookup this version in the object store
+        from Acquire.Storage import MissingVersionError
+        raise MissingVersionError(
+            "Cannot find the version '%s' for file '%s'" %
+            (version, self.filename()))
 
     def filesize(self, version=None):
         """Return the size (in bytes) of the latest (or specified)
@@ -352,9 +514,14 @@ class FileInfo:
         """
         return self._version_info(version=version).aclrules()
 
-    def version(self, version):
-        """Return the version at the specified datetime"""
-        return self._version_info(version=version)
+    def version(self, version=None):
+        """Return the version at the specified datetime. If nothing is
+           specified, then return the version as loaded
+        """
+        if version is None:
+            return self._latest_version
+        else:
+            return self._version_info(version=version)
 
     def latest_version(self):
         """Return the latest version of this file on the storage service. This
@@ -374,6 +541,21 @@ class FileInfo:
             return []
         else:
             return {self._latest_version.datetime(), self._latest_version}
+
+    def close_uploader(self, file_bucket):
+        """Close the uploader"""
+        if self.is_null():
+            return
+        elif not self._latest_version.is_uploading():
+            return
+
+        self._latest_version.close_uploader(file_bucket)
+
+    def is_uploading(self):
+        """Return whether this version is still in the process of
+           being uploaded
+        """
+        return self._latest_version.is_uploading()
 
     def _fileinfo_key(self):
         """Return the key for this fileinfo in the object store"""
@@ -450,8 +632,8 @@ class FileInfo:
 
             for key in keys:
                 parts = key.split("/")
-                uid = parts[-1]
                 uploaded_when = _string_to_datetime(parts[-2])
+                uid = "%s/%s" % (parts[-2], parts[-1])
                 filemeta = _FileMeta(filename=filename,
                                      uploaded_when=uploaded_when,
                                      uid=uid)
@@ -524,7 +706,10 @@ class FileInfo:
         f = FileInfo()
 
         if data is not None and len(data) > 0:
+            from Acquire.ObjectStore import string_to_encoded \
+                as _string_to_encoded
             f._filename = data["filename"]
+            f._encoded_filename = _string_to_encoded(f._filename)
             f._latest_version = VersionInfo.from_data(data["latest_version"])
             f._drive_uid = None
             f._identifiers = identifiers

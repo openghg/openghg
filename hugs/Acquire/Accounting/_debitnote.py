@@ -65,7 +65,7 @@ class DebitNote:
 
     def is_null(self):
         """Return whether or not this is a null note
-        
+
             Returns:
                 bool: True if note not null, else False
         """
@@ -85,7 +85,7 @@ class DebitNote:
 
     def datetime(self):
         """Return the datetime for when value was debited from the account
-        
+
             Returns:
                 datetime: When value was debited from account
         """
@@ -107,9 +107,9 @@ class DebitNote:
 
     def transaction(self):
         """Return the transaction related to this debit note
-        
+
             Returns:
-                Transaction: Transaction related to this credit note 
+                Transaction: Transaction related to this credit note
         """
         if self.is_null():
             return None
@@ -191,7 +191,7 @@ class DebitNote:
 
            Args:
                 refund (Refund): Refund to create debit note from
-                account (Account): 
+                account (Account):
         """
         from Acquire.Accounting import Refund as _Refund
 
@@ -384,7 +384,7 @@ class DebitNote:
 
     def to_data(self):
         """Return this DebitNote as a dictionary that can be encoded as json
-               
+
                Returns:
                     dict: Dictionary to be converted to JSON
 

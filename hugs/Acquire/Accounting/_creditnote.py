@@ -58,7 +58,7 @@ class CreditNote:
 
     def is_null(self):
         """Return whether or not this note is null
-        
+
             Returns:
                 bool: True if note is null, else False
         """
@@ -91,7 +91,7 @@ class CreditNote:
 
     def account_uid(self):
         """Return the UID of the account to which the value was credited
-        
+
             Returns:
                 str: Account UID
         """
@@ -145,7 +145,7 @@ class CreditNote:
 
            Returns:
                 str: UID of the debit note to match this credit note
-            
+
         """
         return self._debit_note_uid
 
@@ -183,7 +183,7 @@ class CreditNote:
            the passed refund. This will actually transfer value from the
            debit note to the credited account (which was the original
            debited account)
-           
+
            debit_note (DebitNote): DebitNote to use
            refund (Refund): Refund from which to take value to create
            CreditNote

@@ -5,6 +5,9 @@ _drive_root = "storage/drive"
 
 _fileinfo_root = "storage/file"
 
+_uploader_root = "storage/uploader"
+_downloader_root = "storage/downloader"
+
 
 def _validate_file_upload(par, file_bucket, file_key, objsize, checksum):
     """Call this function to signify that the file associated with
@@ -42,61 +45,22 @@ def _validate_file_upload(par, file_bucket, file_key, objsize, checksum):
     # SHOULD HERE RECEIPT THE STORAGE TRANSACTION
 
 
-def _validate_bulk_upload(par, bucket_uid, identifiers,
-                          drive_uid, aclrules, max_size):
-    """Call this internal function to signify that the bulk upload
-       is complete. The files have been uploaded to the bucket with
-       name 'bucket_uid', and were uploaded by the user with passed
-       user_guid. The files should be placed into the drive with
-       specified drive_uid, using the passed ACLRules, and they
-       should not have a total size greater than 'max_size'
-    """
-    from Acquire.ObjectStore import ObjectStore as _ObjectStore
-    from Acquire.Service import get_service_account_bucket \
-        as _get_service_account_bucket
-    from Acquire.Service import get_this_service as _get_this_service
-    from Acquire.Storage import DriveInfo as _DriveInfo
-
-    service = _get_this_service()
-    bucket = _get_service_account_bucket()
-
-    drive = _DriveInfo(drive_uid=drive_uid)
-
-    tmpbucket = _ObjectStore.get_bucket(
-                                bucket=bucket,
-                                bucket_name=bucket_uid,
-                                compartment=service.storage_compartment(),
-                                create_if_needed=False)
-
-    try:
-        total_size = drive.copy_from(bucket=tmpbucket, aclrules=aclrules)
-    except Exception as e:
-        # delete the bucket and force the user to upload again...
-        _ObjectStore.delete_bucket(bucket=tmpbucket, force=True)
-        raise e
-
-    if total_size > max_size:
-        # should be cross with the user - give them time to make up
-        # the difference in cost, or else we will delete this data
-        pass
-
-    # SHOULD NOW RECEIPT THE STORAGE TRANSACTION
-
-    # the tmpbucket should now be empty, and all files transferred
-    _ObjectStore.delete_bucket(bucket=tmpbucket, force=True)
-
-
 class DriveInfo:
     """This class provides a service-side handle to the information
        about a particular cloud drive
     """
     def __init__(self, drive_uid=None, identifiers=None,
-                 is_authorised=False, parent_drive_uid=None):
+                 is_authorised=False, parent_drive_uid=None,
+                 autocreate=False):
         """Construct a DriveInfo for the drive with UID 'drive_uid',
            and optionally the GUID of the user making the request
            (and whether this was authorised). If this drive
            has a parent then it is a sub-drive and not recorded
            in the list of top-level drives
+
+           If 'aclrule' is passed, then this drive can only be
+           opened with a maximum of the permissions in the passed
+           aclrule
         """
         self._drive_uid = drive_uid
         self._parent_drive_uid = parent_drive_uid
@@ -104,7 +68,7 @@ class DriveInfo:
         self._is_authorised = is_authorised
 
         if self._drive_uid is not None:
-            self.load()
+            self.load(autocreate=autocreate)
 
     def __str__(self):
         if self.is_null():
@@ -146,15 +110,18 @@ class DriveInfo:
             raise RequestBucketError(
                 "Unable to open the bucket '%s': %s" % (bucket_name, str(e)))
 
-    def _get_file_bucketname(self):
+    def _get_file_bucketname(self, filekey=None):
         """Return the name of the bucket that will contain all of the
-           files for this drive
+           files for this drive.
+
+           _filekey is passed in as a stub, for a future when we will
+           need to split a drive over multiple object store buckets...
         """
         return "user_files"
 
-    def _get_file_bucket(self):
-        """Return the bucket that contains all of the files for this
-           drive
+    def _get_file_bucket(self, filekey=None):
+        """Return the bucket that contains the file data for the
+           file associated with 'filekey' in this drive
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.Service import get_service_account_bucket \
@@ -163,7 +130,7 @@ class DriveInfo:
 
         service = _get_this_service()
         bucket = _get_service_account_bucket()
-        bucket_name = self._get_file_bucketname()
+        bucket_name = self._get_file_bucketname(filekey=filekey)
 
         try:
             return _ObjectStore.get_bucket(
@@ -176,7 +143,8 @@ class DriveInfo:
                 "Unable to open the bucket '%s': %s" % (bucket_name, str(e)))
 
     def _resolve_acl(self, authorisation=None, resource=None,
-                     accept_partial_match=False):
+                     accept_partial_match=False, par=None,
+                     identifiers=None):
         """Internal function used to authorise access to this drive,
            returning the ACLRule of the access
         """
@@ -190,6 +158,24 @@ class DriveInfo:
                             resource=resource,
                             accept_partial_match=accept_partial_match,
                             return_identifiers=True)
+        elif par is not None:
+            from Acquire.Client import PAR as _PAR
+            if not isinstance(par, _PAR):
+                raise TypeError("The par must be type PAR")
+
+            if par.expired():
+                raise PermissionError(
+                    "Cannot access the drive at the PAR has expired!")
+
+            if identifiers is None:
+                raise PermissionError(
+                    "The identifiers for the user who created the PAR "
+                    "must be passed!")
+
+            if par.location().drive_uid() != self._drive_uid:
+                raise PermissionError(
+                    "Cannot access the drive as the PAR is not "
+                    "validated for this drive!")
         else:
             try:
                 identifiers = self._identifiers
@@ -206,95 +192,295 @@ class DriveInfo:
                                             must_resolve=True,
                                             unresolved=False)
 
+        if par is not None:
+            drive_acl = drive_acl * par.aclrule()
+
         return (drive_acl, identifiers)
 
-    def bulk_upload(self, authorisation, encrypt_key, max_size=None,
-                    aclrules=None):
-        """Start the process of a bulk upload of a set of files
-           to this Drive. This will return a Bucket-Write PAR to
-           a temporary bucket to which the files can be uploaded.
-           Once the PAR is closed the files will be copied to the
-           Drive and the temporary bucket deleted.
-
-           You need to provide authorisation for this action,
-           a public key to encrypt the PAR, and optionally
-           specify the maximum size of the data to be uploaded
-           and the ACLs. If the maximum size is not set then
-           you will be limited to a maximum of 100MB upload.
-           If the ACLs are not set, then they will inherit
-           from the Drive (or from previous versions of the
-           file if they exist)
+    def open_uploader(self, filename, aclrules=None, authorisation=None,
+                      par=None, identifiers=None):
+        """Create a return a ChunkUploader that will allow a file
+           to be uploaded chunk-by-chunk (bit-by-bit). The filename
+           of the files is passed as 'filename', and the aclrules
+           specific for the file can also be set (otherwise will
+           inherit from the drive). The authorisation, par and
+           identifiers can be used to authenticate this request
         """
-        from Acquire.Crypto import PublicKey as _PublicKey
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded \
-            as _string_to_encoded
-        from Acquire.Storage import ACLRules as _ACLRules
-
-        if not isinstance(encrypt_key, _PublicKey):
-            raise TypeError("The encryption key must be of type PublicKey")
-
-        if aclrules is not None:
-            if not isinstance(aclrules, _ACLRules):
-                raise TypeError("The ACLRules must be of type ACLRules")
-        else:
-            aclrules = _ACLRules.inherit()
-
-        if max_size is None:
-            max_size = 100*1024*1024  # default 100 MB
-
-        try:
-            max_size = int(max_size)
-        except:
-            raise TypeError("max_size must be an interger!")
-
         (drive_acl, identifiers) = self._resolve_acl(
                         authorisation=authorisation,
-                        resource="bulk_upload %s %s" % (self.uid(), max_size))
+                        resource="chunk_upload %s" % filename,
+                        par=par, identifiers=identifiers)
 
         if not drive_acl.is_writeable():
             raise PermissionError(
                 "You do not have permission to write to this drive. "
                 "Your permissions are %s" % str(drive_acl))
 
-        from Acquire.ObjectStore import create_uuid as _create_uuid
-        from Acquire.ObjectStore import Function as _Function
+        # now generate a FileInfo for this file
+        from Acquire.Storage import FileInfo as _FileInfo
+        fileinfo = _FileInfo(drive_uid=self._drive_uid,
+                             filename=filename,
+                             identifiers=identifiers,
+                             upstream=drive_acl,
+                             aclrules=aclrules,
+                             is_chunked=True)
+
+        # resolve the ACL for the file from this FileHandle
+        filemeta = fileinfo.get_filemeta()
+        file_acl = filemeta.acl()
+
+        if not file_acl.is_writeable():
+            raise PermissionError(
+                "Despite having write permission to the drive, you "
+                "do not have write permission for the file. Your file "
+                "permissions are %s" % str(file_acl))
+
+        from Acquire.Client import ChunkUploader as _ChunkUploader
+        uploader = _ChunkUploader(drive_uid=self._drive_uid,
+                                  file_uid=filemeta.uid())
+
+        fileinfo.save()
+
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.Service import get_service_account_bucket \
             as _get_service_account_bucket
-        from Acquire.Service import get_this_service as _get_this_service
 
-        # construct a bucket for this bulk upload, given a unique name
-        bucket_uid = _create_uuid()
-
-        func = _Function(function=_validate_bulk_upload,
-                         bucket_uid=bucket_uid,
-                         identifiers=identifiers,
-                         drive_uid=self.uid(),
-                         aclrules=aclrules.to_data(),
-                         max_size=max_size)
-
-        service = _get_this_service()
         bucket = _get_service_account_bucket()
+        key = "%s/%s/%s" % (_uploader_root, self._drive_uid, filemeta.uid())
 
-        tmpbucket = _ObjectStore.create_bucket(
-                                    bucket=bucket,
-                                    bucket_name=bucket_uid,
-                                    compartment=service.storage_compartment())
+        data = {"filename": filename,
+                "version": filemeta.uid(),
+                "filekey": fileinfo.latest_version()._file_key(),
+                "secret": uploader.secret()}
+
+        _ObjectStore.set_object_from_json(bucket, key, data)
+
+        return (filemeta, uploader)
+
+    def close_uploader(self, file_uid, secret):
+        """Close the uploader associated with the passed file_uid,
+           authenticated using the passed secret
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.Service import get_service_account_bucket \
+            as _get_service_account_bucket
+
+        bucket = _get_service_account_bucket()
+        key = "%s/%s/%s" % (_uploader_root, self._drive_uid, file_uid)
 
         try:
-            par = _ObjectStore.create_par(bucket=tmpbucket,
-                                          encrypt_key=encrypt_key,
-                                          key=None,
-                                          readable=False,
-                                          writeable=True,
-                                          cleanup_function=func)
+            data = _ObjectStore.get_object_from_json(bucket, key)
         except:
-            _ObjectStore.delete_bucket(bucket=tmpbucket, force=True)
-            raise
+            data = None
 
-        return par
+        if data is None:
+            # the uploader has already been closed
+            return
 
-    def upload(self, filehandle, authorisation, encrypt_key=None):
+        shared_secret = data["secret"]
+
+        if secret != shared_secret:
+            raise PermissionError(
+                "Invalid request - you do not have permission to "
+                "close this uploader")
+
+        try:
+            data2 = _ObjectStore.take_object_from_json(bucket, key)
+        except:
+            data2 = None
+
+        if data2 is None:
+            # someone else is already in the process of closing
+            # this uploader - let them do it!
+            return
+
+        filename = data["filename"]
+        version = data["version"]
+
+        # now get the FileInfo for this file
+        from Acquire.Storage import FileInfo as _FileInfo
+        fileinfo = _FileInfo.load(drive=self,
+                                  filename=filename,
+                                  version=version)
+
+        file_key = data["filekey"]
+        file_bucket = self._get_file_bucket(file_key)
+        fileinfo.close_uploader(file_bucket=file_bucket)
+        fileinfo.save()
+
+    def close_downloader(self, downloader_uid, file_uid, secret):
+        """Close the downloader associated with the passed
+           downloader_uid and file_uid,
+           authenticated using the passed secret
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.Service import get_service_account_bucket \
+            as _get_service_account_bucket
+
+        bucket = _get_service_account_bucket()
+        key = "%s/%s/%s/%s" % (_downloader_root, self._drive_uid,
+                               file_uid, downloader_uid)
+
+        try:
+            data = _ObjectStore.get_object_from_json(bucket, key)
+        except:
+            data = None
+
+        if data is None:
+            # the downloader has already been closed
+            return
+
+        shared_secret = data["secret"]
+
+        if secret != shared_secret:
+            raise PermissionError(
+                "Invalid request - you do not have permission to "
+                "close this downloader")
+
+        try:
+            _ObjectStore.take_object_from_json(bucket, key)
+        except:
+            pass
+
+    def upload_chunk(self, file_uid, chunk_index, secret, chunk, checksum):
+        """Upload a chunk of the file with UID 'file_uid'. This is the
+           chunk at index 'chunk_idx', which is set equal to 'chunk'
+           (validated with 'checksum'). The passed secret is used to
+           authenticate this upload. The secret should be the
+           multi_md5 has of the shared secret with the concatenated
+           drive_uid, file_uid and chunk_index
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.Service import get_service_account_bucket \
+            as _get_service_account_bucket
+
+        bucket = _get_service_account_bucket()
+        key = "%s/%s/%s" % (_uploader_root, self._drive_uid, file_uid)
+        data = _ObjectStore.get_object_from_json(bucket, key)
+        shared_secret = data["secret"]
+
+        from Acquire.Crypto import Hash as _Hash
+        shared_secret = _Hash.multi_md5(shared_secret,
+                                        "%s%s%d" % (self._drive_uid,
+                                                    file_uid,
+                                                    chunk_index))
+
+        if secret != shared_secret:
+            raise PermissionError(
+                "Invalid chunked upload secret. You do not have permission "
+                "to upload chunks to this file!")
+
+        # validate the data checksum
+        check = _Hash.md5(chunk)
+
+        if check != checksum:
+            from Acquire.Storage import FileValidationError
+            raise FileValidationError(
+                "Invalid checksum for chunk: %s versus %s" %
+                (check, checksum))
+
+        meta = {"filesize": len(chunk),
+                "checksum": checksum,
+                "compression": "bz2"}
+
+        file_key = data["filekey"]
+        chunk_index = int(chunk_index)
+
+        file_bucket = self._get_file_bucket(file_key)
+        data_key = "%s/data/%d" % (file_key, chunk_index)
+        meta_key = "%s/meta/%d" % (file_key, chunk_index)
+
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        _ObjectStore.set_object_from_json(file_bucket, meta_key, meta)
+        _ObjectStore.set_object(file_bucket, data_key, chunk)
+
+    def download_chunk(self, file_uid, downloader_uid, chunk_index, secret):
+        """Download a chunk of the file with UID 'file_uid' at chunk
+           index 'chunk_index'. This request is authenticated with
+           the passed secret. The secret should be the
+           multi_md5 has of the shared secret with the concatenated
+           drive_uid, file_uid and chunk_index
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.Service import get_service_account_bucket \
+            as _get_service_account_bucket
+
+        bucket = _get_service_account_bucket()
+        key = "%s/%s/%s/%s" % (_downloader_root, self._drive_uid,
+                               file_uid, downloader_uid)
+
+        try:
+            data = _ObjectStore.get_object_from_json(bucket, key)
+        except:
+            data = None
+
+        if data is None:
+            raise PermissionError(
+                "There is no downloader available to let you download "
+                "this chunked file!")
+
+        shared_secret = data["secret"]
+
+        from Acquire.Crypto import Hash as _Hash
+        shared_secret = _Hash.multi_md5(shared_secret,
+                                        "%s%s%d" % (self._drive_uid,
+                                                    file_uid,
+                                                    chunk_index))
+
+        if secret != shared_secret:
+            raise PermissionError(
+                "Invalid chunked upload secret. You do not have permission "
+                "to upload chunks to this file!")
+
+        file_key = data["filekey"]
+        chunk_index = int(chunk_index)
+
+        file_bucket = self._get_file_bucket(file_key)
+        data_key = "%s/data/%d" % (file_key, chunk_index)
+        meta_key = "%s/meta/%d" % (file_key, chunk_index)
+
+        num_chunks = None
+
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+
+        try:
+            meta = _ObjectStore.get_object_from_json(file_bucket, meta_key)
+        except:
+            meta = None
+
+        if meta is None:
+            # invalid read - see if the file has been closed?
+            filename = data["filename"]
+            version = data["version"]
+
+            from Acquire.Storage import FileInfo as _FileInfo
+            fileinfo = _FileInfo.load(drive=self,
+                                      filename=filename,
+                                      version=version)
+
+            if fileinfo.version().is_uploading():
+                raise IndexError("Invalid chunk index")
+
+            num_chunks = fileinfo.version().num_chunks()
+
+            if chunk_index < 0:
+                chunk_index = num_chunks + chunk_index
+
+            if chunk_index < 0 or chunk_index > num_chunks:
+                raise IndexError("Invalid chunk index")
+            elif chunk_index == num_chunks:
+                # signal we've reached the end of the file
+                return (None, None, num_chunks)
+
+            # we should be able to read this metadata...
+            meta = _ObjectStore.get_object_from_json(file_bucket, meta_key)
+
+        chunk = _ObjectStore.get_object(file_bucket, data_key)
+
+        return (chunk, meta, num_chunks)
+
+    def upload(self, filehandle, authorisation=None, encrypt_key=None,
+               par=None, identifiers=None):
         """Upload the file associated with the passed filehandle.
            If the filehandle has the data embedded, then this uploads
            the file data directly and returns a FileMeta for the
@@ -304,7 +490,7 @@ class DriveInfo:
            file has been uploaded, so that it can be validated
            as correct
         """
-        from Acquire.Client import FileHandle as _FileHandle
+        from Acquire.Storage import FileHandle as _FileHandle
         from Acquire.Storage import FileInfo as _FileInfo
         from Acquire.Crypto import PublicKey as _PublicKey
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
@@ -320,7 +506,8 @@ class DriveInfo:
 
         (drive_acl, identifiers) = self._resolve_acl(
                         authorisation=authorisation,
-                        resource="upload %s" % filehandle.fingerprint())
+                        resource="upload %s" % filehandle.fingerprint(),
+                        par=par, identifiers=identifiers)
 
         if not drive_acl.is_writeable():
             raise PermissionError(
@@ -343,9 +530,8 @@ class DriveInfo:
                 "do not have write permission for the file. Your file "
                 "permissions are %s" % str(file_acl))
 
-        file_bucket = self._get_file_bucket()
-
         file_key = fileinfo.latest_version()._file_key()
+        file_bucket = self._get_file_bucket(file_key)
 
         filedata = None
 
@@ -360,7 +546,7 @@ class DriveInfo:
 
         if filedata is None:
             # the file is too large to include in the filehandle so
-            # we need to use a PAR to upload
+            # we need to use a OSPar to upload
             from Acquire.ObjectStore import Function as _Function
 
             f = _Function(function=_validate_file_upload,
@@ -369,27 +555,26 @@ class DriveInfo:
                           objsize=fileinfo.filesize(),
                           checksum=fileinfo.checksum())
 
-            par = _ObjectStore.create_par(bucket=file_bucket,
-                                          encrypt_key=encrypt_key,
-                                          key=file_key,
-                                          readable=False,
-                                          writeable=True,
-                                          cleanup_function=f)
+            ospar = _ObjectStore.create_par(bucket=file_bucket,
+                                            encrypt_key=encrypt_key,
+                                            key=file_key,
+                                            readable=False,
+                                            writeable=True,
+                                            cleanup_function=f)
         else:
-            par = None
+            ospar = None
 
         # now save the fileinfo to the object store
         fileinfo.save()
         filemeta = fileinfo.get_filemeta()
 
-        assert(filemeta.acl().is_owner())
-
         # return the PAR if we need to have a second-stage of upload
-        return (filemeta, par)
+        return (filemeta, ospar)
 
     def download(self, filename, authorisation,
                  version=None, encrypt_key=None,
-                 force_par=False):
+                 force_par=False, must_chunk=False,
+                 par=None, identifiers=None):
         """Download the file called filename. This will return a
            FileHandle that describes the file. If the file is
            sufficiently small, then the filedata will be embedded
@@ -399,7 +584,7 @@ class DriveInfo:
            Remember to close the PAR once you have finished
            downloading the file...
         """
-        from Acquire.Client import FileHandle as _FileHandle
+        from Acquire.Storage import FileHandle as _FileHandle
         from Acquire.Storage import FileInfo as _FileInfo
         from Acquire.Crypto import PublicKey as _PublicKey
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
@@ -411,7 +596,8 @@ class DriveInfo:
 
         (drive_acl, identifiers) = self._resolve_acl(
                     authorisation=authorisation,
-                    resource="download %s %s" % (self._drive_uid, filename))
+                    resource="download %s %s" % (self._drive_uid, filename),
+                    par=par, identifiers=identifiers)
 
         # even if the drive_acl is not readable by this user, they
         # may have read permission for the file...
@@ -434,24 +620,51 @@ class DriveInfo:
 
         file_bucket = self._get_file_bucket()
 
-        file_key = fileinfo.latest_version()._file_key()
+        file_key = fileinfo.version()._file_key()
         filedata = None
-        par = None
+        downloader = None
+        ospar = None
 
-        if force_par or fileinfo.filesize() > 1048576:
+        if fileinfo.version().is_chunked():
+            # this is a chunked file. We need to return a
+            # ChunkDownloader to download the file
+            from Acquire.Client import ChunkDownloader as _ChunkDownloader
+            downloader = _ChunkDownloader(drive_uid=self._drive_uid,
+                                          file_uid=fileinfo.version().uid())
+
+            from Acquire.ObjectStore import ObjectStore as _ObjectStore
+            from Acquire.Service import get_service_account_bucket \
+                as _get_service_account_bucket
+
+            bucket = _get_service_account_bucket()
+            key = "%s/%s/%s/%s" % (_downloader_root, self._drive_uid,
+                                   filemeta.uid(), downloader.uid())
+
+            data = {"filename": filename,
+                    "version": filemeta.uid(),
+                    "filekey": fileinfo.version()._file_key(),
+                    "secret": downloader.secret()}
+
+            _ObjectStore.set_object_from_json(bucket, key, data)
+
+        elif must_chunk:
+            raise PermissionError(
+                "Cannot download this file in a chunked manner!")
+
+        elif force_par or fileinfo.filesize() > 1048576:
             # the file is too large to include in the download so
-            # we need to use a PAR to download
-            par = _ObjectStore.create_par(bucket=file_bucket,
-                                          encrypt_key=encrypt_key,
-                                          key=file_key,
-                                          readable=True,
-                                          writeable=False)
+            # we need to use a OSPar to download
+            ospar = _ObjectStore.create_par(bucket=file_bucket,
+                                            encrypt_key=encrypt_key,
+                                            key=file_key,
+                                            readable=True,
+                                            writeable=False)
         else:
             # one-trip download of files that are less than 1 MB
             filedata = _ObjectStore.get_object(file_bucket, file_key)
 
-        # return the filemeta, and either the filedata or par
-        return (filemeta, filedata, par)
+        # return the filemeta, and either the filedata, ospar or downloader
+        return (filemeta, filedata, ospar, downloader)
 
     def is_opened_by_owner(self):
         """Return whether or not this drive was opened and authorised
@@ -470,8 +683,10 @@ class DriveInfo:
         except:
             upstream = None
 
-        return self.aclrules().resolve(identifiers=identifiers,
-                                       upstream=upstream).is_owner()
+        drive_acl = self.aclrules().resolve(identifiers=identifiers,
+                                            upstream=upstream)
+
+        return drive_acl.is_owner()
 
     def aclrules(self):
         """Return the acl rules for this drive"""
@@ -495,7 +710,7 @@ class DriveInfo:
         aclrules = _ACLRules.create(user_guid=user_guid, rule=aclrule)
 
         # make sure we have the latest version
-        self.load()
+        self.load(autocreate=False)
 
         if not self.is_opened_by_owner():
             raise PermissionError(
@@ -508,16 +723,31 @@ class DriveInfo:
         self._aclrules.append(aclrules, ensure_owner=True)
 
         self.save()
-        self.load()
+        self.load(autocreate=False)
 
-    def list_files(self, authorisation=None, include_metadata=False):
+    def list_files(self, authorisation=None, par=None,
+                   identifiers=None, include_metadata=False,
+                   dir=None, filename=None):
         """Return the list of FileMeta data for the files contained
            in this Drive. The passed authorisation is needed in case
-           the list contents of this drive is not public
+           the list contents of this drive is not public.
+
+           If 'dir' is specified, then only search for files in 'dir'.
+           If 'filename' is specified, then only search for the
+           file called 'filename'
         """
         (drive_acl, identifiers) = self._resolve_acl(
                                         authorisation=authorisation,
-                                        resource="list_files")
+                                        resource="list_files",
+                                        par=par, identifiers=identifiers)
+
+        if par is not None:
+            if par.location().is_file():
+                dir = None
+                filename = par.location().filename()
+            elif not par.location().is_drive():
+                raise PermissionError(
+                    "You do not have permission to read the Drive")
 
         if not drive_acl.is_readable():
             raise PermissionError(
@@ -525,13 +755,23 @@ class DriveInfo:
 
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import encoded_to_string as _encoded_to_string
+        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
         from Acquire.Storage import FileMeta as _FileMeta
 
         metadata_bucket = self._get_metadata_bucket()
 
-        names = _ObjectStore.get_all_object_names(
-                    metadata_bucket, "%s/%s" % (_fileinfo_root,
-                                                self._drive_uid))
+        if filename is not None:
+            key = "%s/%s/%s" % (_fileinfo_root, self._drive_uid,
+                                _string_to_encoded(filename))
+
+            names = [key]
+        else:
+            key = "%s/%s" % (_fileinfo_root, self._drive_uid)
+
+            if dir is not None:
+                key = "%s/%s" % (key, _string_to_encoded(dir))
+
+            names = _ObjectStore.get_all_object_names(metadata_bucket, key)
 
         files = []
 
@@ -541,16 +781,19 @@ class DriveInfo:
             from Acquire.Storage import FileInfo as _FileInfo
 
             for name in names:
-                data = _ObjectStore.get_object_from_json(metadata_bucket,
-                                                         name)
-                fileinfo = _FileInfo.from_data(data,
-                                               identifiers=identifiers,
-                                               upstream=drive_acl)
-                filemeta = fileinfo.get_filemeta()
-                file_acl = filemeta.acl()
+                try:
+                    data = _ObjectStore.get_object_from_json(metadata_bucket,
+                                                             name)
+                    fileinfo = _FileInfo.from_data(data,
+                                                   identifiers=identifiers,
+                                                   upstream=drive_acl)
+                    filemeta = fileinfo.get_filemeta()
+                    file_acl = filemeta.acl()
 
-                if file_acl.is_readable() or file_acl.is_writeable():
-                    files.append(filemeta)
+                    if file_acl.is_readable() or file_acl.is_writeable():
+                        files.append(filemeta)
+                except:
+                    pass
         else:
             for name in names:
                 filename = _encoded_to_string(name.split("/")[-1])
@@ -559,7 +802,8 @@ class DriveInfo:
         return files
 
     def list_versions(self, filename, authorisation=None,
-                      include_metadata=False):
+                      include_metadata=False, par=None,
+                      identifiers=None):
         """Return the list of versions of the file with specified
            filename. If 'include_metadata' is true then this will
            load full metadata for each version. This will return
@@ -568,7 +812,8 @@ class DriveInfo:
         """
         (drive_acl, identifiers) = self._resolve_acl(
                                     authorisation=authorisation,
-                                    resource="list_versions %s" % filename)
+                                    resource="list_versions %s" % filename,
+                                    par=par, identifiers=identifiers)
 
         if not drive_acl.is_readable():
             raise PermissionError(
@@ -601,7 +846,7 @@ class DriveInfo:
 
         return result
 
-    def load(self):
+    def load(self, autocreate=False):
         """Load the metadata about this drive from the object store"""
         if self.is_null():
             return
@@ -620,6 +865,11 @@ class DriveInfo:
             data = None
 
         if data is None:
+            if not autocreate:
+                raise PermissionError(
+                    "There is no drive available with UID '%s'"
+                    % self._drive_uid)
+
             # by default this user is the drive's owner
             try:
                 user_guid = self._identifiers["user_guid"]

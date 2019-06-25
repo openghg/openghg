@@ -124,6 +124,7 @@ class UserCredentials:
                 try:
                     return UserCredentials.validate_password(
                                             user_uid=user_uid,
+                                            username=username,
                                             device_uid=verified_device_uid,
                                             secrets=data,
                                             password=password,
@@ -145,7 +146,7 @@ class UserCredentials:
             "with username '%s'" % (short_uid, username))
 
     @staticmethod
-    def validate_password(user_uid, device_uid, secrets, password,
+    def validate_password(user_uid, username, device_uid, secrets, password,
                           otpcode, remember_device):
         """Validate that the passed password and one-time-code are valid.
            If they are, then return a tuple of the UserAccount of the unlocked
@@ -217,5 +218,21 @@ class UserCredentials:
                                          password=device_password,
                                          primary_password=primary_password,
                                          device_uid=device_uid)
+
+            # now save a lookup so that we can find the user_uid from
+            # the username and device-specific password
+            encoded_password = UserCredentials.hash(
+                                        username=username,
+                                        password=device_password)
+
+            key = "%s/passwords/%s/%s" % (_user_root, encoded_password,
+                                          user_uid)
+
+            from Acquire.ObjectStore import get_datetime_now_to_string \
+                as _get_datetime_now_to_string
+
+            _ObjectStore.set_string_object(
+                                bucket=bucket, key=key,
+                                string_data=_get_datetime_now_to_string())
 
         return {"user": user, "otp": otp, "device_uid": device_uid}

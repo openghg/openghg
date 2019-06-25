@@ -125,9 +125,9 @@ class Transaction:
 
     def is_null(self):
         """Return whether or not this is a null transaction
-        
+
            Returns:
-                bool: True if transaction is null, else False             
+                bool: True if transaction is null, else False
         """
         return self._value == 0 and self._description is None
 
@@ -137,13 +137,13 @@ class Transaction:
 
            Returns:
                 Decimal: Value of this transaction
-                
+
         """
         return self._value
 
     def description(self):
         """Return the description of this transaction
-           
+
            Returns:
                 str: Description of transaction
         """

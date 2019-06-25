@@ -14,7 +14,7 @@ class Request:
 
     def is_null(self):
         """Return whether or not this request is null
-        
+
         Returns:
             bool: True
         """
@@ -23,7 +23,7 @@ class Request:
 
     def to_data(self):
         """Return this class as a json-serialisable dictionary
-        
+
             Returns:
                 dict: returns a JSON serialisable dictionary
                 of this class
