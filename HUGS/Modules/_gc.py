@@ -9,9 +9,13 @@ class sampling_period(Enum):
     GCMS = 1200
     MEDUSA = 1200
 
-def _testdata():
+def _test_data():
+    """ Return the absolute path for data files used for testing purposes
+    """
     import os as _os
-    return _os.path.dirname(_os.path.abspath(__file__)) + _os.path.sep + "../data"
+    path = _os.path.dirname(_os.path.abspath(__file__)) + _os.path.sep + "../Data"
+    print(path)
+    return path
 
 class GC:
     _gc_root = "GC"
@@ -129,7 +133,7 @@ class GC:
         if key is None:
             key = "%s/uuid/%s" % (GC._gc_root, uuid)
             
-        data = _ObjectStore.get_object_from_json(bucket=budket, key=key)
+        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
         
         return GC.from_data(data=data, bucket=bucket)
 
@@ -214,7 +218,7 @@ class GC:
         import json as _json
         # Load in the params 
         # Load in the parameters dictionary for processing data
-        params_file = "%s/process_gcwerks_parameters.json" % _testdata()
+        params_file = _test_data() + "/process_gcwerks_parameters.json"
         with open(params_file, "r") as FILE:
             self.params = _json.load(FILE)
 
