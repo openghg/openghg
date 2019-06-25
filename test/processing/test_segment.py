@@ -5,14 +5,11 @@ import pytest
 import pandas as pd
 import uuid
 
-from processing import _segment as segment
-from processing import _metadata as meta
-
-from modules import Datasource
-from objectstore import get_bucket
 from Acquire.ObjectStore import ObjectStore
 
-# from processing._segment import 
+from HUGS.Processing import get_split_frequency, get_datasources
+from HUGS.Modules import Datasource
+from HUGS.ObjectStore import get_bucket
 
 mocked_uuid = "00000000-0000-1111-00000-000000000000"
 
@@ -42,7 +39,7 @@ def test_get_split_frequency_large():
     # Crates a ~ 1 GB dataframe
     df = pd.DataFrame(np.random.randint(0, 100, size=(len(date_range), 32)), index=date_range)
 
-    split = segment.get_split_frequency(df)
+    split = get_split_frequency(df)
     assert split == "W"
 
 
@@ -52,11 +49,11 @@ def test_get_split_frequency_small():
     # Crates a small
     df = pd.DataFrame(np.random.randint(0, 100, size=(len(date_range), 32)), index=date_range)
 
-    split = segment.get_split_frequency(df)
+    split = get_split_frequency(df)
     assert split == "Y"
 
 def test_get_datasources_correct_number(data):
-    datasources = segment.get_datasources(data)
+    datasources = get_datasources(data)
     
     assert len(datasources) == 3
 

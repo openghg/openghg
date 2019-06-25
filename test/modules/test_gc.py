@@ -3,7 +3,7 @@ import pytest
 import pandas as pd
 import os
 
-from modules import GC
+from HUGS.Modules import GC
 
 def _testdata():
     return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data"

@@ -5,8 +5,8 @@ import pytest
 from Acquire.ObjectStore import ObjectStore
 from Acquire.ObjectStore import string_to_encoded
 
-from modules._instrument import Instrument
-from objectstore import _local_bucket as local_bucket
+from HUGS.Modules import Instrument
+from HUGS.ObjectStore import get_local_bucket
 
 mocked_uuid = "10000000-0000-0000-00000-000000000001"
 
@@ -66,7 +66,7 @@ def test_from_data(mock_uuid, instrument):
 
 
 def test_save(instrument):
-    bucket = local_bucket.get_local_bucket()
+    bucket = get_local_bucket()
 
     instrument.save()
 
@@ -82,7 +82,7 @@ def test_save(instrument):
 
 
 def test_load(instrument):
-    bucket = local_bucket.get_local_bucket()
+    bucket = get_local_bucket()
     instrument.save(bucket)
 
     loaded_instrument = Instrument.load(bucket=bucket, uuid=mocked_uuid)
@@ -100,7 +100,7 @@ def test_get_uid_from_name(instrument):
 
     instrument._uuid = "00000000-0000-1111-00000-000000000000"
 
-    bucket = local_bucket.get_local_bucket()
+    bucket = get_local_bucket()
     instrument.save(bucket)
 
     found_uuid = Instrument._get_uid_from_name(bucket, "test_name_two")

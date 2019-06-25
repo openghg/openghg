@@ -5,7 +5,7 @@ import os
 
 from Acquire.Client import Drive, StorageCreds
 
-from hugs.Client import Hello
+from HUGS.Client import Hello
 
 @pytest.fixture(scope="session")
 def tempdir(tmpdir_factory):

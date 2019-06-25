@@ -2,14 +2,10 @@ import datetime
 import os
 import pytest
 
-from modules import CRDS
-from objectstore import get_local_bucket
-from processing import in_daterange
-from processing import search_store
-from processing import key_to_daterange
-from processing import gas_search
-
-from modules import Instrument
+from HUGS.Modules import CRDS
+from HUGS.Modules import Instrument
+from HUGS.ObjectStore import get_local_bucket
+from HUGS.Processing import in_daterange, search_store, key_to_daterange, gas_search
 
 from Acquire.ObjectStore import datetime_to_string
 from Acquire.ObjectStore import datetime_to_datetime

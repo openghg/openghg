@@ -4,7 +4,6 @@
 import os
 import pytest
 
-from objectstore import _hugs_objstore
 
 from Acquire.ObjectStore import ObjectStore, ObjectStoreError
 from Acquire.Service import get_service_account_bucket, \

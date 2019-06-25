@@ -4,14 +4,12 @@ import pandas as pd
 import pytest
 import xarray
 
-from objectstore._local_bucket import get_local_bucket
-from modules._crds import CRDS
-from processing import _recombination
-
-from processing._segment import parse_gases
-from processing._recombination import combine_sections
-
-from processing import search_store
+from HUGS.ObjectStore import get_local_bucket
+from HUGS.Modules import CRDS
+from HUGS.Processing import get_datasources
+from HUGS.Processing import parse_gases
+from HUGS.Processing import combine_sections
+from HUGS.Processing import search_store
 
 @pytest.fixture(scope="session")
 def keylist():
@@ -85,7 +83,7 @@ def test_combine_sections():
 
     # Get Datasource IDs from Instrument
     uuid_list = [d._uuid for d in instrument._datasources]
-    datasources = _recombination.get_datasources(bucket, uuid_list)
+    datasources = get_datasources(bucket, uuid_list)
     combined = combine_sections(dataframes)
 
     assert combined.equals(complete)

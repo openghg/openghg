@@ -6,7 +6,7 @@ import uuid
 
 from Acquire.ObjectStore import datetime_to_string
 
-from processing._metadata import Metadata
+from HUGS.Processing import Metadata
 
 @pytest.fixture(scope="session")
 def data():

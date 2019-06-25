@@ -7,15 +7,11 @@ import pandas as pd
 from Acquire.ObjectStore import ObjectStore
 from Acquire.ObjectStore import string_to_encoded
 
-# from objectstore._hugs_objstore
-
-# from processing._segment import get_datasources
-from objectstore._hugs_objstore import get_dated_object
-from objectstore._hugs_objstore import get_dated_object_json
-
-from modules._datasource import Datasource
-from processing._metadata import Metadata
-from objectstore import _local_bucket as local_bucket
+from HUGS.ObjectStore import get_dated_object
+from HUGS.ObjectStore import get_dated_object_json
+from HUGS.Modules import Datasource
+from HUGS.Processing import Metadata
+from HUGS.ObjectStore import _local_bucket
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 
