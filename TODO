@@ -163,3 +163,10 @@ Improve test for gas_search
 Add species specific dataset stuff to the CRDS class
 
 See process_gcwerks CRDS fn
+
+
+
+2019-06-26
+
+On GC parse data why is data passed to the split frequency function None?
+Check return values of functions handling the data
