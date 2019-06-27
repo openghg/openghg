@@ -1,7 +1,4 @@
-
-
-def hello(args):
-
+def goodbye(args):
     try:
         name = args["name"]
     except:
@@ -11,8 +8,6 @@ def hello(args):
         raise PermissionError(
             "You cannot say hello to no-one!")
 
-    greeting = "Hello %s" % name
+    greeting = "Goodbye %s" % name
 
     return {"greeting": greeting}
-
-
