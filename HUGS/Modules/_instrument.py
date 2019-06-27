@@ -52,6 +52,7 @@ class Instrument:
         i = Instrument()
         i._uuid = _create_uuid()
         i._creation_datetime = _get_datetime_now()
+        # TODO - might not need name
         i._name = name
         # Here labels will be the metadata associated with each Datasource
         # associated with this Instrument
@@ -313,13 +314,16 @@ class Instrument:
         from HUGS.Processing import parse_gases as _parse_gases
 
         # Rework this to for the segmentation of data within the Datasource
-        for gas_name, datasource_id, data in gas_data:
+        for gas_name, inlet, datasource_id, data in gas_data:
             if _Datasource.exists(datasource_id=datasource_id):
                 datasource = _Datasource.load(uuid=datasource_id)
                 # TODO - add metadata in here - append to existing?
             else:
                 datasource = _Datasource.create(name=gas_name)
                 # datasource.add_metadata(metadata)
+
+            # Should there be multiple inlets saved in a single Datasource?
+            # Or should these be split into separate datasources?
 
             # Store the name and datasource_id
             self._species[gas_name] = datasource_id

@@ -12,12 +12,14 @@ sys.path.insert(0, os.path.abspath("services"))
 sys.path.insert(0, os.path.abspath("."))
 
 # Added for import of Acquire services modules in tests
-acquire_dir = os.getenv("ACQUIRE_DIR")
+# acquire_dir = os.getenv("ACQUIRE_DIR")
 
-if acquire_dir is None or len(acquire_dir) == 0:
-    raise PermissionError("You need to supply the location of "
-                          "the Acquire source in the environment "
-                          "variable 'ACQUIRE_DIR'")
+# if acquire_dir is None or len(acquire_dir) == 0:
+#     raise PermissionError("You need to supply the location of "
+#                           "the Acquire source in the environment "
+#                           "variable 'ACQUIRE_DIR'")
+
+acquire_dir = "../acquire"
 
 sys.path.insert(0, os.path.abspath(acquire_dir))
 sys.path.insert(0, os.path.abspath("%s/services" % acquire_dir))

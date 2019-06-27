@@ -190,14 +190,15 @@ class GC:
         # Do we need this metadata?
         # metadata = _Metadata
         site = "CGO"
-        gas_data = gc.parse_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
+        gas_data = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                         site=site, instrument=instrument_name)
+                        
         instrument.add_data(gas_data)
         # Save updated Instrument to object store
         instrument.save()
 
         # Ensure this Instrument is saved within the object
-        gc.add_instrument(instrument.get_uuid(), _datetime_to_string(instrument.get_creation_time()))
+        gc.add_instrument(instrument.get_uuid(), _datetime_to_string(instrument.get_creation_datetime()))
 
         gc.save()
         
@@ -206,41 +207,24 @@ class GC:
 
         # For now return the GC object for easier testing
         return gc
+        
 
-    def parse_data(self, data_filepath, precision_filepath, site, instrument):
-        """
-            Process GC data per site and instrument
-            Instruments can be:
-            "GCMD": GC multi-detector (output will be labeled GC-FID or GC-ECD)
-            "GCMS": GC ADS (output GC-ADS)
-            "medusa": GC medusa (output GC-MEDUSA)
-        """
-        import json as _json
-        # Load in the params 
-        # Load in the parameters dictionary for processing data
-        params_file = _test_data() + "/process_gcwerks_parameters.json"
-        with open(params_file, "r") as FILE:
-            self.params = _json.load(FILE)
-
-        # Some of these are used on NetCDF output, it might be worth saving everything for 
-        # future processing
-        # Save these to the object instead of returning
-        self.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath,
-                                                    instrument=instrument)
-        # Segment the processed data
-        gas_data = self.split(site=site)
-
-        return gas_data
-
-    def read_data(self, data_filepath, precision_filepath, instrument):
+    def read_data(self, data_filepath, precision_filepath, site, instrument):
         """ Read data from file
 
             Args:
                 WIP
 
         """
+        import json as _json
         from pandas import read_csv as _read_csv
-            # Read header
+
+        # Load in the parameters dictionary for processing data
+        params_file = _test_data() + "/process_gcwerks_parameters.json"
+        with open(params_file, "r") as FILE:
+            self.params = _json.load(FILE)
+
+        # Read header
         header = _read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
         # Create a function to parse the datetime in the data file
@@ -265,10 +249,8 @@ class GC:
                 # Add it to the dictionary for renaming later
                 columns_renamed[column] = gas_name + "_flag"
                 # Create 2 new columns based on the flag columns
-                df[gas_name +
-                    " status_flag"] = (df[column].str[0] != "-").astype(int)
-                df[gas_name +
-                    " integration_flag"] = (df[column].str[1] != "-").astype(int)
+                df[gas_name + " status_flag"] = (df[column].str[0] != "-").astype(int)
+                df[gas_name + " integration_flag"] = (df[column].str[1] != "-").astype(int)
 
                 col_shift = 4
                 units[gas_name] = header.iloc[1, col_loc + col_shift]
@@ -302,6 +284,11 @@ class GC:
         self._species = species
         self._units = units
         self._scale = scale
+
+        # Segment the processed data
+        gas_data = self.split(site=site)
+
+        return gas_data
 
     def read_precision(self, filepath):
         """ Read GC precision file
@@ -360,6 +347,10 @@ class GC:
         datasource_uuid = 1 # [_uuid4() for s in species]
 
         for sp in self._species:
+            # Check if this species data is all NaNs
+            if self._proc_data[sp].isnull().all():
+                continue
+
             # If we've only got a single inlet
             if len(data_inlets) == 1:
                 data_inlet = data_inlets[0]
@@ -375,14 +366,15 @@ class GC:
                 else:
                     dataframe = self._proc_data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]                    
                     dataframe = dataframe.dropna(axis="index", how="any")
-
-                gas_data.append((sp, datasource_uuid, dataframe))
+                
+                gas_data.append((sp, data_inlet, datasource_uuid, dataframe))
             # For multiple inlets
             else:
                 for data_inlet in data_inlets:
+                    # TODO - add in uniqueness here!
                     dataframe = self._proc_data[data["Inlet"] == data_inlet]
                     dataframe = dataframe.dropna(axis="index", how="any")
-                    gas_data.append((sp, datasource_uuid, dataframe))
+                    gas_data.append((sp, data_inlet, datasource_uuid, dataframe))
 
         return gas_data
 
