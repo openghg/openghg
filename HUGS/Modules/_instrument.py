@@ -314,7 +314,7 @@ class Instrument:
         from HUGS.Processing import parse_gases as _parse_gases
 
         # Rework this to for the segmentation of data within the Datasource
-        for gas_name, inlet, datasource_id, data in gas_data:
+        for gas_name, metadata, datasource_id, data in gas_data:
             if _Datasource.exists(datasource_id=datasource_id):
                 datasource = _Datasource.load(uuid=datasource_id)
                 # TODO - add metadata in here - append to existing?
@@ -322,13 +322,10 @@ class Instrument:
                 datasource = _Datasource.create(name=gas_name)
                 # datasource.add_metadata(metadata)
 
-            # Should there be multiple inlets saved in a single Datasource?
-            # Or should these be split into separate datasources?
-
             # Store the name and datasource_id
             self._species[gas_name] = datasource_id
             # Add the dataframe to the datasource
-            datasource.add_data(data)
+            datasource.add_data(metadata, data)
             # Add the Datasource to this Instrument
             self.add_datasource(datasource)
 

@@ -344,19 +344,22 @@ class GC:
         # TODO - where to get Datasource UUIDs from?
         # Also what to do in case of multiple inlets - each of these will have a unique ID
         # But may be of the same species ?
-        datasource_uuid = 1 # [_uuid4() for s in species]
-
+    
         for sp in self._species:
             # Check if this species data is all NaNs
             if self._proc_data[sp].isnull().all():
                 continue
 
+            # Create a metadata dict for any extra information we might need to store
+            # about the data here
+            
             # If we've only got a single inlet
             if len(data_inlets) == 1:
                 data_inlet = data_inlets[0]
                 # Not sure we need to save this
                 # clean_inlet_height = _re.search(r"\d+m", s).group()
                 # Split by date
+                metadata = {}
                 if "date" in data_inlet:
                     dates = inlet.split("_")[1:]
                     slice_dict = {time: slice(dates[0], dates[1])}
@@ -366,15 +369,23 @@ class GC:
                 else:
                     dataframe = self._proc_data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]                    
                     dataframe = dataframe.dropna(axis="index", how="any")
+
+                metadata["inlet"] = data_inlet
                 
-                gas_data.append((sp, data_inlet, datasource_uuid, dataframe))
+                # TODO - change me
+                datasource_uuid = _uuid4()
+                gas_data.append((sp, metadata, datasource_uuid, dataframe))
             # For multiple inlets
             else:
                 for data_inlet in data_inlets:
                     # TODO - add in uniqueness here!
+                    metadata = {}
                     dataframe = self._proc_data[data["Inlet"] == data_inlet]
                     dataframe = dataframe.dropna(axis="index", how="any")
-                    gas_data.append((sp, data_inlet, datasource_uuid, dataframe))
+                    metadata["inlet"] = data_inlet
+                    # TODO - change me
+                    datasource_uuid = _uuid4()
+                    gas_data.append((sp, metadata, datasource_uuid, dataframe))
 
         return gas_data
 

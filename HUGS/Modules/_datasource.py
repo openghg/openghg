@@ -105,13 +105,12 @@ class Datasource:
         """
         self._labels[key] = value
 
-    def add_data(self, data):
-        """ Segment the data by size
-
-            Add data to this Datasource, data will be keyed independently with
-            the daterange it covers part of its key
+    def add_data(self, metadata, data):
+        """ Add data to this Datasource and segment the data by size.
+            The data is stored as a tuple of the data and the daterange it covers.
 
             Args:
+                metadata (dict): Metadata on the data for this Datasource
                 data (Pandas.DataFrame): Data
             Returns:
                 None
@@ -119,12 +118,15 @@ class Datasource:
         from pandas import Grouper as _Grouper
         from HUGS.Processing import get_split_frequency as _get_split_frequency
 
+        # Store the metadata as labels
+        for k, v in metadata.items():
+            self.add_label(key=k, value=v)
+
         freq = _get_split_frequency(data)
-        # Split into sections by year
+        # Split into sections by splitting frequency
         group = data.groupby(_Grouper(freq=freq))
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
-        # This daterange can just be calculated from the data ? 
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
 
     def get_dataframe_daterange(self, dataframe):
@@ -172,7 +174,7 @@ class Datasource:
 
         if bucket is None:
             bucket = _get_bucket()
-
+        
         # Query object store for Datasource
         return _exists(bucket=bucket, uuid=datasource_id)
 
