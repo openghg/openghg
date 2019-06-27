@@ -1,6 +1,6 @@
-from enum import Enum
-import pandas as pd
-import xarray as xray
+from enum import Enum as _Enum
+
+__all__ = ["GC"]
 
 # Enum or read from JSON?
 # JSON might be easier to change in the future
@@ -350,16 +350,18 @@ class GC:
             if self._proc_data[sp].isnull().all():
                 continue
 
-            # Create a metadata dict for any extra information we might need to store
-            # about the data here
+        
             
             # If we've only got a single inlet
             if len(data_inlets) == 1:
                 data_inlet = data_inlets[0]
                 # Not sure we need to save this
                 # clean_inlet_height = _re.search(r"\d+m", s).group()
-                # Split by date
+
+                # Create a metadata dict for any extra information we might need to store
+                # about the data here
                 metadata = {}
+                # Split by date
                 if "date" in data_inlet:
                     dates = inlet.split("_")[1:]
                     slice_dict = {time: slice(dates[0], dates[1])}
@@ -371,7 +373,6 @@ class GC:
                     dataframe = dataframe.dropna(axis="index", how="any")
 
                 metadata["inlet"] = data_inlet
-                
                 # TODO - change me
                 datasource_uuid = _uuid4()
                 gas_data.append((sp, metadata, datasource_uuid, dataframe))

@@ -1,7 +1,8 @@
 # from _paths import RootPaths
+__all__ = ["CRDS"]
 
 class CRDS:
-    """ Interface for uploading CRDS data
+    """ Interface for processnig CRDS data
 
         Instances of CRDS should be created using the
         CRDS.create() function
