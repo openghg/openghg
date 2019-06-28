@@ -6,17 +6,16 @@ import os
 from HUGS.Modules import GC
 
 @pytest.fixture(scope="session")
-def test_data_path():
-    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC" 
+def data_path():
+    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.C"
 
-def test_read_file(test_data_path):
-    datafile = "capegrim-medusa.18.C"
-    datafile_precision = "capegrim-medusa.18.precisions.C"
+@pytest.fixture(scope="session")
+def precision_path():
+    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.precisions.C"
 
-    data_filepath = os.path.join(test_data_path, datafile)
-    precision_filepath = os.path.join(test_data_path, datafile_precision)
 
-    gc = GC.read_file(data_filepath=data_filepath, precision_filepath=precision_filepath)
+def test_read_file(data_path, precision_path):
+    gc = GC.read_file(data_filepath=data_path, precision_filepath=precision_path)
 
     header = gc._proc_data.head(1)
     assert header["Year"].iloc[0] == 2018.000046
@@ -24,18 +23,13 @@ def test_read_file(test_data_path):
     assert header["c-propane repeatability"].iloc[0] == 0.10063
     assert header["benzene repeatability"].iloc[0] == 0.01107
 
-def test_read_data(test_data_path):
-    datafile = "capegrim-medusa.18.C"
-    datafile_precision = "capegrim-medusa.18.precisions.C"
-    data_filepath = os.path.join(test_data_path, datafile)
-    precision_filepath = os.path.join(test_data_path, datafile_precision)
-
+def test_read_data(data_path, precision_path):
     # Capegrim
     site = "CGO"
     instrument = "GCMD"
 
     gc = GC.create()
-    gas_data = gc.read_data(data_filepath=data_filepath ,precision_filepath=precision_filepath, site=site, instrument=instrument)
+    gas_data = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument)
 
     species, metadata, uuid, data = gas_data[0]
 
@@ -50,6 +44,19 @@ def test_read_data(test_data_path):
     assert head_data["NF3 integration_flag"].iloc[0] == 0
     assert head_data["Inlet"].iloc[0] == "75m_4"
 
+def test_read_precision(precision_path):
+    gc = GC.create()
+
+    precision, precision_series = gc.read_precision(precision_path)
+
+    precision_head = precision.head(1)
+
+    print(precision_head)
+    print("Fix dtype for reading of GC data")
+
+    assert False
+    
+    
 
 
     
