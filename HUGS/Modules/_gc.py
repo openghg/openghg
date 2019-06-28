@@ -163,6 +163,13 @@ class GC:
     def read_file(data_filepath, precision_filepath):
         """ Reads a GC data file by creating a GC object and associated datasources
 
+            Args:
+                data_filepath (str): Path of data file
+                precision_filepath (str): Path of precision file
+            Returns:
+                TODO - should this really return anything?
+                GC: GC object
+
         """
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
@@ -199,7 +206,6 @@ class GC:
 
         # Ensure this Instrument is saved within the object
         gc.add_instrument(instrument.get_uuid(), _datetime_to_string(instrument.get_creation_datetime()))
-
         gc.save()
         
         # Read in the parameters file just when reading in the file.
@@ -207,14 +213,20 @@ class GC:
 
         # For now return the GC object for easier testing
         return gc
-        
+
 
     def read_data(self, data_filepath, precision_filepath, site, instrument):
-        """ Read data from file
+        """ Read data from the data and precision files
 
             Args:
-                WIP
+                data_filepath (str): Path of data file
+                precision_filepath (str): Path of precision file
+                site (str): Name of site
+                instrument (str): Identifying data for instrument 
+            Returns:
+                list: List of tuples (str, dict, str, Pandas.Dataframe)
 
+                Tuple contains species name, species metadata, datasource_uuid and dataframe
         """
         import json as _json
         from pandas import read_csv as _read_csv
@@ -296,8 +308,7 @@ class GC:
         """ Read GC precision file
 
             Args: 
-                WIP
-
+                filepath (str): Path of precision file
         """
         from pandas import read_csv as _read_csv
         from pandas import datetime as _pd_datetime
@@ -323,6 +334,9 @@ class GC:
     def split(self, site):
         """ Splits the dataframe into sections to be stored within individual Datasources
 
+            Args:
+                TODO - cleaner way of doing this?
+                site (str): Name of site from which this data originates
             Returns:
                 list (str, Pandas.DataFrame): List of tuples of gas name and gas data
         """
@@ -353,8 +367,6 @@ class GC:
             if self._proc_data[sp].isnull().all():
                 continue
 
-        
-            
             # If we've only got a single inlet
             if len(data_inlets) == 1:
                 data_inlet = data_inlets[0]
@@ -363,7 +375,6 @@ class GC:
 
                 # Create a metadata dict for any extra information we might need to store
                 # about the data here
-                metadata = {}
                 # Split by date
                 if "date" in data_inlet:
                     dates = inlet.split("_")[1:]
@@ -375,7 +386,7 @@ class GC:
                     dataframe = self._proc_data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]                    
                     dataframe = dataframe.dropna(axis="index", how="any")
 
-                metadata["inlet"] = data_inlet
+                metadata = {"inlet": data_inlet, "species": sp}
                 # TODO - change me
                 datasource_uuid = _uuid4()
                 gas_data.append((sp, metadata, datasource_uuid, dataframe))
@@ -383,10 +394,9 @@ class GC:
             else:
                 for data_inlet in data_inlets:
                     # TODO - add in uniqueness here!
-                    metadata = {}
+                    metadata = {"inlet": data_inlet, "species": sp}
                     dataframe = self._proc_data[data["Inlet"] == data_inlet]
                     dataframe = dataframe.dropna(axis="index", how="any")
-                    metadata["inlet"] = data_inlet
                     # TODO - change me
                     datasource_uuid = _uuid4()
                     gas_data.append((sp, metadata, datasource_uuid, dataframe))
