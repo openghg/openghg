@@ -6,7 +6,6 @@ from Acquire.Service import Service as _Service
 
 __all__ = ["HugsService"]
 
-
 class HugsService(_Service):
     """This is a specialisation of Service for Hugs Services"""
     def __init__(self, other=None):
@@ -15,9 +14,7 @@ class HugsService(_Service):
 
             if self.service_type() != "hugs":
                 from hugs.Service import HugsServiceError
-                raise HugsServiceError(
-                    "Cannot construct a HugsService from "
-                    "a service which is not a hugs service!")
+                raise HugsServiceError("Cannot construct a HugsService from a service which is not a hugs service!")
         else:
             _Service.__init__(self)
 

@@ -4,7 +4,7 @@ __all__ = ["GC"]
 
 # Enum or read from JSON?
 # JSON might be easier to change in the future
-class sampling_period(Enum):
+class sampling_period(_Enum):
     GCMD = 75
     GCMS = 1200
     MEDUSA = 1200
@@ -218,6 +218,8 @@ class GC:
         """
         import json as _json
         from pandas import read_csv as _read_csv
+        from pandas import datetime as _pd_datetime
+        from pandas import Timedelta as _pd_Timedelta
 
         # Load in the parameters dictionary for processing data
         params_file = _test_data() + "/process_gcwerks_parameters.json"
@@ -228,10 +230,10 @@ class GC:
         header = _read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
         # Create a function to parse the datetime in the data file
-        def parser(date): return pd.datetime.strptime(date, '%Y %m %d %H %M')
+        def parser(date): return _pd_datetime.strptime(date, '%Y %m %d %H %M')
         # Read the data in and automatically create a datetime column from the 5 columns
         # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
-        df = pd.read_csv(data_filepath, skiprows=4, sep=r"\s+", index_col=["yyyy_mm_dd_hh_mi"],
+        df = _read_csv(data_filepath, skiprows=4, sep=r"\s+", index_col=["yyyy_mm_dd_hh_mi"],
                          parse_dates=[[1, 2, 3, 4, 5]], date_parser=parser)
         df.index.name = "Datetime"
 
@@ -276,7 +278,7 @@ class GC:
 
         # instrument = "GCMD"
         # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
-        df["new_time"] = df.index - pd.Timedelta(seconds=self.get_precision(instrument)/2.0)
+        df["new_time"] = df.index - _pd_Timedelta(seconds=self.get_precision(instrument)/2.0)
         df.set_index("new_time", inplace=True, drop=True)
         df.index.name = "Datetime"
 
@@ -297,18 +299,19 @@ class GC:
                 WIP
 
         """
+        from pandas import read_csv as _read_csv
+        from pandas import datetime as _pd_datetime
 
         # Function for parsing datetime
-        def parser(date): return pd.datetime.strptime(date, '%y%m%d')
+        def parser(date): return _pd_datetime.strptime(date, '%y%m%d')
 
         # Read precision species
-        precision_header = pd.read_csv(
-            filepath, skiprows=3, nrows=1, header=None, sep=r"\s+")
+        precision_header = _read_csv(filepath, skiprows=3, nrows=1, header=None, sep=r"\s+")
 
         precision_species = precision_header.values[0][1:].tolist()
 
         # Read precisions
-        precision = pd.read_csv(filepath, skiprows=5, header=None, sep=r"\s+",
+        precision = _read_csv(filepath, skiprows=5, header=None, sep=r"\s+",
                                 dtype=str, index_col=0, parse_dates=[0], date_parser=parser)
 
         precision.index.name = "Datetime"

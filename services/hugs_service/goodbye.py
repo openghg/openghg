@@ -2,11 +2,10 @@ def goodbye(args):
     try:
         name = args["name"]
     except:
-        name = "World"
+        name = "John"
 
     if name == "no-one":
-        raise PermissionError(
-            "You cannot say hello to no-one!")
+        raise PermissionError("You cannot say goodbye to no-one!")
 
     greeting = "Goodbye %s" % name
 

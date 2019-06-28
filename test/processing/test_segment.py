@@ -54,10 +54,10 @@ def test_get_split_frequency_small():
     split = get_split_frequency(df)
     assert split == "Y"
 
-def test_get_datasources_correct_number(data):
-    datasources = _segment.get_datasources(data)
+# def test_get_datasources_correct_number(data):
+#     datasources = _segment.get_datasources(data)
     
-    assert len(datasources) == 3
+#     assert len(datasources) == 3
 
 
 

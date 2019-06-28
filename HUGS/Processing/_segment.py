@@ -17,8 +17,8 @@ def get_datasources(gas_data):
     from HUGS.Modules import Datasource as _Datasource
 
     datasources = []
-
-    for gas_name, datasource_id, data in gas_data:
+    print("Yahyahyah", type(gas_data))
+    for gas_name, metadata, datasource_id, data in gas_data:
         if _Datasource.exists(datasource_id=datasource_id):
             datasource = _Datasource.load(uuid=datasource_id)
         else:

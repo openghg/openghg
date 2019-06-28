@@ -311,7 +311,6 @@ class Instrument:
                 None
         """
         from HUGS.Modules import Datasource as _Datasource
-        from HUGS.Processing import parse_gases as _parse_gases
 
         # Rework this to for the segmentation of data within the Datasource
         for gas_name, metadata, datasource_id, data in gas_data:

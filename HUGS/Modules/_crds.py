@@ -172,16 +172,18 @@ class CRDS:
 
         data_list = []
         for n in range(n_gases):
+            metadata = {}
+
             datasource_id = datasource_ids[n]
             # Slice the columns
             gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
 
             # Reset the column numbers
             gas_data.columns = _RangeIndex(gas_data.columns.size)
-            gas_name = gas_data[0][0]
+            species = gas_data[0][0]
 
             column_names = ["count", "stdev", "n_meas"]
-            column_labels = ["%s %s" % (gas_name, l) for l in column_names]
+            column_labels = ["%s %s" % (species, l) for l in column_names]
 
             # Split into years here
             # Name columns
@@ -199,8 +201,9 @@ class CRDS:
 
             # TODO - Verify integrity here? Test if this is required
             gas_data.set_index('Datetime', drop=True, inplace=True, verify_integrity=True)
-
-            data_list.append((gas_name, datasource_id, gas_data))
+            # TODO - What metadata should be added?
+            metadata["label"] = "label"
+            data_list.append((species, metadata, datasource_id, gas_data))
 
         return data_list
 
