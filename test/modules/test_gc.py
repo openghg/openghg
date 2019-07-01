@@ -49,12 +49,19 @@ def test_read_precision(precision_path):
 
     precision, precision_series = gc.read_precision(precision_path)
 
+    prec_test = ['NF3', 'CF4', 'PFC-116', 'PFC-218', 'PFC-318', 'C4F10', 'C6F14', 'SF6']
+    end_prec_test = ['ethene', 'ethane', 'propane', 'c-propane', 'benzene', 'toluene', 'COS', 'desflurane']
+
+    assert precision_series[:8] == prec_test
+    assert precision_series[-8:] == end_prec_test
+
     precision_head = precision.head(1)
-
-    print(precision_head)
-    print("Fix dtype for reading of GC data")
-
-    assert False
+    
+    assert precision_head.iloc[0,0] == 0.02531
+    assert precision_head.iloc[0,2] == 0.08338
+    assert precision_head.iloc[0,5] == 10
+    assert precision_head.iloc[0,7] == 10
+    assert precision_head.iloc[0,10] == 0.00565
     
     
 

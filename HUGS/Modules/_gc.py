@@ -273,8 +273,7 @@ class GC:
                 # Ensure the units and scale have been read in correctly
                 # Have this in case the column shift between the header and data changes
                 if units[gas_name] == "--" or scale[gas_name] == "--":
-                    raise ValueError(
-                        "Error reading units and scale, ensure columns are correct between header and dataframe")
+                    raise ValueError("Error reading units and scale, ensure columns are correct between header and dataframe")
 
                 species.append(gas_name)
 
@@ -301,7 +300,7 @@ class GC:
 
         # Segment the processed data
         gas_data = self.split(site=site)
-
+    
         return gas_data
 
     def read_precision(self, filepath):
@@ -323,7 +322,7 @@ class GC:
 
         # Read precisions
         precision = _read_csv(filepath, skiprows=5, header=None, sep=r"\s+",
-                                dtype=str, index_col=0, parse_dates=[0], date_parser=parser)
+                                index_col=0, parse_dates=[0], date_parser=parser)
 
         precision.index.name = "Datetime"
         # Drop any duplicates from the index
@@ -338,7 +337,9 @@ class GC:
                 TODO - cleaner way of doing this?
                 site (str): Name of site from which this data originates
             Returns:
-                list (str, Pandas.DataFrame): List of tuples of gas name and gas data
+                list (tuples): List of tuples of gas name and gas data
+
+                Tuple of species name (str), metadata (dict), datasource_uuid (str), data (Pandas.DataFrame)
         """
         from fnmatch import fnmatch as _fnmatch
         from uuid import uuid4 as _uuid4
