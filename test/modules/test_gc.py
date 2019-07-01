@@ -132,6 +132,21 @@ def test_save(gc):
 
     assert objs[0].split("/")[-1] == mocked_uuid
 
+def test_load(gc):
+    gc.save()
+
+    gc_new = GC.load(uuid=mocked_uuid)
+
+    assert gc_new._uuid == mocked_uuid
+    assert gc_new._instruments == {'2001': '1970-01-01T00:00:00'}
+    assert gc_new._stored == False
+
+def test_exists(gc):
+    gc.save()
+
+    assert GC.exists(uuid=mocked_uuid) == True
+
+
 
 
 # def test_exists():
