@@ -8,6 +8,9 @@ def hugs_functions(function, args):
     if function == "goodbye":
         from hugs_service.goodbye import goodbye as _goodbye
         return _goodbye(args)
+    if function == "listobjects":
+        from hugs_service.listobjects import listobjects as _listobjects
+        return _listobjects(args)
     else:
         from admin.handler import MissingFunctionError
         raise MissingFunctionError()
