@@ -45,21 +45,6 @@ class CRDS:
         return c
 
     @staticmethod
-    def read_filelist(filelist):
-        """ Returns a number of CRDS objects created from files
-
-            Args:
-                filelist (list): List of filenames
-            Returns:
-                list: List of CRDS objects
-        """
-        crds_list = []
-        for filename in filelist:
-            crds_list.append(CRDS.read_file(filename))
-
-        return crds_list
-
-    @staticmethod
     def read_file(data_filepath):
         """ Creates a CRDS object holding data stored within Datasources
 
