@@ -18,6 +18,8 @@ class CRDS:
         self._stored = False
         # Processed data
         self._proc_data = None
+        # Datasource UUIDs
+        self._datasources
 
 
     def is_null(self):
@@ -62,6 +64,7 @@ class CRDS:
         
         # from processing._metadata import Metadata as _Metadata
         from HUGS.Modules import Instrument as _Instrument
+        from HUGS.Processing import create_datasources as _create_datasources
 
         # First check for the CRDS object - should only be one? 
         # Maybe this can depend on the type or something?
@@ -96,14 +99,12 @@ class CRDS:
         # Pass this gas_data list to the instrument for storage in Datasources
         gas_data = crds.parse_data(data_filepath=data_filepath)
 
-        # Add the data to the instrument after processing
-        instrument.add_data(gas_data)
+        # Create Datasources, save them to the object store and get their UUIDs
+        datasource_uuids = _create_datasources(gas_data)
+        
+        # Add the Datasources to the list of datasources associated with this object
+        crds.add_datasources(datasource_uuids)
 
-        # Save updated Instrument to object store
-        instrument.save()
-
-        # Ensure this Instrument is saved within the object
-        crds.add_instrument(instrument.get_uuid(), _datetime_to_string(instrument.get_creation_datetime()))
         crds.save()
 
         return crds
@@ -380,67 +381,13 @@ class CRDS:
         # Query object store for Instrument
         return _exists(bucket=bucket, uuid=uuid)
 
-
-    def add_instrument(self, instrument_id, value):
-        """ Add an Instument to this object's dictionary of instruments
+    
+    def add_datasources(self, datasource_uuids):
+        """ Add the passed list of Datasources to the current list
 
             Args:
-                instrument_id (str): Instrment UUID
-                value (str): Value to describe Instrument
+                datasource_uuids (list): List of Datasource UUIDs
             Returns:
                 None
         """
-        self._instruments[instrument_id] = value
-
-
-    def get_instruments(self):
-        """ Get the Instruments associated with this object
-
-            Returns:
-                dict: Dictionary of Instrument UUIDs
-        """
-        return self._instruments
-
-
-
-    # def get_daterange(self):
-    #     """ Returns the daterange of the data in this object
-
-    #         Returns:
-    #             tuple (datetime, datetime): Start and end datetime
-    #     """
-    #     return self._start_datetime, self._end_datetime 
-
-
-    def write_file(self, filename):
-        """ Collects the data stored in this object and writes it
-            to file at filename
-
-            TODO - add control of daterange being written to file from
-            data in Datasources
-
-            Args:
-                filename (str): Filename to write data to
-            Returns:
-                None
-        """
-        data = [] 
-
-        return False
-        # for datasource in self._datasources:
-        #     # Get datas - for now just get the data that's there
-        #     # Can either get the daterange here or in the Datasource.get_data fn
-        #     data.append(datasource.get_data())
-
-        #     for datetime in d.datetimes_in_data():
-        #         datetimes[datetime] = 1
-        
-        # datetimes = list(datetimes.keys())
-
-        # datetimes.sort()
-
-        # with open(filename, "w") as FILE:
-        #     FILE.write(metadata)
-        #     # Merge the dataframes
-        #     # If no data for that datetime set as NaN
-        #     # Write these combined tables to the file
+        self._datasources.extend(datasource_uuids)

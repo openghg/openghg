@@ -39,7 +39,6 @@ def gas_search(gas_name, meas_type, start_datetime=None, end_datetime=None):
     from HUGS.Util import get_datetime_epoch as _get_datetime_epoch
     from HUGS.Util import get_datetime_now as _get_datetime_now
 
-    # TODO - This feels clunky
     if start_datetime is None:
         start_datetime = _get_datetime_epoch()
     if end_datetime is None:
@@ -52,6 +51,11 @@ def gas_search(gas_name, meas_type, start_datetime=None, end_datetime=None):
     crds_uuid = crds_list[0].split("/")[-1]
 
     crds = CRDS.load(bucket=bucket, uuid=crds_uuid)
+
+    # Get associated datasources
+    # Get all datasources
+    # Can label datasources by the instrument they belong to
+    datasource_uuids = 
 
     # Get instrument UUIDs
     instrument_uuids = list(crds.get_instruments())

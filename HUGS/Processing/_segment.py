@@ -4,7 +4,9 @@
 
 __all__ = ["get_datasources", "get_split_frequency"]
 
-def get_datasources(gas_data):
+from HUGS.Modules import Datasource as _Datasource
+
+def create_datasources(gas_data):
     """ Create or get an exisiting Datasource for each gas in the file
 
         TODO - currently this function will only take data from a single Datasource
@@ -12,26 +14,30 @@ def get_datasources(gas_data):
         Args:
             gas_data (list): List of tuples gas name, datasource_id, Pandas.Dataframe
         Returns:
-            Datasource: Datasource containing data
+            list: List of UUIDs
     """
-    from HUGS.Modules import Datasource as _Datasource
+    uuids = []
 
-    datasources = []
-    print("Yahyahyah", type(gas_data))
+    # Rework this to for the segmentation of data within the Datasource
     for gas_name, metadata, datasource_id, data in gas_data:
         if _Datasource.exists(datasource_id=datasource_id):
             datasource = _Datasource.load(uuid=datasource_id)
+            # TODO - add metadata in here - append to existing?
         else:
             datasource = _Datasource.create(name=gas_name)
+            # datasource.add_metadata(metadata)
 
-        # Add the dataframes to the datasource
-        for dataframe in data:
-            datasource.add_data(dataframe)
+        # Store the name and datasource_id
+        # self._species[gas_name] = datasource_id
+        # Add the dataframe to the datasource
+        datasource.add_data(metadata, data)
+        # Save Datasource to object store
+        datasource.save()
         
-        datasources.append(datasource)
+        # Add the Datasource to the list
+        uuids.append(datasource.uuid())
 
-    return datasources
-
+    return uuids
 
 def get_split_frequency(data):
     """ Analyses raw data for size and sets a frequency to split the data

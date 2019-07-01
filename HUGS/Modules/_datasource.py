@@ -129,6 +129,7 @@ class Datasource:
         # As some (years, months, weeks) may be empty we don't want those dataframes
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
 
+
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed dataframe
 
@@ -440,7 +441,29 @@ class Datasource:
                 raise ValueError("Cannot get daterange with no data")
                 
         return "".join([_datetime_to_string(self._start_datetime), "_", _datetime_to_string(self._end_datetime)])
-        
 
+    def get_species(self):
+        """ Returns the species of this Datasource
+
+            Returns:
+                str: Species of this Datasource
+        """
+        return self._labels["species"]
+
+    def get_inlet(self):
+        """ Returns the inlet of this Datasource
+
+            Returns:
+                str: Inlet of this Datasource
+        """
+        return self._labels["inlet"]
+        
+    def uuid(self):
+        """ Return the UUID of this object
+
+            Returns:
+                str: UUID
+        """
+        return self._uuid
 
         
