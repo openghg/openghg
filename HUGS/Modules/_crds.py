@@ -372,7 +372,6 @@ class CRDS:
         # Query object store for Instrument
         return _exists(bucket=bucket, uuid=uuid)
 
-    
     def add_datasources(self, datasource_uuids):
         """ Add the passed list of Datasources to the current list
 
@@ -390,3 +389,11 @@ class CRDS:
                 str: UUID of  object
         """
         return self._uuid
+
+    def datasources(self):
+        """ Return the list of Datasources for this object
+
+            Returns:
+                list: List of Datasources
+        """
+        return self._datasources

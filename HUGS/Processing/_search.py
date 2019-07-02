@@ -38,8 +38,7 @@ def gas_search(gas_name, data_type, start_datetime=None, end_datetime=None):
     """
     from HUGS.ObjectStore import get_object_names as _get_object_names
     from HUGS.ObjectStore import get_local_bucket as _get_local_bucket
-    from HUGS.Modules import Instrument as _Instrument
-    from HUGS.Modules import CRDS
+    from HUGS.Modules import Datasource as _Datasource
     from HUGS.Util import get_datetime_epoch as _get_datetime_epoch
     from HUGS.Util import get_datetime_now as _get_datetime_now
 
@@ -51,10 +50,9 @@ def gas_search(gas_name, data_type, start_datetime=None, end_datetime=None):
     search_prefix = "%s/uuid/" % _type
     bucket = _get_local_bucket()
 
-
     # TODO - method to load different types in here for search
     # Maybe just an if else for now?
-    path = DataType[data_type.upper()]
+    data_type = DataType[data_type.upper()]
     # Get the objects that contain the Datasources
     object_list = _get_object_names(bucket=bucket, prefix=search_prefix)
     if len(object_list) > 1:
@@ -62,39 +60,42 @@ def gas_search(gas_name, data_type, start_datetime=None, end_datetime=None):
     object_uuid = object_list[0].split("/")[-1]
 
     # Load in the object
-    obj = object_loader(object_uuid)
+    data_obj = load_object(data_type, object_uuid)
+    
+    # Get the UUIDs of the Datasources associated with the object
+    datasource_uuids = data_obj.datasources()
+    
+    # First check if the uuids we have are in the list of known and valid Datasources
+    # This could be an object has a quick lookup data structure so we don't need to load 
+    # in the datasources and search their keys
+    # TODO - implement lookup tables
 
-
-    crds = CRDS.load(bucket=bucket, uuid=crds_uuid)
-
-
-
-
-    # Get associated datasources
-    # Get all datasources
-    # Can label datasources by the instrument they belong to
-    # datasource_uuids = 
-
-    # Get instrument UUIDs
-    instrument_uuids = list(crds.get_instruments())
-    instruments = [_Instrument.load(uuid=uuid, shallow=True) for uuid in instrument_uuids]
+    datasources = [_Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 
     keys = []
-    for inst in instruments:
-        # Search labels of Instrument for Datasources that hold the gas data we want
-        labels = inst.get_labels()
-        # Loop over the keys 
-        for k in labels.keys():
-            # Need to query the object store for the keys
-            # At the moment just use data? Genericise the search and pass argument somehow?
-            if gas_name in list(labels[k].values()):
-                # Get all the data keys for this object
-                prefix = "data/uuid/%s" % k
-                data_list = _get_object_names(bucket=bucket, prefix=prefix)
-                # Only keep the keys that are within the daterange we want
-                in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+    for datasource in datasources:
+        if datasource.get_species() == gas_name:
+            prefix = "data/uuid/%s" % k
+            data_list = _get_object_names(bucket=bucket, prefix=prefix)
+            in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+             
+            keys.extend(in_date)
+
+    # for inst in instruments:
+    #     # Search labels of Instrument for Datasources that hold the gas data we want
+    #     labels = inst.get_labels()
+    #     # Loop over the keys 
+    #     for k in labels.keys():
+    #         # Need to query the object store for the keys
+    #         # At the moment just use data? Genericise the search and pass argument somehow?
+    #         if gas_name in list(labels[k].values()):
+    #             # Get all the data keys for this object
+    #             prefix = "data/uuid/%s" % k
+    #             data_list = _get_object_names(bucket=bucket, prefix=prefix)
+    #             # Only keep the keys that are within the daterange we want
+    #             in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
             
-                keys.extend(in_date)
+    #             keys.extend(in_date)
 
     return keys
 

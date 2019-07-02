@@ -445,6 +445,15 @@ class GC:
                 None
         """
         self._datasources.extend(datasource_uuids)
+
+    def datasources(self):
+        """ Return the list of Datasources for this object
+
+            Returns:
+                list: List of Datasources
+        """
+        return self._datasources
+        
     # def get_precision(instrument):
     #     """ Get the precision in seconds of the passed instrument
 
