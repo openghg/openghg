@@ -5,7 +5,8 @@ import pytest
 from HUGS.Modules import CRDS
 from HUGS.Modules import Instrument
 from HUGS.ObjectStore import get_local_bucket
-from HUGS.Processing import in_daterange, search_store, key_to_daterange, gas_search
+from HUGS.Processing import in_daterange, search_store, key_to_daterange, gas_search, load_object
+                            
 
 from Acquire.ObjectStore import datetime_to_string
 from Acquire.ObjectStore import datetime_to_datetime
@@ -18,6 +19,16 @@ def crds():
     filepath = os.path.join(dir_path, test_data, filename)
 
     return CRDS.read_file(filepath)
+
+
+def test_load_object(crds):
+    crds.save()
+    uuid = crds.uuid()
+    class_name = "crds"
+    obj = load_object(class_name=class_name, uuid=uuid)
+
+    assert isinstance(obj, CRDS)
+    assert obj.uuid() == crds.uuid()
 
 
 def test_search_store(crds):

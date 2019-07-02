@@ -3,16 +3,20 @@ import os
 
 from Acquire.Client import Drive, StorageCreds
 
-from HUGS.Client import Upload
+from HUGS.Client import ListObjects
 
-def test_upload(authenticated_user):
-    
-    # args = {"authenticated_user":authenticated_user, "filename"=__file__}
-    
-    upload = Upload(service_url="hugs")
-    
-    filemeta = upload.upload(filename=__file__, authenticated_user=authenticated_user)
+@pytest.fixture(scope="session")
+def tempdir(tmpdir_factory):
+    d = tmpdir_factory.mktemp("")
+    return str(d)
 
-    print(filemeta)
+def test_upload(authenticated_user, tempdir):
+    filename = __file__
+    drive_name = "test_drive"
+    creds = StorageCreds(user=authenticated_user, service_url="storage")
+    drive = Drive(name=drive_name, creds=creds, autocreate=True)
+    filemeta = drive.upload(filename=filename)
+
+    print(filemeta.to_data())
 
     assert(False)

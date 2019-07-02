@@ -176,6 +176,7 @@ class GC:
 
         from HUGS.Modules import Instrument as _Instrument
         from HUGS.Processing import Metadata as _Metadata
+        from HUGS.Processing import create_datasources as _create_datasources
 
         gc_id = _create_uuid()
 
@@ -186,30 +187,18 @@ class GC:
 
         print("Remember to update the instrument!")
         # Where to get this from? User input?
-        instrument_name = "GCMD"
-        instrument_id = _create_uuid()
-
-        if _Instrument.exists(uuid=instrument_id):
-            instrument = _Instrument.load(uuid)
-        else:
-            instrument = _Instrument.create(name=instrument_name)
-
-        # Do we need this metadata?
-        # metadata = _Metadata
         site = "CGO"
+        instrument_name = "GCMD"
+
         gas_data = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                         site=site, instrument=instrument_name)
-                        
-        instrument.add_data(gas_data)
-        # Save updated Instrument to object store
-        instrument.save()
-
-        # Ensure this Instrument is saved within the object
-        gc.add_instrument(instrument.get_uuid(), _datetime_to_string(instrument.get_creation_datetime()))
+    
+        # Create Datasources, save them to the object store and get their UUIDs
+        datasource_uuids = _create_datasources(gas_data)
+        # Add the Datasources to the list of datasources associated with this object
+        gc.add_datasources(datasource_uuids)
+        # Save object to object store
         gc.save()
-        
-        # Read in the parameters file just when reading in the file.
-        # Save it but don't save it to the object store as part of this object
 
         # For now return the GC object for easier testing
         return gc
@@ -447,7 +436,15 @@ class GC:
         """
         self._instruments[instrument_id] = value
 
+    def add_datasources(self, datasource_uuids):
+        """ Add the passed list of Datasources to the current list
 
+            Args:
+                datasource_uuids (list): List of Datasource UUIDs
+            Returns:
+                None
+        """
+        self._datasources.extend(datasource_uuids)
     # def get_precision(instrument):
     #     """ Get the precision in seconds of the passed instrument
 

@@ -1,10 +1,10 @@
 """ Segment the data into Datasources
 
 """
-
-__all__ = ["get_datasources", "get_split_frequency"]
+__all__ = ["get_split_frequency", "create_datasources"]
 
 from HUGS.Modules import Datasource as _Datasource
+
 
 def create_datasources(gas_data):
     """ Create or get an exisiting Datasource for each gas in the file
@@ -38,6 +38,7 @@ def create_datasources(gas_data):
         uuids.append(datasource.uuid())
 
     return uuids
+
 
 def get_split_frequency(data):
     """ Analyses raw data for size and sets a frequency to split the data

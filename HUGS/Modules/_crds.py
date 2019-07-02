@@ -19,7 +19,7 @@ class CRDS:
         # Processed data
         self._proc_data = None
         # Datasource UUIDs
-        self._datasources
+        self._datasources = []
 
 
     def is_null(self):
@@ -80,15 +80,6 @@ class CRDS:
             crds = CRDS.load(uuid=crds_uuid)
         else:
             crds = CRDS.create()
-        
-        # TODO - ID instrument from data/user?
-        instrument_name = "instrument_name"
-        instrument_id = _create_uuid()
-
-        if _Instrument.exists(uuid=instrument_id):
-            instrument = _Instrument.load(uuid=instrument_id)
-        else:
-            instrument = _Instrument.create(name="name")
 
         filename = data_filepath.split("/")[-1]
         # metadata = _Metadata.create(filename, raw_data)
@@ -391,3 +382,11 @@ class CRDS:
                 None
         """
         self._datasources.extend(datasource_uuids)
+
+    def uuid(self):
+        """ Return the UUID of this object
+
+            Returns:
+                str: UUID of  object
+        """
+        return self._uuid

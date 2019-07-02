@@ -4,12 +4,10 @@
 """
 from enum import Enum as _Enum
 
-__all__ = ["gas_search", "get_data", 
-           "key_to_daterange",
-           "daterange_to_string",
-           "in_daterange",
-           "daterange_to_string", 
-           "search_store"]
+__all__ = ["gas_search", "get_data",  "in_daterange",
+           "key_to_daterange", "daterange_to_string", 
+           "daterange_to_string",  "search_store",
+           "load_object"]
 
 
 class RootPaths(_Enum):
@@ -19,18 +17,24 @@ class RootPaths(_Enum):
     SITE = "site"
     NETWORK = "network"
 
+# Better name for this enum?
+class DataType(_Enum):
+    CRDS = "CRDS"
+    GC = "GC"
 
-def gas_search(gas_name, meas_type, start_datetime=None, end_datetime=None):
+
+def gas_search(gas_name, data_type, start_datetime=None, end_datetime=None):
     """ Search for gas data (optionally within a daterange)
     
-        Load instruments from the correct network ?
-        Read labels of the Datasources in the Instruments and record ones that match
-        Get a list of UUIDs
-
-        Return list of UUIDs of matching dataframes / datasources?
-
-        WIP
-
+        Args:
+            gas_name (str): Name of gas to search
+            data_type (str): GC / CRDS etc
+            start_datetime (datetime, default=None): Start datetime for search
+            If None a start datetime of UNIX epoch (1970-01-01) is set
+            end_datetime (datetime, default=None): End datetime for search
+            If None an end datetime of the current datetime is set
+        Returns:
+            list: List of keys of Datasources matching the search parameters
     """
     from HUGS.ObjectStore import get_object_names as _get_object_names
     from HUGS.ObjectStore import get_local_bucket as _get_local_bucket
@@ -44,18 +48,32 @@ def gas_search(gas_name, meas_type, start_datetime=None, end_datetime=None):
     if end_datetime is None:
         end_datetime = _get_datetime_now()
 
-    search_prefix = "%s/uuid/" % meas_type
+    search_prefix = "%s/uuid/" % _type
     bucket = _get_local_bucket()
 
-    crds_list = _get_object_names(bucket=bucket, prefix=search_prefix)
-    crds_uuid = crds_list[0].split("/")[-1]
+
+    # TODO - method to load different types in here for search
+    # Maybe just an if else for now?
+    path = DataType[data_type.upper()]
+    # Get the objects that contain the Datasources
+    object_list = _get_object_names(bucket=bucket, prefix=search_prefix)
+    if len(object_list) > 1:
+        raise ValueError("More than one " + data_type + " object found.")
+    object_uuid = object_list[0].split("/")[-1]
+
+    # Load in the object
+    obj = object_loader(object_uuid)
+
 
     crds = CRDS.load(bucket=bucket, uuid=crds_uuid)
+
+
+
 
     # Get associated datasources
     # Get all datasources
     # Can label datasources by the instrument they belong to
-    datasource_uuids = 
+    # datasource_uuids = 
 
     # Get instrument UUIDs
     instrument_uuids = list(crds.get_instruments())
@@ -79,6 +97,7 @@ def gas_search(gas_name, meas_type, start_datetime=None, end_datetime=None):
                 keys.extend(in_date)
 
     return keys
+
 
 def get_data(key_list):
     """ Gets data from the Datasources found by the search function
@@ -222,6 +241,25 @@ def daterange_to_string(start, end):
     end_fmt = end.strftime("%Y%m%d")
 
     return start_fmt + "_" + end_fmt
+
+
+def load_object(class_name, uuid):
+    """ Load an object of type class_name
+
+        Args:
+            class_name (str): Name of class to load
+            uuid (str): UUID of object to load from object store
+        Returns:
+            class_name: class_name object
+    """
+    module_path = "HUGS.Modules"
+    class_name = class_name.upper()
+    # Although __import__ is not usually recommended, here we want to use the
+    # fromlist argument that import_module doesn't support
+    module_object = __import__(name=module_path, fromlist=class_name)
+    target_class = getattr(module_object, class_name)
+
+    return target_class.load(uuid=uuid)
 
 
 

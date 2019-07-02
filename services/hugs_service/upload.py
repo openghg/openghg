@@ -9,13 +9,24 @@ def upload(args):
     except:
         filename = None
 
-    drive_name = "hugs_files"
-    creds = StorageCreds(user=authenticated_user, service_url="storage")
-    drive = Drive(name=drive_name, creds=creds)
+    # Get authentication from data
 
-    filemeta = drive.upload(filename=filename, uploaded_name=filename)
-    
-    return {"result": filemeta.__dict__}
+
+
+    # Create a filehandle
+    # Get authorisation
+    # par_uid, secret and public key
+    # Get the drive UID from the file handle 
+    # Get a drive using DriveInfo
+
+    # (filemeta, par) = drive.upload(filehandle=filehandle,
+    #                             authorisation=authorisation,
+    #                             encrypt_key=public_key,
+    #                             par=par, identifiers=identifiers)
+
+
+
+
 
     # print(filemeta.__dict__)
 

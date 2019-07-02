@@ -179,7 +179,6 @@ class Datasource:
         # Query object store for Datasource
         return _exists(bucket=bucket, uuid=datasource_id)
 
-
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
             for storage in object store
@@ -208,7 +207,6 @@ class Datasource:
 
         return data
 
-    # def load_dataframe(self, bucket, uuid=None):
     def load_dataframe(self, bucket, key):
         """ Loads data from the object store for creation of a Datasource object
 
@@ -466,4 +464,10 @@ class Datasource:
         """
         return self._uuid
 
-        
+    def get_labels(self):
+        """ Retur the labels of this Datasource
+
+            Returns:
+                dict: Labels of Datasource
+        """
+        return self._labels
