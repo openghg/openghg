@@ -11,7 +11,7 @@ def hugs_functions(function, args):
     if function == "listobjects":
         from hugs_service.listobjects import listobjects as _listobjects
         return _listobjects(args)
-    if function == "upload":
+    if function == "search":
         from hugs_service.upload import upload as _upload
         return _upload(args)
     else:
