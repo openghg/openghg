@@ -1,12 +1,72 @@
-# import datetime
-# import os
-# import pandas as pd
-# import pytest
+import datetime
+import os
+import pandas as pd
+import pytest
 # import xarray
 
-# from HUGS.Modules import Instrument, CRDS, Datasource
-# from HUGS.ObjectStore import get_object, get_local_bucket
-# from HUGS.Processing import get_datasources, parse_gases, combine_sections, search_store
+from HUGS.Modules import CRDS, GC
+from HUGS.Processing import gas_search, recombine_sections
+from HUGS.ObjectStore import get_local_bucket
+
+@pytest.fixture(scope="session")
+def data_path():
+    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.C"
+
+
+@pytest.fixture(scope="session")
+def precision_path():
+    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.precisions.C"
+
+def test_recombination_CRDS():
+    # filename = "bsd.picarro.1minute.248m.dat"
+    filename = "hfd.picarro.1minute.100m_min.dat"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    _ = get_local_bucket(empty=True)
+
+    crds = CRDS.read_file(filepath)
+
+    gas_data = crds.read_data(data_filepath=filepath)
+
+    # Date from the processing function, before being passed to the
+    # Datasources for segmentation by date
+    complete_data = gas_data[2][3]
+
+    gas_name = "co"
+    data_type = "CRDS"
+
+    keys = gas_search(species=gas_name, data_type=data_type)
+
+    recombined_dataframe = recombine_sections(data_keys=keys)
+
+    assert len(keys) == 7
+    assert complete_data.equals(recombined_dataframe)
+
+
+def test_recombination_GC(data_path, precision_path):
+    gc = GC.read_file(data_filepath=data_path, precision_filepath=precision_path)
+
+    site = "CGO"
+    instrument_name = "GCMD"
+    gas_data = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument_name)
+
+    complete_data = gas_data[0][3]
+
+    gas_name = "NF3"
+    data_type = "GC"
+
+    keys = gas_search(species=gas_name, data_type=data_type)
+
+    recombined_dataframe=recombine_sections(data_keys = keys)
+
+    assert len(keys) == 1
+    assert recombined_dataframe.equals(complete_data)
+
+
+
+
 
 # @pytest.fixture(scope="session")
 # def keylist():
@@ -77,27 +137,27 @@
 #     assert combined.equals(complete)
 
 
-# # def test_convert_to_netcdf(): 
-# #     filename = "bsd.picarro.1minute.248m.dat"
-# #     dir_path = os.path.dirname(__file__)
-# #     test_data = "../data/proc_test_data/CRDS"
-# #     filepath = os.path.join(dir_path, test_data, filename)
+# def test_convert_to_netcdf(): 
+#     filename = "bsd.picarro.1minute.248m.dat"
+#     dir_path = os.path.dirname(__file__)
+#     test_data = "../data/proc_test_data/CRDS"
+#     filepath = os.path.join(dir_path, test_data, filename)
 
-# #     raw_data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
-# #     gas_data = parse_gases(raw_data)
-# #     dataframes = [data for _, data in gas_data]
-# #     complete = combine_sections(dataframes)
+#     raw_data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
+#     gas_data = parse_gases(raw_data)
+#     dataframes = [data for _, data in gas_data]
+#     complete = combine_sections(dataframes)
 
-# #     filename = _recombination.convert_to_netcdf(complete)
+#     filename = _recombination.convert_to_netcdf(complete)
 
-# #     # Open the NetCDF and check it's valid?
-# #     x_dataset = complete.to_xarray()
+#     # Open the NetCDF and check it's valid?
+#     x_dataset = complete.to_xarray()
 
-# #     ds = xarray.open_dataset(filename)
+#     ds = xarray.open_dataset(filename)
 
-# #     os.remove(filename)
+#     os.remove(filename)
 
-# #     assert ds.equals(x_dataset)
+#     assert ds.equals(x_dataset)
     
 
 

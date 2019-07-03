@@ -88,7 +88,7 @@ class CRDS:
         # Parse the gases
         # Save get gas_name datasource iD and data
         # Pass this gas_data list to the instrument for storage in Datasources
-        gas_data = crds.parse_data(data_filepath=data_filepath)
+        gas_data = crds.read_data(data_filepath=data_filepath)
 
         # Create Datasources, save them to the object store and get their UUIDs
         datasource_uuids = _create_datasources(gas_data)
@@ -100,8 +100,7 @@ class CRDS:
 
         return crds
 
-
-    def parse_data(self, data_filepath):
+    def read_data(self, data_filepath):
         """ Separates the gases stored in the dataframe in 
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed

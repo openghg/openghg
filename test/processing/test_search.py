@@ -69,27 +69,7 @@ def test_gas_search_CRDS_two():
     assert len(keys) == 7
 
 
-def test_recombination():
-    # filename = "bsd.picarro.1minute.248m.dat"
-    filename = "hfd.picarro.1minute.100m_min.dat"
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/CRDS"
-    filepath = os.path.join(dir_path, test_data, filename)
 
-    _ = get_local_bucket(empty=True)
-
-    crds = CRDS.read_file(filepath)
-
-    gas_name = "co"
-    data_type = "CRDS"
-
-    keys = gas_search(species=gas_name, data_type=data_type)
-
-    dataframe = recombine_sections(data_keys=keys)
-
-    print(dataframe.head(1), dataframe.tail(1))
-
-    assert False
 
 
 # def test_search_store(crds):

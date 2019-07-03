@@ -25,6 +25,7 @@ class GC:
         self._creation_datetime = None
         self._instruments = {}
         self._stored = False
+        self._datasources = []
 
     @staticmethod
     def create():
@@ -87,6 +88,7 @@ class GC:
         data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         data["instruments"] = self._instruments
         data["stored"] = self._stored
+        data["datasources"] = self._datasources
 
         return data
 
@@ -108,6 +110,7 @@ class GC:
         gc._creation_datetime = data["creation_datetime"]
         gc._instruments = data["instruments"]
         stored = data["stored"]
+        gc._datasources = data["datasources"]
 
         gc._stored = False
         
