@@ -267,7 +267,7 @@ class GC:
                 species.append(gas_name)
 
         # Rename columns to include the gas this flag represents
-        df.rename(columns=columns_renamed, inplace=True)
+        df = df.rename(columns=columns_renamed, inplace=False)
 
         # Read and parse precisions file
         precision, precision_species = self.read_precision(precision_filepath)
@@ -279,7 +279,7 @@ class GC:
         # instrument = "GCMD"
         # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
         df["new_time"] = df.index - _pd_Timedelta(seconds=self.get_precision(instrument)/2.0)
-        df.set_index("new_time", inplace=True, drop=True)
+        df = df.set_index("new_time", inplace=False, drop=True)
         df.index.name = "Datetime"
 
         self._proc_data = df

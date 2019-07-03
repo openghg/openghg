@@ -6,6 +6,7 @@ from HUGS.Modules import CRDS
 from HUGS.Modules import Instrument
 from HUGS.ObjectStore import get_local_bucket
 from HUGS.Processing import in_daterange, search_store, key_to_daterange, gas_search, load_object
+from HUGS.Processing import recombine_sections
                             
 
 from Acquire.ObjectStore import datetime_to_string
@@ -32,7 +33,7 @@ def test_load_object(crds):
     assert obj.uuid() == crds.uuid()
 
 
-def test_gas_search():
+def test_gas_search_CRDS():
     filename = "bsd.picarro.1minute.248m.dat"
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
@@ -47,7 +48,48 @@ def test_gas_search():
 
     keys = gas_search(species=gas_name, data_type=data_type)
 
+    assert len(keys) == 1
+
+
+def test_gas_search_CRDS_two():
+    filename = "hfd.picarro.1minute.100m_min.dat"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    _ = get_local_bucket(empty=True)
+
+    crds = CRDS.read_file(filepath)
+
+    gas_name = "co"
+    data_type = "CRDS"
+
+    keys = gas_search(species=gas_name, data_type=data_type)
+
     assert len(keys) == 7
+
+
+def test_recombination():
+    # filename = "bsd.picarro.1minute.248m.dat"
+    filename = "hfd.picarro.1minute.100m_min.dat"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    _ = get_local_bucket(empty=True)
+
+    crds = CRDS.read_file(filepath)
+
+    gas_name = "co"
+    data_type = "CRDS"
+
+    keys = gas_search(species=gas_name, data_type=data_type)
+
+    dataframe = recombine_sections(data_keys=keys)
+
+    print(dataframe.head(1), dataframe.tail(1))
+
+    assert False
 
 
 # def test_search_store(crds):

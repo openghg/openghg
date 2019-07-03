@@ -207,7 +207,8 @@ class Datasource:
 
         return data
 
-    def load_dataframe(self, bucket, key):
+    @staticmethod
+    def load_dataframe(bucket, key):
         """ Loads data from the object store for creation of a Datasource object
 
             Args:
@@ -298,7 +299,7 @@ class Datasource:
         
         if d._stored and not shallow:
             for key in d._data_keys:
-                d._data.append(d.load_dataframe(bucket, key))
+                d._data.append(Datasource.load_dataframe(bucket, key))
 
         return d
 

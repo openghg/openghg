@@ -98,8 +98,6 @@ class CRDS:
 
         crds.save()
 
-        print("In CRDS : ", crds.uuid())
-
         return crds
 
 
@@ -151,8 +149,6 @@ class CRDS:
 
         data_list = []
         for n in range(n_gases):
-            metadata = {}
-
             datasource_id = datasource_ids[n]
             # Slice the columns
             gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
@@ -166,10 +162,10 @@ class CRDS:
 
             # Split into years here
             # Name columns
-            gas_data.set_axis(column_labels, axis='columns', inplace=True)
+            gas_data = gas_data.set_axis(column_labels, axis='columns', inplace=False)
 
             # Drop the first two rows now we have the name
-            gas_data.drop(index=gas_data.head(header_rows).index, inplace=True)
+            gas_data = gas_data.drop(index=gas_data.head(header_rows).index, inplace=False)
             gas_data.index = _RangeIndex(gas_data.index.size)
 
             # Cast data to float64 / double
@@ -179,9 +175,10 @@ class CRDS:
             gas_data = _concat([timeframe, gas_data], axis="columns")
 
             # TODO - Verify integrity here? Test if this is required
-            gas_data.set_index('Datetime', drop=True, inplace=True, verify_integrity=True)
+            gas_data = gas_data.set_index('Datetime', drop=True, inplace=False, verify_integrity=True)
             # TODO - What metadata should be added?
-            metadata["label"] = "label"
+            metadata = {"species" : species}
+
             data_list.append((species, metadata, datasource_id, gas_data))
 
         return data_list

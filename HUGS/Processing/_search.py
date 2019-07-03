@@ -56,8 +56,6 @@ def gas_search(species, data_type, start_datetime=None, end_datetime=None):
     # Get the objects that contain the Datasources
     object_list = _get_object_names(bucket=bucket, prefix=search_prefix)
 
-    print("Objects : ", object_list)
-
     if len(object_list) == 0:
         raise ValueError("No " + data_type.name + " object found.")
     if len(object_list) > 1:
@@ -65,17 +63,11 @@ def gas_search(species, data_type, start_datetime=None, end_datetime=None):
 
     object_uuid = object_list[0].split("/")[-1]
 
-    print("Within search ", object_uuid)
-    
     # Load in the object
     data_obj = load_object(data_type.name, object_uuid)
 
-    print("Object's UUID : ")
-    
     # Get the UUIDs of the Datasources associated with the object
     datasource_uuids = data_obj.datasources()
-
-    print(datasource_uuids)
 
     # First check if the uuids we have are in the list of known and valid Datasources
     # This could be an object has a quick lookup data structure so we don't need to load 
@@ -84,34 +76,14 @@ def gas_search(species, data_type, start_datetime=None, end_datetime=None):
 
     datasources = [_Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 
-    print(len(datasources))
-
     keys = []
     for datasource in datasources:
-        print(datasource.uuid())
         if datasource.get_species() == species:
-            print(datasource.get_species())
-            prefix = "data/uuid/%s" % k
+            prefix = "data/uuid/%s" % datasource.uuid()
             data_list = _get_object_names(bucket=bucket, prefix=prefix)
             in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
-             
-            keys.extend(in_date)
-
-    # for inst in instruments:
-    #     # Search labels of Instrument for Datasources that hold the gas data we want
-    #     labels = inst.get_labels()
-    #     # Loop over the keys 
-    #     for k in labels.keys():
-    #         # Need to query the object store for the keys
-    #         # At the moment just use data? Genericise the search and pass argument somehow?
-    #         if gas_name in list(labels[k].values()):
-    #             # Get all the data keys for this object
-    #             prefix = "data/uuid/%s" % k
-    #             data_list = _get_object_names(bucket=bucket, prefix=prefix)
-    #             # Only keep the keys that are within the daterange we want
-    #             in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
             
-    #             keys.extend(in_date)
+            keys.extend(in_date)
 
     return keys
 
