@@ -23,11 +23,11 @@ class DataType(_Enum):
     GC = "GC"
 
 
-def gas_search(gas_name, data_type, start_datetime=None, end_datetime=None):
+def gas_search(species, data_type, start_datetime=None, end_datetime=None):
     """ Search for gas data (optionally within a daterange)
     
         Args:
-            gas_name (str): Name of gas to search
+            species (str): Species to search for
             data_type (str): GC / CRDS etc
             start_datetime (datetime, default=None): Start datetime for search
             If None a start datetime of UNIX epoch (1970-01-01) is set
@@ -47,7 +47,7 @@ def gas_search(gas_name, data_type, start_datetime=None, end_datetime=None):
     if end_datetime is None:
         end_datetime = _get_datetime_now()
 
-    search_prefix = "%s/uuid/" % _type
+    search_prefix = "%s/uuid/" % data_type
     bucket = _get_local_bucket()
 
     # TODO - method to load different types in here for search
@@ -55,26 +55,42 @@ def gas_search(gas_name, data_type, start_datetime=None, end_datetime=None):
     data_type = DataType[data_type.upper()]
     # Get the objects that contain the Datasources
     object_list = _get_object_names(bucket=bucket, prefix=search_prefix)
+
+    print("Objects : ", object_list)
+
+    if len(object_list) == 0:
+        raise ValueError("No " + data_type.name + " object found.")
     if len(object_list) > 1:
-        raise ValueError("More than one " + data_type + " object found.")
+        raise ValueError("More than one " + data_type.name + " object found.")
+
     object_uuid = object_list[0].split("/")[-1]
 
+    print("Within search ", object_uuid)
+    
     # Load in the object
-    data_obj = load_object(data_type, object_uuid)
+    data_obj = load_object(data_type.name, object_uuid)
+
+    print("Object's UUID : ")
     
     # Get the UUIDs of the Datasources associated with the object
     datasource_uuids = data_obj.datasources()
-    
+
+    print(datasource_uuids)
+
     # First check if the uuids we have are in the list of known and valid Datasources
     # This could be an object has a quick lookup data structure so we don't need to load 
     # in the datasources and search their keys
-    # TODO - implement lookup tables
+    # TODO - implement lookup tables?
 
     datasources = [_Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 
+    print(len(datasources))
+
     keys = []
     for datasource in datasources:
-        if datasource.get_species() == gas_name:
+        print(datasource.uuid())
+        if datasource.get_species() == species:
+            print(datasource.get_species())
             prefix = "data/uuid/%s" % k
             data_list = _get_object_names(bucket=bucket, prefix=prefix)
             in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
@@ -254,7 +270,8 @@ def load_object(class_name, uuid):
             class_name: class_name object
     """
     module_path = "HUGS.Modules"
-    class_name = class_name.upper()
+    class_name = str(class_name).upper()
+
     # Although __import__ is not usually recommended, here we want to use the
     # fromlist argument that import_module doesn't support
     module_object = __import__(name=module_path, fromlist=class_name)

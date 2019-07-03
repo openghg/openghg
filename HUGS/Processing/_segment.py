@@ -33,7 +33,7 @@ def create_datasources(gas_data):
         datasource.add_data(metadata, data)
         # Save Datasource to object store
         datasource.save()
-        
+
         # Add the Datasource to the list
         uuids.append(datasource.uuid())
 

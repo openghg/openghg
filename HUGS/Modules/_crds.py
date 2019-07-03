@@ -92,11 +92,13 @@ class CRDS:
 
         # Create Datasources, save them to the object store and get their UUIDs
         datasource_uuids = _create_datasources(gas_data)
-        
+
         # Add the Datasources to the list of datasources associated with this object
         crds.add_datasources(datasource_uuids)
 
         crds.save()
+
+        print("In CRDS : ", crds.uuid())
 
         return crds
 
@@ -258,6 +260,7 @@ class CRDS:
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         d["instruments"] =  self._instruments
         d["stored"] = self._stored
+        d["datasources"] = self._datasources
         # Save UUIDs of associated instruments
         # d["datasources"] = datasource_uuids
         # d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
@@ -292,6 +295,8 @@ class CRDS:
         #  c._instruments[instrument._uuid] = instrument._creation_datetime
         stored = data["stored"]
 
+        c._datasources = data["datasources"]
+
         # Could load instruments? This could be a lot of instruments
         # c._start_datetime = _string_to_datetime(data["data_start_datetime"])
         # c._end_datetime = _string_to_datetime(data["data_end_datetime"])
@@ -319,8 +324,6 @@ class CRDS:
             bucket = _get_bucket()
 
         crds_key = "%s/uuid/%s" % (CRDS._crds_root, self._uuid)
-
-        # Ensure that the Instruments related to this object are stored
 
         self._stored = True
         _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())

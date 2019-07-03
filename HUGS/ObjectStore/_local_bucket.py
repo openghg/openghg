@@ -37,6 +37,7 @@ def get_local_bucket(name=None, empty=False):
     if empty:
         import shutil as _shutil
         import os as _os
+        print("Emptying bucket....")
         # Remove the directory and recreate
         if os.path.isdir(local_buckets_dir):
             _shutil.rmtree(local_buckets_dir)

@@ -258,22 +258,23 @@ def store_file(bucket, filepath):
     size = _os.path.getsize(filepath)
     filename = filepath.split("/")[-1]
 #     # Add to object store
-    ObjectStore.set_object_from_file(
-        bucket=bucket, key=filename, filename=filepath)
+    ObjectStore.set_object_from_file(bucket=bucket, key=filename, filename=filepath)
 
     # Unsure if this or just no return value?
     return filename, size, md5_hash
 
 
-def get_bucket():
+def get_bucket(empty=False):
     """ Returns the HUGS bucket
-
+        
+        Args:
+            empty (bool, default=False): Get an empty bucket
         Returns:
             dict: Bucket
     """
     from HUGS.ObjectStore import get_local_bucket as _get_local_bucket
 
-    return _get_local_bucket()
+    return _get_local_bucket(empty=empty)
 
 
 @staticmethod
