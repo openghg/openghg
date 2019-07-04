@@ -441,6 +441,20 @@ class Datasource:
                 
         return "".join([_datetime_to_string(self._start_datetime), "_", _datetime_to_string(self._end_datetime)])
 
+    def search_labels(self, search_term):
+        """ Search the values of the labels of this Datasource for search_term
+
+            Args:
+                search_term (str): String to search for in labels
+            Returns:
+                bool: True if found else False
+        """
+        for v in self._labels.values():
+            if v == search_term:
+                return True
+
+        return False
+            
     def get_species(self):
         """ Returns the species of this Datasource
 

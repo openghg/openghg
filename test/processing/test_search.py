@@ -3,10 +3,10 @@ import os
 import pytest
 
 from HUGS.Modules import CRDS
-from HUGS.Modules import Instrument
+from HUGS.Modules import Datasource
 from HUGS.ObjectStore import get_local_bucket
 from HUGS.Processing import in_daterange, search_store, key_to_daterange, gas_search, load_object
-from HUGS.Processing import recombine_sections
+from HUGS.Processing import recombine_sections, search
                             
 
 from Acquire.ObjectStore import datetime_to_string
@@ -68,7 +68,23 @@ def test_gas_search_CRDS_two():
 
     assert len(keys) == 7
 
+def test_general_search():
+    # Test a more general search function
+    filename = "hfd.picarro.1minute.100m_min.dat"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filepath = os.path.join(dir_path, test_data, filename)
 
+    _ = get_local_bucket(empty=True)
+
+    crds = CRDS.read_file(filepath)
+
+    search_term = "co"
+    data_type = "CRDS"
+
+    results = search(search_term=search_term, data_type=data_type)
+
+    assert len(results) == 7    
 
 
 
