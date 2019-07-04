@@ -170,3 +170,14 @@ See process_gcwerks CRDS fn
 
 On GC parse data why is data passed to the split frequency function None?
 Check return values of functions handling the data
+
+
+2019-07-02
+
+1. Transfer any data held in Instrument to Datasource labels
+2. Implement lookup tables for searching 
+3. Functions ?
+
+2019-07-04
+
+Merge in sans instrument to search functions and get the search function working

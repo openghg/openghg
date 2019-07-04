@@ -38,7 +38,7 @@ def test_get_split_frequency_large():
 
     date_range = pd.date_range("2010-01-01", "2019-01-01", freq="min")
 
-    # Crates a ~ 1 GB dataframe
+    # Crates an ~ 1 GB dataframe
     df = pd.DataFrame(np.random.randint(0, 100, size=(len(date_range), 32)), index=date_range)
 
     split = get_split_frequency(df)

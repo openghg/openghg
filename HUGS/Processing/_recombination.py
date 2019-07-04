@@ -3,7 +3,8 @@
 
 """
 __all__ = ["get_datasources", "get_dataframes",
-           "combine_sections", "convert_to_netcdf"]
+           "combine_sections", "convert_to_netcdf",
+           "recombine_sections"]
 
 def get_datasources(bucket, uuid_list):
     """ Get the Datasources containing the data from the object 
@@ -32,6 +33,62 @@ def get_dataframes(datasources):
 
     return False
 
+def get_data(data_keys):
+    """ Get the data stored in data_keys from the object store
+
+    """
+    from HUGS.ObjectStore import read_object as _read_object
+    from HUGS.ObjectStore import get_bucket as _get_bucket
+
+    bucket = _get_bucket()
+
+    data = [_read_object(bucket=bucket, key=key) for key in data_keys]
+
+
+def recombine_sections(data_keys):
+    """ Combines separate dataframes into a single dataframe for
+        processing to NetCDF for output
+
+        Args:
+            data_keys (list): List of keys for data stored in the object store
+        Returns:
+            Pandas.Dataframe: Combined dataframes
+    """
+    from pandas import concat as _concat
+    from HUGS.ObjectStore import get_object as _get_object
+    from HUGS.ObjectStore import get_bucket as _get_bucket
+    from HUGS.Modules import Datasource as _Datasource
+
+    bucket = _get_bucket()
+    sections = [_Datasource.load_dataframe(bucket=bucket, key=key) for key in data_keys]
+
+    combined = _concat(sections, axis="rows")
+
+    # Check that the dataframe is sorted by date
+    if not combined.index.is_monotonic_increasing:
+        combined = combined.sort_index()
+
+    # print("Combined : ", combined)
+
+    # print(sections)
+
+    # combined = []
+    # # Combine the dataframes and create a frame of their indices
+    # for section in sections:
+    #     combo = _concat(section, axis="rows")
+    #     combined.append(combo)
+
+    # # Take the datetime column for checking
+    # complete = combined[0].iloc[:, :1]
+
+    # print(complete)
+
+    # for d in combined:
+    #     if len(d.index) != len(complete.index):
+    #         raise ValueError("Mismatch in timeframe and dataframes index length")
+    #     complete = _concat([complete, d], axis="columns")
+
+    return combined
 
 def combine_sections(sections):
     """ Combines separate dataframes into a single dataframe for

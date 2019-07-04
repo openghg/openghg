@@ -129,6 +129,7 @@ class Datasource:
         # As some (years, months, weeks) may be empty we don't want those dataframes
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
 
+
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed dataframe
 
@@ -178,7 +179,6 @@ class Datasource:
         # Query object store for Datasource
         return _exists(bucket=bucket, uuid=datasource_id)
 
-
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
             for storage in object store
@@ -207,8 +207,8 @@ class Datasource:
 
         return data
 
-    # def load_dataframe(self, bucket, uuid=None):
-    def load_dataframe(self, bucket, key):
+    @staticmethod
+    def load_dataframe(bucket, key):
         """ Loads data from the object store for creation of a Datasource object
 
             Args:
@@ -299,7 +299,7 @@ class Datasource:
         
         if d._stored and not shallow:
             for key in d._data_keys:
-                d._data.append(d.load_dataframe(bucket, key))
+                d._data.append(Datasource.load_dataframe(bucket, key))
 
         return d
 
@@ -440,7 +440,35 @@ class Datasource:
                 raise ValueError("Cannot get daterange with no data")
                 
         return "".join([_datetime_to_string(self._start_datetime), "_", _datetime_to_string(self._end_datetime)])
-        
 
+    def get_species(self):
+        """ Returns the species of this Datasource
 
+            Returns:
+                str: Species of this Datasource
+        """
+        return self._labels["species"]
+
+    def get_inlet(self):
+        """ Returns the inlet of this Datasource
+
+            Returns:
+                str: Inlet of this Datasource
+        """
+        return self._labels["inlet"]
         
+    def uuid(self):
+        """ Return the UUID of this object
+
+            Returns:
+                str: UUID
+        """
+        return self._uuid
+
+    def get_labels(self):
+        """ Retur the labels of this Datasource
+
+            Returns:
+                dict: Labels of Datasource
+        """
+        return self._labels

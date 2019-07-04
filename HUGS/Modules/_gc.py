@@ -25,6 +25,7 @@ class GC:
         self._creation_datetime = None
         self._instruments = {}
         self._stored = False
+        self._datasources = []
 
     @staticmethod
     def create():
@@ -87,6 +88,7 @@ class GC:
         data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         data["instruments"] = self._instruments
         data["stored"] = self._stored
+        data["datasources"] = self._datasources
 
         return data
 
@@ -108,6 +110,7 @@ class GC:
         gc._creation_datetime = data["creation_datetime"]
         gc._instruments = data["instruments"]
         stored = data["stored"]
+        gc._datasources = data["datasources"]
 
         gc._stored = False
         
@@ -176,6 +179,7 @@ class GC:
 
         from HUGS.Modules import Instrument as _Instrument
         from HUGS.Processing import Metadata as _Metadata
+        from HUGS.Processing import create_datasources as _create_datasources
 
         gc_id = _create_uuid()
 
@@ -186,30 +190,18 @@ class GC:
 
         print("Remember to update the instrument!")
         # Where to get this from? User input?
-        instrument_name = "GCMD"
-        instrument_id = _create_uuid()
-
-        if _Instrument.exists(uuid=instrument_id):
-            instrument = _Instrument.load(uuid)
-        else:
-            instrument = _Instrument.create(name=instrument_name)
-
-        # Do we need this metadata?
-        # metadata = _Metadata
         site = "CGO"
+        instrument_name = "GCMD"
+
         gas_data = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                         site=site, instrument=instrument_name)
-                        
-        instrument.add_data(gas_data)
-        # Save updated Instrument to object store
-        instrument.save()
-
-        # Ensure this Instrument is saved within the object
-        gc.add_instrument(instrument.get_uuid(), _datetime_to_string(instrument.get_creation_datetime()))
+    
+        # Create Datasources, save them to the object store and get their UUIDs
+        datasource_uuids = _create_datasources(gas_data)
+        # Add the Datasources to the list of datasources associated with this object
+        gc.add_datasources(datasource_uuids)
+        # Save object to object store
         gc.save()
-        
-        # Read in the parameters file just when reading in the file.
-        # Save it but don't save it to the object store as part of this object
 
         # For now return the GC object for easier testing
         return gc
@@ -278,7 +270,7 @@ class GC:
                 species.append(gas_name)
 
         # Rename columns to include the gas this flag represents
-        df.rename(columns=columns_renamed, inplace=True)
+        df = df.rename(columns=columns_renamed, inplace=False)
 
         # Read and parse precisions file
         precision, precision_species = self.read_precision(precision_filepath)
@@ -290,7 +282,7 @@ class GC:
         # instrument = "GCMD"
         # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
         df["new_time"] = df.index - _pd_Timedelta(seconds=self.get_precision(instrument)/2.0)
-        df.set_index("new_time", inplace=True, drop=True)
+        df = df.set_index("new_time", inplace=False, drop=True)
         df.index.name = "Datetime"
 
         self._proc_data = df
@@ -447,7 +439,24 @@ class GC:
         """
         self._instruments[instrument_id] = value
 
+    def add_datasources(self, datasource_uuids):
+        """ Add the passed list of Datasources to the current list
 
+            Args:
+                datasource_uuids (list): List of Datasource UUIDs
+            Returns:
+                None
+        """
+        self._datasources.extend(datasource_uuids)
+
+    def datasources(self):
+        """ Return the list of Datasources for this object
+
+            Returns:
+                list: List of Datasources
+        """
+        return self._datasources
+        
     # def get_precision(instrument):
     #     """ Get the precision in seconds of the passed instrument
 

@@ -1,8 +1,6 @@
 import pytest
 import os
 
-from Acquire.Client import Drive, StorageCreds
-
 from HUGS.Client import ListObjects
 
 @pytest.fixture(scope="session")
