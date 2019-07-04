@@ -10,7 +10,7 @@ or available on this system, e.g. for license incompatibility reasons
 
 try:
     import lazy_import
-    lazy_import.logging.disable(lazy_import.logging.DEBUG)
+    # lazy_import.logging.disable(lazy_import.logging.DEBUG)
 except:
     # lazy_import is not available, e.g. because we want the Apache
     # licensed version of this code - import the non-lazy wrapper
