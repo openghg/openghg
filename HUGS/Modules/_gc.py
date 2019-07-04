@@ -334,6 +334,7 @@ class GC:
                 Tuple of species name (str), metadata (dict), datasource_uuid (str), data (Pandas.DataFrame)
         """
         from fnmatch import fnmatch as _fnmatch
+        from itertools import compress as _compress
         from uuid import uuid4 as _uuid4
 
         # Read inlets from the parameters dictionary
@@ -341,14 +342,14 @@ class GC:
         # Get the inlets in the dataframe
         data_inlets = self._proc_data["Inlet"].unique()
 
-        # Does the data always provide data for all the expected inlets?
-        # if len(expected_inlets) != len(data_inlets):
-        #     raise ValueError("The expected number of inlets does not match the number of inlets in the provided data")
-
         # Check that each inlet in data_inlet matches one that's given by parameters file
         for data_inlet in data_inlets:
             match = [_fnmatch(data_inlet, inlet) for inlet in expected_inlets]
-            if True not in match:
+            if True in match:
+                # Filter the expected inlets by the ones we've found in data
+                # If none of them match processing below will not proceed
+                matching_inlets = list(_compress(data_inlets, match))
+            else:
                 raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
                                   data and inlet in parameters file.")
 
@@ -361,7 +362,7 @@ class GC:
             if self._proc_data[sp].isnull().all():
                 continue
 
-            for inlet in expected_inlets:
+            for inlet in matching_inlets:
                 metadata = {"inlet": inlet, "species": sp}
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
@@ -375,7 +376,16 @@ class GC:
                     dataframe = dataframe.dropna(axis="index", how="any")
                 else:
                     # Take only data for this inlet from the dataframe
-                    dataframe = self._proc_data[data["Inlet"] == inlet]
+                    dataframe = self._proc_data.loc[self._proc_data["Inlet"] == inlet]
+                    
+                    
+                    
+                    
+                    # here select the species data, otherwise getting the whole dataframe each time\
+
+
+
+
                     dataframe = dataframe.dropna(axis="index", how="any")
                     # TODO - change me
                     datasource_uuid = _uuid4()
@@ -388,7 +398,7 @@ class GC:
         """ Add an Instument to this object's dictionary of instruments
 
             Args:
-                instrument_id (str): Instrment UUID
+                instrument_id (str): Instrument UUID
                 value (str): Value to describe Instrument
             Returns:
                 None
