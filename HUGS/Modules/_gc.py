@@ -358,7 +358,7 @@ class GC:
         # But may be of the same species ?
         gas_data = []
         for sp in self._species:
-            # Check if this species data is all NaNs
+            # Check if the data for this species is all NaNs
             if self._proc_data[sp].isnull().all():
                 continue
 
