@@ -12,8 +12,8 @@ def hugs_functions(function, args):
         from hugs_service.listobjects import listobjects as _listobjects
         return _listobjects(args)
     if function == "search":
-        from hugs_service.upload import upload as _upload
-        return _upload(args)
+        from hugs_service.search import search as _search
+        return _search(args)
     else:
         from admin.handler import MissingFunctionError
         raise MissingFunctionError()
