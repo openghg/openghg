@@ -376,16 +376,8 @@ class GC:
                     dataframe = dataframe.dropna(axis="index", how="any")
                 else:
                     # Take only data for this inlet from the dataframe
-                    dataframe = self._proc_data.loc[self._proc_data["Inlet"] == inlet]
-                    
-                    
-                    
-                    
-                    # here select the species data, otherwise getting the whole dataframe each time\
-
-
-
-
+                    inlet_data = self._proc_data.loc[self._proc_data["Inlet"] == inlet]
+                    dataframe = inlet_data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
                     dataframe = dataframe.dropna(axis="index", how="any")
                     # TODO - change me
                     datasource_uuid = _uuid4()
