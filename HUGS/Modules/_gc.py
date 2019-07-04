@@ -335,14 +335,16 @@ class GC:
         """
         from fnmatch import fnmatch as _fnmatch
         from uuid import uuid4 as _uuid4
-        # import re as _re
-
-        gas_data = []
 
         # Read inlets from the parameters dictionary
         expected_inlets = self.get_inlets(site=site)
         # Get the inlets in the dataframe
         data_inlets = self._proc_data["Inlet"].unique()
+
+        # Does the data always provide data for all the expected inlets?
+        # if len(expected_inlets) != len(data_inlets):
+        #     raise ValueError("The expected number of inlets does not match the number of inlets in the provided data")
+
         # Check that each inlet in data_inlet matches one that's given by parameters file
         for data_inlet in data_inlets:
             match = [_fnmatch(data_inlet, inlet) for inlet in expected_inlets]
@@ -350,49 +352,35 @@ class GC:
                 raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
                                   data and inlet in parameters file.")
 
-
         # TODO - where to get Datasource UUIDs from?
         # Also what to do in case of multiple inlets - each of these will have a unique ID
         # But may be of the same species ?
-    
+        gas_data = []
         for sp in self._species:
             # Check if this species data is all NaNs
             if self._proc_data[sp].isnull().all():
                 continue
 
-            # If we've only got a single inlet
-            if len(data_inlets) == 1:
-                data_inlet = data_inlets[0]
-                # Not sure we need to save this
-                # clean_inlet_height = _re.search(r"\d+m", s).group()
-
-                # Create a metadata dict for any extra information we might need to store
-                # about the data here
-                # Split by date
-                if "date" in data_inlet:
+            for inlet in expected_inlets:
+                metadata = {"inlet": inlet, "species": sp}
+                # If we've only got a single inlet
+                if inlet == "any" or inlet == "air":
+                    dataframe = self._proc_data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
+                    dataframe = dataframe.dropna(axis="index", how="any")
+                elif "date" in inlet:
                     dates = inlet.split("_")[1:]
                     slice_dict = {time: slice(dates[0], dates[1])}
                     data_sliced = self._proc_data.loc(slice_dict)
                     dataframe = data_sliced[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
                     dataframe = dataframe.dropna(axis="index", how="any")
                 else:
-                    dataframe = self._proc_data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]                    
-                    dataframe = dataframe.dropna(axis="index", how="any")
-
-                metadata = {"inlet": data_inlet, "species": sp}
-                # TODO - change me
-                datasource_uuid = _uuid4()
-                gas_data.append((sp, metadata, datasource_uuid, dataframe))
-            # For multiple inlets
-            else:
-                for data_inlet in data_inlets:
-                    # TODO - add in uniqueness here!
-                    metadata = {"inlet": data_inlet, "species": sp}
-                    dataframe = self._proc_data[data["Inlet"] == data_inlet]
+                    # Take only data for this inlet from the dataframe
+                    dataframe = self._proc_data[data["Inlet"] == inlet]
                     dataframe = dataframe.dropna(axis="index", how="any")
                     # TODO - change me
                     datasource_uuid = _uuid4()
-                    gas_data.append((sp, metadata, datasource_uuid, dataframe))
+                
+                gas_data.append((sp, metadata, datasource_uuid, dataframe))
 
         return gas_data
 

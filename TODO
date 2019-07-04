@@ -180,4 +180,13 @@ Check return values of functions handling the data
 
 2019-07-04
 
-Merge in sans instrument to search functions and get the search function working
+Merge in sans instrument to search functions and get the search function working - Done
+
+1. Go through issues and check Matt's comments - emailed Matt
+
+2. Function for downloading of multiple sites data over a time period
+
+3. How to store data for emission maps etc that are multi-dimensional and might not fit
+in the tabular pandas format - HDF anyway?
+
+
