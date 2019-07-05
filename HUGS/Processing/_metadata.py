@@ -1,129 +1,52 @@
 
-__all__ = ["Metadata"]
+__all__ = ["parse"]
 
-
-class Metadata:
-    """ Processes and holds metadata for raw data
-
-        Metadata objects should be created using the
-        Metadata.create() function
-    """
-    def __init__(self):
-        self._data = None
-        self._uuid = None
-        self._creation_datetime = None
-
-    @staticmethod
-    def create(filename, data):
+def parse(filename, data, data_type):
         """ Process the metadata and create a JSON serialisable 
             dictionary for saving to object store
 
             Args:
                 filename (str): Filename to process
-                data (Pandas.Dataframe): Raw data
+                data (Pandas.DataFrame): Raw data
+                data_type (str): Data typw (CRDS, GC etc) to parse
             Returns:
                 dict: Dictionary of metadata
         """
-        from Acquire.ObjectStore import create_uuid as _create_uuid
-        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        from HUGS.Processing import DataTypes as _DataTypes
 
-        m = Metadata()
+        data_type = _DataTypes[datatype.upper()].name
 
-        # Dict for storage of metadata
-        m._data = {}
+        if data_type == "CRDS":
+            metadata = _parse_CRDS(filename=filename, data=data)
+        elif data_type == "GC":
+            metadata = _parse_GC(filename=filename, data=data)
 
-        # Where to drop NaNs?
-        # Creating metadata here is limited due to some columns possibly having
-        # Nans and others not
-        # Where to create?
+        return metadata
 
-        # Create metadata for each individual datasource? 
+def _parse_CRDS(self, filename, data):
+        """ Parse CRDS files and create a metadata dict
 
+            Args:
+                filename (str): Name of data file
+                data (Pandas.DataFrame): Raw data
+            Returns:
+                dict: Dictionary containing metadata
+        """
         # Not a huge fan of these hardcoded values
         # TODO - will these change at some point?
-        start_date = str(data[0][2])
-        start_time = str(data[1][2])
-        end_date = str(data.iloc[-1][0])
-        end_time = str(data.iloc[-1][1])
+        # start_date = str(data[0][2])
+        # start_time = str(data[1][2])
+        # end_date = str(data.iloc[-1][0])
+        # end_time = str(data.iloc[-1][1])
 
         # Find gas measured and port used
         type_meas = data[2][2]
         port = data[3][2]
 
-        start = m.parse_date_time(date=start_date, time=start_time)
-        end = m.parse_date_time(date=end_date, time=end_time)
+        # start = self.parse_date_time(date=start_date, time=start_time)
+        # end = self.parse_date_time(date=end_date, time=end_time)
 
-        # Extract data from the filename
-        site, instrument, time_resolution, height = m.parse_filename(filename=filename)
- 
-        # Parse the dataframe to find the gases - this might be excessive
-        # gases, _ = find_gases(data=data)
-        m._uuid = _create_uuid()
-        m._creation_datetime = _datetime_to_string(_get_datetime_now())
-        m._data["site"] = site
-        m._data["instrument"] = instrument
-        m._data["time_resolution"] = time_resolution
-        m._data["height"] = height
-        m._data["start_datetime"] = _datetime_to_string(start)
-        m._data["end_datetime"] = _datetime_to_string(end)
-        m._data["port"] = port
-        m._data["type"] = type_meas
-        # This will be added later
-        # metadata["gases"] = gases
-
-        return m
-
-    def is_null(self):
-        """Return whether this object is null
-        
-            Returns:
-                bool: True if object is null
-        """
-        return self._uuid is None
-
-    def data(self):
-        """ Return the dictionary containing metadata
-
-            Returns:
-                dict: Metadata dictionary
-        """
-        return self._data
-
-    def parse_date_time(self, date, time):
-        """ This function takes two strings and creates a datetime object 
-            
-            Args:
-                date (str): The date in a YYMMDD format
-                time (str): The time in the format hhmmss
-                Example: 104930 for 10:49:30
-            Returns:
-                datetime: Datetime object
-
-        """
-        import datetime as _datetime
-
-        if len(date) != 6:
-            raise ValueError("Incorrect date format, should be YYMMDD")
-        if len(time) != 6:
-            raise ValueError("Incorrect time format, should be hhmmss")
-
-        combined = date + time
-
-        return _datetime.datetime.strptime(combined, "%y%m%d%H%M%S")
-
-
-    def parse_filename(self, filename):
-        """ Extracts the resolution from the passed string
-
-            Args:
-                resolution_str (str): Resolution extracted from the filename
-            Returns:
-                tuple (str, str, str, str): Site, instrument, resolution
-                and height (m)
-
-        """
-        # Split the filename to get the site and resolution
+         # Split the filename to get the site and resolution
         split_filename = filename.split(".")
 
         site = split_filename[0]
@@ -135,5 +58,33 @@ class Metadata:
             resolution = "1m"
         elif(resolution_str == "hourly"):
             resolution = "1h"
+ 
+        # Parse the dataframe to find the gases - this might be excessive
+        # gases, _ = find_gases(data=data)
+        metadata = {}
+        metadata["site"] = site
+        metadata["instrument"] = instrument
+        metadata["time_resolution"] = time_resolution
+        metadata["height"] = height
+        metadata["port"] = port
+        metadata["type"] = type_meas
+        
+        return metadata
 
-        return site, instrument, resolution, height
+
+def _parse_GC(self, filename, data):
+    """ Parse GC files and create a metadata dict
+
+        Args:
+            filename (str): Name of data file
+            data (Pandas.DataFrame): Raw data
+        Returns:
+            dict: Dictionary containing metadata
+    """
+    split_filename = filename.split(".")
+    site = split_filename[0]
+    instrument = split_filename[1]
+
+
+
+

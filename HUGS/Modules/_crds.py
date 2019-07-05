@@ -76,6 +76,9 @@ class CRDS:
         
         # There should only be 1 CRDS object
 
+        c = CRDS.create()
+        c.save()
+
         crds_uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
         crds = CRDS.load(uuid=crds_uuid)
 
@@ -110,6 +113,8 @@ class CRDS:
                 tuple (str, str, list): Name of gas, ID of Datasource of this data and a list Pandas DataFrames for the 
                 date-split gas data
         """
+        import Processing.Metadata as _Metadata
+
         from pandas import RangeIndex as _RangeIndex
         from pandas import concat as _concat
         from pandas import read_csv as _read_csv
@@ -144,6 +149,11 @@ class CRDS:
         timeframe = self.parse_timecols(time_data=time_data)
         timeframe.index = _RangeIndex(timeframe.index.size)
 
+        # Create metadata here
+        metadata = _Metadata.parse(filename=filename, data=data, data_type="CRDS")
+
+        return False
+
         data_list = []
         for n in range(n_gases):
             datasource_id = datasource_ids[n]
@@ -168,13 +178,12 @@ class CRDS:
             # Cast data to float64 / double
             gas_data = gas_data.astype("float64")
             # Concatenate the timeframe and the data
-            # Pandas concat here
             gas_data = _concat([timeframe, gas_data], axis="columns")
 
             # TODO - Verify integrity here? Test if this is required
             gas_data = gas_data.set_index('Datetime', drop=True, inplace=False, verify_integrity=True)
             # TODO - What metadata should be added?
-            metadata = {"species" : species}
+            metadata["species"] = species
 
             data_list.append((species, metadata, datasource_id, gas_data))
 
@@ -200,8 +209,7 @@ class CRDS:
         def t_calc(row, col): return _datetime_to_string(_datetime_to_datetime(
             _datetime.datetime.strptime(row+col, "%y%m%d%H%M%S")))
 
-        time_gen = (t_calc(row, col)
-                    for row, col in time_data.itertuples(index=False))
+        time_gen = (t_calc(row, col) for row, col in time_data.itertuples(index=False))
         time_list = list(time_gen)
 
         timeframe = _DataFrame(data=time_list, columns=["Datetime"])
@@ -235,8 +243,7 @@ class CRDS:
 
             # Check that we have the same number of columns for each gas
             if not _unanimous(gases):
-                raise ValueError(
-                    "Each gas does not have the same number of columns")
+                raise ValueError("Each gas does not have the same number of columns")
 
             return len(gases), list(gases.values())[0]
 

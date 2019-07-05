@@ -155,7 +155,8 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
 
                 if require_all:
                     # If this Datasource also contains all the other terms we're searching for
-                    all_terms = [datasource.search_labels(term) for term in search_terms != search_term]
+                    all_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
+                    
                     if all(all_terms):
                         keys[search_term].extend(in_date)
                 else:

@@ -15,7 +15,7 @@ from Acquire.ObjectStore import datetime_to_datetime
 # Create the CRDS object
 @pytest.fixture(scope="session", autouse=True)
 def create_crds():
-    # prepare something ahead of all tests
+    # prepare something ahead 
     crds = CRDS.create()
     crds.save()
 
@@ -89,7 +89,7 @@ def test_general_search():
     search_term = "co"
     data_type = "CRDS"
 
-    results = search(search_term=search_term, data_type=data_type)
+    results = search(search_terms=search_term, data_type=data_type)
 
     assert len(results[search_term]) == 7    
 
@@ -108,7 +108,7 @@ def test_general_search_multiple_terms():
     search_terms = ["co", "co2", "ch4"]
     data_type = "CRDS"
 
-    results = search(search_term=search_terms, data_type=data_type)
+    results = search(search_terms=search_terms, data_type=data_type)
 
     assert len(results["co"]) == 7
     assert len(results["co2"]) == 7
@@ -132,6 +132,10 @@ def test_search_all_terms():
 
     search_terms = ["co", "co2", "ch4"]
     data_type = "CRDS"
+
+    results = search(search_terms=search_terms, data_type=data_type, require_all=True)
+
+    print(results)
 
 
 

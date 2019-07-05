@@ -225,6 +225,8 @@ class GC:
         from pandas import datetime as _pd_datetime
         from pandas import Timedelta as _pd_Timedelta
 
+        import HUGS.Processing.Metadata as _Metadata
+
         # Load in the parameters dictionary for processing data
         params_file = _test_data() + "/process_gcwerks_parameters.json"
         with open(params_file, "r") as FILE:
