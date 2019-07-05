@@ -41,7 +41,8 @@ class CRDS:
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
         c = CRDS()
-        c._uuid  = _create_uuid()
+        # As there should only be one of these, give it a fixed UUID ? 
+        c._uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
         c._creation_datetime = _get_datetime_now()
 
         return c
@@ -73,13 +74,10 @@ class CRDS:
         # CRDS object doesn't actually hold any of the Instrument objects
         # it just remembers them
         
-        # Get a random UUID for now
-        crds_uuid = _create_uuid()
+        # There should only be 1 CRDS object
 
-        if CRDS.exists(uuid=crds_uuid):
-            crds = CRDS.load(uuid=crds_uuid)
-        else:
-            crds = CRDS.create()
+        crds_uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
+        crds = CRDS.load(uuid=crds_uuid)
 
         filename = data_filepath.split("/")[-1]
         # metadata = _Metadata.create(filename, raw_data)

@@ -12,6 +12,13 @@ from HUGS.Processing import recombine_sections, search
 from Acquire.ObjectStore import datetime_to_string
 from Acquire.ObjectStore import datetime_to_datetime
 
+# Create the CRDS object
+@pytest.fixture(scope="session", autouse=True)
+def create_crds():
+    # prepare something ahead of all tests
+    crds = CRDS.create()
+    crds.save()
+
 @pytest.fixture(scope="session")
 def crds():
     filename = "bsd.picarro.1minute.248m.dat"
@@ -111,6 +118,20 @@ def test_general_search_multiple_terms():
     assert len(results["co2"]) == len(set(results["co2"]))
     assert len(results["ch4"]) == len(set(results["ch4"]))
 
+
+def test_search_all_terms():
+    filename_hfd = "hfd.picarro.1minute.100m_min.dat"
+    filename_bsd = "bsd.picarro.1minute.248m.dat"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filepath = os.path.join(dir_path, test_data, filename_hfd)
+
+    _ = get_local_bucket(empty=True)
+
+    crds = CRDS.read_file(filepath)
+
+    search_terms = ["co", "co2", "ch4"]
+    data_type = "CRDS"
 
 
 
