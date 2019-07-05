@@ -87,12 +87,13 @@ def gas_search(species, data_type, start_datetime=None, end_datetime=None):
     return keys
 
 
-def search(search_terms, data_type, start_datetime=None, end_datetime=None):
+def search(search_terms, data_type, require_all=False, start_datetime=None, end_datetime=None):
     """ Search for gas data (optionally within a daterange)
     
         Args:
             search_terms (string or list): String to search for
             data_type (str): GC / CRDS etc
+            require_all (bool, default=False): Require all search terms to be satisfied
             start_datetime (datetime, default=None): Start datetime for search
             If None a start datetime of UNIX epoch (1970-01-01) is set
             end_datetime (datetime, default=None): End datetime for search
@@ -141,16 +142,24 @@ def search(search_terms, data_type, start_datetime=None, end_datetime=None):
         search_terms = [search_terms]
 
     keys = {}
-    # Do the searching
-    for search_str in search_terms:
-        keys[search_str] = []
+
+    for search_term in search_terms:
+        keys[search_term] = []
         for datasource in datasources:
-            if datasource.search_labels(search_str):
+            # Check the Datasource labels for the search term
+            if datasource.search_labels(search_term):
                 prefix = "data/uuid/%s" % datasource.uuid()
                 data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                # Get the Dataframes that are within the dates we are searching for
                 in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
 
-                keys[search_str].extend(in_date)
+                if require_all:
+                    # If this Datasource also contains all the other terms we're searching for
+                    all_terms = [datasource.search_labels(term) for term in search_terms != search_term]
+                    if all(all_terms):
+                        keys[search_term].extend(in_date)
+                else:
+                    keys[search_term].extend(in_date)
 
     return keys
 
