@@ -6,8 +6,7 @@ from enum import Enum as _Enum
 
 __all__ = ["gas_search", "get_data",  "in_daterange",
            "key_to_daterange", "daterange_to_string", 
-           "daterange_to_string",  "search_store",
-           "load_object", "search"]
+           "daterange_to_string", "load_object", "search"]
 
 
 class RootPaths(_Enum):
@@ -88,18 +87,18 @@ def gas_search(species, data_type, start_datetime=None, end_datetime=None):
     return keys
 
 
-def search(search_term, data_type, start_datetime=None, end_datetime=None):
+def search(search_terms, data_type, start_datetime=None, end_datetime=None):
     """ Search for gas data (optionally within a daterange)
     
         Args:
-            search_tern (str): String to search for
+            search_terms (string or list): String to search for
             data_type (str): GC / CRDS etc
             start_datetime (datetime, default=None): Start datetime for search
             If None a start datetime of UNIX epoch (1970-01-01) is set
             end_datetime (datetime, default=None): End datetime for search
             If None an end datetime of the current datetime is set
         Returns:
-            list: List of keys of Datasources matching the search parameters
+            dict: List of keys of Datasources matching the search parameters
     """
     from HUGS.ObjectStore import get_object_names as _get_object_names
     from HUGS.ObjectStore import get_local_bucket as _get_local_bucket
@@ -120,27 +119,14 @@ def search(search_term, data_type, start_datetime=None, end_datetime=None):
     data_type = DataType[data_type.upper()]
     # Get the objects that contain the Datasources
     object_list = _get_object_names(bucket=bucket, prefix=search_prefix)
+    object_uuid = object_list[0].split("/")[-1]
 
     if len(object_list) == 0:
         raise ValueError("No " + data_type.name + " object found.")
     if len(object_list) > 1:
         raise ValueError("More than one " + data_type.name + " object found.")
 
-    object_uuid = object_list[0].split("/")[-1]
-
-    # Load in the object
     data_obj = load_object(data_type.name, object_uuid)
-
-    if not isinstance(search_term, list):
-        search_term = [search_term]
-
-    for s in search_term:
-        # Do the searching
-
-
-
-
-
     # Get the UUIDs of the Datasources associated with the object
     datasource_uuids = data_obj.datasources()
 
@@ -151,14 +137,20 @@ def search(search_term, data_type, start_datetime=None, end_datetime=None):
 
     datasources = [_Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 
-    keys = []
-    for datasource in datasources:
-        if datasource.search_labels(search_term):
-            prefix = "data/uuid/%s" % datasource.uuid()
-            data_list = _get_object_names(bucket=bucket, prefix=prefix)
-            in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+    if not isinstance(search_terms, list):
+        search_terms = [search_terms]
 
-            keys.extend(in_date)
+    keys = {}
+    # Do the searching
+    for search_str in search_terms:
+        keys[search_str] = []
+        for datasource in datasources:
+            if datasource.search_labels(search_str):
+                prefix = "data/uuid/%s" % datasource.uuid()
+                data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+
+                keys[search_str].extend(in_date)
 
     return keys
 
