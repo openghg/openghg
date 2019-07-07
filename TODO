@@ -190,3 +190,11 @@ Merge in sans instrument to search functions and get the search function working
 in the tabular pandas format - HDF anyway?
 
 
+2019-07-07
+
+Searching and combining types of data correctly - recombination function should read the dict it's
+passed with the data and recombine the dataframes based on the dict values
+
+Fix the loading of CRDS and GC objects, there should only be one of both of these
+Check on creation if the object already exists in the object store to prevent over-writing
+

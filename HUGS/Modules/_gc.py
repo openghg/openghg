@@ -38,7 +38,7 @@ class GC:
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
         gc = GC()
-        gc._uuid = _create_uuid()
+        gc._uuid = "8cba4797-510c-47gc-8af1-e02a5ee57489"
         gc._creation_datetime = _get_datetime_now()
 
         return gc
@@ -178,15 +178,10 @@ class GC:
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         from HUGS.Modules import Instrument as _Instrument
-        from HUGS.Processing import Metadata as _Metadata
         from HUGS.Processing import create_datasources as _create_datasources
 
-        gc_id = _create_uuid()
-
-        if GC.exists(uuid=gc_id):
-            gc = GC.load(uuid=gc_id)
-        else:
-            gc = GC.create()
+        gc_id = "8cba4797-510c-47gc-8af1-e02a5ee57489"
+        gc = GC.load(uuid=gc_id)
 
         print("Remember to update the instrument!")
         # Where to get this from? User input?
@@ -202,6 +197,8 @@ class GC:
         gc.add_datasources(datasource_uuids)
         # Save object to object store
         gc.save()
+
+        assert False
 
         # For now return the GC object for easier testing
         return gc
@@ -242,6 +239,8 @@ class GC:
         df = _read_csv(data_filepath, skiprows=4, sep=r"\s+", index_col=["yyyy_mm_dd_hh_mi"],
                          parse_dates=[[1, 2, 3, 4, 5]], date_parser=parser)
         df.index.name = "Datetime"
+
+        metadata = _Metadata.parse(filename=data_filepath, data=df, data_type="GC")
 
         units = {}
         scale = {}
@@ -293,7 +292,7 @@ class GC:
         self._scale = scale
 
         # Segment the processed data
-        gas_data = self.split(site=site)
+        gas_data = self.split(site=site, metadata=metadata)
     
         return gas_data
 
@@ -324,7 +323,7 @@ class GC:
 
         return precision, precision_species
 
-    def split(self, site):
+    def split(self, site, metadata):
         """ Splits the dataframe into sections to be stored within individual Datasources
 
             Args:
@@ -365,7 +364,7 @@ class GC:
                 continue
 
             for inlet in matching_inlets:
-                metadata = {"inlet": inlet, "species": sp}
+                metadata["species"] = species
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
                     dataframe = self._proc_data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]

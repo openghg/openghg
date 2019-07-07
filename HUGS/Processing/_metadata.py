@@ -1,7 +1,7 @@
 
-__all__ = ["parse"]
+__all__ = ["read_metadata"]
 
-def parse(filename, data, data_type):
+def read_metadata(filename, data, data_type):
         """ Process the metadata and create a JSON serialisable 
             dictionary for saving to object store
 
@@ -14,7 +14,7 @@ def parse(filename, data, data_type):
         """
         from HUGS.Processing import DataTypes as _DataTypes
 
-        data_type = _DataTypes[datatype.upper()].name
+        data_type = _DataTypes[data_type.upper()].name
 
         if data_type == "CRDS":
             metadata = _parse_CRDS(filename=filename, data=data)
@@ -23,7 +23,7 @@ def parse(filename, data, data_type):
 
         return metadata
 
-def _parse_CRDS(self, filename, data):
+def _parse_CRDS(filename, data):
         """ Parse CRDS files and create a metadata dict
 
             Args:
@@ -55,16 +55,16 @@ def _parse_CRDS(self, filename, data):
         height = split_filename[3]
 
         if(resolution_str == "1minute"):
-            resolution = "1m"
+            resolution = "1_minute"
         elif(resolution_str == "hourly"):
-            resolution = "1h"
+            resolution = "1_hour"
  
         # Parse the dataframe to find the gases - this might be excessive
         # gases, _ = find_gases(data=data)
         metadata = {}
         metadata["site"] = site
         metadata["instrument"] = instrument
-        metadata["time_resolution"] = time_resolution
+        metadata["time_resolution"] = resolution
         metadata["height"] = height
         metadata["port"] = port
         metadata["type"] = type_meas
@@ -72,7 +72,7 @@ def _parse_CRDS(self, filename, data):
         return metadata
 
 
-def _parse_GC(self, filename, data):
+def _parse_GC(filename, data):
     """ Parse GC files and create a metadata dict
 
         Args:
@@ -82,8 +82,15 @@ def _parse_GC(self, filename, data):
             dict: Dictionary containing metadata
     """
     split_filename = filename.split(".")
-    site = split_filename[0]
-    instrument = split_filename[1]
+    site = split_filename[0].split("-")[0]
+    instrument = split_filename[0].split("-")[1]
+
+    metadata = {}
+    metadata["site"] = site
+    metadata["instrument"] = instrument
+
+    return metadata
+
 
 
 

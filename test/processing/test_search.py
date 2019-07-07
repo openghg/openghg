@@ -2,7 +2,7 @@ import datetime
 import os
 import pytest
 
-from HUGS.Modules import CRDS
+from HUGS.Modules import CRDS, GC
 from HUGS.Modules import Datasource
 from HUGS.ObjectStore import get_local_bucket
 from HUGS.Processing import in_daterange, key_to_daterange, gas_search, load_object
@@ -75,6 +75,28 @@ def test_gas_search_CRDS_two():
 
     assert len(keys) == 7
 
+def test_search_GC():
+    precision_filename = "capegrim-medusa.18.precisions.C"
+    data_filename = "capegrim-medusa.18.C"
+
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/GC"
+    data_filepath = os.path.join(dir_path, test_data, precision_filename)
+    precision_filepath = os.path.join(dir_path, test_data, data_filename)
+
+    _ = get_local_bucket(empty=True)
+
+    gc = GC.read_file(data_filepath=data_filepath, precision_filepath=precision_filepath)
+
+    
+
+
+
+
+
+
+
+
 def test_general_search():
     # Test a more general search function
     filename = "hfd.picarro.1minute.100m_min.dat"
@@ -121,7 +143,6 @@ def test_general_search_multiple_terms():
 
 def test_search_all_terms():
     filename_hfd = "hfd.picarro.1minute.100m_min.dat"
-    filename_bsd = "bsd.picarro.1minute.248m.dat"
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename_hfd)
@@ -136,6 +157,10 @@ def test_search_all_terms():
     results = search(search_terms=search_terms, data_type=data_type, require_all=True)
 
     print(results)
+
+    assert False
+
+
 
 
 
