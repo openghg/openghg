@@ -75,6 +75,7 @@ def test_gas_search_CRDS_two():
 
     assert len(keys) == 7
 
+
 def test_search_GC():
     precision_filename = "capegrim-medusa.18.precisions.C"
     data_filename = "capegrim-medusa.18.C"
@@ -88,13 +89,7 @@ def test_search_GC():
 
     gc = GC.read_file(data_filepath=data_filepath, precision_filepath=precision_filepath)
 
-    
-
-
-
-
-
-
+    assert False
 
 
 def test_general_search():
@@ -132,8 +127,8 @@ def test_general_search_multiple_terms():
 
     results = search(search_terms=search_terms, data_type=data_type)
 
-    assert len(results["co"]) == 7
     assert len(results["co2"]) == 7
+    assert len(results["co"]) == 7
     assert len(results["ch4"]) == 7
 
     assert len(results["co"]) == len(set(results["co"]))

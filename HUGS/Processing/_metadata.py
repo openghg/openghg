@@ -65,7 +65,7 @@ def _parse_CRDS(filename, data):
         # Parse the dataframe to find the gases - this might be excessive
         # gases, _ = find_gases(data=data)
         metadata = {}
-        metadata["site"] = site
+        metadata["site"] = site 
         metadata["instrument"] = instrument
         metadata["time_resolution"] = resolution
         metadata["height"] = height

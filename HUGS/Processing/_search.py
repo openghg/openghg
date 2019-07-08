@@ -258,7 +258,7 @@ def load_object(class_name, uuid):
     module_object = __import__(name=module_path, fromlist=class_name)
     target_class = getattr(module_object, class_name)
 
-    return target_class.load(uuid=uuid)
+    return target_class.load()
 
 
 

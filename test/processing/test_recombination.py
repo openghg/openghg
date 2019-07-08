@@ -59,9 +59,9 @@ def test_recombination_GC(data_path, precision_path):
 
     keys = gas_search(species=gas_name, data_type=data_type)
 
-    recombined_dataframe=recombine_sections(data_keys = keys)
+    recombined_dataframe=recombine_sections(data_keys=keys)
 
-    assert len(keys) == 1
+    assert len(keys["gas_name"]) == 1
     assert recombined_dataframe.equals(complete_data)
 
 

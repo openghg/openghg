@@ -19,13 +19,12 @@ def create_datasources(gas_data):
     uuids = []
 
     # Rework this to for the segmentation of data within the Datasource
-    for gas_name, metadata, datasource_id, data in gas_data:
+    for species, metadata, datasource_id, data in gas_data:
         if _Datasource.exists(datasource_id=datasource_id):
             datasource = _Datasource.load(uuid=datasource_id)
             # TODO - add metadata in here - append to existing?
         else:
-            datasource = _Datasource.create(name=gas_name)
-            # datasource.add_metadata(metadata)
+            datasource = _Datasource.create(name=species)
 
         # Store the name and datasource_id
         # self._species[gas_name] = datasource_id

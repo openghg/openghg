@@ -122,8 +122,6 @@ class CRDS:
 
         # Create an ID for the Datasource
         # Currently just give it a fixed ID
-        # datasource_ids = ["2e628682-094f-4ffb-949f-83e12e87a603", "2e628682-094f-4ffb-949f-83e12e87a604", 
-        #                     "2e628682-094f-4ffb-949f-83e12e87a605"]
         data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+")
         # Drop any rows with NaNs
         # Reset the index
@@ -150,8 +148,6 @@ class CRDS:
 
         # Create metadata here
         metadata = read_metadata(filename=data_filepath, data=data, data_type="CRDS")
-
-        return False
 
         data_list = []
         for n in range(n_gases):
@@ -182,9 +178,12 @@ class CRDS:
             # TODO - Verify integrity here? Test if this is required
             gas_data = gas_data.set_index('Datetime', drop=True, inplace=False, verify_integrity=True)
             # TODO - What metadata should be added?
-            metadata["species"] = species
+            
+            # Create a copy of the metadata dict
+            species_metadata = metadata.copy()
+            species_metadata["species"] = species
 
-            data_list.append((species, metadata, datasource_id, gas_data))
+            data_list.append((species, species_metadata, datasource_id, gas_data))
 
         return data_list
 

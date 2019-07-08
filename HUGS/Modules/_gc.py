@@ -14,7 +14,6 @@ def _test_data():
     """
     import os as _os
     path = _os.path.dirname(_os.path.abspath(__file__)) + _os.path.sep + "../Data"
-    print(path)
     return path
 
 class GC:
@@ -35,7 +34,6 @@ class GC:
             Returns:
                 GC: GC object 
         """
-        from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
         gc = GC()
@@ -52,9 +50,9 @@ class GC:
         return self._datasources is None
 
     @staticmethod
-    def exists(uuid, bucket=None):
-        """ Check if an object with the passed UUID exists in 
-            the object store
+    def exists(bucket=None):
+        """ Check if a GC object is already saved in the object 
+            store
 
             Args:
                 uuid (str): UUID of GC object
@@ -69,7 +67,7 @@ class GC:
             bucket = _get_bucket()
 
         # Query object store for Instrument
-        return _exists(bucket=bucket, uuid=uuid)
+        return _exists(bucket=bucket, uuid=GC._gc_uuid)
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -107,7 +105,7 @@ class GC:
         
         gc = GC()
         # gc._uuid = data["uuid"]
-        gc._creation_datetime = data["creation_datetime"]
+        gc._creation_datetime = _string_to_datetime(data["creation_datetime"])
         gc._instruments = data["instruments"]
         stored = data["stored"]
         gc._datasources = data["datasources"]
@@ -197,8 +195,6 @@ class GC:
         # Save object to object store
         gc.save()
 
-        assert False
-
         # For now return the GC object for easier testing
         return gc
 
@@ -221,7 +217,7 @@ class GC:
         from pandas import datetime as _pd_datetime
         from pandas import Timedelta as _pd_Timedelta
 
-        import HUGS.Processing.Metadata as _Metadata
+        from HUGS.Processing import read_metadata
 
         # Load in the parameters dictionary for processing data
         params_file = _test_data() + "/process_gcwerks_parameters.json"
@@ -239,7 +235,7 @@ class GC:
                          parse_dates=[[1, 2, 3, 4, 5]], date_parser=parser)
         df.index.name = "Datetime"
 
-        metadata = _Metadata.parse(filename=data_filepath, data=df, data_type="GC")
+        metadata = read_metadata(filename=data_filepath, data=df, data_type="GC")
 
         units = {}
         scale = {}
@@ -357,33 +353,39 @@ class GC:
         # Also what to do in case of multiple inlets - each of these will have a unique ID
         # But may be of the same species ?
         gas_data = []
-        for sp in self._species:
+
+        for species in self._species:
             # Check if the data for this species is all NaNs
-            if self._proc_data[sp].isnull().all():
+            if self._proc_data[species].isnull().all():
                 continue
 
+            # Create a copy of metadata
+            spec_metadata = metadata.copy()
+            spec_metadata["species"] = species
+
             for inlet in matching_inlets:
-                metadata["species"] = species
+                spec_metadata["inlet"] = inlet
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
-                    dataframe = self._proc_data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
+                    dataframe = self._proc_data[[species, species + " repeatability", species + " status_flag",  species + " integration_flag", "Inlet"]]
                     dataframe = dataframe.dropna(axis="index", how="any")
                 elif "date" in inlet:
                     dates = inlet.split("_")[1:]
                     slice_dict = {time: slice(dates[0], dates[1])}
                     data_sliced = self._proc_data.loc(slice_dict)
-                    dataframe = data_sliced[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
+                    dataframe = data_sliced[[species, species + " repeatability", species + " status_flag",  species + " integration_flag", "Inlet"]]
                     dataframe = dataframe.dropna(axis="index", how="any")
                 else:
                     # Take only data for this inlet from the dataframe
                     inlet_data = self._proc_data.loc[self._proc_data["Inlet"] == inlet]
-                    dataframe = inlet_data[[sp, sp + " repeatability", sp + " status_flag",  sp + " integration_flag", "Inlet"]]
+                    dataframe = inlet_data[[species, species + " repeatability", species + " status_flag",  species + " integration_flag", "Inlet"]]
                     dataframe = dataframe.dropna(axis="index", how="any")
                     # TODO - change me
                     datasource_uuid = _uuid4()
-                
-                gas_data.append((sp, metadata, datasource_uuid, dataframe))
-
+            
+                # Append for each inlet
+                gas_data.append((species, spec_metadata, datasource_uuid, dataframe))
+        
         return gas_data
 
     def add_instrument(self, instrument_id, value):
