@@ -175,9 +175,11 @@ class Datasource:
 
         if bucket is None:
             bucket = _get_bucket()
+
+        key = "%s/uuid/%s" % (Datasource._data_root, datasource_id)
         
         # Query object store for Datasource
-        return _exists(bucket=bucket, uuid=datasource_id)
+        return _exists(bucket=bucket, key=key)
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object

@@ -46,6 +46,9 @@ def test_recombination_CRDS():
 
 
 def test_recombination_GC(data_path, precision_path):
+    gc = GC.create()
+    gc.save()
+
     gc = GC.read_file(data_filepath=data_path, precision_filepath=precision_path)
 
     site = "CGO"
@@ -59,9 +62,9 @@ def test_recombination_GC(data_path, precision_path):
 
     keys = gas_search(species=gas_name, data_type=data_type)
 
-    recombined_dataframe=recombine_sections(data_keys=keys)
+    recombined_dataframe = recombine_sections(data_keys=keys)
 
-    assert len(keys["gas_name"]) == 1
+    assert len(keys) == 1
     assert recombined_dataframe.equals(complete_data)
 
 

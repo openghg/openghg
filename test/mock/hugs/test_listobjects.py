@@ -13,6 +13,4 @@ def test_listobjects(authenticated_user, tempdir):
 
     results = listobj.get_list()
 
-    print(results)
-
     assert(False)

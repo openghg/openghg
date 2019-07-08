@@ -25,18 +25,3 @@ acquire_dir = "../acquire"
 sys.path.insert(0, os.path.abspath(acquire_dir))
 sys.path.insert(0, os.path.abspath("%s/services" % acquire_dir))
 
-
-from HUGS.Modules import CRDS, GC
-# Create the CRDS and GC objects for testing
-@pytest.fixture(scope="session", autouse=True)
-def create_gc():
-    gc = GC.create()
-    print("Creating GC object")
-    gc.save()
-
-
-@pytest.fixture(scope="session", autouse=True)
-def create_crds():
-    crds = CRDS.create()
-    print("Creating CRDS object")
-    crds.save()

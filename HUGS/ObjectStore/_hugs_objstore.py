@@ -88,7 +88,7 @@ def get_dated_object_json(bucket, key):
     return _ObjectStore.get_object_from_json(bucket, name[0])
 
 
-def exists(bucket, uuid):
+def exists(bucket, key):
     """ Checks if there is an object in the object store with the given key
 
         Args:
@@ -99,10 +99,8 @@ def exists(bucket, uuid):
     """
     from Acquire.ObjectStore import ObjectStore as _ObjectStore
 
-    prefix = "datasource/uuid/%s" % uuid
-
     # Get the object and use the key as a prefix
-    name = _ObjectStore.get_all_object_names(bucket, prefix=prefix)
+    name = _ObjectStore.get_all_object_names(bucket, prefix=key)
 
     return len(name) > 0
 

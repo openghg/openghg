@@ -77,19 +77,27 @@ def test_gas_search_CRDS_two():
 
 
 def test_search_GC():
-    precision_filename = "capegrim-medusa.18.precisions.C"
     data_filename = "capegrim-medusa.18.C"
+    precision_filename = "capegrim-medusa.18.precisions.C"
 
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/GC"
-    data_filepath = os.path.join(dir_path, test_data, precision_filename)
-    precision_filepath = os.path.join(dir_path, test_data, data_filename)
+    data_filepath = os.path.join(dir_path, test_data, data_filename)
+    precision_filepath = os.path.join(dir_path, test_data, precision_filename)
 
     _ = get_local_bucket(empty=True)
 
+    gc = GC.create()
+    gc.save()
+
     gc = GC.read_file(data_filepath=data_filepath, precision_filepath=precision_filepath)
 
-    assert False
+    search_term = "NF3"
+    data_type = "GC"
+
+    results = search(search_terms=search_term, data_type=data_type)
+
+    assert len(results[search_term]) == 1
 
 
 def test_general_search():
@@ -146,18 +154,13 @@ def test_search_all_terms():
 
     crds = CRDS.read_file(filepath)
 
-    search_terms = ["co", "co2", "ch4"]
+    # Items should contain all these terms
+    search_terms  = ["co", "hfd", "picarro"]
     data_type = "CRDS"
 
     results = search(search_terms=search_terms, data_type=data_type, require_all=True)
 
-    print(results)
-
-    assert False
-
-
-
-
+    assert len(results["co_hfd_picarro"]) == 7
 
 
 # def test_search_store(crds):

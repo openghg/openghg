@@ -369,8 +369,10 @@ class CRDS:
         if bucket is None:
             bucket = _get_bucket()
 
+        key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
+
         # Query object store for Instrument
-        return _exists(bucket=bucket, uuid=CRDS._crds_uuid)
+        return _exists(bucket=bucket, key=key)
 
     def add_datasources(self, datasource_uuids):
         """ Add the passed list of Datasources to the current list

@@ -66,8 +66,9 @@ class GC:
         if bucket is None:
             bucket = _get_bucket()
 
+        key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
         # Query object store for Instrument
-        return _exists(bucket=bucket, uuid=GC._gc_uuid)
+        return _exists(bucket=bucket, key=key)
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -177,7 +178,6 @@ class GC:
         from HUGS.Modules import Instrument as _Instrument
         from HUGS.Processing import create_datasources as _create_datasources
 
-        gc_id = "8cba4797-510c-47gc-8af1-e02a5ee57489"
         gc = GC.load()
 
         print("Remember to update the instrument!")

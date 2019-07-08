@@ -41,6 +41,9 @@ def gc(mock_uuid):
 
 
 def test_read_file(data_path, precision_path):
+    gc = GC.create()
+    gc.save()
+
     gc = GC.read_file(data_filepath=data_path, precision_filepath=precision_path)
 
     header = gc._proc_data.head(1)
@@ -145,6 +148,7 @@ def test_load(gc):
 
 
 def test_exists(gc):
-    gc.save()
+    bucket = get_local_bucket()
+    gc.save(bucket=bucket)
 
-    assert GC.exists() == True
+    assert GC.exists(bucket=bucket) == True

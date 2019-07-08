@@ -140,11 +140,20 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
 
     if not isinstance(search_terms, list):
         search_terms = [search_terms]
+    
+    # Just want to return a single composite key of all search terms
+    if require_all:
+        single_key = "_".join(sorted(search_terms))
 
     keys = {}
-
     for search_term in search_terms:
-        keys[search_term] = []
+        # If we require all the search terms to be satisifed use a single key
+        if require_all:
+            search_key = single_key
+        else:
+            search_key = search_term
+
+        keys[search_key] = []
         for datasource in datasources:
             # Check the Datasource labels for the search term
             if datasource.search_labels(search_term):
@@ -154,13 +163,14 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
                 in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
 
                 if require_all:
-                    # If this Datasource also contains all the other terms we're searching for
-                    all_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
-                    
-                    if all(all_terms):
-                        keys[search_term].extend(in_date)
+                    # Check if this Datasource also contains all the other terms we're searching for
+                    # and get True/False values
+                    remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
+                    # Check if we got all Trues for the other search terms
+                    if all(remaining_terms):
+                        keys[search_key].extend(in_date)
                 else:
-                    keys[search_term].extend(in_date)
+                    keys[search_key].extend(in_date)
 
     return keys
 
