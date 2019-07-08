@@ -10,7 +10,6 @@ from Acquire.ObjectStore import string_to_encoded
 from HUGS.ObjectStore import get_dated_object
 from HUGS.ObjectStore import get_dated_object_json
 from HUGS.Modules import Datasource
-from HUGS.Processing import Metadata
 from HUGS.ObjectStore import get_local_bucket
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"

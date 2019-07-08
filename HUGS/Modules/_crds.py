@@ -9,9 +9,10 @@ class CRDS:
         
     """
     _crds_root = "CRDS"
+    _crds_uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
 
     def __init__(self):
-        self._uuid = None
+        # self._uuid = None
         self._instruments = {}
         self._creation_datetime = None
         # self._labels = {}
@@ -28,7 +29,7 @@ class CRDS:
             Returns:
                 bool: True if object is null
         """
-        return self._uuid is None
+        return self._datasources is None
 
     @staticmethod
     def create():
@@ -37,12 +38,10 @@ class CRDS:
             Returns:
                 CRDS: CRDS object 
         """
-        from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
         c = CRDS()
-        # As there should only be one of these, give it a fixed UUID ? 
-        c._uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
+        # c._uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
         c._creation_datetime = _get_datetime_now()
 
         return c
@@ -60,7 +59,7 @@ class CRDS:
         """
         from pandas import read_csv as _read_csv
         
-        from Acquire.ObjectStore import create_uuid as _create_uuid
+        # from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
         
         # from processing._metadata import Metadata as _Metadata
@@ -79,8 +78,8 @@ class CRDS:
         c = CRDS.create()
         c.save()
 
-        crds_uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
-        crds = CRDS.load(uuid=crds_uuid)
+        # crds_uuid = 
+        crds = CRDS.load()
 
         filename = data_filepath.split("/")[-1]
         # metadata = _Metadata.create(filename, raw_data)
@@ -113,11 +112,11 @@ class CRDS:
                 tuple (str, str, list): Name of gas, ID of Datasource of this data and a list Pandas DataFrames for the 
                 date-split gas data
         """
-        import Processing.Metadata as _Metadata
-
         from pandas import RangeIndex as _RangeIndex
         from pandas import concat as _concat
         from pandas import read_csv as _read_csv
+
+        from HUGS.Processing import read_metadata
 
         from uuid import uuid4 as _uuid4
 
@@ -150,7 +149,7 @@ class CRDS:
         timeframe.index = _RangeIndex(timeframe.index.size)
 
         # Create metadata here
-        metadata = _Metadata.parse(filename=filename, data=data, data_type="CRDS")
+        metadata = read_metadata(filename=data_filepath, data=data, data_type="CRDS")
 
         return False
 
@@ -257,7 +256,7 @@ class CRDS:
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         d = {}
-        d["UUID"] = self._uuid
+        # d["UUID"] = self._uuid
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         d["instruments"] =  self._instruments
         d["stored"] = self._stored
@@ -290,7 +289,7 @@ class CRDS:
             bucket = _get_bucket()
         
         c = CRDS()
-        c._uuid = data["UUID"]
+        # c._uuid = data["UUID"]
         c._creation_datetime = _string_to_datetime(data["creation_datetime"])
         c._instruments = data["instruments"]
         #  c._instruments[instrument._uuid] = instrument._creation_datetime
@@ -324,13 +323,13 @@ class CRDS:
         if bucket is None:
             bucket = _get_bucket()
 
-        crds_key = "%s/uuid/%s" % (CRDS._crds_root, self._uuid)
+        crds_key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
 
         self._stored = True
         _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
     @staticmethod
-    def load(uuid, key=None, bucket=None):
+    def load(bucket=None):
         """ Load a CRDS object from the datastore using the passed
             bucket and UUID
 
@@ -347,15 +346,13 @@ class CRDS:
         if bucket is None:
             bucket = _get_bucket()
 
-        if key is None:
-            key = "%s/uuid/%s" % (CRDS._crds_root, uuid)
-
+        key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
         return CRDS.from_data(data=data, bucket=bucket)
 
     @staticmethod
-    def exists(uuid, bucket=None):
+    def exists(bucket=None):
         """ Uses an ID of some kind to query whether or not this is a new
             Instrument and should be created
 
@@ -365,7 +362,7 @@ class CRDS:
                 instrument_id (str): ID of Instrument
                 bucket (dict, default=None): Bucket for data storage
             Returns:
-                bool: True if Instrument exists 
+                bool: True if Instrument exists
         """
         from HUGS.ObjectStore import exists as _exists
         from HUGS.ObjectStore import get_bucket as _get_bucket
@@ -374,7 +371,7 @@ class CRDS:
             bucket = _get_bucket()
 
         # Query object store for Instrument
-        return _exists(bucket=bucket, uuid=uuid)
+        return _exists(bucket=bucket, uuid=CRDS._crds_uuid)
 
     def add_datasources(self, datasource_uuids):
         """ Add the passed list of Datasources to the current list
@@ -392,7 +389,7 @@ class CRDS:
             Returns:
                 str: UUID of  object
         """
-        return self._uuid
+        return CRDS._crds_uuid
 
     def datasources(self):
         """ Return the list of Datasources for this object

@@ -19,9 +19,10 @@ def _test_data():
 
 class GC:
     _gc_root = "GC"
+    _gc_uuid = "8cba4797-510c-gcgc-8af1-e02a5ee57489"
 
     def __init__(self):
-        self._uuid = None
+        # self._uuid = None
         self._creation_datetime = None
         self._instruments = {}
         self._stored = False
@@ -38,7 +39,6 @@ class GC:
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
         gc = GC()
-        gc._uuid = "8cba4797-510c-47gc-8af1-e02a5ee57489"
         gc._creation_datetime = _get_datetime_now()
 
         return gc
@@ -49,7 +49,7 @@ class GC:
             Returns:
                 bool: True if object is null
         """
-        return self._uuid is None
+        return self._datasources is None
 
     @staticmethod
     def exists(uuid, bucket=None):
@@ -84,7 +84,7 @@ class GC:
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         data = {}
-        data["uuid"] = self._uuid
+        # data["uuid"] = self._uuid
         data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         data["instruments"] = self._instruments
         data["stored"] = self._stored
@@ -106,7 +106,7 @@ class GC:
             return GC()
         
         gc = GC()
-        gc._uuid = data["uuid"]
+        # gc._uuid = data["uuid"]
         gc._creation_datetime = data["creation_datetime"]
         gc._instruments = data["instruments"]
         stored = data["stored"]
@@ -117,7 +117,7 @@ class GC:
         return gc
 
     @staticmethod
-    def load(uuid, key=None, bucket=None):
+    def load(bucket=None):
         """ Load a GC object from the object store
 
             Args:
@@ -133,8 +133,7 @@ class GC:
         if bucket is None:
             bucket = _get_bucket()
         
-        if key is None:
-            key = "%s/uuid/%s" % (GC._gc_root, uuid)
+        key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
             
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
         
@@ -159,7 +158,7 @@ class GC:
             bucket = _get_bucket()
 
         self._stored = True
-        gc_key = "%s/uuid/%s" % (GC._gc_root, self._uuid)
+        gc_key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
         _ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
 
     @staticmethod
@@ -181,7 +180,7 @@ class GC:
         from HUGS.Processing import create_datasources as _create_datasources
 
         gc_id = "8cba4797-510c-47gc-8af1-e02a5ee57489"
-        gc = GC.load(uuid=gc_id)
+        gc = GC.load()
 
         print("Remember to update the instrument!")
         # Where to get this from? User input?

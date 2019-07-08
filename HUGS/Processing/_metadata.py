@@ -14,6 +14,9 @@ def read_metadata(filename, data, data_type):
         """
         from HUGS.Processing import DataTypes as _DataTypes
 
+        # In case we're passed a filepath, just take the filename
+        filename = filename.split("/")[-1]
+
         data_type = _DataTypes[data_type.upper()].name
 
         if data_type == "CRDS":
