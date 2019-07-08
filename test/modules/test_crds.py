@@ -1,25 +1,33 @@
-# import datetime
-# import os
-# import pytest
-# import uuid
+import datetime
+import os
+import pytest
+import uuid
 
-# from HUGS.Modules import CRDS
-# from HUGS.ObjectStore import get_local_bucket
-# from HUGS.Processing import Metadata
+from HUGS.Modules import CRDS
+from HUGS.ObjectStore import get_local_bucket, get_object_names
 
-# from Acquire.ObjectStore import string_to_datetime
-# from Acquire.ObjectStore import datetime_to_datetime
+from Acquire.ObjectStore import string_to_datetime
+from Acquire.ObjectStore import datetime_to_datetime
 
-# # @pytest.fixture(scope="session")
-# # def data():
-# #     filename = "bsd.picarro.1minute.248m.dat"
-# #     dir_path = os.path.dirname(__file__)
-# #     test_data = "../data/proc_test_data/CRDS"
-# #     filepath = os.path.join(dir_path, test_data, filename)
+# @pytest.fixture(scope="session")
+# def data():
+#     filename = "bsd.picarro.1minute.248m.dat"
+#     dir_path = os.path.dirname(__file__)
+#     test_data = "../data/proc_test_data/CRDS"
+#     filepath = os.path.join(dir_path, test_data, filename)
 
-# #     return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
+#     return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
 
-# mocked_uuid = "10000000-0000-0000-00000-000000000001"
+
+def test_read_folder():
+    folder_path = "/home/gar/Documents/Devel/hugs/raw_data/CRDS_picarro"
+    CRDS.read_folder(folder_path=folder_path)
+    buicket = get_local_bucket()
+    objs = get_object_names(bucket=bucket)
+
+    print(objs)
+
+    assert False
 
 # @pytest.fixture
 # def mock_uuid(monkeypatch):

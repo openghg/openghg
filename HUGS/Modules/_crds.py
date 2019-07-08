@@ -46,6 +46,29 @@ class CRDS:
 
         return c
 
+
+    @staticmethod
+    def read_folder(folder_path):
+        """ Read all data matching filter in folder
+
+            Args:
+                folder_path (str): Path of folder
+        """
+        from glob import glob as _glob
+        from os import path as _path
+
+        folder_path = _path.join(folder_path, "*/*.dat")
+        filepaths = _glob(folder_path, recursive=True)
+
+        print(filepaths)
+
+        for fp in filepaths:
+            print("Processing %s" % fp.split("/")[-1])
+            CRDS.read_file(data_filepath=fp)
+
+        return False
+
+
     @staticmethod
     def read_file(data_filepath):
         """ Creates a CRDS object holding data stored within Datasources
@@ -58,36 +81,17 @@ class CRDS:
                 None
         """
         from pandas import read_csv as _read_csv
-        
-        # from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        
-        # from processing._metadata import Metadata as _Metadata
-        from HUGS.Modules import Instrument as _Instrument
         from HUGS.Processing import create_datasources as _create_datasources
 
-        # First check for the CRDS object - should only be one? 
-        # Maybe this can depend on the type or something?
-
-        # Load CRDS object from object store
-        # CRDS object doesn't actually hold any of the Instrument objects
-        # it just remembers them
-        
         # There should only be 1 CRDS object
-
         c = CRDS.create()
         c.save()
 
-        # crds_uuid = 
         crds = CRDS.load()
 
         filename = data_filepath.split("/")[-1]
-        # metadata = _Metadata.create(filename, raw_data)
 
-        # Parse the data here
-        # Parse the gases
-        # Save get gas_name datasource iD and data
-        # Pass this gas_data list to the instrument for storage in Datasources
         gas_data = crds.read_data(data_filepath=data_filepath)
 
         # Create Datasources, save them to the object store and get their UUIDs

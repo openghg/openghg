@@ -125,3 +125,4 @@ user/notebooks/.ipynb_checkpoints/
 # reading and writing to the object store
 test_tmp/
 
+raw_data/
