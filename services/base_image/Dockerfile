@@ -3,9 +3,9 @@ FROM chryswoods/acquire-base:latest
 WORKDIR /function
 USER root
 
-ADD hugs $PYTHON_EXT/hugs
+ADD HUGS $PYTHON_EXT/HUGS
 
-RUN python3 -m compileall $PYTHON_EXT/hugs/*
+RUN python3 -m compileall $PYTHON_EXT/HUGS/*
 
 ENTRYPOINT ["bash"]
 

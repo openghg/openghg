@@ -1,4 +1,6 @@
 
+from Acquire.Client import Authorisation
+
 
 def hello(args):
 
@@ -7,6 +9,15 @@ def hello(args):
     except:
         name = "World"
 
+    try:
+        authorisation = Authorisation.from_data(args["authorisation"])
+    except:
+        authorisation = None
+
+    if authorisation:
+        authorisation.verify("hello")
+        name = "%s [authorised]" % authorisation.user_guid()
+
     if name == "no-one":
         raise PermissionError(
             "You cannot say hello to no-one!")
@@ -14,5 +25,3 @@ def hello(args):
     greeting = "Hello %s" % name
 
     return {"greeting": greeting}
-
-
