@@ -1,6 +1,12 @@
 # from _paths import RootPaths
 __all__ = ["CRDS"]
 
+# TODO - look into what's causing the logging messages in the first place
+# This does stop them
+import logging
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
+
 class CRDS:
     """ Interface for processnig CRDS data
 
@@ -60,7 +66,7 @@ class CRDS:
         folder_path = _path.join(folder_path, "*/*.dat")
         filepaths = _glob(folder_path, recursive=True)
 
-        print(filepaths)
+        # print(filepaths)
 
         for fp in filepaths:
             print("Processing %s" % fp.split("/")[-1])
@@ -119,6 +125,8 @@ class CRDS:
         from pandas import RangeIndex as _RangeIndex
         from pandas import concat as _concat
         from pandas import read_csv as _read_csv
+        from pandas import datetime as _pd_datetime
+        from pandas import NaT as _pd_NaT
 
         from HUGS.Processing import read_metadata
 
@@ -126,7 +134,19 @@ class CRDS:
 
         # Create an ID for the Datasource
         # Currently just give it a fixed ID
-        data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+")
+
+        # # Create a function to parse the datetime in the data file
+        def parse_date(date):
+            try:
+                return _pd_datetime.strptime(date, '%y%m%d %H%M%S')
+            except ValueError:
+                return _pd_NaT
+                
+        data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"], parse_dates=[[0,1]], date_parser=parse_date)
+        data.index.name = "Datetime"
+
+        return False
+
         # Drop any rows with NaNs
         # Reset the index
         # This is now done before creating metadata
