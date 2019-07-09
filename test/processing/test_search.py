@@ -180,17 +180,14 @@ def test_three_sites():
 
     datasources = [Datasource.load(key=key) for key in objs]
 
-    print("Datasources in test: ", datasources)
-    # for d in datasources:
-    #     print(d.labels())
-
-    # print(objs)
     search_terms = ["bsd", "hfd", "tac"]
     data_type = "CRDS"
 
     results = search(search_terms=search_terms, data_type=data_type, require_all=False)
-    # print(results)
 
+    
+    
+    
     assert False
 
 

@@ -62,6 +62,11 @@ class CRDS:
         """
         from glob import glob as _glob
         from os import path as _path
+        from HUGS.Modules import CRDS as _CRDS
+
+        # TODO - Remove this
+        crds = _CRDS.create()
+        crds.save()
 
         # This finds data files in sub-folders
         folder_path = _path.join(folder_path, "./*.dat")
@@ -73,7 +78,6 @@ class CRDS:
             raise FileNotFoundError("No data files found")
 
         for fp in filepaths:
-            print("Reading " + fp.split("/")[-1])
             CRDS.read_file(data_filepath=fp)
 
         return False
@@ -93,10 +97,6 @@ class CRDS:
         from pandas import read_csv as _read_csv
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
         from HUGS.Processing import create_datasources as _create_datasources
-
-        # There should only be 1 CRDS object
-        c = CRDS.create()
-        c.save()
 
         crds = CRDS.load()
 
@@ -216,7 +216,6 @@ class CRDS:
 
             # Loop over the gases and find each unique value
             for column in head_row.columns:
-                # print(column)
                 s = head_row[column][0]
                 if s != "-":
                     gases[s] = gases.get(s, 0) + 1

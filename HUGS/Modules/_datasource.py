@@ -331,6 +331,7 @@ class Datasource:
 
             self._stored = True
 
+
         datasource_key = "%s/uuid/%s" % (Datasource._datasource_root, self._uuid)
         _ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
         
