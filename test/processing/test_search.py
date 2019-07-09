@@ -4,8 +4,8 @@ import pytest
 
 from HUGS.Modules import CRDS, GC
 from HUGS.Modules import Datasource
-from HUGS.ObjectStore import get_local_bucket
-from HUGS.Processing import in_daterange, key_to_daterange, gas_search, load_object
+from HUGS.ObjectStore import get_local_bucket, get_object_names
+from HUGS.Processing import in_daterange, key_to_daterange, load_object
 from HUGS.Processing import recombine_sections, search
                             
 
@@ -161,6 +161,41 @@ def test_search_all_terms():
     results = search(search_terms=search_terms, data_type=data_type, require_all=True)
 
     assert len(results["co_hfd_picarro"]) == 7
+
+
+def test_three_sites():
+    # Here can return a single key for each search term
+    # How to seach for 3 different sites
+    # bilsdale, heathfield, tacolneston
+    # Between 2016 - 2018
+    # search terms bsd, hfd, tac
+    bucket = get_local_bucket(empty=True)
+
+    test_data = "../data/search_data"
+    folder_path = os.path.join(os.path.dirname(__file__), test_data)
+    CRDS.read_folder(folder_path=folder_path)
+
+    prefix = "datasource"
+    objs = get_object_names(bucket=bucket, prefix=prefix)
+
+    datasources = [Datasource.load(key=key) for key in objs]
+
+    print("Datasources in test: ", datasources)
+    # for d in datasources:
+    #     print(d.labels())
+
+    # print(objs)
+    search_terms = ["bsd", "hfd", "tac"]
+    data_type = "CRDS"
+
+    results = search(search_terms=search_terms, data_type=data_type, require_all=False)
+    # print(results)
+
+    assert False
+
+
+
+
 
 
 # def test_search_store(crds):

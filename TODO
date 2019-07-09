@@ -203,3 +203,14 @@ Check on creation if the object already exists in the object store to prevent ov
 
 Check dropping of NaNs in both GC and CRDS - ensure this is consistent
 
+TODO - check source of test/modules/test_crds.py::test_read_folder
+  /home/gar/Documents/Devel/hugs/test/modules/test_crds.py:54: DtypeWarning: Columns (3,4,5,6,7,8,9,10,11,12) have mixed types. Specify dtype option on import or set low_memory=False.
+    CRDS.read_folder(folder_path=folder_path)
+
+test/modules/test_crds.py::test_read_folder
+  /home/gar/Documents/Devel/hugs/test/modules/test_crds.py:54: DtypeWarning: Columns (3,4,5,6,7,8,9) have mixed types. Specify dtype option on import or set low_memory=False.
+    CRDS.read_folder(folder_path=folder_path)
+
+-- Docs: https://docs.pytest.org/en/latest/warnings.html
+
+Storing of Datasource by name has been disabled for now - seems unnecessary

@@ -334,9 +334,9 @@ class Datasource:
         datasource_key = "%s/uuid/%s" % (Datasource._datasource_root, self._uuid)
         _ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
         
-        encoded_name = _string_to_encoded(self._name)
-        name_key = "%s/name/%s/%s" % (Datasource._datasource_root, encoded_name, self._uuid)
-        _ObjectStore.set_string_object(bucket=bucket, key=name_key, string_data=self._uuid)
+        # encoded_name = _string_to_encoded(self._name)
+        # name_key = "%s/name/%s/%s" % (Datasource._datasource_root, encoded_name, self._uuid)
+        # _ObjectStore.set_string_object(bucket=bucket, key=name_key, string_data=self._uuid)
 
 
     @staticmethod
@@ -478,7 +478,7 @@ class Datasource:
         """
         return self._uuid
 
-    def get_labels(self):
+    def labels(self):
         """ Retur the labels of this Datasource
 
             Returns:

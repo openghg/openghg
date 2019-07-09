@@ -49,15 +49,13 @@ def test_read_file():
     assert data_three[0]["co n_meas"].iloc[0] == pytest.approx(19.0)
 
 
-
-
 def test_read_folder():
     folder_path = "/home/gar/Documents/Devel/hugs/raw_data/CRDS_picarro"
     CRDS.read_folder(folder_path=folder_path)
-    buicket = get_local_bucket()
+    bucket = get_local_bucket()
     objs = get_object_names(bucket=bucket)
 
-    print(objs)
+    # print(objs)
 
     assert False
 

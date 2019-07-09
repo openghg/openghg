@@ -54,7 +54,7 @@ class CRDS:
 
 
     @staticmethod
-    def read_folder(folder_path):
+    def read_folder(folder_path, recursive=False):
         """ Read all data matching filter in folder
 
             Args:
@@ -63,13 +63,17 @@ class CRDS:
         from glob import glob as _glob
         from os import path as _path
 
-        folder_path = _path.join(folder_path, "*/*.dat")
+        # This finds data files in sub-folders
+        folder_path = _path.join(folder_path, "./*.dat")
+        # This finds files in the current folder, get recursive
+        # folder_path = _path.join(folder_path, "*.dat")
         filepaths = _glob(folder_path, recursive=True)
 
-        # print(filepaths)
+        if len(filepaths) == 0:
+            raise FileNotFoundError("No data files found")
 
         for fp in filepaths:
-            print("Processing %s" % fp.split("/")[-1])
+            print("Reading " + fp.split("/")[-1])
             CRDS.read_file(data_filepath=fp)
 
         return False
@@ -131,7 +135,7 @@ class CRDS:
 
         from HUGS.Processing import read_metadata
 
-        # # Create a function to parse the datetime in the data file
+        # Function to parse the datetime format found in the datafile
         def parse_date(date):
             try:
                 return _pd_datetime.strptime(date, '%y%m%d %H%M%S')

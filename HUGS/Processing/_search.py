@@ -70,12 +70,17 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
     # This could be an object has a quick lookup data structure so we don't need to load
     # in the datasources and search their keys
     # TODO - implement lookup tables?
-
     datasources = [_Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 
     if not isinstance(search_terms, list):
         search_terms = [search_terms]
     
+    # Here can return a single key for each search term
+    # How to seach for 3 different sites
+    # bilsdale, heathfield, tacolneston
+    # Between 2016 - 2018
+    # search terms bsd, hfd, tac
+
     # Just want to return a single composite key of all search terms
     if require_all:
         single_key = "_".join(sorted(search_terms))
