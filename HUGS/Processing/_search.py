@@ -22,11 +22,12 @@ class DataType(_Enum):
     GC = "GC"
 
 
-def search(search_terms, data_type, require_all=False, start_datetime=None, end_datetime=None):
+def search(search_a, search_b, data_type, require_all=False, start_datetime=None, end_datetime=None):
     """ Search for gas data (optionally within a daterange)
     
         Args:
-            search_terms (string or list): String to search for
+            search_a (string or list): String(s) giving objects to search
+            search_b (string or list): String(s) to search the objects in search_a for
             data_type (str): GC / CRDS etc
             require_all (bool, default=False): Require all search terms to be satisfied
             start_datetime (datetime, default=None): Start datetime for search
@@ -72,8 +73,11 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
     # TODO - implement lookup tables?
     datasources = [_Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 
-    if not isinstance(search_terms, list):
-        search_terms = [search_terms]
+    if not isinstance(search_a, list):
+        search_a = [search_a]
+
+    if not isinstance(search_b, list):
+        search_b = [search_b]
     
     # Here can return a single key for each search term
     # How to seach for 3 different sites
@@ -86,31 +90,36 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
         single_key = "_".join(sorted(search_terms))
 
     keys = {}
-    for search_term in search_terms:
+    for search_term_a in search_a:
         # If we require all the search terms to be satisifed use a single key
         if require_all:
             search_key = single_key
         else:
-            search_key = search_term
+            search_key = search_term_a
+
+        # TODO - improve this by being able to pass two arguments to search_labels?
+        # zip the lists for parsing?
 
         keys[search_key] = []
         for datasource in datasources:
             # Check the Datasource labels for the search term
-            if datasource.search_labels(search_term):
-                prefix = "data/uuid/%s" % datasource.uuid()
-                data_list = _get_object_names(bucket=bucket, prefix=prefix)
-                # Get the Dataframes that are within the dates we are searching for
-                in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+            if datasource.search_labels(search_term_a):
+                for search_term_b in search_b:
+                    if datasource.search_labels(search_term_b):
+                        prefix = "data/uuid/%s" % datasource.uuid()
+                        data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                        # Get the Dataframes that are within the dates we are searching for
+                        in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
 
-                if require_all:
-                    # Check if this Datasource also contains all the other terms we're searching for
-                    # and get True/False values
-                    remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
-                    # Check if we got all Trues for the other search terms
-                    if all(remaining_terms):
-                        keys[search_key].extend(in_date)
-                else:
-                    keys[search_key].extend(in_date)
+                        if require_all:
+                            # Check if this Datasource also contains all the other terms we're searching for
+                            # and get True/False values
+                            remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term_a]
+                            # Check if we got all Trues for the other search terms
+                            if all(remaining_terms):
+                                keys[search_key].extend(in_date)
+                        else:
+                            keys[search_key].extend(in_date)
 
     return keys
 
