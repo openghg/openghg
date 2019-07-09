@@ -77,7 +77,7 @@ class Datasource:
         """
         return self._uuid is None
 
-    def get_start_datetime(self):
+    def start_datetime(self):
         """ Returns the starting datetime for the data in this Datasource
 
             Returns:
@@ -85,7 +85,7 @@ class Datasource:
         """        
         return self._start_datetime
 
-    def get_end_datetime(self):
+    def end_datetime(self):
         """ Returns the end datetime for the data in this Datasource
 
             Returns:
@@ -128,7 +128,6 @@ class Datasource:
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
-
 
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed dataframe
@@ -221,8 +220,6 @@ class Datasource:
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from HUGS.ObjectStore import get_dated_object as _get_dated_object
-
-        # data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
 
         data = _get_dated_object(bucket, key)
 
@@ -417,7 +414,7 @@ class Datasource:
         
         return uuid[0].split("/")[-1]
 
-    def get_data(self):
+    def data(self):
         """ Get the data stored in this Datasource
 
             Returns:
@@ -425,7 +422,7 @@ class Datasource:
         """
         return self._data
 
-    def get_daterange(self):
+    def daterange(self):
         """ Get the daterange this Datasource covers as a string
 
             Returns:

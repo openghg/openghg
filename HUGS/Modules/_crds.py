@@ -127,13 +127,9 @@ class CRDS:
         from pandas import read_csv as _read_csv
         from pandas import datetime as _pd_datetime
         from pandas import NaT as _pd_NaT
-
-        from HUGS.Processing import read_metadata
-
         from uuid import uuid4 as _uuid4
 
-        # Create an ID for the Datasource
-        # Currently just give it a fixed ID
+        from HUGS.Processing import read_metadata
 
         # # Create a function to parse the datetime in the data file
         def parse_date(date):
@@ -141,17 +137,15 @@ class CRDS:
                 return _pd_datetime.strptime(date, '%y%m%d %H%M%S')
             except ValueError:
                 return _pd_NaT
-                
-        data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"], parse_dates=[[0,1]], date_parser=parse_date)
-        data.index.name = "Datetime"
 
-        return False
+        data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"], 
+                            parse_dates=[[0,1]], date_parser=parse_date)
+        data.index.name = "Datetime"
 
         # Drop any rows with NaNs
         # Reset the index
         # This is now done before creating metadata
-        data = data.dropna(axis=0, how="any")
-        data.index = _RangeIndex(data.index.size)
+        data = data.dropna(axis="rows", how="any")
 
         # Get the number of gases in dataframe and number of columns of data present for each gas
         n_gases, n_cols = self.gas_info(data=data)
@@ -162,13 +156,13 @@ class CRDS:
         header = data.head(2)
         skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
-        time_cols = 2
+        # time_cols = 2
         header_rows = 2
         # Dataframe containing the time data for this data input
-        time_data = data.iloc[2:, 0:time_cols]
+        # time_data = data.iloc[2:, 0:time_cols]
 
-        timeframe = self.parse_timecols(time_data=time_data)
-        timeframe.index = _RangeIndex(timeframe.index.size)
+        # timeframe = self.parse_timecols(time_data=time_data)
+        # timeframe.index = _RangeIndex(timeframe.index.size)
 
         # Create metadata here
         metadata = read_metadata(filename=data_filepath, data=data, data_type="CRDS")
@@ -185,23 +179,12 @@ class CRDS:
 
             column_names = ["count", "stdev", "n_meas"]
             column_labels = ["%s %s" % (species, l) for l in column_names]
-
-            # Split into years here
             # Name columns
             gas_data = gas_data.set_axis(column_labels, axis='columns', inplace=False)
-
             # Drop the first two rows now we have the name
             gas_data = gas_data.drop(index=gas_data.head(header_rows).index, inplace=False)
-            gas_data.index = _RangeIndex(gas_data.index.size)
-
             # Cast data to float64 / double
             gas_data = gas_data.astype("float64")
-            # Concatenate the timeframe and the data
-            gas_data = _concat([timeframe, gas_data], axis="columns")
-
-            # TODO - Verify integrity here? Test if this is required
-            gas_data = gas_data.set_index('Datetime', drop=True, inplace=False, verify_integrity=True)
-            # TODO - What metadata should be added?
             
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
@@ -210,36 +193,6 @@ class CRDS:
             data_list.append((species, species_metadata, datasource_id, gas_data))
 
         return data_list
-
-    def parse_timecols(self, time_data):
-        """ Takes a dataframe that contains the date and time 
-            and creates a single columned dataframe containing a 
-            UTC datetime
-
-            Args:
-                time_data (Pandas.Dataframe): Dataframe containing
-            Returns:
-                timeframe (Pandas.Dataframe): Dataframe containing datetimes set to UTC
-        """
-        import datetime as _datetime
-        from pandas import DataFrame as _DataFrame
-        from pandas import to_datetime as _to_datetime
-
-        from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-
-        def t_calc(row, col): return _datetime_to_string(_datetime_to_datetime(
-            _datetime.datetime.strptime(row+col, "%y%m%d%H%M%S")))
-
-        time_gen = (t_calc(row, col) for row, col in time_data.itertuples(index=False))
-        time_list = list(time_gen)
-
-        timeframe = _DataFrame(data=time_list, columns=["Datetime"])
-
-        # Check how these data work when read back out
-        timeframe["Datetime"] = _to_datetime(timeframe["Datetime"])
-
-        return timeframe
 
     def gas_info(self, data):
             """ Returns the number of columns of data for each gas
@@ -259,6 +212,7 @@ class CRDS:
 
             # Loop over the gases and find each unique value
             for column in head_row.columns:
+                # print(column)
                 s = head_row[column][0]
                 if s != "-":
                     gases[s] = gases.get(s, 0) + 1

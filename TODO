@@ -199,5 +199,7 @@ Fix the loading of CRDS and GC objects, there should only be one of both of thes
 Check on creation if the object already exists in the object store to prevent over-writing - Done
 
 
-2019-07-08
+2019-07-09
+
+Check dropping of NaNs in both GC and CRDS - ensure this is consistent
 
