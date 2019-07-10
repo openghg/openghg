@@ -1,25 +1,63 @@
-# import datetime
-# import os
-# import pytest
-# import uuid
+import datetime
+import os
+import pytest
+import uuid
 
-# from HUGS.Modules import CRDS
-# from HUGS.ObjectStore import get_local_bucket
-# from HUGS.Processing import Metadata
+from HUGS.Modules import Datasource, CRDS
+from HUGS.ObjectStore import get_local_bucket, get_object_names
 
-# from Acquire.ObjectStore import string_to_datetime
-# from Acquire.ObjectStore import datetime_to_datetime
+from Acquire.ObjectStore import string_to_datetime
+from Acquire.ObjectStore import datetime_to_datetime
 
-# # @pytest.fixture(scope="session")
-# # def data():
-# #     filename = "bsd.picarro.1minute.248m.dat"
-# #     dir_path = os.path.dirname(__file__)
-# #     test_data = "../data/proc_test_data/CRDS"
-# #     filepath = os.path.join(dir_path, test_data, filename)
+# @pytest.fixture(scope="session")
+# def data():
+#     filename = "bsd.picarro.1minute.248m.dat"
+#     dir_path = os.path.dirname(__file__)
+#     test_data = "../data/proc_test_data/CRDS"
+#     filepath = os.path.join(dir_path, test_data, filename)
 
-# #     return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
+#     return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
 
-# mocked_uuid = "10000000-0000-0000-00000-000000000001"
+def test_read_file():
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filename = "hfd.picarro.1minute.100m_min.dat"
+
+    filepath = os.path.join(dir_path, test_data, filename)
+    bucket = get_local_bucket()
+
+    crds = CRDS.read_file(data_filepath=filepath)
+
+    # Get the data from the object store and ensure it's been read correctly
+    datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
+
+    data_one = datasources[0].data()
+    assert data_one[0]["ch4 count"].iloc[0] == pytest.approx(1993.83)
+    assert data_one[0]["ch4 stdev"].iloc[0] == pytest.approx(1.555)
+    assert data_one[0]["ch4 n_meas"].iloc[0] == pytest.approx(19.0)
+
+    data_two = datasources[1].data()
+
+    assert data_two[0]["co2 count"].iloc[0] == pytest.approx(414.21)
+    assert data_two[0]["co2 stdev"].iloc[0] == pytest.approx(0.109)
+    assert data_two[0]["co2 n_meas"].iloc[0] == pytest.approx(19.0)
+
+    data_three = datasources[2].data()
+
+    assert data_three[0]["co count"].iloc[0] == pytest.approx(214.28)
+    assert data_three[0]["co stdev"].iloc[0] == pytest.approx(4.081)
+    assert data_three[0]["co n_meas"].iloc[0] == pytest.approx(19.0)
+
+
+def test_read_folder():
+    folder_path = "/home/gar/Documents/Devel/hugs/raw_data/CRDS_picarro"
+    CRDS.read_folder(folder_path=folder_path)
+    bucket = get_local_bucket()
+    objs = get_object_names(bucket=bucket)
+
+    # print(objs)
+
+    assert False
 
 # @pytest.fixture
 # def mock_uuid(monkeypatch):

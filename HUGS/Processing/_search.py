@@ -4,7 +4,7 @@
 """
 from enum import Enum as _Enum
 
-__all__ = ["gas_search", "get_data",  "in_daterange",
+__all__ = ["get_data",  "in_daterange",
            "key_to_daterange", "daterange_to_string", 
            "daterange_to_string", "load_object", "search"]
 
@@ -20,71 +20,6 @@ class RootPaths(_Enum):
 class DataType(_Enum):
     CRDS = "CRDS"
     GC = "GC"
-
-
-def gas_search(species, data_type, start_datetime=None, end_datetime=None):
-    """ Search for gas data (optionally within a daterange)
-    
-        Args:
-            species (str): Species to search for
-            data_type (str): GC / CRDS etc
-            start_datetime (datetime, default=None): Start datetime for search
-            If None a start datetime of UNIX epoch (1970-01-01) is set
-            end_datetime (datetime, default=None): End datetime for search
-            If None an end datetime of the current datetime is set
-        Returns:
-            list: List of keys of Datasources matching the search parameters
-    """
-    from HUGS.ObjectStore import get_object_names as _get_object_names
-    from HUGS.ObjectStore import get_local_bucket as _get_local_bucket
-    from HUGS.Modules import Datasource as _Datasource
-    from HUGS.Util import get_datetime_epoch as _get_datetime_epoch
-    from HUGS.Util import get_datetime_now as _get_datetime_now
-
-    if start_datetime is None:
-        start_datetime = _get_datetime_epoch()
-    if end_datetime is None:
-        end_datetime = _get_datetime_now()
-
-    search_prefix = "%s/uuid/" % data_type
-    bucket = _get_local_bucket()
-
-    # TODO - method to load different types in here for search
-    # Maybe just an if else for now?
-    data_type = DataType[data_type.upper()]
-    # Get the objects that contain the Datasources
-    object_list = _get_object_names(bucket=bucket, prefix=search_prefix)
-
-    if len(object_list) == 0:
-        raise ValueError("No " + data_type.name + " object found.")
-    if len(object_list) > 1:
-        raise ValueError("More than one " + data_type.name + " object found.")
-
-    object_uuid = object_list[0].split("/")[-1]
-
-    # Load in the object
-    data_obj = load_object(data_type.name, object_uuid)
-
-    # Get the UUIDs of the Datasources associated with the object
-    datasource_uuids = data_obj.datasources()
-
-    # First check if the uuids we have are in the list of known and valid Datasources
-    # This could be an object has a quick lookup data structure so we don't need to load 
-    # in the datasources and search their keys
-    # TODO - implement lookup tables?
-
-    datasources = [_Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
-
-    keys = []
-    for datasource in datasources:
-        if datasource.get_species() == species:
-            prefix = "data/uuid/%s" % datasource.uuid()
-            data_list = _get_object_names(bucket=bucket, prefix=prefix)
-            in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
-            
-            keys.extend(in_date)
-
-    return keys
 
 
 def search(search_terms, data_type, require_all=False, start_datetime=None, end_datetime=None):
@@ -135,26 +70,40 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
     # This could be an object has a quick lookup data structure so we don't need to load
     # in the datasources and search their keys
     # TODO - implement lookup tables?
-
     datasources = [_Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 
     if not isinstance(search_terms, list):
         search_terms = [search_terms]
     
+    # Here can return a single key for each search term
+    # How to seach for 3 different sites
+    # bilsdale, heathfield, tacolneston
+    # Between 2016 - 2018
+    # search terms bsd, hfd, tac
+
     # Just want to return a single composite key of all search terms
     if require_all:
         single_key = "_".join(sorted(search_terms))
 
     keys = {}
+    # Populate keys, tidies way to do this with .get() below?
     for search_term in search_terms:
-        # If we require all the search terms to be satisifed use a single key
-        if require_all:
-            search_key = single_key
-        else:
-            search_key = search_term
-
-        keys[search_key] = []
         for datasource in datasources:
+            keys[search_term + "_" + datasource.species()] = []
+
+    # Iterate over two 
+    # keys = {search_key + "_" + datasource.species() : [] for datasource in datasources}
+    for search_term in search_terms:
+        for datasource in datasources:
+            # If we require all the search terms to be satisfied use a single key
+            if require_all:
+                search_key = single_key
+            else:
+                search_key = search_term + "_" + datasource.species()
+            # Here add the species to the key to aid recombination
+            # TODO - not sure how this will scale to other data types, better alternative?
+            # TODO - remove this search_term key
+            # search_key = search_term + "_" + datasource.species()
             # Check the Datasource labels for the search term
             if datasource.search_labels(search_term):
                 prefix = "data/uuid/%s" % datasource.uuid()
@@ -168,9 +117,15 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
                     remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
                     # Check if we got all Trues for the other search terms
                     if all(remaining_terms):
+                        # keys[search_key] = keys.get(search_key, []).extend(in_date)
                         keys[search_key].extend(in_date)
                 else:
                     keys[search_key].extend(in_date)
+                    # keys[search_key] = keys.get(search_key, [])
+                    # keys[search_key].extend(in_date)
+
+    # Remove the empty keys
+    keys = {k: v for k,v in keys.items() if len(keys[k]) != 0}
 
     return keys
 

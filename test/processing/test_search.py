@@ -1,12 +1,14 @@
 import datetime
 import os
 import pytest
+import matplotlib.pyplot as plt
 
 from HUGS.Modules import CRDS, GC
 from HUGS.Modules import Datasource
-from HUGS.ObjectStore import get_local_bucket
-from HUGS.Processing import in_daterange, key_to_daterange, gas_search, load_object
+from HUGS.ObjectStore import get_local_bucket, get_object_names
+from HUGS.Processing import in_daterange, key_to_daterange, load_object
 from HUGS.Processing import recombine_sections, search
+from HUGS.Util import get_datetime
                             
 
 from Acquire.ObjectStore import datetime_to_string
@@ -163,85 +165,46 @@ def test_search_all_terms():
     assert len(results["co_hfd_picarro"]) == 7
 
 
-# def test_search_store(crds):
-#     bucket = get_local_bucket()
-#     # Create and store data
-#     crds.save(bucket=bucket)
+def test_three_sites():
+    # Here can return a single key for each search term
+    # How to seach for 3 different sites
+    # bilsdale, heathfield, tacolneston
+    # Between 2016 - 2018
+    # search terms bsd, hfd, tac
+    bucket = get_local_bucket(empty=True)
 
-#     # Get the instrument
-#     instrument_uuids = list(crds._instruments)
+    test_data = "../data/search_data"
+    folder_path = os.path.join(os.path.dirname(__file__), test_data)
+    CRDS.read_folder(folder_path=folder_path)
 
-#     # Get UUID from Instrument
-#     instrument = Instrument.load(bucket=bucket, uuid=instrument_uuids[0])
-#     # Get Datasource IDs from Instrument
-#     data_uuids = [d._uuid for d in instrument._datasources]
+    prefix = "datasource"
+    objs = get_object_names(bucket=bucket, prefix=prefix)
 
-#     start = datetime.datetime.strptime("2014-01-30", "%Y-%m-%d")
-#     end = datetime.datetime.strptime("2014-01-31", "%Y-%m-%d")
+    datasources = [Datasource.load(key=key) for key in objs]
 
-#     keys = search_store(bucket=bucket, data_uuids=data_uuids, root_path="datasource",
-#                         start_datetime=start, end_datetime=end)
+    search_terms = ["bsd", "hfd", "tac"]
 
-#     # TODO - better test for this
-#     assert len(keys) == 3
+    # Search sites for a single gas - how?
+    data_type = "CRDS"
+    start = get_datetime(year=2014, month=1, day=1)
+    end = get_datetime(year=2016, month=1, day=1)
 
+    results = search(search_terms=search_terms, data_type=data_type, require_all=False, start_datetime=start, end_datetime=end)
 
-# def test_search_store_two():
-#     # Load in the new data
-#     filename = "hfd.picarro.1minute.100m_min.dat"
-#     dir_path = os.path.dirname(__file__)
-#     test_data = "../data/proc_test_data/CRDS"
-#     filepath = os.path.join(dir_path, test_data, filename)
+    # Get the results for each of the keys
+    recombined_sections = recombine_sections(data_keys=results)
 
-#     crds = CRDS.read_file(filepath)
+    hdf_ch4 = recombined_sections["hfd_ch4"]
+    bsd_ch4 = recombined_sections["bsd_ch4"]
+    tac_ch4 = recombined_sections["tac_ch4"]
 
-#     bucket = get_local_bucket()
-#     # Create and store data
-#     crds.save(bucket=bucket)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(hdf_ch4.index.values, hdf_ch4["ch4 count"], label = "hdf ch4", linewidth = 1)
+    ax.plot(bsd_ch4.index.values, bsd_ch4["ch4 count"], label = "bsd ch4", linewidth = 1)
+    ax.plot(tac_ch4.index.values, tac_ch4["ch4 count"], label = "tac ch4", linewidth = 1)
+    ax.legend()
 
-#     # Get the instrument
-#     instrument_uuids = list(crds._instruments)
-
-#     # Get UUID from Instrument
-#     instrument = Instrument.load(bucket=bucket, uuid=instrument_uuids[0])
-#     # Get Datasource IDs from Instrument
-#     data_uuids = [d._uuid for d in instrument._datasources]
-
-#     start = datetime.datetime.strptime("2013-01-01", "%Y-%m-%d")
-#     end = datetime.datetime.strptime("2019-06-01", "%Y-%m-%d")
+    plt.show()
     
-
-#     keys = search_store(bucket=bucket, data_uuids=data_uuids, root_path="datasource",
-#                         start_datetime=start, end_datetime=end)
-
-#     # TODO - better test for this
-#     # 21 as 7 years * 3 gases
-#     assert len(keys) == 21
-
-
-# def test_in_daterange():
-#     start = datetime_to_datetime(datetime.datetime.strptime("2013-01-01", "%Y-%m-%d"))
-#     end = datetime_to_datetime(datetime.datetime.strptime("2019-06-01", "%Y-%m-%d"))
-#     start_key = datetime_to_datetime(datetime.datetime.strptime("2014-01-01", "%Y-%m-%d"))
-#     end_key = datetime_to_datetime(datetime.datetime.strptime("2018-06-01", "%Y-%m-%d"))
-
-#     daterange_str = "".join([datetime_to_string(start_key), "_", datetime_to_string(end_key)])
-
-#     key = "datasource/uuid/10000000-0000-0000-00000-000000000001/%s" % daterange_str
-
-#     assert in_daterange(key, start_search=start, end_search=end) == True
-        
-
-# def test_key_to_daterange():
-#     start_key = datetime_to_datetime(datetime.datetime.strptime("2014-01-01", "%Y-%m-%d"))
-#     end_key = datetime_to_datetime(datetime.datetime.strptime("2018-06-01", "%Y-%m-%d"))
-
-#     daterange_str = "".join([datetime_to_string(start_key), "_", datetime_to_string(end_key)])
-
-#     key = "datasource/uuid/10000000-0000-0000-00000-000000000001/%s" % daterange_str
-
-#     start_back, end_back = key_to_daterange(key)
-
-#     assert start_back == start_key
-#     assert end_back == end_key
-
+    assert False

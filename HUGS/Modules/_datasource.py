@@ -77,7 +77,7 @@ class Datasource:
         """
         return self._uuid is None
 
-    def get_start_datetime(self):
+    def start_datetime(self):
         """ Returns the starting datetime for the data in this Datasource
 
             Returns:
@@ -85,7 +85,7 @@ class Datasource:
         """        
         return self._start_datetime
 
-    def get_end_datetime(self):
+    def end_datetime(self):
         """ Returns the end datetime for the data in this Datasource
 
             Returns:
@@ -128,7 +128,6 @@ class Datasource:
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
-
 
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed dataframe
@@ -221,8 +220,6 @@ class Datasource:
         """
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from HUGS.ObjectStore import get_dated_object as _get_dated_object
-
-        # data_key = "%s/uuid/%s" % (Datasource._data_root, self._uuid)
 
         data = _get_dated_object(bucket, key)
 
@@ -334,12 +331,13 @@ class Datasource:
 
             self._stored = True
 
+
         datasource_key = "%s/uuid/%s" % (Datasource._datasource_root, self._uuid)
         _ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
         
-        encoded_name = _string_to_encoded(self._name)
-        name_key = "%s/name/%s/%s" % (Datasource._datasource_root, encoded_name, self._uuid)
-        _ObjectStore.set_string_object(bucket=bucket, key=name_key, string_data=self._uuid)
+        # encoded_name = _string_to_encoded(self._name)
+        # name_key = "%s/name/%s/%s" % (Datasource._datasource_root, encoded_name, self._uuid)
+        # _ObjectStore.set_string_object(bucket=bucket, key=name_key, string_data=self._uuid)
 
 
     @staticmethod
@@ -417,7 +415,7 @@ class Datasource:
         
         return uuid[0].split("/")[-1]
 
-    def get_data(self):
+    def data(self):
         """ Get the data stored in this Datasource
 
             Returns:
@@ -425,7 +423,7 @@ class Datasource:
         """
         return self._data
 
-    def get_daterange(self):
+    def daterange(self):
         """ Get the daterange this Datasource covers as a string
 
             Returns:
@@ -457,7 +455,7 @@ class Datasource:
 
         return False
             
-    def get_species(self):
+    def species(self):
         """ Returns the species of this Datasource
 
             Returns:
@@ -465,7 +463,7 @@ class Datasource:
         """
         return self._labels["species"]
 
-    def get_inlet(self):
+    def inlet(self):
         """ Returns the inlet of this Datasource
 
             Returns:
@@ -481,7 +479,7 @@ class Datasource:
         """
         return self._uuid
 
-    def get_labels(self):
+    def labels(self):
         """ Retur the labels of this Datasource
 
             Returns:

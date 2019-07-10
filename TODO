@@ -196,21 +196,26 @@ Searching and combining types of data correctly - recombination function should 
 passed with the data and recombine the dataframes based on the dict values
 
 Fix the loading of CRDS and GC objects, there should only be one of both of these
-Check on creation if the object already exists in the object store to prevent over-writing
+Check on creation if the object already exists in the object store to prevent over-writing - Done
 
 
-2019-07-08
+2019-07-09
 
-Checkout this warning
+Check dropping of NaNs in both GC and CRDS - ensure this is consistent
 
-test/processing/test_recombination.py::test_recombination_CRDS
-  /home/gar/Documents/Devel/hugs/HUGS/Processing/_recombination.py:65: FutureWarning: Sorting because non-concatenation axis is not aligned. A future version
-  of pandas will change to not sort by default.
-  
-  To accept the future behavior, pass 'sort=False'.
-  
-  To retain the current behavior and silence the warning, pass 'sort=True'.
-  
-    combined = _concat(sections, axis="rows")
+TODO - check source of test/modules/test_crds.py::test_read_folder
+  /home/gar/Documents/Devel/hugs/test/modules/test_crds.py:54: DtypeWarning: Columns (3,4,5,6,7,8,9,10,11,12) have mixed types. Specify dtype option on import or set low_memory=False.
+    CRDS.read_folder(folder_path=folder_path)
+
+test/modules/test_crds.py::test_read_folder
+  /home/gar/Documents/Devel/hugs/test/modules/test_crds.py:54: DtypeWarning: Columns (3,4,5,6,7,8,9) have mixed types. Specify dtype option on import or set low_memory=False.
+    CRDS.read_folder(folder_path=folder_path)
 
 -- Docs: https://docs.pytest.org/en/latest/warnings.html
+
+Storing of Datasource by name has been disabled for now - seems unnecessary
+
+
+2019-07-10
+
+Tidy the search function for search_key and single_key

@@ -1,6 +1,12 @@
 # from _paths import RootPaths
 __all__ = ["CRDS"]
 
+# TODO - look into what's causing the logging messages in the first place
+# This does stop them
+import logging
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
+
 class CRDS:
     """ Interface for processnig CRDS data
 
@@ -46,6 +52,35 @@ class CRDS:
 
         return c
 
+
+    @staticmethod
+    def read_folder(folder_path, recursive=False):
+        """ Read all data matching filter in folder
+
+            Args:
+                folder_path (str): Path of folder
+        """
+        from glob import glob as _glob
+        from os import path as _path
+        from HUGS.Modules import CRDS as _CRDS
+
+        # TODO - Remove this
+        crds = _CRDS.create()
+        crds.save()
+
+        # This finds data files in sub-folders
+        folder_path = _path.join(folder_path, "./*.dat")
+        # This finds files in the current folder, get recursive
+        # folder_path = _path.join(folder_path, "*.dat")
+        filepaths = _glob(folder_path, recursive=True)
+
+        if len(filepaths) == 0:
+            raise FileNotFoundError("No data files found")
+
+        for fp in filepaths:
+            CRDS.read_file(data_filepath=fp)
+
+
     @staticmethod
     def read_file(data_filepath):
         """ Creates a CRDS object holding data stored within Datasources
@@ -58,36 +93,13 @@ class CRDS:
                 None
         """
         from pandas import read_csv as _read_csv
-        
-        # from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        
-        # from processing._metadata import Metadata as _Metadata
-        from HUGS.Modules import Instrument as _Instrument
         from HUGS.Processing import create_datasources as _create_datasources
 
-        # First check for the CRDS object - should only be one? 
-        # Maybe this can depend on the type or something?
-
-        # Load CRDS object from object store
-        # CRDS object doesn't actually hold any of the Instrument objects
-        # it just remembers them
-        
-        # There should only be 1 CRDS object
-
-        c = CRDS.create()
-        c.save()
-
-        # crds_uuid = 
         crds = CRDS.load()
 
         filename = data_filepath.split("/")[-1]
-        # metadata = _Metadata.create(filename, raw_data)
 
-        # Parse the data here
-        # Parse the gases
-        # Save get gas_name datasource iD and data
-        # Pass this gas_data list to the instrument for storage in Datasources
         gas_data = crds.read_data(data_filepath=data_filepath)
 
         # Create Datasources, save them to the object store and get their UUIDs
@@ -115,19 +127,27 @@ class CRDS:
         from pandas import RangeIndex as _RangeIndex
         from pandas import concat as _concat
         from pandas import read_csv as _read_csv
+        from pandas import datetime as _pd_datetime
+        from pandas import NaT as _pd_NaT
+        from uuid import uuid4 as _uuid4
 
         from HUGS.Processing import read_metadata
 
-        from uuid import uuid4 as _uuid4
+        # Function to parse the datetime format found in the datafile
+        def parse_date(date):
+            try:
+                return _pd_datetime.strptime(date, '%y%m%d %H%M%S')
+            except ValueError:
+                return _pd_NaT
 
-        # Create an ID for the Datasource
-        # Currently just give it a fixed ID
-        data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+")
+        data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"], 
+                            parse_dates=[[0,1]], date_parser=parse_date)
+        data.index.name = "Datetime"
+
         # Drop any rows with NaNs
         # Reset the index
         # This is now done before creating metadata
-        data = data.dropna(axis=0, how="any")
-        data.index = _RangeIndex(data.index.size)
+        data = data.dropna(axis="rows", how="any")
 
         # Get the number of gases in dataframe and number of columns of data present for each gas
         n_gases, n_cols = self.gas_info(data=data)
@@ -138,13 +158,13 @@ class CRDS:
         header = data.head(2)
         skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
-        time_cols = 2
+        # time_cols = 2
         header_rows = 2
         # Dataframe containing the time data for this data input
-        time_data = data.iloc[2:, 0:time_cols]
+        # time_data = data.iloc[2:, 0:time_cols]
 
-        timeframe = self.parse_timecols(time_data=time_data)
-        timeframe.index = _RangeIndex(timeframe.index.size)
+        # timeframe = self.parse_timecols(time_data=time_data)
+        # timeframe.index = _RangeIndex(timeframe.index.size)
 
         # Create metadata here
         metadata = read_metadata(filename=data_filepath, data=data, data_type="CRDS")
@@ -161,23 +181,12 @@ class CRDS:
 
             column_names = ["count", "stdev", "n_meas"]
             column_labels = ["%s %s" % (species, l) for l in column_names]
-
-            # Split into years here
             # Name columns
             gas_data = gas_data.set_axis(column_labels, axis='columns', inplace=False)
-
             # Drop the first two rows now we have the name
             gas_data = gas_data.drop(index=gas_data.head(header_rows).index, inplace=False)
-            gas_data.index = _RangeIndex(gas_data.index.size)
-
             # Cast data to float64 / double
             gas_data = gas_data.astype("float64")
-            # Concatenate the timeframe and the data
-            gas_data = _concat([timeframe, gas_data], axis="columns")
-
-            # TODO - Verify integrity here? Test if this is required
-            gas_data = gas_data.set_index('Datetime', drop=True, inplace=False, verify_integrity=True)
-            # TODO - What metadata should be added?
             
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
@@ -186,36 +195,6 @@ class CRDS:
             data_list.append((species, species_metadata, datasource_id, gas_data))
 
         return data_list
-
-    def parse_timecols(self, time_data):
-        """ Takes a dataframe that contains the date and time 
-            and creates a single columned dataframe containing a 
-            UTC datetime
-
-            Args:
-                time_data (Pandas.Dataframe): Dataframe containing
-            Returns:
-                timeframe (Pandas.Dataframe): Dataframe containing datetimes set to UTC
-        """
-        import datetime as _datetime
-        from pandas import DataFrame as _DataFrame
-        from pandas import to_datetime as _to_datetime
-
-        from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-
-        def t_calc(row, col): return _datetime_to_string(_datetime_to_datetime(
-            _datetime.datetime.strptime(row+col, "%y%m%d%H%M%S")))
-
-        time_gen = (t_calc(row, col) for row, col in time_data.itertuples(index=False))
-        time_list = list(time_gen)
-
-        timeframe = _DataFrame(data=time_list, columns=["Datetime"])
-
-        # Check how these data work when read back out
-        timeframe["Datetime"] = _to_datetime(timeframe["Datetime"])
-
-        return timeframe
 
     def gas_info(self, data):
             """ Returns the number of columns of data for each gas
