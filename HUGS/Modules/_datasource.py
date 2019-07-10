@@ -455,7 +455,7 @@ class Datasource:
 
         return False
             
-    def get_species(self):
+    def species(self):
         """ Returns the species of this Datasource
 
             Returns:
@@ -463,7 +463,7 @@ class Datasource:
         """
         return self._labels["species"]
 
-    def get_inlet(self):
+    def inlet(self):
         """ Returns the inlet of this Datasource
 
             Returns:

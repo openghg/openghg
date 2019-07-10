@@ -86,15 +86,24 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
         single_key = "_".join(sorted(search_terms))
 
     keys = {}
+    # Populate keys, tidies way to do this with .get() below?
     for search_term in search_terms:
-        # If we require all the search terms to be satisifed use a single key
-        if require_all:
-            search_key = single_key
-        else:
-            search_key = search_term
-
-        keys[search_key] = []
         for datasource in datasources:
+            keys[search_term + "_" + datasource.species()] = []
+
+    # Iterate over two 
+    # keys = {search_key + "_" + datasource.species() : [] for datasource in datasources}
+    for search_term in search_terms:
+        for datasource in datasources:
+            # If we require all the search terms to be satisfied use a single key
+            if require_all:
+                search_key = single_key
+            else:
+                search_key = search_term + "_" + datasource.species()
+            # Here add the species to the key to aid recombination
+            # TODO - not sure how this will scale to other data types, better alternative?
+            # TODO - remove this search_term key
+            # search_key = search_term + "_" + datasource.species()
             # Check the Datasource labels for the search term
             if datasource.search_labels(search_term):
                 prefix = "data/uuid/%s" % datasource.uuid()
@@ -108,9 +117,16 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
                     remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
                     # Check if we got all Trues for the other search terms
                     if all(remaining_terms):
+                        # keys[search_key] = keys.get(search_key, []).extend(in_date)
                         keys[search_key].extend(in_date)
                 else:
+                    print(search_key)
                     keys[search_key].extend(in_date)
+                    # keys[search_key] = keys.get(search_key, [])
+                    # keys[search_key].extend(in_date)
+
+    # Remove the empty keys
+    keys = {k: v for k,v in keys.items() if len(keys[k]) != 0}
 
     return keys
 
