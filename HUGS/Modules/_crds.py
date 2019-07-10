@@ -80,8 +80,6 @@ class CRDS:
         for fp in filepaths:
             CRDS.read_file(data_filepath=fp)
 
-        return False
-
 
     @staticmethod
     def read_file(data_filepath):

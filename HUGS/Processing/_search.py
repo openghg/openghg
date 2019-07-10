@@ -120,7 +120,6 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
                         # keys[search_key] = keys.get(search_key, []).extend(in_date)
                         keys[search_key].extend(in_date)
                 else:
-                    print(search_key)
                     keys[search_key].extend(in_date)
                     # keys[search_key] = keys.get(search_key, [])
                     # keys[search_key].extend(in_date)
