@@ -219,3 +219,5 @@ Storing of Datasource by name has been disabled for now - seems unnecessary
 2019-07-10
 
 Tidy the search function for search_key and single_key
+
+Add nbstripout to repo
