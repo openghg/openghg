@@ -91,6 +91,11 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
         for datasource in datasources:
             keys[search_term + "_" + datasource.species()] = []
 
+    # See 
+    # https://docs.quantifiedcode.com/python-anti-patterns/correctness/not_using_defaultdict.html
+    # and using defaultdict instead of dict, can place a list as default
+
+
     # Iterate over two 
     # keys = {search_key + "_" + datasource.species() : [] for datasource in datasources}
     for search_term in search_terms:
