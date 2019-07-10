@@ -42,6 +42,8 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
     from HUGS.Util import get_datetime_epoch as _get_datetime_epoch
     from HUGS.Util import get_datetime_now as _get_datetime_now
 
+    from collections import defaultdict as _defaultdict
+
     if start_datetime is None:
         start_datetime = _get_datetime_epoch()
     if end_datetime is None:
@@ -84,15 +86,8 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
     # Just want to return a single composite key of all search terms
     if require_all:
         single_key = "_".join(sorted(search_terms))
-
-    keys = {}
-    # Populate keys, tidies way to do this with .get() below?
-    for search_term in search_terms:
-        for datasource in datasources:
-            keys[search_term + "_" + datasource.species()] = []
-
-    # Iterate over two 
-    # keys = {search_key + "_" + datasource.species() : [] for datasource in datasources}
+        
+    keys = _defaultdict(list)
     for search_term in search_terms:
         for datasource in datasources:
             # If we require all the search terms to be satisfied use a single key
