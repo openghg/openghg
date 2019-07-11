@@ -186,8 +186,8 @@ def test_three_sites():
 
     # Search sites for a single gas - how?
     data_type = "CRDS"
-    start = get_datetime(year=2014, month=1, day=1)
-    end = get_datetime(year=2016, month=1, day=1)
+    start = get_datetime(year=2016, month=1, day=1)
+    end = get_datetime(year=2017, month=1, day=1)
 
     results = search(search_terms=search_terms, data_type=data_type, require_all=False, start_datetime=start, end_datetime=end)
 
