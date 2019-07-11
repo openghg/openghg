@@ -41,6 +41,7 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
     from HUGS.Modules import Datasource as _Datasource
     from HUGS.Util import get_datetime_epoch as _get_datetime_epoch
     from HUGS.Util import get_datetime_now as _get_datetime_now
+    from HUGS.Util import load_object as _load_object
 
     from collections import defaultdict as _defaultdict
 
@@ -64,7 +65,7 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
     if len(object_list) > 1:
         raise ValueError("More than one " + data_type.name + " object found.")
 
-    data_obj = load_object(data_type.name, object_uuid)
+    data_obj = _load_object(data_type.name)
     # Get the UUIDs of the Datasources associated with the object
     datasource_uuids = data_obj.datasources()
 
@@ -195,28 +196,6 @@ def daterange_to_string(start, end):
     end_fmt = end.strftime("%Y%m%d")
 
     return start_fmt + "_" + end_fmt
-
-
-def load_object(class_name, uuid):
-    """ Load an object of type class_name
-
-        Args:
-            class_name (str): Name of class to load
-            uuid (str): UUID of object to load from object store
-        Returns:
-            class_name: class_name object
-    """
-    module_path = "HUGS.Modules"
-    class_name = str(class_name).upper()
-
-    # Although __import__ is not usually recommended, here we want to use the
-    # fromlist argument that import_module doesn't support
-    module_object = __import__(name=module_path, fromlist=class_name)
-    target_class = getattr(module_object, class_name)
-
-    return target_class.load()
-
-
 
 # def get_objects(bucket, root_path, datetime_begin, datetime_end):
 #     """ Get all values stored in the object store

@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 from HUGS.Modules import CRDS, GC
 from HUGS.Modules import Datasource
 from HUGS.ObjectStore import get_local_bucket, get_object_names
-from HUGS.Processing import in_daterange, key_to_daterange, load_object
+from HUGS.Processing import in_daterange, key_to_daterange
 from HUGS.Processing import recombine_sections, search
-from HUGS.Util import get_datetime
+from HUGS.Util import get_datetime, load_object
                             
 
 from Acquire.ObjectStore import datetime_to_string
@@ -36,7 +36,7 @@ def test_load_object(crds):
     crds.save(bucket)
     uuid = crds.uuid()
     class_name = "crds"
-    obj = load_object(class_name=class_name, uuid=uuid)
+    obj = load_object(class_name=class_name)
 
     assert isinstance(obj, CRDS)
     assert obj.uuid() == crds.uuid()
