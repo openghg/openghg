@@ -103,7 +103,7 @@ class Datasource:
             Returns:
                 None
         """
-        self._labels[key] = value
+        self._labels[key.lower()] = value.lower()
 
     def add_data(self, metadata, data):
         """ Add data to this Datasource and segment the data by size.
@@ -450,7 +450,7 @@ class Datasource:
                 bool: True if found else False
         """
         for v in self._labels.values():
-            if v == search_term:
+            if v == search_term.lower():
                 return True
 
         return False
