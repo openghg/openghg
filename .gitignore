@@ -126,3 +126,5 @@ user/notebooks/.ipynb_checkpoints/
 test_tmp/
 
 raw_data/
+
+.gitconfig

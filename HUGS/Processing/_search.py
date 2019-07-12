@@ -6,7 +6,7 @@ from enum import Enum as _Enum
 
 __all__ = ["get_data",  "in_daterange",
            "key_to_daterange", "daterange_to_string", 
-           "daterange_to_string", "load_object", "search"]
+           "daterange_to_string", "search"]
 
 
 class RootPaths(_Enum):
