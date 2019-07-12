@@ -1,6 +1,7 @@
 from HUGS.ObjectStore import get_object_names, get_bucket
 from HUGS.Processing import search as _hugs_search
 
+
 def search(args):
     species = args["species"]
     data_type = args["data_type"]

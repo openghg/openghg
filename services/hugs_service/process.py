@@ -11,6 +11,11 @@ def process(args):
         
     authorisation.verify("process")
 
+    # For GC
+    # PAR for data will be at args["par"]["data"]
+    # If it exists precision will be at args["par"]["data"]
+
+    # Have a PAR for each file
     par = PAR.from_data(args["file_par"])
     par_secret = args["par_secret"]
 
@@ -21,10 +26,9 @@ def process(args):
 
     filename = file.download(dir="/tmp")
 
-    print("Filename : ", filename)
     data_type = "CRDS"
     # process(file_data, data_type):
-    results = _hugs_process(filepath=filename, data_type=data_type)
+    results = _hugs_process(filepath=filename, precision_filepath=data_type)
 
     return {"results": results}
 
