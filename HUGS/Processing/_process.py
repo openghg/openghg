@@ -1,7 +1,7 @@
 __all__ = ["process"]
 
 
-def process(file_data, data_type):
+def process(filepath, data_type):
     """ Parses the passed filename using the passed data_type as a hint for
         processing
 
