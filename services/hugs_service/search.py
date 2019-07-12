@@ -1,5 +1,5 @@
 from HUGS.ObjectStore import get_object_names, get_bucket
-from HUGS.Processing import gas_search
+from HUGS.Processing import search as _hugs_search
 
 def search(args):
     species = args["species"]
@@ -15,7 +15,7 @@ def search(args):
     else:
         end_datetime = None
 
-    results = gas_search(species=species, data_type=data_type, 
+    results = _hugs_search(search_terms=species, data_type=data_type,
                             start_datetime=start_datetime, end_datetime=end_datetime)
 
     return {"results" : results}
