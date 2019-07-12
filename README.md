@@ -1,7 +1,7 @@
 # Hub for UK Greenhouse Gas Science
 Repository for the HUGS project
 
-# Running HUGS
+# Installation
 HUGS currently uses a testing branch of the Acquire package and requires acquire to be cloned into the same folder as HUGS
 
 For example
