@@ -1,7 +1,7 @@
 from Acquire.Client import Authorisation, PAR
 from Acquire.Service import get_this_service
 
-from HUGS.Processing import process as _hugs_process
+from HUGS.Processing import proc
 
 # Take a PAR from an uploaded file and process the data
 def process(args):
@@ -28,7 +28,7 @@ def process(args):
 
     data_type = "CRDS"
     # process(file_data, data_type):
-    results = _hugs_process(filepath=filename, precision_filepath=data_type)
+    results = proc(data_file=filename, data_type=data_type)
 
     return {"results": results}
 
