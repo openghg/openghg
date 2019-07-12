@@ -6,7 +6,8 @@ from HUGS.Processing import process
 # Take a PAR from an uploaded file and process the data
 def process(args):
     data_type = args["data_type"]
-    authorisation = args["authorisation"]
+    auth = args["authorisation"]
+    authorisation = Authorisation.from_data(auth)
         
     authorisation.verify("process")
 
@@ -23,7 +24,7 @@ def process(args):
     # process(file_data, data_type):
     results = process(file_data=filename, data_type=data_type)
 
-    return {"results":results}
+    return {"results": results}
 
     # This could be a dict to handle the different types of data files we'll be
     # uploading. How to handle processing of two files by GC?
