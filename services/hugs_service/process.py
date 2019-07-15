@@ -6,29 +6,33 @@ from HUGS.Processing import proc
 # Take a PAR from an uploaded file and process the data
 def process(args):
     data_type = args["data_type"]
+
+    # TODO - cleaner way to do this?
+    data_par = PAR.from_data(args["par"]["data"])
+    data_secret = args["par_secret"]["data"]
+       
     auth = args["authorisation"]
     authorisation = Authorisation.from_data(auth)
         
     authorisation.verify("process")
 
-    # For GC
-    # PAR for data will be at args["par"]["data"]
-    # If it exists precision will be at args["par"]["data"]
-
-    # Have a PAR for each file
-    par = PAR.from_data(args["file_par"])
-    par_secret = args["par_secret"]
-
     hugs = get_this_service(need_private_access=True)
-    par_secret = hugs.decrypt_data(par_secret)
+    
+    data_secret = hugs.decrypt_data(data_secret)
+    data_file = data_par.resolve(secret=data_secret)
+    data_filename = data_file.download(dir="/tmp")
 
-    file = par.resolve(secret=par_secret)
+    if data_type == "GC":
+        precision_par = PAR.from_data(args["par"]["precision"])
+        precision_secret = args["par_secret"]["precision"]
+        precision_secret = hugs.decrypt_data(precision_secret)
+        precision_filename = precision_par.resolve(secret-precision_secret)
+    else:
+        precision_filename = None
 
-    filename = file.download(dir="/tmp")
-
-    data_type = "CRDS"
+    # data_type = "GC"
     # process(file_data, data_type):
-    results = proc(data_file=filename, data_type=data_type)
+    results = proc(data_file=data_filename, precision_filepath=precision_filename, data_type=data_type)
 
     return {"results": results}
 

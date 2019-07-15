@@ -2,11 +2,12 @@ __all__ = ["proc"]
 
 
 def proc(data_file, precision_filepath=None, data_type="CRDS"):
-    """ Parses the passed filename using the passed data_type as a hint for
-        processing
+    """ Passes the passed filename(s) to the correct processing
+        object depending on the data_type argument.
 
         Args:
             file_data (str): Name of file for processing
+            precision_filepath (str, default=None): Name of precision file for GC data
             data_type (str): Type of data to be processed (CRDS, GC etc)
         Returns:
             WIP
@@ -15,9 +16,7 @@ def proc(data_file, precision_filepath=None, data_type="CRDS"):
     from HUGS.Processing import DataTypes as _DataTypes
     from HUGS.Util import load_object as _load_object
 
-    # Load in tuple here for GC data and precision filenames?
     data_type = _DataTypes[data_type.upper()].name
-
     # Load in the the class used to process the data file/s
     processing_obj = _load_object(class_name=data_type)
 
@@ -27,6 +26,7 @@ def proc(data_file, precision_filepath=None, data_type="CRDS"):
         obj = proc_obj.read_file(data_filepath=data_file, precision_filepath=precision_filepath)
 
     # Return a summary of the data
+    # TODO - modify me to return something useful
     return obj.datasources()
 
 
