@@ -13,8 +13,8 @@ For example
 
 HUGS will look for Acquire at `../acquire`
 
-1.`git clone https://github.com/chryswoods/acquire.git`
-2.`git clone https://github.com/chryswoods/hugs.git`
+1. `git clone https://github.com/chryswoods/acquire.git`
+2. `git clone https://github.com/chryswoods/hugs.git`
 3. `cd acquire`
 4. `git checkout testingObjStore`
 
