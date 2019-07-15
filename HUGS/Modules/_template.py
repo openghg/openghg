@@ -59,10 +59,6 @@ class Template:
         from os import path as _path
         from HUGS.Modules import CRDS as _CRDS
 
-        # TODO - Remove this
-        crds = _CRDS.create()
-        crds.save()
-
         # This finds data files in sub-folders
         folder_path = _path.join(folder_path, "./*.dat")
         # This finds files in the current folder, get recursive
