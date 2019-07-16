@@ -1,7 +1,7 @@
 import datetime
 import os
 import pytest
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from HUGS.Modules import CRDS, GC
 from HUGS.Modules import Datasource
@@ -207,4 +207,37 @@ def test_three_sites():
 
     plt.show()
     
+    assert False
+
+
+def test_location_search():
+    # Here can return a single key for each search term
+    # How to seach for 3 different sites
+    # bilsdale, heathfield, tacolneston
+    # Between 2016 - 2018
+    # search terms bsd, hfd, tac
+    bucket = get_local_bucket(empty=True)
+
+    test_data = "../data/search_data"
+    folder_path = os.path.join(os.path.dirname(__file__), test_data)
+    CRDS.read_folder(folder_path=folder_path)
+
+    # prefix = "datasource"
+    # objs = get_object_names(bucket=bucket, prefix=prefix)
+
+    # datasources = [Datasource.load(key=key) for key in objs]
+
+    search_terms = "co2"
+    locations = ["bsd", "hfd", "tac"]
+
+    # Search sites for a single gas - how?
+    data_type = "CRDS"
+    start = None  # get_datetime(year=2016, month=1, day=1)
+    end = None  # get_datetime(year=2017, month=1, day=1)
+
+    results = search(search_terms=search_terms, locations=locations, data_type=data_type, require_all=False, 
+                    start_datetime=start, end_datetime=end)
+
+    print(results)
+
     assert False

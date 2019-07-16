@@ -22,13 +22,12 @@ class DataType(_Enum):
     GC = "GC"
 
 
-def search(search_a, search_b, data_type, require_all=False, start_datetime=None, end_datetime=None):
+def search(search_terms, locations, data_type, require_all=False, start_datetime=None, end_datetime=None):
     """ Search for gas data (optionally within a daterange)
     
         Args:
-            search_a (string or list): String(s) giving objects to search
-            search_b (string or list): String(s) to search the objects in search_a for
-            data_type (str): GC / CRDS etc
+            search_terms (string or list): Terms to search for in Datasources
+            locations (string or list): Where to search for the terms in search_terms
             require_all (bool, default=False): Require all search terms to be satisfied
             start_datetime (datetime, default=None): Start datetime for search
             If None a start datetime of UNIX epoch (1970-01-01) is set
@@ -76,11 +75,11 @@ def search(search_a, search_b, data_type, require_all=False, start_datetime=None
     # TODO - implement lookup tables?
     datasources = [_Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 
-    if not isinstance(search_a, list):
-        search_a = [search_a]
+    if not isinstance(search_terms, list):
+        search_terms = [search_terms]
 
-    if not isinstance(search_b, list):
-        search_b = [search_b]
+    if not isinstance(locations, list):
+        locations = [locations]
     
     # Here can return a single key for each search term
     # How to seach for 3 different sites
@@ -92,30 +91,58 @@ def search(search_a, search_b, data_type, require_all=False, start_datetime=None
     if require_all:
         single_key = "_".join(sorted(search_terms))
         
-    keys = _defaultdict(list)
-    for search_term in search_terms:
+    # First we find the Datasources from locations we want to narrow down our search
+    location_sources = _defaultdict(list)
+    for location in locations:
         for datasource in datasources:
-            # Check the Datasource labels for the search term
-            if datasource.search_labels(search_term):
-                prefix = "data/uuid/%s" % datasource.uuid()
-                data_list = _get_object_names(bucket=bucket, prefix=prefix)
-                # Get the Dataframes that are within the dates we are searching for
-                in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+            if datasource.search_labels(location):
+                location_sources[location].append(datasource)
 
-                if require_all:
-                    # Check if this Datasource also contains all the other terms we're searching for
-                    # and get True/False values
-                    search_key = single_key
-                    remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
-                    # Check if we got all Trues for the other search terms
-                    if all(remaining_terms):
-                        keys[search_key].extend(in_date)
-                else:
-                    search_key = search_term + "_" + datasource.species()
-                    keys[search_key].extend(in_date)
+    # Next we search these keys for the search terms we require
+    keys = _defaultdict(list)
+    # Search for the search terms in the locations that we want
+    for search_term in search_terms:
+        for location in location_sources:
+            for datasource in location_sources[location]:
+                if datasource.search_labels(search_term):
+                    prefix = "data/uuid/%s" % datasource.uuid()
+                    data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                    # Get the Dataframes that are within the dates we are searching for
+                    in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+
+                    if require_all:
+                        remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
+                        # Check if we got all Trues for the other search terms
+                        if all(remaining_terms):
+                            keys[search_key].extend(in_date)
+                    else:
+                        keys[location].extend(in_date)
+
+    return keys
+
+    # for search_term in search_terms:
+    #     for datasource in datasources:
+    #         # Check the Datasource labels for the search term
+    #         if datasource.search_labels(search_term):
+    #             prefix = "data/uuid/%s" % datasource.uuid()
+    #             data_list = _get_object_names(bucket=bucket, prefix=prefix)
+    #             # Get the Dataframes that are within the dates we are searching for
+    #             in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+
+    #             if require_all:
+    #                 # Check if this Datasource also contains all the other terms we're searching for
+    #                 # and get True/False values
+    #                 search_key = single_key
+    #                 remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
+    #                 # Check if we got all Trues for the other search terms
+    #                 if all(remaining_terms):
+    #                     keys[search_key].extend(in_date)
+    #             else:
+    #                 search_key = search_term + "_" + datasource.species()
+    #                 keys[search_key].extend(in_date)
                    
     # Remove the empty keys
-    keys = {k: v for k,v in keys.items() if len(keys[k]) != 0}
+    # keys = {k: v for k,v in keys.items() if len(keys[k]) != 0}
 
     return keys
 
