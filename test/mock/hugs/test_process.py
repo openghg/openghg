@@ -33,6 +33,8 @@ def test_process_CRDS(authenticated_user, tempdir):
     response = hugs.call_function(function="process", args=args)
 
     print(response)
+    
+    assert False
 
 
 def test_process_GC(authenticated_user, tempdir):
@@ -61,3 +63,5 @@ def test_process_GC(authenticated_user, tempdir):
     response = hugs.call_function(function="process", args=args)
 
     print(response)
+
+    assert False

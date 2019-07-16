@@ -10,7 +10,6 @@ def process_data(data_file, precision_filepath=None, data_type="CRDS"):
             precision_filepath (str, default=None): Name of precision file for GC data
             data_type (str): Type of data to be processed (CRDS, GC etc)
         Returns:
-            WIP
             list: List of Datasources
     """
     from HUGS.Processing import DataTypes as _DataTypes
@@ -25,9 +24,4 @@ def process_data(data_file, precision_filepath=None, data_type="CRDS"):
     elif data_type == "GC":
         obj = processing_obj.read_file(data_filepath=data_file, precision_filepath=precision_filepath)
 
-    return False
-    
-    
-    
-
-
+    return obj.datasources()
