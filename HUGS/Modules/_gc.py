@@ -25,7 +25,6 @@ class GC:
     def __init__(self):
         # self._uuid = None
         self._creation_datetime = None
-        self._instruments = {}
         self._stored = False
         self._datasources = []
 
@@ -55,7 +54,6 @@ class GC:
             bucket = _get_bucket()
 
         key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
-        # Query object store for Instrument
         return _exists(bucket=bucket, key=key)
 
     @staticmethod
@@ -87,7 +85,6 @@ class GC:
         data = {}
         # data["uuid"] = self._uuid
         data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
-        data["instruments"] = self._instruments
         data["stored"] = self._stored
         data["datasources"] = self._datasources
 
@@ -109,7 +106,6 @@ class GC:
         gc = GC()
         # gc._uuid = data["uuid"]
         gc._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        gc._instruments = data["instruments"]
         stored = data["stored"]
         gc._datasources = data["datasources"]
 
@@ -177,7 +173,6 @@ class GC:
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-        from HUGS.Modules import Instrument as _Instrument
         from HUGS.Processing import create_datasources as _create_datasources
 
         gc = GC.load()
@@ -334,7 +329,12 @@ class GC:
         # Read inlets from the parameters dictionary
         expected_inlets = self.get_inlets(site=site)
         # Get the inlets in the dataframe
-        data_inlets = data["Inlet"].unique()
+        try:
+            data_inlets = data["Inlet"].unique()
+        except KeyError:
+            raise KeyError("Unable to read inlets from data, please ensure this data is of the GC type"
+                            "expected by this processing module")
+            
 
         # Check that each inlet in data_inlet matches one that's given by parameters file
         for data_inlet in data_inlets:

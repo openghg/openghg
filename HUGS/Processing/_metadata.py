@@ -35,22 +35,15 @@ def _parse_CRDS(filename, data):
             Returns:
                 dict: Dictionary containing metadata
         """
-        # Not a huge fan of these hardcoded values
-        # TODO - will these change at some point?
-        # start_date = str(data[0][2])
-        # start_time = str(data[1][2])
-        # end_date = str(data.iloc[-1][0])
-        # end_time = str(data.iloc[-1][1])
-
         # Find gas measured and port used
         type_meas = data[2][2]
         port = data[3][2]
 
-        # start = self.parse_date_time(date=start_date, time=start_time)
-        # end = self.parse_date_time(date=end_date, time=end_time)
-
          # Split the filename to get the site and resolution
         split_filename = filename.split(".")
+
+        if len(split_filename) < 4:
+            raise ValueError("Error reading metadata from filename. The expected format is {site}.{instrument}.{time resolution}.{height}.dat")
 
         site = split_filename[0]
         instrument = split_filename[1]
@@ -61,6 +54,8 @@ def _parse_CRDS(filename, data):
             resolution = "1_minute"
         elif(resolution_str == "hourly"):
             resolution = "1_hour"
+        else:
+            resolution = "Not read"
  
         # Parse the dataframe to find the gases - this might be excessive
         # gases, _ = find_gases(data=data)
@@ -85,16 +80,16 @@ def _parse_GC(filename, data):
             dict: Dictionary containing metadata
     """
     split_filename = filename.split(".")
-    site = split_filename[0].split("-")[0]
-    instrument = split_filename[0].split("-")[1]
+    # If we haven't been able to split the filename raise an error
+    split_hyphen = split_filename[0].split("-")
+    if len(split_hyphen) < 2:
+        raise ValueError("Error reading metadata from filename. The expected format is {site}-{instrument}.{number}.C")
+
+    site = split_hyphen[0]
+    instrument = split_hyphen[1]
 
     metadata = {}
     metadata["site"] = site
     metadata["instrument"] = instrument
 
     return metadata
-
-
-
-
-

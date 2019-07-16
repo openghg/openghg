@@ -238,7 +238,7 @@ class CRDS:
             except ValueError:
                 return _pd_NaT
 
-        data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"], 
+        data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"],
                             parse_dates=[[0,1]], date_parser=parse_date)
         data.index.name = "Datetime"
 
@@ -310,9 +310,23 @@ class CRDS:
 
             # Check that we have the same number of columns for each gas
             if not _unanimous(gases):
-                raise ValueError("Each gas does not have the same number of columns")
+                raise ValueError("Each gas does not have the same number of columns. Please ensure data"
+                                 "is of the CRDS type expected by this module")
 
             return len(gases), list(gases.values())[0]
+        
+    @staticmethod
+    def data_check(data_filepath):
+        """ Checks that the passed datafile can be read by this processing
+            object
+
+            Args:
+                data_filepath (str): Data file path
+            Returns:
+                bool: True if data can be read
+
+        """
+        read_metadata()
 
     def add_datasources(self, datasource_uuids):
         """ Add the passed list of Datasources to the current list
@@ -339,3 +353,5 @@ class CRDS:
                 list: List of Datasources
         """
         return self._datasources
+
+    
