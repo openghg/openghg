@@ -18,16 +18,9 @@ class CRDS:
     _crds_uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
 
     def __init__(self):
-        # self._uuid = None
-        self._instruments = {}
         self._creation_datetime = None
-        # self._labels = {}
         self._stored = False
-        # Processed data
-        self._proc_data = None
-        # Datasource UUIDs
         self._datasources = []
-
 
     def is_null(self):
         """ Check if this is a null object
@@ -36,6 +29,25 @@ class CRDS:
                 bool: True if object is null
         """
         return self._datasources is None
+
+    @staticmethod
+    def exists(bucket=None):
+        """ Query the object store to check if a CRDS object already exists
+
+            Args:
+                bucket (dict, default=None): Bucket for data storage
+            Returns:
+                bool: True if CRDS object exists in object store
+        """
+        from HUGS.ObjectStore import exists as _exists
+        from HUGS.ObjectStore import get_bucket as _get_bucket
+
+        if bucket is None:
+            bucket = _get_bucket()
+
+        key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
+
+        return _exists(bucket=bucket, key=key)
 
     @staticmethod
     def create():
@@ -47,11 +59,98 @@ class CRDS:
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
         c = CRDS()
-        # c._uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
         c._creation_datetime = _get_datetime_now()
 
         return c
 
+    def to_data(self):
+        """ Return a JSON-serialisable dictionary of object
+            for storage in object store
+
+            Returns:
+                dict: Dictionary version of object
+        """
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+
+        d = {}
+        d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        d["stored"] = self._stored
+        d["datasources"] = self._datasources
+
+        return d
+
+    @staticmethod
+    def from_data(data, bucket=None):
+        """ Create a CRDS object from data
+
+            Args:
+                data (str): JSON data
+                bucket (dict, default=None): Bucket for data storage
+            Returns:
+                CRDS: CRDS object created from data
+        """
+        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+        from HUGS.ObjectStore import get_bucket as _get_bucket
+
+        if data is None or len(data) == 0:
+            return CRDS()
+
+        if bucket is None:
+            bucket = _get_bucket()
+        
+        c = CRDS()
+        c._creation_datetime = _string_to_datetime(data["creation_datetime"])
+        stored = data["stored"]
+
+        c._datasources = data["datasources"]
+        c._stored = False
+        return c
+
+    def save(self, bucket=None):
+        """ Save the object to the object store
+
+            Args:
+                bucket (dict, default=None): Bucket for data
+            Returns:
+                None
+        """
+        if self.is_null():
+            return
+
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+        from HUGS.ObjectStore import get_bucket as _get_bucket
+
+        if bucket is None:
+            bucket = _get_bucket()
+
+        crds_key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
+
+        self._stored = True
+        _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
+
+    @staticmethod
+    def load(bucket=None):
+        """ Load a CRDS object from the datastore using the passed
+            bucket and UUID
+
+            Args:
+                uuid (str): UUID of CRDS object
+                key (str, default=None): Key of object in object store
+                bucket (dict, default=None): Bucket to store object
+            Returns:
+                Datasource: Datasource object created from JSON
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from HUGS.ObjectStore import get_bucket as _get_bucket
+
+        if bucket is None:
+            bucket = _get_bucket()
+
+        key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
+        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
+
+        return CRDS.from_data(data=data, bucket=bucket)
 
     @staticmethod
     def read_folder(folder_path, recursive=False):
@@ -79,9 +178,6 @@ class CRDS:
 
         for fp in filepaths:
             CRDS.read_file(data_filepath=fp)
-
-        return False
-
 
     @staticmethod
     def read_file(data_filepath):
@@ -142,12 +238,11 @@ class CRDS:
             except ValueError:
                 return _pd_NaT
 
-        data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"], 
+        data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"],
                             parse_dates=[[0,1]], date_parser=parse_date)
         data.index.name = "Datetime"
 
         # Drop any rows with NaNs
-        # Reset the index
         # This is now done before creating metadata
         data = data.dropna(axis="rows", how="any")
 
@@ -160,14 +255,7 @@ class CRDS:
         header = data.head(2)
         skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
-        # time_cols = 2
         header_rows = 2
-        # Dataframe containing the time data for this data input
-        # time_data = data.iloc[2:, 0:time_cols]
-
-        # timeframe = self.parse_timecols(time_data=time_data)
-        # timeframe.index = _RangeIndex(timeframe.index.size)
-
         # Create metadata here
         metadata = read_metadata(filename=data_filepath, data=data, data_type="CRDS")
 
@@ -222,138 +310,23 @@ class CRDS:
 
             # Check that we have the same number of columns for each gas
             if not _unanimous(gases):
-                raise ValueError("Each gas does not have the same number of columns")
+                raise ValueError("Each gas does not have the same number of columns. Please ensure data"
+                                 "is of the CRDS type expected by this module")
 
             return len(gases), list(gases.values())[0]
-
-    def to_data(self):
-        """ Return a JSON-serialisable dictionary of object
-            for storage in object store
-
-            Returns:
-                dict: Dictionary version of object
-        """
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-
-        d = {}
-        # d["UUID"] = self._uuid
-        d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
-        d["instruments"] =  self._instruments
-        d["stored"] = self._stored
-        d["datasources"] = self._datasources
-        # Save UUIDs of associated instruments
-        # d["datasources"] = datasource_uuids
-        # d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
-        # d["data_end_datetime"] = _datetime_to_string(self._end_datetime)
-        # This is only set as True when saving this object in the object store
-
-        return d
-
-    @staticmethod
-    def from_data(data, bucket=None):
-        """ Create a CRDS object from data
-
-            Args:
-                data (str): JSON data
-                bucket (dict, default=None): Bucket for data storage
-            Returns:
-                CRDS: CRDS object created from data
-        """
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
-        from HUGS.ObjectStore import get_bucket as _get_bucket
-
-        if data is None or len(data) == 0:
-            return CRDS()
-
-        if bucket is None:
-            bucket = _get_bucket()
         
-        c = CRDS()
-        # c._uuid = data["UUID"]
-        c._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        c._instruments = data["instruments"]
-        #  c._instruments[instrument._uuid] = instrument._creation_datetime
-        stored = data["stored"]
-
-        c._datasources = data["datasources"]
-
-        # Could load instruments? This could be a lot of instruments
-        # c._start_datetime = _string_to_datetime(data["data_start_datetime"])
-        # c._end_datetime = _string_to_datetime(data["data_end_datetime"])
-        # Now we're loading it in again 
-        c._stored = False
-
-        return c
-
-    def save(self, bucket=None):
-        """ Save the object to the object store
-
-            Args:
-                bucket (dict, default=None): Bucket for data
-            Returns:
-                None
-        """
-        if self.is_null():
-            return
-
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from HUGS.ObjectStore import get_bucket as _get_bucket
-
-        if bucket is None:
-            bucket = _get_bucket()
-
-        crds_key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
-
-        self._stored = True
-        _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
-
     @staticmethod
-    def load(bucket=None):
-        """ Load a CRDS object from the datastore using the passed
-            bucket and UUID
+    def data_check(data_filepath):
+        """ Checks that the passed datafile can be read by this processing
+            object
 
             Args:
-                uuid (str): UUID of CRDS object
-                key (str, default=None): Key of object in object store
-                bucket (dict, default=None): Bucket to store object
+                data_filepath (str): Data file path
             Returns:
-                Datasource: Datasource object created from JSON
+                bool: True if data can be read
+
         """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from HUGS.ObjectStore import get_bucket as _get_bucket
-
-        if bucket is None:
-            bucket = _get_bucket()
-
-        key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
-        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
-
-        return CRDS.from_data(data=data, bucket=bucket)
-
-    @staticmethod
-    def exists(bucket=None):
-        """ Uses an ID of some kind to query whether or not this is a new
-            Instrument and should be created
-
-            TODO - update this when I have a clearer idea of how to ID Instruments
-
-            Args:
-                instrument_id (str): ID of Instrument
-                bucket (dict, default=None): Bucket for data storage
-            Returns:
-                bool: True if Instrument exists
-        """
-        from HUGS.ObjectStore import exists as _exists
-        from HUGS.ObjectStore import get_bucket as _get_bucket
-        
-        if bucket is None:
-            bucket = _get_bucket()
-
-        key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
-
-        # Query object store for Instrument
-        return _exists(bucket=bucket, key=key)
+        read_metadata()
 
     def add_datasources(self, datasource_uuids):
         """ Add the passed list of Datasources to the current list
@@ -380,3 +353,5 @@ class CRDS:
                 list: List of Datasources
         """
         return self._datasources
+
+    

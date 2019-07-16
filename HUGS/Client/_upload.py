@@ -1,6 +1,9 @@
 
 __all__ = ["Upload"]
 
+from Acquire.Client import User, Drive, Service, PAR, Authorisation
+
+
 class Upload:
     """This is a simple class to demonstrate client-server
        communication
@@ -13,7 +16,7 @@ class Upload:
         else:
             self._service = None
 
-    def upload(self, filename, authenticated_user):
+    def upload(self, filename):
         if self._service is None:
             raise PermissionError("Cannot use a null service!")
 

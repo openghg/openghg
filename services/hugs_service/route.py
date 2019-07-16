@@ -14,6 +14,9 @@ def hugs_functions(function, args):
     if function == "search":
         from hugs_service.search import search as _search
         return _search(args)
+    if function == "process":
+        from hugs_service.process import process as _process
+        return _process(args)
     else:
         from admin.handler import MissingFunctionError
         raise MissingFunctionError()

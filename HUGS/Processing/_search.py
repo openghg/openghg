@@ -6,7 +6,7 @@ from enum import Enum as _Enum
 
 __all__ = ["get_data",  "in_daterange",
            "key_to_daterange", "daterange_to_string", 
-           "daterange_to_string", "load_object", "search"]
+           "daterange_to_string", "search"]
 
 
 class RootPaths(_Enum):
@@ -16,7 +16,7 @@ class RootPaths(_Enum):
     SITE = "site"
     NETWORK = "network"
 
-# Better name for this enum?
+
 class DataType(_Enum):
     CRDS = "CRDS"
     GC = "GC"
@@ -42,6 +42,9 @@ def search(search_a, search_b, data_type, require_all=False, start_datetime=None
     from HUGS.Modules import Datasource as _Datasource
     from HUGS.Util import get_datetime_epoch as _get_datetime_epoch
     from HUGS.Util import get_datetime_now as _get_datetime_now
+    from HUGS.Util import load_object as _load_object
+
+    from collections import defaultdict as _defaultdict
 
     if start_datetime is None:
         start_datetime = _get_datetime_epoch()
@@ -63,7 +66,7 @@ def search(search_a, search_b, data_type, require_all=False, start_datetime=None
     if len(object_list) > 1:
         raise ValueError("More than one " + data_type.name + " object found.")
 
-    data_obj = load_object(data_type.name, object_uuid)
+    data_obj = _load_object(data_type.name)
     # Get the UUIDs of the Datasources associated with the object
     datasource_uuids = data_obj.datasources()
 
@@ -88,38 +91,37 @@ def search(search_a, search_b, data_type, require_all=False, start_datetime=None
     # Just want to return a single composite key of all search terms
     if require_all:
         single_key = "_".join(sorted(search_terms))
-
-    keys = {}
-    for search_term_a in search_a:
-        # If we require all the search terms to be satisifed use a single key
-        if require_all:
-            search_key = single_key
-        else:
-            search_key = search_term_a
-
-        # TODO - improve this by being able to pass two arguments to search_labels?
-        # zip the lists for parsing?
-
-        keys[search_key] = []
+        
+    keys = _defaultdict(list)
+    for search_term in search_terms:
         for datasource in datasources:
+            # If we require all the search terms to be satisfied use a single key
+            if require_all:
+                search_key = single_key
+            else:
+                search_key = search_term + "_" + datasource.species()
+            # Here add the species to the key to aid recombination
+            # TODO - not sure how this will scale to other data types, better alternative?
+            
             # Check the Datasource labels for the search term
-            if datasource.search_labels(search_term_a):
-                for search_term_b in search_b:
-                    if datasource.search_labels(search_term_b):
-                        prefix = "data/uuid/%s" % datasource.uuid()
-                        data_list = _get_object_names(bucket=bucket, prefix=prefix)
-                        # Get the Dataframes that are within the dates we are searching for
-                        in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+            if datasource.search_labels(search_term):
+                prefix = "data/uuid/%s" % datasource.uuid()
+                data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                # Get the Dataframes that are within the dates we are searching for
+                in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
 
-                        if require_all:
-                            # Check if this Datasource also contains all the other terms we're searching for
-                            # and get True/False values
-                            remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term_a]
-                            # Check if we got all Trues for the other search terms
-                            if all(remaining_terms):
-                                keys[search_key].extend(in_date)
-                        else:
-                            keys[search_key].extend(in_date)
+                if require_all:
+                    # Check if this Datasource also contains all the other terms we're searching for
+                    # and get True/False values
+                    remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
+                    # Check if we got all Trues for the other search terms
+                    if all(remaining_terms):
+                        keys[search_key].extend(in_date)
+                else:
+                    keys[search_key].extend(in_date)
+                   
+    # Remove the empty keys
+    keys = {k: v for k,v in keys.items() if len(keys[k]) != 0}
 
     return keys
 
@@ -198,28 +200,6 @@ def daterange_to_string(start, end):
     end_fmt = end.strftime("%Y%m%d")
 
     return start_fmt + "_" + end_fmt
-
-
-def load_object(class_name, uuid):
-    """ Load an object of type class_name
-
-        Args:
-            class_name (str): Name of class to load
-            uuid (str): UUID of object to load from object store
-        Returns:
-            class_name: class_name object
-    """
-    module_path = "HUGS.Modules"
-    class_name = str(class_name).upper()
-
-    # Although __import__ is not usually recommended, here we want to use the
-    # fromlist argument that import_module doesn't support
-    module_object = __import__(name=module_path, fromlist=class_name)
-    target_class = getattr(module_object, class_name)
-
-    return target_class.load()
-
-
 
 # def get_objects(bucket, root_path, datetime_begin, datetime_end):
 #     """ Get all values stored in the object store

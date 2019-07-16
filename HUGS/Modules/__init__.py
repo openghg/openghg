@@ -4,7 +4,6 @@
 """
 
 from ._datasource import *
-from ._instrument import *
 from ._network import *
 from ._site import *
 from ._crds import *

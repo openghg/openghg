@@ -27,8 +27,10 @@ def recombine_sections(data_keys):
     for key in data_keys:
         keyed_data[key] = [_Datasource.load_dataframe(bucket=bucket, key=k) for k in data_keys[key]]
 
+
     combined = {}
     for key in keyed_data:
+        # print(key, keyed_data[key])
         comb = _concat(keyed_data[key], axis="rows")
         # Check that the dataframe's index is sorted by date
         if not comb.index.is_monotonic_increasing:
