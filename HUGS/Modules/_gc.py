@@ -9,12 +9,14 @@ class sampling_period(_Enum):
     GCMS = 1200
     MEDUSA = 1200
 
+
 def _test_data():
     """ Return the absolute path for data files used for testing purposes
     """
     import os as _os
     path = _os.path.dirname(_os.path.abspath(__file__)) + _os.path.sep + "../Data"
     return path
+
 
 class GC:
     _gc_root = "GC"
@@ -26,20 +28,6 @@ class GC:
         self._instruments = {}
         self._stored = False
         self._datasources = []
-
-    @staticmethod
-    def create():
-        """ This function should be used to create GC objects
-
-            Returns:
-                GC: GC object 
-        """
-        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
-
-        gc = GC()
-        gc._creation_datetime = _get_datetime_now()
-
-        return gc
 
     def is_null(self):
         """ Check if this is a null object
@@ -69,6 +57,20 @@ class GC:
         key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
         # Query object store for Instrument
         return _exists(bucket=bucket, key=key)
+
+    @staticmethod
+    def create():
+        """ This function should be used to create GC objects
+
+            Returns:
+                GC: GC object 
+        """
+        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
+
+        gc = GC()
+        gc._creation_datetime = _get_datetime_now()
+
+        return gc
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -115,6 +117,28 @@ class GC:
         
         return gc
 
+    def save(self, bucket=None):
+        """ Save this GC object in the object store
+
+            Args:
+                bucket (dict): Bucket for data storage
+            Returns:
+                None
+        """
+        if self.is_null():
+            return
+
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+        from HUGS.ObjectStore import get_bucket as _get_bucket
+
+        if bucket is None:
+            bucket = _get_bucket()
+
+        self._stored = True
+        gc_key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
+        _ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
+
     @staticmethod
     def load(bucket=None):
         """ Load a GC object from the object store
@@ -137,28 +161,6 @@ class GC:
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
         
         return GC.from_data(data=data, bucket=bucket)
-
-    def save(self, bucket=None):
-        """ Save this GC object in the object store
-
-            Args:
-                bucket (dict): Bucket for data storage
-            Returns:
-                None
-        """
-        if self.is_null():
-            return
-
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from HUGS.ObjectStore import get_bucket as _get_bucket
-
-        if bucket is None:
-            bucket = _get_bucket()
-
-        self._stored = True
-        gc_key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
-        _ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
 
     @staticmethod
     def read_file(data_filepath, precision_filepath):
@@ -197,7 +199,6 @@ class GC:
 
         # For now return the GC object for easier testing
         return gc
-
 
     def read_data(self, data_filepath, precision_filepath, site, instrument):
         """ Read data from the data and precision files
