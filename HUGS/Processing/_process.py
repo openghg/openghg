@@ -1,7 +1,7 @@
-__all__ = ["proc"]
+__all__ = ["process_data"]
 
 
-def proc(data_file, precision_filepath=None, data_type="CRDS"):
+def process_data(data_file, precision_filepath=None, data_type="CRDS"):
     """ Passes the passed filename(s) to the correct processing
         object depending on the data_type argument.
 
@@ -22,12 +22,12 @@ def proc(data_file, precision_filepath=None, data_type="CRDS"):
 
     if data_type == "CRDS":
         obj = processing_obj.read_file(data_filepath=data_file)
-    elif data_tpe == "GC":
-        obj = proc_obj.read_file(data_filepath=data_file, precision_filepath=precision_filepath)
+    elif data_type == "GC":
+        obj = processing_obj.read_file(data_filepath=data_file, precision_filepath=precision_filepath)
 
-    # Return a summary of the data
-    # TODO - modify me to return something useful
-    return obj.datasources()
-
+    return False
+    
+    
+    
 
 
