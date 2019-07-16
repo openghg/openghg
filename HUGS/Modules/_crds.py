@@ -18,16 +18,9 @@ class CRDS:
     _crds_uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
 
     def __init__(self):
-        # self._uuid = None
-        self._instruments = {}
         self._creation_datetime = None
-        # self._labels = {}
         self._stored = False
-        # Processed data
-        self._proc_data = None
-        # Datasource UUIDs
         self._datasources = []
-
 
     def is_null(self):
         """ Check if this is a null object
@@ -47,7 +40,6 @@ class CRDS:
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
         c = CRDS()
-        # c._uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
         c._creation_datetime = _get_datetime_now()
 
         return c
@@ -158,14 +150,7 @@ class CRDS:
         header = data.head(2)
         skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
-        # time_cols = 2
         header_rows = 2
-        # Dataframe containing the time data for this data input
-        # time_data = data.iloc[2:, 0:time_cols]
-
-        # timeframe = self.parse_timecols(time_data=time_data)
-        # timeframe.index = _RangeIndex(timeframe.index.size)
-
         # Create metadata here
         metadata = read_metadata(filename=data_filepath, data=data, data_type="CRDS")
 
@@ -234,16 +219,9 @@ class CRDS:
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         d = {}
-        # d["UUID"] = self._uuid
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
-        d["instruments"] =  self._instruments
         d["stored"] = self._stored
         d["datasources"] = self._datasources
-        # Save UUIDs of associated instruments
-        # d["datasources"] = datasource_uuids
-        # d["data_start_datetime"] = _datetime_to_string(self._start_datetime)
-        # d["data_end_datetime"] = _datetime_to_string(self._end_datetime)
-        # This is only set as True when saving this object in the object store
 
         return d
 
@@ -267,20 +245,11 @@ class CRDS:
             bucket = _get_bucket()
         
         c = CRDS()
-        # c._uuid = data["UUID"]
         c._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        c._instruments = data["instruments"]
-        #  c._instruments[instrument._uuid] = instrument._creation_datetime
         stored = data["stored"]
 
         c._datasources = data["datasources"]
-
-        # Could load instruments? This could be a lot of instruments
-        # c._start_datetime = _string_to_datetime(data["data_start_datetime"])
-        # c._end_datetime = _string_to_datetime(data["data_end_datetime"])
-        # Now we're loading it in again 
         c._stored = False
-
         return c
 
     def save(self, bucket=None):
@@ -331,16 +300,12 @@ class CRDS:
 
     @staticmethod
     def exists(bucket=None):
-        """ Uses an ID of some kind to query whether or not this is a new
-            Instrument and should be created
-
-            TODO - update this when I have a clearer idea of how to ID Instruments
+        """ Query the object store to check if a CRDS object already exists
 
             Args:
-                instrument_id (str): ID of Instrument
                 bucket (dict, default=None): Bucket for data storage
             Returns:
-                bool: True if Instrument exists
+                bool: True if CRDS object exists in object store
         """
         from HUGS.ObjectStore import exists as _exists
         from HUGS.ObjectStore import get_bucket as _get_bucket
@@ -350,7 +315,6 @@ class CRDS:
 
         key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
 
-        # Query object store for Instrument
         return _exists(bucket=bucket, key=key)
 
     def add_datasources(self, datasource_uuids):

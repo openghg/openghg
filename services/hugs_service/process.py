@@ -1,53 +1,44 @@
 from Acquire.Client import Authorisation, PAR
 from Acquire.Service import get_this_service
 
-from HUGS.Processing import proc
+from HUGS.Processing import process_data
 
-# Take a PAR from an uploaded file and process the data
+
 def process(args):
+    """ Take a PAR from an uploaded file and process the data
+
+        Args:
+            args (dict): Dictionary of JSON serialised objects to be
+            used by processing functions
+        Returns:
+            dict: Dictionary of results of processing
+    """
     data_type = args["data_type"]
+
+    data_par = PAR.from_data(args["par"]["data"])
+    data_secret = args["par_secret"]["data"]
+
     auth = args["authorisation"]
     authorisation = Authorisation.from_data(auth)
-        
+
+    # Verify that this process had authorisation to be called
     authorisation.verify("process")
 
-    # For GC
-    # PAR for data will be at args["par"]["data"]
-    # If it exists precision will be at args["par"]["data"]
-
-    # Have a PAR for each file
-    par = PAR.from_data(args["file_par"])
-    par_secret = args["par_secret"]
-
     hugs = get_this_service(need_private_access=True)
-    par_secret = hugs.decrypt_data(par_secret)
 
-    file = par.resolve(secret=par_secret)
+    data_secret = hugs.decrypt_data(data_secret)
+    data_filename = data_par.resolve(secret=data_secret)
+    data_file = data_filename.download(dir="/tmp")
 
-    filename = file.download(dir="/tmp")
+    if data_type == "GC":
+        precision_par = PAR.from_data(args["par"]["precision"])
+        precision_secret = args["par_secret"]["precision"]
+        precision_secret = hugs.decrypt_data(precision_secret)
+        precision_filename = precision_par.resolve(precision_secret)
+        precision_file = precision_filename.download(dir="/tmp")
+    else:
+        precision_file = None
 
-    data_type = "CRDS"
-    # process(file_data, data_type):
-    results = proc(data_file=filename, data_type=data_type)
+    results = process_data(data_file=data_file, precision_filepath=precision_file, data_type=data_type)
 
     return {"results": results}
-
-    # This could be a dict to handle the different types of data files we'll be
-    # uploading. How to handle processing of two files by GC?
-    # Just work with CRDS for now?
-    # filenames = file.download(dir="/tmp/hugs")
-    # result["filename"] = filenames
-    # print(results)
-
-
-    # with open(filename, "r") as f:
-    #     lines = f.readlines()
-    
-    # result["uploaded"] = lines
-
-    # return result
-
-
-
-
-
