@@ -95,14 +95,6 @@ def search(search_a, search_b, data_type, require_all=False, start_datetime=None
     keys = _defaultdict(list)
     for search_term in search_terms:
         for datasource in datasources:
-            # If we require all the search terms to be satisfied use a single key
-            if require_all:
-                search_key = single_key
-            else:
-                search_key = search_term + "_" + datasource.species()
-            # Here add the species to the key to aid recombination
-            # TODO - not sure how this will scale to other data types, better alternative?
-            
             # Check the Datasource labels for the search term
             if datasource.search_labels(search_term):
                 prefix = "data/uuid/%s" % datasource.uuid()
@@ -113,11 +105,13 @@ def search(search_a, search_b, data_type, require_all=False, start_datetime=None
                 if require_all:
                     # Check if this Datasource also contains all the other terms we're searching for
                     # and get True/False values
+                    search_key = single_key
                     remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
                     # Check if we got all Trues for the other search terms
                     if all(remaining_terms):
                         keys[search_key].extend(in_date)
                 else:
+                    search_key = search_term + "_" + datasource.species()
                     keys[search_key].extend(in_date)
                    
     # Remove the empty keys
