@@ -16,7 +16,7 @@ class RootPaths(_Enum):
     SITE = "site"
     NETWORK = "network"
 
-# Better name for this enum?
+
 class DataType(_Enum):
     CRDS = "CRDS"
     GC = "GC"

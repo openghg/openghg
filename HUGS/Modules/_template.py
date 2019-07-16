@@ -17,13 +17,11 @@ class Template:
 
     def __init__(self):
         self._creation_datetime = None
-        # self._labels = {}
         self._stored = False
         # Processed data
         self._proc_data = None
         # Datasource UUIDs
         self._datasources = []
-
 
     def is_null(self):
         """ Check if this is a null object
@@ -129,7 +127,6 @@ class Template:
 
         from HUGS.Processing import read_metadata
 
-       
         # Create metadata here
         metadata = read_metadata(filename=data_filepath, data=data, data_type="CRDS")
 
@@ -142,7 +139,6 @@ class Template:
             data_list.append((species, species_metadata, datasource_id, gas_data))
 
         return data_list
-
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -181,18 +177,8 @@ class Template:
             bucket = _get_bucket()
         
         c = CRDS()
-        # c._uuid = data["UUID"]
         c._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        c._instruments = data["instruments"]
-        #  c._instruments[instrument._uuid] = instrument._creation_datetime
-        stored = data["stored"]
-
         c._datasources = data["datasources"]
-
-        # Could load instruments? This could be a lot of instruments
-        # c._start_datetime = _string_to_datetime(data["data_start_datetime"])
-        # c._end_datetime = _string_to_datetime(data["data_end_datetime"])
-        # Now we're loading it in again 
         c._stored = False
 
         return c
@@ -243,28 +229,23 @@ class Template:
 
         return CRDS.from_data(data=data, bucket=bucket)
 
-    @staticmethod
+   @staticmethod
     def exists(bucket=None):
-        """ Uses an ID of some kind to query whether or not this is a new
-            Instrument and should be created
-
-            TODO - update this when I have a clearer idea of how to ID Instruments
+        """ Query the object store to check if a template object already exists
 
             Args:
-                instrument_id (str): ID of Instrument
                 bucket (dict, default=None): Bucket for data storage
             Returns:
-                bool: True if Instrument exists
+                bool: True if CRDS object exists in object store
         """
         from HUGS.ObjectStore import exists as _exists
         from HUGS.ObjectStore import get_bucket as _get_bucket
-        
+
         if bucket is None:
             bucket = _get_bucket()
 
         key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
 
-        # Query object store for Instrument
         return _exists(bucket=bucket, key=key)
 
     def add_datasources(self, datasource_uuids):
