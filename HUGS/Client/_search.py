@@ -7,11 +7,21 @@ class Search:
         self._service = wallet.get_service(service_url=service_url)
         
 
-    def search(self, species, data_type):
+    def search(self, search_terms, locations, data_type, start_datetime=None, end_datetime=None):
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
-        args = {"species" : species, "data_type" : data_type}
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+
+        args = {}
+        args["search_terms"] = search_terms
+        args["locations"] = locations
+        args["data_type"] = data_type
+
+        if start_datetime:
+            args["start_datetime"] = _datetime_to_string(start_datetime)
+        if end_datetime:
+            args["end_datetime"] = _datetime_to_string(end_datetime)
 
         response = self._service.call_function(function="search", args=args)
 

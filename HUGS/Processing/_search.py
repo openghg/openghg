@@ -16,18 +16,18 @@ class RootPaths(_Enum):
     SITE = "site"
     NETWORK = "network"
 
-# Better name for this enum?
+
 class DataType(_Enum):
     CRDS = "CRDS"
     GC = "GC"
 
 
-def search(search_terms, data_type, require_all=False, start_datetime=None, end_datetime=None):
+def search(search_terms, locations, data_type, require_all=False, start_datetime=None, end_datetime=None):
     """ Search for gas data (optionally within a daterange)
     
         Args:
-            search_terms (string or list): String to search for
-            data_type (str): GC / CRDS etc
+            search_terms (string or list): Terms to search for in Datasources
+            locations (string or list): Where to search for the terms in search_terms
             require_all (bool, default=False): Require all search terms to be satisfied
             start_datetime (datetime, default=None): Start datetime for search
             If None a start datetime of UNIX epoch (1970-01-01) is set
@@ -77,47 +77,44 @@ def search(search_terms, data_type, require_all=False, start_datetime=None, end_
 
     if not isinstance(search_terms, list):
         search_terms = [search_terms]
-    
-    # Here can return a single key for each search term
-    # How to seach for 3 different sites
-    # bilsdale, heathfield, tacolneston
-    # Between 2016 - 2018
-    # search terms bsd, hfd, tac
 
+    if not isinstance(locations, list):
+        locations = [locations]
+    
     # Just want to return a single composite key of all search terms
     if require_all:
         single_key = "_".join(sorted(search_terms))
         
+    # First we find the Datasources from locations we want to narrow down our search
+    location_sources = _defaultdict(list)
+    for location in locations:
+        for datasource in datasources:
+            if datasource.search_labels(location):
+                location_sources[location].append(datasource)
+
+    # Next we search these keys for the search terms we require
     keys = _defaultdict(list)
     for search_term in search_terms:
-        for datasource in datasources:
-            # If we require all the search terms to be satisfied use a single key
-            if require_all:
-                search_key = single_key
-            else:
-                search_key = search_term + "_" + datasource.species()
-            # Here add the species to the key to aid recombination
-            # TODO - not sure how this will scale to other data types, better alternative?
-            
-            # Check the Datasource labels for the search term
-            if datasource.search_labels(search_term):
-                prefix = "data/uuid/%s" % datasource.uuid()
-                data_list = _get_object_names(bucket=bucket, prefix=prefix)
-                # Get the Dataframes that are within the dates we are searching for
-                in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+        for location in location_sources:
+            for datasource in location_sources[location]:
+                if datasource.search_labels(search_term):
+                    prefix = "data/uuid/%s" % datasource.uuid()
+                    data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                    # Get the Dataframes that are within the required date range
+                    in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
 
-                if require_all:
-                    # Check if this Datasource also contains all the other terms we're searching for
-                    # and get True/False values
-                    remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
-                    # Check if we got all Trues for the other search terms
-                    if all(remaining_terms):
+                    if require_all:
+                        search_key = "%s_%s" % (location, single_key)
+                        remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
+                        # Check if we got all Trues for the other search terms
+                        if all(remaining_terms):
+                            keys[search_key].extend(in_date)
+                    else:
+                        search_key = "%s_%s" % (location, search_term)
+                        print(search_key)
                         keys[search_key].extend(in_date)
-                else:
-                    keys[search_key].extend(in_date)
-                   
-    # Remove the empty keys
-    keys = {k: v for k,v in keys.items() if len(keys[k]) != 0}
+
+    # keys = {k: v for k,v in keys.items() if len(keys[k]) != 0}
 
     return keys
 

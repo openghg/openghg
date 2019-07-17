@@ -18,6 +18,11 @@ from Acquire.ObjectStore import datetime_to_datetime
 
 #     return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
 
+@pytest.fixture(autouse=True)
+def before_tests():
+    crds = CRDS.create()
+    crds.save()
+
 def test_read_file():
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
@@ -49,15 +54,15 @@ def test_read_file():
     assert data_three[0]["co n_meas"].iloc[0] == pytest.approx(19.0)
 
 
-def test_read_folder():
-    folder_path = "/home/gar/Documents/Devel/hugs/raw_data/CRDS_picarro"
-    CRDS.read_folder(folder_path=folder_path)
-    bucket = get_local_bucket()
-    objs = get_object_names(bucket=bucket)
+# def test_read_folder():
+#     folder_path = "/home/gar/Documents/Devel/hugs/raw_data/CRDS_picarro"
+#     CRDS.read_folder(folder_path=folder_path)
+#     bucket = get_local_bucket()
+#     objs = get_object_names(bucket=bucket)
 
-    # print(objs)
+#     # print(objs)
 
-    assert False
+#     assert False
 
 # @pytest.fixture
 # def mock_uuid(monkeypatch):

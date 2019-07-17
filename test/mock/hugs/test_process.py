@@ -3,6 +3,8 @@ import os
 import uuid
 
 from HUGS.Client import Process
+from HUGS.ObjectStore import get_local_bucket
+from HUGS.Modules import GC, CRDS
 from Acquire.Client import User, Drive, Service, StorageCreds, PAR, Authorisation
 
 
@@ -11,8 +13,16 @@ def tempdir(tmpdir_factory):
     d = tmpdir_factory.mktemp("")
     return str(d)
 
+@pytest.fixture(autouse=True)
+def run_before_tests():
+    _ = get_local_bucket(empty=True)
+
+
 
 def test_process_CRDS(authenticated_user, tempdir):
+    crds = CRDS.create()
+    crds.save()
+
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
     filepath = os.path.join(os.path.dirname(__file__), "../../../test/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat")
@@ -38,6 +48,9 @@ def test_process_CRDS(authenticated_user, tempdir):
 
 
 def test_process_GC(authenticated_user, tempdir):
+    gc = GC.create()
+    gc.save()
+
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
     data_filepath = os.path.join(os.path.dirname(__file__), "../../../test/data/proc_test_data/GC/capegrim-medusa.18.C")
@@ -61,7 +74,5 @@ def test_process_GC(authenticated_user, tempdir):
             "data_type": "GC"}
 
     response = hugs.call_function(function="process", args=args)
-
-    print(response)
 
     assert False
