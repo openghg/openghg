@@ -84,35 +84,53 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     # Just want to return a single composite key of all search terms
     if require_all:
         single_key = "_".join(sorted(search_terms))
-        
-    # First we find the Datasources from locations we want to narrow down our search
-    location_sources = _defaultdict(list)
-    for location in locations:
-        for datasource in datasources:
-            if datasource.search_labels(location):
-                location_sources[location].append(datasource)
 
+     # First we find the Datasources from locations we want to narrow down our search
+    location_sources = _defaultdict(list)
+    # If we locations to search
+    if locations:
+        for location in locations:
+            for datasource in datasources:
+                if datasource.search_labels(location):
+                    location_sources[location].append(datasource)
+    # If we have an empty list of locations, search everywhere
+    # TODO - this feels clunky
+    else:
+        for datasource in datasources:
+            location_sources[datasource.site()] = datasource
+
+    
     # Next we search these keys for the search terms we require
     keys = _defaultdict(list)
-    for search_term in search_terms:
+    # If we have search terms
+    if search_terms:
+        for search_term in search_terms:
+            for location in location_sources:
+                for datasource in location_sources[location]:
+                    if datasource.search_labels(search_term):
+                        prefix = "data/uuid/%s" % datasource.uuid()
+                        data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                        # Get the Dataframes that are within the required date range
+                        in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+
+                        if require_all:
+                            search_key = "%s_%s" % (location, single_key)
+                            remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
+                            # Check if we got all Trues for the other search terms
+                            if all(remaining_terms):
+                                keys[search_key].extend(in_date)
+                        else:
+                            search_key = "%s_%s" % (location, search_term)
+                            keys[search_key].extend(in_date)
+    # If we don't have any search terms, return everything that's in the correct daterange
+    else:
         for location in location_sources:
             for datasource in location_sources[location]:
-                if datasource.search_labels(search_term):
-                    prefix = "data/uuid/%s" % datasource.uuid()
-                    data_list = _get_object_names(bucket=bucket, prefix=prefix)
-                    # Get the Dataframes that are within the required date range
-                    in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
-
-                    if require_all:
-                        search_key = "%s_%s" % (location, single_key)
-                        remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
-                        # Check if we got all Trues for the other search terms
-                        if all(remaining_terms):
-                            keys[search_key].extend(in_date)
-                    else:
-                        search_key = "%s_%s" % (location, search_term)
-                        print(search_key)
-                        keys[search_key].extend(in_date)
+                prefix = "data/uuid/%s" % datasource.uuid()
+                data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+                search_key = "%s_%s" % (location, search_term)
+                keys[search_key].extend(in_date)
 
     # keys = {k: v for k,v in keys.items() if len(keys[k]) != 0}
 
