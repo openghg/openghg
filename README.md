@@ -13,8 +13,8 @@ For example
 
 HUGS will look for Acquire at `../acquire`
 
-1.`git clone https://github.com/chryswoods/acquire.git`
-2.`git clone https://github.com/chryswoods/hugs.git`
+1. `git clone https://github.com/chryswoods/acquire.git`
+2. `git clone https://github.com/chryswoods/hugs.git`
 3. `cd acquire`
 4. `git checkout testingObjStore`
 
@@ -25,8 +25,7 @@ If you want to work with HUGS and want to write a processing module for a certai
 Please make a new branch for each feature you create. Each function should also have unit tests in the respective directory
 in `test`.
 
-After finishing your feature branch please submit a pull request to merge into devel. Don't merge straight away without another
-user performing a review of your code.
+After finishing your feature branch please submit a pull request to merge into devel.
 
 # Setting up nbstripout after cloning
 Jupyer notebook output may be automatically stripped on commit through the use of the nbstripout tool.
