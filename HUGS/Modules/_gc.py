@@ -182,11 +182,13 @@ class GC:
         site = "CGO"
         instrument_name = "GCMD"
 
-        gas_data = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
-                        site=site, instrument=instrument_name)
+        data, species, metadata = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
+                                                site=site, instrument=instrument_name)
+
+        split_data = gc.split(data=data, site=site, species=species, metadata=metadata)
     
         # Create Datasources, save them to the object store and get their UUIDs
-        datasource_uuids = _create_datasources(gas_data)
+        datasource_uuids = _create_datasources(split_data)
         # Add the Datasources to the list of datasources associated with this object
         gc.add_datasources(datasource_uuids)
         # Save object to object store
@@ -275,11 +277,8 @@ class GC:
         data["new_time"] = data.index - _pd_Timedelta(seconds=self.get_precision(instrument)/2.0)
         data = data.set_index("new_time", inplace=False, drop=True)
         data.index.name = "Datetime"
-
-        # Segment the processed data
-        gas_data = self.split(data=data, site=site, species=species, metadata=metadata)
-    
-        return gas_data
+        
+        return (data, species, metadata)
 
     def read_precision(self, filepath):
         """ Read GC precision file

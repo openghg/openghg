@@ -81,12 +81,6 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     if not isinstance(locations, list):
         locations = [locations]
     
-    # Here can return a single key for each search term
-    # How to seach for 3 different sites
-    # bilsdale, heathfield, tacolneston
-    # Between 2016 - 2018
-    # search terms bsd, hfd, tac
-
     # Just want to return a single composite key of all search terms
     if require_all:
         single_key = "_".join(sorted(search_terms))
@@ -100,48 +94,26 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
 
     # Next we search these keys for the search terms we require
     keys = _defaultdict(list)
-    # Search for the search terms in the locations that we want
     for search_term in search_terms:
         for location in location_sources:
             for datasource in location_sources[location]:
                 if datasource.search_labels(search_term):
                     prefix = "data/uuid/%s" % datasource.uuid()
                     data_list = _get_object_names(bucket=bucket, prefix=prefix)
-                    # Get the Dataframes that are within the dates we are searching for
+                    # Get the Dataframes that are within the required date range
                     in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
 
                     if require_all:
+                        search_key = "%s_%s" % (location, single_key)
                         remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
                         # Check if we got all Trues for the other search terms
                         if all(remaining_terms):
                             keys[search_key].extend(in_date)
                     else:
-                        keys[location].extend(in_date)
+                        search_key = "%s_%s" % (location, search_term)
+                        print(search_key)
+                        keys[search_key].extend(in_date)
 
-    return keys
-
-    # for search_term in search_terms:
-    #     for datasource in datasources:
-    #         # Check the Datasource labels for the search term
-    #         if datasource.search_labels(search_term):
-    #             prefix = "data/uuid/%s" % datasource.uuid()
-    #             data_list = _get_object_names(bucket=bucket, prefix=prefix)
-    #             # Get the Dataframes that are within the dates we are searching for
-    #             in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
-
-    #             if require_all:
-    #                 # Check if this Datasource also contains all the other terms we're searching for
-    #                 # and get True/False values
-    #                 search_key = single_key
-    #                 remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
-    #                 # Check if we got all Trues for the other search terms
-    #                 if all(remaining_terms):
-    #                     keys[search_key].extend(in_date)
-    #             else:
-    #                 search_key = search_term + "_" + datasource.species()
-    #                 keys[search_key].extend(in_date)
-                   
-    # Remove the empty keys
     # keys = {k: v for k,v in keys.items() if len(keys[k]) != 0}
 
     return keys
