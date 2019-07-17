@@ -470,6 +470,12 @@ class Datasource:
                 str: Inlet of this Datasource
         """
         return self._labels["inlet"]
+
+    def site(self):
+        if "site" in self._labels:
+            return self._labels["site"]
+        else:
+            return "NA"
         
     def uuid(self):
         """ Return the UUID of this object
