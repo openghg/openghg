@@ -97,11 +97,11 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     # TODO - this feels clunky
     else:
         for datasource in datasources:
-            location_sources[datasource.site()] = datasource
+            location_sources[datasource.site()].append(datasource)
 
-    
     # Next we search these keys for the search terms we require
     keys = _defaultdict(list)
+    # TODO - is there a way of tidying this up?
     # If we have search terms
     if search_terms:
         for search_term in search_terms:
@@ -129,7 +129,8 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                 prefix = "data/uuid/%s" % datasource.uuid()
                 data_list = _get_object_names(bucket=bucket, prefix=prefix)
                 in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
-                search_key = "%s_%s" % (location, search_term)
+                # TODO - currently adding in the species here, is this OK?
+                search_key = "%s_%s" % (location, datasource.species())
                 keys[search_key].extend(in_date)
 
     # keys = {k: v for k,v in keys.items() if len(keys[k]) != 0}
