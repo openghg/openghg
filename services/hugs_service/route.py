@@ -17,6 +17,9 @@ def hugs_functions(function, args):
     if function == "process":
         from hugs_service.process import process as _process
         return _process(args)
+    if function == "retrieve":
+        from hugs_service.retrieve import retrieve as _retrieve
+        return _retrieve(args)
     else:
         from admin.handler import MissingFunctionError
         raise MissingFunctionError()
