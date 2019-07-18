@@ -218,6 +218,14 @@ Storing of Datasource by name has been disabled for now - seems unnecessary
 
 2019-07-10
 
-Tidy the search function for search_key and single_key
+Tidy the search function for search_key and single_key - done
 
-Add nbstripout to repo
+Add nbstripout to repo - done
+
+2019-07-18
+
+Cloud processing of GC and CRDS - return summary of processed data for confirmation
+Cloud search functionality - search returns the data required in a NetCDF format? Maybe Pandas Dataframe for now
+Search functionality should be accompanied by functions to recombine the get this data from the object store and recombine items
+Create a Jupyter notebook interface, see voila for interfaces
+

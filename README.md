@@ -28,7 +28,7 @@ in `test`.
 After finishing your feature branch please submit a pull request to merge into devel.
 
 # Setting up nbstripout after cloning
-Jupyer notebook output may be automatically stripped on commit through the use of the nbstripout tool.
+Jupyter notebook output may be automatically stripped on commit through the use of the nbstripout tool.
 
 To setup the nbstripout tool after cloning this repository please run
 

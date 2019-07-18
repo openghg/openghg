@@ -81,13 +81,13 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     if not isinstance(locations, list):
         locations = [locations]
     
-    # Just want to return a single composite key of all search terms
+    # If all search terms are required just use a single composite key of all search terms
     if require_all:
         single_key = "_".join(sorted(search_terms))
 
      # First we find the Datasources from locations we want to narrow down our search
     location_sources = _defaultdict(list)
-    # If we locations to search
+    # If we have locations to search
     if locations:
         for location in locations:
             for datasource in datasources:
