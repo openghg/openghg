@@ -229,3 +229,4 @@ Cloud search functionality - search returns the data required in a NetCDF format
 Search functionality should be accompanied by functions to recombine the get this data from the object store and recombine items
 Create a Jupyter notebook interface, see voila for interfaces
 
+Search and then download - user might want to redo search or modify it, saves downloading data multiple times
