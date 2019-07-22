@@ -26,6 +26,7 @@ def read_metadata(filename, data, data_type):
 
         return metadata
 
+
 def _parse_CRDS(filename, data):
         """ Parse CRDS files and create a metadata dict
 

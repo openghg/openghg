@@ -230,3 +230,7 @@ Search functionality should be accompanied by functions to recombine the get thi
 Create a Jupyter notebook interface, see voila for interfaces
 
 Search and then download - user might want to redo search or modify it, saves downloading data multiple times
+
+
+
+See Leaflet for map plotting, plotting layers on top of maps etc
