@@ -194,7 +194,10 @@ class CRDS:
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
         from HUGS.Processing import create_datasources as _create_datasources
 
-        crds = CRDS.load()
+        if not CRDS.exists():
+            crds = CRDS.create()
+        else:
+            crds = CRDS.load()
 
         filename = data_filepath.split("/")[-1]
 

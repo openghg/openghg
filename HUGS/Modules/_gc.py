@@ -175,7 +175,10 @@ class GC:
 
         from HUGS.Processing import create_datasources as _create_datasources
 
-        gc = GC.load()
+        if not GC.exists():
+            gc = GC.create()
+        else:
+            gc = GC.load()
 
         print("Remember to update the instrument!")
         # Where to get this from? User input?
