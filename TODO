@@ -234,3 +234,20 @@ Search and then download - user might want to redo search or modify it, saves do
 
 
 See Leaflet for map plotting, plotting layers on top of maps etc
+
+
+2019-07-22
+
+Clean up the testing get buckets, see Christophers 
+
+@pytest.fixture(scope="session")
+def bucket(tmpdir_factory):
+    try:
+        return get_service_account_bucket()
+    except:
+        d = tmpdir_factory.mktemp("objstore")
+        push_is_running_service()
+        bucket = get_service_account_bucket(str(d))
+        while is_running_service():
+            pop_is_running_service()
+        return bucket

@@ -25,30 +25,40 @@ def get_local_bucket(name=None, empty=False):
         Returns:
             dict: Local bucket
     """
-    # Get the path of the user's home directory
-    home_path = os.path.expanduser("~")
-    hugs_test_buckets = "hugs_tmp/test_buckets"
-    
-    local_buckets_dir = os.path.join(home_path, hugs_test_buckets)
+    from Acquire.Service import get_service_account_bucket
 
-    if name:
-        hugs_test_buckets += "/%s" % name
+    # TODO - clean this up
+    try:
+        return get_service_account_bucket()
+    except:
+        # Get the path of the user's home directory
+        home_path = os.path.expanduser("~")
+        hugs_test_buckets = "hugs_tmp/test_buckets"
+        
+        local_buckets_dir = os.path.join(home_path, hugs_test_buckets)
 
-    if empty:
-        import shutil as _shutil
-        import os as _os
-        # Remove the directory and recreate
-        if os.path.isdir(local_buckets_dir):
-            _shutil.rmtree(local_buckets_dir)
-            os.makedirs(local_buckets_dir)
-        else:
-            os.makedirs(local_buckets_dir)
+        if name:
+            hugs_test_buckets += "/%s" % name
 
-    root_bucket = use_testing_object_store_backend(local_buckets_dir)
+        if empty:
+            import shutil as _shutil
+            import os as _os
+            # Remove the directory and recreate
+            if os.path.isdir(local_buckets_dir):
+                _shutil.rmtree(local_buckets_dir)
+                os.makedirs(local_buckets_dir)
+            else:
+                os.makedirs(local_buckets_dir)
 
-    bucket = ObjectStore.create_bucket(bucket=root_bucket, bucket_name="hugs_test")
+        root_bucket = use_testing_object_store_backend(local_buckets_dir)
 
-    return bucket
+        bucket = ObjectStore.create_bucket(bucket=root_bucket, bucket_name="hugs_test")
+
+        return bucket
+
+
+
+
 
 
 
