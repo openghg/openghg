@@ -10,33 +10,25 @@ def retrieve(args):
 
     """
     from HUGS.Processing import recombine_sections as _recombine_sections
+    from collections import defaultdict as _defaultdict
 
     if "keys" in args:
-        keys = args["keys"]
+        key_dict = args["keys"]
     else:
         raise KeyError("Keys required for data retrieval")
 
     if "return_type" in args:
         return_type = args["return_type"]
     else:
-        return_type = "csv"
+        return_type = "json"
 
-    results = _recombine_sections(keys)
+    # Recombine the data by key and save to a dictionary for returning
+    combined_data = {}
+    for key in key_dict:
+        combined = _recombine_sections(key_dict[key])
+        if return_type == "json":
+            combined_data[key] = combined.to_json()
+        else:
+            raise NotImplementedError("Not yet implemented")
 
-    # Here we have to convert a number of dataframes to csv and
-    # add them to a list, this feels very clunky but should work?
-
-    # Convert dataframes to JSON here
-    # JSON or just return binary data?
-    results_list = []
-    if return_type == "json":
-        for key in results:
-            results_list.append(results[key].to_json())
-    else:
-        # TODO - implement this
-        results = False
-    # Can select the return type of the data?
-    # On download can select the type required
-
-    # How will this work with returning a dataframe?
-    return {"results" : results_list}
+    return {"results": combined_data}

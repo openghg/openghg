@@ -10,7 +10,7 @@ def recombine_sections(data_keys):
         processing to NetCDF for output
 
         Args:
-            keys (dict): Dictionary of object store keys keyed by search
+            data_keys (list): Dictionary of object store keys keyed by search
             term
         Returns:
             Pandas.Dataframe or list: Combined dataframes
@@ -22,20 +22,11 @@ def recombine_sections(data_keys):
 
     bucket = _get_bucket()
 
-    # Get dataframes by key
-    keyed_data = {} 
-    for key in data_keys:
-        keyed_data[key] = [_Datasource.load_dataframe(bucket=bucket, key=k) for k in data_keys[key]]
+    data = [_Datasource.load_dataframe(bucket=bucket, key=k) for k in data_keys]
 
-
-    combined = {}
-    for key in keyed_data:
-        # print(key, keyed_data[key])
-        comb = _concat(keyed_data[key], axis="rows")
-        # Check that the dataframe's index is sorted by date
-        if not comb.index.is_monotonic_increasing:
-            comb = comb.sort_index()
-        
-        combined[key] = comb
-
+    combined = _concat(data, axis="rows")
+    # Check that the dataframe's index is sorted by date
+    if not combined.index.is_monotonic_increasing:
+        combined = combined.sort_index()
+    
     return combined
