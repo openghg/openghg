@@ -42,6 +42,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     from HUGS.Util import get_datetime_epoch as _get_datetime_epoch
     from HUGS.Util import get_datetime_now as _get_datetime_now
     from HUGS.Util import load_object as _load_object
+    from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
 
     from collections import defaultdict as _defaultdict
 
@@ -49,6 +50,10 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
         start_datetime = _get_datetime_epoch()
     if end_datetime is None:
         end_datetime = _get_datetime_now()
+
+    # Ensure passed datetimes are timezone aware
+    start_datetime = _datetime_to_datetime(start_datetime)
+    end_datetime = _datetime_to_datetime(end_datetime)
 
     search_prefix = "%s/uuid/" % data_type
     bucket = _get_local_bucket()

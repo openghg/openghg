@@ -428,3 +428,22 @@ class GC:
                 list: List of Datasources
         """
         return self._datasources
+
+    def remove_datasource(self, uuid):
+        """ Remove the Datasource with the given uuid from the list 
+            of Datasources
+
+            Args:
+                uuid (str): UUID of Datasource to be removed
+        """
+        self._datasources.remove(uuid)
+
+    def clear_datasources(self):
+        """ Remove all Datasources from the object
+
+            Returns:
+                None
+        """
+        self._datasources = []
+            
+

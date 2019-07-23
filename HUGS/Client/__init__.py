@@ -4,3 +4,6 @@ from ._upload import *
 from ._search import *
 from ._process import *
 from ._retrieve import *
+from ._cleardatasources import *
+from ._removeobjects import *
+

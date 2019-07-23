@@ -256,3 +256,5 @@ Sort out GC and CRDS creation problem
 
 Added calls to the create function in load for both GC and CRDS, these should be removed
 on first setup
+
+Update Datasource list to set 

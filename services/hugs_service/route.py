@@ -23,6 +23,9 @@ def hugs_functions(function, args):
     if function == "remove_objects":
         from hugs_service.removeobjects import remove_objects as _remove_objects
         return _remove_objects(args)
+    if function == "clear_datasources":
+        from hugs_service.cleardatasources import clear_datasources as _clear_datasources
+        return _clear_datasources(args)
 
     else:
         from admin.handler import MissingFunctionError

@@ -16,7 +16,7 @@ def test_remove_objects(authenticated_user):
     top_three = keys[0:3]
 
     assert len(top_three) == 3
-
+ 
     args = {"keys": top_three}
 
     hugs = Service(service_url="hugs")

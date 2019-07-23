@@ -5,6 +5,8 @@ def remove_objects(args):
 
     if "keys" in args:
         keys = args["keys"]
+        if not keys:
+            raise ValueError("No keys in list")
     else:
         raise KeyError("No keys found")
 
