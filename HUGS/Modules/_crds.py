@@ -57,7 +57,6 @@ class CRDS:
                 CRDS: CRDS object 
         """
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
-
         c = CRDS()
         c._creation_datetime = _get_datetime_now()
 
@@ -198,10 +197,7 @@ class CRDS:
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
         from HUGS.Processing import create_datasources as _create_datasources
 
-        if not CRDS.exists():
-            crds = CRDS.create()
-        else:
-            crds = CRDS.load()
+        crds = CRDS.load()
 
         filename = data_filepath.split("/")[-1]
 

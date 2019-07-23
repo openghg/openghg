@@ -1,12 +1,12 @@
 __all__ = ["Search"]
 
+
 class Search:
     def __init__(self, service_url=None):
         from Acquire.Client import Wallet as _Wallet
         wallet = _Wallet()
         self._service = wallet.get_service(service_url=service_url)
         
-
     def search(self, search_terms, locations, data_type, start_datetime=None, end_datetime=None):
         if self._service is None:
             raise PermissionError("Cannot use a null service")

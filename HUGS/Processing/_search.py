@@ -37,7 +37,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
             dict: List of keys of Datasources matching the search parameters
     """
     from HUGS.ObjectStore import get_object_names as _get_object_names
-    from HUGS.ObjectStore import get_local_bucket as _get_local_bucket
+    from HUGS.ObjectStore import get_bucket as _get_bucket
     from HUGS.Modules import Datasource as _Datasource
     from HUGS.Util import get_datetime_epoch as _get_datetime_epoch
     from HUGS.Util import get_datetime_now as _get_datetime_now
@@ -56,19 +56,19 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     end_datetime = _datetime_to_datetime(end_datetime)
 
     search_prefix = "%s/uuid/" % data_type
-    bucket = _get_local_bucket()
+    bucket = _get_bucket()
 
     # TODO - method to load different types in here for search
     # Maybe just an if else for now?
     data_type = DataType[data_type.upper()]
     # Get the objects that contain the Datasources
-    object_list = _get_object_names(bucket=bucket, prefix=search_prefix)
-    object_uuid = object_list[0].split("/")[-1]
+    # object_list = _get_object_names(bucket=bucket, prefix=search_prefix)
+    # object_uuid = object_list[0].split("/")[-1]
 
-    if len(object_list) == 0:
-        raise ValueError("No " + data_type.name + " object found.")
-    if len(object_list) > 1:
-        raise ValueError("More than one " + data_type.name + " object found.")
+    # if len(object_list) == 0:
+    #     raise ValueError("No " + data_type.name + " object found.")
+    # if len(object_list) > 1:
+    #     raise ValueError("More than one " + data_type.name + " object found.")
 
     data_obj = _load_object(data_type.name)
     # Get the UUIDs of the Datasources associated with the object

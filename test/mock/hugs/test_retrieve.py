@@ -4,7 +4,7 @@ from pandas import read_json, Timestamp
 
 from HUGS.Client import Retrieve, Search
 from HUGS.Modules import CRDS
-from HUGS.ObjectStore import get_local_bucket
+from HUGS.ObjectStore import get_local_bucket, get_object_names
 
 @pytest.fixture(scope="session")
 def tempdir(tmpdir_factory):
@@ -18,6 +18,7 @@ def crds():
     crds = CRDS.create()
     crds.save()
 
+
 def test_retrieve(authenticated_user):
     filename = "bsd.picarro.1minute.248m.dat"
     dir_path = os.path.dirname(__file__)
@@ -29,6 +30,12 @@ def test_retrieve(authenticated_user):
     search_term = "co"
     location = "bsd"
     data_type = "CRDS"
+
+    
+
+    # bucket = get_local_bucket()
+    # objects = get_object_names(bucket=bucket)
+    # print(objects)
 
     search_obj = Search(service_url="hugs")
 

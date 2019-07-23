@@ -258,3 +258,9 @@ Added calls to the create function in load for both GC and CRDS, these should be
 on first setup
 
 Update Datasource list to set 
+
+Cloud search doesn't work with empty search terms and locations
+
+Update tests for cloud functions to use the call_function method
+
+Update retrieve function to block data up by key as in bsd_co

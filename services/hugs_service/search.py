@@ -1,7 +1,6 @@
 
 def search(args):
     from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
-    from HUGS.ObjectStore import get_object_names, get_bucket
     from HUGS.Processing import search as _hugs_search
 
     if "start_datetime" in args:
