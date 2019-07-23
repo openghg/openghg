@@ -20,6 +20,10 @@ def hugs_functions(function, args):
     if function == "retrieve":
         from hugs_service.retrieve import retrieve as _retrieve
         return _retrieve(args)
+    if function == "remove_objects":
+        from hugs_service.removeobjects import remove_objects as _remove_objects
+        return _remove_objects(args)
+
     else:
         from admin.handler import MissingFunctionError
         raise MissingFunctionError()

@@ -203,43 +203,6 @@ def hash_files(file_list):
     return hashes
 
 
-def write_dataframe(bucket, key, dataframe):
-    """ Write the passed dataframe to the object store
-
-    TODO - at the moment this creates a compressred HDF5 file
-    from the passed dataframe and then writes that to the
-    object store. I feel like it'd be best to get an HDF5 object back
-    from Pandas and keep it in memory before passing it to
-    the object store for writings. That'd save a lot of reading and
-    writing to disk, should have plenty of memory?
-
-        Args:  
-            bucket (dict): Bucket to store data
-            key (str): Key to data in object store
-            dataframe (Pandas.Dataframe): Pandas dataframe to write
-        Returns:
-            None
-    
-    """
-    import os as _os
-
-    home_path = _os.path.expanduser("~")
-    hugs_test_folder = "hugs_tmp/test_hdf5s"
-    filename = "testing_dframe.hdf"
-    temp_path = _os.path.join(home_path, hugs_test_folder, filename)
-    
-    # Write to the dataframe to a blosc:lz4 compressed HDF5 file
-    dataframe.to_hdf(path=temp_path, key=filename, mode="w", complib="blosc:lz4")
-    # Write this HDF5 file to the object store
-    filename, size, md5 = store_file(bucket, filename)
-
-    # print(filename, size, md5)
-    
-
-
-# TODO - How to write the HDF5 file to an HDF5 object instead of a HDF5 file 
-# on the drive?
-
 def store_file(bucket, filepath):
     """ Write file to the object store
 
@@ -273,9 +236,6 @@ def get_bucket(empty=False):
     from HUGS.ObjectStore import get_local_bucket as _get_local_bucket
 
     return _get_local_bucket(empty=empty)
-
-
-
 
 
 
