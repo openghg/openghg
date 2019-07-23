@@ -16,7 +16,7 @@ class Retrieve:
         """ Retrieve the data at the keys found by the search function
 
             Args:
-                keys (list): List of object store keys
+                keys (dict): Dictionary of object store keys
             Returns:
                 dict: Dictionary of results at key results
         """

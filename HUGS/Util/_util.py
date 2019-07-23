@@ -37,7 +37,6 @@ def get_daterange_str(start, end):
 
     return start_fmt + "_" + end_fmt
 
-
 def get_datetime_epoch():
     """ Returns the UNIX epoch time
         1st of January 1970
