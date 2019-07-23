@@ -144,6 +144,11 @@ class CRDS:
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from HUGS.ObjectStore import get_bucket as _get_bucket
 
+        # TODO - these will have to be manually added on first setup
+        # then this can be removed
+        if not CRDS.exists():
+            return CRDS.create()
+
         if bucket is None:
             bucket = _get_bucket()
 
@@ -161,10 +166,9 @@ class CRDS:
         """
         from glob import glob as _glob
         from os import path as _path
-        from HUGS.Modules import CRDS as _CRDS
 
         # TODO - Remove this
-        crds = _CRDS.create()
+        crds = CRDS.create()
         crds.save()
 
         # This finds data files in sub-folders

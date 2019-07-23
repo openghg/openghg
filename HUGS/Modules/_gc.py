@@ -149,6 +149,9 @@ class GC:
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from HUGS.ObjectStore import get_bucket as _get_bucket
 
+        if not GC.exists():
+            return GC.create()
+
         if bucket is None:
             bucket = _get_bucket()
         
