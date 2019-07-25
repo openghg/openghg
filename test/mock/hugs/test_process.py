@@ -24,20 +24,41 @@ def test_folder(filename):
     return os.path.join(dir_path, test_folder, filename)
 
 
-def test_process_files(authenticated_user):
+def test_process_CRDS_files(authenticated_user):
     service_url = "hugs"
+
+    hugs = Service(service_url="hugs")
+    _ = hugs.call_function(function="clear_datasources", args={})
 
     files = ["bsd.picarro.1minute.108m.min.dat", "hfd.picarro.1minute.100m.min.dat", "tac.picarro.1minute.100m.min.dat"]
     filepaths = [test_folder(f) for f in files]
 
-    process = Process(service_url=service_url)
+    process = Process(service_url=service_url) 
 
     response = process.process_files(user=authenticated_user, files=filepaths, data_type="CRDS", 
                                         hugs_url="hugs", storage_url="storage")
 
-    print(response)
+    assert len(response["bsd.picarro.1minute.108m.min.dat"]) == 3
+    assert len(response["hfd.picarro.1minute.100m.min.dat"]) == 3
+    assert len(response["tac.picarro.1minute.100m.min.dat"]) == 2
 
-    assert False
+# def test_process_GC_files(authenticated_user):
+#     service_url = "hugs"
+
+#     hugs = Service(service_url="hugs")
+#     _ = hugs.call_function(function="clear_datasources", args={})
+
+#     files = ["bsd.picarro.1minute.108m.min.dat", "hfd.picarro.1minute.100m.min.dat", "tac.picarro.1minute.100m.min.dat"]
+#     filepaths = [test_folder(f) for f in files]
+
+#     process = Process(service_url=service_url) 
+
+#     response = process.process_files(user=authenticated_user, files=filepaths, data_type="CRDS", 
+#                                         hugs_url="hugs", storage_url="storage")
+
+#     assert False
+
+
 
 
 def test_process_CRDS(authenticated_user, tempdir):

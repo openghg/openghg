@@ -200,8 +200,8 @@ class GC:
         # Save object to object store
         gc.save()
 
-        # For now return the GC object for easier testing
-        return gc
+        # Return the UUIDs of the datasources in which the data was stored
+        return datasource_uuids
 
     def read_data(self, data_filepath, precision_filepath, site, instrument):
         """ Read data from the data and precision files

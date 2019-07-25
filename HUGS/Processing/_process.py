@@ -20,8 +20,8 @@ def process_data(data_file, precision_filepath=None, data_type="CRDS"):
     processing_obj = _load_object(class_name=data_type)
 
     if data_type == "CRDS":
-        obj = processing_obj.read_file(data_filepath=data_file)
+        datasource_uuids = processing_obj.read_file(data_filepath=data_file)
     elif data_type == "GC":
-        obj = processing_obj.read_file(data_filepath=data_file, precision_filepath=precision_filepath)
+        datasource_uuids = processing_obj.read_file(data_filepath=data_file, precision_filepath=precision_filepath)
 
-    return obj.datasources()
+    return datasource_uuids

@@ -211,7 +211,7 @@ class CRDS:
 
         crds.save()
 
-        return crds
+        return datasource_uuids
 
     def read_data(self, data_filepath):
         """ Separates the gases stored in the dataframe in 

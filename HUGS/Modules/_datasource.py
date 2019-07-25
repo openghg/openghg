@@ -129,6 +129,7 @@ class Datasource:
         # As some (years, months, weeks) may be empty we don't want those dataframes
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
 
+
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed dataframe
 
