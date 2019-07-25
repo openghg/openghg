@@ -264,3 +264,10 @@ Cloud search doesn't work with empty search terms and locations
 Update tests for cloud functions to use the call_function method
 
 Update retrieve function to block data up by key as in bsd_co
+
+
+
+2019-07-25
+
+Check the behaviour of pytest when -vsm /path/to/test is used. Get an internal errror divide by zero
+
