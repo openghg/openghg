@@ -15,30 +15,6 @@ def tempdir(tmpdir_factory):
     d = tmpdir_factory.mktemp("")
     return str(d)
 
-# @pytest.fixture(autouse=True)
-# def crds(authenticated_user):
-#     # Empty the local bucket
-#     _ = get_local_bucket(empty=True)
-#     creds = StorageCreds(user=authenticated_user, service_url="storage")
-#     drive = Drive(creds=creds, name="test_drive")
-#     filepath = os.path.join(os.path.dirname(__file__), "../../../test/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat")
-#     filemeta = drive.upload(filepath)
-
-#     par = PAR(location=filemeta.location(), user=authenticated_user)
-
-#     hugs = Service(service_url="hugs")
-#     par_secret = hugs.encrypt_data(par.secret())
-
-#     auth = Authorisation(resource="process", user=authenticated_user)
-
-#     args = {"authorisation": auth.to_data(),
-#             "par": {"data": par.to_data()},
-#             "par_secret": {"data": par_secret},
-#             "data_type": "CRDS"}
-
-#     response = hugs.call_function(function="process", args=args)
-
-
 @pytest.fixture(scope="session")
 def load_crds(authenticated_user):
     hugs = Service(service_url="hugs")
@@ -130,5 +106,3 @@ def test_search_multiplesite_multiplespecies(load_crds):
 
     assert len(results["tac_ch4"]) == 8
     assert len(results["tac_co2"]) == 8
-
-    # print(results)
