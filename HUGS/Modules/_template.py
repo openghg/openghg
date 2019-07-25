@@ -229,7 +229,7 @@ class Template:
 
         return CRDS.from_data(data=data, bucket=bucket)
 
-   @staticmethod
+    @staticmethod
     def exists(bucket=None):
         """ Query the object store to check if a template object already exists
 
