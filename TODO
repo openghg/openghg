@@ -271,3 +271,10 @@ Update retrieve function to block data up by key as in bsd_co
 
 Check the behaviour of pytest when -vsm /path/to/test is used. Get an internal errror divide by zero
 
+2019-07-26
+
+Get an interface to the dictionary that's returned and can select different sites
+Create visualizations that are dynamically created by the server and then presented as an image to the user
+without having to download the data
+Then offer download of the selected data
+

@@ -5,7 +5,7 @@ class Search:
     def __init__(self, service_url=None):
         from Acquire.Client import Wallet as _Wallet
         wallet = _Wallet()
-        self._service = wallet.get_service(service_url=service_url)
+        self._service = wallet.get_service(service_url="%s/hugs" % service_url)
         
     def search(self, search_terms, locations, data_type, start_datetime=None, end_datetime=None):
         if self._service is None:
@@ -17,6 +17,8 @@ class Search:
         args["search_terms"] = search_terms
         args["locations"] = locations
         args["data_type"] = data_type
+
+        print(search_terms, locations)
 
         if start_datetime:
             args["start_datetime"] = _datetime_to_string(start_datetime)
