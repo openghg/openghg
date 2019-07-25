@@ -26,6 +26,7 @@ def retrieve(args):
     combined_data = {}
     for key in key_dict:
         combined = _recombine_sections(key_dict[key])
+
         if return_type == "json":
             combined_data[key] = combined.to_json()
         else:

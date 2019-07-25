@@ -16,6 +16,8 @@ def tempdir(tmpdir_factory):
 
 @pytest.fixture(autouse=True)
 def crds(authenticated_user):
+    # Empty the local bucket
+    _ = get_local_bucket(empty=True)
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
     filepath = os.path.join(os.path.dirname(__file__), "../../../test/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat")

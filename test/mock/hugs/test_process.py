@@ -18,6 +18,27 @@ def run_before_tests():
     _ = get_local_bucket(empty=True)
 
 
+def test_folder(filename):
+    dir_path = os.path.dirname(__file__)
+    test_folder = "../../../test/data/search_data"
+    return os.path.join(dir_path, test_folder, filename)
+
+
+def test_process_files(authenticated_user):
+    service_url = "hugs"
+
+    files = ["bsd.picarro.1minute.108m.min.dat", "hfd.picarro.1minute.100m.min.dat", "tac.picarro.1minute.100m.min.dat"]
+    filepaths = [test_folder(f) for f in files]
+
+    process = Process(service_url=service_url)
+
+    response = process.process_files(user=authenticated_user, files=filepaths, data_type="CRDS", 
+                                        hugs_url="hugs", storage_url="storage")
+
+    print(response)
+
+    assert False
+
 
 def test_process_CRDS(authenticated_user, tempdir):
     crds = CRDS.create()
