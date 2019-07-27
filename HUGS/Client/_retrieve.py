@@ -10,7 +10,7 @@ class Retrieve:
     def __init__(self, service_url=None):
         from Acquire.Client import Wallet as _Wallet
         wallet = _Wallet()
-        self._service = wallet.get_service(service_url=service_url)
+        self._service = wallet.get_service(service_url="%s/hugs" % service_url)
 
     def retrieve(self, keys):
         """ Retrieve the data at the keys found by the search function
