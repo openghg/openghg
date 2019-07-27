@@ -13,9 +13,7 @@ class ClearDatasources:
 
         args = {}
 
-        response = self._service.call_function(function="clear_datasources", args=args)
-
-        return response["results"]
+        self._service.call_function(function="clear_datasources", args=args)
 
     def service(self):
         return self._service

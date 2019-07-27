@@ -29,7 +29,8 @@ def recombine_sections(data_keys):
     if not combined.index.is_monotonic_increasing:
         combined = combined.sort_index()
 
-    # if not combined.index.is_unique:
-    #     raise ValueError("Dataframe index is not unique")
+    if not combined.index.is_unique:
+        raise ValueError("Dataframe index is not unique")
+
     
     return combined

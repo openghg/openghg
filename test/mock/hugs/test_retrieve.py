@@ -2,7 +2,7 @@ import pytest
 import os
 from pandas import read_json, Timestamp
 
-from HUGS.Client import Retrieve, Search
+from HUGS.Client import Retrieve, Search, ClearDatasources
 from HUGS.Modules import CRDS
 from HUGS.ObjectStore import get_local_bucket, get_object_names
 from Acquire.Client import User, Drive, Service, StorageCreds, PAR, Authorisation
@@ -15,6 +15,9 @@ def tempdir(tmpdir_factory):
 # Seems like a lot to be doing this before each test? Alternative?
 @pytest.fixture(autouse=True)
 def crds(authenticated_user):
+    clear_ds = ClearDatasources(service_url="hugs")
+    clear_ds.clear_datasources()
+
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
     filepath = os.path.join(os.path.dirname(__file__), "../../../test/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat")
@@ -36,7 +39,6 @@ def crds(authenticated_user):
 
 
 def test_retrieve(authenticated_user, crds):
-
     search_term = "co"
     location = "bsd"
     data_type = "CRDS"

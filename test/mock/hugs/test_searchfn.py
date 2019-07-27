@@ -20,6 +20,11 @@ def load_crds(authenticated_user):
     hugs = Service(service_url="hugs")
     _ = hugs.call_function(function="clear_datasources", args={})
 
+    def test_folder(filename):
+        dir_path = os.path.dirname(__file__)
+        test_folder = "../../../test/data/search_data"
+        return os.path.join(dir_path, test_folder, filename)
+
     files = ["bsd.picarro.1minute.108m.min.dat", "hfd.picarro.1minute.100m.min.dat", "tac.picarro.1minute.100m.min.dat"]
     filepaths = [test_folder(f) for f in files]
 
@@ -28,10 +33,6 @@ def load_crds(authenticated_user):
     response = process.process_files(user=authenticated_user, files=filepaths, data_type="CRDS", 
                                         hugs_url="hugs", storage_url="storage")
 
-def test_folder(filename):
-    dir_path = os.path.dirname(__file__)
-    test_folder = "../../../test/data/search_data"
-    return os.path.join(dir_path, test_folder, filename)
 
 def test_search_bsd(crds):
     search = Search(service_url="hugs")
