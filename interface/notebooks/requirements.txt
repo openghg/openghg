@@ -1,0 +1,13 @@
+numpy
+pandas
+jupyter
+voila
+ipywidgets
+bqplot
+requests
+pyotp
+cachetools
+tblib
+cryptography
+qrcode[pil]
+pyopt
