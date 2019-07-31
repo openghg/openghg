@@ -26,6 +26,9 @@ def hugs_functions(function, args):
     if function == "clear_datasources":
         from hugs_service.cleardatasources import clear_datasources as _clear_datasources
         return _clear_datasources(args)
+    if function == "status":
+        from hugs_service.status import status as _status
+        return _status()
 
     else:
         from admin.handler import MissingFunctionError

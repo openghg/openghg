@@ -31,4 +31,4 @@ RUN jupyter trust interface_container.ipynb
 # Become the $V_USER so that nothing runs as root
 
 
-CMD ["voila", "interface_container.ipynb"]
+CMD ["voila", "interface_container.ipynb", "--no-browser"]
