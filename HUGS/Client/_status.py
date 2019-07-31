@@ -22,5 +22,5 @@ class Status:
 
         return response
 
-     def service(self):
+    def service(self):
         return self._service
