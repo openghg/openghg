@@ -23,11 +23,13 @@ Now move into the hugs directory and change to the `devel` branch
 
 # Install dependencies
 
-From inside the hugs directory please run 
+Change into the `acquire` directory and run
 
 `pip install -r requirements.txt` 
 or 
 `conda install --file requirements.txt`
+
+Then do the same in the `hugs` directory.
 
 # Post-install
 
