@@ -33,9 +33,11 @@ or
 
 bqplot and ipyleaflet must be enabled using the following commands
 
+```
 jupyter nbextension install --py --symlink --sys-prefix bqplot
 jupyter nbextension enable --py --sys-prefix bqplot
 jupyter nbextension enable --py --sys-prefix ipyleaflet
+```
 
 # Register with HUGS
 
