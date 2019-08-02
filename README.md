@@ -1,36 +1,48 @@
-# Hub for UK Greenhouse Gas Science
-Repository for the HUGS project
+# Clone
 
-# Installation
-HUGS currently uses a testing branch of the Acquire package and requires acquire to be cloned into the same folder as HUGS
-
-For example 
+Please clone Acquire into the same top level directory so the folder structure looks like this
 
 ```
-/development/acquire
-/development/HUGS
+/a_directory
+	/acquire # Cloned Acquire folder
+	/hugs    # Cloned HUGS folder
+
 ```
 
-HUGS will look for Acquire at `../acquire`
+`git clone https://github.com/chryswoods/acquire.git`
+`git clone https://github.com/chryswoods/hugs.git`
 
-1. `git clone https://github.com/chryswoods/acquire.git`
-2. `git clone https://github.com/chryswoods/hugs.git`
-3. `cd acquire`
-4. `git checkout testingObjStore`
+Move into the acquire folder and change to the `devel` branch
+
+`git checkout devel`
+
+Now move into the hugs directory and change to the `devel` branch
+
+`git checkout devel`
 
 
-# Developers
-If you want to work with HUGS and want to write a processing module for a certain type of data format please see the `_template.py` file in the Modules directory. This gives an outline of the way a class should be written to interact with the platform.
+# Install dependencies
 
-Please make a new branch for each feature you create. Each function should also have unit tests in the respective directory
-in `test`.
+From inside the hugs directory please run 
 
-After finishing your feature branch please submit a pull request to merge into devel.
+`pip install -r requirements.txt` 
+or 
+`conda install --file requirements.txt`
 
-# Setting up nbstripout after cloning
-Jupyter notebook output may be automatically stripped on commit through the use of the nbstripout tool.
+# Post-install
 
-To setup the nbstripout tool after cloning this repository please run
+bqplot and ipyleaflet must be enabled using the following commands
 
-`python tools/trust-origin-git-config -e`
+jupyter nbextension install --py --symlink --sys-prefix bqplot
+jupyter nbextension enable --py --sys-prefix bqplot
+jupyter nbextension enable --py --sys-prefix ipyleaflet
 
+# Register with HUGS
+
+In the hugs directory under `user/notebooks/account` run `jupyter notebook` and open the `register.ipynb` notebook. This notebook will guide you through the process of creating an account. You will need a 2FA authentication app like andOTP or Google Authenticator.
+
+Now test your newly created account using the `login.ipynb` notebook.
+
+# Use HUGS
+
+A simple graphical interface to the HUGS service is available in the `HGUS_interface.ipynb` notebook within the `user/notebooks` directory. Please scroll down until you see the 'Scroll to here' text and then do Cell -> Run All Above from the toolbar. A simple GUI that allows interaction with functions running on the cloud should appear.
