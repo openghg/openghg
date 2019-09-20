@@ -45,6 +45,10 @@ class Process:
         if not isinstance(files, list):
             files = [files]
 
+        if data_type.upper() == "GC":
+            if not all(isinstance(item, tuple) for item in files):
+                return TypeError("If data type is GC, a list of tuples for data and precision filenames must be passed")
+
         if storage_url is None:
             storage_url = self._service_url + "/storage"
 
@@ -56,25 +60,60 @@ class Process:
         drive = Drive(creds=creds, name="test_drive")
         auth = Authorisation(resource="process", user=user)
 
+        # # Need to ensure that there's a precision file for each data file
+        # if data_type.upper() == "GC":
+        #     data_files = [f for file in files if "precisions" not in file.lower()]
+        #     prec_files = [f for file in files if "precisions" in file.lower()]
+        #     # Get locations for each to check we've got the correct files
+        #     loc_data_files = [f.split(".")[0] for file in data_files]
+        #     loc_prec_files = [f.split(".")[0] for file in prec_files]
+
+        #     if len(loc_data_files) != len(loc_prec_files):
+        #         raise ValueError("For GC data both a data file and a precision file must be passed.")
+            
+        #     for loc in loc_data_files:
+        #         if loc not in loc_prec_files:
+        #             raise ValueError(f"No precision file found for {loc}. Please upload a precision file for each data file and ensure
+        #                             they are labelled correctly.")
+        # # For every other data type currently
+        # else:
+        #     data_files = files
+
+        # Here we'll need special cases for different data types. As GC requires
+        # both the data file and precision data and they need to be kept together
+        # for use in processing.
+        # We can maybe reconsider the way this is done if there ends up being a lot of test
+        # cases and this gets a bit clunky
         datasource_uuids = {}
         for file in files:
-            filemeta = drive.upload(file)
-            par = PAR(location=filemeta.location(), user=user)
-            par_secret = hugs.encrypt_data(par.secret())
-            
-            args = {"authorisation": auth.to_data(),
-                    "par": {"data": par.to_data()},
-                    "par_secret": {"data": par_secret},
-                    "data_type": data_type}
+            if data_type.upper() == "GC":
+                filemeta = drive.upload(file[0])
+                par = PAR(location=filemeta.location(), user=user)
+                par_secret = hugs.encrypt_data(par.secret())
 
-            filename = file.split("/")[-1]
+                prec_meta = drive.upload(file[1])
+                prec_par = PAR(location=prec_meta.location(), user=user)
+                prec_par_secret = hugs.encrypt_data(prec_par.secret())
+
+                args = {"authorisation": auth.to_data(),
+                        "par": {"data": par.to_data(), "precision": prec_par.to_data()},
+                        "par_secret": {"data": par_secret, "precision": prec_par_secret},
+                        "data_type": data_type}
+            else:
+                filemeta = drive.upload(file)
+                par = PAR(location=filemeta.location(), user=user)
+                par_secret = hugs.encrypt_data(par.secret())
+
+                args = {"authorisation": auth.to_data(),
+                        "par": {"data": par.to_data()},
+                        "par_secret": {"data": par_secret},
+                        "data_type": data_type}
 
             response = self._service.call_function(function="process", args=args)
 
             datasource_uuids[filename] = response["results"]
 
         return datasource_uuids
-
 
     def process_file(self, auth, par, par_secret, data_type):
         """ Pass a PAR for the file to be processed to the processing function
@@ -87,9 +126,9 @@ class Process:
             raise PermissionError("Cannot use a null service")
 
         args = {"authorisation": auth.to_data(),
-            "par": {"data": par.to_data()},
-            "par_secret": {"data": par_secret},
-            "data_type": "CRDS"}
+                "par": {"data": par.to_data()},
+                "par_secret": {"data": par_secret},
+                "data_type": "CRDS"}
 
         response = self._service.call_function(function="process", args=args)
 
