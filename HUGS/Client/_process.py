@@ -60,25 +60,6 @@ class Process:
         drive = Drive(creds=creds, name="test_drive")
         auth = Authorisation(resource="process", user=user)
 
-        # # Need to ensure that there's a precision file for each data file
-        # if data_type.upper() == "GC":
-        #     data_files = [f for file in files if "precisions" not in file.lower()]
-        #     prec_files = [f for file in files if "precisions" in file.lower()]
-        #     # Get locations for each to check we've got the correct files
-        #     loc_data_files = [f.split(".")[0] for file in data_files]
-        #     loc_prec_files = [f.split(".")[0] for file in prec_files]
-
-        #     if len(loc_data_files) != len(loc_prec_files):
-        #         raise ValueError("For GC data both a data file and a precision file must be passed.")
-            
-        #     for loc in loc_data_files:
-        #         if loc not in loc_prec_files:
-        #             raise ValueError(f"No precision file found for {loc}. Please upload a precision file for each data file and ensure
-        #                             they are labelled correctly.")
-        # # For every other data type currently
-        # else:
-        #     data_files = files
-
         # Here we'll need special cases for different data types. As GC requires
         # both the data file and precision data and they need to be kept together
         # for use in processing.
