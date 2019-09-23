@@ -21,7 +21,6 @@ class Process:
         else:
             self._service
 
-
     # Find a better way to get this storage url in here, currently used for testing
     def process_files(self, user, files, data_type, hugs_url=None, storage_url=None):
         """ Process the passed file(s) 
@@ -68,6 +67,10 @@ class Process:
         datasource_uuids = {}
         for file in files:
             if data_type.upper() == "GC":
+                # This is only used as a key when returning the Datasource UUIDs
+                # This may be removed in the future as is currently only for testing
+                filename = file[0].split("/")[-1]
+
                 filemeta = drive.upload(file[0])
                 par = PAR(location=filemeta.location(), user=user)
                 par_secret = hugs.encrypt_data(par.secret())
@@ -81,6 +84,8 @@ class Process:
                         "par_secret": {"data": par_secret, "precision": prec_par_secret},
                         "data_type": data_type}
             else:
+                filename = file.split("/")[-1]
+                
                 filemeta = drive.upload(file)
                 par = PAR(location=filemeta.location(), user=user)
                 par_secret = hugs.encrypt_data(par.secret())
@@ -96,21 +101,21 @@ class Process:
 
         return datasource_uuids
 
-    def process_file(self, auth, par, par_secret, data_type):
-        """ Pass a PAR for the file to be processed to the processing function
+    # def process_file(self, auth, par, par_secret, data_type):
+    #     """ Pass a PAR for the file to be processed to the processing function
 
-            Args:
-                par : JSON serialised PAR object
+    #         Args:
+    #             par : JSON serialised PAR object
 
-        """
-        if self._service is None:
-            raise PermissionError("Cannot use a null service")
+    #     """
+    #     if self._service is None:
+    #         raise PermissionError("Cannot use a null service")
 
-        args = {"authorisation": auth.to_data(),
-                "par": {"data": par.to_data()},
-                "par_secret": {"data": par_secret},
-                "data_type": "CRDS"}
+    #     args = {"authorisation": auth.to_data(),
+    #             "par": {"data": par.to_data()},
+    #             "par_secret": {"data": par_secret},
+    #             "data_type": "CRDS"}
 
-        response = self._service.call_function(function="process", args=args)
+    #     response = self._service.call_function(function="process", args=args)
 
-        return response["results"]
+    #     return response["results"]
