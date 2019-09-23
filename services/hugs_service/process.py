@@ -28,6 +28,8 @@ def process(args):
 
     data_secret = hugs.decrypt_data(data_secret)
     data_filename = data_par.resolve(secret=data_secret)
+    # Here we're downloading the data to the tmp directory
+    # Be good if we could load it directly from the object store?
     data_file = data_filename.download(dir="/tmp")
 
     if data_type == "GC":
