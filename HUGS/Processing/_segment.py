@@ -45,6 +45,7 @@ def get_split_frequency(data):
 
         Args:
             data (Pandas.Dataframe): Raw data in dataframe
+            Note: DataFrame must have a Datetime index
         Returns:
             str: String selecting frequency for data splitting by Groupby
     """

@@ -129,21 +129,64 @@ class Datasource:
         # As some (years, months, weeks) may be empty we don't want those dataframes
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
 
-
-    def get_dataframe_daterange(self, dataframe):
-        """ Returns the daterange for the passed dataframe
+    def add_footprint(self, metadata, data):
+        """ Add footprint data
+            The data is stored as a tuple of the data and the daterange it covers.
 
             Args:
-                dataframe (Pandas.DataFrame): Dataframe to parse
+                metadata (dict): Metadata on the data for this Datasource
+                Note this data will be taken from the read NetCDF file
+        """
+        # Store the metadata as labels
+        for k, v in metadata.items():
+            self.add_label(key=k, value=v)
+
+
+    def get_dataframe_daterange(self, dataframe):
+        """ Returns the daterange for the passed DataFrame
+
+            Args:
+                dataframe (Pandas.DataFrame): DataFrame to parse
             Returns:
-                tuple (datetime, datetime): Start and end datetimes for dataframe
+                tuple (datetime, datetime): Start and end datetimes for DataSet
         """
         import datetime as _datetime
-
-        start = dataframe.first_valid_index()
-        end = dataframe.last_valid_index()
+        from pandas import DatetimeIndex as _DatetimeIndex
+        from pandas import to_datetime as _to_datetime
+        from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+        
+        if not isinstance(dataframe.index, _DatetimeIndex):
+            raise TypeError("Only DataFrames with a DatetimeIndex must be passed")
+        
+        # This seems a bit long winded but we end up with standard Python datetime objects
+        # that are timezone aware and set to UTC
+        start = _datetime_to_datetime(_to_datetime(dataframe.first_valid_index()))
+        end = _datetime_to_datetime(_to_datetime(dataframe.last_valid_index()))
 
         return start, end
+
+    def get_dataset_daterange(self, dataset):
+        """ Get the daterange for the passed DataSet
+
+            Args:
+                dataset (xarray.DataSet): DataSet to parse
+            Returns:
+                tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
+
+        """
+        from xarray import DataSet as _DataSet
+        from pandas import Timestamp as _Timestamp
+        from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+
+        if not isinstance(dataset, _DataSet):
+            raise TypeError("Only xarray DataSet types can be processed")
+
+        start = _datetime_to_datetime(_Timestamp(dataset.time[0].values).to_pydatetime())
+        end = _datetime_to_datetime(_Timestamp(dataset.time[-1].values).to_pydatetime())
+
+        return start, end
+
+        
 
     def add_metadata(self, metadata):
         """ Add metadata to this object

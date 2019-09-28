@@ -106,7 +106,6 @@ class GC:
         gc = GC()
         # gc._uuid = data["uuid"]
         gc._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        stored = data["stored"]
         gc._datasources = data["datasources"]
 
         gc._stored = False
@@ -140,8 +139,6 @@ class GC:
         """ Load a GC object from the object store
 
             Args:
-                uuid (str): UUID of GC object
-                key (str, default=None): Key of object in object store
                 bucket (dict, default=None): Bucket to store object
             Returns:
                 Datasource: Datasource object created from JSON
