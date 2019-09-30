@@ -169,8 +169,9 @@ class Footprint:
 
 
 
-    def get_split_frequency(footprint_ds):
-        
+    def get_split_frequency(footprint_ds, split_freq="W"):
+        """
+        """
 
         group = footprint_ds.groupby("time.week")
 

@@ -73,9 +73,11 @@ def get_split_frequency(data):
     # Try splitting into years
     if data_size / num_years <= segment_size:
         return freq
+    # Months
     elif data_size / (num_years * n_months) <= segment_size:
         freq = "M"
         return freq
+    # Weeks
     elif data_size / (num_years * n_months * n_weeks) <= segment_size:
         freq = "W"
         return freq

@@ -122,6 +122,11 @@ class Datasource:
         for k, v in metadata.items():
             self.add_label(key=k, value=v)
 
+        # Add in a type record for timeseries data
+        # Can possibly combine this function and the add_footprint (and other)
+        # functions in the future
+        self.add_label(key="type", value="timeseries")
+
         freq = _get_split_frequency(data)
         # Split into sections by splitting frequency
         group = data.groupby(_Grouper(freq=freq))
@@ -140,6 +145,19 @@ class Datasource:
         # Store the metadata as labels
         for k, v in metadata.items():
             self.add_label(key=k, value=v)
+
+        self.add_label(key="type", value="footprint")
+
+        # Placeholder - unsure if this is needed
+        # freq = _get_split_frequency()
+        # For now just split into weeks
+        freq = "W"
+
+        if freq == "W":
+            group = data.groupby("time.week")
+
+        self._data = [(g, self.get_dataset_daterange(g)) for _, g in group if len(g) > 0]
+
 
 
     def get_dataframe_daterange(self, dataframe):
