@@ -282,3 +282,15 @@ Then offer download of the selected data
 Start setting up Datasource IDs for selected data sources
 Currently data from the same site at different heights will be returned as being the same data and will
 break the retrieval code - multiple indexes with the same value
+
+
+
+
+2019-09-02
+
+Currently for timeseries data Datasources are created using the create_datasource fn in the segment module
+For other types of data we need to create datsources in another way.
+
+For now I'll create the Datasources within the Footprint class and add these to the list of available data
+
+

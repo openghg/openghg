@@ -1,13 +1,13 @@
 """ Segment the data into Datasources
 
 """
-__all__ = ["get_split_frequency", "create_datasources"]
+__all__ = ["get_split_frequency", "create_datasources",
+           "create_footprint_datasources"]
 
 from HUGS.Modules import Datasource as _Datasource
 
-
 def create_datasources(gas_data):
-    """ Create or get an exisiting Datasource for each gas in the file
+    """ Create or get an existing Datasource for each gas in the file
 
         TODO - currently this function will only take data from a single Datasource
         
@@ -37,6 +37,18 @@ def create_datasources(gas_data):
         uuids.append(datasource.uuid())
 
     return uuids
+
+
+def create_footprint_datasources(footprint_data):
+    """ Create Datasources for the passed footprint data
+
+        Args:
+            footprint_data (list): List of tupes of footprint name, datasource_id, xarray.Dataset
+        Returns:
+            list: List of UUIDs of used/created Datasources
+    """
+
+
 
 
 def get_split_frequency(data):

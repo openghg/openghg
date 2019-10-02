@@ -119,13 +119,14 @@ class Datasource:
         from HUGS.Processing import get_split_frequency as _get_split_frequency
 
         # Store the metadata as labels
-        for k, v in metadata.items():
-            self.add_label(key=k, value=v)
+        # for k, v in metadata.items():
+        #     self.add_label(key=k, value=v)
+        self._metadata.update(metadata)
 
         # Add in a type record for timeseries data
         # Can possibly combine this function and the add_footprint (and other)
         # functions in the future
-        self.add_label(key="type", value="timeseries")
+        self.add_label(key="data_type", value="timeseries")
 
         freq = _get_split_frequency(data)
         # Split into sections by splitting frequency
@@ -134,19 +135,26 @@ class Datasource:
         # As some (years, months, weeks) may be empty we don't want those dataframes
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
 
-    def add_footprint(self, metadata, data):
+    def add_footprint_data(self, metadata, data):
         """ Add footprint data
             The data is stored as a tuple of the data and the daterange it covers.
 
             Args:
                 metadata (dict): Metadata on the data for this Datasource
-                Note this data will be taken from the read NetCDF file
+                data (xarray.Dataset): Footprint data
+            Returns:
+                None
         """
         # Store the metadata as labels
-        for k, v in metadata.items():
-            self.add_label(key=k, value=v)
+        # for k, v in metadata.items():
+        #     self.add_label(key=k, value=v)
 
-        self.add_label(key="type", value="footprint")
+        self._metadata.update(metadata)
+        self.add_label(key="data_type", value="footprint")
+        
+        start, end = self.get_dataset_daterange(data)
+        self._start_datetime = start
+        self._end_datetime = end
 
         # Placeholder - unsure if this is needed
         # freq = _get_split_frequency()
@@ -157,8 +165,6 @@ class Datasource:
             group = data.groupby("time.week")
 
         self._data = [(g, self.get_dataset_daterange(g)) for _, g in group if len(g) > 0]
-
-
 
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed DataFrame
@@ -204,15 +210,14 @@ class Datasource:
 
         return start, end
 
-        
-
+  
     def add_metadata(self, metadata):
         """ Add metadata to this object
 
             Args:
                 metadata (Metadata): Metadata object
         """
-        self._metadata = metadata
+        self._metadata.update(metadata)
 
 
     @staticmethod

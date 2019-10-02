@@ -139,24 +139,68 @@ class Footprint:
         return Footprint.from_data(data=data, bucket=bucket)
         
     @staticmethod
-    def read_file(filepath):
+    def read_file(filepath, metadata):
         """ For a single footprint file we can break it down into chunks of a certain size
             for easier lookup.
 
             Args:
-                filepath: Path to NetCDF file containing footprint data
-
+                filepath (str): Path to NetCDF file containing footprint data
+                metadata (dict): Metadata provided by the data provider
+            Returns:
+                None
         """
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
+        from xarray import open_dataset as _open_dataset
+
         from HUGS.Processing import create_datasources as _create_datasources
+        from HUGS.Datasource import get_dataset_daterange as _get_dataset_daterange
+        from HUGS.Datasource import Datasource as _Datasource
 
         # Get the footprint object we need to load and save the passed files
         if not Footprint.exists():
             footprint = Footprint.create()
         else:
             footprint = Footprint.load()
+
+        dataset = _open_dataset(filepath)
+        # Read metadata from the netCDF file
+        file_metadata = _read_metadata(dataset)
+        # Update the user passed metadata with that extracted from the NetCDF
+        metadata.update(file_metadata)
+
+        # Add in a temporary name key until this is connected to user based input
+        metadata["name"] = "temp_footprint_name"
+
+
+        start_datetime, end_datetime = _get_dataset_daterange(dataset)
+        
+        # Lookup Datasource UUID using name of site? 
+        # TODO - implement lookup
+
+        # datasource_uuid = _lookup_uuid(datasource_name)
+        # Create a Datasource for this file - can directly create a Datasource here as we'll
+        # only have one per NetCDF?
+        datasource = Datasource.create()
+
+        if _Datasource.exists(datasource_id=datasource_id):
+            datasource = _Datasource.load(uuid=datasource_id)
+        else:
+            datasource = Datasource.create(name=metadata["name"])
+
+        datasource.add_footprint_data(metadata=metadata, data=dataset)
+
+        datasource.save()
+
+        return datasource.uuid()
+            
+        # Start and end datetime is stored in the Datasource
+        # self._start_datetime = None
+        # self._end_datetime = None
+
+
+
 
         # Read in the footprint
         # Split into ~ 5 MB chunks? Use get_split_freq to calculate this
@@ -167,7 +211,23 @@ class Footprint:
         # Maybe separate functions due to the differences? Can always combine them afterwards
 
 
+    def _read_metadata(dataset):
+        """ Read in the metadata held in the passed xarray.Dataset
 
+            Args:
+                dataset (xarray.Dataset): Footprint Dataset
+           
+           Read the date range covered, data variables available, attributes, coordinates
+
+        """
+        data_variables = list(dataset.var())
+        coordinates = list(dataset.coords)
+
+        metadata = {}
+        metadata["data_variables"] = list(dataset.var())
+        metadata["coordinates"] = list(dataset.coords)
+        
+        return metadata
 
     def get_split_frequency(footprint_ds, split_freq="W"):
         """
@@ -179,6 +239,19 @@ class Footprint:
         data = [g for _, g in group if len(g) > 0]
 
 
+    # def create_datasource(self, metadata, data):
+    #     """ Create Datasources that will hold the footprint data
+
+    #         Args:
+
+
+    #     """
+
+    #     # Create a datasource for each footprint source
+    #     # for x in footprints:
+    #         # create datasource
+    #         # add_footprint data
+    #     add_footprint_data
 
 
 
