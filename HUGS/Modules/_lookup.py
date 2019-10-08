@@ -141,21 +141,48 @@ class Lookup:
             relationships between each Datasource
 
             Args:
-                ?
+                source_id (str): ID of source
+                source_name (str): Name of source
             Returns:
                 dict: Dictionary providing data on relationships between Datasources
         """
         results = {}
 
-        # This feels very clunky - best return value?
-
         if source_id is None and source_name is None:
             raise ValueError("source_id or source_name must be provided")
 
-        results["id_lookup"] = self._uuid_records.get(source_id, False)
-        results["name_lookup"] = self._name_records.get(source_name, False)
+        results["id"] = self._uuid_records.get(source_id, False)
+        results["name"] = self._name_records.get(source_name, False)
             
         return results
+    
+    def set_id(self, source_name, source_id=None):
+        """ Set a source's ID and name
+
+            Args:
+                source_name (str): UUID for source
+
+        """
+
+
+        
+        
+    def build_structure(self):
+        """ Build a relationship structure between the passed file/data ?
+
+        """
+        raise NotImplementedError()
+
+
+
+    def ensure_sync(): 
+        """ Ensures the two dictionary's are synced for fast lookup
+            by key
+
+            Returns:
+                None
+        """
+        raise NotImplementedError()
 
 
                 

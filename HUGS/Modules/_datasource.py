@@ -292,7 +292,43 @@ class Datasource:
 
         return Datasource.hdf_to_dataframe(data)
 
+    def dataset_to_netcdf(data):
+        """ Write the passed dataset to a compressed in-memory NetCDF file
+
+
+
+        """
+        import netCDF4
+        import xarray
+
+        store = xarray.backends.NetCDF4DataStore(data)
+        nc4_ds = netCDF4.Dataset(store)
+
+        nc_buf = nc4_ds.close()
+
+
+
+        
     # The save_dataframe function was moved to be part of save()
+
+
+
+    def netcdf_to_dataset(data):
+        """ Converts the binary data in data to xarray.Dataset
+
+            Args:
+                data: Binary data
+            Returns:
+                xarray.Dataset: Dataset created from data
+        """
+        import netCDF4
+        import xarray
+
+        nc4_ds = netCDF4.Dataset("in_memory.nc", memory=data)
+        store = xarray.backends.NetCDF4DataStore(nc4_ds)
+        return xarray.open_dataset(store)
+
+
 
     # Modified from
     # https://github.com/pandas-dev/pandas/issues/9246
