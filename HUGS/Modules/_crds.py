@@ -183,7 +183,7 @@ class CRDS:
             CRDS.read_file(data_filepath=fp)
 
     @staticmethod
-    def read_file(data_filepath):
+    def read_file(data_filepath, source_id):
         """ Creates a CRDS object holding data stored within Datasources
 
             TODO - currently only works with a single Datasource

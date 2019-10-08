@@ -22,7 +22,7 @@ class Process:
             self._service
 
     # Find a better way to get this storage url in here, currently used for testing
-    def process_files(self, user, files, data_type, hugs_url=None, storage_url=None):
+    def process_files(self, user, files, data_type, hugs_url=None, storage_url=None, datasource=None):
         """ Process the passed file(s) 
 
             Args:
@@ -30,6 +30,7 @@ class Process:
                 files (str, list): Path of files to be processed
                 data_type (str): Type of data to be processed (CRDS, GC etc)
                 hugs_url (str): URL of HUGS service. Currently used for testing
+                datasource (str): Datasource name or UUID
                 This may be removed in the future.
                 storage_url (str): URL of storage service. Currently used for testing
                 This may be removed in the future.
@@ -82,7 +83,7 @@ class Process:
                 args = {"authorisation": auth.to_data(),
                         "par": {"data": par.to_data(), "precision": prec_par.to_data()},
                         "par_secret": {"data": par_secret, "precision": prec_par_secret},
-                        "data_type": data_type}
+                        "data_type": data_type, "datasource": datasource}
             else:
                 filename = file.split("/")[-1]
                 
@@ -93,7 +94,7 @@ class Process:
                 args = {"authorisation": auth.to_data(),
                         "par": {"data": par.to_data()},
                         "par_secret": {"data": par_secret},
-                        "data_type": data_type}
+                        "data_type": data_type, "datasource": datasource}
 
             response = self._service.call_function(function="process", args=args)
 

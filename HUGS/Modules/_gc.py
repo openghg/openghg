@@ -42,7 +42,6 @@ class GC:
             store
 
             Args:
-                uuid (str): UUID of GC object
                 bucket (dict, default=None): Bucket for data storage
             Returns:
                 bool: True if object exists
@@ -104,10 +103,8 @@ class GC:
             return GC()
         
         gc = GC()
-        # gc._uuid = data["uuid"]
         gc._creation_datetime = _string_to_datetime(data["creation_datetime"])
         gc._datasources = data["datasources"]
-
         gc._stored = False
         
         return gc
