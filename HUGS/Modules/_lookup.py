@@ -12,7 +12,9 @@ class Lookup:
     def __init__(self):
         self._creation_datetime = None
         self._stored = False
+        # Keyed by name - allows retrieval of UUID from name
         self._name_records = {}
+        # Keyed by UUID - allows retrieval of name by UUID
         self._uuid_records = {}
 
     # This will be moved out to the template / util module
@@ -134,7 +136,7 @@ class Lookup:
         key = "%s/uuid/%s" % (Lookup._lookup_root, Lookup._lookup_uuid)
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
-        return Lookup.from_data(data=data, bucket=bucket)
+        return Lookup.from_data(data=data, bucket=b ucket)
 
     def lookup(self, source_id=None, source_name=None):
         """ This function provides the interface to the underlying dict which stores the
@@ -155,34 +157,74 @@ class Lookup:
         results["name"] = self._name_records.get(source_name, False)
             
         return results
+
+    def get_id(self, source_name):
+        """ Returns the UUID of the Datasource with name given by source_name
+
+            Args:
+                source_name (str): Name of Datasource
+            Returns:
+                str or bool: UUID of Datasource if found, else False
+        """
+        self._name_records.get(source_name, False)
+
+    def get_name(self, source_id):
+        """ Returns the name of the Datasource with UUID given by source_id
+        
+            Args:
+                source_id (str): UUID of Datasource
+            Returns:
+                str or bool: Name of Datasource if found, else False
+        """
+        self._uuid_records.get(source_id, False)
+
+    def source_exists(self, source_name=None, source_id=None):
+        """ Check if the source already exists on record
+
+            Args:
+                source_name (str): Name of Datasource
+                source_id (str): UUID of Datasource
+            Returns:
+                bool: True if exists
+        """
+        if source_name is None and source_id is None:
+            raise ValueError("source_name or source_id must be provded")
+        
+        if source_name:
+            source_name = source_name.lower()
+            return self._name_records.get(source_name, False)
+
+        if source_id:
+            return self._uuid_records.get(source_id, False)
     
-    def set_id(self, source_name, source_id=None):
+    def set_id(self, source_name, source_id=None, overwrite=False):
         """ Set a source's ID and name
 
             Args:
                 source_name (str): UUID for source
-
-        """
-
-
-        
-        
-    def build_structure(self):
-        """ Build a relationship structure between the passed file/data ?
-
-        """
-        raise NotImplementedError()
-
-
-
-    def ensure_sync(): 
-        """ Ensures the two dictionary's are synced for fast lookup
-            by key
-
+                source_id (str, default=None): UUID to assign to object
             Returns:
                 None
         """
-        raise NotImplementedError()
+        if source_name in self._name_records and overwrite is False:
+            raise ValueError("Cannot overwrite record")
+
+        if source_id is None:
+            import uuid
+            source_id = uuid.uuid4()
+
+        source_name = source_name.lower()
+        self._uuid_records[source_name] = source_id
+        self._name_records[source_id] = source_name        
+ 
+
+    #     """ Ensures the two dictionary's are synced for fast lookup
+    #         by key
+
+    #         Returns:
+    #             None
+    #     """
+        
 
 
                 
