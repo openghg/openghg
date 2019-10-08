@@ -12,7 +12,8 @@ class Lookup:
     def __init__(self):
         self._creation_datetime = None
         self._stored = False
-        self._records = {}
+        self._name_records = {}
+        self._uuid_records = {}
 
     # This will be moved out to the template / util module
     def is_null():
@@ -135,7 +136,7 @@ class Lookup:
 
         return Lookup.from_data(data=data, bucket=bucket)
 
-    def lookup():
+    def lookup(self, source_id=None, source_name=None):
         """ This function provides the interface to the underlying dict which stores the
             relationships between each Datasource
 
@@ -144,6 +145,20 @@ class Lookup:
             Returns:
                 dict: Dictionary providing data on relationships between Datasources
         """
+        results = {}
+
+        # This feels very clunky - best return value?
+
+        if source_id is None and source_name is None:
+            raise ValueError("source_id or source_name must be provided")
+
+        results["id_lookup"] = self._uuid_records.get(source_id, False)
+        results["name_lookup"] = self._name_records.get(source_name, False)
+            
+        return results
+
+
+                
 
         
 
