@@ -21,6 +21,6 @@ setuptools.setup(
     install_requires=[
         "acquire",
         "tables",
-    ]
+    ],
     python_requires=">=3.6",
 )
