@@ -95,15 +95,18 @@ def test_split(data_path, precision_path):
     metadata = read_metadata(filename=data_path, data=None, data_type="GC")
     gas_data = gc.split(data=data, site=site, species=species, metadata=metadata)
 
-    assert gas_data[0][0] == "NF3"
-    assert gas_data[0][1] == {'inlet': '75m_4', 'instrument': 'medusa', 'site': 'capegrim', 'species': 'NF3'}
+    metadata = gas_data["NF3"]["metadata"]
+    data = gas_data["NF3"]["data"]
+
+    assert metadata == {'inlet': '75m_4', 'instrument': 'medusa', 'site': 'capegrim', 'species': 'NF3'}
     
-    head_data = gas_data[0][3].head(1)
+    head_data = data.head(1)
     assert head_data["NF3"].iloc[0] == pytest.approx(1.603)
     assert head_data["NF3 repeatability"].iloc[0] == pytest.approx(0.02531)
     assert head_data["NF3 status_flag"].iloc[0] == 0
     assert head_data["NF3 integration_flag"].iloc[0] == 0
     assert head_data["Inlet"].iloc[0] == "75m_4"
+    # assert False
 
 
 def test_to_data(gc):
