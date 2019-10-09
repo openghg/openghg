@@ -75,14 +75,13 @@ class CRDS:
         """
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-        d = {}
-        d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
-        d["stored"] = self._stored
-        # d["datasources"] = self._datasources
-        d["datasource_uuids"] = self._datasource_uuids
-        d["datasource_names"] = self._datasource_names
+        data = {}
+        data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        data["stored"] = self._stored
+        data["datasource_uuids"] = self._datasource_uuids
+        data["datasource_names"] = self._datasource_names
 
-        return d
+        return data
 
     @staticmethod
     def from_data(data, bucket=None):
@@ -191,7 +190,7 @@ class CRDS:
             CRDS.read_file(data_filepath=fp)
 
     @staticmethod
-    def read_file(data_filepath, source_name=None, source_id=None):
+    def read_file(data_filepath, source_name, source_id=None):
         """ Creates a CRDS object holding data stored within Datasources
 
             TODO - currently only works with a single Datasource
@@ -356,7 +355,7 @@ class CRDS:
             species_metadata = metadata.copy()
             species_metadata["species"] = species
 
-            combined_data[species] = {"metadata": species_metadata, "data":gas_data}
+            combined_data[species] = {"metadata": species_metadata, "data": gas_data}
 
             # data_list.append((species, species_metadata, gas_data))
 
@@ -432,7 +431,6 @@ class CRDS:
             Returns:
                 list: List of Datasources
         """
-        # return self._datasources
         return self._datasource_uuids.keys()
 
     def remove_datasource(self, uuid):
@@ -442,7 +440,6 @@ class CRDS:
             Args:
                 uuid (str): UUID of Datasource to be removed
         """
-        # self._datasources.remove(uuid)
         del self._datasource_uuids[uuid]
 
     def clear_datasources(self):
@@ -451,9 +448,8 @@ class CRDS:
             Returns:
                 None
         """
-        # self._datasources = []
-        self._datasource_uuids = {}
-        self._datasource_names = {}
+        self._datasource_uuids.clear()
+        self._datasource_names.clear()
 
 
     

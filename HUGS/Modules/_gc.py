@@ -27,6 +27,10 @@ class GC:
         self._creation_datetime = None
         self._stored = False
         self._datasources = []
+        # Keyed by name - allows retrieval of UUID from name
+        self._datasource_names = {}
+        # Keyed by UUID - allows retrieval of name by UUID
+        self._datasource_uuids = {}
 
     def is_null(self):
         """ Check if this is a null object
@@ -34,7 +38,7 @@ class GC:
             Returns:
                 bool: True if object is null
         """
-        return self._datasources is None
+        return len(self._datasource_uuids) > 0
 
     @staticmethod
     def exists(bucket=None):
@@ -82,10 +86,10 @@ class GC:
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         data = {}
-        # data["uuid"] = self._uuid
         data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         data["stored"] = self._stored
-        data["datasources"] = self._datasources
+        data["datasource_uuids"] = self._datasource_uuids
+        data["datasource_names"] = self._datasource_names
 
         return data
 
@@ -99,14 +103,15 @@ class GC:
         """ 
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
 
-        if data is None or len(data) == 0:
+        if not data:
             return GC()
         
         gc = GC()
         gc._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        gc._datasources = data["datasources"]
+        gc._datasource_uuids = data["datasource_uuids"]
+        gc._datasource_names = data["datasource_names"]
         gc._stored = False
-        
+
         return gc
 
     def save(self, bucket=None):
@@ -156,7 +161,7 @@ class GC:
         return GC.from_data(data=data, bucket=bucket)
 
     @staticmethod
-    def read_file(data_filepath, precision_filepath):
+    def read_file(data_filepath, precision_filepath, source_name, source_id=None):
         """ Reads a GC data file by creating a GC object and associated datasources
 
             Args:
@@ -170,12 +175,9 @@ class GC:
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-        from HUGS.Processing import create_datasources as _create_datasources
+        from HUGS.Processing import assign_data
 
-        if not GC.exists():
-            gc = GC.create()
-        else:
-            gc = GC.load()
+        gc = GC.load()
 
         print("Remember to update the instrument!")
         # Where to get this from? User input?
@@ -185,10 +187,12 @@ class GC:
         data, species, metadata = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                                                 site=site, instrument=instrument_name)
 
-        split_data = gc.split(data=data, site=site, species=species, metadata=metadata)
+        gas_data = gc.split(data=data, site=site, species=species, metadata=metadata)
+
+        lookup_results = gc.lookup_datasources(gas_data=gas_data, source_name=source_name, source_id=source_id)
     
         # Create Datasources, save them to the object store and get their UUIDs
-        datasource_uuids = _create_datasources(split_data)
+        datasource_uuids = assign_data(gas_data=split_data, lookup_results=lookup_results)
         # Add the Datasources to the list of datasources associated with this object
         gc.add_datasources(datasource_uuids)
         # Save object to object store
@@ -196,6 +200,32 @@ class GC:
 
         # Return the UUIDs of the datasources in which the data was stored
         return datasource_uuids
+
+    # TODO - move this out to a module so we don't have it in two places, just
+    # pass in the dict it searches
+    def lookup_datasources(self, gas_data, source_name=None, source_id=None):
+        """ Check which datasources
+
+            Args: 
+                gas_data (list): Gas data to process
+                source_name (str)
+            Returns:
+                dict: Dictionary keyed by source_name. Value of Datasource UUID
+        """
+        # If we already have data from these datasources then return that UUID
+        # otherwise return False
+        if source_id is not None:
+            raise NotImplementedError()
+
+        results = {}
+
+        for species in gas_data:
+            datasource_name = source_name + "_" + species
+            results[species] = {}
+            results[species]["uuid"] = self._datasource_names.get(datasource_name, False)
+            results[species]["name"] = datasource_name
+
+        return results
 
     def read_data(self, data_filepath, precision_filepath, site, instrument):
         """ Read data from the data and precision files
@@ -350,6 +380,7 @@ class GC:
         # Also what to do in case of multiple inlets - each of these will have a unique ID
         # But may be of the same spec ?
         gas_data = []
+        combined_data = {}
 
         for spec in species:
             # Check if the data for this spec is all NaNs
@@ -378,11 +409,12 @@ class GC:
                     dataframe = inlet_data[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
                     dataframe = dataframe.dropna(axis="index", how="any")
                     # TODO - change me
-                    datasource_uuid = _uuid4()
-            
-                gas_data.append((spec, spec_metadata, datasource_uuid, dataframe))
+                    # datasource_uuid = _uuid4()
+
+                combined_data[spec] = {"metadata": spec_metadata, "data": dataframe}
+                # gas_data.append((spec, spec_metadata, datasource_uuid, dataframe))
         
-        return gas_data
+        return combined_data
 
     def get_precision(self, instrument):
         """ Get the precision of the instrument in seconds
@@ -409,11 +441,14 @@ class GC:
         """ Add the passed list of Datasources to the current list
 
             Args:
-                datasource_uuids (list): List of Datasource UUIDs
+                datasource_uuids (dict): Dict of Datasource UUIDs
             Returns:
                 None
         """
-        self._datasources.extend(datasource_uuids)
+        self._datasource_names.update(datasource_uuids)
+        # Invert the dictionary to update the dict keyed by UUID
+        uuid_keyed = {v: k for k, v in datasource_uuids.items()}
+        self._datasource_uuids.update(uuid_keyed)
 
     def datasources(self):
         """ Return the list of Datasources for this object
@@ -421,7 +456,7 @@ class GC:
             Returns:
                 list: List of Datasources
         """
-        return self._datasources
+        return self._datasource_uuids.keys()
 
     def remove_datasource(self, uuid):
         """ Remove the Datasource with the given uuid from the list 
@@ -430,7 +465,7 @@ class GC:
             Args:
                 uuid (str): UUID of Datasource to be removed
         """
-        self._datasources.remove(uuid)
+        del self._datasource_uuids[uuid]
 
     def clear_datasources(self):
         """ Remove all Datasources from the object
@@ -438,6 +473,7 @@ class GC:
             Returns:
                 None
         """
-        self._datasources = []
+        self._datasource_uuids.clear()
+        self._datasource_names.clear()
             
 
