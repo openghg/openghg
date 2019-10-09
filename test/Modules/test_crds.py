@@ -77,24 +77,23 @@ def test_data_persistence():
     filename = "hfd.picarro.1minute.100m_min.dat"
 
     filepath = os.path.join(dir_path, test_data, filename)
-    bucket = get_local_bucket(empty=True)
+    bucket = get_local_bucket(empty=False)
 
-    crds = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
-    crds.save()
+    # crds.save()
 
     # Get the data from the object store and ensure it's been read correctly
-    datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
+    # datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
 
-    for d in datasources:
-        print(d.uuid())
+    # print(crds.datasources())
 
-    crds = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+    # crds = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
-    datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
+    # datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
 
-    for d in datasources:
-        print(d.uuid())
+    # for d in datasources:
+    #     print(d.uuid())
 
 
 # def test_read_folder():
