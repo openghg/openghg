@@ -20,7 +20,11 @@ class CRDS:
     def __init__(self):
         self._creation_datetime = None
         self._stored = False
-        self._datasources = []
+        # self._datasources = []
+        # Keyed by name - allows retrieval of UUID from name
+        self._datasource_names = {}
+        # Keyed by UUID - allows retrieval of name by UUID
+        self._datasource_uuids = {}
 
     def is_null(self):
         """ Check if this is a null object
@@ -28,7 +32,7 @@ class CRDS:
             Returns:
                 bool: True if object is null
         """
-        return self._datasources is None
+        return len(self._datasource_uuids) > 0
 
     @staticmethod
     def exists(bucket=None):
@@ -74,7 +78,9 @@ class CRDS:
         d = {}
         d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         d["stored"] = self._stored
-        d["datasources"] = self._datasources
+        # d["datasources"] = self._datasources
+        d["datasource_uuids"] = self._datasource_uuids
+        d["datasource_names"] = self._datasource_names
 
         return d
 
@@ -101,7 +107,9 @@ class CRDS:
         c._creation_datetime = _string_to_datetime(data["creation_datetime"])
         stored = data["stored"]
 
-        c._datasources = data["datasources"]
+        # c._datasources = data["datasources"]
+        c._datasource_uuids = data["datasource_uuids"]
+        c._datasource_names = data["datasource_names"]
         c._stored = False
         return c
 
@@ -183,7 +191,7 @@ class CRDS:
             CRDS.read_file(data_filepath=fp)
 
     @staticmethod
-    def read_file(data_filepath, source_id):
+    def read_file(data_filepath, source_name=None, source_id=None):
         """ Creates a CRDS object holding data stored within Datasources
 
             TODO - currently only works with a single Datasource
@@ -195,23 +203,82 @@ class CRDS:
         """
         from pandas import read_csv as _read_csv
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        from HUGS.Processing import create_datasources as _create_datasources
+        from HUGS.Processing import assign_data
+
+        # here we check the source id from the interface or the source_name
+        # Check that against the lookup table and then we can decide if we want to 
+        # either create a new Datasource or add the data to an existing source
 
         crds = CRDS.load()
 
         filename = data_filepath.split("/")[-1]
-
         gas_data = crds.read_data(data_filepath=data_filepath)
 
+        # Check to see if we've had data from these Datasources before
+        # TODO - currently just using a simple naming system here - update to use 
+        # an assigned UUID? Seems safer? How to give each gas a UUID? 
+        lookup_results = crds.lookup_datasources(gas_data, source_name, source_id)
+
+        # If we're passed a source name or source id check it against the records of current CRDS data
+        # Update the Datasource records for CRDS and make it a dictionary where 
+        # our given source name and the species name are the key
+        # Will have to update the search functionality to take this into account
+
+        # Get the given source name or id
+        # Read in the data and make a key of sourcename_species and check the dict
+        # Have two dicts for each type, one keyed by uuid and the other by name
+        # Update the search to take this into account from the object
+        # Can just load the keys of the UUID keyed dict in instead of the list of UUIDs
+        # when loading Datasources
+
+        # Must add the new dicts name_records and uuid_records to the data, load and save fns
+
+
+        # # Load the lookup object
+        # lookup = Lookup.load()
+        # # Check for existing data
+        # if lookup.source_exists(source_id=source_id, source_name=source_name):
+        #    records = lookup.lookup(source_id=source_id, source_name=source_name)
+        # else:
+
+        # records = lookup.lookup(source_id=source_id, source_name=source_name)
+        # if records:
+        #     # Load data into new datasources
+        # else:
+        #     # Create new datasources
+
         # Create Datasources, save them to the object store and get their UUIDs
-        datasource_uuids = _create_datasources(gas_data)
+        # Change this to assign_data
+        datasource_uuids = assign_data(gas_data)
 
         # Add the Datasources to the list of datasources associated with this object
         crds.add_datasources(datasource_uuids)
-
         crds.save()
 
         return datasource_uuids
+
+    def lookup_datasources(self, gas_data, source_name=None, source_id=None):
+        """ Check which datasources
+
+            Args: 
+                gas_data (list): Gas data to process
+                source_name (str)
+            Returns:
+                dict: Dictionary keyed by source_name. Value of Datasource UUID
+        """
+        # If we already have data from these datasources then return that UUID
+        # otherwise return False
+        if source_id is not None:
+            raise NotImplementedError()
+
+        results = {}
+
+        for species in gas_data:
+            datasource_name = source_name + "_" + species
+            results[species]["uuid"] = self._datasource_names.get(datasource_name, False)
+            results[species]["name"] = datasource_name
+
+        return results
 
     def read_data(self, data_filepath):
         """ Separates the gases stored in the dataframe in 
@@ -262,7 +329,10 @@ class CRDS:
         # Create metadata here
         metadata = read_metadata(filename=data_filepath, data=data, data_type="CRDS")
 
-        data_list = []
+        # data_list = []
+
+        data = {}
+
         for n in range(n_gases):
             # Slice the columns
             gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
@@ -270,6 +340,7 @@ class CRDS:
             # Reset the column numbers
             gas_data.columns = _RangeIndex(gas_data.columns.size)
             species = gas_data[0][0]
+            species = species.lower()
 
             column_names = ["count", "stdev", "n_meas"]
             column_labels = ["%s %s" % (species, l) for l in column_names]
@@ -284,9 +355,11 @@ class CRDS:
             species_metadata = metadata.copy()
             species_metadata["species"] = species
 
-            data_list.append((species, species_metadata, gas_data))
+            data[species] = {"metadata": species_metadata, "data":gas_data}
 
-        return data_list
+            # data_list.append((species, species_metadata, gas_data))
+
+        return data
 
     def gas_info(self, data):
             """ Returns the number of columns of data for each gas
@@ -338,7 +411,11 @@ class CRDS:
             Returns:
                 None
         """
-        self._datasources.extend(datasource_uuids)
+        self._datasource_names.update(datasource_uuids)
+        # Invert the dictionary to update the dict keyed by UUID
+        uuid_keyed = {v:k for k, v in datasource_uuids.items()}
+        self._datasource_uuids.update(uuid_keyed)
+        # self._datasources.extend(datasource_uuids)
 
     def uuid(self):
         """ Return the UUID of this object
@@ -354,7 +431,8 @@ class CRDS:
             Returns:
                 list: List of Datasources
         """
-        return self._datasources
+        # return self._datasources
+        return self._datasource_uuids.keys()
 
     def remove_datasource(self, uuid):
         """ Remove the Datasource with the given uuid from the list 
@@ -363,7 +441,8 @@ class CRDS:
             Args:
                 uuid (str): UUID of Datasource to be removed
         """
-        self._datasources.remove(uuid)
+        # self._datasources.remove(uuid)
+        del self._datasource_uuids[uuid]
 
     def clear_datasources(self):
         """ Remove all Datasources from the object
@@ -371,7 +450,9 @@ class CRDS:
             Returns:
                 None
         """
-        self._datasources = []
+        # self._datasources = []
+        self._datasource_uuids = {}
+        self._datasource_names = {}
 
 
     

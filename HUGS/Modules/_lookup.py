@@ -1,6 +1,5 @@
 __all___ = ["Lookup"]
 
-
 class Lookup:
     """ This class handles the lookup of Datasource names and UUIDs
         for processing and searching of data
@@ -136,7 +135,7 @@ class Lookup:
         key = "%s/uuid/%s" % (Lookup._lookup_root, Lookup._lookup_uuid)
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
-        return Lookup.from_data(data=data, bucket=b ucket)
+        return Lookup.from_data(data=data, bucket=bucket)
 
     def lookup(self, source_id=None, source_name=None):
         """ This function provides the interface to the underlying dict which stores the
@@ -191,11 +190,10 @@ class Lookup:
             raise ValueError("source_name or source_id must be provided")
         
         if source_name:
-            source_name = source_name.lower()
-            return self._name_records.get(source_name, False)
+            return source_name.lower() in self._name_records
 
         if source_id:
-            return self._uuid_records.get(source_id, False)
+            return source_id in self._uuid_records
     
     def set_id(self, source_name, source_id=None, overwrite=False):
         """ Set a source's ID and name

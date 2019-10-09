@@ -90,7 +90,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     if require_all:
         single_key = "_".join(sorted(search_terms))
 
-     # First we find the Datasources from locations we want to narrow down our search
+    # First we find the Datasources from locations we want to narrow down our search
     location_sources = _defaultdict(list)
     # If we have locations to search
     if locations:

@@ -2,7 +2,7 @@
 
 """
 __all__ = ["get_split_frequency", "create_datasources",
-           "create_footprint_datasources"]
+           "create_footprint_datasources", "assign_data"]
 
 def create_datasources(gas_data):
     """ Create or get an existing Datasource for each gas in the file
@@ -24,7 +24,7 @@ def create_datasources(gas_data):
     # Need to allow UUID input here so we can add new data to existing Datasources easily without
     # relying on the naming method
     for species, metadata, data in gas_data:
-        # Lookup Datasource uuid, if exists 
+        # Lookup Datasource uuid, if exists
         if Datasource.exists(datasource_id=datasource_id):
             datasource = Datasource.load(uuid=datasource_id)
             # TODO - add metadata in here - append to existing?
@@ -41,6 +41,51 @@ def create_datasources(gas_data):
         # Add the Datasource to the list
         uuids.append(datasource.uuid())
 
+    return uuids
+
+
+def assign_data(gas_data, datasource_ids):
+    """ Create or get an existing Datasource for each gas in the file
+
+        TODO - currently this function will only take data from a single Datasource
+        
+        Args:
+            gas_data (list): List of tuples gas name, datasource_id, Pandas.Dataframe
+        Returns:
+            list: List of UUIDs
+    """
+    from HUGS.Modules import Datasource
+
+    uuids = {}
+
+    # Rework this to for the segmentation of data within the Datasource
+    # How to reliably get existing UUIDs to be passed through from an interface or selection?
+    # Rely on site_species for now via name lookup?
+    # Need to allow UUID input here so we can add new data to existing Datasources easily without
+    # relying on the naming method
+
+    # TODO - simplify this
+    for species in gas_data:
+        metadata = gas_data[species]["metadata"]
+        data = gas_data[species]["data"]
+        name = datasource_ids[species]["name"]
+        uid = datasource_ids[species]["uuid"]
+
+        # If we have a UUID for this Datasource
+        if uid:
+            datasource = Datasource.load(uid)
+        else:
+            datasource = Datasource.create(name=name)
+
+        # Store the name and datasource_id
+        # self._species[gas_name] = datasource_id
+        # Add the dataframe to the datasource
+        datasource.add_data(metadata, data)
+        # Save Datasource to object store
+        datasource.save()
+
+        uuids[name] = datasource.uuid()
+        
     return uuids
 
 
