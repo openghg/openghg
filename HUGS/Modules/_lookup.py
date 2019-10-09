@@ -188,7 +188,7 @@ class Lookup:
                 bool: True if exists
         """
         if source_name is None and source_id is None:
-            raise ValueError("source_name or source_id must be provded")
+            raise ValueError("source_name or source_id must be provided")
         
         if source_name:
             source_name = source_name.lower()
@@ -204,7 +204,7 @@ class Lookup:
                 source_name (str): UUID for source
                 source_id (str, default=None): UUID to assign to object
             Returns:
-                None
+                str: UUID of record
         """
         if source_name in self._name_records and overwrite is False:
             raise ValueError("Cannot overwrite record")
@@ -214,18 +214,54 @@ class Lookup:
             source_id = uuid.uuid4()
 
         source_name = source_name.lower()
-        self._uuid_records[source_name] = source_id
-        self._name_records[source_id] = source_name        
- 
+        self._uuid_records[source_id] = source_name
+        self._name_records[source_name] = source_id
 
-    #     """ Ensures the two dictionary's are synced for fast lookup
-    #         by key
+        return source_id
 
-    #         Returns:
-    #             None
-    #     """
+    def add_timeseries(self, source_name, species):
+        """ Takes a source name and a list of species and creates
+            a UUID for each Datasource
+
+            Args:   
+                source_name (str): Name of source
+                species (list): List of species names
+            Returns
+                dict: Dictionary keyed by Datasource name where name is
+                source_name + species. Values are the UUIDs for each Datasource
+        """
+        if not isinstance(species, list):
+            species = [species]
+        
+        source_name = source_name
+        records = {}
+
+        for sp in species:
+            datasource_name = source_name + "_" + sp
+            uid = self.set_id(datasource_name)
+            records[datasource_name.lower()] = uid
+
+        return records
+
+    def add_footprint(self, source_name):
+        """ Takes a source name and creates a record for the footprint data
+
+            Args:   
+                source_name (str): Name of source
+            Returns:
+                dict: Dictionary keyed by Datasource name. Value is the UUID for 
+                the Datasource
+        """
+        source_name = source_name.lower()
+        uid = self.set_id(source_name)
+
+        return {source_name: uid}
+
         
 
+
+        
+        
 
                 
 

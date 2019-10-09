@@ -595,3 +595,13 @@ class Datasource:
                 dict: Labels of Datasource
         """
         return self._labels
+
+    def set_id(self, uid):
+        """ Set the UUID for this Datasource
+
+            Args:
+                id (str): UUID
+            Returns:
+                None
+        """
+        self._uuid = uid

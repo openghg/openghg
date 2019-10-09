@@ -252,8 +252,8 @@ class CRDS:
         # Get the number of gases in dataframe and number of columns of data present for each gas
         n_gases, n_cols = self.gas_info(data=data)
 
-        # TODO - at the moment just create a new UUID for each gas
-        datasource_ids = [_uuid4() for gas in range(n_gases)]
+        # # TODO - at the moment just create a new UUID for each gas
+        # datasource_ids = [_uuid4() for gas in range(n_gases)]
 
         header = data.head(2)
         skip_cols = sum([header[column][0] == "-" for column in header.columns])
@@ -264,7 +264,6 @@ class CRDS:
 
         data_list = []
         for n in range(n_gases):
-            datasource_id = datasource_ids[n]
             # Slice the columns
             gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
 
@@ -285,7 +284,7 @@ class CRDS:
             species_metadata = metadata.copy()
             species_metadata["species"] = species
 
-            data_list.append((species, species_metadata, datasource_id, gas_data))
+            data_list.append((species, species_metadata, gas_data))
 
         return data_list
 

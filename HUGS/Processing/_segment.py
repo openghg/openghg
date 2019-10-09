@@ -4,8 +4,6 @@
 __all__ = ["get_split_frequency", "create_datasources",
            "create_footprint_datasources"]
 
-from HUGS.Modules import Datasource as _Datasource
-
 def create_datasources(gas_data):
     """ Create or get an existing Datasource for each gas in the file
 
@@ -16,15 +14,22 @@ def create_datasources(gas_data):
         Returns:
             list: List of UUIDs
     """
+    from HUGS.Modules import Datasource
+
     uuids = []
 
     # Rework this to for the segmentation of data within the Datasource
-    for species, metadata, datasource_id, data in gas_data:
-        if _Datasource.exists(datasource_id=datasource_id):
-            datasource = _Datasource.load(uuid=datasource_id)
+    # How to reliably get existing UUIDs to be passed through from an interface or selection?
+    # Rely on site_species for now via name lookup?
+    # Need to allow UUID input here so we can add new data to existing Datasources easily without
+    # relying on the naming method
+    for species, metadata, data in gas_data:
+        # Lookup Datasource uuid, if exists 
+        if Datasource.exists(datasource_id=datasource_id):
+            datasource = Datasource.load(uuid=datasource_id)
             # TODO - add metadata in here - append to existing?
         else:
-            datasource = _Datasource.create(name=species)
+            datasource = Datasource.create(name=species)
 
         # Store the name and datasource_id
         # self._species[gas_name] = datasource_id
@@ -47,6 +52,7 @@ def create_footprint_datasources(footprint_data):
         Returns:
             list: List of UUIDs of used/created Datasources
     """
+    raise NotImplementedError()
 
 
 
