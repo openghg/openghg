@@ -48,7 +48,7 @@ def test_read_file():
     filepath = os.path.join(dir_path, test_data, filename)
     bucket = get_local_bucket(empty=True)
 
-    crds = CRDS.read_file(data_filepath=filepath)
+    crds = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
     # Get the data from the object store and ensure it's been read correctly
     datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]

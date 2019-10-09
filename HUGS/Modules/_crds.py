@@ -249,13 +249,13 @@ class CRDS:
 
         # Create Datasources, save them to the object store and get their UUIDs
         # Change this to assign_data
-        datasource_uuids = assign_data(gas_data)
+        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results)
 
         # Add the Datasources to the list of datasources associated with this object
         crds.add_datasources(datasource_uuids)
         crds.save()
 
-        return datasource_uuids
+        return crds
 
     def lookup_datasources(self, gas_data, source_name=None, source_id=None):
         """ Check which datasources
@@ -275,6 +275,7 @@ class CRDS:
 
         for species in gas_data:
             datasource_name = source_name + "_" + species
+            results[species] = {}
             results[species]["uuid"] = self._datasource_names.get(datasource_name, False)
             results[species]["name"] = datasource_name
 
@@ -331,7 +332,7 @@ class CRDS:
 
         # data_list = []
 
-        data = {}
+        combined_data = {}
 
         for n in range(n_gases):
             # Slice the columns
@@ -355,11 +356,11 @@ class CRDS:
             species_metadata = metadata.copy()
             species_metadata["species"] = species
 
-            data[species] = {"metadata": species_metadata, "data":gas_data}
+            combined_data[species] = {"metadata": species_metadata, "data":gas_data}
 
             # data_list.append((species, species_metadata, gas_data))
 
-        return data
+        return combined_data
 
     def gas_info(self, data):
             """ Returns the number of columns of data for each gas

@@ -16,7 +16,7 @@ class Datasource:
         self._creation_datetime = None
         self._labels = {}
 
-        self._metadata = None
+        self._metadata = {}
         self._parent = None
         # These may be unnecessary?
         self._instrument = None

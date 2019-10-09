@@ -44,7 +44,7 @@ def create_datasources(gas_data):
     return uuids
 
 
-def assign_data(gas_data, datasource_ids):
+def assign_data(gas_data, lookup_results):
     """ Create or get an existing Datasource for each gas in the file
 
         TODO - currently this function will only take data from a single Datasource
@@ -68,8 +68,8 @@ def assign_data(gas_data, datasource_ids):
     for species in gas_data:
         metadata = gas_data[species]["metadata"]
         data = gas_data[species]["data"]
-        name = datasource_ids[species]["name"]
-        uid = datasource_ids[species]["uuid"]
+        name = lookup_results[species]["name"]
+        uid = lookup_results[species]["uuid"]
 
         # If we have a UUID for this Datasource
         if uid:
