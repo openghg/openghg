@@ -32,7 +32,7 @@ class CRDS:
             Returns:
                 bool: True if object is null
         """
-        return len(self._datasource_uuids) > 0
+        return len(self._datasource_uuids) == 0
 
     @staticmethod
     def exists(bucket=None):
@@ -252,6 +252,7 @@ class CRDS:
 
         # Add the Datasources to the list of datasources associated with this object
         crds.add_datasources(datasource_uuids)
+        print("In read file", crds._datasource_uuids)
         crds.save()
 
         # return crds

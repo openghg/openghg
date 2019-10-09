@@ -86,9 +86,13 @@ def test_data_persistence():
     # Get the data from the object store and ensure it's been read correctly
     # datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
 
-    # print(crds.datasources())
+    print(crds.datasources())
 
-    # crds = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+
+    print(crds.datasources())
+
+
 
     # datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
 

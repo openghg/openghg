@@ -73,7 +73,7 @@ def assign_data(gas_data, lookup_results):
 
         # If we have a UUID for this Datasource
         if uid:
-            datasource = Datasource.load(uid)
+            datasource = Datasource.load(uuid=uid)
         else:
             datasource = Datasource.create(name=name)
 
