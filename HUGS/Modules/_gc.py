@@ -1,10 +1,10 @@
-from enum import Enum as _Enum
+from enum import Enum
 
 __all__ = ["GC"]
 
 # Enum or read from JSON?
 # JSON might be easier to change in the future
-class sampling_period(_Enum):
+class sampling_period(Enum):
     GCMD = 75
     GCMS = 1200
     MEDUSA = 1200

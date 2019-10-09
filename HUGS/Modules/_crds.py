@@ -416,6 +416,7 @@ class CRDS:
         uuid_keyed = {v:k for k, v in datasource_uuids.items()}
         self._datasource_uuids.update(uuid_keyed)
         # self._datasources.extend(datasource_uuids)
+        # print(self._datasource_names)
 
     def uuid(self):
         """ Return the UUID of this object

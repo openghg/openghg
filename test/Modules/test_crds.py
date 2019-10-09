@@ -71,6 +71,32 @@ def test_read_file():
     assert data_three[0]["co n_meas"].iloc[0] == pytest.approx(19.0)
 
 
+def test_data_persistence():
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filename = "hfd.picarro.1minute.100m_min.dat"
+
+    filepath = os.path.join(dir_path, test_data, filename)
+    bucket = get_local_bucket(empty=True)
+
+    crds = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+
+    crds.save()
+
+    # Get the data from the object store and ensure it's been read correctly
+    datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
+
+    for d in datasources:
+        print(d.uuid())
+
+    crds = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+
+    datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
+
+    for d in datasources:
+        print(d.uuid())
+
+
 # def test_read_folder():
 #     folder_path = "/home/gar/Documents/Devel/hugs/raw_data/CRDS_picarro"
 #     CRDS.read_folder(folder_path=folder_path)
