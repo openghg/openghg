@@ -393,7 +393,7 @@ class Datasource:
         d = Datasource()
         d._uuid = data["UUID"]
         d._name = data["name"]
-        d._creation_datetime = _string_to_datetime(data["creation_datetime"])
+        d._creation_datetime = string_to_datetime(data["creation_datetime"])
         d._metadata = data["metadata"]
         d._stored = data["stored"]
         d._data_keys = data["data_keys"]
