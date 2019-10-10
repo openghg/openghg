@@ -14,9 +14,8 @@ class Datasource:
         self._uuid = None
         self._name = None
         self._creation_datetime = None
-        self._labels = {}
 
-        self._metadata = None
+        self._metadata = {}
         self._parent = None
         # These may be unnecessary?
         self._instrument = None
@@ -36,7 +35,7 @@ class Datasource:
             Args:
                 name (str): Name for Datasource
                 data (list, default=None): List of Pandas.Dataframes
-                **kwargs (dict): Dictionary saved as the labels for this object
+                **kwargs (dict): Dictionary saved as the metadata for this object
             Returns:
                 Datasource
 
@@ -55,8 +54,8 @@ class Datasource:
         d._creation_datetime = _get_datetime_now()
                 
         # Any need to parse these for safety?
-        d._labels = kwargs
-        d._labels["gas"] = name
+        d._metadata = kwargs
+        d._metadata["source_name"] = name
         
         if data is not None:
             # This could be a list of dataframes
@@ -93,7 +92,7 @@ class Datasource:
         """
         return self._end_datetime
 
-    def add_label(self, key, value):
+    def add_metadata(self, key, value):
         """ Add a label to the label dictionary with the key value pair
             This will overwrite any previous entry stored at that key.
 
@@ -103,7 +102,7 @@ class Datasource:
             Returns:
                 None
         """
-        self._labels[key.lower()] = value.lower()
+        self._metadata[key.lower()] = value.lower()
 
     def add_data(self, metadata, data):
         """ Add data to this Datasource and segment the data by size.
@@ -120,13 +119,13 @@ class Datasource:
 
         # Store the metadata as labels
         # for k, v in metadata.items():
-        #     self.add_label(key=k, value=v)
+        #     self.add_metadata(key=k, value=v)
         self._metadata.update(metadata)
 
         # Add in a type record for timeseries data
         # Can possibly combine this function and the add_footprint (and other)
         # functions in the future
-        self.add_label(key="data_type", value="timeseries")
+        self.add_metadata(key="data_type", value="timeseries")
 
         freq = _get_split_frequency(data)
         # Split into sections by splitting frequency
@@ -147,10 +146,10 @@ class Datasource:
         """
         # Store the metadata as labels
         # for k, v in metadata.items():
-        #     self.add_label(key=k, value=v)
+        #     self.add_metadata(key=k, value=v)
 
         self._metadata.update(metadata)
-        self.add_label(key="data_type", value="footprint")
+        self.add_metadata(key="data_type", value="footprint")
         
         start, end = self.get_dataset_daterange(data)
         self._start_datetime = start
@@ -210,16 +209,6 @@ class Datasource:
 
         return start, end
 
-  
-    def add_metadata(self, metadata):
-        """ Add metadata to this object
-
-            Args:
-                metadata (Metadata): Metadata object
-        """
-        self._metadata.update(metadata)
-
-
     @staticmethod
     def exists(datasource_id, bucket=None):
         """ Uses an ID of some kind to query whether or not this is a new
@@ -269,7 +258,7 @@ class Datasource:
         data["UUID"] = self._uuid
         data["name"] = self._name
         data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
-        data["labels"] = self._labels
+        data["metadata"] = self._metadata
         data["stored"] = self._stored
         data["data_keys"] = self._data_keys
 
@@ -358,7 +347,7 @@ class Datasource:
         d._uuid = data["UUID"]
         d._name = data["name"]
         d._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        d._labels = data["labels"]
+        d._metadata = data["metadata"]
         d._stored = data["stored"]
         d._data_keys = data["data_keys"]
         d._data = []
@@ -508,15 +497,15 @@ class Datasource:
                 
         return "".join([_datetime_to_string(self._start_datetime), "_", _datetime_to_string(self._end_datetime)])
 
-    def search_labels(self, search_term):
-        """ Search the values of the labels of this Datasource for search_term
+    def search_metadata(self, search_term):
+        """ Search the values of the metadata of this Datasource for search_term
 
             Args:
-                search_term (str): String to search for in labels
+                search_term (str): String to search for in metadata
             Returns:
                 bool: True if found else False
         """
-        for v in self._labels.values():
+        for v in self._metadata.values():
             if v == search_term.lower():
                 return True
 
@@ -528,7 +517,7 @@ class Datasource:
             Returns:
                 str: Species of this Datasource
         """
-        return self._labels["species"]
+        return self._metadata["species"]
 
     def inlet(self):
         """ Returns the inlet of this Datasource
@@ -536,11 +525,11 @@ class Datasource:
             Returns:
                 str: Inlet of this Datasource
         """
-        return self._labels["inlet"]
+        return self._metadata["inlet"]
 
     def site(self):
-        if "site" in self._labels:
-            return self._labels["site"]
+        if "site" in self._metadata:
+            return self._metadata["site"]
         else:
             return "NA"
         
@@ -552,10 +541,10 @@ class Datasource:
         """
         return self._uuid
 
-    def labels(self):
-        """ Retur the labels of this Datasource
+    def metadata(self):
+        """ Retur the metadata of this Datasource
 
             Returns:
-                dict: Labels of Datasource
+                dict: Metadata of Datasource
         """
-        return self._labels
+        return self._metadata
