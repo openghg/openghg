@@ -187,7 +187,9 @@ class CRDS:
             raise FileNotFoundError("No data files found")
 
         for fp in filepaths:
-            CRDS.read_file(data_filepath=fp)
+            filename = fp.split("/")[-1]
+            filename = ".".join(filename.split(".")[:-1])
+            CRDS.read_file(data_filepath=fp, source_name=filename)
 
     @staticmethod
     def read_file(data_filepath, source_name, source_id=None, overwrite=False):

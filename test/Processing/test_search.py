@@ -28,7 +28,7 @@ def crds_obj():
     test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
 
-    return CRDS.read_file(filepath)
+    return CRDS.read_file(filepath, source_name="bsd.picarro.1minute.248m")
 
 @pytest.fixture(scope="session")
 def crds_read():

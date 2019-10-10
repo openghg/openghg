@@ -38,6 +38,23 @@ def before_tests():
 #     print(len(datasources))
 
 #     assert False
+def test_labels():
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filename = "hfd.picarro.1minute.100m_min.dat"
+
+    filepath = os.path.join(dir_path, test_data, filename)
+    bucket = get_local_bucket(empty=True)
+
+    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+
+    crds = CRDS.load()
+
+    # Get the data from the object store and ensure it's been read correctly
+    datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
+
+    for d in datasources:
+        print(d._labels)
 
 
 def test_read_file():
@@ -79,13 +96,17 @@ def test_data_persistence():
     filepath = os.path.join(dir_path, test_data, filename)
     bucket = get_local_bucket(empty=True)
 
-    crds = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+
+    crds = CRDS.load()
 
     first_store = crds.datasources()
 
     crds.save()
 
     crds = CRDS.load()
+
+    print(crds.datasources)
 
     # CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
