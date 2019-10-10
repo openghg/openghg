@@ -23,7 +23,7 @@ def process_data(data_file, source_name, precision_filepath=None, data_type="CRD
     if data_type == "CRDS":
         datasource_uuids = processing_obj.read_file(data_filepath=data_file, source_name=source_name, overwrite=overwrite)
     elif data_type == "GC":
-        datasource_uuids = processing_obj.read_file(data_filepath=data_file, precision_filepath=precision_filepath
+        datasource_uuids = processing_obj.read_file(data_filepath=data_file, precision_filepath=precision_filepath,
                                                     source_name=source_name, overwrite=overwrite)
 
     return datasource_uuids
