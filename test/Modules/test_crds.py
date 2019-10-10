@@ -57,6 +57,22 @@ def test_labels():
         print(d._labels)
 
 
+def test_labels():
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filename = "hfd.picarro.1minute.100m_min.dat"
+
+    filepath = os.path.join(dir_path, test_data, filename)
+    bucket = get_local_bucket(empty=True)
+
+    CRDS.read_file(data_filepath=filepath)
+
+    crds = CRDS.load()
+
+    # Get the data from the object store and ensure it's been read correctly
+    datasources = [Datasource.load(uuid=uuid, shallow=False)
+                   for uuid in crds.datasources()]
+
 def test_read_file():
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"

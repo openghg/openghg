@@ -96,7 +96,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     if locations:
         for location in locations:
             for datasource in datasources:
-                if datasource.search_labels(location):
+                if datasource.search_metadata(location):
                     location_sources[location].append(datasource)
     # If we have an empty list of locations, search everywhere
     # TODO - this feels clunky
@@ -112,7 +112,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
         for search_term in search_terms:
             for location in location_sources:
                 for datasource in location_sources[location]:
-                    if datasource.search_labels(search_term):
+                    if datasource.search_metadata(search_term):
                         prefix = "data/uuid/%s" % datasource.uuid()
                         data_list = _get_object_names(bucket=bucket, prefix=prefix)
                         # Get the Dataframes that are within the required date range
@@ -120,7 +120,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
 
                         if require_all:
                             search_key = "%s_%s" % (location, single_key)
-                            remaining_terms = [datasource.search_labels(term) for term in search_terms if term != search_term]
+                            remaining_terms = [datasource.search_metadata(term) for term in search_terms if term != search_term]
                             # Check if we got all Trues for the other search terms
                             if all(remaining_terms):
                                 keys[search_key].extend(in_date)
