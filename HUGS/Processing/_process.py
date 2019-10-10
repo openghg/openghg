@@ -1,14 +1,15 @@
 __all__ = ["process_data"]
 
 
-def process_data(data_file, precision_filepath=None, data_type="CRDS"):
+def process_data(data_file, source_name, precision_filepath=None, data_type="CRDS", overwrite=False):
     """ Passes the passed filename(s) to the correct processing
         object depending on the data_type argument.
 
         Args:
             file_data (str): Name of file for processing
             precision_filepath (str, default=None): Name of precision file for GC data
-            data_type (str): Type of data to be processed (CRDS, GC etc)
+            data_type (str, default="CRDS"): Type of data to be processed (CRDS, GC etc)
+            overwrite (bool, default=False): Should existing and overlapping data be overwritten
         Returns:
             list: List of Datasources
     """
@@ -20,8 +21,9 @@ def process_data(data_file, precision_filepath=None, data_type="CRDS"):
     processing_obj = _load_object(class_name=data_type)
 
     if data_type == "CRDS":
-        datasource_uuids = processing_obj.read_file(data_filepath=data_file)
+        datasource_uuids = processing_obj.read_file(data_filepath=data_file, source_name=source_name, overwrite=overwrite)
     elif data_type == "GC":
-        datasource_uuids = processing_obj.read_file(data_filepath=data_file, precision_filepath=precision_filepath)
+        datasource_uuids = processing_obj.read_file(data_filepath=data_file, precision_filepath=precision_filepath
+                                                    source_name=source_name, overwrite=overwrite)
 
     return datasource_uuids

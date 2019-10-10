@@ -29,7 +29,7 @@ def process(args):
     data_secret = hugs.decrypt_data(data_secret)
     data_filename = data_par.resolve(secret=data_secret)
     # Here we're downloading the data to the tmp directory
-    # Be good if we could load it directly from the object store?
+    # Be good if we could load it directly from the object store
     data_file = data_filename.download(dir="/tmp")
 
     if data_type == "GC":
@@ -41,6 +41,14 @@ def process(args):
     else:
         precision_file = None
 
-    results = process_data(data_file=data_file, precision_filepath=precision_file, data_type=data_type)
+    if overwrite in args:
+        overwrite = args["overwrite"]
+    else:
+        overwrite = False
+
+    source_name = args["source_name"]
+
+    results = process_data(data_file=data_file, source_name=source_name,
+                            precision_filepath=precision_file, data_type=data_type, overwrite=overwrite)
 
     return {"results": results}

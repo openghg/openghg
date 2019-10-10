@@ -22,7 +22,7 @@ class Process:
             self._service
 
     # Find a better way to get this storage url in here, currently used for testing
-    def process_files(self, user, files, data_type, hugs_url=None, storage_url=None, datasource=None):
+    def process_files(self, user, files, data_type, source_name, overwrite=False, hugs_url=None, storage_url=None, datasource=None):
         """ Process the passed file(s) 
 
             Args:
@@ -83,7 +83,8 @@ class Process:
                 args = {"authorisation": auth.to_data(),
                         "par": {"data": par.to_data(), "precision": prec_par.to_data()},
                         "par_secret": {"data": par_secret, "precision": prec_par_secret},
-                        "data_type": data_type, "datasource": datasource}
+                        "data_type": data_type, "datasource": datasource,
+                        "source_name":source_name, "overwrite": overwrite}
             else:
                 filename = file.split("/")[-1]
                 
@@ -94,7 +95,8 @@ class Process:
                 args = {"authorisation": auth.to_data(),
                         "par": {"data": par.to_data()},
                         "par_secret": {"data": par_secret},
-                        "data_type": data_type, "datasource": datasource}
+                        "data_type": data_type, "datasource": datasource,
+                        "source_name":source_name, "overwrite":overwrite}
 
             response = self._service.call_function(function="process", args=args)
 
