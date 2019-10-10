@@ -54,7 +54,7 @@ class Datasource:
         d._creation_datetime = _get_datetime_now()
                 
         # Any need to parse these for safety?
-        d._metadata = kwargs
+        # d._metadata = kwargs
         d._metadata["source_name"] = name
         
         if data is not None:
