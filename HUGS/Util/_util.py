@@ -3,7 +3,8 @@
 """
 
 __all__ = ["url_join", "get_daterange_str", "get_datetime_epoch", 
-            "get_datetime_now", "get_datetime", "unanimous", "load_object"]
+            "get_datetime_now", "get_datetime", "unanimous", "load_object",
+            "hash_file"]
 
 def url_join(*args):
     """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
@@ -119,3 +120,30 @@ def load_object(class_name):
     target_class = getattr(module_object, class_name)
 
     return target_class.load()
+
+def hash_file(filepath):
+    """ Opens the file at filepath and calculates its SHA1 hash
+
+        Taken from https://stackoverflow.com/a/22058673
+
+        Args:
+            filepath (str): Path to file
+        Returns:
+            str: SHA1 hash
+    """
+    import hashlib
+
+    BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
+
+    sha1 = hashlib.sha1()
+
+    with open(file, 'rb') as f:
+        while True:
+            data = f.read(BUF_SIZE)
+            if not data:
+                break
+            sha1.update(data)
+
+    return sha1.hexdigest()
+
+

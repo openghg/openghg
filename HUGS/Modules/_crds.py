@@ -25,6 +25,8 @@ class CRDS:
         self._datasource_names = {}
         # Keyed by UUID - allows retrieval of name by UUID
         self._datasource_uuids = {}
+        # Hashes of previously uploaded files
+        self._file_hashes = {}
 
     def is_null(self):
         """ Check if this is a null object
@@ -80,6 +82,7 @@ class CRDS:
         data["stored"] = self._stored
         data["datasource_uuids"] = self._datasource_uuids
         data["datasource_names"] = self._datasource_names
+        data["file_hashes"] = self._file_hashes
 
         return data
 
@@ -109,6 +112,7 @@ class CRDS:
         # c._datasources = data["datasources"]
         c._datasource_uuids = data["datasource_uuids"]
         c._datasource_names = data["datasource_names"]
+        c._file_hashes = data["file_hashes"]
         c._stored = False
         return c
 
@@ -205,11 +209,17 @@ class CRDS:
         from pandas import read_csv as _read_csv
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
         from HUGS.Processing import assign_data
+        from HUGS.Util import hash_file
 
         # here we check the source id from the interface or the source_name
         # Check that against the lookup table and then we can decide if we want to 
         # either create a new Datasource or add the data to an existing source
 
+        # Take hash of file and save it's hash so we know we've read it already
+        file_hash = hash_file(filepath=data_filepath)
+        if file_hash in self._file_hashes:
+            return ValueError(f"This file has been uploaded previously with the filename : " {self._file_hashes[file_hash]})
+        
         crds = CRDS.load()
 
         filename = data_filepath.split("/")[-1]
@@ -254,6 +264,11 @@ class CRDS:
 
         # Add the Datasources to the list of datasources associated with this object
         crds.add_datasources(datasource_uuids)
+
+        # Store the hash as the key for easy searching, store the filename as well for
+        # ease of checking by user
+        filename = data_filepath.split("/")[-1]
+        self._file_hashes[file_hash] = filename
 
         crds.save()
 
@@ -310,6 +325,9 @@ class CRDS:
                 return _pd_datetime.strptime(date, '%y%m%d %H%M%S')
             except ValueError:
                 return _pd_NaT
+
+        # Can check here if we've processed this file before?
+
 
         data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"],
                             parse_dates=[[0,1]], date_parser=parse_date)
