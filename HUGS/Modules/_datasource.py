@@ -27,7 +27,7 @@ class Datasource:
         self._start_datetime = None
         self._end_datetime = None
         self._stored = False
-        self._data_keys = []
+        self._data_keys = {}
 
     @staticmethod
     def create(name, data=None, **kwargs):
@@ -105,22 +105,19 @@ class Datasource:
         """
         self._labels[key.lower()] = value.lower()
 
-    def add_data(self, metadata, data):
+    def add_data(self, metadata, data, overwrite=False):
         """ Add data to this Datasource and segment the data by size.
             The data is stored as a tuple of the data and the daterange it covers.
 
             Args:
                 metadata (dict): Metadata on the data for this Datasource
                 data (Pandas.DataFrame): Data
-            Returns:
+                overwrite (bool, default=False): Overwrite existing data
                 None
         """
-        from pandas import Grouper as _Grouper
-        from HUGS.Processing import get_split_frequency as _get_split_frequency
+        from pandas import Grouper
+        from HUGS.Processing import get_split_frequency
 
-        # Store the metadata as labels
-        # for k, v in metadata.items():
-        #     self.add_label(key=k, value=v)
         self._metadata.update(metadata)
 
         # Add in a type record for timeseries data
@@ -128,12 +125,36 @@ class Datasource:
         # functions in the future
         self.add_label(key="data_type", value="timeseries")
 
-        freq = _get_split_frequency(data)
+        # Store the hashes of data we've seen previously in a dict?
+        # Then also check that the data we're trying to input doesn't overwrite the data we
+        # currently have
+        # Be easiest to first check the dates covered by the data?
+
+        # Check the daterange covered by this data and if we have an overlap
+        # 
+        if self._data:
+            # print("We have data?", self._data)
+            start_data, end_data = self.daterange()
+            start_new, end_new = self.get_dataframe_daterange(data)
+
+            # Check if there's overlap of data
+            if start_new >= start_data and end_new <= end_data and overwrite is False:
+                return ValueError("The provided data overlaps dates covered by existing data")
+
+        # Need to check here if we've seen this data before
+        # Can we do this before splitting the
+        freq = get_split_frequency(data)
         # Split into sections by splitting frequency
-        group = data.groupby(_Grouper(freq=freq))
+        group = data.groupby(Grouper(freq=freq))
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
+
+        # Update the start, end datetimes for this Datasource
+        start, end = self.daterange()
+        self._start_datetime = start
+        self._end_datetime = end
+
 
     def add_footprint_data(self, metadata, data):
         """ Add footprint data
@@ -174,18 +195,17 @@ class Datasource:
             Returns:
                 tuple (datetime, datetime): Start and end datetimes for DataSet
         """
-        import datetime as _datetime
-        from pandas import DatetimeIndex as _DatetimeIndex
-        from pandas import to_datetime as _to_datetime
-        from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+        from pandas import DatetimeIndex
+        from pandas import to_datetime
+        from Acquire.ObjectStore import datetime_to_datetime
         
-        if not isinstance(dataframe.index, _DatetimeIndex):
+        if not isinstance(dataframe.index, DatetimeIndex):
             raise TypeError("Only DataFrames with a DatetimeIndex must be passed")
         
         # This seems a bit long winded but we end up with standard Python datetime objects
         # that are timezone aware and set to UTC
-        start = _datetime_to_datetime(_to_datetime(dataframe.first_valid_index()))
-        end = _datetime_to_datetime(_to_datetime(dataframe.last_valid_index()))
+        start = datetime_to_datetime(to_datetime(dataframe.first_valid_index()))
+        end = datetime_to_datetime(to_datetime(dataframe.last_valid_index()))
 
         return start, end
 
@@ -385,7 +405,7 @@ class Datasource:
             Returns:
                 Datasource: Datasource created from JSON
         """
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+        from Acquire.ObjectStore import string_to_datetime
 
         if data is None or len(data) == 0:
             return Datasource()
@@ -393,7 +413,7 @@ class Datasource:
         d = Datasource()
         d._uuid = data["UUID"]
         d._name = data["name"]
-        d._creation_datetime = _string_to_datetime(data["creation_datetime"])
+        d._creation_datetime = string_to_datetime(data["creation_datetime"])
         d._labels = data["labels"]
         d._stored = data["stored"]
         d._data_keys = data["data_keys"]
@@ -401,7 +421,10 @@ class Datasource:
         
         if d._stored and not shallow:
             for key in d._data_keys:
-                d._data.append(Datasource.load_dataframe(bucket, key))
+                daterange = d._data_keys[key].split("_")
+                start =  string_to_datetime(daterange[0])
+                end = string_to_datetime(daterange[1])
+                d._data.append((Datasource.load_dataframe(bucket, key), (start,end)))
 
         return d
 
@@ -429,11 +452,10 @@ class Datasource:
                 start, end = daterange
                 daterange_str = "".join([_datetime_to_string(start), "_", _datetime_to_string(end)])
                 data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
-                self._data_keys.append(data_key)
+                self._data_keys[data_key] = daterange_str
                 _ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
 
             self._stored = True
-
 
         datasource_key = "%s/uuid/%s" % (Datasource._datasource_root, self._uuid)
         _ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
@@ -489,7 +511,6 @@ class Datasource:
         from HUGS.ObjectStore import get_dated_object_json as _get_dated_object_json
 
         key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
-
         data = _get_dated_object_json(bucket=bucket, key=key)
 
         return data["name"]
@@ -508,9 +529,7 @@ class Datasource:
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
 
         encoded_name = _string_to_encoded(name)
-
         prefix = "%s/name/%s" % (Datasource._datasource_root, encoded_name)
-
         uuid = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
 
         if len(uuid) > 1:
@@ -532,17 +551,27 @@ class Datasource:
             Returns:
                 str: Daterange as string 
         """
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        from Acquire.ObjectStore import datetime_to_datetime
 
         if self._start_datetime is None or self._end_datetime is None:
             if self._data is not None:
                 # TODO - this is clunky - better way?
-                self._start_datetime = self._data[0][1][0]
-                self._end_datetime = self._data[-1][1][1]
+                start = self._data[0][0].first_valid_index()
+                end = self._data[-1][0].last_valid_index()
             else:
                 raise ValueError("Cannot get daterange with no data")
+
+            return datetime_to_datetime(start), datetime_to_datetime(end)
                 
-        return "".join([_datetime_to_string(self._start_datetime), "_", _datetime_to_string(self._end_datetime)])
+    def daterange_str(self):    
+        """ Get the daterange this Datasource covers as a string in
+            the form start_end
+
+            Returns:
+                str: Daterange covered by this Datasource
+        """
+        start, end = self.daterange()
+        return "".join([_datetime_to_string(start), "_", _datetime_to_string(end)])
 
     def search_labels(self, search_term):
         """ Search the values of the labels of this Datasource for search_term

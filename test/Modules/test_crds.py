@@ -77,20 +77,23 @@ def test_data_persistence():
     filename = "hfd.picarro.1minute.100m_min.dat"
 
     filepath = os.path.join(dir_path, test_data, filename)
-    bucket = get_local_bucket(empty=False)
+    bucket = get_local_bucket(empty=True)
+
+    crds = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+
+    first_store = crds.datasources()
+
+    crds.save()
+
+    crds = CRDS.load()
 
     CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
-    # crds.save()
+    second_store = crds.datasources()
 
-    # Get the data from the object store and ensure it's been read correctly
-    # datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
-
-    print(crds.datasources())
-
-    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
-
-    print(crds.datasources())
+    print(first_store, second_store)
+    
+    assert first_store == second_store
 
 
 

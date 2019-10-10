@@ -38,7 +38,7 @@ class GC:
             Returns:
                 bool: True if object is null
         """
-        return len(self._datasource_uuids) > 0
+        return len(self._datasource_uuids) == 0
 
     @staticmethod
     def exists(bucket=None):

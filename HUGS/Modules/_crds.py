@@ -252,10 +252,10 @@ class CRDS:
 
         # Add the Datasources to the list of datasources associated with this object
         crds.add_datasources(datasource_uuids)
-        print("In read file", crds._datasource_uuids)
+
         crds.save()
 
-        # return crds
+        return crds
 
     def lookup_datasources(self, gas_data, source_name=None, source_id=None):
         """ Check which datasources
