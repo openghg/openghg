@@ -3,7 +3,6 @@ from Acquire.Service import get_this_service
 
 from HUGS.Processing import process_data
 
-
 def process(args):
     """ Take a PAR from an uploaded file and process the data
 
@@ -41,7 +40,7 @@ def process(args):
     else:
         precision_file = None
 
-    if overwrite in args:
+    if "overwrite" in args:
         overwrite = args["overwrite"]
     else:
         overwrite = False
