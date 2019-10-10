@@ -71,7 +71,8 @@ def assign_data(gas_data, lookup_results, overwrite):
         name = lookup_results[species]["name"]
         uid = lookup_results[species]["uuid"]
 
-        # If we have a UUID for this Datasource
+        # If we have a UUID for this Datasource load the existing object
+        # from the object store
         if uid:
             datasource = Datasource.load(uuid=uid)
         else:
@@ -98,9 +99,6 @@ def create_footprint_datasources(footprint_data):
             list: List of UUIDs of used/created Datasources
     """
     raise NotImplementedError()
-
-
-
 
 def get_split_frequency(data):
     """ Analyses raw data for size and sets a frequency to split the data

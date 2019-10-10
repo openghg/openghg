@@ -114,15 +114,6 @@ def test_data_overlap_raises():
     with pytest.raises(ValueError):
         CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
-    # assert first_store == second_store
-
-
-
-    # datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
-
-    # for d in datasources:
-    #     print(d.uuid())
-
 
 # def test_read_folder():
 #     folder_path = "/home/gar/Documents/Devel/hugs/raw_data/CRDS_picarro"

@@ -294,3 +294,7 @@ For other types of data we need to create datsources in another way.
 For now I'll create the Datasources within the Footprint class and add these to the list of available data
 
 
+2019-10-10
+
+Look at an inverse dictionary for searching labels so a list won't have to be searched
+when search_labels() is run. Don't actually use the keys in the labels dict really.

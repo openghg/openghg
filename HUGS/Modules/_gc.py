@@ -161,7 +161,7 @@ class GC:
         return GC.from_data(data=data, bucket=bucket)
 
     @staticmethod
-    def read_file(data_filepath, precision_filepath, source_name, source_id=None):
+    def read_file(data_filepath, precision_filepath, source_name, source_id=None, overwrite=False):
         """ Reads a GC data file by creating a GC object and associated datasources
 
             Args:
@@ -192,7 +192,7 @@ class GC:
         lookup_results = gc.lookup_datasources(gas_data=gas_data, source_name=source_name, source_id=source_id)
     
         # Create Datasources, save them to the object store and get their UUIDs
-        datasource_uuids = assign_data(gas_data=split_data, lookup_results=lookup_results)
+        datasource_uuids = assign_data(gas_data=split_data, lookup_results=lookup_results, overwrite=overwrite)
         # Add the Datasources to the list of datasources associated with this object
         gc.add_datasources(datasource_uuids)
         # Save object to object store

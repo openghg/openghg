@@ -8,7 +8,7 @@ mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
 class CRDS:
-    """ Interface for processnig CRDS data
+    """ Interface for processing CRDS data
 
         Instances of CRDS should be created using the
         CRDS.create() function
