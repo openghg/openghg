@@ -255,7 +255,7 @@ class CRDS:
 
         crds.save()
 
-        return crds
+        return datasource_uuids
 
     def lookup_datasources(self, gas_data, source_name=None, source_id=None):
         """ Check which datasources
