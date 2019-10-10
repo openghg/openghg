@@ -190,7 +190,7 @@ class CRDS:
             CRDS.read_file(data_filepath=fp)
 
     @staticmethod
-    def read_file(data_filepath, source_name, source_id=None):
+    def read_file(data_filepath, source_name, source_id=None, overwrite=False):
         """ Creates a CRDS object holding data stored within Datasources
 
             TODO - currently only works with a single Datasource
@@ -248,7 +248,7 @@ class CRDS:
 
         # Create Datasources, save them to the object store and get their UUIDs
         # Change this to assign_data
-        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results)
+        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
 
         # Add the Datasources to the list of datasources associated with this object
         crds.add_datasources(datasource_uuids)

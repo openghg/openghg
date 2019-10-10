@@ -44,7 +44,7 @@ def create_datasources(gas_data):
     return uuids
 
 
-def assign_data(gas_data, lookup_results):
+def assign_data(gas_data, lookup_results, overwrite):
     """ Create or get an existing Datasource for each gas in the file
 
         TODO - currently this function will only take data from a single Datasource
@@ -80,7 +80,7 @@ def assign_data(gas_data, lookup_results):
         # Store the name and datasource_id
         # self._species[gas_name] = datasource_id
         # Add the dataframe to the datasource
-        datasource.add_data(metadata, data)
+        datasource.add_data(metadata=metadata, data=data, overwrite=overwrite)
         # Save Datasource to object store
         datasource.save()
 

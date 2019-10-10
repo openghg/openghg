@@ -105,7 +105,7 @@ class Datasource:
         """
         self._labels[key.lower()] = value.lower()
 
-    def add_data(self, metadata, data, overwrite=False):
+    def add_data(self, metadata, data, overwrite):
         """ Add data to this Datasource and segment the data by size.
             The data is stored as a tuple of the data and the daterange it covers.
 
@@ -123,8 +123,6 @@ class Datasource:
         # Add in a type record for timeseries data
         # Can possibly combine this function and the add_footprint (and other)
         # functions in the future
-        self.add_label(key="data_type", value="timeseries")
-
         # Store the hashes of data we've seen previously in a dict?
         # Then also check that the data we're trying to input doesn't overwrite the data we
         # currently have
@@ -133,13 +131,13 @@ class Datasource:
         # Check the daterange covered by this data and if we have an overlap
         # 
         if self._data:
-            # print("We have data?", self._data)
+            # print("We have data already", self._data)
             start_data, end_data = self.daterange()
             start_new, end_new = self.get_dataframe_daterange(data)
 
             # Check if there's overlap of data
             if start_new >= start_data and end_new <= end_data and overwrite is False:
-                return ValueError("The provided data overlaps dates covered by existing data")
+                raise ValueError("The provided data overlaps dates covered by existing data")
 
         # Need to check here if we've seen this data before
         # Can we do this before splitting the
@@ -149,12 +147,9 @@ class Datasource:
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
-
-        # Update the start, end datetimes for this Datasource
-        start, end = self.daterange()
-        self._start_datetime = start
-        self._end_datetime = end
-
+        self.add_label(key="data_type", value="timeseries")
+        # Use daterange() to update the recorded values
+        self.daterange()
 
     def add_footprint_data(self, metadata, data):
         """ Add footprint data
@@ -312,41 +307,35 @@ class Datasource:
 
         return Datasource.hdf_to_dataframe(data)
 
-    def dataset_to_netcdf(data):
-        """ Write the passed dataset to a compressed in-memory NetCDF file
+    # These functins don't work, placeholders for when it's possible to get 
+    # an in memory NetCDF4 file
+    # def dataset_to_netcdf(data):
+    #     """ Write the passed dataset to a compressed in-memory NetCDF file
 
 
 
-        """
-        import netCDF4
-        import xarray
+    #     """
+    #     import netCDF4
+    #     import xarray
 
-        store = xarray.backends.NetCDF4DataStore(data)
-        nc4_ds = netCDF4.Dataset(store)
+    #     store = xarray.backends.NetCDF4DataStore(data)
+    #     nc4_ds = netCDF4.Dataset(store)
+    #     nc_buf = nc4_ds.close()
 
-        nc_buf = nc4_ds.close()
+    # def netcdf_to_dataset(data):
+    #     """ Converts the binary data in data to xarray.Dataset
 
+    #         Args:
+    #             data: Binary data
+    #         Returns:
+    #             xarray.Dataset: Dataset created from data
+    #     """
+    #     import netCDF4
+    #     import xarray
 
-
-        
-    # The save_dataframe function was moved to be part of save()
-
-
-
-    def netcdf_to_dataset(data):
-        """ Converts the binary data in data to xarray.Dataset
-
-            Args:
-                data: Binary data
-            Returns:
-                xarray.Dataset: Dataset created from data
-        """
-        import netCDF4
-        import xarray
-
-        nc4_ds = netCDF4.Dataset("in_memory.nc", memory=data)
-        store = xarray.backends.NetCDF4DataStore(nc4_ds)
-        return xarray.open_dataset(store)
+    #     nc4_ds = netCDF4.Dataset("in_memory.nc", memory=data)
+    #     store = xarray.backends.NetCDF4DataStore(nc4_ds)
+    #     return xarray.open_dataset(store)
 
 
 
@@ -541,7 +530,7 @@ class Datasource:
         """ Get the data stored in this Datasource
 
             Returns:
-                Pandas.Dataframe: Dataframe stored in this object
+                list: List of tuples of Pandas.DataFrame and start,end datetime tuple
         """
         return self._data
 
@@ -549,20 +538,19 @@ class Datasource:
         """ Get the daterange this Datasource covers as a string
 
             Returns:
-                str: Daterange as string 
+                tuple (datetime, datetime): Start, end datetimes
         """
         from Acquire.ObjectStore import datetime_to_datetime
 
-        if self._start_datetime is None or self._end_datetime is None:
-            if self._data is not None:
-                # TODO - this is clunky - better way?
-                start = self._data[0][0].first_valid_index()
-                end = self._data[-1][0].last_valid_index()
-            else:
-                raise ValueError("Cannot get daterange with no data")
+        # if self._start_datetime is None or self._end_datetime is None:
+        if self._data is not None:
+            # TODO - this is clunky - better way?
+            self._start_datetime = self._data[0][0].first_valid_index()
+            self._end_datetime = self._data[-1][0].last_valid_index()
+            return datetime_to_datetime(self._start_datetime), datetime_to_datetime(self._end_datetime)
+        else:
+            raise ValueError("Cannot get daterange with no data")
 
-            return datetime_to_datetime(start), datetime_to_datetime(end)
-                
     def daterange_str(self):    
         """ Get the daterange this Datasource covers as a string in
             the form start_end
@@ -570,8 +558,10 @@ class Datasource:
             Returns:
                 str: Daterange covered by this Datasource
         """
+        from Acquire.ObjectStore import datetime_to_string
+
         start, end = self.daterange()
-        return "".join([_datetime_to_string(start), "_", _datetime_to_string(end)])
+        return "".join([datetime_to_string(start), "_", datetime_to_string(end)])
 
     def search_labels(self, search_term):
         """ Search the values of the labels of this Datasource for search_term
