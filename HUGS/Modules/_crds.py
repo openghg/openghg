@@ -211,18 +211,17 @@ class CRDS:
         from HUGS.Processing import assign_data
         from HUGS.Util import hash_file
 
+        crds = CRDS.load()
         # here we check the source id from the interface or the source_name
         # Check that against the lookup table and then we can decide if we want to 
         # either create a new Datasource or add the data to an existing source
 
         # Take hash of file and save it's hash so we know we've read it already
         file_hash = hash_file(filepath=data_filepath)
-        if file_hash in self._file_hashes:
-            return ValueError(f"This file has been uploaded previously with the filename : " {self._file_hashes[file_hash]})
+        if file_hash in crds._file_hashes:
+            raise ValueError(f"This file has been uploaded previously with the filename : {crds._file_hashes[file_hash]}")
         
-        crds = CRDS.load()
-
-        filename = data_filepath.split("/")[-1]
+        filename = data_filepath.split("/")[-1] 
         gas_data = crds.read_data(data_filepath=data_filepath)
 
         # Check to see if we've had data from these Datasources before
@@ -268,7 +267,7 @@ class CRDS:
         # Store the hash as the key for easy searching, store the filename as well for
         # ease of checking by user
         filename = data_filepath.split("/")[-1]
-        self._file_hashes[file_hash] = filename
+        crds._file_hashes[file_hash] = filename
 
         crds.save()
 

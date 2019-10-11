@@ -133,11 +133,11 @@ def hash_file(filepath):
     """
     import hashlib
 
-    BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
-
+    # Lets read stuff in 64kb chunks
+    BUF_SIZE = 65536 
     sha1 = hashlib.sha1()
 
-    with open(file, 'rb') as f:
+    with open(filepath, 'rb') as f:
         while True:
             data = f.read(BUF_SIZE)
             if not data:
