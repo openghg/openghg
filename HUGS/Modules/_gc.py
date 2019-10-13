@@ -31,6 +31,8 @@ class GC:
         self._datasource_names = {}
         # Keyed by UUID - allows retrieval of name by UUID
         self._datasource_uuids = {}
+        # Hashes of previously uploaded files
+        self._file_hashes = {}
 
     def is_null(self):
         """ Check if this is a null object

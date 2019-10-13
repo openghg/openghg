@@ -466,11 +466,16 @@ class CRDS:
     def clear_datasources(self):
         """ Remove all Datasources from the object
 
+            This will also clear any file hashes
+
             Returns:
                 None
         """
         self._datasource_uuids.clear()
         self._datasource_names.clear()
+        self._file_hashes.clear()
+
+        
 
 
     
