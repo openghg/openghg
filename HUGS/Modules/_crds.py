@@ -475,6 +475,8 @@ class CRDS:
         self._datasource_names.clear()
         self._file_hashes.clear()
 
+        self.save()
+
         
 
 
