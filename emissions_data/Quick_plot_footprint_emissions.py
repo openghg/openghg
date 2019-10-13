@@ -139,41 +139,41 @@ if __name__=="__main__":
     lat_values = ds[fp_name][lat_name].values
     zero_values = ds[fp_name][:,:,0].values
     
-    ax.contourf(long_values, lat_values, zero_values, cmap=cm.get_cmap("inferno"), levels=levels)
+    # ax.contourf(long_values, lat_values, zero_values, cmap=cm.get_cmap("inferno"), levels=levels)
 
-    # ax.contour(long_values, lat_values, zero_values, cmap=cm.get_cmap("inferno"), levels=levels)
+    ax.contour(long_values, lat_values, zero_values, cmap=cm.get_cmap("inferno"), levels=levels)
 
     plt.show()
     
     # Emissions plot
     
-    emissions_directory = "."
-    emissions_filename = os.path.join(emissions_directory,"ch4-enteric-fermentation_EUROPE_2010.nc")
+    # emissions_directory = "."
+    # emissions_filename = os.path.join(emissions_directory,"ch4-enteric-fermentation_EUROPE_2010.nc")
     
-    ds_emissions = xray.open_dataset(emissions_filename)
+    # ds_emissions = xray.open_dataset(emissions_filename)
     
-    print("Emissions file as a dataset")
-    print(ds_emissions)
+    # print("Emissions file as a dataset")
+    # print(ds_emissions)
 
-    em_fig = plt.figure()
-    em_ax = em_fig.add_subplot(111, projection=ccrs.PlateCarree())
+    # em_fig = plt.figure()
+    # em_ax = em_fig.add_subplot(111, projection=ccrs.PlateCarree())
     
-    plot_domain(ax=em_ax, domain=domain)
+    # # plot_domain(ax=em_ax, domain=domain)
     
-    emissions_name = "flux"
-    lon_name = "lon"
-    lat_name = "lat"
+    # emissions_name = "flux"
+    # lon_name = "lon"
+    # lat_name = "lat"
     
-    emissions = ds_emissions[emissions_name]
+    # emissions = ds_emissions[emissions_name]
     
-    cmap = cm.get_cmap("viridis")
-    lower = np.percentile(emissions.values[emissions.values>0],5)
-    upper = np.percentile(emissions.values,95)
-    levels = np.linspace(lower,upper,20)
+    # cmap = cm.get_cmap("viridis")
+    # lower = np.percentile(emissions.values[emissions.values>0],5)
+    # upper = np.percentile(emissions.values,95)
+    # levels = np.linspace(lower,upper,20)
     
-    em_ax.contourf(ds_emissions[emissions_name][lon_name].values, ds_emissions[emissions_name]
-                   [lat_name].values, ds_emissions[emissions_name][:, :, 0].values, cmap=cmap, levels=levels)
+    # em_ax.contourf(ds_emissions[emissions_name][lon_name].values, ds_emissions[emissions_name]
+    #                [lat_name].values, ds_emissions[emissions_name][:, :, 0].values, cmap=cmap, levels=levels)
     
-    plt.show()
+    # plt.show()
     
     
