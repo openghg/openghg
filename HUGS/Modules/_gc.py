@@ -184,7 +184,7 @@ class GC:
         # print("Remember to update the instrument!")
         # Where to get this from? User input?
         site = "CGO"
-        instrument_name = "GCMD"
+        instrument_name = "medusa"
 
         data, species, metadata = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                                                 site=site, instrument=instrument_name)

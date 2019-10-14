@@ -120,6 +120,9 @@ class Datasource:
         # Store the metadata as labels
         # for k, v in metadata.items():
         #     self.add_metadata(key=k, value=v)
+
+        # Ensure metadata values are all lowercase
+        metadata = {k: v.lower() for k,v in metadata.items()}
         self._metadata.update(metadata)
 
         # Add in a type record for timeseries data
@@ -562,8 +565,10 @@ class Datasource:
             Returns:
                 bool: True if found else False
         """
+        search_term = search_term.lower()
+
         for v in self._metadata.values():
-            if v == search_term.lower():
+            if v == search_term:
                 return True
 
         return False
