@@ -15,20 +15,22 @@ from HUGS.Client import Process, Search, Retrieve
 from HUGS.Processing import search
 import os
 import sys
+import secrets
+import string
 from datetime import datetime
 sys.path.insert(0, "../../..")
 sys.path.insert(0, "../../../../acquire")
 
-__all__ = ["get_login"]
+__all__ = ["get_login", "generate_password"]
 
-def get_login():
+def get_login(username):
     login_text = HTML(value="<b>Please click the buton below to create a login link</b>")
-
+    # username_text = Text(value=None, placeholder="user", description="Username: ")
     status_text = HTML(value=f"<font color='black'>Waiting for login</font>")
     login_button = Button(description="Login", button_style="success")
     login_link_box = Output()
     base_url = "https://hugs.acquire-aaai.com/t"
-    user = User(username="gareth", identity_url=F"{base_url}/identity")
+    user = User(username=username, identity_url=F"{base_url}/identity")
 
     def login(a):
         with login_link_box:
@@ -42,4 +44,9 @@ def get_login():
     login_button.on_click(login)
     return user, VBox(children=[login_button, status_text, login_link_box])
     
+def generate_password():
+    length=20
+    return "".join(secrets.choice(string.hexdigits) for _ in range(length))
     
+
+

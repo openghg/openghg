@@ -181,7 +181,7 @@ class GC:
 
         gc = GC.load()
 
-        print("Remember to update the instrument!")
+        # print("Remember to update the instrument!")
         # Where to get this from? User input?
         site = "CGO"
         instrument_name = "GCMD"
@@ -194,7 +194,7 @@ class GC:
         lookup_results = gc.lookup_datasources(gas_data=gas_data, source_name=source_name, source_id=source_id)
     
         # Create Datasources, save them to the object store and get their UUIDs
-        datasource_uuids = assign_data(gas_data=split_data, lookup_results=lookup_results, overwrite=overwrite)
+        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
         # Add the Datasources to the list of datasources associated with this object
         gc.add_datasources(datasource_uuids)
         # Save object to object store

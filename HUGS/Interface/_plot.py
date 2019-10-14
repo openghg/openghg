@@ -1,7 +1,4 @@
-from cartopy.feature import BORDERS
-import cartopy.crs as ccrs
 import matplotlib.cm as cm
-
 import numpy as np
 import xarray as xray
 from bqplot import pyplot as plt
@@ -58,7 +55,9 @@ def comparison_plot(data, to_compare):
 
 def plot_emissions(file):
     import matplotlib.pyplot as plt
-
+    from cartopy.feature import BORDERS
+    import cartopy.crs as ccrs
+    
     ds = xray.open_dataset(
         "/home/home/gar/Documents/Devel/RSE/hugs/emissions_data/WAO-20magl_EUROPE_201511.nc")
 
