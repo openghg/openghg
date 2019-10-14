@@ -4,9 +4,64 @@ import xarray as xray
 from bqplot import pyplot as plt
 from bqplot import DateScale, LinearScale, LogScale, Axis, Lines, Figure, Scatter
 
-__all__ = ["scatter_plot", "comparison_plot", "plot_emissions"]
+__all__ = ["scatter_plot", "comparison_plot", "plot_emissions", "get_map_locations"]
 
 
+def get_map_locations(search_results):
+    from ipyleaflet import (
+        Map,
+        Marker, MarkerCluster, TileLayer, ImageOverlay, GeoJSON,
+        Polyline, Polygon, Rectangle, Circle, CircleMarker, Popup,
+        SplitMapControl, WidgetControl,
+        basemaps, basemap_to_tiles
+    )
+    from ipywidgets import HTML
+
+    center = [54.2361, -4.548]
+    zoom = 5
+    m = Map(center=center, zoom=zoom)
+
+    map_locations = get_locations(search_results)
+
+    for l in map_locations:
+        lat, long = map_locations[l]["location"]
+        name = map_locations[l]["name"]
+        species = ",".join(map_locations[l]["species"])
+        mark = Marker(location=(lat, long))
+        mark.popup = HTML(value="<br/>".join([("<b>"+ name + "</b>"), "Species: ", species.upper()]))
+
+        m += mark
+
+    return m
+
+
+def get_locations(search_results):
+    """ Returns the lat:long coordinates of the sites in the search results
+
+        Returns:
+            dict: Dictionary of site: lat,long
+    """
+    locations = {}
+    locations["bsd"] = {"location": (54.942544, -1.369204), "name": "Bilsdale"}
+    locations["mhd"] = {"location": (53.20, -9.54), "name": "Macehead"}
+    locations["tac"] = {"location": (52.511, 1.155003), "name": "Tacolneston"}
+    locations["hfd"] = {"location": (50.967, 0.257), "name": "Heathfield"}
+
+    results = {}
+    for res in search_results:
+        loc_species = res.split("_")
+        loc = loc_species[0]
+        species = loc_species[1]
+
+        if loc in results:
+            results[loc]["species"].append(species)
+        else:
+            results[loc] = locations[loc]
+            results[loc]["species"] = [species]
+
+        # If we've already seen this location, append gas name ?
+
+    return results
 
 def scatter_plot(data, title=None, x_title=None, y_title=None):
     x_scale = DateScale()
@@ -39,11 +94,10 @@ def comparison_plot(data, to_compare):
         species_data = data[d]
         x_data = species_data.index
         y_data = species_data.iloc[:,0]
-        plot = Scatter(x=x_data, y=y_data, scales=scales,
-                       colors=color,  default_size=24)
+        plot = Scatter(x=x_data, y=y_data, scales=scales, colors=color,  default_size=24, labels=[str(d).upper()], display_legend=True)
         plots.append(plot)
 
-    return Figure(marks=plots, axes=[ax, ay], animation_duration=1000, display_legend=True)
+    return Figure(marks=plots, axes=[ax, ay], animation_duration=1000)
 
 
 """
