@@ -21,6 +21,19 @@ from Acquire.ObjectStore import datetime_to_datetime
 #     crds = CRDS.create()
 #     crds.save()
 
+
+@pytest.fixture(scope="session")
+def gc_obj():
+    bucket = get_local_bucket(empty=True)
+    data_file = "capegrim-medusa.18.C"
+    prec_file = "capegrim-medusa.18.precisions.C"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/GC"
+    data_filepath = os.path.join(dir_path, test_data, data_file)
+    prec_filepath = os.path.join(dir_path, test_data, prec_file)
+
+    GC.read_file(data_filepath=data_filepath, precision_filepath=prec_filepath, source_name="capegrim-medusa.18")
+
 @pytest.fixture(scope="session")
 def crds_obj():
     filename = "bsd.picarro.1minute.248m.dat"
@@ -38,15 +51,40 @@ def crds_read():
     CRDS.read_folder(folder_path=folder_path)
 
 
-def test_load_object(crds_obj):
-    bucket = get_local_bucket()
-    crds_obj.save(bucket)
-    uuid = crds_obj.uuid()
-    class_name = "crds"
-    obj = load_object(class_name=class_name)
+def test_search_GC():
+    search_terms = ["CF4", "C6F14"]
+    locations = []
+    data_type = "GC"
+    start = None
+    end = None
 
-    assert isinstance(obj, CRDS)
-    assert obj.uuid() == crds_obj.uuid()
+    bucket = get_local_bucket(empty=True)
+    data_file = "capegrim-medusa.18.C"
+    prec_file = "capegrim-medusa.18.precisions.C"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/GC"
+    data_filepath = os.path.join(dir_path, test_data, data_file)
+    prec_filepath = os.path.join(dir_path, test_data, prec_file)
+
+    GC.read_file(data_filepath=data_filepath, precision_filepath=prec_filepath, source_name="capegrim-medusa.18")
+
+    results = search(search_terms=search_terms, locations=locations, data_type=data_type, require_all=False,
+                     start_datetime=start, end_datetime=end)
+
+    print(results)
+
+    assert False
+
+
+# def test_load_object(crds_obj):
+#     bucket = get_local_bucket()
+#     crds_obj.save(bucket)
+#     uuid = crds_obj.uuid()
+#     class_name = "crds"
+#     obj = load_object(class_name=class_name)
+
+#     assert isinstance(obj, CRDS)
+#     assert obj.uuid() == crds_obj.uuid()
 
 
 def test_location_search(crds_read):
