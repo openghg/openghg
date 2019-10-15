@@ -37,6 +37,9 @@ class Process:
         from pathlib import Path
         import os
 
+        if data_type != "CRDS":
+            raise NotImplementedError("Only currently implemented for CRDS data type")
+
         filepaths = [f for f in Path(folder_path).glob(f'**/*.{extension}')]
 
         return self.process_files(user=user, files=filepaths, data_type=data_type, source_name=source_name, overwrite=overwrite)
@@ -117,7 +120,7 @@ class Process:
                         "data_type": data_type, "datasource": datasource,
                         "source_name":source_name, "overwrite": overwrite}
             else:
-                filename = file.split("/")[-1]
+                filename = str(file).split("/")[-1]
                 
                 filemeta = drive.upload(file)
                 par = PAR(location=filemeta.location(), user=user)
