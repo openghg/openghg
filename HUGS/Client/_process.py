@@ -106,7 +106,6 @@ class Process:
                     source_name = os.path.splitext(filename)[0]
                 
                 filemeta = drive.upload(file[0])
-                filemeta._compression = None
                 par = PAR(location=filemeta.location(), user=user)
                 par_secret = hugs.encrypt_data(par.secret())
 
@@ -123,7 +122,6 @@ class Process:
                 filename = str(file).split("/")[-1]
                 
                 filemeta = drive.upload(file)
-                filemeta._compression = None
                 par = PAR(location=filemeta.location(), user=user)
                 par_secret = hugs.encrypt_data(par.secret())
 
