@@ -21,8 +21,28 @@ class Process:
         else:
             self._service
 
+    def process_folder(self, user, folder_path, data_type, source_name=None, overwrite=False, extension="dat", hurls_url=None, storage_url=None):
+        """ Process the passed directory of data files
+
+            Args:
+                user (User): Authenticated Acquire User
+                folder (str, list): Path of files to be processed
+                data_type (str): Type of data to be processed (CRDS, GC etc)
+                hugs_url (str): URL of HUGS service. Currently used for testing
+                datasource (str): Datasource name or UUID
+                This may be removed in the future.
+                storage_url (str): URL of storage service. Currently used for testing
+                This may be removed in the future.
+        """
+        from pathlib import Path
+        import os
+
+        filepaths = [f for f in Path(folder_path).glob(f'**/*.{extension}')]
+
+        return self.process_files(user=user, files=filepaths, data_type=data_type, source_name=source_name, overwrite=overwrite)
+
     # Find a better way to get this storage url in here, currently used for testing
-    def process_files(self, user, files, data_type, source_name, overwrite=False, hugs_url=None, storage_url=None, datasource=None):
+    def process_files(self, user, files, data_type, source_name=None, overwrite=False, hugs_url=None, storage_url=None, datasource=None):
         """ Process the passed file(s) 
 
             Args:
@@ -31,6 +51,9 @@ class Process:
                 data_type (str): Type of data to be processed (CRDS, GC etc)
                 hugs_url (str): URL of HUGS service. Currently used for testing
                 datasource (str): Datasource name or UUID
+
+                TODO - update this
+
                 This may be removed in the future.
                 storage_url (str): URL of storage service. Currently used for testing
                 This may be removed in the future.
@@ -38,6 +61,7 @@ class Process:
                 dict: UUID of processed files keyed by filename
         """
         from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
+        import os
 
         if self._service is None:
             raise PermissionError("Cannot use a null service")
@@ -55,6 +79,9 @@ class Process:
         if hugs_url is None:
             hugs_url = self._service_url + "/hugs"
 
+        if not source_names:
+            source_names = [os.path.splitext(filepath.split("/")[-1]) for filepath in filepaths)]
+        
         hugs = Service(service_url=hugs_url)
         creds = StorageCreds(user=user, service_url=storage_url)
         drive = Drive(creds=creds, name="test_drive")
@@ -71,7 +98,10 @@ class Process:
                 # This is only used as a key when returning the Datasource UUIDs
                 # This may be removed in the future as is currently only for testing
                 filename = file[0].split("/")[-1]
-
+                
+                if not source_name:
+                    source_name = os.path.splitext(filename)[0]
+                
                 filemeta = drive.upload(file[0])
                 par = PAR(location=filemeta.location(), user=user)
                 par_secret = hugs.encrypt_data(par.secret())

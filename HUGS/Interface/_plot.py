@@ -46,6 +46,9 @@ def get_locations(search_results):
     locations["mhd"] = {"location": (53.20, -9.54), "name": "Macehead"}
     locations["tac"] = {"location": (52.511, 1.155003), "name": "Tacolneston"}
     locations["hfd"] = {"location": (50.967, 0.257), "name": "Heathfield"}
+    locations["rpb"] = {"location": (50.967, 0.257), "name": "Barbados"}
+    locations["tta"] = {"location": (50.967, 0.257), "name": "Angus"}
+    locations["rgl"] = {"location": (50.967, 0.257), "name": "Ridgehill"}
 
     results = {}
     for res in search_results:

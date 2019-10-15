@@ -168,32 +168,32 @@ class CRDS:
         return CRDS.from_data(data=data, bucket=bucket)
 
     @staticmethod
-    def read_folder(folder_path, recursive=False):
+    def read_folder(folder_path):
         """ Read all data matching filter in folder
 
             Args:
                 folder_path (str): Path of folder
+            Returns:
+                dict: Dictionary of the Datasources created for each file
         """
-        from glob import glob as _glob
-        from os import path as _path
+        from pathlib import Path
 
-        # TODO - Remove this
-        crds = CRDS.create()
-        crds.save()
+        filepaths = [f for f in Path(folder_path).glob('**/*.dat') ]
 
-        # This finds data files in sub-folders
-        folder_path = _path.join(folder_path, "./*.dat")
-        # This finds files in the current folder, get recursive
-        # folder_path = _path.join(folder_path, "*.dat")
-        filepaths = _glob(folder_path, recursive=True)
-
-        if len(filepaths) == 0:
-            raise FileNotFoundError("No data files found")
-
+        if not filepaths:
+            raise FileNotFoundError("No data files found")  
+        
+        results = {}
         for fp in filepaths:
-            filename = fp.split("/")[-1]
+            filename  = fp.name
+            # Strip the file suffix
             filename = ".".join(filename.split(".")[:-1])
-            CRDS.read_file(data_filepath=fp, source_name=filename)
+            print(f"Processing {filename}")
+            datasources = CRDS.read_file(data_filepath=fp.resolve(), source_name=filename)
+            results.update(datasources)
+
+        return results
+
 
     @staticmethod
     def read_file(data_filepath, source_name, source_id=None, overwrite=False):
@@ -221,6 +221,7 @@ class CRDS:
         if file_hash in crds._file_hashes:
             raise ValueError(f"This file has been uploaded previously with the filename : {crds._file_hashes[file_hash]}")
         
+        data_filepath = str(data_filepath)
         filename = data_filepath.split("/")[-1] 
         gas_data = crds.read_data(data_filepath=data_filepath)
 
