@@ -80,7 +80,8 @@ class Process:
             hugs_url = self._service_url + "/hugs"
 
         if not source_name:
-            source_name = [os.path.splitext(filepath.split("/")[-1]) for filepath in files]
+            # Take the filename without the file extension
+            source_name = [os.path.splitext((filepath.name).split("/")[-1])[0] for filepath in files]
         
         hugs = Service(service_url=hugs_url)
         creds = StorageCreds(user=user, service_url=storage_url)
