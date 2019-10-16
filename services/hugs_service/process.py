@@ -37,8 +37,12 @@ def process(args):
         precision_secret = hugs.decrypt_data(precision_secret)
         precision_filename = precision_par.resolve(precision_secret)
         precision_file = precision_filename.download(dir="/tmp")
+        site = args["site"]
+        instrument = args["instrument"]
     else:
         precision_file = None
+        site = None
+        instrument = None
 
     if "overwrite" in args:
         overwrite = args["overwrite"]
@@ -47,7 +51,7 @@ def process(args):
 
     source_name = args["source_name"]
 
-    results = process_data(data_file=data_file, source_name=source_name,
-                            precision_filepath=precision_file, data_type=data_type, overwrite=overwrite)
+    results = process_data(data_file=data_file, source_name=source_name, precision_filepath=precision_file, 
+                            data_type=data_type, site=site, instrument=instrument, overwrite=overwrite)
 
     return {"results": results}

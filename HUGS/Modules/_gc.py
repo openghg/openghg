@@ -163,7 +163,8 @@ class GC:
         return GC.from_data(data=data, bucket=bucket)
 
     @staticmethod
-    def read_file(data_filepath, precision_filepath, source_name, source_id=None, overwrite=False):
+    def read_file(data_filepath, precision_filepath, source_name, site, instrument_name="GCMD", 
+                    source_id=None, overwrite=False):
         """ Reads a GC data file by creating a GC object and associated datasources
 
             Args:
@@ -180,12 +181,7 @@ class GC:
         from HUGS.Processing import assign_data
 
         gc = GC.load()
-
-        # print("Remember to update the instrument!")
-        # Where to get this from? User input?
-        site = "CGO"
-        instrument_name = "medusa"
-
+    
         data, species, metadata = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                                                 site=site, instrument=instrument_name)
 

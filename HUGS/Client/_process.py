@@ -45,7 +45,8 @@ class Process:
         return self.process_files(user=user, files=filepaths, data_type=data_type, source_name=source_name, overwrite=overwrite)
 
     # Find a better way to get this storage url in here, currently used for testing
-    def process_files(self, user, files, data_type, source_name=None, overwrite=False, hugs_url=None, storage_url=None, datasource=None):
+    def process_files(self, user, files, data_type, source_name=None, overwrite=False, hugs_url=None, 
+                        storage_url=None, datasource=None, site=None, instrument=None):
         """ Process the passed file(s) 
 
             Args:
@@ -113,11 +114,12 @@ class Process:
                 prec_par = PAR(location=prec_meta.location(), user=user)
                 prec_par_secret = hugs.encrypt_data(prec_par.secret())
 
-                args = {"authorisation": auth.to_data(),
+                args = { "authorisation": auth.to_data(),
                         "par": {"data": par.to_data(), "precision": prec_par.to_data()},
                         "par_secret": {"data": par_secret, "precision": prec_par_secret},
                         "data_type": data_type, "datasource": datasource,
-                        "source_name":source_name, "overwrite": overwrite}
+                        "source_name":source_name, "overwrite": overwrite,
+                        "site":site, "instrument":instrument }
             else:
                 filename = str(file).split("/")[-1]
                 
@@ -125,11 +127,11 @@ class Process:
                 par = PAR(location=filemeta.location(), user=user)
                 par_secret = hugs.encrypt_data(par.secret())
 
-                args = {"authorisation": auth.to_data(),
+                args = { "authorisation": auth.to_data(),
                         "par": {"data": par.to_data()},
                         "par_secret": {"data": par_secret},
                         "data_type": data_type, "datasource": datasource,
-                        "source_name":source_name, "overwrite":overwrite}
+                        "source_name":source_name, "overwrite":overwrite }
 
             response = self._service.call_function(function="process", args=args)
 
