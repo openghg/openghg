@@ -306,3 +306,20 @@ when search_labels() is run. Don't actually use the keys in the labels dict real
 
 Why do large files fail to upload?
 After 3 calls to process the function seems to fail - what's causing this?
+
+
+2019-10-17
+
+I'm going to try un-pinning the version of the fdk from fdk==0.0.35 and see if that fixes the error in the
+RemoteFunctionCallError: Cannot call remote function 'process' as 'https://hugs.acquire-aaai.com/t/hugs'. Invalid error code 502 returned. Message:
+b'{"message":"error receiving function response"}\n'
+
+This was reported on a GitHub issue 
+
+/home/opc/acquire/services/base_image
+
+
+Client version: 0.5.22 is not latest: 0.5.90
+Server version:  0.3.602
+
+Managed to stop the server process and can't get it start again
