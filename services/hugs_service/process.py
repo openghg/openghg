@@ -52,6 +52,6 @@ def process(args):
     source_name = args["source_name"]
 
     results = process_data(data_file=data_file, source_name=source_name, precision_filepath=precision_file, 
-                            data_type=data_type, site=site, instrument=instrument, overwrite=overwrite)
+                            data_type=data_type, site=site, instrument_name=instrument, overwrite=overwrite)
 
     return {"results": results}

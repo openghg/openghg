@@ -2,7 +2,7 @@ __all__ = ["process_data"]
 
 
 def process_data(data_file, source_name, precision_filepath=None, data_type="CRDS", 
-                    site=None, instrument=None, overwrite=False):
+                    site=None, instrument_name=None, overwrite=False):
     """ Passes the passed filename(s) to the correct processing
         object depending on the data_type argument.
 
@@ -28,7 +28,7 @@ def process_data(data_file, source_name, precision_filepath=None, data_type="CRD
             raise ValueError("Site must be specified when reading GC data")
 
         datasource_uuids = processing_obj.read_file(data_filepath=data_file, precision_filepath=precision_filepath,
-                                                    source_name=source_name, site=site, instrument=instrument, 
+                                                    source_name=source_name, instrument_name=instrument_name, site=site, 
                                                     overwrite=overwrite)
 
     return datasource_uuids
