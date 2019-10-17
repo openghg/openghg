@@ -141,10 +141,9 @@ class Process:
             # file contains overlapping data
             try:
                 response = self._service.call_function(function="process", args=args)
+                datasource_uuids[filename] = response["results"]
             except ValueError as err:
                 datasource_uuids[filename] = err
-
-            datasource_uuids[filename] = response["results"]
 
         return datasource_uuids
 
