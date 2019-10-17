@@ -104,7 +104,11 @@ class Process:
                 filename = file[0].split("/")[-1]
                 
                 if not source_name:
-                    source_name = os.path.splitext(filename)[0]
+                    source_name = filename.split(".")[0]
+
+                # TODO - update this
+                if not site:
+                    site = source_name
                 
                 filemeta = drive.upload(file[0])
                 par = PAR(location=filemeta.location(), user=user)
