@@ -22,6 +22,8 @@ class GC:
     _gc_root = "GC"
     _gc_uuid = "8cba4797-510c-gcgc-8af1-e02a5ee57489"
 
+   
+
     def __init__(self):
         # self._uuid = None
         self._creation_datetime = None
@@ -33,6 +35,8 @@ class GC:
         self._datasource_uuids = {}
         # Hashes of previously uploaded files
         self._file_hashes = {}
+        # Site codes for inlet readings
+        self._site_codes = {}
 
     def is_null(self):
         """ Check if this is a null object
@@ -179,8 +183,25 @@ class GC:
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         from HUGS.Processing import assign_data
+        import json
 
         gc = GC.load()
+
+        # TODO - I feel this is messy, should be improved and the _test_data function
+        # removed, create a json folder so there's a proper structure?
+        # Load in the parameters dictionary for processing data
+        params_file = _test_data() + "/process_gcwerks_parameters.json"
+        with open(params_file, "r") as f:
+            gc._params = json.load(f)
+        # Load in the params for code_site, site_code dictionaries for selection
+        # of inlets from the above parameters
+        site_codes_json = _test_data() + "/site_codes.json"
+        with open(site_codes_json, "r") as f:
+            d = json.load(f)
+            gc._site_codes = d["name_code"]
+
+        if site not in gc._site_codes:
+            raise ValueError("Site not recognized")
     
         data, species, metadata = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                                                 site=site, instrument=instrument_name)
@@ -238,17 +259,12 @@ class GC:
 
                 Tuple contains species name, species metadata, datasource_uuid and dataframe
         """
-        import json as _json
         from pandas import read_csv as _read_csv
         from pandas import datetime as _pd_datetime
         from pandas import Timedelta as _pd_Timedelta
 
         from HUGS.Processing import read_metadata
 
-        # Load in the parameters dictionary for processing data
-        params_file = _test_data() + "/process_gcwerks_parameters.json"
-        with open(params_file, "r") as FILE:
-            self._params = _json.load(FILE)
 
         # Read header
         header = _read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
@@ -349,27 +365,26 @@ class GC:
 
                 Tuple of species name (str), metadata (dict), datasource_uuid (str), data (Pandas.DataFrame)
         """
-        from fnmatch import fnmatch as _fnmatch
-        from itertools import compress as _compress
-        from uuid import uuid4 as _uuid4
+        from fnmatch import fnmatch
+        from itertools import compress
 
+        site_code = self._site_codes[site]
         # Read inlets from the parameters dictionary
-        expected_inlets = self.get_inlets(site=site)
+        expected_inlets = self.get_inlets(site_code=site_code)
         # Get the inlets in the dataframe
         try:
             data_inlets = data["Inlet"].unique()
         except KeyError:
             raise KeyError("Unable to read inlets from data, please ensure this data is of the GC type"
                             "expected by this processing module")
-            
 
         # Check that each inlet in data_inlet matches one that's given by parameters file
         for data_inlet in data_inlets:
-            match = [_fnmatch(data_inlet, inlet) for inlet in expected_inlets]
+            match = [fnmatch(data_inlet, inlet) for inlet in expected_inlets]
             if True in match:
                 # Filter the expected inlets by the ones we've found in data
                 # If none of them match processing below will not proceed
-                matching_inlets = list(_compress(data_inlets, match))
+                matching_inlets = list(compress(data_inlets, match))
             else:
                 raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
                                   data and inlet in parameters file.")
@@ -406,11 +421,8 @@ class GC:
                     inlet_data = data.loc[data["Inlet"] == inlet]
                     dataframe = inlet_data[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
                     dataframe = dataframe.dropna(axis="index", how="any")
-                    # TODO - change me
-                    # datasource_uuid = _uuid4()
 
                 combined_data[spec] = {"metadata": spec_metadata, "data": dataframe}
-                # gas_data.append((spec, spec_metadata, datasource_uuid, dataframe))
         
         return combined_data
 
@@ -425,7 +437,7 @@ class GC:
         """
         return self._params["GC"]["sampling_period"][instrument]
 
-    def get_inlets(self, site):
+    def get_inlets(self, site_code):
         """ Get the inlets used at this site
 
             Args:
@@ -433,7 +445,7 @@ class GC:
             Returns:
                 list: List of inlets
         """
-        return self._params["GC"][site]["inlets"]
+        return self._params["GC"][site_code]["inlets"]
 
     def add_datasources(self, datasource_uuids):
         """ Add the passed list of Datasources to the current list
@@ -473,5 +485,6 @@ class GC:
         """
         self._datasource_uuids.clear()
         self._datasource_names.clear()
+        self._file_hashes.clear()
             
 

@@ -1,0 +1,43 @@
+{
+    "name_code":
+    {
+        "bilsdale": "BSD", 
+        "capegrim": "CGO", 
+        "capepoint": "CPT", 
+        "heathfield": "HFD", 
+        "gosan": "GSN",
+        "jungfraujoch": "JFJ", 
+        "mtecimone": "CMN", 
+        "macehead": "MHD",
+        "ridgehill": "RGL", 
+        "barbados": "RPB", 
+        "shangdianzi": "SDZ",
+        "sio": "SIO", 
+        "samoa": "SMO", 
+        "tacolneston": "TAC",
+        "trinidadhead": "THD", 
+        "angus": "TTA", 
+        "zeppelin": "ZEP"
+    },
+
+    "code_name":
+    {
+        "BSD": "bilsdale",
+        "CGO": "capegrim",
+        "CPT": "capepoint",
+        "HFD": "heathfield",
+        "GSN": "gosan",
+        "JFJ": "jungfraujoch",
+        "CMN": "mtecimone",
+        "MHD": "macehead",
+        "RGL": "ridgehill",
+        "RPB": "barbados",
+        "SDZ": "shangdianzi",
+        "SIO": "sio",
+        "SMO": "samoa",
+        "TAC": "tacolneston",
+        "THD": "trinidadhead",
+        "TTA": "angus",
+        "ZEP": "zeppelin"
+    }
+} 
