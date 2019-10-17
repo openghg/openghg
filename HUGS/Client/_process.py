@@ -137,7 +137,12 @@ class Process:
                         "data_type": data_type, "datasource": datasource,
                         "source_name":source_name, "overwrite":overwrite }
 
-            response = self._service.call_function(function="process", args=args)
+            # If we try to upload many files we don't want it to fail if a single
+            # file contains overlapping data
+            try:
+                response = self._service.call_function(function="process", args=args)
+            except ValueError as err:
+                datasource_uuids[filename] = err
 
             datasource_uuids[filename] = response["results"]
 
