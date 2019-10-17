@@ -378,6 +378,8 @@ class GC:
             raise KeyError("Unable to read inlets from data, please ensure this data is of the GC type"
                             "expected by this processing module")
 
+        # For now just add air to the expected inlets
+        expected_inlets.append("air")
         # Check that each inlet in data_inlet matches one that's given by parameters file
         for data_inlet in data_inlets:
             match = [fnmatch(data_inlet, inlet) for inlet in expected_inlets]
