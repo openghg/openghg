@@ -378,18 +378,21 @@ class GC:
             raise KeyError("Unable to read inlets from data, please ensure this data is of the GC type"
                             "expected by this processing module")
 
-        # For now just add air to the expected inlets
-        expected_inlets.append("air")
-        # Check that each inlet in data_inlet matches one that's given by parameters file
-        for data_inlet in data_inlets:
-            match = [fnmatch(data_inlet, inlet) for inlet in expected_inlets]
-            if True in match:
-                # Filter the expected inlets by the ones we've found in data
-                # If none of them match processing below will not proceed
-                matching_inlets = list(compress(data_inlets, match))
-            else:
-                raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
-                                  data and inlet in parameters file.")
+        # TODO - ask Matt/Rachel about inlets
+        matching_inlets = data_inlets
+
+        # # For now just add air to the expected inlets
+        # expected_inlets.append("air")
+        # # Check that each inlet in data_inlet matches one that's given by parameters file
+        # for data_inlet in data_inlets:
+        #     match = [fnmatch(data_inlet, inlet) for inlet in expected_inlets]
+        #     if True in match:
+        #         # Filter the expected inlets by the ones we've found in data
+        #         # If none of them match processing below will not proceed
+        #         matching_inlets = list(compress(data_inlets, match))
+        #     else:
+        #         raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
+        #                           data and inlet in parameters file.")
 
         # TODO - where to get Datasource UUIDs from?
         # Also what to do in case of multiple inlets - each of these will have a unique ID
