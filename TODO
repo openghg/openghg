@@ -323,3 +323,7 @@ Client version: 0.5.22 is not latest: 0.5.90
 Server version:  0.3.602
 
 Managed to stop the server process and can't get it start again
+
+
+When returning search results add more to the dictionary returend so we hav more metadata to differentiate between dataosources
+to plot / analyse

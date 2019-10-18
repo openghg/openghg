@@ -22,8 +22,6 @@ class GC:
     _gc_root = "GC"
     _gc_uuid = "8cba4797-510c-gcgc-8af1-e02a5ee57489"
 
-   
-
     def __init__(self):
         # self._uuid = None
         self._creation_datetime = None

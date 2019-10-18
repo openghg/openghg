@@ -244,20 +244,6 @@ class CRDS:
 
         # Must add the new dicts name_records and uuid_records to the data, load and save fns
 
-
-        # # Load the lookup object
-        # lookup = Lookup.load()
-        # # Check for existing data
-        # if lookup.source_exists(source_id=source_id, source_name=source_name):
-        #    records = lookup.lookup(source_id=source_id, source_name=source_name)
-        # else:
-
-        # records = lookup.lookup(source_id=source_id, source_name=source_name)
-        # if records:
-        #     # Load data into new datasources
-        # else:
-        #     # Create new datasources
-
         # Create Datasources, save them to the object store and get their UUIDs
         # Change this to assign_data
         datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
@@ -325,9 +311,6 @@ class CRDS:
                 return _pd_datetime.strptime(date, '%y%m%d %H%M%S')
             except ValueError:
                 return _pd_NaT
-
-        # Can check here if we've processed this file before?
-
 
         data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"],
                             parse_dates=[[0,1]], date_parser=parse_date)
