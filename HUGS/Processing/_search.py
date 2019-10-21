@@ -110,10 +110,27 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
         for datasource in datasources:
             location_sources[datasource.site()].append(datasource)
 
+    # Return the metadata for each datasource with the results?
+    # Display the additional metadata with each item
+    # How to then differentiate between the
+    # Take the values of the metadata keys and add them to the returned key to allow differentiation
+    # between returned keys? This feels clunky but should be OK for now
+    # Will get too long with lots of metadata
+
+    # Instead of adding the values to the key retur the metadata dict?
+    # Then we can parse that in the UI 
+    # OR just update the UI for selcetion of the type of data before searching and then
+    # it creates a dictionary of search terms that can be parsed more easily by this function?
+    # For now we can differentiate between inlets at least
+
     # Next we search these keys for the search terms we require
     keys = _defaultdict(list)
     # TODO - is there a way of tidying this up?
     # If we have search terms
+
+    # Here we could create a dictionary keyed by inlet, location, height etc and the height we require
+
+    # Return the metadata for each datasource as an extension to the key?
     if search_terms:
         for search_term in search_terms:
             for location in location_sources:
@@ -123,15 +140,25 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                         data_list = _get_object_names(bucket=bucket, prefix=prefix)
                         # Get the Dataframes that are within the required date range
                         in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+                        
+                        # Add the metadata dict to the results - 
+                        # res = {"datasources":in_date, "metadata":datasource.metadata()}
+                        # Add a number to the end of the key?
+                        # If we have different heights we'll have multiple results with the same key as we have
+                        # location_key for each location
+                        # Add the values of the metadata dictionary to the key for differentiation
+                        key_addition = "_".join([v for k, v in datasource.metadata().items() if k == "inlet" or k == "height"])
 
                         if require_all:
-                            search_key = "%s_%s" % (location, single_key)
+                            search_key = f"{location}_{single_key}_{key_addition}"
                             remaining_terms = [datasource.search_metadata(term) for term in search_terms if term != search_term]
+
                             # Check if we got all Trues for the other search terms
+                            # TODO - check the behaviour of this - doing this multiple times uneccesarily
                             if all(remaining_terms):
                                 keys[search_key].extend(in_date)
                         else:
-                            search_key = "%s_%s" % (location, search_term)
+                            search_key = f"{location}_{search_term}_{key_addition}"
                             keys[search_key].extend(in_date)
     # If we don't have any search terms, return everything that's in the correct daterange
     else:
@@ -140,10 +167,14 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                 prefix = "data/uuid/%s" % datasource.uuid()
                 data_list = _get_object_names(bucket=bucket, prefix=prefix)
                 in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
-                # TODO - currently adding in the species here, is this OK?
-                search_key = "%s_%s" % (location, datasource.species())
-                keys[search_key].extend(in_date)
 
+                key_addition = "_".join([v for k, v in datasource.metadata().items() if k == "inlet" or k == "height"])
+
+                # TODO - currently adding in the species here, is this OK?
+                # key_addition = "_".join(datasource.metadata().values())
+                search_key = f"{location}_{datasource.species()}_{key_addition}"
+                keys[search_key].extend(in_date)
+    
     return keys
 
 
