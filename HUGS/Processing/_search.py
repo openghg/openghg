@@ -53,9 +53,9 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
         end_datetime = _get_datetime_now()
 
     # TODO - for now the latest dates people can access is the end of 2017
-    max_datetime = _datetime_to_datetime(datetime(2017, 12, 31))
-    if end_datetime > max_datetime:
-        end_datetime = max_datetime
+    # max_datetime = _datetime_to_datetime(datetime(2017, 12, 31))
+    # if end_datetime > max_datetime:
+    #     end_datetime = max_datetime
 
     # Ensure passed datetimes are timezone aware
     start_datetime = _datetime_to_datetime(start_datetime)
@@ -143,8 +143,6 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                 # TODO - currently adding in the species here, is this OK?
                 search_key = "%s_%s" % (location, datasource.species())
                 keys[search_key].extend(in_date)
-
-    # keys = {k: v for k,v in keys.items() if len(keys[k]) != 0}
 
     return keys
 

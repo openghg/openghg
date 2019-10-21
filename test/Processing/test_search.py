@@ -32,7 +32,7 @@ def gc_obj():
     data_filepath = os.path.join(dir_path, test_data, data_file)
     prec_filepath = os.path.join(dir_path, test_data, prec_file)
 
-    GC.read_file(data_filepath=data_filepath, precision_filepath=prec_filepath, source_name="capegrim-medusa.18")
+    GC.read_file(data_filepath=data_filepath, precision_filepath=prec_filepath, site="capegrim", source_name="capegrim-medusa.18", instrument_name="medusa")
 
 @pytest.fixture(scope="session")
 def crds_obj():
@@ -52,7 +52,7 @@ def crds_read():
 
 
 def test_search_GC():
-    search_terms = ["CF4", "C6F14"]
+    search_terms = []
     locations = []
     data_type = "GC"
     start = None
@@ -66,15 +66,24 @@ def test_search_GC():
     data_filepath = os.path.join(dir_path, test_data, data_file)
     prec_filepath = os.path.join(dir_path, test_data, prec_file)
 
-    GC.read_file(data_filepath=data_filepath, precision_filepath=prec_filepath, source_name="capegrim-medusa.18")
+    datasources = GC.read_file(data_filepath=data_filepath, precision_filepath=prec_filepath, site="capegrim", source_name="capegrim-medusa.18", instrument_name="medusa")
 
-    results = search(search_terms=search_terms, locations=locations, data_type=data_type, require_all=False,
-                     start_datetime=start, end_datetime=end)
+    results = search(search_terms=search_terms, locations=locations, data_type=data_type, require_all=False, 
+                        start_datetime=start, end_datetime=end)
 
-    print(results)
+    assert results["capegrim_nf3"][0].split("/")[-1] == '2018-01-01T02:24:00_2018-01-31T23:33:00'
 
-    assert False
+    assert "capegrim_nf3" in results
+    assert "capegrim_cf4" in results
+    assert "capegrim_pfc-116" in results
+    assert "capegrim_pfc-218" in results
+    assert "capegrim_pfc-318" in results
+    assert "capegrim_c4f10" in results
+    assert "capegrim_c6f14" in results
+    assert "capegrim_sf6" in results
+    assert "capegrim_so2f2" in results
 
+    assert len(datasources) == 56
 
 # def test_load_object(crds_obj):
 #     bucket = get_local_bucket()
