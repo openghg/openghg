@@ -1,257 +1,258 @@
-# """ Module to load emissions maps and break them down into usable chunks
-#     for saving as Datasources
+""" Module to load emissions maps and break them down into usable chunks
+    for saving as Datasources
 
     
-# """
-# class Footprint:
-#     _footprint_root = "footprint"
-#     _footprint_uuid = "8cba4797-510c-foot-print-e02a5ee57489"
+"""
+class Footprint:
+    _footprint_root = "footprint"
+    _footprint_uuid = "8cba4797-510c-foot-print-e02a5ee57489"
     
-#     def __init__():
-#         self._creation_datetime = None
-#         self._stored = None
-#         self._datasources = []
+    def __init__():
+        self._creation_datetime = None
+        self._stored = None
+        self._datasources = []
 
-#     def is_null(self):
-#         """ Check if this is a null object
+    def is_null(self):
+        """ Check if this is a null object
 
-#             Returns:
-#                 bool: True if object is null
-#         """
-#         return self._datasources is None
+            Returns:
+                bool: True if object is null
+        """
+        return self._datasources is None
 
-#     @staticmethod
-#     def exists(bucket=None):
-#         """ Check if a Footprint object is already saved in the object 
-#             store
+    @staticmethod
+    def exists(bucket=None):
+        """ Check if a Footprint object is already saved in the object 
+            store
 
-#             Args:
-#                 bucket (dict, default=None): Bucket for data storage
-#             Returns:
-#                 bool: True if object exists
-#         """
-#         from HUGS.ObjectStore import exists as _exists
-#         from HUGS.ObjectStore import get_bucket as _get_bucket
+            Args:
+                bucket (dict, default=None): Bucket for data storage
+            Returns:
+                bool: True if object exists
+        """
+        from HUGS.ObjectStore import exists as _exists
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
-#         if bucket is None:
-#             bucket = _get_bucket()
+        if bucket is None:
+            bucket = _get_bucket()
 
-#         key = "%s/uuid/%s" % (Footprint._footprint_uuid, Footprint._footprint_uuid)
-#         return _exists(bucket=bucket, key=key)
+        key = "%s/uuid/%s" % (Footprint._footprint_uuid, Footprint._footprint_uuid)
+        return _exists(bucket=bucket, key=key)
     
-#     @staticmethod
-#     def create():
-#         """ Used to create Footprint objects
+    @staticmethod
+    def create():
+        """ Used to create Footprint objects
 
-#             Returns:
-#                 Footprint: Footprint object
-#         """
-#         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
+            Returns:
+                Footprint: Footprint object
+        """
+        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
-#         footprint = Footprint()
-#         footprint._creation_datetime = _get_datetime_now()
+        footprint = Footprint()
+        footprint._creation_datetime = _get_datetime_now()
         
-#         return footprint
+        return footprint
     
-#     def to_data(self):
-#         """ Return a JSON-serialisable dictionary of object
-#             for storage in object store
+    def to_data(self):
+        """ Return a JSON-serialisable dictionary of object
+            for storage in object store
 
-#             Returns:
-#                 dict: Dictionary version of object
-#         """
-#         if self.is_null():
-#             return {}
+            Returns:
+                dict: Dictionary version of object
+        """
+        if self.is_null():
+            return {}
 
-#         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-#         data = {}
-#         # data["uuid"] = self._uuid
-#         data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
-#         data["stored"] = self._stored
-#         data["datasources"] = self._datasources
+        data = {}
+        # data["uuid"] = self._uuid
+        data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        data["stored"] = self._stored
+        data["datasources"] = self._datasources
 
-#     @staticmethod
-#     def from_data(data, bucket=None):
-#         """ Create a Footprint object from data
+    @staticmethod
+    def from_data(data, bucket=None):
+        """ Create a Footprint object from data
 
-#             Args:
-#                 data (dict): JSON data
-#                 bucket (dict, default=None): Bucket for data storage
-#         """ 
-#         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+            Args:
+                data (dict): JSON data
+                bucket (dict, default=None): Bucket for data storage
+        """ 
+        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
 
-#         if data is None or len(data) == 0:
-#             return Footprint()
+        if data is None or len(data) == 0:
+            return Footprint()
         
-#         footprint = Footprint()
-#         # gc._uuid = data["uuid"]
-#         footprint._creation_datetime = _string_to_datetime(data["creation_datetime"])
-#         footprint._datasources = data["datasources"]
+        footprint = Footprint()
+        # gc._uuid = data["uuid"]
+        footprint._creation_datetime = _string_to_datetime(data["creation_datetime"])
+        footprint._datasources = data["datasources"]
 
-#         footprint._stored = False
+        footprint._stored = False
 
-#         return footprint
+        return footprint
 
-#     def save(self, bucket=None):
-#         """ Save this Footprint object in the object store
+    def save(self, bucket=None):
+        """ Save this Footprint object in the object store
 
-#             Args:
-#                 bucket (dict): Bucket for data storage
-#             Returns:
-#                 None
-#         """
-#         if self.is_null():
-#             return
+            Args:
+                bucket (dict): Bucket for data storage
+            Returns:
+                None
+        """
+        if self.is_null():
+            return
 
-#         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-#         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-#         from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
-#         if bucket is None:
-#             bucket = _get_bucket()
+        if bucket is None:
+            bucket = _get_bucket()
 
-#         self._stored = True
-#         key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_uuid)
-#         _ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
+        self._stored = True
+        key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_uuid)
+        _ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
 
-#     @staticmethod
-#     def load(bucket=None):
-#         """ Load a Footprint object from the object store
+    @staticmethod
+    def load(bucket=None):
+        """ Load a Footprint object from the object store
 
-#             Args:
-#                 bucket (dict, default=None): Bucket to store object
-#             Returns:
-#                 Datasource: Datasource object created from JSON
-#         """
-#         from Acquire.ObjectStore import ObjectStore as _ObjectStore
-#         from HUGS.ObjectStore import get_bucket as _get_bucket
+            Args:
+                bucket (dict, default=None): Bucket to store object
+            Returns:
+                Datasource: Datasource object created from JSON
+        """
+        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from HUGS.ObjectStore import get_bucket as _get_bucket
 
-#         if not Footprint.exists():
-#             return Footprint.create()
+        if not Footprint.exists():
+            return Footprint.create()
 
-#         if bucket is None:
-#             bucket = _get_bucket()
+        if bucket is None:
+            bucket = _get_bucket()
         
-#         key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_root)
-#         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
+        key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_root)
+        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
         
-#         return Footprint.from_data(data=data, bucket=bucket)
+        return Footprint.from_data(data=data, bucket=bucket)
         
-#     @staticmethod
-#     def read_file(filepath, metadata):
-#         """ For a single footprint file we can break it down into chunks of a certain size
-#             for easier lookup.
+    @staticmethod
+    def read_file(filepath, metadata):
+        """ For a single footprint file we can break it down into chunks of a certain size
+            for easier lookup.
 
-#             Args:
-#                 filepath (str): Path to NetCDF file containing footprint data
-#                 metadata (dict): Metadata provided by the data provider
-#             Returns:
-#                 None
-#         """
-#         from Acquire.ObjectStore import create_uuid as _create_uuid
-#         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+            Args:
+                filepath (str): Path to NetCDF file containing footprint data
+                metadata (dict): Metadata provided by the data provider
+            Returns:
+                None
+        """
+        from Acquire.ObjectStore import create_uuid as _create_uuid
+        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-#         from xarray import open_dataset as _open_dataset
+        from xarray import open_dataset as _open_dataset
+        from HUGS.Processing import create_datasources as _create_datasources
+        from HUGS.Datasource import get_dataset_daterange as _get_dataset_daterange
+        from HUGS.Datasource import Datasource as _Datasource
 
-#         from HUGS.Processing import create_datasources as _create_datasources
-#         from HUGS.Datasource import get_dataset_daterange as _get_dataset_daterange
-#         from HUGS.Datasource import Datasource as _Datasource
+        # Get the footprint object we need to load and save the passed files
+        if not Footprint.exists():
+            footprint = Footprint.create()
+        else:
+            footprint = Footprint.load()
 
-#         # Get the footprint object we need to load and save the passed files
-#         if not Footprint.exists():
-#             footprint = Footprint.create()
-#         else:
-#             footprint = Footprint.load()
-
-#         dataset = _open_dataset(filepath)
-#         # Read metadata from the netCDF file
-#         file_metadata = _read_metadata(dataset)
-#         # Update the user passed metadata with that extracted from the NetCDF
-#         metadata.update(file_metadata)
-
-#         # Add in a temporary name key until this is connected to user based input
-#         metadata["name"] = "temp_footprint_name"
+        dataset = _open_dataset(filepath)
 
 
-#         start_datetime, end_datetime = _get_dataset_daterange(dataset)
+        # We can save this metadata within the NetCDF file
+
+        # Read metadata from the netCDF file
+        file_metadata = _read_metadata(dataset)
+        # Update the user passed metadata with that extracted from the NetCDF
+        metadata.update(file_metadata)
+
+        # Add in a temporary name key until this is connected to user based input
+        metadata["name"] = "temp_footprint_name"
+
+        start_datetime, end_datetime = _get_dataset_daterange(dataset)
         
-#         # Lookup Datasource UUID using name of site? 
-#         # TODO - implement lookup
+        # Lookup Datasource UUID using name of site? 
+        # TODO - implement lookup
 
-#         # datasource_uuid = _lookup_uuid(datasource_name)
-#         # Create a Datasource for this file - can directly create a Datasource here as we'll
-#         # only have one per NetCDF?
-#         datasource = Datasource.create()
+        # datasource_uuid = _lookup_uuid(datasource_name)
+        # Create a Datasource for this file - can directly create a Datasource here as we'll
+        # only have one per NetCDF?
+        datasource = Datasource.create()
 
-#         if _Datasource.exists(datasource_id=datasource_id):
-#             datasource = _Datasource.load(uuid=datasource_id)
-#         else:
-#             datasource = Datasource.create(name=metadata["name"])
+        if _Datasource.exists(datasource_id=datasource_id):
+            datasource = _Datasource.load(uuid=datasource_id)
+        else:
+            datasource = Datasource.create(name=metadata["name"])
 
-#         datasource.add_footprint_data(metadata=metadata, data=dataset)
+        datasource.add_footprint_data(metadata=metadata, data=dataset)
 
-#         datasource.save()
+        datasource.save()
 
-#         return datasource.uuid()
+        return datasource.uuid()
             
-#         # Start and end datetime is stored in the Datasource
-#         # self._start_datetime = None
-#         # self._end_datetime = None
+        # Start and end datetime is stored in the Datasource
+        # self._start_datetime = None
+        # self._end_datetime = None
 
 
 
+        # Read in the footprint
+        # Split into ~ 5 MB chunks? Use get_split_freq to calculate this
+        # Just do weeks for now?
+        # Each datasource such as WAO-20magl will have a Datasource
+        # netcdfs may be split into segments
+        # Update the get_split_frequency function to handle datasets as well as dataframes?
+        # Maybe separate functions due to the differences? Can always combine them afterwards
 
-#         # Read in the footprint
-#         # Split into ~ 5 MB chunks? Use get_split_freq to calculate this
-#         # Just do weeks for now?
-#         # Each datasource such as WAO-20magl will have a Datasource
-#         # netcdfs may be split into segments
-#         # Update the get_split_frequency function to handle datasets as well as dataframes?
-#         # Maybe separate functions due to the differences? Can always combine them afterwards
 
+    def _read_metadata(dataset):
+        """ Read in the metadata held in the passed xarray.Dataset
 
-#     def _read_metadata(dataset):
-#         """ Read in the metadata held in the passed xarray.Dataset
-
-#             Args:
-#                 dataset (xarray.Dataset): Footprint Dataset
+            Args:
+                dataset (xarray.Dataset): Footprint Dataset
            
-#            Read the date range covered, data variables available, attributes, coordinates
+           Read the date range covered, data variables available, attributes, coordinates
 
-#         """
-#         data_variables = list(dataset.var())
-#         coordinates = list(dataset.coords)
+        """
+        data_variables = list(dataset.var())
+        coordinates = list(dataset.coords)
 
-#         metadata = {}
-#         metadata["data_variables"] = list(dataset.var())
-#         metadata["coordinates"] = list(dataset.coords)
+        metadata = {}
+        metadata["data_variables"] = list(dataset.var())
+        metadata["coordinates"] = list(dataset.coords)
         
-#         return metadata
+        return metadata
 
-#     def get_split_frequency(footprint_ds, split_freq="W"):
-#         """
-#         """
+    def get_split_frequency(footprint_ds, split_freq="W"):
+        """
+        """
 
-#         group = footprint_ds.groupby("time.week")
+        group = footprint_ds.groupby("time.week")
 
-#         # Get the Datasets for each week's worth of data
-#         data = [g for _, g in group if len(g) > 0]
-
-
-#     # def create_datasource(self, metadata, data):
-#     #     """ Create Datasources that will hold the footprint data
-
-#     #         Args:
+        # Get the Datasets for each week's worth of data
+        data = [g for _, g in group if len(g) > 0]
 
 
-#     #     """
+    # def create_datasource(self, metadata, data):
+    #     """ Create Datasources that will hold the footprint data
 
-#     #     # Create a datasource for each footprint source
-#     #     # for x in footprints:
-#     #         # create datasource
-#     #         # add_footprint data
-#     #     add_footprint_data
+    #         Args:
+
+
+    #     """
+
+    #     # Create a datasource for each footprint source
+    #     # for x in footprints:
+    #         # create datasource
+    #         # add_footprint data
+    #     add_footprint_data
 
 
 

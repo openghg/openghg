@@ -169,22 +169,39 @@ class Datasource:
         # for k, v in metadata.items():
         #     self.add_metadata(key=k, value=v)
 
+        # This should be stored in the NetCDF file - how to add this to the attributes of the
+        # NetCDF?
+
+        # Write NetCDF to Zarr in the save function?
         self._metadata.update(metadata)
+        # Modify this to update the NetCDF - really could do with the bytes?
+        # Zarr to bytes?
         self.add_metadata(key="data_type", value="footprint")
         
         start, end = self.get_dataset_daterange(data)
         self._start_datetime = start
         self._end_datetime = end
 
+        if self._data:
+            start_data, end_data = self.daterange()
+            start_new, end_new = self.get_dataset_daterange(data)
+
+            # Check if there's overlap of data
+            if start_new >= start_data and end_new <= end_data and overwrite is False:
+                raise ValueError("The provided data overlaps dates covered by existing data")
+
+        self._data[(data, (start, end))]
+
+
         # Placeholder - unsure if this is needed
         # freq = _get_split_frequency()
         # For now just split into weeks
-        freq = "W"
+        # freq = "W"
 
-        if freq == "W":
-            group = data.groupby("time.week")
+        # if freq == "W":
+        #     group = data.groupby("time.week")
 
-        self._data = [(g, self.get_dataset_daterange(g)) for _, g in group if len(g) > 0]
+        # self._data = [(g, self.get_dataset_daterange(g)) for _, g in group if len(g) > 0]
 
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed DataFrame
@@ -422,6 +439,7 @@ class Datasource:
         if self.is_null():
             return
 
+        from collections import MutableMapping
         from Acquire.ObjectStore import ObjectStore as _ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
@@ -430,13 +448,34 @@ class Datasource:
         if bucket is None:
             bucket = _get_bucket()
 
+            self.add_metadata(key="data_type", value="timeseries")
+
         if self._data is not None:
-            for data, daterange in self._data:
-                start, end = daterange
+            if self._metadata["data_type"] == "timeseries"]
+                for data, daterange in self._data:
+                    start, end = daterange
+                    daterange_str = "".join([_datetime_to_string(start), "_", _datetime_to_string(end)])
+                    data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
+                    self._data_keys[data_key] = daterange_str
+                    _ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
+            elif self._metadata["data_type"] == "footprint":
+                # For now convert this to Zarr to make sure it works
+                # Check if we have footprint Data, for now we'll continue using HDF5 for Timeseries
+                dates, data = self._data[0]
+                start, end = dates
+
+                m = MutableMapping()
+                
+                with tempfile.SpooledTemporaryFile() as f:
+                    data.to_zarr()
+
+
                 daterange_str = "".join([_datetime_to_string(start), "_", _datetime_to_string(end)])
-                data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
-                self._data_keys[data_key] = daterange_str
-                _ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
+            else:
+                raise NotImplementedError("Not implemented")
+
+
+
 
             self._stored = True
 
