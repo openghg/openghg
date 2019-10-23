@@ -333,3 +333,8 @@ to plot / analyse
 Need to think more about improving the search functionality - currently searching for CH4 at a site with multiple 
 heights will just return a load of data that may be from different heights. I've added the inlet or height to the key 
 for now but it would be better to return the metadata with a more unique key. This about a better way to do this.
+
+
+With zarr, each NetCDF is separated into chunks and written to separate files. Metadata is stored in json format.
+Using Acquire we need to either pass it bytes or a filepath for it to read. Will just continue using NetCDFs for now until
+I can add functionality to Acquire to improve its compatibility with zarr stores.

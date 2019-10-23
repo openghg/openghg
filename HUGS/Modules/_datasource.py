@@ -27,6 +27,7 @@ class Datasource:
         self._end_datetime = None
         self._stored = False
         self._data_keys = {}
+        self._data_type = None
 
     @staticmethod
     def create(name, data=None, **kwargs):
@@ -52,7 +53,6 @@ class Datasource:
         d._name = name
         d._uuid = _create_uuid()
         d._creation_datetime = _get_datetime_now()
-                
         # Any need to parse these for safety?
         # d._metadata = kwargs
         d._metadata["source_name"] = name
@@ -152,6 +152,7 @@ class Datasource:
         # As some (years, months, weeks) may be empty we don't want those dataframes
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
         self.add_metadata(key="data_type", value="timeseries")
+        self._data_type = "timeseries"
         # Use daterange() to update the recorded values
         self.daterange()
 
@@ -177,6 +178,7 @@ class Datasource:
         # Modify this to update the NetCDF - really could do with the bytes?
         # Zarr to bytes?
         self.add_metadata(key="data_type", value="footprint")
+        self._data_type = "footprint"
         
         start, end = self.get_dataset_daterange(data)
         self._start_datetime = start
@@ -190,7 +192,7 @@ class Datasource:
             if start_new >= start_data and end_new <= end_data and overwrite is False:
                 raise ValueError("The provided data overlaps dates covered by existing data")
 
-        self._data[(data, (start, end))]
+        self._data.append((data, (start, end)))
 
 
         # Placeholder - unsure if this is needed
@@ -234,15 +236,15 @@ class Datasource:
                 tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
 
         """
-        from xarray import DataSet as _DataSet
-        from pandas import Timestamp as _Timestamp
-        from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+        from xarray import Dataset
+        from pandas import Timestamp
+        from Acquire.ObjectStore import datetime_to_datetime
 
-        if not isinstance(dataset, _DataSet):
+        if not isinstance(dataset, Dataset):
             raise TypeError("Only xarray DataSet types can be processed")
 
-        start = _datetime_to_datetime(_Timestamp(dataset.time[0].values).to_pydatetime())
-        end = _datetime_to_datetime(_Timestamp(dataset.time[-1].values).to_pydatetime())
+        start = datetime_to_datetime(Timestamp(dataset.time[0].values).to_pydatetime())
+        end = datetime_to_datetime(Timestamp(dataset.time[-1].values).to_pydatetime())
 
         return start, end
 
@@ -298,6 +300,7 @@ class Datasource:
         data["metadata"] = self._metadata
         data["stored"] = self._stored
         data["data_keys"] = self._data_keys
+        data["data_type"] = self._data_type
 
         return data
 
@@ -307,7 +310,7 @@ class Datasource:
 
             Args:
                 bucket (dict): Bucket containing data
-                uuid (str): UUID for Datasource 
+                key (str): Key for data
             Returns:
                 Pandas.Dataframe: Dataframe from stored HDF file
         """
@@ -317,6 +320,34 @@ class Datasource:
         data = _get_dated_object(bucket, key)
 
         return Datasource.hdf_to_dataframe(data)
+
+
+    @staticmethod
+    def load_dataset(bucket, key):
+        """ Loads a xarray Dataset from the passed key for creation of a Datasource object
+
+            Args:
+                bucket (dict): Bucket containing data
+                key (str): Key for data
+            Returns:
+                xarray.Dataset: Dataset from NetCDF file
+        """
+        from Acquire.ObjectStore import ObjectStore
+        from xarray import open_dataset
+        import tempfile
+
+        data = ObjectStore.get_object(bucket, key)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path =  f"{tmpdir}/tmp.nc"
+            with open(tmp_path, "wb") as f:
+                f.write(data)
+
+            ds = open_dataset(tmp_path)
+
+            return ds
+
+
 
     # These functins don't work, placeholders for when it's possible to get 
     # an in memory NetCDF4 file
@@ -418,13 +449,25 @@ class Datasource:
         d._stored = data["stored"]
         d._data_keys = data["data_keys"]
         d._data = []
+        d._data_type = data["data_type"]
         
         if d._stored and not shallow:
-            for key in d._data_keys:
-                daterange = d._data_keys[key].split("_")
-                start =  string_to_datetime(daterange[0])
-                end = string_to_datetime(daterange[1])
-                d._data.append((Datasource.load_dataframe(bucket, key), (start,end)))
+            if d._data_type == "timeseries":
+                for key in d._data_keys:
+                    daterange = d._data_keys[key].split("_")
+                    start =  string_to_datetime(daterange[0])
+                    end = string_to_datetime(daterange[1])
+                    d._data.append((Datasource.load_dataframe(bucket, key), (start,end)))
+            elif d._data_type == "footprint":
+                for key in d._data_keys:
+                    daterange = d._data_keys[key].split("_")
+                    start = string_to_datetime(daterange[0])
+                    end = string_to_datetime(daterange[1])
+                    d._data.append((Datasource.load_dataset(bucket, key), (start,end)))
+            else:
+                raise NotImplementedError("Not yet implemented")
+
+        d._stored = False
 
         return d
 
@@ -439,48 +482,75 @@ class Datasource:
         if self.is_null():
             return
 
-        from collections import MutableMapping
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
+        from Acquire.ObjectStore import ObjectStore
         from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
         from HUGS.ObjectStore import get_bucket as _get_bucket
+        # from zarr import Blosc
+        import tempfile
+
 
         if bucket is None:
             bucket = _get_bucket()
 
-            self.add_metadata(key="data_type", value="timeseries")
+        # For now we'll get the data type from the metadata
+        data_type = self._metadata["data_type"]
 
         if self._data is not None:
-            if self._metadata["data_type"] == "timeseries"]
+            if self._data_type == "timeseries":
                 for data, daterange in self._data:
                     start, end = daterange
                     daterange_str = "".join([_datetime_to_string(start), "_", _datetime_to_string(end)])
                     data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
                     self._data_keys[data_key] = daterange_str
-                    _ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
-            elif self._metadata["data_type"] == "footprint":
+                    ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
+            elif self._data_type == "footprint":
                 # For now convert this to Zarr to make sure it works
                 # Check if we have footprint Data, for now we'll continue using HDF5 for Timeseries
-                dates, data = self._data[0]
+                # print(len(self._data[0]))
+                data, dates = self._data[0]
                 start, end = dates
 
-                m = MutableMapping()
-                
-                with tempfile.SpooledTemporaryFile() as f:
-                    data.to_zarr()
+                # Set the compression type and level for each variable
+                # For some reason conversion to zarr seems to increase the amount of space
+                # the data takes, this could be due to compression in the NetCDF file.
+                # Compressing using zstd with a compression level of 3 seems to be a good trade-off
+                # of size and compression time
+                # encodings = {}
+                # for k in data.keys():
+                #     encodings[k] = {"compressor": Blosc(cname='zstd', clevel=3)}
+                # # Convert to zarr format and compress
+                # data = data.to_zarr(consolidated=True, encoding=encodings)
 
+                # encodings = {}
+                # for k in data.keys():
+                #     encodings[k] = {"zlib": True, "complevel": 3}
+        
+                # Convert to zarr format and compress
+                # data = data.to_zarr(consolidated=True, encoding=encodings)
+                # data.to_netcdf(filepath, encoding=encodings)        
+                # Won't use compression for now
 
                 daterange_str = "".join([_datetime_to_string(start), "_", _datetime_to_string(end)])
+                data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
+                self._data_keys[data_key] = daterange_str
+
+                # TODO - for now just create a temporary directory - will have to update Acquire
+                # or work on a PR for xarray to allow returning a NetCDF as bytes
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    filepath = f"{tmpdir}/temp.nc"
+                    data.to_netcdf(filepath)
+                    ObjectStore.set_object_from_file(bucket, data_key, filepath)
+                # ObjectStore.set_object(bucket, data_key, data)
+                # ObjectStore.set_object_from_file(bucket, data_key, filepath)
+
             else:
                 raise NotImplementedError("Not implemented")
 
-
-
-
-            self._stored = True
+        self._stored = True
 
         datasource_key = "%s/uuid/%s" % (Datasource._datasource_root, self._uuid)
-        _ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
+        ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
         
         # encoded_name = _string_to_encoded(self._name)
         # name_key = "%s/name/%s/%s" % (Datasource._datasource_root, encoded_name, self._uuid)
@@ -515,7 +585,6 @@ class Datasource:
             key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
 
         data = _get_object_json(bucket=bucket, key=key)
-
         return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
 
     @staticmethod
