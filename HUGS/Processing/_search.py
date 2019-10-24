@@ -16,11 +16,10 @@ class RootPaths(_Enum):
     SITE = "site"
     NETWORK = "network"
 
-
 class DataType(_Enum):
     CRDS = "CRDS"
     GC = "GC"
-
+    FOOTPRINT = "FOOTPRINT"
 
 def search(search_terms, locations, data_type, require_all=False, start_datetime=None, end_datetime=None):
     """ Search for gas data (optionally within a daterange)
@@ -96,22 +95,30 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     if require_all:
         single_key = "_".join(sorted(search_terms))
 
-    # First we find the Datasources from locations we want to narrow down our search
-    location_sources = _defaultdict(list)
-    # If we have locations to search
-    if locations:
-        for location in locations:
+    if data_type == "GC" or data_type == "CRDS":
+        # First we find the Datasources from locations we want to narrow down our search
+        location_sources = _defaultdict(list)
+        # If we have locations to search
+        if locations:
+            for location in locations:
+                for datasource in datasources:
+                    if datasource.search_metadata(location):
+                        location_sources[location].append(datasource)
+        # If we have an empty list of locations, search everywhere
+        # TODO - this feels clunky
+        else:
             for datasource in datasources:
-                if datasource.search_metadata(location):
-                    location_sources[location].append(datasource)
-    # If we have an empty list of locations, search everywhere
-    # TODO - this feels clunky
-    else:
-        for datasource in datasources:
-            location_sources[datasource.site()].append(datasource)
+                location_sources[datasource.site()].append(datasource)
 
-    # Return the metadata for each datasource with the results?
-    # Display the additional metadata with each item
+
+    elif data_type == "FOOTPRINT":
+        footprints = []
+        search_fn = datasource.search_metadata
+        footprints = []
+        for datasource in datasources:
+            if datasource.search_metadata(data_type.lower()):
+                # Return the metadata for each datasource with the results?
+                # Display the additional metadata with each item
     # How to then differentiate between the
     # Take the values of the metadata keys and add them to the returned key to allow differentiation
     # between returned keys? This feels clunky but should be OK for now
@@ -131,50 +138,56 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     # Here we could create a dictionary keyed by inlet, location, height etc and the height we require
 
     # Return the metadata for each datasource as an extension to the key?
-    if search_terms:
-        for search_term in search_terms:
+    if data_type == "GC" or data_type == "CRDS":
+        if search_terms:
+            for search_term in search_terms:
+                for location in location_sources:
+                    for datasource in location_sources[location]:
+                        if datasource.search_metadata(search_term):
+                            prefix = "data/uuid/%s" % datasource.uuid()
+                            data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                            # Get the Dataframes that are within the required date range
+                            in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
+                            
+                            # Add the metadata dict to the results - 
+                            # res = {"datasources":in_date, "metadata":datasource.metadata()}
+                            # Add a number to the end of the key?
+                            # If we have different heights we'll have multiple results with the same key as we have
+                            # location_key for each location
+                            # Add the values of the metadata dictionary to the key for differentiation
+                            key_addition = "_".join([v for k, v in datasource.metadata().items() if k == "inlet" or k == "height"])
+
+                            if require_all:
+                                search_key = f"{location}_{single_key}_{key_addition}"
+                                remaining_terms = [datasource.search_metadata(term) for term in search_terms if term != search_term]
+
+                                # Check if we got all Trues for the other search terms
+                                # TODO - check the behaviour of this - doing this multiple times uneccesarily
+                                if all(remaining_terms):
+                                    keys[search_key].extend(in_date)
+                            else:
+                                search_key = f"{location}_{search_term}_{key_addition}"
+                                keys[search_key].extend(in_date)
+        # If we don't have any search terms, return everything that's in the correct daterange
+        else:
             for location in location_sources:
                 for datasource in location_sources[location]:
-                    if datasource.search_metadata(search_term):
-                        prefix = "data/uuid/%s" % datasource.uuid()
-                        data_list = _get_object_names(bucket=bucket, prefix=prefix)
-                        # Get the Dataframes that are within the required date range
-                        in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
-                        
-                        # Add the metadata dict to the results - 
-                        # res = {"datasources":in_date, "metadata":datasource.metadata()}
-                        # Add a number to the end of the key?
-                        # If we have different heights we'll have multiple results with the same key as we have
-                        # location_key for each location
-                        # Add the values of the metadata dictionary to the key for differentiation
-                        key_addition = "_".join([v for k, v in datasource.metadata().items() if k == "inlet" or k == "height"])
+                    prefix = "data/uuid/%s" % datasource.uuid()
+                    data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                    in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
 
-                        if require_all:
-                            search_key = f"{location}_{single_key}_{key_addition}"
-                            remaining_terms = [datasource.search_metadata(term) for term in search_terms if term != search_term]
+                    key_addition = "_".join([v for k, v in datasource.metadata().items() if k == "inlet" or k == "height"])
 
-                            # Check if we got all Trues for the other search terms
-                            # TODO - check the behaviour of this - doing this multiple times uneccesarily
-                            if all(remaining_terms):
-                                keys[search_key].extend(in_date)
-                        else:
-                            search_key = f"{location}_{search_term}_{key_addition}"
-                            keys[search_key].extend(in_date)
-    # If we don't have any search terms, return everything that's in the correct daterange
+                    # TODO - currently adding in the species here, is this OK?
+                    # key_addition = "_".join(datasource.metadata().values())
+                    search_key = f"{location}_{datasource.species()}_{key_addition}"
+                    keys[search_key].extend(in_date)
+    elif data_type == "FOOTPRINT":
+        
+
     else:
-        for location in location_sources:
-            for datasource in location_sources[location]:
-                prefix = "data/uuid/%s" % datasource.uuid()
-                data_list = _get_object_names(bucket=bucket, prefix=prefix)
-                in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
-
-                key_addition = "_".join([v for k, v in datasource.metadata().items() if k == "inlet" or k == "height"])
-
-                # TODO - currently adding in the species here, is this OK?
-                # key_addition = "_".join(datasource.metadata().values())
-                search_key = f"{location}_{datasource.species()}_{key_addition}"
-                keys[search_key].extend(in_date)
-    
+        raise NotImplementedError("Only time series and footprint data can be searched for currently")
+        
     return keys
 
 

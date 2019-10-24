@@ -82,8 +82,13 @@ def test_save_footprint():
     bucket = get_local_bucket(empty=True)
     
     metadata = {"test": "testing123"}
-    data = xarray.open_dataset("/Users/wm19361/Documents/Devel/hugs/emissions_data/WAO-20magl_EUROPE_201306.nc")
 
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data"
+    filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    data = xarray.open_dataset(filepath)
 
     datasource = Datasource.create(name="test_name")
     datasource.add_footprint_data(metadata=metadata, data=data)
@@ -94,11 +99,10 @@ def test_save_footprint():
 
     datasource_2 = Datasource.load(bucket=bucket, key=objs[0])
 
-    print(datasource_2._data_type)
-
-    print(datasource_2._data)
-
-    assert False
+    data = datasource_2._data[0][0]
+    assert float(data.pressure[0].values) == pytest.approx(1023.971)
+    assert float(data.pressure[2].values) == pytest.approx(1009.940)
+    assert float(data.pressure[-1].values) == pytest.approx(1021.303)
 
 def test_creation(mock_uuid, datasource):
     assert datasource._uuid == mocked_uuid

@@ -166,17 +166,7 @@ class Datasource:
             Returns:
                 None
         """
-        # Store the metadata as labels
-        # for k, v in metadata.items():
-        #     self.add_metadata(key=k, value=v)
-
-        # This should be stored in the NetCDF file - how to add this to the attributes of the
-        # NetCDF?
-
-        # Write NetCDF to Zarr in the save function?
         self._metadata.update(metadata)
-        # Modify this to update the NetCDF - really could do with the bytes?
-        # Zarr to bytes?
         self.add_metadata(key="data_type", value="footprint")
         self._data_type = "footprint"
         
@@ -185,25 +175,20 @@ class Datasource:
         self._end_datetime = end
 
         if self._data:
-            start_data, end_data = self.daterange()
-            start_new, end_new = self.get_dataset_daterange(data)
+            start_existing, end_existing = self.daterange()
 
             # Check if there's overlap of data
-            if start_new >= start_data and end_new <= end_data and overwrite is False:
+            if start >= start_existing and end <= end_existing and overwrite is False:
                 raise ValueError("The provided data overlaps dates covered by existing data")
+        
+        # Really we should just concatenate the Datasets?
+        # Concatenated datasets would be be better when we move to zarr
+        # but as we're still using NetCDF this current methods works best
 
+        # TODO - here could I create a struct to hold this data?
+        # Could be cleaner than trying to ensure people / me remember
+        # that this is a list of tuple(dataset, tuple) ?
         self._data.append((data, (start, end)))
-
-
-        # Placeholder - unsure if this is needed
-        # freq = _get_split_frequency()
-        # For now just split into weeks
-        # freq = "W"
-
-        # if freq == "W":
-        #     group = data.groupby("time.week")
-
-        # self._data = [(g, self.get_dataset_daterange(g)) for _, g in group if len(g) > 0]
 
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed DataFrame
@@ -326,6 +311,12 @@ class Datasource:
     def load_dataset(bucket, key):
         """ Loads a xarray Dataset from the passed key for creation of a Datasource object
 
+            Currently this function gets binary data back from the object store, writes it
+            to a temporary file and then gets xarray to read from this file. 
+
+            This is done in a long winded way due to xarray not being able to create a Dataset
+            from binary data at the moment.
+
             Args:
                 bucket (dict): Bucket containing data
                 key (str): Key for data
@@ -338,6 +329,7 @@ class Datasource:
 
         data = ObjectStore.get_object(bucket, key)
 
+        # TODO - is there a cleaner way of doing this?
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path =  f"{tmpdir}/tmp.nc"
             with open(tmp_path, "wb") as f:
@@ -347,15 +339,10 @@ class Datasource:
 
             return ds
 
-
-
-    # These functins don't work, placeholders for when it's possible to get 
+    # These functions don't work, placeholders for when it's possible to get 
     # an in memory NetCDF4 file
     # def dataset_to_netcdf(data):
     #     """ Write the passed dataset to a compressed in-memory NetCDF file
-
-
-
     #     """
     #     import netCDF4
     #     import xarray
@@ -482,35 +469,38 @@ class Datasource:
         if self.is_null():
             return
 
-        from Acquire.ObjectStore import ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        from HUGS.ObjectStore import get_bucket as _get_bucket
-        # from zarr import Blosc
         import tempfile
-
+        from Acquire.ObjectStore import ObjectStore
+        from Acquire.ObjectStore import datetime_to_string
+        from HUGS.ObjectStore import get_bucket
+        # from zarr import Blosc
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
 
         # For now we'll get the data type from the metadata
         data_type = self._metadata["data_type"]
 
         if self._data is not None:
-            if self._data_type == "timeseries":
-                for data, daterange in self._data:
-                    start, end = daterange
-                    daterange_str = "".join([_datetime_to_string(start), "_", _datetime_to_string(end)])
-                    data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
-                    self._data_keys[data_key] = daterange_str
+            for data, daterange in self._data:
+                start, end = daterange
+                daterange_str = "".join([datetime_to_string(start), "_", datetime_to_string(end)])
+                data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
+                self._data_keys[data_key] = daterange_str
+                if self._data_type == "timeseries":
                     ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
-            elif self._data_type == "footprint":
-                # For now convert this to Zarr to make sure it works
-                # Check if we have footprint Data, for now we'll continue using HDF5 for Timeseries
-                # print(len(self._data[0]))
-                data, dates = self._data[0]
-                start, end = dates
-
+                # TODO - for now just create a temporary directory - will have to update Acquire
+                # or work on a PR for xarray to allow returning a NetCDF as bytes
+                elif self._data_type == "footprint":   
+                    with tempfile.TemporaryDirectory() as tmpdir:
+                        filepath = f"{tmpdir}/temp.nc"
+                        data.to_netcdf(filepath)
+                        ObjectStore.set_object_from_file(bucket, data_key, filepath)
+                else:
+                    raise NotImplementedError("Not implemented")
+                
+                # TODO - tidy or remove this
+                # Leftover from trying out converting to zarr with compression, will leave for now
                 # Set the compression type and level for each variable
                 # For some reason conversion to zarr seems to increase the amount of space
                 # the data takes, this could be due to compression in the NetCDF file.
@@ -529,33 +519,11 @@ class Datasource:
                 # Convert to zarr format and compress
                 # data = data.to_zarr(consolidated=True, encoding=encodings)
                 # data.to_netcdf(filepath, encoding=encodings)        
-                # Won't use compression for now
-
-                daterange_str = "".join([_datetime_to_string(start), "_", _datetime_to_string(end)])
-                data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
-                self._data_keys[data_key] = daterange_str
-
-                # TODO - for now just create a temporary directory - will have to update Acquire
-                # or work on a PR for xarray to allow returning a NetCDF as bytes
-                with tempfile.TemporaryDirectory() as tmpdir:
-                    filepath = f"{tmpdir}/temp.nc"
-                    data.to_netcdf(filepath)
-                    ObjectStore.set_object_from_file(bucket, data_key, filepath)
-                # ObjectStore.set_object(bucket, data_key, data)
-                # ObjectStore.set_object_from_file(bucket, data_key, filepath)
-
-            else:
-                raise NotImplementedError("Not implemented")
 
         self._stored = True
 
         datasource_key = "%s/uuid/%s" % (Datasource._datasource_root, self._uuid)
         ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
-        
-        # encoded_name = _string_to_encoded(self._name)
-        # name_key = "%s/name/%s/%s" % (Datasource._datasource_root, encoded_name, self._uuid)
-        # _ObjectStore.set_string_object(bucket=bucket, key=name_key, string_data=self._uuid)
-
 
     @staticmethod
     def load(bucket=None, uuid=None, key=None, shallow=False):
