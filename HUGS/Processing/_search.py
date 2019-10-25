@@ -80,8 +80,6 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     data_obj = load_object(class_name=data_type)
     # Get the UUIDs of the Datasources associated with the object
     datasource_uuids = data_obj.datasources()
-    
-    print(f"Footprint UUIDS : {datasource_uuids}")
 
     # First check if the uuids we have are in the list of known and valid Datasources
     # This could be an object has a quick lookup data structure so we don't need to load
@@ -189,14 +187,11 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     elif data_type == "FOOTPRINT":
         # For now get all footprints
         for datasource in datasources:
-            print("datasource")
             if datasource.data_type() == "footprint":
-                print("footprint")
                 prefix = "data/uuid/%s" % datasource.uuid()
                 data_list = _get_object_names(bucket=bucket, prefix=prefix)
                 keys["footprints"].extend(data_list)
     else:
-        print(data_type)
         raise NotImplementedError("Only time series and footprint data can be searched for currently")
     
     return keys

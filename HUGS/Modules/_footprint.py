@@ -42,7 +42,8 @@ class Footprint:
         if bucket is None:
             bucket = get_bucket()
 
-        key = "%s/uuid/%s" % (Footprint._footprint_uuid, Footprint._footprint_uuid)
+        key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_uuid)
+
         return exists(bucket=bucket, key=key)
     
     @staticmethod
@@ -136,13 +137,12 @@ class Footprint:
         from HUGS.ObjectStore import get_bucket
 
         if not Footprint.exists():
-            print("Footprint doesn't exist")
             return Footprint.create()
 
         if bucket is None:
             bucket = get_bucket()
         
-        key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_root)
+        key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_uuid)
         data = ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
         
@@ -165,11 +165,7 @@ class Footprint:
         from HUGS.Modules import Datasource
         from HUGS.Processing import lookup_footprint_datasources
 
-        # Get the footprint object we need to load and save the passed files
-        if not Footprint.exists():
-            footprint = Footprint.create()
-        else:
-            footprint = Footprint.load()
+        footprint = Footprint.load()
 
         dataset = xarray.open_dataset(filepath)
 
@@ -189,8 +185,6 @@ class Footprint:
         # only have one per NetCDF?
         # datasource = Datasource.create(name="temp_name")
         datasource_uuids = footprint.assign_data(lookup_results=lookup_results, source_name=source_name, data=dataset, metadata=metadata)
-
-        print(f"Within read_file {datasource_uuids}")
         
         footprint.add_datasources(datasource_uuids)
         

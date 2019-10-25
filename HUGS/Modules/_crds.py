@@ -189,7 +189,6 @@ class CRDS:
             filename  = fp.name
             # Strip the file suffix
             filename = ".".join(filename.split(".")[:-1])
-            print(f"Processing {filename}")
             datasources = CRDS.read_file(data_filepath=fp.resolve(), source_name=filename)
             results.update(datasources)
 

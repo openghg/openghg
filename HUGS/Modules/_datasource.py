@@ -156,7 +156,7 @@ class Datasource:
         # Use daterange() to update the recorded values
         self.daterange()
 
-    def add_footprint_data(self, metadata, data):
+    def add_footprint_data(self, metadata, data, overwrite=False):
         """ Add footprint data
             The data is stored as a tuple of the data and the daterange it covers.
 
@@ -600,12 +600,13 @@ class Datasource:
         """ Get the data stored in this Datasource
 
             Returns:
-                list: List of tuples of Pandas.DataFrame and start,end datetime tuple
+                list: List of tuples of Pandas.DataFrame and start, end datetime tuple
         """
         return self._data
 
     def daterange(self):
-        """ Get the daterange this Datasource covers as a string
+        """ Get the daterange the data in this Datasource covers as tuple
+            of start, end datetime objects
 
             Returns:
                 tuple (datetime, datetime): Start, end datetimes
@@ -614,10 +615,24 @@ class Datasource:
 
         # if self._start_datetime is None or self._end_datetime is None:
         if self._data is not None:
-            # TODO - this is clunky - better way?
-            self._start_datetime = self._data[0][0].first_valid_index()
-            self._end_datetime = self._data[-1][0].last_valid_index()
-            return datetime_to_datetime(self._start_datetime), datetime_to_datetime(self._end_datetime)
+            data_type = self._data_type
+            if data_type == "CRDS" or data_type == "CRDS":
+                # TODO - this is clunky - better way?
+                self._start_datetime = self._data[0][0].first_valid_index()
+                self._end_datetime = self._data[-1][0].last_valid_index()
+                # TODO - assigning this and calculating it each time is a waste of time - flag for computed or just
+                # don't store as a member?
+                return datetime_to_datetime(self._start_datetime), datetime_to_datetime(self._end_datetime)
+            elif data_type == "footprint":
+                # TODO - this is a mess
+                start, _ = self.get_dataset_daterange(self._data[0][0])
+                _, end = self.get_dataset_daterange(self._data[-1][0])
+                self._start_datetime = datetime_to_datetime(start)
+                self._end_datetime = datetime_to_datetime(end)
+                return self._start_datetime, self._end_datetime
+            else:
+                raise NotImplementedError("Only CRDS, GC and footprint data currently recognized")
+
         else:
             raise ValueError("Cannot get daterange with no data")
 

@@ -179,7 +179,7 @@ def test_search_require_all():
     assert len(results["bsd_108m_co2_picarro"]) == 3
 
 def test_search_footprints():
-    bucket = get_local_bucket(empty=False)
+    bucket = get_local_bucket(empty=True)
     test_data = "../data/emissions"
     filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
     filepath = os.path.join(os.path.dirname(__file__), test_data, filename)

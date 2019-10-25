@@ -338,3 +338,7 @@ for now but it would be better to return the metadata with a more unique key. Th
 With zarr, each NetCDF is separated into chunks and written to separate files. Metadata is stored in json format.
 Using Acquire we need to either pass it bytes or a filepath for it to read. Will just continue using NetCDFs for now until
 I can add functionality to Acquire to improve its compatibility with zarr stores.
+
+
+Instead of a struct to store the data in self._data in the Datasource just create a dictionary that's keyed
+as data, daterange : {start:start, end:end} ?
