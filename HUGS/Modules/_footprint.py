@@ -145,12 +145,10 @@ class Footprint:
         key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_uuid)
         data = ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
-        
-        
         return Footprint.from_data(data=data, bucket=bucket)
         
     @staticmethod
-    def read_file(filepath, metadata, source_name):
+    def read_file(filepath, source_name):
         """ For a single footprint file we can break it down into chunks of a certain size
             for easier lookup.
 
@@ -169,22 +167,19 @@ class Footprint:
 
         dataset = xarray.open_dataset(filepath)
 
-        # We can save this metadata within the NetCDF file
+        # We can save this metadata within the NetCDF file?
         # Read metadata from the netCDF file
-        file_metadata = footprint._read_metadata(dataset)
-        # Update the user passed metadata with that extracted from the NetCDF
-        metadata.update(file_metadata)
+        metadata = {}
         metadata["name"] = source_name
+        # Update the user passed metadata with that extracted from the NetCDF
+        file_metadata = footprint._read_metadata(dataset)
+        metadata.update(file_metadata)
         
-        # Lookup Datasource UUID using name of site? 
-        # TODO - implement lookup
         datasource_names = footprint.datasource_names()
         lookup_results = lookup_footprint_datasources(lookup_dict=datasource_names, source_name=source_name)
-        # datasource_uuid = _lookup_uuid(datasource_name)
-        # Create a Datasource for this file - can directly create a Datasource here as we'll
-        # only have one per NetCDF?
-        # datasource = Datasource.create(name="temp_name")
-        datasource_uuids = footprint.assign_data(lookup_results=lookup_results, source_name=source_name, data=dataset, metadata=metadata)
+   
+        datasource_uuids = footprint.assign_data(lookup_results=lookup_results, source_name=source_name, data=dataset,
+                                                 metadata=metadata)
         
         footprint.add_datasources(datasource_uuids)
         

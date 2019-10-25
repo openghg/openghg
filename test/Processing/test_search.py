@@ -187,10 +187,6 @@ def test_search_footprints():
     source_name = "WAO-20magl_EUROPE"
     datasource_uuids = Footprint.read_file(filepath=filepath, metadata=metadata, source_name=source_name)
 
-    footprint = Footprint.load()
-
-    print(f"Loaded footprint datasources: {footprint.datasources()}")
-
     data_type = "footprint"
     search_terms = []
     locations = []
@@ -200,9 +196,7 @@ def test_search_footprints():
 
     results = search(search_terms=search_terms, locations=locations, data_type=data_type, start_datetime=start, end_datetime=end)
 
-    print(results)
-
-    assert False
+    assert len(results["footprints"]) == 1
 
 
 

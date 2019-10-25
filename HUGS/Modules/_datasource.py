@@ -154,7 +154,7 @@ class Datasource:
         self.add_metadata(key="data_type", value="timeseries")
         self._data_type = "timeseries"
         # Use daterange() to update the recorded values
-        self.daterange()
+        self.update_daterange()
 
     def add_footprint_data(self, metadata, data, overwrite=False):
         """ Add footprint data
@@ -171,12 +171,9 @@ class Datasource:
         self._data_type = "footprint"
         
         start, end = self.get_dataset_daterange(data)
-        self._start_datetime = start
-        self._end_datetime = end
-
+        
         if self._data:
             start_existing, end_existing = self.daterange()
-
             # Check if there's overlap of data
             if start >= start_existing and end <= end_existing and overwrite is False:
                 raise ValueError("The provided data overlaps dates covered by existing data")
@@ -189,6 +186,7 @@ class Datasource:
         # Could be cleaner than trying to ensure people / me remember
         # that this is a list of tuple(dataset, tuple) ?
         self._data.append((data, (start, end)))
+        self.update_daterange()
 
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed DataFrame
@@ -439,17 +437,13 @@ class Datasource:
         d._data_type = data["data_type"]
         
         if d._stored and not shallow:
-            if d._data_type == "timeseries":
-                for key in d._data_keys:
-                    daterange = d._data_keys[key].split("_")
-                    start =  string_to_datetime(daterange[0])
-                    end = string_to_datetime(daterange[1])
+            for key in d._data_keys:
+                daterange = d._data_keys[key].split("_")
+                start =  string_to_datetime(daterange[0])
+                end = string_to_datetime(daterange[1])
+                if d._data_type == "timeseries":
                     d._data.append((Datasource.load_dataframe(bucket, key), (start,end)))
-            elif d._data_type == "footprint":
-                for key in d._data_keys:
-                    daterange = d._data_keys[key].split("_")
-                    start = string_to_datetime(daterange[0])
-                    end = string_to_datetime(daterange[1])
+                elif d._data_type == "footprint":
                     d._data.append((Datasource.load_dataset(bucket, key), (start,end)))
             else:
                 raise NotImplementedError("Not yet implemented")
@@ -604,6 +598,44 @@ class Datasource:
         """
         return self._data
 
+    def check_integrity(self):
+        """ Ensure the data in this datasource is in order and any other checks we should
+            be doing on the data
+
+            Returns:
+                bool: True if in order, else False
+        """
+        return False
+
+    def update_daterange(self):
+        """ Get the daterange the data in this Datasource covers as tuple
+            of start, end datetime objects
+
+            Update it this so we only compute the daterange covered each time we add data to the datasource
+
+            TODO - big limition here is that we expect the data list to be in date order
+
+            Returns:
+                tuple (datetime, datetime): Start, end datetimes
+        """
+        from Acquire.ObjectStore import datetime_to_datetime
+
+        if self._data is not None:
+            data_type = self._data_type
+            if data_type == "CRDS" or data_type == "CRDS":
+                self._start_datetime = datetime_to_datetime(self._data[0][0].first_valid_index())
+                self._end_datetime = datetime_to_datetime(self._data[-1][0].last_valid_index())
+            elif data_type == "footprint":
+                # TODO - this is a mess
+                start, _ = self.get_dataset_daterange(self._data[0][0])
+                _, end = self.get_dataset_daterange(self._data[-1][0])
+                self._start_datetime = datetime_to_datetime(start)
+                self._end_datetime = datetime_to_datetime(end)
+            else:
+                raise NotImplementedError("Only CRDS, GC and footprint data currently recognized")
+        else:
+            raise ValueError("Cannot get daterange with no data")
+
     def daterange(self):
         """ Get the daterange the data in this Datasource covers as tuple
             of start, end datetime objects
@@ -611,30 +643,7 @@ class Datasource:
             Returns:
                 tuple (datetime, datetime): Start, end datetimes
         """
-        from Acquire.ObjectStore import datetime_to_datetime
-
-        # if self._start_datetime is None or self._end_datetime is None:
-        if self._data is not None:
-            data_type = self._data_type
-            if data_type == "CRDS" or data_type == "CRDS":
-                # TODO - this is clunky - better way?
-                self._start_datetime = self._data[0][0].first_valid_index()
-                self._end_datetime = self._data[-1][0].last_valid_index()
-                # TODO - assigning this and calculating it each time is a waste of time - flag for computed or just
-                # don't store as a member?
-                return datetime_to_datetime(self._start_datetime), datetime_to_datetime(self._end_datetime)
-            elif data_type == "footprint":
-                # TODO - this is a mess
-                start, _ = self.get_dataset_daterange(self._data[0][0])
-                _, end = self.get_dataset_daterange(self._data[-1][0])
-                self._start_datetime = datetime_to_datetime(start)
-                self._end_datetime = datetime_to_datetime(end)
-                return self._start_datetime, self._end_datetime
-            else:
-                raise NotImplementedError("Only CRDS, GC and footprint data currently recognized")
-
-        else:
-            raise ValueError("Cannot get daterange with no data")
+        return self._start_datetime, self._end_datetime
 
     def daterange_str(self):    
         """ Get the daterange this Datasource covers as a string in
