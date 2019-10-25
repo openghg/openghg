@@ -62,9 +62,10 @@ class CRDS:
             Returns:
                 CRDS: CRDS object 
         """
-        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
+        from Acquire.ObjectStore import get_datetime_now
+        
         c = CRDS()
-        c._creation_datetime = _get_datetime_now()
+        c._creation_datetime = get_datetime_now()
 
         return c
 
@@ -75,10 +76,10 @@ class CRDS:
             Returns:
                 dict: Dictionary version of object
         """
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        from Acquire.ObjectStore import datetime_to_string
 
         data = {}
-        data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
         data["stored"] = self._stored
         data["datasource_uuids"] = self._datasource_uuids
         data["datasource_names"] = self._datasource_names

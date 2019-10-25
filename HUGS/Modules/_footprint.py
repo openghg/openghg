@@ -25,7 +25,7 @@ class Footprint:
             Returns:
                 bool: True if object is null
         """
-        return bool(self._datasource_names)
+        return len(self._datasource_names) == 0
 
     @staticmethod
     def exists(bucket=None):
@@ -37,14 +37,13 @@ class Footprint:
             Returns:
                 bool: True if object exists
         """
-        from HUGS.ObjectStore import exists as _exists
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import exists, get_bucket
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
 
         key = "%s/uuid/%s" % (Footprint._footprint_uuid, Footprint._footprint_uuid)
-        return _exists(bucket=bucket, key=key)
+        return exists(bucket=bucket, key=key)
     
     @staticmethod
     def create():
@@ -53,10 +52,10 @@ class Footprint:
             Returns:
                 Footprint: Footprint object
         """
-        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
+        from Acquire.ObjectStore import get_datetime_now
 
         footprint = Footprint()
-        footprint._creation_datetime = _get_datetime_now()
+        footprint._creation_datetime = get_datetime_now()
         
         return footprint
     
@@ -70,13 +69,16 @@ class Footprint:
         if self.is_null():
             return {}
 
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        from Acquire.ObjectStore import datetime_to_string
 
         data = {}
-        # data["uuid"] = self._uuid
-        data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
         data["stored"] = self._stored
-        data["datasources"] = self._datasources
+        data["datasource_uuids"] = self._datasource_uuids
+        data["datasource_names"] = self._datasource_names
+        data["file_hashes"] = self._file_hashes
+
+        return data
 
     @staticmethod
     def from_data(data, bucket=None):
@@ -86,16 +88,16 @@ class Footprint:
                 data (dict): JSON data
                 bucket (dict, default=None): Bucket for data storage
         """ 
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+        from Acquire.ObjectStore import string_to_datetime
 
         if data is None or len(data) == 0:
             return Footprint()
         
         footprint = Footprint()
-        # gc._uuid = data["uuid"]
-        footprint._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        footprint._datasources = data["datasources"]
-
+        footprint._creation_datetime = string_to_datetime(data["creation_datetime"])
+        footprint._datasource_uuids = data["datasource_uuids"]
+        footprint._datasource_names = data["datasource_names"]
+        footprint._file_hashes = data["file_hashes"]
         footprint._stored = False
 
         return footprint
@@ -111,16 +113,15 @@ class Footprint:
         if self.is_null():
             return
 
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import ObjectStore
+        from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
 
         self._stored = True
         key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_uuid)
-        _ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
+        ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
 
     @staticmethod
     def load(bucket=None):
@@ -131,17 +132,20 @@ class Footprint:
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import ObjectStore
+        from HUGS.ObjectStore import get_bucket
 
         if not Footprint.exists():
+            print("Footprint doesn't exist")
             return Footprint.create()
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
         
         key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_root)
-        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
+        data = ObjectStore.get_object_from_json(bucket=bucket, key=key)
+
+        
         
         return Footprint.from_data(data=data, bucket=bucket)
         
@@ -185,9 +189,11 @@ class Footprint:
         # only have one per NetCDF?
         # datasource = Datasource.create(name="temp_name")
         datasource_uuids = footprint.assign_data(lookup_results=lookup_results, source_name=source_name, data=dataset, metadata=metadata)
+
+        print(f"Within read_file {datasource_uuids}")
         
         footprint.add_datasources(datasource_uuids)
-
+        
         footprint.save()
 
         return datasource_uuids
@@ -216,8 +222,8 @@ class Footprint:
             else:
                 datasource = Datasource.create(name=name)
 
-        datasource.add_footprint_data(metadata=metadata, data=data)
-        datasource.save()
+            datasource.add_footprint_data(metadata=metadata, data=data)
+            datasource.save()
 
         uuids[name] = datasource.uuid()
 
@@ -244,6 +250,7 @@ class Footprint:
 
     def get_split_frequency(footprint_ds, split_freq="W"):
         """
+            Currently unused
         """
 
         group = footprint_ds.groupby("time.week")
@@ -257,7 +264,7 @@ class Footprint:
             Returns:
                 list: List of Datasources
         """
-        return self._datasource_uuids.keys()
+        return list(self._datasource_uuids.keys())
 
     def add_datasources(self, datasource_uuids):
         """ Add the passed list of Datasources to the current list
@@ -281,6 +288,11 @@ class Footprint:
         """
         return self._datasource_names
 
+    def uuid(self):
+        """ Returns the UUID of this object
+
+        """
+        return Footprint._footprint_uuid
 
     # def create_datasource(self, metadata, data):
     #     """ Create Datasources that will hold the footprint data

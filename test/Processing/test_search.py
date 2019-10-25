@@ -24,7 +24,7 @@ from Acquire.ObjectStore import datetime_to_datetime
 
 @pytest.fixture(scope="session")
 def gc_obj():
-    bucket = get_local_bucket(empty=True)
+    bucket = get_local_bucket(empty=False)
     data_file = "capegrim-medusa.18.C"
     prec_file = "capegrim-medusa.18.precisions.C"
     dir_path = os.path.dirname(__file__)
@@ -45,7 +45,7 @@ def crds_obj():
 
 @pytest.fixture(scope="session")
 def crds_read():
-    bucket = get_local_bucket(empty=True)
+    bucket = get_local_bucket(empty=False)
     test_data = "../data/search_data"
     folder_path = os.path.join(os.path.dirname(__file__), test_data)
     CRDS.read_folder(folder_path=folder_path)
@@ -65,7 +65,7 @@ def test_search_GC():
     start = None
     end = None
 
-    bucket = get_local_bucket(empty=True)
+    bucket = get_local_bucket(empty=False)
     data_file = "capegrim-medusa.18.C"
     prec_file = "capegrim-medusa.18.precisions.C"
     dir_path = os.path.dirname(__file__)
@@ -179,12 +179,17 @@ def test_search_require_all():
     assert len(results["bsd_108m_co2_picarro"]) == 3
 
 def test_search_footprints():
+    bucket = get_local_bucket(empty=False)
     test_data = "../data/emissions"
     filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
     filepath = os.path.join(os.path.dirname(__file__), test_data, filename)
     metadata = {"name": "WAO-20magl_EUROPE"}
     source_name = "WAO-20magl_EUROPE"
-    Footprint.read_file(filepath=filepath, metadata=metadata, source_name=source_name)
+    datasource_uuids = Footprint.read_file(filepath=filepath, metadata=metadata, source_name=source_name)
+
+    footprint = Footprint.load()
+
+    print(f"Loaded footprint datasources: {footprint.datasources()}")
 
     data_type = "footprint"
     search_terms = []

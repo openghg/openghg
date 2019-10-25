@@ -75,10 +75,13 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     #     raise ValueError("No " + data_type.name + " object found.")
     # if len(object_list) > 1:
     #     raise ValueError("More than one " + data_type.name + " object found.")
-
-    data_obj = load_object(data_type)
+    
+    # Load the CRDS/GC/Footprint etc object we need to read the data
+    data_obj = load_object(class_name=data_type)
     # Get the UUIDs of the Datasources associated with the object
     datasource_uuids = data_obj.datasources()
+    
+    print(f"Footprint UUIDS : {datasource_uuids}")
 
     # First check if the uuids we have are in the list of known and valid Datasources
     # This could be an object has a quick lookup data structure so we don't need to load
