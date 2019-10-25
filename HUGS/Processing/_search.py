@@ -6,7 +6,8 @@ from enum import Enum as _Enum
 
 __all__ = ["get_data",  "in_daterange",
            "key_to_daterange", "daterange_to_string", 
-           "daterange_to_string", "search"]
+           "daterange_to_string", "search", "lookup_gas_datasources",
+           "lookup_footprint_datasources"]
 
 
 class RootPaths(_Enum):
@@ -197,6 +198,50 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     
     return keys
 
+def lookup_gas_datasources(lookup_dict, gas_data, source_name, source_id=None):
+    """ Check if the passed data exists in the lookup dict
+
+        Args: 
+            lookup_dict (dict): Dictionary to search for exisiting Datasources
+            gas_data (list): Gas data to process
+            source_name (str): Name of course
+            source_id (str, default=None): UUID of source. Not currently implemented.
+        Returns:
+            dict: source_name: Datasource UUID (key: value)
+    """
+    # If we already have data from these datasources then return that UUID
+    # otherwise return False
+    if source_id is not None:
+        raise NotImplementedError()
+
+    results = {}
+    for species in gas_data:
+        datasource_name = source_name + "_" + species
+        results[species] = {}
+        results[species]["uuid"] = lookup_dict.get(datasource_name, False)
+        results[species]["name"] = datasource_name
+
+    return results
+
+def lookup_footprint_datasources(lookup_dict, source_name, source_id=None):
+    """ Check if we've had data from this Datasource before
+
+        TODO - This seems like a waste - combine this with lookup_gas_datasources ?
+
+        Args: 
+            lookup_dict (dict): Dictionary to search for exisiting Datasources
+            source_name (str): Name of course
+            source_id (str, default=None): UUID of source. Not currently implemented.
+        Returns:
+            dict: source_name: Datasource UUID (key: value)
+    """
+    if source_id is not None:
+       raise NotImplementedError()
+
+    results = {source_name: {}}
+    results[source_name]["uuid"] = lookup_dict.get(source_name, False)
+
+    return results
 
 def get_data(key_list):
     """ Gets data from the Datasources found by the search function

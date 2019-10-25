@@ -69,11 +69,11 @@ def assign_data(gas_data, lookup_results, overwrite):
         metadata = gas_data[species]["metadata"]
         data = gas_data[species]["data"]
         name = lookup_results[species]["name"]
-        uid = lookup_results[species]["uuid"]
+        uuid = lookup_results[species]["uuid"]
 
         # If we have a UUID for this Datasource load the existing object
         # from the object store
-        if uid:
+        if uuid:
             datasource = Datasource.load(uuid=uid)
         else:
             datasource = Datasource.create(name=name)

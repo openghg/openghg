@@ -25,7 +25,7 @@ class Footprint:
             Returns:
                 bool: True if object is null
         """
-        return self._datasources is None
+        return bool(self._datasource_names)
 
     @staticmethod
     def exists(bucket=None):
@@ -146,7 +146,7 @@ class Footprint:
         return Footprint.from_data(data=data, bucket=bucket)
         
     @staticmethod
-    def read_file(filepath, metadata):
+    def read_file(filepath, metadata, source_name):
         """ For a single footprint file we can break it down into chunks of a certain size
             for easier lookup.
 
@@ -156,11 +156,10 @@ class Footprint:
             Returns:
                 None
         """
-        from Acquire.ObjectStore import create_uuid as _create_uuid
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-
+        import os
         import xarray
         from HUGS.Modules import Datasource
+        from HUGS.Processing import lookup_footprint_datasources
 
         # Get the footprint object we need to load and save the passed files
         if not Footprint.exists():
@@ -172,49 +171,59 @@ class Footprint:
 
         # We can save this metadata within the NetCDF file
         # Read metadata from the netCDF file
-        file_metadata = _read_metadata(dataset)
+        file_metadata = footprint._read_metadata(dataset)
         # Update the user passed metadata with that extracted from the NetCDF
         metadata.update(file_metadata)
-
-        # Add in a temporary name key until this is connected to user based input
-        metadata["name"] = "temp_footprint_name"
+        metadata["name"] = source_name
         
         # Lookup Datasource UUID using name of site? 
         # TODO - implement lookup
-
+        datasource_names = footprint.datasource_names()
+        lookup_results = lookup_footprint_datasources(lookup_dict=datasource_names, source_name=source_name)
         # datasource_uuid = _lookup_uuid(datasource_name)
         # Create a Datasource for this file - can directly create a Datasource here as we'll
         # only have one per NetCDF?
-        datasource = Datasource.create()
-
-        if Datasource.exists(datasource_id=datasource_id):
-            datasource = Datasource.load(uuid=datasource_id)
-        else:
-            datasource = Datasource.create(name=metadata["name"])
-
-        datasource.add_footprint_data(metadata=metadata, data=dataset)
-        datasource.save()
-
-        datasource_uuids = {metadata["name"]: datasource.uuid()}
-
+        # datasource = Datasource.create(name="temp_name")
+        datasource_uuids = footprint.assign_data(lookup_results=lookup_results, source_name=source_name, data=dataset, metadata=metadata)
+        
         footprint.add_datasources(datasource_uuids)
 
         footprint.save()
 
-        return datasource.uuid()
-            
-        # Start and end datetime is stored in the Datasource
-        # self._start_datetime = None
-        # self._end_datetime = None
-        # Read in the footprint
-        # Split into ~ 5 MB chunks? Use get_split_freq to calculate this
-        # Just do weeks for now?
-        # Each datasource such as WAO-20magl will have a Datasource
-        # netcdfs may be split into segments
-        # Update the get_split_frequency function to handle datasets as well as dataframes?
-        # Maybe separate functions due to the differences? Can always combine them afterwards
+        return datasource_uuids
+ 
+    def assign_data(self, lookup_results, source_name, data, metadata, overwrite=False):
+        """ Assign data to a new or existing Datasource
 
-    def _read_metadata(dataset):
+            Args:
+                lookup_results (dict): Results of Datasource lookup
+                source_name (str): Name of data source
+                data (xarray.Dataset): Data
+                metadata (dict): Dictionary of metadata
+                overwrite (bool, default=False): Should exisiting data be overwritten
+            Returns:
+                list: List of Datasource UUIDs
+        """
+        from HUGS.Modules import Datasource
+
+        uuids = {}
+        for key in lookup_results:
+            uuid = lookup_results[key]["uuid"]
+            name = metadata["name"]
+
+            if uuid:
+                datasource = Datasource.load(uuid=uuid)
+            else:
+                datasource = Datasource.create(name=name)
+
+        datasource.add_footprint_data(metadata=metadata, data=data)
+        datasource.save()
+
+        uuids[name] = datasource.uuid()
+
+        return uuids
+
+    def _read_metadata(self, dataset):
         """ Read in the metadata held in the passed xarray.Dataset
 
             Args:
@@ -262,6 +271,15 @@ class Footprint:
         # Invert the dictionary to update the dict keyed by UUID
         uuid_keyed = {v: k for k, v in datasource_uuids.items()}
         self._datasource_uuids.update(uuid_keyed)
+
+    def datasource_names(self):
+        """ Returns the dictionary containing the names and UUIDs of
+            Datasources associated with this object
+
+            Returns:
+                dict: Dictionary of name: UUID of associated Datasources
+        """
+        return self._datasource_names
 
 
     # def create_datasource(self, metadata, data):

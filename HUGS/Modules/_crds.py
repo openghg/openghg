@@ -206,9 +206,7 @@ class CRDS:
             Returns:
                 None
         """
-        from pandas import read_csv as _read_csv
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        from HUGS.Processing import assign_data
+        from HUGS.Processing import assign_data, lookup_gas_datasources
         from HUGS.Util import hash_file
 
         crds = CRDS.load()
@@ -228,7 +226,7 @@ class CRDS:
         # Check to see if we've had data from these Datasources before
         # TODO - currently just using a simple naming system here - update to use 
         # an assigned UUID? Seems safer? How to give each gas a UUID? 
-        lookup_results = crds.lookup_datasources(gas_data, source_name, source_id)
+        lookup_results = lookup_gas_datasources(gas_data, source_name, source_id)
 
         # If we're passed a source name or source id check it against the records of current CRDS data
         # Update the Datasource records for CRDS and make it a dictionary where 
@@ -260,29 +258,30 @@ class CRDS:
 
         return datasource_uuids
 
-    def lookup_datasources(self, gas_data, source_name=None, source_id=None):
-        """ Check which datasources
+    # Moved to processing/search.py
+    # def lookup_datasources(self, gas_data, source_name=None, source_id=None):
+    #     """ Check which datasources
 
-            Args: 
-                gas_data (list): Gas data to process
-                source_name (str)
-            Returns:
-                dict: Dictionary keyed by source_name. Value of Datasource UUID
-        """
-        # If we already have data from these datasources then return that UUID
-        # otherwise return False
-        if source_id is not None:
-            raise NotImplementedError()
+    #         Args: 
+    #             gas_data (list): Gas data to process
+    #             source_name (str)
+    #         Returns:
+    #             dict: Dictionary keyed by source_name. Value of Datasource UUID
+    #     """
+    #     # If we already have data from these datasources then return that UUID
+    #     # otherwise return False
+    #     if source_id is not None:
+    #         raise NotImplementedError()
 
-        results = {}
+    #     results = {}
 
-        for species in gas_data:
-            datasource_name = source_name + "_" + species
-            results[species] = {}
-            results[species]["uuid"] = self._datasource_names.get(datasource_name, False)
-            results[species]["name"] = datasource_name
+    #     for species in gas_data:
+    #         datasource_name = source_name + "_" + species
+    #         results[species] = {}
+    #         results[species]["uuid"] = self._datasource_names.get(datasource_name, False)
+    #         results[species]["name"] = datasource_name
 
-        return results
+    #     return results
 
     def read_data(self, data_filepath):
         """ Separates the gases stored in the dataframe in 

@@ -177,10 +177,7 @@ class GC:
                 GC: GC object
 
         """
-        from Acquire.ObjectStore import create_uuid as _create_uuid
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-
-        from HUGS.Processing import assign_data
+        from HUGS.Processing import assign_data, lookup_gas_datasources
         import json
 
         gc = GC.load()
@@ -206,7 +203,7 @@ class GC:
 
         gas_data = gc.split(data=data, site=site, species=species, metadata=metadata)
 
-        lookup_results = gc.lookup_datasources(gas_data=gas_data, source_name=source_name, source_id=source_id)
+        lookup_results = lookup_gas_datasources(gas_data=gas_data, source_name=source_name, source_id=source_id)
     
         # Create Datasources, save them to the object store and get their UUIDs
         datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
@@ -220,29 +217,29 @@ class GC:
 
     # TODO - move this out to a module so we don't have it in two places, just
     # pass in the dict it searches
-    def lookup_datasources(self, gas_data, source_name=None, source_id=None):
-        """ Check which datasources
+    # def lookup_datasources(self, lookup_dict, gas_data, source_name=None, source_id=None):
+    #     """ Check which datasources hold data from this source
 
-            Args: 
-                gas_data (list): Gas data to process
-                source_name (str)
-            Returns:
-                dict: Dictionary keyed by source_name. Value of Datasource UUID
-        """
-        # If we already have data from these datasources then return that UUID
-        # otherwise return False
-        if source_id is not None:
-            raise NotImplementedError()
+    #         Args: 
+    #             gas_data (list): Gas data to process
+    #             source_name (str)
+    #         Returns:
+    #             dict: Dictionary keyed by source_name. Value of Datasource UUID
+    #     """
+    #     # If we already have data from these datasources then return that UUID
+    #     # otherwise return False
+    #     if source_id is not None:
+    #         raise NotImplementedError()
 
-        results = {}
+    #     results = {}
 
-        for species in gas_data:
-            datasource_name = source_name + "_" + species
-            results[species] = {}
-            results[species]["uuid"] = self._datasource_names.get(datasource_name, False)
-            results[species]["name"] = datasource_name
+    #     for species in gas_data:
+    #         datasource_name = source_name + "_" + species
+    #         results[species] = {}
+    #         results[species]["uuid"] = self._datasource_names.get(datasource_name, False)
+    #         results[species]["name"] = datasource_name
 
-        return results
+    #     return results
 
     def read_data(self, data_filepath, precision_filepath, site, instrument):
         """ Read data from the data and precision files

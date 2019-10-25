@@ -179,11 +179,12 @@ def test_search_require_all():
     assert len(results["bsd_108m_co2_picarro"]) == 3
 
 def test_search_footprints():
-    test_data = "../data"
+    test_data = "../data/emissions"
     filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
-    filepath = os.path.join(os.path.dirname(__file__), filename)
+    filepath = os.path.join(os.path.dirname(__file__), test_data, filename)
     metadata = {"name": "WAO-20magl_EUROPE"}
-    Footprint.read_file(filepath=filepath, metadata=metadata)
+    source_name = "WAO-20magl_EUROPE"
+    Footprint.read_file(filepath=filepath, metadata=metadata, source_name=source_name)
 
     data_type = "footprint"
     search_terms = []
@@ -192,8 +193,7 @@ def test_search_footprints():
     start = get_datetime_epoch()
     end = get_datetime_now()
 
-    results = search(search_terms=search_terms, locations=locations, data_type=data_type, 
-                                                start_datetime=start, end_datetime=end)
+    results = search(search_terms=search_terms, locations=locations, data_type=data_type, start_datetime=start, end_datetime=end)
 
     print(results)
 
