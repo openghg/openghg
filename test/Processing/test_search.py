@@ -3,12 +3,12 @@ import os
 import pytest
 # import matplotlib.pyplot as plt
 
-from HUGS.Modules import CRDS, GC
+from HUGS.Modules import CRDS, GC, Footprint
 from HUGS.Modules import Datasource
 from HUGS.ObjectStore import get_local_bucket, get_object_names
 from HUGS.Processing import in_daterange, key_to_daterange
 from HUGS.Processing import recombine_sections, search
-from HUGS.Util import get_datetime, load_object
+from HUGS.Util import get_datetime, load_object, get_datetime_epoch, get_datetime_now
                             
 
 from Acquire.ObjectStore import datetime_to_string
@@ -50,6 +50,13 @@ def crds_read():
     folder_path = os.path.join(os.path.dirname(__file__), test_data)
     CRDS.read_folder(folder_path=folder_path)
 
+# @pytest.fixture(scope="session")
+# def footprint_read():
+#     test_data = "../data"
+#     filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
+#     filepath = os.path.join(os.path.dirname(__file__), filename)
+#     metadata = {"name": "WAO-20magl_EUROPE"}
+#     Footprint.read_file(filepath=filepath, metadata=metadata)
 
 def test_search_GC():
     search_terms = []
@@ -171,11 +178,26 @@ def test_search_require_all():
 
     assert len(results["bsd_108m_co2_picarro"]) == 3
 
+def test_search_footprints():
+    test_data = "../data"
+    filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
+    filepath = os.path.join(os.path.dirname(__file__), filename)
+    metadata = {"name": "WAO-20magl_EUROPE"}
+    Footprint.read_file(filepath=filepath, metadata=metadata)
 
+    data_type = "footprint"
+    search_terms = []
+    locations = []
 
+    start = get_datetime_epoch()
+    end = get_datetime_now()
 
+    results = search(search_terms=search_terms, locations=locations, data_type=data_type, 
+                                                start_datetime=start, end_datetime=end)
 
+    print(results)
 
+    assert False
 
 
 

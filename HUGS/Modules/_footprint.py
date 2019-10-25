@@ -3,14 +3,21 @@
 
     
 """
+__all__ = ["Footprint"]
+
 class Footprint:
     _footprint_root = "footprint"
     _footprint_uuid = "8cba4797-510c-foot-print-e02a5ee57489"
     
-    def __init__():
+    def __init__(self):
         self._creation_datetime = None
         self._stored = None
-        self._datasources = []
+        # Keyed by name - allows retrieval of UUID from name
+        self._datasource_names = {}
+        # Keyed by UUID - allows retrieval of name by UUID
+        self._datasource_uuids = {}
+        # Hashes of previously uploaded files
+        self._file_hashes = {}
 
     def is_null(self):
         """ Check if this is a null object
@@ -152,10 +159,8 @@ class Footprint:
         from Acquire.ObjectStore import create_uuid as _create_uuid
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
-        from xarray import open_dataset as _open_dataset
-        from HUGS.Processing import create_datasources as _create_datasources
-        from HUGS.Datasource import get_dataset_daterange as _get_dataset_daterange
-        from HUGS.Datasource import Datasource as _Datasource
+        import xarray
+        from HUGS.Modules import Datasource
 
         # Get the footprint object we need to load and save the passed files
         if not Footprint.exists():
@@ -163,11 +168,9 @@ class Footprint:
         else:
             footprint = Footprint.load()
 
-        dataset = _open_dataset(filepath)
-
+        dataset = xarray.open_dataset(filepath)
 
         # We can save this metadata within the NetCDF file
-
         # Read metadata from the netCDF file
         file_metadata = _read_metadata(dataset)
         # Update the user passed metadata with that extracted from the NetCDF
@@ -175,8 +178,6 @@ class Footprint:
 
         # Add in a temporary name key until this is connected to user based input
         metadata["name"] = "temp_footprint_name"
-
-        start_datetime, end_datetime = _get_dataset_daterange(dataset)
         
         # Lookup Datasource UUID using name of site? 
         # TODO - implement lookup
@@ -186,23 +187,25 @@ class Footprint:
         # only have one per NetCDF?
         datasource = Datasource.create()
 
-        if _Datasource.exists(datasource_id=datasource_id):
-            datasource = _Datasource.load(uuid=datasource_id)
+        if Datasource.exists(datasource_id=datasource_id):
+            datasource = Datasource.load(uuid=datasource_id)
         else:
             datasource = Datasource.create(name=metadata["name"])
 
         datasource.add_footprint_data(metadata=metadata, data=dataset)
-
         datasource.save()
+
+        datasource_uuids = {metadata["name"]: datasource.uuid()}
+
+        footprint.add_datasources(datasource_uuids)
+
+        footprint.save()
 
         return datasource.uuid()
             
         # Start and end datetime is stored in the Datasource
         # self._start_datetime = None
         # self._end_datetime = None
-
-
-
         # Read in the footprint
         # Split into ~ 5 MB chunks? Use get_split_freq to calculate this
         # Just do weeks for now?
@@ -210,7 +213,6 @@ class Footprint:
         # netcdfs may be split into segments
         # Update the get_split_frequency function to handle datasets as well as dataframes?
         # Maybe separate functions due to the differences? Can always combine them afterwards
-
 
     def _read_metadata(dataset):
         """ Read in the metadata held in the passed xarray.Dataset
@@ -227,6 +229,7 @@ class Footprint:
         metadata = {}
         metadata["data_variables"] = list(dataset.var())
         metadata["coordinates"] = list(dataset.coords)
+        metadata["data_type"] = "footprint"
         
         return metadata
 
@@ -238,6 +241,27 @@ class Footprint:
 
         # Get the Datasets for each week's worth of data
         data = [g for _, g in group if len(g) > 0]
+
+    def datasources(self):
+        """ Return the list of Datasources for this object
+
+            Returns:
+                list: List of Datasources
+        """
+        return self._datasource_uuids.keys()
+
+    def add_datasources(self, datasource_uuids):
+        """ Add the passed list of Datasources to the current list
+
+            Args:
+                datasource_uuids (dict): Dict of Datasource UUIDs
+            Returns:
+                None
+        """
+        self._datasource_names.update(datasource_uuids)
+        # Invert the dictionary to update the dict keyed by UUID
+        uuid_keyed = {v: k for k, v in datasource_uuids.items()}
+        self._datasource_uuids.update(uuid_keyed)
 
 
     # def create_datasource(self, metadata, data):

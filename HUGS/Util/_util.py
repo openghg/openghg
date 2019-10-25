@@ -114,10 +114,16 @@ def load_object(class_name):
     module_path = "HUGS.Modules"
     class_name = str(class_name).upper()
 
-    # Although __import__ is not usually recommended, here we want to use the
-    # fromlist argument that import_module doesn't support
-    module_object = __import__(name=module_path, fromlist=class_name)
-    target_class = getattr(module_object, class_name)
+    # Here we try upper and lowercase for the module
+    try:
+        # Although __import__ is not usually recommended, here we want to use the
+        # fromlist argument that import_module doesn't support
+        module_object = __import__(name=module_path, fromlist=class_name)
+        target_class = getattr(module_object, class_name)
+    except AttributeError:
+        class_name = class_name.lower().capitalize()
+        module_object = __import__(name=module_path, fromlist=class_name)
+        target_class = getattr(module_object, class_name)
 
     return target_class.load()
 

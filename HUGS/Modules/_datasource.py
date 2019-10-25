@@ -696,3 +696,11 @@ class Datasource:
                 None
         """
         self._uuid = uid
+
+    def data_type(self):
+        """ Returns the data type held by this Datasource
+
+            Returns:
+                str: Data type held by Datasource
+        """
+        return self._data_type

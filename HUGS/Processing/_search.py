@@ -40,7 +40,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     from HUGS.Modules import Datasource as _Datasource
     from HUGS.Util import get_datetime_epoch as _get_datetime_epoch
     from HUGS.Util import get_datetime_now as _get_datetime_now
-    from HUGS.Util import load_object as _load_object
+    from HUGS.Util import load_object
     from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
     from datetime import datetime
 
@@ -65,7 +65,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
 
     # TODO - method to load different types in here for search
     # Maybe just an if else for now?
-    data_type = DataType[data_type.upper()]
+    data_type = DataType[data_type.upper()].name
     # Get the objects that contain the Datasources
     # object_list = _get_object_names(bucket=bucket, prefix=search_prefix)
     # object_uuid = object_list[0].split("/")[-1]
@@ -75,7 +75,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     # if len(object_list) > 1:
     #     raise ValueError("More than one " + data_type.name + " object found.")
 
-    data_obj = _load_object(data_type.name)
+    data_obj = load_object(data_type)
     # Get the UUIDs of the Datasources associated with the object
     datasource_uuids = data_obj.datasources()
 
@@ -111,12 +111,12 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                 location_sources[datasource.site()].append(datasource)
 
 
-    elif data_type == "FOOTPRINT":
-        footprints = []
-        search_fn = datasource.search_metadata
-        footprints = []
-        for datasource in datasources:
-            if datasource.search_metadata(data_type.lower()):
+    # elif data_type == "FOOTPRINT":
+    #     footprints = []
+    #     search_fn = datasource.search_metadata
+    #     footprints = []
+    #     for datasource in datasources:
+    #         if datasource.search_metadata(data_type.lower()):
                 # Return the metadata for each datasource with the results?
                 # Display the additional metadata with each item
     # How to then differentiate between the
@@ -183,11 +183,18 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                     search_key = f"{location}_{datasource.species()}_{key_addition}"
                     keys[search_key].extend(in_date)
     elif data_type == "FOOTPRINT":
-        
-
+        # For now get all footprints
+        for datasource in datasources:
+            print("datasource")
+            if datasource.data_type() == "footprint":
+                print("footprint")
+                prefix = "data/uuid/%s" % datasource.uuid()
+                data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                keys["footprints"].extend(data_list)
     else:
+        print(data_type)
         raise NotImplementedError("Only time series and footprint data can be searched for currently")
-        
+    
     return keys
 
 
