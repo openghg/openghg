@@ -598,14 +598,18 @@ class Datasource:
         """
         return self._data
 
-    def check_integrity(self):
-        """ Ensure the data in this datasource is in order and any other checks we should
-            be doing on the data
+    def sort_data(self):
+        """ Sorts the data in the data list
+
+            TODO: Could this be better handled using an OrderedDict?
 
             Returns:
-                bool: True if in order, else False
+                None
         """
-        return False
+        # Data list elements contain a tuple of
+        # (data,(start_datetime, end_datetime))
+        # Could also check to make sure we don't have overlapping dateranges?
+        self._data = sorted(self._data, key=lambda d: d[1][0])
 
     def update_daterange(self):
         """ Get the daterange the data in this Datasource covers as tuple
@@ -621,6 +625,8 @@ class Datasource:
         from Acquire.ObjectStore import datetime_to_datetime
 
         if self._data is not None:
+            # Sort the data by date
+            self.sort_data()
             data_type = self._data_type
             if data_type == "CRDS" or data_type == "CRDS":
                 self._start_datetime = datetime_to_datetime(self._data[0][0].first_valid_index())
