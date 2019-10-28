@@ -606,10 +606,11 @@ class Datasource:
             Returns:
                 None
         """
+        from operator import itemgetter 
         # Data list elements contain a tuple of
         # (data,(start_datetime, end_datetime))
         # Could also check to make sure we don't have overlapping dateranges?
-        self._data = sorted(self._data, key=lambda d: d[1][0])
+        self._data = sorted(self._data, key=itemgetter(1,0))
 
     def update_daterange(self):
         """ Get the daterange the data in this Datasource covers as tuple
