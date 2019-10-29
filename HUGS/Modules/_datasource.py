@@ -45,14 +45,12 @@ class Datasource:
             This would allow some elasticity to the datasources
                 
         """        
-        from Acquire.ObjectStore import create_uuid as _create_uuid
-        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+        from Acquire.ObjectStore import create_uuid, get_datetime_now, string_to_datetime
 
         d = Datasource()
         d._name = name
-        d._uuid = _create_uuid()
-        d._creation_datetime = _get_datetime_now()
+        d._uuid = create_uuid()
+        d._creation_datetime = get_datetime_now()
         # Any need to parse these for safety?
         # d._metadata = kwargs
         d._metadata["source_name"] = name
@@ -63,8 +61,8 @@ class Datasource:
             # Just store these as time stamps?
             # Get the first and last datetime from the list of dataframes
             # TODO - update this as each dataframe may have different start and end dates
-            d._start_datetime = _string_to_datetime(data[0].first_valid_index())
-            d._end_datetime = _string_to_datetime(data[-1].last_valid_index())
+            d._start_datetime = string_to_datetime(data[0].first_valid_index())
+            d._end_datetime = string_to_datetime(data[-1].last_valid_index())
         
         return d
 

@@ -136,7 +136,6 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     keys = _defaultdict(list)
     # TODO - is there a way of tidying this up?
     # If we have search terms
-
     # Here we could create a dictionary keyed by inlet, location, height etc and the height we require
 
     # Return the metadata for each datasource as an extension to the key?
@@ -253,8 +252,6 @@ def get_data(key_list):
     # Maybe want to do some preprocessing on this data before it comes raw out of the object store?
     # We only want the data in the correct daterange
     return [_Datasource.load(key=key)._data for key in key_list]
-
-
 
 def in_daterange(key, start_search, end_search):
     """ Does this key contain data in the daterange we want?
