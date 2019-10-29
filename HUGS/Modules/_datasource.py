@@ -233,30 +233,21 @@ class Datasource:
 
     @staticmethod
     def exists(datasource_id, bucket=None):
-        """ Uses an ID of some kind to query whether or not this is a new
-            Datasource and should be created
-
-            Check if a datasource with this ID is already stored in the object store
-
-            WIP
-
-            TODO - update this when I have a clearer idea of how to ID datasources
+        """ Check if a datasource with this ID is already stored in the object store
 
             Args:
                 datasource_id (str): ID of datasource created from Data / given in data
             Returns:
                 bool: True if Datasource exists 
         """
-        from HUGS.ObjectStore import exists as _exists
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import exists, get_bucket
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
 
         key = "%s/uuid/%s" % (Datasource._data_root, datasource_id)
         
-        # Query object store for Datasource
-        return _exists(bucket=bucket, key=key)
+        return exists(bucket=bucket, key=key)
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -274,12 +265,12 @@ class Datasource:
         if self.is_null():
             return {}
 
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        from Acquire.ObjectStore import datetime_to_string
 
         data = {}
         data["UUID"] = self._uuid
         data["name"] = self._name
-        data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
         data["metadata"] = self._metadata
         data["stored"] = self._stored
         data["data_keys"] = self._data_keys
@@ -297,10 +288,9 @@ class Datasource:
             Returns:
                 Pandas.Dataframe: Dataframe from stored HDF file
         """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from HUGS.ObjectStore import get_dated_object as _get_dated_object
+        from HUGS.ObjectStore import get_dated_object
 
-        data = _get_dated_object(bucket, key)
+        data = get_dated_object(bucket, key)
 
         return Datasource.hdf_to_dataframe(data)
 
@@ -380,15 +370,12 @@ class Datasource:
             Returns:
                 bytes: HDF5 file as bytes object
         """
-        from pandas import HDFStore as _HDFStore
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        from Acquire.ObjectStore import get_datetime_now_to_string
+        from pandas import HDFStore
 
-        with _HDFStore("write.hdf", mode="w", driver="H5FD_CORE", driver_core_backing_store=0,
+        with HDFStore("write.hdf", mode="w", driver="H5FD_CORE", driver_core_backing_store=0,
                         complevel=6, complib="blosc:blosclz") as out:
             
             out["data"] = data
-            # Copy the data and close the file to check if this works
             return out._handle.get_file_image()
 
     @staticmethod
@@ -403,11 +390,9 @@ class Datasource:
             Returns:
                 Pandas.Dataframe: Dataframe read from HDF5 file buffer
         """
-        from pandas import HDFStore as _HDFStore
-        from pandas import read_hdf as _read_hdf
-        from Acquire.ObjectStore import get_datetime_now_to_string
+        from pandas import HDFStore, read_hdf
 
-        with _HDFStore("read.hdf", mode="r", driver="H5FD_CORE", driver_core_backing_store=0,
+        with HDFStore("read.hdf", mode="r", driver="H5FD_CORE", driver_core_backing_store=0,
                         driver_core_image=hdf_data) as data:
             return _read_hdf(data)
 
@@ -464,8 +449,7 @@ class Datasource:
             return
 
         import tempfile
-        from Acquire.ObjectStore import ObjectStore
-        from Acquire.ObjectStore import datetime_to_string
+        from Acquire.ObjectStore import datetime_to_strin, ObjectStore
         from HUGS.ObjectStore import get_bucket
         # from zarr import Blosc
 
@@ -578,12 +562,11 @@ class Datasource:
             Returns:
                 str: UUID for the Datasource
         """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+        from Acquire.ObjectStore import ObjectStore, string_to_encoded
 
-        encoded_name = _string_to_encoded(name)
+        encoded_name = string_to_encoded(name)
         prefix = "%s/name/%s" % (Datasource._datasource_root, encoded_name)
-        uuid = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
+        uuid = ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
 
         if len(uuid) > 1:
             raise ValueError("There should only be one Datasource associated with this name")
@@ -606,22 +589,17 @@ class Datasource:
             Returns:
                 None
         """
-        from operator import itemgetter 
+        from operator import itemgetter
         # Data list elements contain a tuple of
         # (data,(start_datetime, end_datetime))
         # Could also check to make sure we don't have overlapping dateranges?
         self._data = sorted(self._data, key=itemgetter(1,0))
 
     def update_daterange(self):
-        """ Get the daterange the data in this Datasource covers as tuple
-            of start, end datetime objects
-
-            Update it this so we only compute the daterange covered each time we add data to the datasource
-
-            TODO - big limition here is that we expect the data list to be in date order
+        """ Update the dates stored by this 
 
             Returns:
-                tuple (datetime, datetime): Start, end datetimes
+                None
         """
         from Acquire.ObjectStore import datetime_to_datetime
 
@@ -633,7 +611,7 @@ class Datasource:
                 self._start_datetime = datetime_to_datetime(self._data[0][0].first_valid_index())
                 self._end_datetime = datetime_to_datetime(self._data[-1][0].last_valid_index())
             elif data_type == "footprint":
-                # TODO - this is a mess
+                # TODO - this feels messy
                 start, _ = self.get_dataset_daterange(self._data[0][0])
                 _, end = self.get_dataset_daterange(self._data[-1][0])
                 self._start_datetime = datetime_to_datetime(start)
