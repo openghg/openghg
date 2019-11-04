@@ -66,9 +66,21 @@ def search_box():
             dbox = download_box()
             # Vertical spacer ? 
             # This breaks stuff here - find out why!
-            new_box = [search_vbox, dbox]
-            # search_vbox.children = [widgets.HTML(value="YAHYAHYAH")]
-            search_vbox.children = new_box
+            # extra_vbox = [widgets.VBox(children=[widgets.HTML(value="YAHYAHYAH")])]
+            yahyah = widgets.HTML(value="YAHYAHYAH")
+            # search_vbox.children = [widgets.VBox(children=search_children.extend([yahyah]))]
+            # updated = search_children + [yahyah]
+            updated = search_children + dbox
+
+            # updated_box = widgets.VBox(children=updated)
+
+            search_vbox.children = updated
+            
+            # for f in search_children:
+            #     print(type(f))
+            # new_box = [search_vbox, extra_vbox]
+            # search_vbox.children = extra_vbox
+            # search_vbox.children = new_box
             # search_children.append(dbox)
         else:
             status_box.value = f"<font color='red'>No results</font>"
@@ -128,7 +140,7 @@ def download_box():
     """ Creates the plotting box that holds the plotting buttons and windows
 
         Returns:
-            ipywidgets.VBox    
+            list: List of download widgets
     """
     table_style = {'description_width': 'initial'}
     table_layout = {'width': '100px', 'min_width': '100px', 'height': '28px', 'min_height': '28px'}
@@ -183,8 +195,8 @@ def download_box():
 
     status_bar = widgets.HTML(value="Status: Waiting...", layout=statusbar_layout)
 
-    d_box = widgets.VBox(children=[header_box, dynamic_box, download_button_box, status_bar])
-
+    # d_box = widgets.VBox(children=[])
+    download_widgets = [header_box, dynamic_box, download_button_box, status_bar]
     # download_box = VBox[header_box, dynamic_box, download_button_box, status_bar]
 
-    return d_box
+    return download_widgets
