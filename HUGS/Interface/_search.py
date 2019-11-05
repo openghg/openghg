@@ -1,4 +1,4 @@
-__all__ = ["search_emissions", "get_emissions_data", "search_box", "test_case"]
+__all__ = ["search_emissions", "get_emissions_data", "create_search_box", "test_case"]
 
 """
     Searching interface functions
@@ -7,8 +7,10 @@ __all__ = ["search_emissions", "get_emissions_data", "search_box", "test_case"]
 from datetime import datetime
 from Acquire.ObjectStore import datetime_to_string
 from HUGS.Client import Search
-# from HUGS.Interface import download_box
+from HUGS.Client import Retrieve
 import ipywidgets as widgets
+from pandas import read_json as pd_read_json
+from functools import partial
 
 
 def search_emissions(search_terms):
@@ -17,7 +19,7 @@ def search_emissions(search_terms):
 def get_emissions_data(search_terms):
     return []
 
-def search_box():
+def create_search_box():
     """ Create the searching interface
 
         Returns:
@@ -39,6 +41,8 @@ def search_box():
                        search_button, status_box]
 
     search_vbox = widgets.VBox(children=search_children)
+
+    date_keys = {"foo": 1, "bar":2, "spam": 3}
     
     def call_search(x):
         if start_picker.value:
@@ -63,32 +67,101 @@ def search_box():
             # date_keys = _parse_results(search_results)
             status_box.value = f"<font color='green'>Success</font>"
             # Now we have search results we can select the ones we want to download
-            dbox = download_box()
-            # Vertical spacer ? 
-            # This breaks stuff here - find out why!
-            # extra_vbox = [widgets.VBox(children=[widgets.HTML(value="YAHYAHYAH")])]
-            yahyah = widgets.HTML(value="YAHYAHYAH")
-            # search_vbox.children = [widgets.VBox(children=search_children.extend([yahyah]))]
-            # updated = search_children + [yahyah]
-            updated = search_children + dbox
-
-            # updated_box = widgets.VBox(children=updated)
-
-            search_vbox.children = updated
-            
-            # for f in search_children:
-            #     print(type(f))
-            # new_box = [search_vbox, extra_vbox]
-            # search_vbox.children = extra_vbox
-            # search_vbox.children = new_box
-            # search_children.append(dbox)
+            d_box = create_download_box(date_keys=date_keys)
+            # Update the children of the previous box to include the download box
+            search_vbox.children = search_children + d_box
         else:
             status_box.value = f"<font color='red'>No results</font>"
     
     search_button.on_click(call_search)
 
+
+    status_box.value = "Yahyah"
+    # # From here create a 
+    # selected_data = []
+
+    # # New from here
+    # def select_data(**kwargs):
+    #     selected_data.clear()
+    #     for key in kwargs:
+    #         if kwargs[key] is True:
+    #             selected_data.append(key)
+
+    # def update_statusbar(text):
+    #     status_bar.value = f"Status: {text}"
+
+    # data = None
+    # def download_data(date_keys, selected_data):
+    #     print("Yahyahyah")
+    #     update_statusbar("Downloading...")
+
+    #     download_keys = {key: date_keys[key]["keys"] for key in selected_data}
+
+    #     retrieve = Retrieve(service_url=base_url)
+    #     data = retrieve.retrieve(keys=download_keys)
+
+    #     # Convert the JSON into Dataframes
+    #     # TODO - the returned data will be an xarray Dataset in the future
+    #     # Write a test to catch this change
+    #     for key in data:
+    #         data[key] = pd_read_json(data[key])
+
+    #     # # Update the status bar
+    #     # if data:
+    #     #     update_statusbar("Download complete")
+    #     #     # Create the plotting box
+    #     #     create_plotting_box()
+    #     # else:
+    #     #     update_statusbar("No data downloaded")
+
+    # # Here could update the status bar and call the download function
+    # # download_button.on_click(download_data)
+    
+    # out = widgets.interactive_output(select_data, arg_dict)
+
+    # return download_widgets
+
     return widgets.VBox(children=[search_vbox])
 
+
+def download_data(arg_dict):
+    print("Yahyahyah")
+        
+    update_statusbar("Downloading...")
+
+    download_keys = {key: date_keys[key]["keys"] for key in selected_data}
+
+    retrieve = Retrieve(service_url=base_url)
+    data = retrieve.retrieve(keys=download_keys)
+
+    # Convert the JSON into Dataframes
+    # TODO - the returned data will be an xarray Dataset in the future
+    # Write a test to catch this change
+    for key in data:
+        data[key] = pd_read_json(data[key])
+
+    # Update the status bar
+    if data:
+    #     update_statusbar("Download complete")
+    #     # Create the plotting box
+        create_plotting_box()
+    else:
+        print("Booo")
+    #     update_statusbar("No data downloaded")
+
+    selected_data = []
+    def select_data(**kwargs):
+        selected_data.clear()
+        for key in kwargs:
+            if kwargs[key] is True:
+                selected_data.append(key)
+
+    # Here could update the status bar and call the download function
+    # download_button.on_click(download_data)
+    
+    out = widgets.interactive_output(select_data, arg_dict)
+
+    # return download_widgets
 
 def _parse_results(results):
     """ Split the keys into a list of each key and the date that the data covers
@@ -136,9 +209,11 @@ def test_case():
     return VBox(children=[top_toggle, vb])
 
 
-def download_box():
+def create_download_box(date_keys):
     """ Creates the plotting box that holds the plotting buttons and windows
-
+        
+        Args:
+            date_keys (dict): Dictionary of keys containing dates to be read
         Returns:
             list: List of download widgets
     """
@@ -159,27 +234,29 @@ def download_box():
     site_labels = []
     date_labels = []
     gas_labels = []
-    # for key in date_keys:
-    #     # Create the checkboxes
-    #     checkbox = widgets.Checkbox(value=False)
-    #     checkbox_objects.append(checkbox)
-    #     search_keys.append(key)
+    for key in date_keys:
+        # Create the checkboxes
+        checkbox = widgets.Checkbox(value=False)
+        checkbox_objects.append(checkbox)
+        # search_keys.append(key)
 
-    #     dates = date_keys[key]["dates"].replace("_", " to ").replace("T", " ")
-    #     date_label = widgets.Label(value=dates, layout=date_layout)
+        # dates = date_keys[key]["dates"].replace("_", " to ").replace("T", " ")
+        # date_label = widgets.Label(value=dates, layout=date_layout)
 
-    #     split_key = key.split("_")
-    #     site_name = split_key[0].upper()
-    #     gas_name = split_key[1].upper()
+        # split_key = key.split("_")
+        # site_name = split_key[0].upper()
+        # gas_name = split_key[1].upper()
 
-    #     gas_label = widgets.Label(value=gas_name, layout=table_layout)
-    #     site_label = widgets.Label(value=site_name, layout=table_layout)
+        # gas_label = widgets.Label(value=gas_name, layout=table_layout)
+        # site_label = widgets.Label(value=site_name, layout=table_layout)
 
-    #     date_labels.append(date_label)
-    #     site_labels.append(site_label)
-    #     gas_labels.append(gas_label)
+        # date_labels.append(date_label)
+        # site_labels.append(site_label)
+        # gas_labels.append(gas_label)
 
     # arg_dict = {search_keys[i]: checkbox for i, checkbox in enumerate(checkbox_objects)}
+
+    arg_dict_tmp = {chr(i+65): checkbox for i, checkbox in enumerate(checkbox_objects)}
 
     header_box = widgets.HBox(children=[header_label_site, header_label_gas, header_label_dates, header_label_select])
 
@@ -191,12 +268,12 @@ def download_box():
     dynamic_box = widgets.HBox(children=[site_vbox, gas_vbox, dates_vbox, checkbox_vbox])
 
     download_button = widgets.Button(description="Download", button_style="success", layout=table_layout)
+
+    download_button.on_click(download_data)
     download_button_box = widgets.HBox(children=[download_button])
 
     status_bar = widgets.HTML(value="Status: Waiting...", layout=statusbar_layout)
 
-    # d_box = widgets.VBox(children=[])
     download_widgets = [header_box, dynamic_box, download_button_box, status_bar]
-    # download_box = VBox[header_box, dynamic_box, download_button_box, status_bar]
 
     return download_widgets
