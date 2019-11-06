@@ -5,10 +5,11 @@
 from Acquire.Client import User
 import collections
 from datetime import datetime
+import functools
 import ipywidgets as widgets
-from HUGS.Client import Retrieve
+from HUGS.Client import Retrieve, Search
 from HUGS.Interface import generate_password
-import pandas
+import pandas as pd
 
 
 
@@ -29,8 +30,12 @@ class Interface:
 
         Can move the layouts to be class members
     """
+    
+
     def __init__(self):
         self._widgets = {} #collections.defaultdict(list)
+        self._search_results = None
+        self._base_url = "https://hugs.acquire-aaai.com/t"
 
     def create_login(self, user, x):
         """ Create a basic login widget and add it to the widget dict
@@ -53,14 +58,14 @@ class Interface:
         status_text = widgets.HTML(value=f"<font color='blue'>Enter credentials</font>")
         output_box = widgets.Output()
 
-        base_url = "https://hugs.acquire-aaai.com/t"
+        
 
         def register_user(a):
             if password_box.value != conf_password_box.value:
                 with output_box:
                     status_text.value = f"<font color='red'>Passwords do not match</font>"
             else:
-                result = User.register(username=username_box.value, password=password_box.value, identity_url=f"{base_url}/identity")
+                result = User.register(username=username_box.value, password=password_box.value, identity_url=f"{self._base_url}/identity")
 
                 with output_box:
                     status_text.value = f"<font color='green'>Please scan QR code with authenticator app</font>"
@@ -83,13 +88,12 @@ class Interface:
         status_text = widgets.HTML(value=f"<font color='black'>Waiting for login</font>")
         login_button = widgets.Button(description="Login", button_style="success")
         login_link_box = widgets.Output()
-        base_url = "https://hugs.acquire-aaai.com/t"
 
         user = None
 
         def login(a):
             global user
-            user = User(username=username_text.value, identity_url=f"{base_url}/identity")
+            user = User(username=username_text.value, identity_url=f"{self._base_url}/identity")
 
             with login_link_box:
                 print(username_text.value)
@@ -143,9 +147,9 @@ class Interface:
             split_search_terms = search_terms.value.replace(" ", "").split(",")
             split_locations = locations.value.replace(" ", "").split(",")
 
-            #search = Search(service_url=base_url)
-            search_results = ["yah"]  # search.search(search_terms=split_search_terms, locations=split_locations,
-            #          data_type=data_type.value, start_datetime=start, end_datetime=end)
+            search = Search(service_url=self._base_url)
+            search_results = search.search(search_terms=split_search_terms, locations=split_locations,
+                                                data_type=data_type.value, start_datetime=start, end_datetime=end)
 
             if search_results:
                 date_keys = self.parse_results(results=search_results)
@@ -241,25 +245,23 @@ class Interface:
             # Create the checkboxes
             checkbox = widgets.Checkbox(value=False)
             checkbox_objects.append(checkbox)
-            # search_keys.append(key)
+            search_keys.append(key)
 
-            # dates = date_keys[key]["dates"].replace("_", " to ").replace("T", " ")
-            # date_label = widgets.Label(value=dates, layout=date_layout)
+            dates = date_keys[key]["dates"].replace("_", " to ").replace("T", " ")
+            date_label = widgets.Label(value=dates, layout=date_layout)
 
-            # split_key = key.split("_")
-            # site_name = split_key[0].upper()
-            # gas_name = split_key[1].upper()
+            split_key = key.split("_")
+            site_name = split_key[0].upper()
+            gas_name = split_key[1].upper()
 
-            # gas_label = widgets.Label(value=gas_name, layout=table_layout)
-            # site_label = widgets.Label(value=site_name, layout=table_layout)
+            gas_label = widgets.Label(value=gas_name, layout=table_layout)
+            site_label = widgets.Label(value=site_name, layout=table_layout)
 
-            # date_labels.append(date_label)
-            # site_labels.append(site_label)
-            # gas_labels.append(gas_label)
+            date_labels.append(date_label)
+            site_labels.append(site_label)
+            gas_labels.append(gas_label)
 
-        # arg_dict = {search_keys[i]: checkbox for i, checkbox in enumerate(checkbox_objects)}
-
-        arg_dict_tmp = {chr(i+65): checkbox for i, checkbox in enumerate(checkbox_objects)}
+        arg_dict = {search_keys[i]: checkbox for i, checkbox in enumerate(checkbox_objects)}
 
         header_box = widgets.HBox(children=[header_label_site, header_label_gas, header_label_dates, header_label_select])
 
@@ -272,7 +274,14 @@ class Interface:
 
         download_button = widgets.Button(description="Download", button_style="success", layout=table_layout)
 
-        download_button.on_click(self.download_data)
+
+        # FIXME
+        def on_download_click(b, download_keys):
+            global download_keys
+            download_keys = {key: date_keys[key]["keys"] for key in arg_dict if arg_dict[key].value is True}
+            self.download_data(download_keys=download_keys)
+
+        download_button.on_click(functools.partial(on_download_click, download_keys))
         download_button_box = widgets.HBox(children=[download_button])
 
         # Put widgets we want to be able to interact with from outside in self._widgets dictionary
@@ -313,7 +322,7 @@ class Interface:
     def update_statusbar(self, text):
         self._widgets["status_bar"].value = f"Status: {text}"
 
-    def download_data(self, date_keys, selected_data):
+    def download_data(self, download_keys):
         """ Download the data in the selected keys from the object store
 
             Args:
@@ -321,26 +330,29 @@ class Interface:
             Returns:
                 None
         """
+        print(download_keys)
 
 
+
+
+        # retrieve = Retrieve(service_url=base_url)
         self.update_statusbar("Downloading...")
 
-        download_keys = {key: date_keys[key]["keys"] for key in selected_data}
-        retrieve = Retrieve(service_url=base_url)
+        # data = retrieve.retrieve(keys=download_keys)
 
-        data = retrieve.retrieve(keys=download_keys)
+        # # Conver the JSON into Dataframes
+        # for key in data:
+        #     data[key] = pd.read_json(data[key])
 
-        # Conver the JSON into Dataframes
-        for key in data:
-            data[key] = pd_read_json(data[key])
+        # # Update the status bar
+        # if data:
+        #     update_statusbar("Download complete")
+        #     # Create the plotting box
+        #     create_plotting_box()
+        # else:
+        #     update_statusbar("No data downloaded")
 
-        # Update the status bar
-        if data:
-            update_statusbar("Download complete")
-            # Create the plotting box
-            create_plotting_box()
-        else:
-            update_statusbar("No data downloaded")
+        # out = widgets.interactive_output(select_data, arg_dict)
 
 
 
