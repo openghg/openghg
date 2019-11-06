@@ -30,12 +30,13 @@ class Interface:
 
         Can move the layouts to be class members
     """
-    
-
     def __init__(self):
-        self._widgets = {} #collections.defaultdict(list)
-        self._search_results = None
         self._base_url = "https://hugs.acquire-aaai.com/t"
+        self._search_results = None
+        self._module_list = ["register", "login", "search", "download", "plot_1", "plot_2"]
+        # Maybe just made _widgets a defaultdict(list) as originally thought?
+        # self._widgets = {key: [] for key in self._module_list} #collections.defaultdict(list)
+        self._widgets = {}
 
     def create_login(self, user, x):
         """ Create a basic login widget and add it to the widget dict
@@ -57,8 +58,6 @@ class Interface:
         register_button = widgets.Button(description="Register", button_style="primary")
         status_text = widgets.HTML(value=f"<font color='blue'>Enter credentials</font>")
         output_box = widgets.Output()
-
-        
 
         def register_user(a):
             if password_box.value != conf_password_box.value:
@@ -129,8 +128,6 @@ class Interface:
                         search_button, status_box]
 
         search_vbox = widgets.VBox(children=search_children)
-
-        date_keys = {"foo": 1, "bar": 2, "spam": 3}
 
         def call_search(x):
             if start_picker.value:
@@ -274,22 +271,24 @@ class Interface:
 
         download_button = widgets.Button(description="Download", button_style="success", layout=table_layout)
 
-
-        # FIXME
-        def on_download_click(b, download_keys):
-            global download_keys
-            download_keys = {key: date_keys[key]["keys"] for key in arg_dict if arg_dict[key].value is True}
-            self.download_data(download_keys=download_keys)
-
-        download_button.on_click(functools.partial(on_download_click, download_keys))
-        download_button_box = widgets.HBox(children=[download_button])
-
-        # Put widgets we want to be able to interact with from outside in self._widgets dictionary
-        # Should we put all widgets in? May get messy if these all need naming etc
         self._widgets["status_bar"] = widgets.HTML(value="Status: Waiting...", layout=statusbar_layout)
         status_bar = self._widgets["status_bar"]
 
-        download_widgets = [header_box, dynamic_box, download_button_box, status_bar]
+        def on_download_click(a):
+            download_keys = {key: date_keys[key]["keys"] for key in arg_dict if arg_dict[key].value is True}
+            self.download_data(download_keys=download_keys)
+
+        download_button.on_click(on_download_click)
+        download_button_box = widgets.HBox(children=[download_button])
+
+        plot_box = widgets.VBox()
+
+        # TODO - can build each GUI with a dictionary of lists that are used to create each block of widgets
+
+        # Put widgets we want to be able to interact with from outside in self._widgets dictionary
+        # Should we put all widgets in? May get messy if these all need naming etc
+        self._widgets["download"] = [header_box, dynamic_box, download_button_box, status_bar, plot_box]
+        download_widgets = self._widgets["download"]
 
         return download_widgets
 
@@ -330,17 +329,11 @@ class Interface:
             Returns:
                 None
         """
-        print(download_keys)
-
-
-
-
-        # retrieve = Retrieve(service_url=base_url)
+        # retrieve = Retrieve(service_url=self.base_url)
+        # data = retrieve.retrieve(keys=download_keys)
         self.update_statusbar("Downloading...")
 
-        # data = retrieve.retrieve(keys=download_keys)
-
-        # # Conver the JSON into Dataframes
+        # # Convert the JSON into Dataframes
         # for key in data:
         #     data[key] = pd.read_json(data[key])
 
@@ -351,10 +344,19 @@ class Interface:
         #     create_plotting_box()
         # else:
         #     update_statusbar("No data downloaded")
+        
+        # Messy
+        self._widgets["download"][-1].children = [widgets.Button(description="Register", button_style="primary")]
 
-        # out = widgets.interactive_output(select_data, arg_dict)
+    def populate_dictionary(self, keys):
+        """ Populate the dictionary used to store the lists of widgets
 
-
+            Args:
+                keys (list): List of keys to be used to populate dictionary
+            Returns:
+                None
+        """
+        self._widgets = {key: [] for key in keys}
 
 
     def show_interface(self, new_user=False):
