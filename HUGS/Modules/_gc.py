@@ -203,7 +203,9 @@ class GC:
 
         gas_data = gc.split(data=data, site=site, species=species, metadata=metadata)
 
-        lookup_results = lookup_gas_datasources(gas_data=gas_data, source_name=source_name, source_id=source_id)
+        # lookup_results = lookup_gas_datasources(gas_data=gas_data, source_name=source_name, source_id=source_id)
+        lookup_results = lookup_gas_datasources(lookup_dict=self._datasource_names, gas_data=gas_data,
+                                                source_name=source_name, source_id=source_id)
     
         # Create Datasources, save them to the object store and get their UUIDs
         datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
