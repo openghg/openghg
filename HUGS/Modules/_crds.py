@@ -226,7 +226,9 @@ class CRDS:
         # Check to see if we've had data from these Datasources before
         # TODO - currently just using a simple naming system here - update to use 
         # an assigned UUID? Seems safer? How to give each gas a UUID? 
-        lookup_results = lookup_gas_datasources(gas_data, source_name, source_id)
+        # This could be rolled into the assign_data function?
+        lookup_results = lookup_gas_datasources(lookup_dict=crds._datasource_names, gas_data=gas_data, 
+                                                source_name=source_name, source_id=source_id)
 
         # If we're passed a source name or source id check it against the records of current CRDS data
         # Update the Datasource records for CRDS and make it a dictionary where 

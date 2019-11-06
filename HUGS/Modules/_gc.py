@@ -35,6 +35,7 @@ class GC:
         self._file_hashes = {}
         # Site codes for inlet readings
         self._site_codes = {}
+        self._params = {}
 
     def is_null(self):
         """ Check if this is a null object
@@ -54,14 +55,14 @@ class GC:
             Returns:
                 bool: True if object exists
         """
-        from HUGS.ObjectStore import exists as _exists
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import exists
+        from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
 
         key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
-        return _exists(bucket=bucket, key=key)
+        return exists(bucket=bucket, key=key)
 
     @staticmethod
     def create():
@@ -70,10 +71,10 @@ class GC:
             Returns:
                 GC: GC object 
         """
-        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
+        from Acquire.ObjectStore import get_datetime_now
 
         gc = GC()
-        gc._creation_datetime = _get_datetime_now()
+        gc._creation_datetime = get_datetime_now()
 
         return gc
 
@@ -185,25 +186,23 @@ class GC:
         # TODO - I feel this is messy, should be improved and the _test_data function
         # removed, create a json folder so there's a proper structure?
         # Load in the parameters dictionary for processing data
-        params_file = _test_data() + "/process_gcwerks_parameters.json"
-        with open(params_file, "r") as f:
-            gc._params = json.load(f)
+        
+        # params_file = _test_data() + "/process_gcwerks_parameters.json"
+        # with open(params_file, "r") as f:
+        #     gc._params = json.load(f)
         # Load in the params for code_site, site_code dictionaries for selection
         # of inlets from the above parameters
-        site_codes_json = _test_data() + "/site_codes.json"
-        with open(site_codes_json, "r") as f:
-            d = json.load(f)
-            gc._site_codes = d["name_code"]
+        
 
-        if site not in gc._site_codes:
-            raise ValueError("Site not recognized")
-    
+        
         data, species, metadata = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                                                 site=site, instrument=instrument_name)
 
         gas_data = gc.split(data=data, site=site, species=species, metadata=metadata)
 
-        lookup_results = lookup_gas_datasources(gas_data=gas_data, source_name=source_name, source_id=source_id)
+        # lookup_results = lookup_gas_datasources(gas_data=gas_data, source_name=source_name, source_id=source_id)
+        lookup_results = lookup_gas_datasources(lookup_dict=gc._datasource_names, gas_data=gas_data,
+                                                source_name=source_name, source_id=source_id)
     
         # Create Datasources, save them to the object store and get their UUIDs
         datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
@@ -363,16 +362,16 @@ class GC:
         from fnmatch import fnmatch
         from itertools import compress
 
-        site_code = self._site_codes[site]
+        
+        site_code = self.get_site_code(site)
         # Read inlets from the parameters dictionary
         expected_inlets = self.get_inlets(site_code=site_code)
         # Get the inlets in the dataframe
         try:
             data_inlets = data["Inlet"].unique()
         except KeyError:
-            raise KeyError("Unable to read inlets from data, please ensure this data is of the GC type"
-                            "expected by this processing module")
-
+            raise KeyError("Unable to read inlets from data, please ensure this data is of the GC \
+                                    type expected by this processing module")
         # TODO - ask Matt/Rachel about inlets
         matching_inlets = data_inlets
 
@@ -435,6 +434,9 @@ class GC:
                 int: Precision of instrument in seconds
 
         """
+        if not self._params:
+            self.load_params()
+
         return self._params["GC"]["sampling_period"][instrument]
 
     def get_inlets(self, site_code):
@@ -445,7 +447,45 @@ class GC:
             Returns:
                 list: List of inlets
         """
+        if not self._params:
+            self.load_params()
+
         return self._params["GC"][site_code]["inlets"]
+
+    def load_params(self):
+        """ Load the parameters from file
+
+            Returns:
+                None
+        """
+        import json
+
+        params_file = _test_data() + "/process_gcwerks_parameters.json"
+        with open(params_file, "r") as f:
+            self._params = json.load(f)
+
+    def get_site_code(self, site):
+        """ Get the site code
+
+            Args:
+                site (str): Name of site
+            Returns:
+                str: Site code
+        """
+        import json
+
+        if not self._site_codes:
+            site_codes_json = _test_data() + "/site_codes.json"
+            with open(site_codes_json, "r") as f:
+                d = json.load(f)
+                self._site_codes = d["name_code"]
+
+        try:
+            site_code = self._site_codes[site.lower()]
+        except KeyError:
+            raise KeyError("Site not recognized")
+        
+        return site_code
 
     def add_datasources(self, datasource_uuids):
         """ Add the passed list of Datasources to the current list

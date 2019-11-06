@@ -87,7 +87,7 @@ def test_read_precision(precision_path):
     
 def test_split(data_path, precision_path):
     # Capegrim
-    site = "CGO"
+    site = "capegrim"
     instrument = "GCMD"
 
     gc = GC.create()
@@ -109,10 +109,12 @@ def test_split(data_path, precision_path):
     # assert False
 
 
-def test_to_data(gc):
+def test_to_data():
+    gc = GC.create()
+
     data = gc.to_data()
 
-    assert data["stored"] == False
+    assert data["stored"] == True
     assert data["creation_datetime"] == datetime_to_string(datetime.datetime(1970,1,1))
 
 
