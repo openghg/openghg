@@ -2,11 +2,16 @@
     A class to create the interface for HUGS
     
 """
+from Acquire.Client import User
 import collections
 from datetime import datetime
 import ipywidgets as widgets
+from HUGS.Client import Retrieve
 from HUGS.Interface import generate_password
-from Acquire.Client import User
+import pandas
+
+
+
 
 __all__ = ["Interface"]
 
@@ -143,7 +148,7 @@ class Interface:
             #          data_type=data_type.value, start_datetime=start, end_datetime=end)
 
             if search_results:
-                # date_keys = self._parse_results(search_results)
+                date_keys = self.parse_results(results=search_results)
                 status_box.value = f"<font color='green'>Success</font>"
                 # Now we have search results we can select the ones we want to download
                 # TODO - move this so it's a part of the widgets dict
@@ -267,24 +272,28 @@ class Interface:
 
         download_button = widgets.Button(description="Download", button_style="success", layout=table_layout)
 
-        # download_button.on_click(download_data)
+        download_button.on_click(self.download_data)
         download_button_box = widgets.HBox(children=[download_button])
 
-        status_bar = widgets.HTML(value="Status: Waiting...", layout=statusbar_layout)
+        # Put widgets we want to be able to interact with from outside in self._widgets dictionary
+        # Should we put all widgets in? May get messy if these all need naming etc
+        self._widgets["status_bar"] = widgets.HTML(value="Status: Waiting...", layout=statusbar_layout)
+        status_bar = self._widgets["status_bar"]
 
         download_widgets = [header_box, dynamic_box, download_button_box, status_bar]
 
-        # return widgets.VBox(children=download_widgets)
         return download_widgets
 
-    def _parse_results(self, results):
-        """ Split the keys into a list of each key and the date that the data covers
+    def parse_results(self, results):
+        """ Split the keys into a dictionary of each key and the date that the data covers
             
             Args:
                 results (dict): Dictionary of search results
             Returns:
-                list (tuple): List of date, data key list pairs
+                dict: Keyed by object store key, each value being a dictionary of dates covered
+                and the keys for these dates
         """
+        # TODO - clear this up and improve comments
         date_keys = {}
         for key in results.keys():
             keys = sorted(results[key])
@@ -304,6 +313,35 @@ class Interface:
     def update_statusbar(self, text):
         self._widgets["status_bar"].value = f"Status: {text}"
 
+    def download_data(self, date_keys, selected_data):
+        """ Download the data in the selected keys from the object store
+
+            Args:
+                date_keys (dict): Dictionary 
+            Returns:
+                None
+        """
+
+
+        self.update_statusbar("Downloading...")
+
+        download_keys = {key: date_keys[key]["keys"] for key in selected_data}
+        retrieve = Retrieve(service_url=base_url)
+
+        data = retrieve.retrieve(keys=download_keys)
+
+        # Conver the JSON into Dataframes
+        for key in data:
+            data[key] = pd_read_json(data[key])
+
+        # Update the status bar
+        if data:
+            update_statusbar("Download complete")
+            # Create the plotting box
+            create_plotting_box()
+        else:
+            update_statusbar("No data downloaded")
+
 
 
 
@@ -317,8 +355,6 @@ class Interface:
             # widget_list.append(self.create_user())
 
             self._widgets["create"] = self.create_user()
-
-        
 
         user, login_box = self.create_login_box()
 

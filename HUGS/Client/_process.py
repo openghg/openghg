@@ -135,7 +135,7 @@ class Process:
                         "par": {"data": par.to_data()},
                         "par_secret": {"data": par_secret},
                         "data_type": data_type, "datasource": datasource,
-                        "source_name":source_name, "overwrite":overwrite }
+                        "source_name":source_name, "overwrite":overwrite}
 
             # If we try to upload many files we don't want it to fail if a single
             # file contains overlapping data
