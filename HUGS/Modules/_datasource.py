@@ -104,13 +104,15 @@ class Datasource:
         """
         self._metadata[key.lower()] = value.lower()
 
-    def add_data(self, metadata, data, overwrite):
+    def add_data(self, metadata, data, data_type=None, overwrite=False):
         """ Add data to this Datasource and segment the data by size.
             The data is stored as a tuple of the data and the daterange it covers.
 
             Args:
                 metadata (dict): Metadata on the data for this Datasource
                 data (Pandas.DataFrame): Data
+                data_type (str, default=None): Placeholder for combination of this fn
+                with add_footprint_data in the future
                 overwrite (bool, default=False): Overwrite existing data
                 None
         """
@@ -394,7 +396,7 @@ class Datasource:
 
         with HDFStore("read.hdf", mode="r", driver="H5FD_CORE", driver_core_backing_store=0,
                         driver_core_image=hdf_data) as data:
-            return _read_hdf(data)
+            return read_hdf(data)
 
     @staticmethod
     def from_data(bucket, data, shallow):
@@ -430,8 +432,6 @@ class Datasource:
                     d._data.append((Datasource.load_dataframe(bucket, key), (start,end)))
                 elif d._data_type == "footprint":
                     d._data.append((Datasource.load_dataset(bucket, key), (start,end)))
-            else:
-                raise NotImplementedError("Not yet implemented")
 
         d._stored = False
 
@@ -449,7 +449,7 @@ class Datasource:
             return
 
         import tempfile
-        from Acquire.ObjectStore import datetime_to_strin, ObjectStore
+        from Acquire.ObjectStore import datetime_to_string, ObjectStore
         from HUGS.ObjectStore import get_bucket
         # from zarr import Blosc
 
@@ -596,7 +596,9 @@ class Datasource:
         self._data = sorted(self._data, key=itemgetter(1,0))
 
     def update_daterange(self):
-        """ Update the dates stored by this 
+        """ Update the dates stored by this Datasource
+
+            TODO - cleaner way of doing this?
 
             Returns:
                 None
@@ -607,7 +609,7 @@ class Datasource:
             # Sort the data by date
             self.sort_data()
             data_type = self._data_type
-            if data_type == "CRDS" or data_type == "CRDS":
+            if data_type == "timeseries":
                 self._start_datetime = datetime_to_datetime(self._data[0][0].first_valid_index())
                 self._end_datetime = datetime_to_datetime(self._data[-1][0].last_valid_index())
             elif data_type == "footprint":
