@@ -13,9 +13,6 @@ from HUGS.Interface import generate_password
 import numpy as np
 import pandas as pd
 
-
-
-
 __all__ = ["Interface"]
 
 class Interface:
@@ -38,11 +35,9 @@ class Interface:
         # This is the order in which they'll be shown (if created)
         self._module_list = ["register", "login", "search", "download", "plot_1", "plot_2"]
         # Maybe just made _widgets a defaultdict(list) as originally thought?
-        # self._widgets = {key: [] for key in self._module_list} #collections.defaultdict(list)
-        # self._widgets = {} 
         self._widgets = collections.defaultdict(widgets.VBox)
-        # self.populate_dictionary(self._module_list)
-        # self._widgets = {}
+
+        # Styles - maybe these can be moved somewhere else?
         self.table_style = {'description_width': 'initial'}
         self.table_layout = {'width': '100px', 'min_width': '100px','height': '28px', 'min_height': '28px'}
         self.date_layout = {'width': '275px', 'min_width': '200px','height': '28px', 'min_height': '28px'}
@@ -125,9 +120,6 @@ class Interface:
             Returns:
                 ipywidgets.VBox
         """
-        search_results = None
-        date_keys = None
-
         search_terms = widgets.Text(value="", placeholder="Search", description="Search terms:", disabled=False)
         locations = widgets.Text(value="", placeholder="BSD, HFD", description="Locations:", disabled=False)
         data_type = widgets.Dropdown(options=["CRDS", "GC"], value="CRDS", description="Data type", disabled=False)
@@ -136,11 +128,6 @@ class Interface:
         start_picker = widgets.DatePicker(description='Start date', disabled=False)
         end_picker = widgets.DatePicker(description='End date', disabled=False)
         status_box = widgets.HTML(value="")
-
-        search_children = [search_terms, locations, start_picker, end_picker, data_type,
-                        search_button, status_box]
-
-        # search_vbox = widgets.VBox(children=search_children)
 
         def call_search(x):
             if start_picker.value:
@@ -172,57 +159,8 @@ class Interface:
 
         search_button.on_click(call_search)
 
-        status_box.value = "Yahyah"
-
-
-
-        
-
-        # # From here create a
-        # selected_data = []
-
-        # # New from here
-        # def select_data(**kwargs):
-        #     selected_data.clear()
-        #     for key in kwargs:
-        #         if kwargs[key] is True:
-        #             selected_data.append(key)
-
-        # def update_statusbar(text):
-        #     status_bar.value = f"Status: {text}"
-
-        # data = None
-        # def download_data(date_keys, selected_data):
-        #     print("Yahyahyah")
-        #     update_statusbar("Downloading...")
-
-        #     download_keys = {key: date_keys[key]["keys"] for key in selected_data}
-
-        #     retrieve = Retrieve(service_url=base_url)
-        #     data = retrieve.retrieve(keys=download_keys)
-
-        #     # Convert the JSON into Dataframes
-        #     # TODO - the returned data will be an xarray Dataset in the future
-        #     # Write a test to catch this change
-        #     for key in data:
-        #         data[key] = pd_read_json(data[key])
-
-        #     # # Update the status bar
-        #     # if data:
-        #     #     update_statusbar("Download complete")
-        #     #     # Create the plotting box
-        #     #     create_plotting_box()
-        #     # else:
-        #     #     update_statusbar("No data downloaded")
-
-        # # Here could update the status bar and call the download function
-        # # download_button.on_click(download_data)
-
-        # out = widgets.interactive_output(select_data, arg_dict)
-
-        # return download_widgets
-
-        # return widgets.VBox(children=[search_vbox])
+        search_children = [search_terms, locations, start_picker, end_picker, data_type,
+                           search_button, status_box]
 
         return search_children
     
@@ -348,7 +286,6 @@ class Interface:
             plot_keys.append(key)
             plot_checkboxes.append(widgets.Checkbox(description=desc, value=False))
 
-
         select_instruction = widgets.HTML(value="<b>Select data: </b>", layout=self.table_layout)
         plot_button = widgets.Button(description="Plot", button_style="success", layout=self.table_layout)
 
@@ -361,37 +298,22 @@ class Interface:
         # Clunk
         arg_dict = {plot_keys[i]: checkbox for i, checkbox in enumerate(plot_checkboxes)}
 
-        # def on_download_click(a):
-        #     download_keys = {key: date_keys[key]["keys"]
-        #                      for key in arg_dict if arg_dict[key].value is True}
-        #     self.download_data(download_keys=download_keys)
-
-        selected_data = []
-
         def on_plot_clicked(a):
             # Get the data for ticked checkboxes
             to_plot = {key: data[key] for key in arg_dict if arg_dict[key].value is True}
             plot_data(to_plot=to_plot)
 
+        # def select_data(**kwargs):
+        #     selected_data.clear()
 
-        def select_data(**kwargs):
-            selected_data.clear()
-
-            for key in kwargs:
-                if kwargs[key] is True:
-                    selected_data.append(key)
-
-            print("Yahyah", selected_data)
-
-
-        # Link the checkbox selection with the selected dataframes to plot
-        # out = widgets.interactive_output(select_data, arg_dict)
-
+        #     for key in kwargs:
+        #         if kwargs[key] is True:
+        #             selected_data.append(key)
         output = widgets.Output()
 
         def plot_data(to_plot):
-            """ Each key in the data dict is a dataframe
-
+            """ 
+                Each key in the data dict is a dataframe
             """
             # Here take the keys in the selected data list and use them to
             # access the Dataframes to plot
