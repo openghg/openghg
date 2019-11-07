@@ -368,6 +368,12 @@ class Interface:
 
         selected_data = []
 
+        def on_plot_clicked(a):
+            # Get the data for ticked checkboxes
+            to_plot = {key: data[key] for key in arg_dict if arg_dict[key].value is True}
+            plot_data(to_plot=to_plot)
+
+
         def select_data(**kwargs):
             selected_data.clear()
 
@@ -375,14 +381,15 @@ class Interface:
                 if kwargs[key] is True:
                     selected_data.append(key)
 
-            print(selected_data)
+            print("Yahyah", selected_data)
+
 
         # Link the checkbox selection with the selected dataframes to plot
-        out = widgets.interactive_output(select_data, arg_dict)
+        # out = widgets.interactive_output(select_data, arg_dict)
 
         output = widgets.Output()
 
-        def plot_data(arg):
+        def plot_data(to_plot):
             """ Each key in the data dict is a dataframe
 
             """
@@ -391,8 +398,7 @@ class Interface:
             # Use the same axes. Can have a button to create new plots etc in the future
 
             # TODO - change this to take the data directly from the dict?
-            plot_data = [data[x] for x in selected_data]
-
+            # plot_data = [data[x] for x in selected_data]
             # For now just plot the first column in the data
 
             # Setup the axes
@@ -400,8 +406,11 @@ class Interface:
             y_scale = bq.LinearScale()
             scales = {"x": x_scale, "y": y_scale}
 
-            lines.x = [d.index.values.tolist() for d in plot_data]
-            lines.y = [d.iloc[:, 0] for d in plot_data]
+            lines.x = [to_plot[key].index for key in to_plot]
+            lines.y = [to_plot[key].iloc[:,0] for key in to_plot]
+
+            # lines.x = [d.index.values.tolist() for d in to_plot]
+            # lines.y = [d.iloc[:, 0] for d in to_plot]
 
         x_scale = bq.DateScale()
         y_scale = bq.LinearScale()
@@ -414,10 +423,11 @@ class Interface:
         lines = bq.Lines(x=np.arange(100), y=np.cumsum(np.random.randn(2, 100), axis=1), scales=scales)
         figure = bq.Figure(marks=[lines], axes=[ax, ay], animation_duration=1000)
 
-        plot_button.on_click(plot_data)
+        plot_button.on_click(on_plot_clicked)
 
         # plotting_box.children = [ui_box, out, figure]
-        return [ui_box, out, figure]
+        # return [ui_box, out, figure]
+        return [ui_box, figure]
 
     # Will this force an update ?
     def update_statusbar(self, status_name, text):
@@ -455,23 +465,7 @@ class Interface:
         else:
             raise NotImplementedError
             # update_statusbar("No data downloaded")
-        
-        # Messy
-        # self._widgets["download"][-1].children = [widgets.Button(description="Register", button_style="primary")]
 
-    # def populate_dictionary(self, keys):
-    #     """ Populate the dictionary used to store the lists of widgets
-
-    #         Args:
-    #             keys (list): List of keys to be used to populate dictionary
-    #         Returns:
-    #             None
-    #     """
-    #     # Create a VBox for each of the sections of the interface
-    #     # We can then update the children for each section
-    #     # TODO - not sure if this needs to be a function, move to ctor
-    #     # if this is all it'll do
-    #     self._widgets = {key: widgets.VBox() for key in keys}
 
     def add_widgets(self, section, _widgets):
         """ Add widgets to be the children of the key section
