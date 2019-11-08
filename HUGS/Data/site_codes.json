@@ -39,5 +39,38 @@
         "THD": "trinidadhead",
         "TTA": "angus",
         "ZEP": "zeppelin"
+    },
+
+    "locations":
+    {
+        "BSD": {
+            "lat": 54.942544,
+            "long":-1.369204
+        },
+        "CGO": "capegrim",
+        "CPT": "capepoint",
+        "HFD": {
+            "lat": 50.967430,
+            "long": 0.255235
+        },
+        "GSN": "gosan",
+        "JFJ": "jungfraujoch",
+        "CMN": "mtecimone",
+        "MHD": {
+            "lat": 53.3252,
+            "long": -9.9041
+        },
+        "RGL": "ridgehill",
+        "RPB": "barbados",
+        "SDZ": "shangdianzi",
+        "SIO": "sio",
+        "SMO": "samoa",
+        "TAC": {
+            "lat": 52.511,
+            "long": 1.155003
+        },
+        "THD": "trinidadhead",
+        "TTA": "angus",
+        "ZEP": "zeppelin"
     }
-} 
+}

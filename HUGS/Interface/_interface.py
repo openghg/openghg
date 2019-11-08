@@ -8,6 +8,7 @@ import collections
 from datetime import datetime
 import functools
 import ipywidgets as widgets
+import ipyleaflet
 from HUGS.Client import Retrieve, Search
 from HUGS.Interface import generate_password
 import numpy as np
@@ -43,6 +44,8 @@ class Interface:
         self.date_layout = {'width': '275px', 'min_width': '200px','height': '28px', 'min_height': '28px'}
         self.checkbox_layout = {'width': '100px', 'min_width': '100px','height': '28px', 'min_height': '28px'}
         self.statusbar_layout = {'width': '250px', 'min_width': '250px', 'height': '28px', 'min_height': '28px'}
+        # Lat/long of sites for use in map selection
+        self._site_locations = {}
 
     def create_login(self, user, x):
         """ Create a basic login widget and add it to the widget dict
@@ -295,12 +298,18 @@ class Interface:
         plot_box = widgets.HBox(children=[plot_button])
         ui_box = widgets.VBox(children=[horiz_select, plot_box])
 
-        # Clunk
+        # Cleaner way of doing this?
         arg_dict = {plot_keys[i]: checkbox for i, checkbox in enumerate(plot_checkboxes)}
+
+        # For some reason the datetimeindex of the dataframes isn't being preserved
+        # and we're getting an unnamed column for the first column and a numbered index
+        # But only on export of the dataframe to csv, otherwise just get the standard
+        # 'co count', 'co stdev', 'co n_meas'
 
         def on_plot_clicked(a):
             # Get the data for ticked checkboxes
             to_plot = {key: data[key] for key in arg_dict if arg_dict[key].value is True}
+            # print([list(to_plot[k].columns) for k in to_plot])
             plot_data(to_plot=to_plot)
 
         # def select_data(**kwargs):
@@ -310,6 +319,11 @@ class Interface:
         #         if kwargs[key] is True:
         #             selected_data.append(key)
         output = widgets.Output()
+
+        # Create a dropdown to select which part of the dataframe
+        # to plot, count, stddev etc
+
+        
 
         def plot_data(to_plot):
             """ 
@@ -323,16 +337,13 @@ class Interface:
             # plot_data = [data[x] for x in selected_data]
             # For now just plot the first column in the data
 
-            # Setup the axes
-            x_scale = bq.DateScale()
-            y_scale = bq.LinearScale()
-            scales = {"x": x_scale, "y": y_scale}
+            # # Setup the axes
+            # x_scale = bq.DateScale()
+            # y_scale = bq.LinearScale()
+            # scales = {"x": x_scale, "y": y_scale}
 
             lines.x = [to_plot[key].index for key in to_plot]
             lines.y = [to_plot[key].iloc[:,0] for key in to_plot]
-
-            # lines.x = [d.index.values.tolist() for d in to_plot]
-            # lines.y = [d.iloc[:, 0] for d in to_plot]
 
         x_scale = bq.DateScale()
         y_scale = bq.LinearScale()
@@ -342,14 +353,74 @@ class Interface:
         # TODO - this could be updated depending on what's being plot
         ay = bq.Axis(label="Count", scale=y_scale, orientation="vertical")
 
-        lines = bq.Lines(x=np.arange(100), y=np.cumsum(np.random.randn(2, 100), axis=1), scales=scales)
+        # lines = bq.Lines(x=np.arange(100), y=np.cumsum(np.random.randn(2, 100), axis=1), scales=scales)
+        lines = bq.Lines(scales=scales)
         figure = bq.Figure(marks=[lines], axes=[ax, ay], animation_duration=1000)
 
         plot_button.on_click(on_plot_clicked)
 
-        # plotting_box.children = [ui_box, out, figure]
-        # return [ui_box, out, figure]
         return [ui_box, figure]
+
+    def create_map_box(self, site_data):
+        """ Create the mapping box for selection of site data from the map
+            
+            Args:   
+                site_data (dict): Dictionary of site data including data
+                held for each site
+            Returns:
+                list: List of ipywidgets
+        """
+        # Need a JSON of all the long-lats of the sites, add to the
+        # other JSON data in the Data directory
+        # Maybe move this into a
+        if not self._site_locations:
+            params_file = (_os.path.dirname(_os.path.abspath(__file__)) + 
+                            _os.path.sep + "../Data/site_codes.json")
+
+            with open(params_file, "r") as f:
+                data = json.load(f)
+                self._site_locations = data["locations"]
+
+
+    def get_site_location(self, site_code):
+        """ Returns the lat/long of a site 
+
+            Args:
+                site_code (str): Site code for site eg BSD for Bilsdale
+            Returns:
+                tuple: (latitude, longitude)
+        """
+        
+
+        
+        
+    def get_map_locations(search_results):
+        from ipyleaflet import (
+            Map,
+            Marker, MarkerCluster, TileLayer, ImageOverlay, GeoJSON,
+            Polyline, Polygon, Rectangle, Circle, CircleMarker, Popup,
+            SplitMapControl, WidgetControl,
+            basemaps, basemap_to_tiles
+        )
+        from ipywidgets import HTML
+
+        center = [54.2361, -4.548]
+        zoom = 5
+        m = ipyleaflet.Map(center=center, zoom=zoom)
+
+        map_locations = get_locations(search_results)
+
+        for l in map_locations:
+            lat, long = map_locations[l]["location"]
+            name = map_locations[l]["name"]
+            species = ",".join(map_locations[l]["species"])
+            mark = Marker(location=(lat, long))
+            mark.popup = HTML(
+                value="<br/>".join([("<b>" + name + "</b>"), "Species: ", species.upper()]))
+
+            m += mark
+
+        return m
 
     # Will this force an update ?
     def update_statusbar(self, status_name, text):
