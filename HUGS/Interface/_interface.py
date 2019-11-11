@@ -36,7 +36,7 @@ class Interface:
         self._base_url = "https://hugs.acquire-aaai.com/t"
         self._search_results = None
         # This is the order in which they'll be shown (if created)
-        self._module_list = ["register", "login", "search", "download", "map", "plot_1", "plot_2"]
+        self._module_list = ["register", "login", "search", "selection", "download", "map", "plot_1", "plot_2"]
         # Maybe just made _widgets a defaultdict(list) as originally thought?
         self._widgets = collections.defaultdict(widgets.VBox)
 
@@ -160,11 +160,16 @@ class Interface:
             if search_results:
                 date_keys = self.parse_results(results=search_results)
                 status_box.value = f"<font color='green'>Success</font>"
+                # TODO - see how the layout works with voila for side-by-side list and map boxes
+                self.add_widgets(section="selection", _widgets=self.create_selection_box(date_keys=date_keys, search_results=search_results))
                 d_box = self.create_download_box(date_keys=date_keys)
                 # Add the download widgets to the download box
-                self.add_widgets(section="download", _widgets=d_box)
+                self.add_widgets(section="download", _widgets=self.create_download_box(date_keys=date_keys))
+
                 # For now create the mapping box here
-                self.add_widgets(section="map", _widgets=self.create_map_box(search_results=search_results))
+                # By default we'll create the list download box by default
+                # OR have them side by side
+                # self.add_widgets(section="map", _widgets=self.create_map_box(search_results=search_results))
             else:
                 status_box.value = f"<font color='red'>No results</font>"
 
@@ -174,7 +179,57 @@ class Interface:
                            search_button, status_box]
 
         return search_children
-    
+
+    def create_selection_box(self, date_keys, search_results):
+        """ Select a list or map selection type
+
+            Or create side by side option?
+
+            Returns:
+                list: List containing a HBox (WIP)
+        """    
+        # split_button = widgets.Button(description="Split", button_style="info", layout=self.table_layout)
+        list_button = widgets.Button(description="List selection", button_style="info", layout=self.table_layout)
+        map_button = widgets.Button(description="Map selection", button_style="info", layout=self.table_layout)
+
+        def split_click(a):
+            self.add_widgets(section="download", _widgets=self.create_split_box(date_keys=date_keys, search_results=search_results))
+            self.add_widgets(section="map", _widgets=widgets.VBox())
+
+        def list_click(a):
+            self.add_widgets(section="download", _widgets=self.create_download_box(date_keys=date_keys))
+            self.add_widgets(section="map", _widgets=widgets.VBox())
+
+        def map_click(a):
+            self.add_widgets(section="download", _widgets=widgets.VBox())
+            self.add_widgets(section="map", _widgets=self.create_map_box(search_results=search_results))
+
+        # split_button.on_click(split_click)
+        list_button.on_click(list_click)
+        map_button.on_click(map_click)
+        
+        buttons = [list_button, map_button]
+        
+        button_box = widgets.HBox(children=buttons)
+
+        return [button_box]
+
+    def create_split_box(self, date_keys, search_results):
+        """ Create a box with list selection on the left and map selection on the right
+
+            Returns:
+                list: List of HBox
+        """
+        list_widgets = self.create_download_box(date_keys=date_keys)
+        map_widgets = self.create_map_box(search_results=search_results)
+
+        # list_box = widgets.VBox(children=list_widgets)
+        # map_box = widgets.VBox(children=map_widgets)
+
+        combined = widgets.HBox(children=list_widgets+map_widgets)
+
+        return combined
+
     def create_download_box(self, date_keys):
         """ Creates the plotting box that holds the plotting buttons and windows
             
@@ -436,6 +491,8 @@ class Interface:
         site_map.add_control(reset_control)
         site_map.add_control(selected_control)
 
+        # TODO - not sure how the selection of data using the map will work if there are multiple species
+
         def site_select(r, **kwargs):
             self._selected_sites.add(r)
             selected_text.value = "Sites selected : " + ", ".join(list(self._selected_sites))
@@ -454,14 +511,16 @@ class Interface:
             site = site.upper()
             latitude, longitude = site_locations[site]["location"]
             name = site_locations[site]["name"]
-            species = ", ".join(site_locations[site]["species"])
-            mark = ipyleaflet.Marker(location=(latitude, longitude), name=name)
-            dates = site_locations[site]["dates"]
 
-            mark.on_click(functools.partial(site_select, r=mark.name))
+            mark = ipyleaflet.Marker(location=(latitude, longitude), name=name)
+            # These are added to the HTML in the popup of the marker
+            species = ", ".join(site_locations[site]["species"])
+            dates = site_locations[site]["dates"]
 
             html_string = "<br/>".join([(f"<b>{name}</b>"), "Species: ", species.upper(), "Data covering: ", dates])
             mark.popup = widgets.HTML(value=html_string)
+            # We want to pass the name of the site selected to the site_select function
+            mark.on_click(functools.partial(site_select, r=mark.name))
 
             site_map.add_layer(mark)
 
