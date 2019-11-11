@@ -47,7 +47,11 @@ class Interface:
         self.checkbox_layout = {'width': '100px', 'min_width': '100px','height': '28px', 'min_height': '28px'}
         self.statusbar_layout = {'width': '250px', 'min_width': '250px', 'height': '28px', 'min_height': '28px'}
         # Lat/long of sites for use in map selection
-        self._site_locations = {}
+
+        params_file = (os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../Data/site_codes.json")
+        with open(params_file, "r") as f:
+            data = json.load(f)
+            self._site_locations = data["locations"]
 
     def create_login(self, user, x):
         """ Create a basic login widget and add it to the widget dict
@@ -106,7 +110,7 @@ class Interface:
             user = User(username=username_text.value, identity_url=f"{self._base_url}/identity")
 
             with login_link_box:
-                print(username_text.value)
+                # print(username_text.value)
                 response = user.request_login()
 
             # if user.wait_for_login():
@@ -160,7 +164,7 @@ class Interface:
                 # Add the download widgets to the download box
                 self.add_widgets(section="download", _widgets=d_box)
                 # For now create the mapping box here
-                self.add_widgets(setion="map", _widgets=self.create_map_box(search_results=search_results))
+                self.add_widgets(section="map", _widgets=self.create_map_box(search_results=search_results))
             else:
                 status_box.value = f"<font color='red'>No results</font>"
 
@@ -205,7 +209,8 @@ class Interface:
             gas_name = split_key[1].upper()
 
             gas_label = widgets.Label(value=gas_name, layout=self.table_layout)
-            site_label = widgets.Label(value=site_name, layout=self.table_layout)
+            site_text = f'{self._site_locations[site_name]["name"]} ({site_name})'
+            site_label = widgets.Label(value=site_text, layout=self.table_layout)
 
             date_labels.append(date_label)
             site_labels.append(site_label)
@@ -237,14 +242,6 @@ class Interface:
         download_button.on_click(on_download_click)
         download_button_box = widgets.HBox(children=[download_button])
 
-        # plot_box = widgets.VBox()
-
-        # TODO - can build each GUI with a dictionary of lists that are used to create each block of widgets
-
-        # Put widgets we want to be able to interact with from outside in self._widgets dictionary
-        # Should we put all widgets in? May get messy if these all need naming etc
-        # self._widgets["download"] = [header_box, dynamic_box, download_button_box, status_bar, plot_box]
-        # download_widgets = self._widgets["download"]
         download_widgets = [header_box, dynamic_box, download_button_box, status_bar]
 
         return download_widgets
@@ -261,18 +258,42 @@ class Interface:
         # TODO - clear this up and improve comments
         date_keys = {}
         for key in results.keys():
-            keys = sorted(results[key])
-            start_key = keys[0]
-            end_key = keys[-1]
-            # Get the first and last dates from the keys in the search results
-            start_date = start_key.split("/")[-1].split("_")[0]
-            end_date = end_key.split("/")[-1].split("_")[-1]
-
+            # keys = sorted(results[key])
+            # start_key = keys[0]
+            # end_key = keys[-1]
+            # # Get the first and last dates from the keys in the search results
+            # start_date = start_key.split("/")[-1].split("_")[0]
+            # end_date = end_key.split("/")[-1].split("_")[-1]
+            start_date, end_date = self.strip_dates_key(results[key])
             dates_covered = start_date + "_" + end_date
 
-            date_keys[key] = {"dates": dates_covered, "keys": keys}
+            date_keys[key] = {"dates": dates_covered, "keys": results[key]}
 
         return date_keys
+
+    def strip_dates_key(self, keys):
+        """ Strips the date from a key, could this data just be read from JSON instead?
+            Read dates covered from the Datasource?
+
+            TODO - check if this is necessary
+
+            Args:
+                keys (list): List of keys containing data
+                data/uuid/<uuid>/2014-01-30T10:52:30_2014-01-30T14:20:30'
+            Returns:
+                tuple (str,str): Start, end dates
+        """
+        if not isinstance(keys, list):
+            keys = [keys]
+        
+        keys = sorted(keys)
+        start_key = keys[0]
+        end_key = keys[-1]
+        # Get the first and last dates from the keys in the search results
+        start_date = start_key.split("/")[-1].split("_")[0].replace("T", " ")
+        end_date = end_key.split("/")[-1].split("_")[-1].replace("T", " ")
+
+        return start_date, end_date
 
 
     def create_plotting_box(self, data):
@@ -372,26 +393,60 @@ class Interface:
                 list: List containing an ipyleaflet map (may be expanded to include
                 other widgets)
         """
-        # Need a JSON of all the long-lats of the sites, add to the
-        # other JSON data in the Data directory
-        # Maybe move this into a
-        
-        # If we haven't already read in the site locations read in the lat/long
-        # of each site from JSON
-        if not self._site_locations:
-            params_file = (os.path.dirname(os.path.abspath(__file__)) + 
-                            os.path.sep + "../Data/site_codes.json")
+        # Parse the search results and extract dates, site locations etc
+        site_locations = collections.defaultdict(dict)
+        for key in search_results:
+            # Key such as bsd_co, bsd_co2
+            split_key = key.split("_")
+            location = split_key[0]
+            species = split_key[1]
 
-            with open(params_file, "r") as f:
-                data = json.load(f)
-                self._site_locations = data["locations"]
+            start, end = self.strip_dates_key(search_results[key])
+            # Need this in uppercase for use with the JSON
+            location = location.upper()
 
+            if location in site_locations:
+                site_locations[location]["species"].append(species)
+            else:
+                site_data = self._site_locations[location]
+                site_locations[location]["location"] = site_data["latitude"], site_data["longitude"]
+                site_locations[location]["species"] = [species]
+                site_locations[location]["name"] = site_data["name"]
+                site_locations[location]["dates"] = f"{start} to {end}"
+
+        # Now we can create the map with the data parsed from the search results
         center = [54.2361, -4.548]
         zoom = 5
         site_map = ipyleaflet.Map(center=center, zoom=zoom)
+        
+        # We only want to select each site once
+        self._selected_sites = set()
 
-        # Parse the search results to get the gases at each site
-        site_locations = self.get_locations(search_results)
+        # These widgets are overlain on the map itself
+        clear_button = widgets.Button(description="Clear selection")
+        clear_control = ipyleaflet.WidgetControl(widget=clear_button, position='bottomright')
+
+        reset_button = widgets.Button(description="Reset map")
+        reset_control = ipyleaflet.WidgetControl(widget=reset_button, position="bottomright")
+
+        selected_text = widgets.HTML(value="")
+        selected_control = ipyleaflet.WidgetControl(widget=selected_text, position="topright")
+
+        site_map.add_control(clear_control)
+        site_map.add_control(reset_control)
+        site_map.add_control(selected_control)
+
+        def site_select(r, **kwargs):
+            self._selected_sites.add(r)
+            selected_text.value = "Sites selected : " + ", ".join(list(self._selected_sites))
+
+        def clear_selection(a):
+            self._selected_sites.clear()
+            selected_text.value = ""
+
+        def reset_map(a):
+            site_map.center = center
+            site_map.zoom = 5
 
         # Create a marker for each site we have results for, on the marker show the
         # species etc we have data for
@@ -400,41 +455,50 @@ class Interface:
             latitude, longitude = site_locations[site]["location"]
             name = site_locations[site]["name"]
             species = ", ".join(site_locations[site]["species"])
-            mark = Marker(location=(lat, long))
-            mark.popup = HTML(value="<br/>".join([("<b>" + name + "</b>"), "Species: ", species.upper()]))
+            mark = ipyleaflet.Marker(location=(latitude, longitude), name=name)
+            dates = site_locations[site]["dates"]
 
-            site_map += mark
+            mark.on_click(functools.partial(site_select, r=mark.name))
+
+            html_string = "<br/>".join([(f"<b>{name}</b>"), "Species: ", species.upper(), "Data covering: ", dates])
+            mark.popup = widgets.HTML(value=html_string)
+
+            site_map.add_layer(mark)
+
+        reset_button.on_click(reset_map)
+        clear_button.on_click(clear_selection)
 
         return [site_map]
 
-    def get_locations(self, search_results):
-        """ Returns the lat:long coordinates of the sites in the search results
+    # def get_locations(self, search_results):
+    #     """ Returns the lat:long coordinates of the sites in the search results
 
-            Returns:
-                dict: Dictionary of site: lat,long
-        """
-        # TODO - test for this so if change in key we get failure
+    #         Returns:
+    #             dict: Dictionary of site: latitude, longitude
+    #     """
+    #     # TODO - test for this so if change in key we get failure
 
-        
-        parsed = colletions.defaultdict(dict)
-        for key in search_results:
-            # Key such as bsd_co, bsd_co2
-            split_key = key.split("_")
-            location = split_key[0]
-            species = split_key[1]
-            
-            # Need this in uppercase for use with the JSON
-            location = location.upper()
+    #     parsed = collections.defaultdict(dict)
+    #     for key in search_results:
+    #         # Key such as bsd_co, bsd_co2
+    #         split_key = key.split("_")
+    #         location = split_key[0]
+    #         species = split_key[1]
 
-            if location in parsed:
-                parsed[location]["species"].append(species)
-            else:
-                site_data = self._site_locations[location]
-                parsed[location][location] = site_data["latitude"], site_data["longitude"]
-                parsed[location]["species"] = [species]
-                parsed[location]["name"] = site_data["name"]
+    #         start, end = self.strip_dates_key(search_results[key])
+    #         # Need this in uppercase for use with the JSON
+    #         location = location.upper()
 
-        return parsed
+    #         if location in parsed:
+    #             parsed[location]["species"].append(species)
+    #         else:
+    #             site_data = self._site_locations[location]
+    #             parsed[location]["location"] = site_data["latitude"], site_data["longitude"]
+    #             parsed[location]["species"] = [species]
+    #             parsed[location]["name"] = site_data["name"]
+    #             parsed[location]["dates"] = f"{start} to {end}" 
+
+    #     return parsed
 
     # Will this force an update ?
     def update_statusbar(self, status_name, text):
@@ -467,7 +531,6 @@ class Interface:
         if data:
             # update_statusbar("Download complete")
             # Create the plotting box
-            # self.add_widgets self.create_plotting_box()
             self.add_widgets(section="plot_1", _widgets=self.create_plotting_box(data=data))
         else:
             raise NotImplementedError
