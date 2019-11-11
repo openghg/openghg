@@ -44,33 +44,85 @@
     "locations":
     {
         "BSD": {
-            "lat": 54.942544,
-            "long":-1.369204
+            "latitude": 54.942544,
+            "longitude":-1.369204,
+            "name":"Bilsdale"
         },
-        "CGO": "capegrim",
-        "CPT": "capepoint",
+        "CGO": {
+            "latitude": 40.683,
+            "longitude": 144.689,
+            "name": "Cape Grim"
+        },
+        "CPT": {
+            "latitude": -34.356,
+            "longitude": 18.495,
+            "name": "Cape Point"
+        },
         "HFD": {
-            "lat": 50.967430,
-            "long": 0.255235
+            "latitude": 50.967430,
+            "longitude": 0.255235,
+            "name": "Heathfield"
         },
-        "GSN": "gosan",
-        "JFJ": "jungfraujoch",
-        "CMN": "mtecimone",
+        "GSN": {
+            "latitude": 33,
+            "longitude": 126,
+            "name": "Gosan"
+        },
+        "JFJ": {
+            "latitude": 46.547,
+            "longtiude": 7.985,
+            "name": "Jungfraujoch" 
+        },
+        "CMN": {
+            "latitude": 44.197,
+            "longitude": 10.703,
+            "name": "Monte Cimone"
+        },
         "MHD": {
-            "lat": 53.3252,
-            "long": -9.9041
+            "latitude": 53.3252,
+            "longitude": -9.9041,
+            "name": "Macehead"
         },
-        "RGL": "ridgehill",
-        "RPB": "barbados",
-        "SDZ": "shangdianzi",
+        "RGL": {
+            "latitude": 52.021,
+            "longitude": -2.713,
+            "name": "Ridge Hill"
+        },
+        "RPB": {
+            "latitude": 13.165,
+            "longtiude": -59.433,
+            "name": "Barbados"
+        },
+        "SDZ": {
+            "latitude": 40.131,
+            "longitude": 117.269,
+            "name": "Shangdianzi"
+        },
         "SIO": "sio",
-        "SMO": "samoa",
-        "TAC": {
-            "lat": 52.511,
-            "long": 1.155003
+        "SMO": {
+            "latitude": 14.25,
+            "longtiude": 17,
+            "name": "Samoa"
         },
-        "THD": "trinidadhead",
-        "TTA": "angus",
-        "ZEP": "zeppelin"
+        "TAC": {
+            "latitude": 52.511,
+            "longitude": 1.155,
+            "name": "Tacolneston"
+        },
+        "THD": {
+            "latitude": 41.05,
+            "longitude": 124.15,
+            "name": "Trinidad Head"
+        },
+        "TTA": {
+            "latitude": 56.702,
+            "longitude": -2.909,
+            "name": "Angus"
+        },
+        "ZEP": {
+            "latitude": 78.907,
+            "longitude": 11.889,
+            "name": "Zeppelin"
+        }
     }
 }

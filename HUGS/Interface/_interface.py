@@ -11,7 +11,9 @@ import ipywidgets as widgets
 import ipyleaflet
 from HUGS.Client import Retrieve, Search
 from HUGS.Interface import generate_password
+import json
 import numpy as np
+import os
 import pandas as pd
 
 __all__ = ["Interface"]
@@ -34,7 +36,7 @@ class Interface:
         self._base_url = "https://hugs.acquire-aaai.com/t"
         self._search_results = None
         # This is the order in which they'll be shown (if created)
-        self._module_list = ["register", "login", "search", "download", "plot_1", "plot_2"]
+        self._module_list = ["register", "login", "search", "download", "map", "plot_1", "plot_2"]
         # Maybe just made _widgets a defaultdict(list) as originally thought?
         self._widgets = collections.defaultdict(widgets.VBox)
 
@@ -157,6 +159,8 @@ class Interface:
                 d_box = self.create_download_box(date_keys=date_keys)
                 # Add the download widgets to the download box
                 self.add_widgets(section="download", _widgets=d_box)
+                # For now create the mapping box here
+                self.add_widgets(setion="map", _widgets=self.create_map_box(search_results=search_results))
             else:
                 status_box.value = f"<font color='red'>No results</font>"
 
@@ -323,8 +327,6 @@ class Interface:
         # Create a dropdown to select which part of the dataframe
         # to plot, count, stddev etc
 
-        
-
         def plot_data(to_plot):
             """ 
                 Each key in the data dict is a dataframe
@@ -361,66 +363,78 @@ class Interface:
 
         return [ui_box, figure]
 
-    def create_map_box(self, site_data):
+    def create_map_box(self, search_results):
         """ Create the mapping box for selection of site data from the map
             
             Args:   
-                site_data (dict): Dictionary of site data including data
-                held for each site
+                search_results (dict): Dictionary containing search results
             Returns:
-                list: List of ipywidgets
+                list: List containing an ipyleaflet map (may be expanded to include
+                other widgets)
         """
         # Need a JSON of all the long-lats of the sites, add to the
         # other JSON data in the Data directory
         # Maybe move this into a
+        
+        # If we haven't already read in the site locations read in the lat/long
+        # of each site from JSON
         if not self._site_locations:
-            params_file = (_os.path.dirname(_os.path.abspath(__file__)) + 
-                            _os.path.sep + "../Data/site_codes.json")
+            params_file = (os.path.dirname(os.path.abspath(__file__)) + 
+                            os.path.sep + "../Data/site_codes.json")
 
             with open(params_file, "r") as f:
                 data = json.load(f)
                 self._site_locations = data["locations"]
 
-
-    def get_site_location(self, site_code):
-        """ Returns the lat/long of a site 
-
-            Args:
-                site_code (str): Site code for site eg BSD for Bilsdale
-            Returns:
-                tuple: (latitude, longitude)
-        """
-        
-
-        
-        
-    def get_map_locations(search_results):
-        from ipyleaflet import (
-            Map,
-            Marker, MarkerCluster, TileLayer, ImageOverlay, GeoJSON,
-            Polyline, Polygon, Rectangle, Circle, CircleMarker, Popup,
-            SplitMapControl, WidgetControl,
-            basemaps, basemap_to_tiles
-        )
-        from ipywidgets import HTML
-
         center = [54.2361, -4.548]
         zoom = 5
-        m = ipyleaflet.Map(center=center, zoom=zoom)
+        site_map = ipyleaflet.Map(center=center, zoom=zoom)
 
-        map_locations = get_locations(search_results)
+        # Parse the search results to get the gases at each site
+        site_locations = self.get_locations(search_results)
 
-        for l in map_locations:
-            lat, long = map_locations[l]["location"]
-            name = map_locations[l]["name"]
-            species = ",".join(map_locations[l]["species"])
+        # Create a marker for each site we have results for, on the marker show the
+        # species etc we have data for
+        for site in site_locations:
+            site = site.upper()
+            latitude, longitude = site_locations[site]["location"]
+            name = site_locations[site]["name"]
+            species = ", ".join(site_locations[site]["species"])
             mark = Marker(location=(lat, long))
-            mark.popup = HTML(
-                value="<br/>".join([("<b>" + name + "</b>"), "Species: ", species.upper()]))
+            mark.popup = HTML(value="<br/>".join([("<b>" + name + "</b>"), "Species: ", species.upper()]))
 
-            m += mark
+            site_map += mark
 
-        return m
+        return [site_map]
+
+    def get_locations(self, search_results):
+        """ Returns the lat:long coordinates of the sites in the search results
+
+            Returns:
+                dict: Dictionary of site: lat,long
+        """
+        # TODO - test for this so if change in key we get failure
+
+        
+        parsed = colletions.defaultdict(dict)
+        for key in search_results:
+            # Key such as bsd_co, bsd_co2
+            split_key = key.split("_")
+            location = split_key[0]
+            species = split_key[1]
+            
+            # Need this in uppercase for use with the JSON
+            location = location.upper()
+
+            if location in parsed:
+                parsed[location]["species"].append(species)
+            else:
+                site_data = self._site_locations[location]
+                parsed[location][location] = site_data["latitude"], site_data["longitude"]
+                parsed[location]["species"] = [species]
+                parsed[location]["name"] = site_data["name"]
+
+        return parsed
 
     # Will this force an update ?
     def update_statusbar(self, status_name, text):
