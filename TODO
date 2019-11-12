@@ -342,3 +342,9 @@ I can add functionality to Acquire to improve its compatibility with zarr stores
 
 Instead of a struct to store the data in self._data in the Datasource just create a dictionary that's keyed
 as data, daterange : {start:start, end:end} ?
+
+2019-11-12
+
+Improve the search_results, have data keys, site code/name etc, need an improved key for the download results, only going to get longer
+with more information
+

@@ -133,6 +133,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     # For now we can differentiate between inlets at least
 
     # Next we search these keys for the search terms we require
+    # keys = _defaultdict(dict)
     keys = _defaultdict(list)
     # TODO - is there a way of tidying this up?
     # If we have search terms
@@ -161,6 +162,10 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                             if require_all:
                                 search_key = f"{location}_{single_key}_{key_addition}"
                                 remaining_terms = [datasource.search_metadata(term) for term in search_terms if term != search_term]
+
+                                # TODO - here update the defaultdict to be dict and save site, dates covered etc as keys in the returend
+                                # dictionary, make it easier to process in the interface etc
+                                # keys: [data_keys]
 
                                 # Check if we got all Trues for the other search terms
                                 # TODO - check the behaviour of this - doing this multiple times uneccesarily

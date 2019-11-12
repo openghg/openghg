@@ -30,7 +30,7 @@ class Interface:
         Each box creation function should return either an ipywidgets.VBox or HBox
         with a set layout
 
-        Can move the layouts to be class members
+        Can move the layouts to be class members ? 
     """
     def __init__(self):
         self._base_url = "https://hugs.acquire-aaai.com/t"
@@ -52,6 +52,8 @@ class Interface:
         with open(params_file, "r") as f:
             data = json.load(f)
             self._site_locations = data["locations"]
+            # Keyed name: code
+            self._site_codes = data["name_code"]
 
     def create_login(self, user, x):
         """ Create a basic login widget and add it to the widget dict
@@ -87,8 +89,7 @@ class Interface:
 
         register_button.on_click(register_user)
 
-        return widgets.VBox(children=[username_box, suggested_password, password_box, conf_password_box, 
-                                        register_button, status_text, output_box])
+        return [username_box, suggested_password, password_box, conf_password_box, register_button, status_text, output_box]
 
     def create_login_box(self):
         """ 
@@ -120,14 +121,14 @@ class Interface:
 
         login_button.on_click(login)
         login_widgets = [username_text, login_button, status_text, login_link_box]
-        # return user, widgets.VBox(children=[username_text, login_button, status_text, login_link_box])
+
         return user, login_widgets
 
     def create_search_box(self):
         """ Create the searching interface
 
             Returns:
-                ipywidgets.VBox
+                list: List of ipywidgets widgets
         """
         search_terms = widgets.Text(value="", placeholder="Search", description="Search terms:", disabled=False)
         locations = widgets.Text(value="", placeholder="BSD, HFD", description="Locations:", disabled=False)
@@ -158,11 +159,11 @@ class Interface:
                                                 data_type=data_type.value, start_datetime=start, end_datetime=end)
 
             if search_results:
-                date_keys = self.parse_results(results=search_results)
+                date_keys = self.parse_results(search_results=search_results)
                 status_box.value = f"<font color='green'>Success</font>"
                 # TODO - see how the layout works with voila for side-by-side list and map boxes
-                self.add_widgets(section="selection", _widgets=self.create_selection_box(date_keys=date_keys, search_results=search_results))
-                d_box = self.create_download_box(date_keys=date_keys)
+                self.add_widgets(section="selection", _widgets=self.create_selection_box(date_keys=date_keys, 
+                                                                                            search_results=search_results))
                 # Add the download widgets to the download box
                 self.add_widgets(section="download", _widgets=self.create_download_box(date_keys=date_keys))
 
@@ -209,7 +210,6 @@ class Interface:
         map_button.on_click(map_click)
         
         buttons = [list_button, map_button]
-        
         button_box = widgets.HBox(children=buttons)
 
         return [button_box]
@@ -222,9 +222,6 @@ class Interface:
         """
         list_widgets = self.create_download_box(date_keys=date_keys)
         map_widgets = self.create_map_box(search_results=search_results)
-
-        # list_box = widgets.VBox(children=list_widgets)
-        # map_box = widgets.VBox(children=map_widgets)
 
         combined = widgets.HBox(children=list_widgets+map_widgets)
 
@@ -301,28 +298,21 @@ class Interface:
 
         return download_widgets
 
-    def parse_results(self, results):
+    def parse_results(self, search_results):
         """ Split the keys into a dictionary of each key and the date that the data covers
             
             Args:
-                results (dict): Dictionary of search results
+                search_results (dict): Dictionary of search results
             Returns:
                 dict: Keyed by object store key, each value being a dictionary of dates covered
                 and the keys for these dates
         """
-        # TODO - clear this up and improve comments
         date_keys = {}
-        for key in results.keys():
-            # keys = sorted(results[key])
-            # start_key = keys[0]
-            # end_key = keys[-1]
-            # # Get the first and last dates from the keys in the search results
-            # start_date = start_key.split("/")[-1].split("_")[0]
-            # end_date = end_key.split("/")[-1].split("_")[-1]
-            start_date, end_date = self.strip_dates_key(results[key])
+        for key in search_results:
+            start_date, end_date = self.strip_dates_key(search_results[key])
             dates_covered = start_date + "_" + end_date
 
-            date_keys[key] = {"dates": dates_covered, "keys": results[key]}
+            date_keys[key] = {"dates": dates_covered, "keys": search_results[key]}
 
         return date_keys
 
@@ -330,7 +320,7 @@ class Interface:
         """ Strips the date from a key, could this data just be read from JSON instead?
             Read dates covered from the Datasource?
 
-            TODO - check if this is necessary
+            TODO - check if this is necessary - Datasource instead?
 
             Args:
                 keys (list): List of keys containing data
@@ -349,7 +339,6 @@ class Interface:
         end_date = end_key.split("/")[-1].split("_")[-1].replace("T", " ")
 
         return start_date, end_date
-
 
     def create_plotting_box(self, data):
         """ Create the window for plotting the downloaded data
@@ -389,6 +378,7 @@ class Interface:
         def on_plot_clicked(a):
             # Get the data for ticked checkboxes
             to_plot = {key: data[key] for key in arg_dict if arg_dict[key].value is True}
+          
             # print([list(to_plot[k].columns) for k in to_plot])
             plot_data(to_plot=to_plot)
 
@@ -419,7 +409,6 @@ class Interface:
             # x_scale = bq.DateScale()
             # y_scale = bq.LinearScale()
             # scales = {"x": x_scale, "y": y_scale}
-
             lines.x = [to_plot[key].index for key in to_plot]
             lines.y = [to_plot[key].iloc[:,0] for key in to_plot]
 
@@ -451,6 +440,7 @@ class Interface:
         # Parse the search results and extract dates, site locations etc
         site_locations = collections.defaultdict(dict)
         for key in search_results:
+            # TODO - refactor this to work with the new search results
             # Key such as bsd_co, bsd_co2
             split_key = key.split("_")
             location = split_key[0]
@@ -478,32 +468,47 @@ class Interface:
         self._selected_sites = set()
 
         # These widgets are overlain on the map itself
-        clear_button = widgets.Button(description="Clear selection")
-        clear_control = ipyleaflet.WidgetControl(widget=clear_button, position='bottomright')
+        button_layout = widgets.Layout(min_width='80px', max_width='120px')
+        download_layout = widgets.Layout(min_width='80px', max_width='100px')
 
-        reset_button = widgets.Button(description="Reset map")
-        reset_control = ipyleaflet.WidgetControl(widget=reset_button, position="bottomright")
+        clear_button = widgets.Button(description="Clear selection", layout=button_layout)
+        clear_control = ipyleaflet.WidgetControl(widget=clear_button, position='bottomleft')
+
+        reset_button = widgets.Button(description="Reset map", layout=button_layout)
+        reset_control = ipyleaflet.WidgetControl(widget=reset_button, position="bottomleft")
 
         selected_text = widgets.HTML(value="")
         selected_control = ipyleaflet.WidgetControl(widget=selected_text, position="topright")
 
+        download_button = widgets.Button(description="Download", disabled=True, layout=download_layout)
+        download_control = ipyleaflet.WidgetControl(widget=download_button, position="bottomright")
+
         site_map.add_control(clear_control)
         site_map.add_control(reset_control)
         site_map.add_control(selected_control)
+        site_map.add_control(download_control)
 
         # TODO - not sure how the selection of data using the map will work if there are multiple species
-
         def site_select(r, **kwargs):
             self._selected_sites.add(r)
             selected_text.value = "Sites selected : " + ", ".join(list(self._selected_sites))
+            download_button.disabled = False
 
         def clear_selection(a):
             self._selected_sites.clear()
             selected_text.value = ""
+            download_button.disabled = True
 
         def reset_map(a):
             site_map.center = center
             site_map.zoom = 5
+
+        def download_click(a):
+            # Get the selected site's codes from the dict
+            site_codes = {self._site_codes[s.lower()] for s in self._selected_sites}
+            # If the site codes above are in the search_results' keys, add these to the dictionary
+            to_download = {key: search_results[key] for key in search_results for s in site_codes if s.lower() in key}
+            self.download_data(download_keys=to_download)
 
         # Create a marker for each site we have results for, on the marker show the
         # species etc we have data for
@@ -512,7 +517,7 @@ class Interface:
             latitude, longitude = site_locations[site]["location"]
             name = site_locations[site]["name"]
 
-            mark = ipyleaflet.Marker(location=(latitude, longitude), name=name)
+            mark = ipyleaflet.Marker(location=(latitude, longitude), name=name, draggable=False)
             # These are added to the HTML in the popup of the marker
             species = ", ".join(site_locations[site]["species"])
             dates = site_locations[site]["dates"]
@@ -526,38 +531,9 @@ class Interface:
 
         reset_button.on_click(reset_map)
         clear_button.on_click(clear_selection)
+        download_button.on_click(download_click)
 
         return [site_map]
-
-    # def get_locations(self, search_results):
-    #     """ Returns the lat:long coordinates of the sites in the search results
-
-    #         Returns:
-    #             dict: Dictionary of site: latitude, longitude
-    #     """
-    #     # TODO - test for this so if change in key we get failure
-
-    #     parsed = collections.defaultdict(dict)
-    #     for key in search_results:
-    #         # Key such as bsd_co, bsd_co2
-    #         split_key = key.split("_")
-    #         location = split_key[0]
-    #         species = split_key[1]
-
-    #         start, end = self.strip_dates_key(search_results[key])
-    #         # Need this in uppercase for use with the JSON
-    #         location = location.upper()
-
-    #         if location in parsed:
-    #             parsed[location]["species"].append(species)
-    #         else:
-    #             site_data = self._site_locations[location]
-    #             parsed[location]["location"] = site_data["latitude"], site_data["longitude"]
-    #             parsed[location]["species"] = [species]
-    #             parsed[location]["name"] = site_data["name"]
-    #             parsed[location]["dates"] = f"{start} to {end}" 
-
-    #     return parsed
 
     # Will this force an update ?
     def update_statusbar(self, status_name, text):
@@ -571,6 +547,8 @@ class Interface:
     def download_data(self, download_keys):
         """ Download the data in the selected keys from the object store
 
+            Save the passed data as a temporary class member?
+
             Args:
                 date_keys (dict): Dictionary 
             Returns:
@@ -578,7 +556,7 @@ class Interface:
         """
         retrieve = Retrieve(service_url=self._base_url)
         data = retrieve.retrieve(keys=download_keys)
-        
+
         # TODO - get the status bar updates working
         # self.update_statusbar(status_name="download_status", text="Downloading...")
 
@@ -592,8 +570,9 @@ class Interface:
             # Create the plotting box
             self.add_widgets(section="plot_1", _widgets=self.create_plotting_box(data=data))
         else:
-            raise NotImplementedError
+            # raise NotImplementedError
             # update_statusbar("No data downloaded")
+            print("No data downloaded")
 
 
     def add_widgets(self, section, _widgets):
