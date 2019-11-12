@@ -92,8 +92,7 @@ class Interface:
         return [username_box, suggested_password, password_box, conf_password_box, register_button, status_text, output_box]
 
     def create_login_box(self):
-        """ 
-            Create a login box
+        """ Create a login box
 
             Returns:
                 tuple (User, list): Acquire.User and a list of ipywidgets
@@ -164,13 +163,7 @@ class Interface:
                 # TODO - see how the layout works with voila for side-by-side list and map boxes
                 self.add_widgets(section="selection", _widgets=self.create_selection_box(date_keys=date_keys, 
                                                                                             search_results=search_results))
-                # Add the download widgets to the download box
                 self.add_widgets(section="download", _widgets=self.create_download_box(date_keys=date_keys))
-
-                # For now create the mapping box here
-                # By default we'll create the list download box by default
-                # OR have them side by side
-                # self.add_widgets(section="map", _widgets=self.create_map_box(search_results=search_results))
             else:
                 status_box.value = f"<font color='red'>No results</font>"
 
@@ -488,7 +481,6 @@ class Interface:
         site_map.add_control(selected_control)
         site_map.add_control(download_control)
 
-        # TODO - not sure how the selection of data using the map will work if there are multiple species
         def site_select(r, **kwargs):
             self._selected_sites.add(r)
             selected_text.value = "Sites selected : " + ", ".join(list(self._selected_sites))
