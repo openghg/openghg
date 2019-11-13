@@ -583,6 +583,35 @@ class Interface:
 
         self._widgets[section].children = _widgets
 
+    def show_module(self, module_name):
+        """ Returns the widgets in a given module
+
+            Args:
+                module_name (str): Name of module from self._module_list 
+            Returns:
+                list: List containing ipywidgets VBox. The VBox is placed into a list
+                as ipyvuetify requires the children attribute to be a list of widgets
+        """
+        module_name = module_name.lower()
+
+        if module_name not in self._module_list:
+            raise KeyError("module_name must be valid module from module list")
+
+        return [self._widgets[module_name]]
+
+    def voila_interface(self):
+        """ Creates the interface for use in voila
+
+            Returns:
+                None
+        """
+        self.add_widgets(section="register", _widgets=self.create_registration_box())
+        # TODO - How to handle user here? Just assign to self._user or something?
+        user, login_box = self.create_login_box()
+        self.add_widgets(section="login", _widgets=login_box)
+        self.add_widgets(section="search", _widgets=self.create_search_box())
+
+
     def show_interface(self, new_user=False):
         """ Return the completed interface
 
