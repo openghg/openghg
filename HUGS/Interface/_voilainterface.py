@@ -81,6 +81,7 @@ class VoilaInterface:
         register_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["account_circle"]), "  Register"])])
         login_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["check_circle_outline"]), "  Login"])])
         search_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["search"]), "  Search"])])
+        # map_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["search"]), "  Map"])])
         plot_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["fa-bar-chart"]), "  Plotting"])])
 
         def on_menu_click(widget, event, data):
@@ -97,23 +98,46 @@ class VoilaInterface:
             # reg_layout.children = self.interface_module(module_name="search")
             reg_layout.children = self.search_select_layout()
 
+        # def on_map_click(widget, event, data):
+        #     print(self.interface_module(module_name="map"))
+        #     reg_layout.children = self.interface_module(module_name="map")
+
         def on_plot_click(widget, event, data):
-            print(self.interface_module(module_name="plot_1"))
-        #     reg_layout.children = self.interface_module(module_name="plot_1")
+            # print(self.interface_module(module_name="plot_1"))
+            reg_layout.children = self.interface_module(module_name="plot_1")
 
         register_nav.on_event("click", on_register_click)
         login_nav.on_event("click", on_login_click)
         search_nav.on_event("click", on_search_click)
         plot_nav.on_event("click", on_plot_click)
+        # map_nav.on_event("click", on_map_click)
 
         nav_items = [register_nav, login_nav, search_nav, plot_nav]
 
-        nav_drawer = v.NavigationDrawer(children=nav_items)
+        nav_drawer = v.NavigationDrawer(v_model=True, children=nav_items)
 
         nav_layout = v.Layout(_metadata={"mount_id": "content-nav"}, children=[nav_drawer])
         reg_layout = v.Layout(_metadata={"mount_id": "content-main"}, children=[])
+        # toolbar_layout = v.Layout(children=[self.create_toolbar()])
+        
+        container = v.Container(class_="fill-height", fluid=True, children=[reg_layout])
+        content = v.Content(children=[container])
 
-        return v.Layout(children=[nav_layout, reg_layout])
+        bar_button = v.Btn(color='primary', children=['Close drawer'])
+        toolbar = v.Toolbar(app=True, dark=True, class_="teal", children=[v.ToolbarTitle(class_="headline", children=[bar_button, "HUGS"])])
+        # app_bar = v.AppBar(app=True, color="teal", dark=True, children=[bar_button])
+        app_bar = v.AppBar(color="teal", flex=True, children=[bar_button, "HUGS"])
+
+        def toggle_navbar(*args):
+            nav_drawer.v_model = not nav_drawer.v_model
+
+        bar_button.on_event("click", toggle_navbar)
+        
+        app = v.App(children=[v.Layout(row=True, children=[nav_drawer, toolbar, content])])
+
+        # layout = v.Layout(children=[nav_layout, reg_layout])
+
+        return app
 
     
     def search_select_layout(self):
@@ -122,17 +146,26 @@ class VoilaInterface:
 
         """
         search_layout = v.Layout(children=self.interface_module(module_name="search"))
+        selection_layout = v.Layout(children=self.interface_module(module_name="selection"))
         data_layout = v.Layout(children=self.interface_module(module_name="download"))
-        map_button = v.Btn(children=["Open map"])
-        map_button_layout = v.Layout(chldren=map_button)
-        map_layout = v.Layout(children=[])
+        # map_button = v.Btn(children=["Open map"], disabled=False)
+        # map_button_layout = v.Layout(children=[map_button])
+        # map_layout = v.Layout(children=[])
 
-        def show_map(*args):
-            map_layout.children = self.interface_module(module_name="map")
+        # Map currently doesn't display within a v.Layout - issue opened
+        # https://github.com/jupyter-widgets/ipyleaflet/issues/441
+        # def show_map(*args):
+            # _map = self.interface_module(module_name="map")
+            # print(_map)
+            # map_layout.children = [test_button_layout]
 
-        map_button.on_event("click", show_map)
+        # # Need to enable the map on search results being true
+        # map_button.on_event("click", show_map)
 
-        selection_layout = v.Layout(row=True, children=[search_layout, v.Spacer(), data_layout, map_button_layout, map_layout])
+        selection_layout = v.Layout(row=True, wrap=True, align_center=True,
+                                    children=[search_layout, selection_layout, data_layout])
+
+        # selection_layout = v.Layout(row=True, children=[map_button])
         
         return [selection_layout]
 
