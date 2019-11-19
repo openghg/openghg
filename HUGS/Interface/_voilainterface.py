@@ -118,26 +118,28 @@ class VoilaInterface:
 
         nav_layout = v.Layout(_metadata={"mount_id": "content-nav"}, children=[nav_drawer])
         reg_layout = v.Layout(_metadata={"mount_id": "content-main"}, children=[])
+
         # toolbar_layout = v.Layout(children=[self.create_toolbar()])
         
         container = v.Container(class_="fill-height", fluid=True, children=[reg_layout])
         content = v.Content(children=[container])
 
-        bar_button = v.Btn(color='primary', children=['Close drawer'])
-        toolbar = v.Toolbar(app=True, dark=True, class_="teal", children=[v.ToolbarTitle(class_="headline", children=[bar_button, "HUGS"])])
+        # bar_button = v.Btn(color='primary', children=['Close drawer'])
+        # toolbar = v.Toolbar(app=True, dark=True, class_="teal", children=[v.ToolbarTitle(class_="headline", children=[bar_button, "HUGS"])])
         # app_bar = v.AppBar(app=True, color="teal", dark=True, children=[bar_button])
-        app_bar = v.AppBar(color="teal", flex=True, children=[bar_button, "HUGS"])
+        # app_bar = v.AppBar(color="teal", flex=True, children=[bar_button, "HUGS"])
 
-        def toggle_navbar(*args):
-            nav_drawer.v_model = not nav_drawer.v_model
+        # def toggle_navbar(*args):
+        #     nav_drawer.v_model = not nav_drawer.v_model
 
-        bar_button.on_event("click", toggle_navbar)
+        # bar_button.on_event("click", toggle_navbar)
         
-        app = v.App(children=[v.Layout(row=True, children=[nav_drawer, toolbar, content])])
+        # app = v.App(children=[v.Layout(row=True, children=[nav_drawer, toolbar, content])])
+        # app = v.App(children=[v.Layout(row=True, children=[nav_drawer, content])])
 
-        # layout = v.Layout(children=[nav_layout, reg_layout])
+        layout = v.Layout(children=[nav_layout, reg_layout])
 
-        return app
+        return layout
 
     
     def search_select_layout(self):
@@ -145,12 +147,16 @@ class VoilaInterface:
             widgets
 
         """
-        search_layout = v.Layout(children=self.interface_module(module_name="search"))
-        selection_layout = v.Layout(children=self.interface_module(module_name="selection"))
-        data_layout = v.Layout(children=self.interface_module(module_name="download"))
+        # search_layout = v.Layout(children=self.interface_module(module_name="search"))
+        # selection_layout = v.Layout(children=self.interface_module(module_name="selection"))
+        # data_layout = v.Layout(children=self.interface_module(module_name="download"))
         # map_button = v.Btn(children=["Open map"], disabled=False)
         # map_button_layout = v.Layout(children=[map_button])
         # map_layout = v.Layout(children=[])
+
+        search_row = v.Row(align="start", justify="start", children=self.interface_module(module_name="search"))
+        data_row = v.Row(align="start", justify="start", children=self.interface_module(module_name="download"))
+
 
         # Map currently doesn't display within a v.Layout - issue opened
         # https://github.com/jupyter-widgets/ipyleaflet/issues/441
@@ -162,12 +168,12 @@ class VoilaInterface:
         # # Need to enable the map on search results being true
         # map_button.on_event("click", show_map)
 
-        selection_layout = v.Layout(row=True, wrap=True, align_center=True,
-                                    children=[search_layout, selection_layout, data_layout])
+        # selection_layout = v.Layout(row=True, wrap=True, align_center=True,
+        #                             children=[search_layout, data_layout])
 
-        # selection_layout = v.Layout(row=True, children=[map_button])
-        
-        return [selection_layout]
+        container = v.Container(children=[search_row, data_row])
+
+        return [container]
 
 
 
