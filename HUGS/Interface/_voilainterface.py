@@ -116,8 +116,12 @@ class VoilaInterface:
 
         nav_drawer = v.NavigationDrawer(v_model=True, children=nav_items)
 
-        nav_layout = v.Layout(_metadata={"mount_id": "content-nav"}, children=[nav_drawer])
-        reg_layout = v.Layout(_metadata={"mount_id": "content-main"}, children=[])
+        nav_layout = v.Layout(_metadata={"mount_id": "content-nav"},  children=[nav_drawer])
+        reg_layout = v.Layout(_metadata={"mount_id": "content-main"}, justify_start=True, align_center=True, children=[])
+
+        # Set the alignment of the reg_layout to align / justify left so not to move
+        # align - vertical
+        # justify - horizontal
 
         # toolbar_layout = v.Layout(children=[self.create_toolbar()])
         
@@ -137,7 +141,7 @@ class VoilaInterface:
         # app = v.App(children=[v.Layout(row=True, children=[nav_drawer, toolbar, content])])
         # app = v.App(children=[v.Layout(row=True, children=[nav_drawer, content])])
 
-        layout = v.Layout(children=[nav_layout, reg_layout])
+        layout = v.Layout(justify="start", children=[nav_layout, reg_layout])
 
         return layout
 
@@ -154,8 +158,8 @@ class VoilaInterface:
         # map_button_layout = v.Layout(children=[map_button])
         # map_layout = v.Layout(children=[])
 
-        search_row = v.Row(align="start", justify="start", children=self.interface_module(module_name="search"))
-        data_row = v.Row(align="start", justify="start", children=self.interface_module(module_name="download"))
+        search_row = v.Row(children=self.interface_module(module_name="search"))
+        data_row = v.Row(children=self.interface_module(module_name="download"))
 
 
         # Map currently doesn't display within a v.Layout - issue opened

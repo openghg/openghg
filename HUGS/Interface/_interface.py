@@ -46,6 +46,9 @@ class Interface:
         self.date_layout = {'width': '275px', 'min_width': '200px','height': '28px', 'min_height': '28px'}
         self.checkbox_layout = {'width': '100px', 'min_width': '100px','height': '28px', 'min_height': '28px'}
         self.statusbar_layout = {'width': '250px', 'min_width': '250px', 'height': '28px', 'min_height': '28px'}
+
+        self.small_button_layout = widgets.Layout(min_width='80px', max_width='100px')
+        self.med_button_layout = widgets.Layout(min_width='80px', max_width='120px')
         # Lat/long of sites for use in map selection
 
         params_file = (os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../Data/site_codes.json")
@@ -70,9 +73,10 @@ class Interface:
         """
         username_box = widgets.Text(value=None, placeholder="username", description="Username: ")
         suggested_password = widgets.Label(value=f"Suggested password : {generate_password()}")
+        spacer = widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
         password_box = widgets.Password(description="Password: ", placeholder="")
         conf_password_box = widgets.Password(description="Confirm: ", placeholder="")
-        register_button = widgets.Button(description="Register", button_style="primary")
+        register_button = widgets.Button(description="Register", button_style="primary", layout=self.small_button_layout)
         status_text = widgets.HTML(value=f"<font color='blue'>Enter credentials</font>")
         output_box = widgets.Output()
 
@@ -89,7 +93,7 @@ class Interface:
 
         register_button.on_click(register_user)
 
-        return [username_box, suggested_password, password_box, conf_password_box, register_button, status_text, output_box]
+        return [username_box, suggested_password, password_box, conf_password_box, spacer, register_button, status_text, output_box]
 
     def create_login_box(self):
         """ Create a login box
@@ -100,7 +104,11 @@ class Interface:
         login_text = widgets.HTML(value="<b>Please click the buton below to create a login link</b>")
         username_text = widgets.Text(value=None, placeholder="username", description="Username: ")
         status_text = widgets.HTML(value=f"<font color='black'>Waiting for login</font>")
-        login_button = widgets.Button(description="Login", button_style="success")
+        spacer = widgets.Text(value=None)
+        spacer.layout.visibility = "hidden"
+        login_button = widgets.Button(description="Login", button_style="success", layout=self.small_button_layout)
+        # login_button_box = widgets.HBox(children=[login_button])
+        # login_button_box.layout.object_position = "right"
         login_link_box = widgets.Output()
 
         user = None
@@ -119,7 +127,8 @@ class Interface:
             #     status_text.value = f"<font color='red'>Login failure</font>"
 
         login_button.on_click(login)
-        login_widgets = [username_text, login_button, status_text, login_link_box]
+        login_widgets = [username_text, spacer,
+                         login_button, status_text, login_link_box]
 
         return user, login_widgets
 
@@ -132,10 +141,10 @@ class Interface:
         search_terms = widgets.Text(value="", placeholder="Search", description="Search terms:", disabled=False)
         locations = widgets.Text(value="", placeholder="BSD, HFD", description="Locations:", disabled=False)
         data_type = widgets.Dropdown(options=["CRDS", "GC"], value="CRDS", description="Data type", disabled=False)
-        search_button = widgets.Button(description="Search", button_style="success")
-
+        search_button = widgets.Button(description="Search", button_style="success", layout=self.small_button_layout)
         start_picker = widgets.DatePicker(description='Start date', disabled=False)
         end_picker = widgets.DatePicker(description='End date', disabled=False)
+        spacer = widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
         status_box = widgets.HTML(value="")
 
         def call_search(x):
@@ -169,7 +178,7 @@ class Interface:
 
         search_button.on_click(call_search)
 
-        search_children = [search_terms, locations, start_picker, end_picker, data_type,
+        search_children = [search_terms, locations, start_picker, end_picker, data_type, spacer,
                            search_button, status_box]
 
         return search_children
@@ -356,9 +365,13 @@ class Interface:
 
         select_box = widgets.HBox(children=[select_instruction])
         checkbox_box = widgets.VBox(children=plot_checkboxes)
-        horiz_select = widgets.HBox(children=[select_box, checkbox_box])
+
+        # Select data using checkboxes
+        selection_box = widgets.HBox(children=[select_box, checkbox_box])
+        # Plot button
         plot_box = widgets.HBox(children=[plot_button])
-        ui_box = widgets.VBox(children=[horiz_select, plot_box])
+
+        # ui_box = widgets.VBox(children=[horiz_select, plot_box])
 
         # Cleaner way of doing this?
         arg_dict = {plot_keys[i]: checkbox for i, checkbox in enumerate(plot_checkboxes)}
@@ -371,16 +384,8 @@ class Interface:
         def on_plot_clicked(a):
             # Get the data for ticked checkboxes
             to_plot = {key: data[key] for key in arg_dict if arg_dict[key].value is True}
-          
-            # print([list(to_plot[k].columns) for k in to_plot])
             plot_data(to_plot=to_plot)
 
-        # def select_data(**kwargs):
-        #     selected_data.clear()
-
-        #     for key in kwargs:
-        #         if kwargs[key] is True:
-        #             selected_data.append(key)
         output = widgets.Output()
 
         # Create a dropdown to select which part of the dataframe
@@ -419,7 +424,7 @@ class Interface:
 
         plot_button.on_click(on_plot_clicked)
 
-        return [ui_box, figure]
+        return [selection_box, figure, plot_box]
 
     def create_map_box(self, search_results):
         """ Create the mapping box for selection of site data from the map

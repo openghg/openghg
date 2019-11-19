@@ -23,11 +23,11 @@ sys.path.insert(0, "../../../../acquire")
 
 __all__ = ["generate_password"]
 
-
     
 def generate_password():
     length=20
-    return "".join(secrets.choice(string.hexdigits) for _ in range(length))
+    selection = string.ascii_letters + string.digits
+    return "".join(secrets.choice(selection) for _ in range(length))
     
 
 
