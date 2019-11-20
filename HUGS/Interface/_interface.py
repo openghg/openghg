@@ -57,6 +57,8 @@ class Interface:
             self._site_locations = data["locations"]
             # Keyed name: code
             self._site_codes = data["name_code"]
+            # Keyed code: name
+            self._site_names = data["code_name"]
 
     def create_login(self, user, x):
         """ Create a basic login widget and add it to the widget dict
@@ -388,15 +390,6 @@ class Interface:
         header_label_dates = widgets.HTML(value=f"<b>Dates</b>", layout=self.date_layout)
         header_label_select = widgets.HTML(value=f"<b>Select</b>", layout=self.checkbox_layout)
 
-        # for key in data:
-        #     # Create a more readable description
-        #     desc = " ".join(key.split("_")).upper()
-            
-        #     plot_keys.append(key)
-        #     plot_checkboxes.append(widgets.Checkbox(description=desc, value=False))
-
-        print(selected_results)
-
         for key in selected_results:
             start_date = selected_results[key]["start_date"]
             end_date = selected_results[key]["end_date"]
@@ -407,12 +400,12 @@ class Interface:
             gas_name = selected_results[key]["metadata"]["species"]
             gas_label = widgets.Label(value=gas_name, layout=self.table_layout)
             
-            site_name = selected_results[key]["metadata"]["site"]
-            site_text = f'{self._site_locations[site_name]["name"]} ({site_name})'
+            site_code = selected_results[key]["metadata"]["site"]
+            site_text = f'{self._site_locations[site_code.upper()]["name"]} ({site_code.upper()})'
             site_label = widgets.Label(value=site_text, layout=self.table_layout)
 
             plot_keys.append(key)
-            plot_checkboxes.append(widgets.Checkbox(description=desc, value=False))
+            plot_checkboxes.append(widgets.Checkbox(value=False))
 
             date_labels.append(date_label)
             site_labels.append(site_label)
@@ -487,16 +480,19 @@ class Interface:
         # lines = bq.Lines(x=np.arange(100), y=np.cumsum(np.random.randn(2, 100), axis=1), scales=scales)
         lines = bq.Lines(scales=scales)
         figure = bq.Figure(marks=[lines], axes=[ax, ay], animation_duration=1000)
+        figure.layout.width = "auto"
+        figure.layout.height = "auto"
+        figure.layout.min_height = "300px"
 
         plot_button.on_click(on_plot_clicked)
 
         # return [selection_box, figure, plot_box]
-        return [dynamic_box, figure, plot_box]
+        return [header_box, dynamic_box, figure, plot_box]
 
     def create_map_box(self, search_results):
         """ Create the mapping box for selection of site data from the map
             
-            Args:   
+            Args:
                 search_results (dict): Dictionary containing search results
             Returns:
                 list: List containing an ipyleaflet map (may be expanded to include
