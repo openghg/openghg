@@ -248,6 +248,19 @@ class Interface:
         site_labels = []
         date_labels = []
         gas_labels = []
+
+        # Pull this out to a function so we can use it in the plotting box as well
+
+        # def create_data_selection(self, search_results, checkbox=True):
+        #     """ Create the data selection widgets for downloading and plotting data
+
+        #         Args:
+        #             search_results (dict): Search results to parse
+        #             checkbox (bool, default=True): Should checkboxes be ct
+                
+
+        #     """
+
         for key in search_results:
             # Create the checkboxes
             checkbox = widgets.Checkbox(value=False)
@@ -293,8 +306,11 @@ class Interface:
         self.add_widgets(section="download_status", _widgets=status_bar)
 
         def on_download_click(a):
-            download_keys = {key: search_results[key]["keys"] for key in arg_dict if arg_dict[key].value is True}
-            self.download_data(download_keys=download_keys)
+            # download_keys = {key: search_results[key]["keys"] for key in arg_dict if arg_dict[key].value is True}
+
+            # If the tickbox is ticked, copy the selected values from the search results to pass to the download fn            
+            selected_results = {key: search_results[key] for key in arg_dict if arg_dict if arg_dict[key].value is True}
+            self.download_data(selected_results=selected_results)
 
         download_button.on_click(on_download_click)
         download_button_box = widgets.HBox(children=[download_button])
@@ -350,7 +366,7 @@ class Interface:
 
     #     return start_date, end_date
 
-    def create_plotting_box(self, data):
+    def create_plotting_box(self, selected_results, data):
         """ Create the window for plotting the downloaded data
 
             TODO
@@ -362,20 +378,62 @@ class Interface:
         plot_checkboxes = []
         plot_keys = []
 
-        for key in data:
-            # Create a more readable description
-            desc = " ".join(key.split("_")).upper()
+        site_labels = []
+        date_labels = []
+        gas_labels = []
+
+        # TODO - pull this out into a function that can be used here and in create_download_box
+        header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=self.table_layout)
+        header_label_gas = widgets.HTML(value=f"<b>Gas</b>", layout=self.table_layout)
+        header_label_dates = widgets.HTML(value=f"<b>Dates</b>", layout=self.date_layout)
+        header_label_select = widgets.HTML(value=f"<b>Select</b>", layout=self.checkbox_layout)
+
+        # for key in data:
+        #     # Create a more readable description
+        #     desc = " ".join(key.split("_")).upper()
+            
+        #     plot_keys.append(key)
+        #     plot_checkboxes.append(widgets.Checkbox(description=desc, value=False))
+
+        print(selected_results)
+
+        for key in selected_results:
+            start_date = selected_results[key]["start_date"]
+            end_date = selected_results[key]["end_date"]
+            dates = f"{start_date} to {end_date}"
+
+            date_label = widgets.Label(value=dates, layout=self.date_layout)
+    
+            gas_name = selected_results[key]["metadata"]["species"]
+            gas_label = widgets.Label(value=gas_name, layout=self.table_layout)
+            
+            site_name = selected_results[key]["metadata"]["site"]
+            site_text = f'{self._site_locations[site_name]["name"]} ({site_name})'
+            site_label = widgets.Label(value=site_text, layout=self.table_layout)
+
             plot_keys.append(key)
             plot_checkboxes.append(widgets.Checkbox(description=desc, value=False))
+
+            date_labels.append(date_label)
+            site_labels.append(site_label)
+            gas_labels.append(gas_label)
 
         select_instruction = widgets.HTML(value="<b>Select data: </b>", layout=self.table_layout)
         plot_button = widgets.Button(description="Plot", button_style="success", layout=self.table_layout)
 
         select_box = widgets.HBox(children=[select_instruction])
-        checkbox_box = widgets.VBox(children=plot_checkboxes)
+
+        header_box = widgets.HBox(children=[header_label_site, header_label_gas, header_label_dates, header_label_select])
+
+        site_vbox = widgets.VBox(children=site_labels)
+        gas_vbox = widgets.VBox(children=gas_labels)
+        dates_vbox = widgets.VBox(children=date_labels)
+        checkbox_vbox = widgets.VBox(children=plot_checkboxes)
+
+        dynamic_box = widgets.HBox(children=[site_vbox, gas_vbox, dates_vbox, checkbox_vbox])
 
         # Select data using checkboxes
-        selection_box = widgets.HBox(children=[select_box, checkbox_box])
+        # selection_box = widgets.HBox(children=[select_box, checkbox_box])
         # Plot button
         plot_box = widgets.HBox(children=[plot_button])
 
@@ -432,7 +490,8 @@ class Interface:
 
         plot_button.on_click(on_plot_clicked)
 
-        return [selection_box, figure, plot_box]
+        # return [selection_box, figure, plot_box]
+        return [dynamic_box, figure, plot_box]
 
     def create_map_box(self, search_results):
         """ Create the mapping box for selection of site data from the map
@@ -551,7 +610,7 @@ class Interface:
         return False
         # self._widgets[status_name].value = f"Status: {text}"
 
-    def download_data(self, download_keys):
+    def download_data(self, selected_results):
         """ Download the data in the selected keys from the object store
 
             Save the passed data as a temporary class member?
@@ -561,25 +620,30 @@ class Interface:
             Returns:
                 None
         """
+        # Create a Retrieve object to interact with the HUGS Cloud object store
         retrieve = Retrieve(service_url=self._base_url)
+        # Select the keys we want to download
+        download_keys = {key: selected_results[key]["keys"] for key in selected_results}
         data = retrieve.retrieve(keys=download_keys)
 
         # TODO - get the status bar updates working
         # self.update_statusbar(status_name="download_status", text="Downloading...")
 
-        # Convert the JSON into Dataframes
-        for key in data:
-            data[key] = pd.read_json(data[key])
-
         # Update the status bar
         if data:
+            # Convert the JSON into Dataframes
+            for key in data:
+                data[key] = pd.read_json(data[key])
+
             # update_statusbar("Download complete")
             # Create the plotting box
-            self.add_widgets(section="plot_1", _widgets=self.create_plotting_box(data=data))
+            self.add_widgets(section="plot_1", _widgets=self.create_plotting_box(selected_results=selected_results, data=data))
         else:
             # raise NotImplementedError
             # update_statusbar("No data downloaded")
             print("No data downloaded")
+
+        return data
 
 
     def add_widgets(self, section, _widgets):

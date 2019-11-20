@@ -151,11 +151,9 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                             # Get the Dataframes that are within the required date range
                             in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
                             
-                            # Add the metadata dict to the results - 
-                            # res = {"datasources":in_date, "metadata":datasource.metadata()}
-                            # Add a number to the end of the key?
-                            # If we have different heights we'll have multiple results with the same key as we have
-                            # location_key for each location
+                            # Could use a readablekey_shortuuid keying in the dict to make sure there isn't
+                            # any overwriting of results
+                            
                             # Add the values of the metadata dictionary to the key for differentiation
                             key_addition = "_".join([v for k, v in datasource.metadata().items() if k == "inlet" or k == "height"])
 
@@ -163,16 +161,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                                 search_key = f"{location}_{single_key}_{key_addition}"
                                 remaining_terms = [datasource.search_metadata(term) for term in search_terms if term != search_term]
 
-                                # TODO - here update the defaultdict to be dict and save site, dates covered etc as keys in the returend
-                                # dictionary, make it easier to process in the interface etc
-                                # keys: [data_keys]
-
-                                # Need to add in the other metadata from the datasource to the key
-
-                                # Need defaultdict(list) behaviour for results[search_key]["keys"]
-
-                                # Check if we got all Trues for the other search terms
-                                # TODO - check the behaviour of this - doing this multiple times uneccesarily
+                                # TODO - check the behaviour of this - doing this multiple times uneccesarily ?
                                 if all(remaining_terms):
                                     results = append_keys(results=results, search_key=search_key, keys=in_date)
                                     # Add the metadata from the Datasource to the results
@@ -181,6 +170,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                             else:
                                 search_key = f"{location}_{search_term}_{key_addition}"
                                 results = append_keys(results=results, search_key=search_key, keys=in_date)
+                                results[search_key]["metadata"] = datasource.metadata()
                                 # results[search_key].extend(in_date)
         # If we don't have any search terms, return everything that's in the correct daterange
         else:
