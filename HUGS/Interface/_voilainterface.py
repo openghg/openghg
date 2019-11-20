@@ -104,7 +104,7 @@ class VoilaInterface:
 
         def on_plot_click(widget, event, data):
             # print(self.interface_module(module_name="plot_1"))
-            reg_layout.children = self.interface_module(module_name="plot_1")
+            reg_layout.children = self.interface_module(module_name="plot_complete")
 
         register_nav.on_event("click", on_register_click)
         login_nav.on_event("click", on_login_click)

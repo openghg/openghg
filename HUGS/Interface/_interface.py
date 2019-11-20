@@ -36,7 +36,8 @@ class Interface:
         self._base_url = "https://hugs.acquire-aaai.com/t"
         self._search_results = None
         # This is the order in which they'll be shown (if created)
-        self._module_list = ["register", "login", "search", "selection", "download", "map", "plot_1", "plot_2"]
+        self._module_list = ["register", "login", "search", "selection", "download", 
+                            "map", "plot_window", "plot_controls", "plot_complete"]
         # Maybe just made _widgets a defaultdict(list) as originally thought?
         self._widgets = collections.defaultdict(widgets.VBox)
 
@@ -50,6 +51,8 @@ class Interface:
         self.small_button_layout = widgets.Layout(min_width='80px', max_width='100px')
         self.med_button_layout = widgets.Layout(min_width='80px', max_width='120px')
         # Lat/long of sites for use in map selection
+
+        self._plot_box = []
 
         params_file = (os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../Data/site_codes.json")
         with open(params_file, "r") as f:
@@ -375,6 +378,7 @@ class Interface:
             1. Implement adding new plots to create a grid
             2. Editing of plots ?
             3. Adding new overlays to axes
+            4. Updating axis titles, adding figure titles etc
         """
         # Create some checkboxes
         plot_checkboxes = []
@@ -412,7 +416,6 @@ class Interface:
             gas_labels.append(gas_label)
 
         select_instruction = widgets.HTML(value="<b>Select data: </b>", layout=self.table_layout)
-        plot_button = widgets.Button(description="Plot", button_style="success", layout=self.table_layout)
 
         select_box = widgets.HBox(children=[select_instruction])
 
@@ -428,7 +431,10 @@ class Interface:
         # Select data using checkboxes
         # selection_box = widgets.HBox(children=[select_box, checkbox_box])
         # Plot button
-        plot_box = widgets.HBox(children=[plot_button])
+        
+        plot_button = widgets.Button(description="Plot", button_style="success", layout=self.table_layout)
+
+        button_box = widgets.HBox(children=[plot_button])
 
         # ui_box = widgets.VBox(children=[horiz_select, plot_box])
 
@@ -444,8 +450,6 @@ class Interface:
             # Get the data for ticked checkboxes
             to_plot = {key: data[key] for key in arg_dict if arg_dict[key].value is True}
             plot_data(to_plot=to_plot)
-
-        output = widgets.Output()
 
         # Create a dropdown to select which part of the dataframe
         # to plot, count, stddev etc
@@ -482,12 +486,73 @@ class Interface:
         figure = bq.Figure(marks=[lines], axes=[ax, ay], animation_duration=1000)
         figure.layout.width = "auto"
         figure.layout.height = "auto"
-        figure.layout.min_height = "300px"
+        figure.layout.min_height = "500px"
+
+        plot_widgets = [header_box, dynamic_box, figure, button_box]
 
         plot_button.on_click(on_plot_clicked)
 
-        # return [selection_box, figure, plot_box]
-        return [header_box, dynamic_box, figure, plot_box]
+        # Need to update the plotting selection box each time download is called
+
+        # Here have a function that just adds a whole new box to the box this has created
+        # Have a VBox that contains the first, then update to append each plot to the grid
+        # Each time we just append a new vbox to the list of boxes here
+
+        # self._plot_box = [header_box, dynamic_box, figure, button_box]
+        
+        # # Initially just create a single plot
+        # plot_box = widgets.VBox(children=plot_widgets)
+        # self._plot_box.append(plot_box)
+
+        return plot_widgets
+
+    def plot_controller(self, selected_results, data):
+        """ This function controls the gridding of plots 
+            and creates a new set of controlling widgets for each new plotting
+            window
+
+            Args:
+                search_results (dict): Dictionary of search results
+                data (dict): Dictionary of data downloaded from object store
+            Returns:
+                list: List of widgets to be added to widgets.VBox
+        """
+        # Clear the current plots
+        self._plot_box.clear()
+        
+        # self._widgets["plot_complete"] = {}
+        # self._widgets["plot_complete"]["plot_window"] = widgets.VBox()
+        # self._widgets["plot_complete"]["plot_controls"] = widgets.VBox()
+
+        # Add plot button can be here
+        plot_window = widgets.VBox(children=self.create_plotting_box(selected_results=selected_results, data=data))
+        add_button = widgets.Button(description="Add plot", button_style="primary", layout=self.table_layout)
+        spacer = widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
+        
+
+        # Plotting vbox - plotting windows, add new windows to this vbox - self._plot_box can be this VBox
+
+        def add_window(a):
+            new_window = widgets.VBox(children=self.create_plotting_box(selected_results=selected_results, data=data))
+            # Use this for persistence between calls
+            # self._plot_box can be the child of the plot window VBox, add the button to the bottom of this
+            self._plot_box.append(new_window)
+            self._widgets["plot_window"].children = self._plot_box
+        
+        # TODO - tidy this up, convoluted
+
+        # This window includes the controls for the selection of data, visualisation and the plot button
+        plotting_window = widgets.VBox(children=[plot_window])
+        self._plot_box.append(plotting_window)
+
+        self._widgets["plot_window"].children = self._plot_box
+        self._widgets["plot_controls"].children = [spacer, add_button]
+
+        add_button.on_click(add_window)
+        
+        return [self._widgets["plot_window"], self._widgets["plot_controls"]]
+
+        
 
     def create_map_box(self, search_results):
         """ Create the mapping box for selection of site data from the map
@@ -633,7 +698,11 @@ class Interface:
 
             # update_statusbar("Download complete")
             # Create the plotting box
-            self.add_widgets(section="plot_1", _widgets=self.create_plotting_box(selected_results=selected_results, data=data))
+            # self.add_widgets(section="plot_1", _widgets=self.create_plotting_box(selected_results=selected_results, data=data))
+            # If we have new data clear the old plotting box
+            # self.clear_widgets(section="plot_1")
+            # Recreate the plot controller window
+            self.add_widgets(section="plot_complete", _widgets=self.plot_controller(selected_results=selected_results, data=data))
         else:
             # raise NotImplementedError
             # update_statusbar("No data downloaded")
@@ -658,6 +727,17 @@ class Interface:
 
         self._widgets[section].children = _widgets
 
+    def clear_widgets(self, section):
+        """ Clear the widgets for this section by creating an empty
+            VBox in their place
+
+            Args:
+                section (str): Name of section to clear
+            Returns:
+                None
+        """
+        self._widgets[section] = widgets.VBox()
+
     def show_module(self, module_name):
         """ Returns the widgets in a given module
 
@@ -670,7 +750,7 @@ class Interface:
         module_name = module_name.lower()
 
         if module_name not in self._module_list:
-            raise KeyError("module_name must be valid module from module list")
+            raise KeyError(f"{module_name} must be valid module from module list")
 
         return [self._widgets[module_name]]
 
