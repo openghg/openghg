@@ -262,7 +262,7 @@ def append_keys(results, search_key, keys):
     if search_key in results:
         results[search_key]["keys"].extend(keys)
     else:
-        results[search_key]["keys"] = keys
+        results[search_key] = {"keys": keys}
 
     return results
 
