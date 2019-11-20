@@ -519,25 +519,18 @@ class Interface:
         """
         # Clear the current plots
         self._plot_box.clear()
-        
-        # self._widgets["plot_complete"] = {}
-        # self._widgets["plot_complete"]["plot_window"] = widgets.VBox()
-        # self._widgets["plot_complete"]["plot_controls"] = widgets.VBox()
 
         # Add plot button can be here
         plot_window = widgets.VBox(children=self.create_plotting_box(selected_results=selected_results, data=data))
         add_button = widgets.Button(description="Add plot", button_style="primary", layout=self.table_layout)
         spacer = widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
-        
-
-        # Plotting vbox - plotting windows, add new windows to this vbox - self._plot_box can be this VBox
 
         def add_window(a):
             new_window = widgets.VBox(children=self.create_plotting_box(selected_results=selected_results, data=data))
             # Use this for persistence between calls
             # self._plot_box can be the child of the plot window VBox, add the button to the bottom of this
             self._plot_box.append(new_window)
-            self._widgets["plot_window"].children = self._plot_box
+            self.add_widgets(section="plot_window", _widgets=self._plot_box)
         
         # TODO - tidy this up, convoluted
 
@@ -545,13 +538,15 @@ class Interface:
         plotting_window = widgets.VBox(children=[plot_window])
         self._plot_box.append(plotting_window)
 
-        self._widgets["plot_window"].children = self._plot_box
-        self._widgets["plot_controls"].children = [spacer, add_button]
+        self.add_widgets(section="plot_window", _widgets=self._plot_box)
+        self.add_widgets(section="plot_controls", _widgets=[spacer, add_button])
+
+        # self._widgets["plot_window"].children = self._plot_box
+        # self._widgets["plot_controls"].children = 
 
         add_button.on_click(add_window)
         
         return [self._widgets["plot_window"], self._widgets["plot_controls"]]
-
         
 
     def create_map_box(self, search_results):
@@ -736,7 +731,7 @@ class Interface:
             Returns:
                 None
         """
-        self._widgets[section] = widgets.VBox()
+        self._widgets[section].children = []
 
     def show_module(self, module_name):
         """ Returns the widgets in a given module
