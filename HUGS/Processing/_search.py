@@ -213,7 +213,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     # Here we can add the daterange key to the search results
     # TODO - can this just be taken more easily from the Datasource?
     for key in results:
-        start, end = strip_dates_keys(keys=results[key])
+        start, end = strip_dates_keys(keys=results[key]["keys"])
         results[key]["start_date"] = start
         results[key]["end_date"] = end
     
