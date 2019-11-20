@@ -167,12 +167,13 @@ class Interface:
                                                 data_type=data_type.value, start_datetime=start, end_datetime=end)
 
             if search_results:
-                date_keys = self.parse_results(search_results=search_results)
+                # date_keys = self.parse_results(search_results=search_results)
+
                 status_box.value = f"<font color='green'>Success</font>"
                 # TODO - see how the layout works with voila for side-by-side list and map boxes
                 # self.add_widgets(section="selection", _widgets=self.create_selection_box(date_keys=date_keys, 
                 #                                                                             search_results=search_results))
-                self.add_widgets(section="download", _widgets=self.create_download_box(date_keys=date_keys))
+                self.add_widgets(section="download", _widgets=self.create_download_box(search_results=search_results))
             else:
                 status_box.value = f"<font color='red'>No results</font>"
 
@@ -183,7 +184,7 @@ class Interface:
 
         return search_children
 
-    def create_selection_box(self, date_keys, search_results):
+    def create_selection_box(self, search_results):
         """ Select a list or map selection type
 
             Or create side by side option?
@@ -196,11 +197,11 @@ class Interface:
         map_button = widgets.Button(description="Map selection", button_style="info", layout=self.table_layout)
 
         def split_click(a):
-            self.add_widgets(section="download", _widgets=self.create_split_box(date_keys=date_keys, search_results=search_results))
+            self.add_widgets(section="download", _widgets=self.create_split_box(search_results=search_results))
             self.add_widgets(section="map", _widgets=widgets.VBox())
 
         def list_click(a):
-            self.add_widgets(section="download", _widgets=self.create_download_box(date_keys=date_keys))
+            self.add_widgets(section="download", _widgets=self.create_download_box(search_results=search_results))
             self.add_widgets(section="map", _widgets=widgets.VBox())
 
         def map_click(a):
@@ -216,28 +217,27 @@ class Interface:
 
         return [button_box]
 
-    def create_split_box(self, date_keys, search_results):
+    def create_split_box(self, search_results):
         """ Create a box with list selection on the left and map selection on the right
 
             Returns:
                 list: List of HBox
         """
-        list_widgets = self.create_download_box(date_keys=date_keys)
+        list_widgets = self.create_download_box(search_results=search_results)
         map_widgets = self.create_map_box(search_results=search_results)
 
         combined = widgets.HBox(children=list_widgets+map_widgets)
 
         return combined
 
-    def create_download_box(self, date_keys):
+    def create_download_box(self, search_results):
         """ Creates the plotting box that holds the plotting buttons and windows
             
             Args:
-                date_keys (dict): Dictionary of keys containing dates to be read
+                search_results (dict): Search results to be parsed for user information
             Returns:
                 list: List of download widgets
         """
-        
         header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=self.table_layout)
         header_label_gas = widgets.HTML(value=f"<b>Gas</b>", layout=self.table_layout)
         header_label_dates = widgets.HTML(value=f"<b>Dates</b>", layout=self.date_layout)
@@ -249,13 +249,17 @@ class Interface:
         site_labels = []
         date_labels = []
         gas_labels = []
-        for key in date_keys:
+        for key in search_results:
             # Create the checkboxes
             checkbox = widgets.Checkbox(value=False)
             checkbox_objects.append(checkbox)
             search_keys.append(key)
 
-            dates = date_keys[key]["dates"].replace("_", " to ").replace("T", " ")
+            # dates = date_keys[key]["dates"].replace("_", " to ").replace("T", " ")
+            start_date = search_results[key]["start_date"]
+            end_date = search_results[key]["end_date"]
+            dates = f"{start_date} to {end_date}"
+
             date_label = widgets.Label(value=dates, layout=self.date_layout)
 
             split_key = key.split("_")
@@ -290,7 +294,7 @@ class Interface:
         self.add_widgets(section="download_status", _widgets=status_bar)
 
         def on_download_click(a):
-            download_keys = {key: date_keys[key]["keys"] for key in arg_dict if arg_dict[key].value is True}
+            download_keys = {key: search_results[key]["keys"] for key in arg_dict if arg_dict[key].value is True}
             self.download_data(download_keys=download_keys)
 
         download_button.on_click(on_download_click)
@@ -300,6 +304,7 @@ class Interface:
 
         return download_widgets
 
+    # Need to add this date parsing to the search_results
     def parse_results(self, search_results):
         """ Split the keys into a dictionary of each key and the date that the data covers
             
@@ -311,36 +316,40 @@ class Interface:
         """
         date_keys = {}
         for key in search_results:
-            start_date, end_date = self.strip_dates_key(search_results[key])
+            keys = search_results[key]["keys"]
+            start_date = search_results[key]["start_date"]
+            end_date = search_results[key]["end_date"]
+            # start_date, end_date = self.strip_dates_key(keys)
             dates_covered = start_date + "_" + end_date
 
-            date_keys[key] = {"dates": dates_covered, "keys": search_results[key]}
+            date_keys[key] = {"dates": dates_covered, "keys": keys}
 
         return date_keys
 
-    def strip_dates_key(self, keys):
-        """ Strips the date from a key, could this data just be read from JSON instead?
-            Read dates covered from the Datasource?
+    # Moved to search function
+    # def strip_dates_key(self, keys):
+    #     """ Strips the date from a key, could this data just be read from JSON instead?
+    #         Read dates covered from the Datasource?
 
-            TODO - check if this is necessary - Datasource instead?
+    #         TODO - check if this is necessary - Datasource instead?
 
-            Args:
-                keys (list): List of keys containing data
-                data/uuid/<uuid>/2014-01-30T10:52:30_2014-01-30T14:20:30'
-            Returns:
-                tuple (str,str): Start, end dates
-        """
-        if not isinstance(keys, list):
-            keys = [keys]
+    #         Args:
+    #             keys (list): List of keys containing data
+    #             data/uuid/<uuid>/2014-01-30T10:52:30_2014-01-30T14:20:30'
+    #         Returns:
+    #             tuple (str,str): Start, end dates
+    #     """
+    #     if not isinstance(keys, list):
+    #         keys = [keys]
         
-        keys = sorted(keys)
-        start_key = keys[0]
-        end_key = keys[-1]
-        # Get the first and last dates from the keys in the search results
-        start_date = start_key.split("/")[-1].split("_")[0].replace("T", " ")
-        end_date = end_key.split("/")[-1].split("_")[-1].replace("T", " ")
+    #     keys = sorted(keys)
+    #     start_key = keys[0]
+    #     end_key = keys[-1]
+    #     # Get the first and last dates from the keys in the search results
+    #     start_date = start_key.split("/")[-1].split("_")[0].replace("T", " ")
+    #     end_date = end_key.split("/")[-1].split("_")[-1].replace("T", " ")
 
-        return start_date, end_date
+    #     return start_date, end_date
 
     def create_plotting_box(self, data):
         """ Create the window for plotting the downloaded data
@@ -444,7 +453,9 @@ class Interface:
             location = split_key[0]
             species = split_key[1]
 
-            start, end = self.strip_dates_key(search_results[key])
+            # start, end = self.strip_dates_key(search_results[key])
+            start = search_results[key]["start_date"]
+            end = search_results[key]["end_date"]
             # Need this in uppercase for use with the JSON
             location = location.upper()
 
@@ -547,7 +558,7 @@ class Interface:
             Save the passed data as a temporary class member?
 
             Args:
-                date_keys (dict): Dictionary 
+                download_keys (dict): Dictionary 
             Returns:
                 None
         """

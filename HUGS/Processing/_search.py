@@ -134,7 +134,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
 
     # Next we search these keys for the search terms we require
     # keys = _defaultdict(dict)
-    keys = _defaultdict(list)
+    results = _defaultdict(list)
     # TODO - is there a way of tidying this up?
     # If we have search terms
     # Here we could create a dictionary keyed by inlet, location, height etc and the height we require
@@ -167,13 +167,21 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                                 # dictionary, make it easier to process in the interface etc
                                 # keys: [data_keys]
 
+                                # Need to add in the other metadata from the datasource to the key
+
+                                # Need defaultdict(list) behaviour for results[search_key]["keys"]
+
                                 # Check if we got all Trues for the other search terms
                                 # TODO - check the behaviour of this - doing this multiple times uneccesarily
                                 if all(remaining_terms):
-                                    keys[search_key].extend(in_date)
+                                    results = append_keys(results=results, search_key=search_key, keys=in_date)
+                                    # Add the metadata from the Datasource to the results
+                                    results[search_key]["metadata"] = datasource.metadata()
+                                    # results[search_key].extend(in_date)
                             else:
                                 search_key = f"{location}_{search_term}_{key_addition}"
-                                keys[search_key].extend(in_date)
+                                results = append_keys(results=results, search_key=search_key, keys=in_date)
+                                # results[search_key].extend(in_date)
         # If we don't have any search terms, return everything that's in the correct daterange
         else:
             for location in location_sources:
@@ -187,18 +195,77 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                     # TODO - currently adding in the species here, is this OK?
                     # key_addition = "_".join(datasource.metadata().values())
                     search_key = f"{location}_{datasource.species()}_{key_addition}"
-                    keys[search_key].extend(in_date)
+                    results = append_keys(results=results, search_key=search_key, keys=in_date)
+                    results[search_key]["metadata"] = datasource.metadata()
+                    # results[search_key].extend(in_date)
     elif data_type == "FOOTPRINT":
         # For now get all footprints
         for datasource in datasources:
             if datasource.data_type() == "footprint":
                 prefix = "data/uuid/%s" % datasource.uuid()
                 data_list = _get_object_names(bucket=bucket, prefix=prefix)
-                keys["footprints"].extend(data_list)
+                results = append_keys(results=results, search_key=search_key, keys=data_list)
+                results[search_key]["metadata"] = datasource.metadata()
+                # results["footprints"].extend(data_list)
     else:
         raise NotImplementedError("Only time series and footprint data can be searched for currently")
+
+    # Here we can add the daterange key to the search results
+    # TODO - can this just be taken more easily from the Datasource?
+    for key in results:
+        start, end = strip_dates_keys(keys=results[key])
+        results[key]["start_date"] = start
+        results[key]["end_date"] = end
     
-    return keys
+    return results
+
+
+def strip_dates_keys(keys):
+    """ Strips the date from a key, could this data just be read from JSON instead?
+        Read dates covered from the Datasource?
+
+        TODO - check if this is necessary - Datasource instead?
+
+        Args:
+            keys (list): List of keys containing data
+            data/uuid/<uuid>/2014-01-30T10:52:30_2014-01-30T14:20:30'
+        Returns:
+            tuple (str,str): Start, end dates
+    """
+    if not isinstance(keys, list):
+        keys = [keys]
+
+    keys = sorted(keys)
+    start_key = keys[0]
+    end_key = keys[-1]
+    # Get the first and last dates from the keys in the search results
+    start_date = start_key.split("/")[-1].split("_")[0].replace("T", " ")
+    end_date = end_key.split("/")[-1].split("_")[-1].replace("T", " ")
+
+    return start_date, end_date
+
+
+def append_keys(results, search_key, keys):
+    """ defaultdict(list) behaviour for keys record
+
+        If search_key exists in results the keys list is appended
+        to the list stored at that key. Otherwise a new list containing
+        the keys is created and stored at that key.
+
+        Args:
+            results (dict): Results dictionary
+            search_key (str): Key to use to access results
+            keys (list): List of object store keys to access 
+        Returns:
+            dict: Results dictionary
+    """
+    if search_key in results:
+        results[search_key]["keys"].append(keys)
+    else:
+        results[search_key]["keys"] = [keys]
+
+    return results
+
 
 def lookup_gas_datasources(lookup_dict, gas_data, source_name, source_id=None):
     """ Check if the passed data exists in the lookup dict

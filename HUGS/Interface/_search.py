@@ -125,8 +125,6 @@ def create_search_box():
 
 
 def download_data(arg_dict):
-    print("Yahyahyah")
-        
     update_statusbar("Downloading...")
 
     download_keys = {key: date_keys[key]["keys"] for key in selected_data}
@@ -146,7 +144,7 @@ def download_data(arg_dict):
     #     # Create the plotting box
         create_plotting_box()
     else:
-        print("Booo")
+        print("Update statusbar")
     #     update_statusbar("No data downloaded")
 
     selected_data = []
