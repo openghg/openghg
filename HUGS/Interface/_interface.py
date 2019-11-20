@@ -168,7 +168,6 @@ class Interface:
 
             if search_results:
                 # date_keys = self.parse_results(search_results=search_results)
-
                 status_box.value = f"<font color='green'>Success</font>"
                 # TODO - see how the layout works with voila for side-by-side list and map boxes
                 # self.add_widgets(section="selection", _widgets=self.create_selection_box(date_keys=date_keys, 

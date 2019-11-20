@@ -260,9 +260,9 @@ def append_keys(results, search_key, keys):
             dict: Results dictionary
     """
     if search_key in results:
-        results[search_key]["keys"].append(keys)
+        results[search_key]["keys"].extend(keys)
     else:
-        results[search_key]["keys"] = [keys]
+        results[search_key]["keys"] = keys
 
     return results
 
