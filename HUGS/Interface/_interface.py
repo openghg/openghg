@@ -66,12 +66,17 @@ class Interface:
             # Keyed code: name
             self._site_names = data["code_name"]
 
-        colour_maps = (os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../Data/colour_maps.json")
-        with open(colour_maps, "r") as f:
-            data = json.load(f)
-            self._tableau20 = list(data["tableau20"].values())
-            self._colour_blind = list(data["colour_blind"].values())
+        # colour_maps = (os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../Data/colour_maps.json")
+        # with open(colour_maps, "r") as f:
+        #     data = json.load(f)
+        #     self._tableau20 = list(data["tableau20"].values())
+        #     self._colour_blind = list(data["colour_blind"].values())
 
+        # self._tableau20 = list(matplotlib.cm.tab20.colors)
+        # self._colour_blind = list(data["colour_blind"].values())
+
+        self._tableau20 = [matplotlib.colors.rgb2hex(x) for x in matplotlib.cm.tab20.colors]
+        self._colour_blind = self._tableau20
 
     def rand_colors(self, colour_blind=False):
         """ Get a random set of colours
@@ -109,22 +114,24 @@ class Interface:
         conf_password_box = widgets.Password(description="Confirm: ", placeholder="")
         register_button = widgets.Button(description="Register", button_style="primary", layout=self.small_button_layout)
         
-        status_text = widgets.HTML(value=f"<font color='blue'>Enter credentials</font>")
-        self.set_status(status_widget=status_text)
+        status_text = "<font color='blue'>Enter credentials</font>"
+        self.set_status(status_text=status_text)
 
         # self.set_status(status_text=f"<font color='blue'>Enter credentials</font>")
         output_box = widgets.Output()
 
         def register_user(a):
             if password_box.value != conf_password_box.value:
-                with output_box:
-                    status_text.value = f"<font color='red'>Passwords do not match</font>"
+                password_match_error = f"<font color='red'>Passwords do not match</font>"
+                self.set_status(status_text=password_match_error)
             else:
                 result = User.register(username=username_box.value, password=password_box.value, identity_url=f"{self._base_url}/identity")
 
                 with output_box:
-                    status_text.value = f"<font color='green'>Please scan QR code with authenticator app</font>"
                     display(result["qrcode"])
+                
+                qr_code_message = f"<font color='green'>Please scan QR code with authenticator app</font>"
+                self.set_status(status_text=qr_code_message)
 
         register_button.on_click(register_user)
 
@@ -203,13 +210,15 @@ class Interface:
 
             if search_results:
                 # date_keys = self.parse_results(search_results=search_results)
-                status_box.value = f"<font color='green'>Success</font>"
+                status_box_success = f"<font color='green'>Success</font>"
+                self.set_status(status_text=status_box_success)
                 # TODO - see how the layout works with voila for side-by-side list and map boxes
                 # self.add_widgets(section="selection", _widgets=self.create_selection_box(date_keys=date_keys, 
                 #                                                                             search_results=search_results))
                 self.add_widgets(section="download", _widgets=self.create_download_box(search_results=search_results))
             else:
-                status_box.value = f"<font color='red'>No results</font>"
+                status_box_error = f"<font color='red'>No results</font>"
+                self.set_status(status_text=status_box_error)
 
         search_button.on_click(call_search)
 
@@ -336,9 +345,11 @@ class Interface:
 
         # self._widgets["status_bar"] = widgets.HTML(value="Status: Waiting...", layout=statusbar_layout)
         # status_bar = self._widgets["status_bar"]
-        status_bar = widgets.HTML(value="Status: Waiting...", layout=self.statusbar_layout)
+        # status_bar = widgets.HTML(value="Status: Waiting...", layout=self.statusbar_layout)
+        self.set_status(status_text="Status: Waiting...")
+
         # self._status_bar = status_bar
-        self.add_widgets(section="download_status", _widgets=status_bar)
+        # self.add_widgets(section="download_status", _widgets=status_bar)
 
         def on_download_click(a):
             # download_keys = {key: search_results[key]["keys"] for key in arg_dict if arg_dict[key].value is True}
@@ -349,7 +360,7 @@ class Interface:
         download_button.on_click(on_download_click)
         download_button_box = widgets.HBox(children=[download_button])
 
-        download_widgets = [header_box, dynamic_box, download_button_box, status_bar]
+        download_widgets = [header_box, dynamic_box, download_button_box]
 
         return download_widgets
 
@@ -487,7 +498,9 @@ class Interface:
 
         # Plot button
         plot_button = widgets.Button(description="Plot", button_style="success", layout=self.table_layout)
-        button_box = widgets.HBox(children=[plot_button])
+        spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
+
+        button_box = widgets.VBox(children=[plot_button, spacer, spacer])
 
         # ui_box = widgets.VBox(children=[horiz_select, plot_box])
 
@@ -765,7 +778,8 @@ class Interface:
             for key in data:
                 data[key] = pd.read_json(data[key])
 
-            # update_statusbar("Download complete")
+            retrieve_success = f"<font color='green'>Retrieval complete</font>"
+            self.set_status(status_text=retrieve_success)
             # Create the plotting box
             # self.add_widgets(section="plot_1", _widgets=self.create_plotting_box(selected_results=selected_results, data=data))
             # If we have new data clear the old plotting box
@@ -773,15 +787,14 @@ class Interface:
             # Recreate the plot controller window
             self.add_widgets(section="plot_complete", _widgets=self.plot_controller(selected_results=selected_results, data=data))
         else:
-            # raise NotImplementedError
-            # update_statusbar("No data downloaded")
-            print("No data downloaded")
+            data_error = f"<font color='red'>No data downloaded</font>"
+            self.set_status(status_text=data_error)
 
         return data
 
-    def set_status(self, status_widget):
-        # status_html = widgets.HTML(value=status_text)
-        self._widgets["status_bar"].children = [status_widget]
+    def set_status(self, status_text):
+        status_html = widgets.HTML(value=status_text)
+        self._widgets["status_bar"].children = [status_html]
 
 
     def add_widgets(self, section, _widgets):
@@ -838,7 +851,7 @@ class Interface:
         user, login_box = self.create_login_box()
         self.add_widgets(section="login", _widgets=login_box)
         self.add_widgets(section="search", _widgets=self.create_search_box())
-        self.add_widgets(section="status_bar", _widgets=[widgets.HTML(value="Wooo")])
+        self.add_widgets(section="status_bar", _widgets=[widgets.HTML(value="Woo")])
 
 
     def show_interface(self, new_user=False):

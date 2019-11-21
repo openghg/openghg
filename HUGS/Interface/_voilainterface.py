@@ -116,14 +116,22 @@ class VoilaInterface:
 
         nav_drawer = v.NavigationDrawer(v_model=True, children=nav_items)
 
+        toolbar = v.Toolbar(app=True, dark=True, class_="teal",
+                            children=[v.ToolbarTitle(class_="headline", children=["HUGS"])])
+
+        # Without using a template these mount_id's will be ignored
         nav_layout = v.Layout(_metadata={"mount_id": "content-nav"},  children=[nav_drawer])
         reg_layout = v.Layout(_metadata={"mount_id": "content-main"}, justify_start=True, align_center=True, children=[])
+        status_layout = v.Layout(_metadata={"mount_id": "content-status"}, children=self.interface_module(module_name="status_bar"))
 
 
 
         # Here set the template to put this at the bottom in some kind of toolbar
-        status_layout = v.Layout(children=self.interface_module(module_name="status_bar"))
+        # Appbar
+        # Content
+        # App
 
+        app_bar = v.AppBar(color="#CFD8DC", children=["HUGS Cloud"])
 
 # _metadata = {"mount_id": "content-status"},
         # Set the alignment of the reg_layout to align / justify left so not to move
@@ -131,9 +139,11 @@ class VoilaInterface:
         # justify - horizontal
 
         # toolbar_layout = v.Layout(children=[self.create_toolbar()])
-        
-        container = v.Container(class_="fill-height", fluid=True, children=[reg_layout])
+        # toolbar_container 
+        container = v.Container(class_="fill-height", fluid=True, children=[nav_layout, reg_layout])
         content = v.Content(children=[container])
+        
+        app = v.App(children=[app_bar, content])
 
         # bar_button = v.Btn(color='primary', children=['Close drawer'])
         # toolbar = v.Toolbar(app=True, dark=True, class_="teal", children=[v.ToolbarTitle(class_="headline", children=[bar_button, "HUGS"])])
@@ -150,7 +160,7 @@ class VoilaInterface:
 
         layout = v.Layout(justify="start", children=[nav_layout, reg_layout, status_layout])
 
-        return layout
+        return app
 
     def search_select_layout(self):
         """ Creates the ipyvuetify layout for the searching and data selection
