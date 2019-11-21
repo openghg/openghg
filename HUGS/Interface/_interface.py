@@ -15,6 +15,8 @@ import json
 import numpy as np
 import os
 import pandas as pd
+import matplotlib
+import random
 
 __all__ = ["Interface"]
 
@@ -37,9 +39,12 @@ class Interface:
         self._search_results = None
         # This is the order in which they'll be shown (if created)
         self._module_list = ["register", "login", "search", "selection", "download", 
-                            "map", "plot_window", "plot_controls", "plot_complete"]
+                            "map", "plot_window", "plot_controls", "plot_complete", "status_bar"]
         # Maybe just made _widgets a defaultdict(list) as originally thought?
         self._widgets = collections.defaultdict(widgets.VBox)
+
+        # Number of plots created
+        self._n_figs = 0
 
         # Styles - maybe these can be moved somewhere else?
         self.table_style = {'description_width': 'initial'}
@@ -47,10 +52,8 @@ class Interface:
         self.date_layout = {'width': '275px', 'min_width': '200px','height': '28px', 'min_height': '28px'}
         self.checkbox_layout = {'width': '100px', 'min_width': '100px','height': '28px', 'min_height': '28px'}
         self.statusbar_layout = {'width': '250px', 'min_width': '250px', 'height': '28px', 'min_height': '28px'}
-
         self.small_button_layout = widgets.Layout(min_width='80px', max_width='100px')
         self.med_button_layout = widgets.Layout(min_width='80px', max_width='120px')
-        # Lat/long of sites for use in map selection
 
         self._plot_box = []
 
@@ -62,6 +65,29 @@ class Interface:
             self._site_codes = data["name_code"]
             # Keyed code: name
             self._site_names = data["code_name"]
+
+        colour_maps = (os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../Data/colour_maps.json")
+        with open(colour_maps, "r") as f:
+            data = json.load(f)
+            self._tableau20 = list(data["tableau20"].values())
+            self._colour_blind = list(data["colour_blind"].values())
+
+
+    def rand_colors(self, colour_blind=False):
+        """ Get a random set of colours
+
+            Returns:
+                list: A random list of Tableau20 colours
+        """
+        # Need to copy as shuffle shuffles in-place
+        if colour_blind:
+            colours = self._colour_blind.copy()
+        else:
+            colours = self._tableau20.copy()
+
+        random.shuffle(colours)
+
+        return colours
 
     def create_login(self, user, x):
         """ Create a basic login widget and add it to the widget dict
@@ -82,7 +108,11 @@ class Interface:
         password_box = widgets.Password(description="Password: ", placeholder="")
         conf_password_box = widgets.Password(description="Confirm: ", placeholder="")
         register_button = widgets.Button(description="Register", button_style="primary", layout=self.small_button_layout)
+        
         status_text = widgets.HTML(value=f"<font color='blue'>Enter credentials</font>")
+        self.set_status(status_widget=status_text)
+
+        # self.set_status(status_text=f"<font color='blue'>Enter credentials</font>")
         output_box = widgets.Output()
 
         def register_user(a):
@@ -98,7 +128,7 @@ class Interface:
 
         register_button.on_click(register_user)
 
-        return [username_box, suggested_password, password_box, conf_password_box, spacer, register_button, status_text, output_box]
+        return [username_box, suggested_password, password_box, conf_password_box, spacer, register_button, output_box]
 
     def create_login_box(self):
         """ Create a login box
@@ -312,7 +342,6 @@ class Interface:
 
         def on_download_click(a):
             # download_keys = {key: search_results[key]["keys"] for key in arg_dict if arg_dict[key].value is True}
-
             # If the tickbox is ticked, copy the selected values from the search results to pass to the download fn            
             selected_results = {key: search_results[key] for key in arg_dict if arg_dict if arg_dict[key].value is True}
             self.download_data(selected_results=selected_results)
@@ -371,8 +400,15 @@ class Interface:
 
     #     return start_date, end_date
 
-    def create_plotting_box(self, selected_results, data):
+    def create_plotting_box(self, selected_results, data, plot_number=1):
         """ Create the window for plotting the downloaded data
+
+            Args:
+                selected_results (dict): Dictionary of selected search results
+                data (dict): Dictionary of data as JSON format
+                plot_number (int, default=1): Plot number to add to figure
+            Returns:
+                list: List of widgets
 
             TODO
             1. Implement adding new plots to create a grid
@@ -428,12 +464,29 @@ class Interface:
 
         dynamic_box = widgets.HBox(children=[site_vbox, gas_vbox, dates_vbox, checkbox_vbox])
 
-        # Select data using checkboxes
-        # selection_box = widgets.HBox(children=[select_box, checkbox_box])
-        # Plot button
+        # Edit box - for modifying plot types
+        # Dropdown line/scatter
+        # If line - linewidth
+        # If scatter - marker size
         
-        plot_button = widgets.Button(description="Plot", button_style="success", layout=self.table_layout)
+        # Get the colors now so they don't change each time plot is clicked
+        colors = self.rand_colors()
+        # Enable/disable legend
+        plot_dropdown = widgets.Dropdown(options=["Line", "Scatter"], value="Line", description="Plot style: ")
+        marker_size = widgets.IntSlider(value=2, min=1, max=5, step=1, description="Linewidth: ")
 
+        def on_plot_change(a):
+            if plot_dropdown.value == "Line":
+                marker_size.description = "Linewidth: "
+            else:
+                marker_size.description = "Marker size: "
+
+        plot_dropdown.observe(on_plot_change)
+
+        edit_box = widgets.HBox(children=[plot_dropdown, marker_size])
+
+        # Plot button
+        plot_button = widgets.Button(description="Plot", button_style="success", layout=self.table_layout)
         button_box = widgets.HBox(children=[plot_button])
 
         # ui_box = widgets.VBox(children=[horiz_select, plot_box])
@@ -458,39 +511,52 @@ class Interface:
             """ 
                 Each key in the data dict is a dataframe
             """
-            # Here take the keys in the selected data list and use them to
-            # access the Dataframes to plot
-            # Use the same axes. Can have a button to create new plots etc in the future
+            # Modify here so user can select line, scatter
+            # Marker size etc
+            plot_style = plot_dropdown.value
 
-            # TODO - change this to take the data directly from the dict?
-            # plot_data = [data[x] for x in selected_data]
-            # For now just plot the first column in the data
+            x_scale = bq.DateScale()
+            y_scale = bq.LinearScale()
+            scales = {"x": x_scale, "y": y_scale}
 
-            # # Setup the axes
-            # x_scale = bq.DateScale()
-            # y_scale = bq.LinearScale()
-            # scales = {"x": x_scale, "y": y_scale}
-            lines.x = [to_plot[key].index for key in to_plot]
-            lines.y = [to_plot[key].iloc[:,0] for key in to_plot]
+            ax = bq.Axis(label="Date", scale=x_scale)
+            ay = bq.Axis(label="Count", scale=y_scale, orientation="vertical")
 
-        x_scale = bq.DateScale()
-        y_scale = bq.LinearScale()
-        scales = {"x": x_scale, "y": y_scale}
+            axes = [ax,ay]
 
-        ax = bq.Axis(label="Date", scale=x_scale)
-        # TODO - this could be updated depending on what's being plot
-        ay = bq.Axis(label="Count", scale=y_scale, orientation="vertical")
+            if plot_style == "Line":
+                marks = bq.Lines(scales=scales, colors=colors, stroke_width=marker_size.value)
+                marks.x = [to_plot[key].index for key in to_plot]
+                marks.y = [to_plot[key].iloc[:,0] for key in to_plot]
+                figure.marks = [marks]
+            else:
+                # For scatter we need to create a plot for each key
+                marks = []
+                for key in to_plot:
+                    single_color = [random.choice(colors)]
+                    scatter = bq.Scatter(scales=scales, colors=single_color, stroke_width=marker_size.value)
+                    scatter.x = to_plot[key].index
+                    scatter.y = to_plot[key].iloc[:, 0]
+                    marks.append(scatter)
+        
+                figure.marks = marks
 
+            figure.axes = axes
+  
         # lines = bq.Lines(x=np.arange(100), y=np.cumsum(np.random.randn(2, 100), axis=1), scales=scales)
-        lines = bq.Lines(scales=scales)
-        figure = bq.Figure(marks=[lines], axes=[ax, ay], animation_duration=1000)
+        # lines = bq.Lines(scales=scales, colors=self.rand_colors())
+        figure = bq.Figure(marks=[], axes=[], animation_duration=1000)
         figure.layout.width = "auto"
         figure.layout.height = "auto"
         figure.layout.min_height = "500px"
 
-        plot_widgets = [header_box, dynamic_box, figure, button_box]
+        spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
+
+        plot_widgets = [header_box, dynamic_box, spacer, edit_box, figure, button_box]
 
         plot_button.on_click(on_plot_clicked)
+
+        self._n_figs += 1
 
         # Need to update the plotting selection box each time download is called
 
@@ -524,29 +590,37 @@ class Interface:
         plot_window = widgets.VBox(children=self.create_plotting_box(selected_results=selected_results, data=data))
         add_button = widgets.Button(description="Add plot", button_style="primary", layout=self.table_layout)
         spacer = widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
+        # Add a number to the plot
 
         def add_window(a):
-            new_window = widgets.VBox(children=self.create_plotting_box(selected_results=selected_results, data=data))
-            # Use this for persistence between calls
-            # self._plot_box can be the child of the plot window VBox, add the button to the bottom of this
-            self._plot_box.append(new_window)
-            self.add_widgets(section="plot_window", _widgets=self._plot_box)
-        
-        # TODO - tidy this up, convoluted
+            # Number of figures so we know when to create a new HBox for gridding
+            # Figure 1 is figure 0 here
+            n_figs = self._n_figs - 1
 
-        # This window includes the controls for the selection of data, visualisation and the plot button
-        plotting_window = widgets.VBox(children=[plot_window])
-        self._plot_box.append(plotting_window)
+            # Get current HBox
+            new_plot = widgets.VBox(children=self.create_plotting_box(selected_results=selected_results, data=data))
+
+            if n_figs % 2 == 0:
+                current_box = self._plot_box[-1]
+                # Take the current HBox at the last element and create a new list containing two HBoxes
+                updated_box = widgets.HBox(children=[current_box, new_plot])
+                self._plot_box[-1] = updated_box
+            else:
+                self._plot_box.append(new_plot)
+
+            self.add_widgets(section="plot_window", _widgets=self._plot_box)
+
+
+        self._plot_box.append(plot_window)
 
         self.add_widgets(section="plot_window", _widgets=self._plot_box)
         self.add_widgets(section="plot_controls", _widgets=[spacer, add_button])
 
-        # self._widgets["plot_window"].children = self._plot_box
-        # self._widgets["plot_controls"].children = 
-
         add_button.on_click(add_window)
+
+        complete = [self._widgets["plot_window"], self._widgets["plot_controls"]]
         
-        return [self._widgets["plot_window"], self._widgets["plot_controls"]]
+        return complete
         
 
     def create_map_box(self, search_results):
@@ -705,6 +779,10 @@ class Interface:
 
         return data
 
+    def set_status(self, status_widget):
+        # status_html = widgets.HTML(value=status_text)
+        self._widgets["status_bar"].children = [status_widget]
+
 
     def add_widgets(self, section, _widgets):
         """ Add widgets to be the children of the key section
@@ -760,11 +838,14 @@ class Interface:
         user, login_box = self.create_login_box()
         self.add_widgets(section="login", _widgets=login_box)
         self.add_widgets(section="search", _widgets=self.create_search_box())
+        self.add_widgets(section="status_bar", _widgets=[widgets.HTML(value="Wooo")])
 
 
     def show_interface(self, new_user=False):
         """ Return the completed interface
 
+            Returns:
+                widgets.VBox
         """
         # Here we can assign children to the VBox's created in the function above
         if new_user:

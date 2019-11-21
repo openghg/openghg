@@ -119,6 +119,13 @@ class VoilaInterface:
         nav_layout = v.Layout(_metadata={"mount_id": "content-nav"},  children=[nav_drawer])
         reg_layout = v.Layout(_metadata={"mount_id": "content-main"}, justify_start=True, align_center=True, children=[])
 
+
+
+        # Here set the template to put this at the bottom in some kind of toolbar
+        status_layout = v.Layout(children=self.interface_module(module_name="status_bar"))
+
+
+# _metadata = {"mount_id": "content-status"},
         # Set the alignment of the reg_layout to align / justify left so not to move
         # align - vertical
         # justify - horizontal
@@ -141,11 +148,10 @@ class VoilaInterface:
         # app = v.App(children=[v.Layout(row=True, children=[nav_drawer, toolbar, content])])
         # app = v.App(children=[v.Layout(row=True, children=[nav_drawer, content])])
 
-        layout = v.Layout(justify="start", children=[nav_layout, reg_layout])
+        layout = v.Layout(justify="start", children=[nav_layout, reg_layout, status_layout])
 
         return layout
 
-    
     def search_select_layout(self):
         """ Creates the ipyvuetify layout for the searching and data selection
             widgets
@@ -174,6 +180,8 @@ class VoilaInterface:
 
         # selection_layout = v.Layout(row=True, wrap=True, align_center=True,
         #                             children=[search_layout, data_layout])
+
+        divider = v.Divider()
 
         container = v.Container(children=[search_row, data_row])
 
