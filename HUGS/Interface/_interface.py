@@ -50,10 +50,12 @@ class Interface:
         self.table_style = {'description_width': 'initial'}
         self.table_layout = {'width': '100px', 'min_width': '100px','height': '28px', 'min_height': '28px'}
         self.date_layout = {'width': '275px', 'min_width': '200px','height': '28px', 'min_height': '28px'}
-        self.checkbox_layout = {'width': '100px', 'min_width': '100px','height': '28px', 'min_height': '28px'}
+        self.checkbox_layout = {'width': '100px', 'min_width': '100px', 'height': '28px', 'min_height': '28px'}
         self.statusbar_layout = {'width': '250px', 'min_width': '250px', 'height': '28px', 'min_height': '28px'}
         self.small_button_layout = widgets.Layout(min_width='80px', max_width='100px')
         self.med_button_layout = widgets.Layout(min_width='80px', max_width='120px')
+
+        self._spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
 
         self._plot_box = []
 
@@ -75,7 +77,7 @@ class Interface:
         # self._tableau20 = list(matplotlib.cm.tab20.colors)
         # self._colour_blind = list(data["colour_blind"].values())
 
-        self._tableau20 = [matplotlib.colors.rgb2hex(x) for x in matplotlib.cm.tab20.colors]
+        self._tableau20 = [matplotlib.colors.rgb2hex(colour) for colour in matplotlib.cm.tab20.colors]
         self._colour_blind = self._tableau20
 
     def rand_colors(self, colour_blind=False):
@@ -223,7 +225,7 @@ class Interface:
         search_button.on_click(call_search)
 
         search_children = [search_terms, locations, start_picker, end_picker, data_type, spacer,
-                           search_button, status_box]
+                           search_button, self._spacer]
 
         return search_children
 
@@ -341,6 +343,7 @@ class Interface:
 
         dynamic_box = widgets.HBox(children=[site_vbox, gas_vbox, dates_vbox, checkbox_vbox])
 
+        select_all_button = widgets.Button(description="Select all", button_style="info", layout=self.table_layout)
         download_button = widgets.Button(description="Retrieve", button_style="success", layout=self.table_layout)
 
         # self._widgets["status_bar"] = widgets.HTML(value="Status: Waiting...", layout=statusbar_layout)
@@ -357,8 +360,20 @@ class Interface:
             selected_results = {key: search_results[key] for key in arg_dict if arg_dict if arg_dict[key].value is True}
             self.download_data(selected_results=selected_results)
 
+        def select_all(a):
+            vals = [c.value for c in checkbox_objects]
+            if all(vals):
+                for c in checkbox_objects:
+                    c.value = False
+            else:
+                for c in checkbox_objects:
+                    c.value = True
+                        
+        
         download_button.on_click(on_download_click)
-        download_button_box = widgets.HBox(children=[download_button])
+        select_all_button.on_click(select_all)
+
+        download_button_box = widgets.VBox(children=[self._spacer, select_all_button, download_button])
 
         download_widgets = [header_box, dynamic_box, download_button_box]
 
@@ -534,26 +549,24 @@ class Interface:
 
             ax = bq.Axis(label="Date", scale=x_scale)
             ay = bq.Axis(label="Count", scale=y_scale, orientation="vertical")
-
             axes = [ax,ay]
 
-            if plot_style == "Line":
-                marks = bq.Lines(scales=scales, colors=colors, stroke_width=marker_size.value)
-                marks.x = [to_plot[key].index for key in to_plot]
-                marks.y = [to_plot[key].iloc[:,0] for key in to_plot]
-                figure.marks = [marks]
-            else:
-                # For scatter we need to create a plot for each key
-                marks = []
-                for key in to_plot:
-                    single_color = [random.choice(colors)]
-                    scatter = bq.Scatter(scales=scales, colors=single_color, stroke_width=marker_size.value)
-                    scatter.x = to_plot[key].index
-                    scatter.y = to_plot[key].iloc[:, 0]
-                    marks.append(scatter)
-        
-                figure.marks = marks
+            marks = []
+            for key in to_plot:
+                single_color = [random.choice(colors)]
 
+                if plot_style == "Line":
+                    mark = bq.Lines(scales=scales, colors=single_color, stroke_width=marker_size.value)
+                else:
+                    mark = bq.Scatter(scales=scales, colors=single_color, stroke_width=marker_size.value)
+                    
+                mark.x = to_plot[key].index
+                # TODO - can modify this to be able to add error bars etc
+                mark.y = to_plot[key].iloc[:,0]
+                
+                marks.append(mark)
+
+            figure.marks = marks
             figure.axes = axes
   
         # lines = bq.Lines(x=np.arange(100), y=np.cumsum(np.random.randn(2, 100), axis=1), scales=scales)
