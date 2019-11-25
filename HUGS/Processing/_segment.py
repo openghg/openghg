@@ -73,7 +73,7 @@ def assign_data(gas_data, lookup_results, overwrite):
         # If we have a UUID for this Datasource load the existing object
         # from the object store
         if uuid:
-            datasource = Datasource.load(uuid=uid)
+            datasource = Datasource.load(uuid=uuid)
         else:
             datasource = Datasource.create(name=name)
 
