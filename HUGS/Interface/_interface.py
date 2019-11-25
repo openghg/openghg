@@ -547,8 +547,8 @@ class Interface:
             y_scale = bq.LinearScale()
             scales = {"x": x_scale, "y": y_scale}
 
-            ax = bq.Axis(label="Date", scale=x_scale)
-            ay = bq.Axis(label="Count", scale=y_scale, orientation="vertical")
+            ax = bq.Axis(label="Date", scale=x_scale, grid_lines="none")
+            ay = bq.Axis(label="Count", scale=y_scale, orientation="vertical", grid_lines="none")
             axes = [ax,ay]
 
             marks = []

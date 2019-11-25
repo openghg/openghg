@@ -22,7 +22,7 @@ class Process:
             self._service
 
     def process_folder(self, user, folder_path, data_type, source_name=None, overwrite=False, extension="dat", 
-                        hugs_url=None, storage_url=None):
+                        hugs_url=None, storage_url=None, instrument=None):
         """ Process the passed directory of data files
 
             Args:
@@ -52,7 +52,8 @@ class Process:
         else:
             raise NotImplementedError("Currently only implemented for CRDS and GC data types")
 
-        return self.process_files(user=user, files=filepaths, data_type=data_type, source_name=source_name, overwrite=overwrite)
+        return self.process_files(user=user, files=filepaths, data_type=data_type, source_name=source_name, overwrite=overwrite,
+                                    instrument=instrument)
 
     # Find a better way to get this storage url in here, currently used for testing
     def process_files(self, user, files, data_type, source_name=None, overwrite=False, hugs_url=None, 
@@ -110,8 +111,8 @@ class Process:
         for file in files:
             if data_type.upper() == "GC":
                 # This is only used as a key when returning the Datasource UUIDs
-                # This may be removed in the future as is currently only for testing
                 filename = file[0].name
+                # This may be removed in the future as is currently only for testing
                 
                 if not source_name:
                     source_name = os.path.splitext(filename)[0]
@@ -136,7 +137,7 @@ class Process:
                         "source_name":source_name, "overwrite": overwrite,
                         "site":site, "instrument":instrument }
             else:
-                filename = str(file).split("/")[-1]
+                filename = file[0].name
                 
                 filemeta = drive.upload(file)
                 par = PAR(location=filemeta.location(), user=user)
