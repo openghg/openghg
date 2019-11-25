@@ -111,12 +111,13 @@ class Process:
             if data_type.upper() == "GC":
                 # This is only used as a key when returning the Datasource UUIDs
                 # This may be removed in the future as is currently only for testing
-                filename = file[0].split("/")[-1]
+                filename = file[0].name
                 
                 if not source_name:
-                    source_name = filename.split(".")[0]
+                    source_name = os.path.splitext(filename)[0]
 
-                # TODO - update this
+                # TODO - update this so we get proper reading of parameters
+                # dictionary
                 if not site:
                     site = source_name
                 
