@@ -224,7 +224,7 @@ class CRDS:
         filename = data_filepath.split("/")[-1] 
         gas_data = crds.read_data(data_filepath=data_filepath)
 
-        source_name = os.path.splitext(filename)
+        source_name = os.path.splitext(filename)[0]
 
         # Check to see if we've had data from these Datasources before
         # TODO - currently just using a simple naming system here - update to use 
