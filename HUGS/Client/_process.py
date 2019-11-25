@@ -120,7 +120,7 @@ class Process:
                 # TODO - update this so we get proper reading of parameters
                 # dictionary
                 if not site:
-                    site = source_name
+                    site = source_name.split(".")[0]
                 
                 filemeta = drive.upload(file[0])
                 par = PAR(location=filemeta.location(), user=user)
