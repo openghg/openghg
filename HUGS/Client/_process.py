@@ -43,11 +43,11 @@ class Process:
             # Find all files in 
             for f in Path(folder_path).glob(f"**/*.C"):
                 if "precisions" in f.name:
-                    # Remove precisions section and ensure file exists?
+                    # Remove precisions section and ensure file exists
                     data_filename = str(f).replace(".precisions", "")
                     if Path(data_filename).exists():
                         filepaths.append((Path(data_filename), f))
-        elif data_type == "CRDS"
+        elif data_type == "CRDS":
             filepaths = [f for f in Path(folder_path).glob(f'**/*.{extension}')]
         else:
             raise NotImplementedError("Currently only implemented for CRDS and GC data types")

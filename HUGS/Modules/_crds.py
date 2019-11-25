@@ -208,6 +208,7 @@ class CRDS:
         """
         from HUGS.Processing import assign_data, lookup_gas_datasources
         from HUGS.Util import hash_file
+        import os
 
         crds = CRDS.load()
         # here we check the source id from the interface or the source_name
@@ -222,6 +223,8 @@ class CRDS:
         data_filepath = str(data_filepath)
         filename = data_filepath.split("/")[-1] 
         gas_data = crds.read_data(data_filepath=data_filepath)
+
+        source_name = os.path.splitext(filename)
 
         # Check to see if we've had data from these Datasources before
         # TODO - currently just using a simple naming system here - update to use 
