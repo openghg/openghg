@@ -21,7 +21,8 @@ class Process:
         else:
             self._service
 
-    def process_folder(self, user, folder_path, data_type, source_name=None, overwrite=False, extension="dat", hurls_url=None, storage_url=None):
+    def process_folder(self, user, folder_path, data_type, source_name=None, overwrite=False, extension="dat", 
+                        hugs_url=None, storage_url=None):
         """ Process the passed directory of data files
 
             Args:
@@ -37,10 +38,19 @@ class Process:
         from pathlib import Path
         import os
 
-        if data_type != "CRDS":
-            raise NotImplementedError("Only currently implemented for CRDS data type")
-
-        filepaths = [f for f in Path(folder_path).glob(f'**/*.{extension}')]
+        if data_type == "GC":
+            filepaths = []
+            # Find all files in 
+            for f in Path(folder_path).glob(f"**/*.C"):
+                if "precisions" in f.name:
+                    # Remove precisions section and ensure file exists?
+                    data_filename = str(f).replace(".precisions", "")
+                    if Path(data_filename).exists():
+                        filepaths.append((Path(data_filename), f))
+        elif data_type == "CRDS"
+            filepaths = [f for f in Path(folder_path).glob(f'**/*.{extension}')]
+        else:
+            raise NotImplementedError("Currently only implemented for CRDS and GC data types")
 
         return self.process_files(user=user, files=filepaths, data_type=data_type, source_name=source_name, overwrite=overwrite)
 
