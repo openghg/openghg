@@ -215,8 +215,7 @@ class Interface:
                 status_box_success = f"<font color='green'>Success</font>"
                 self.set_status(status_text=status_box_success)
                 # TODO - see how the layout works with voila for side-by-side list and map boxes
-                # self.add_widgets(section="selection", _widgets=self.create_selection_box(date_keys=date_keys, 
-                #                                                                             search_results=search_results))
+                self.add_widgets(section="selection", _widgets=self.create_selection_box(search_results=search_results))
                 self.add_widgets(section="download", _widgets=self.create_download_box(search_results=search_results))
             else:
                 status_box_error = f"<font color='red'>No results</font>"
@@ -237,7 +236,7 @@ class Interface:
             Returns:
                 list: List containing a HBox (WIP)
         """    
-        # split_button = widgets.Button(description="Split", button_style="info", layout=self.table_layout)
+        split_button = widgets.Button(description="Split", button_style="info", layout=self.table_layout)
         list_button = widgets.Button(description="List selection", button_style="info", layout=self.table_layout)
         map_button = widgets.Button(description="Map selection", button_style="info", layout=self.table_layout)
 
@@ -253,11 +252,11 @@ class Interface:
             self.add_widgets(section="download", _widgets=widgets.VBox())
             self.add_widgets(section="map", _widgets=self.create_map_box(search_results=search_results))
 
-        # split_button.on_click(split_click)
+        split_button.on_click(split_click)
         list_button.on_click(list_click)
         map_button.on_click(map_click)
         
-        buttons = [list_button, map_button]
+        buttons = [split_button, list_button, map_button]
         button_box = widgets.HBox(children=buttons)
 
         return [button_box]
@@ -271,7 +270,7 @@ class Interface:
         list_widgets = self.create_download_box(search_results=search_results)
         map_widgets = self.create_map_box(search_results=search_results)
 
-        combined = widgets.HBox(children=list_widgets+map_widgets)
+        combined = widgets.VBox(children=list_widgets+map_widgets)
 
         return combined
 
@@ -283,7 +282,8 @@ class Interface:
             Returns:
                 list: List of download widgets
         """
-        header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=self.table_layout)
+        header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=self.date_layout)
+        # header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=self.table_layout)
         header_label_gas = widgets.HTML(value=f"<b>Gas</b>", layout=self.table_layout)
         header_label_dates = widgets.HTML(value=f"<b>Dates</b>", layout=self.date_layout)
         header_label_select = widgets.HTML(value=f"<b>Select</b>", layout=self.checkbox_layout)
@@ -756,6 +756,23 @@ class Interface:
         download_button.on_click(download_click)
 
         return [site_map]
+
+    def create_upload_box(self, user):
+        """ Create the widgets required for a user to upload data to HUGS
+
+            Args:
+                user: A logged-in User object
+            Returns:
+                list: List of widgets
+        """
+        
+        # Create the login widget - currently only accept a single file
+        selection_button = widgets.FileUpload(description="Select", multiple=False)
+        upload_button = widgets.Button(description="Upload", button_style="primary")
+
+
+
+
 
     # Will this force an update ?
     def update_statusbar(self, status_name, text):

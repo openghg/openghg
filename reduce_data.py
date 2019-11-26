@@ -33,7 +33,7 @@ def create_filelist(folder_path, data_type="CRDS", extension="dat"):
         eight_meg = 10*1024*1024
         # Find all files in
         for f in Path(folder_path).glob(f"**/*.C"):
-            if "precisions" in f.name:
+            if "precisions" in f.name and "-" not in f.name:
                 # Remove precisions section and ensure file exists
                 data_filename = str(f).replace(".precisions", "")
                 data_path = Path(data_filename)
