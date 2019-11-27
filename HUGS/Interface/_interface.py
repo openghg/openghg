@@ -980,17 +980,16 @@ class Interface:
         return [self._widgets[module_name]]
 
     def voila_interface(self):
-        """ Creates the interface for use in voila
+        """ Creates the interface for use with the voila interface
 
             Returns:
                 None
         """
         self.add_widgets(section="register", _widgets=self.create_registration_box())
-        # TODO - How to handle user here? Just assign to self._user or something?
-        # login_box = self.create_login_box()
         self.add_widgets(section="login", _widgets=self.create_login_box())
         self.add_widgets(section="search", _widgets=self.create_search_box())
-        self.add_widgets(section="status_bar", _widgets=[widgets.HTML(value="Woo")])
+        self.add_widgets(section="upload", _widgets=self.create_fileselector())
+        # self.add_widgets(section="status_bar", _widgets=[widgets.HTML(value="Woo")])
 
 
     def show_interface(self, new_user=False):
