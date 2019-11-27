@@ -137,7 +137,7 @@ class Process:
                         "source_name":source_name, "overwrite": overwrite,
                         "site":site, "instrument":instrument }
             else:
-                filename = file[0].name
+                filename = file.name
                 
                 filemeta = drive.upload(file)
                 par = PAR(location=filemeta.location(), user=user)
