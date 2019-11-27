@@ -15,7 +15,7 @@ class VoilaInterface:
         # Create an Interface object, this handles the creation of ipywidgets and
         # widgets layout etc
         self._interface = Interface()
-        # Create the voila interface
+        # Create the widget boxes to use in the voila interface
         self._interface.voila_interface()
 
     def interface_module(self, module_name):
