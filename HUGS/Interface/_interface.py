@@ -770,8 +770,77 @@ class Interface:
         selection_button = widgets.FileUpload(description="Select", multiple=False)
         upload_button = widgets.Button(description="Upload", button_style="primary")
 
+    def create_fileselector(self, *args):
+        header_label_filename = widgets.HTML(value=f"<b>Filename</b>", layout=header_layout)
+        header_label_datatype = widgets.HTML(value=f"<b>Data type</b>", layout=header_layout)
+        header_label_select = widgets.HTML(value=f"<b>Select</b>", layout=header_layout)
 
+        filenames = []
+        data_types = []
+        checkboxes = []
 
+        # This holds the binary data passed by the FileUpload widget
+        data = {}
+
+        data_type_list = ["CRDS", "GC"]
+
+        files = ["file1 is really how fdfd",
+                "file1 is really howfdfdf ", "file1 is really how"]
+
+        def clear_checkboxes(*args):
+            for c in checkboxes:
+                c.value = False
+
+        def upload_data(*args):
+            # Call the upload function and pass data to processing
+            pass
+
+        def update_filelist(*args):
+            """ Update the list of files to be selected for upload
+            
+            """
+            for filename in selection_button.value.keys():
+                filenames.append(widgets.HTML(
+                    value=f"{filename}", layout=widgets.Layout(flex='1 1 auto', width='auto')))
+                data_types.append(widgets.Dropdown(options=data_type_list, value="GC",
+                                                layout=widgets.Layout(flex='1 1 auto', width='auto')))
+                checkboxes.append(widgets.Checkbox(
+                    value=True, layout=widgets.Layout(flex='1 1 auto', width='auto')))
+
+            filename_box = widgets.VBox(children=filenames)
+            datatype_box = widgets.VBox(children=data_types)
+            checkbox_box = widgets.VBox(children=checkboxes)
+
+            list_box.children = [filename_box, datatype_box, checkbox_box]
+
+        header = widgets.HBox(children=[header_label_filename, header_label_datatype, header_label_select], 
+                                layout=main_layout)
+
+        filename_box = widgets.VBox(children=filenames)
+        datatype_box = widgets.VBox(children=data_types)
+        checkbox_box = widgets.VBox(children=checkboxes)
+
+        # list_box = widgets.HBox(children=[filename_box, datatype_box, checkbox_box], layout=main_layout)
+        list_box = widgets.HBox(children=[], layout=main_layout)
+
+        file_selector = widgets.VBox(children=[header, list_box])
+
+        # Now create file selector button and clear, upload buttons
+
+        selection_button = widgets.FileUpload(description="Select")
+        clear_button = widgets.Button(button_style="danger", description="Clear")
+        upload_button = widgets.Button(button_style="primary", description="Upload")
+
+        selection_button.observe(update_filelist, names="value")
+
+        clear_button.on_click(clear_checkboxes)
+
+        button_box = widgets.VBox(children=[selection_button, widgets.HBox(children=[clear_button, upload_button])], 
+                                    layout=main_layout)
+
+        complete = widgets.VBox(children=[file_selector, button_box])
+
+        return complete
 
 
     # Will this force an update ?

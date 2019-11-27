@@ -1,5 +1,11 @@
-voila
-ipywidgets
-ipyleaflet
 bqplot
-traitlets
+ipyleaflet
+ipyvuetify
+ipywidgets
+matplotlib
+netcdf4
+numpy
+pandas
+tables
+voila
+xarray
