@@ -806,6 +806,9 @@ class Interface:
             """ Update the list of files to be selected for upload
             
             """
+            if self._user and self._user.is_logged_in()
+                upload_button.disabled = False
+                
             for filename in selection_button.value.keys():
                 filenames.append(widgets.HTML(
                     value=f"{filename}", layout=widgets.Layout(flex='1 1 auto', width='auto')))
@@ -836,7 +839,7 @@ class Interface:
 
         selection_button = widgets.FileUpload(description="Select")
         clear_button = widgets.Button(button_style="danger", description="Clear")
-        upload_button = widgets.Button(button_style="primary", description="Upload")
+        upload_button = widgets.Button(button_style="primary", description="Upload", disabled=True)
 
         # TODO - disable the upload button until the user is logged in
         selection_button.observe(update_filelist, names="value")
