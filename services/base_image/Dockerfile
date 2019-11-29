@@ -1,9 +1,11 @@
-FROM chryswoods/acquire-base:latest
+FROM loc-acquire-base:latest
 
 WORKDIR /function
 USER root
 
 ADD requirements.txt .
+
+RUN pip3 install -U pip
 
 RUN pip3 install --target /python/ --no-cache --no-cache-dir \
                  -r requirements.txt && \

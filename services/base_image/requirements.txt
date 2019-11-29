@@ -3,3 +3,5 @@ numpy
 xarray
 netcdf4
 tables
+tblib
+uvloop
