@@ -12,6 +12,9 @@ def get_ceda_yaml(*args):
         Returns:
             str: Dictionary object serialised to YAML document
     """
+
+    # YAML versions in example files look a lot like JSON instad of the YAML
+    # that yaml.dump(data) creates. Is this a different version of yaml?
     # Load in JSON for storing data for CEDA compliance
     # JSON feels cleaner to work with/read here
     with open("ceda_compliance.json", "r") as f:
