@@ -1,0 +1,52 @@
+{
+  "title": "Arctic Cloud Summer Expedition (ACSE): carbon dioxide and water vapour measurements from the University of Leeds LI-COR Li-7500 gas analyzer on board Icebreaker Oden",
+  "description": "This dataset contains carbon dioxide and water vapour concentration measurements from the University of Leeds' LI-COR LI-7500 open path gas analyser mounted on board the Swedish Icebreaker Oden durning Arctic Cloud Summer Expedition (ACSE). ACSE took place in the Arctic during summer 2014. \n\nThe instrument's sensing head was located on the foremast of Icebreaker Oden, approximately 1 m forward of the sonic anemometer. Data times were truncated to match those from the sonic anemometer and the internal lag was corrected for.\n\nThe UK participation of ACSE was funded by the Natural Environment Research Council (NERC, grant: NE/K011820/1) and involved instrumentation from the Atmospheric Measurement Facility of the UK's National Centre for Atmospheric Science (NCAS AMF). ",
+  "authors": [
+    {
+      "firstname": "Joe",
+      "surname": "Bloggs"
+    },
+    {
+      "firstname": "",
+      "surname": ""
+    },
+    {
+      "firstname": "",
+      "surname": ""
+    }
+  ],
+  "bbox": {
+    "north": "85.2300°",
+    "south": "\t 69.6600°",
+    "east": "\t 180.0000°",
+    "west": "-180.0000°"
+  },
+  "time_range": {
+    "start": "2014-07-10T14:02:00",
+    "end": "2014-10-02T23:57:59"
+  },
+  "lineage": "Data were collected, quality controlled and prepared for archiving by the instrument scientists before upload to the Centre for Environmental Data Analysis (CEDA) for long term archiving.",
+  "quality": "Data are as given by the data provider, no quality control has been performed by the Centre for Environmental Data Analysis (CEDA)",
+  "docs": [],
+  "project": {
+    "catalogue_url": "",
+    "title": "Arctic Cloud Summer Expedition (ACSE)",
+    "description": "The Arctic Cloud Summer Expedition (ACSE) was a collaboration between the University of Leeds, the University of Stockholm, and NOAA-CIRES. ACSE aimed to study the response of Arctic boundary layer cloud to changes in surface conditions in the Arctic Ocean as a working package of the larger Swedish-Russian-US Investigation of Climate, Cryosphere and Carbon interaction (SWERUS-C3) Expedition in Summer 2014. This expedition was a core component to the overall SWERUS-C3 programme and was supported by the Swedish Polar Research Secretariat.\n\nThe UK participation of ACSE was funded by the Natural Environment Research Council (NERC, grant: NE/K011820/1) and involved instrumentation from the Atmospheric Measurement Facility of the UK's National Centre for Atmospheric Science (NCAS AMF).\n\n",
+    "PI": {
+      "firstname": "Joe",
+      "lastname": "Bloggd"
+    },
+    "funder": "Natural Environment Research Council",
+    "grant_number": "NE/K011820/1"
+  },
+  "instrument": {
+    "catalogue_url": "",
+    "title": "University of Leeds: Licor Li-7500 gas analyzer on the  Swedish Maritime Administration Icebreaker Oden",
+    "description": "Arctic Cloud Summer Expedition (ACSE): carbon dioxide and water vapour measurements from the University of Leeds LI-COR Li-7500 gas analyzer on board Icebreaker Oden"
+  },
+  "computation": {
+    "catalogue_url": "",
+    "title": "",
+    "description": ""
+  }
+}
