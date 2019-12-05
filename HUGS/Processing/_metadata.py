@@ -84,10 +84,12 @@ def _parse_GC(filename, data):
     # If we haven't been able to split the filename raise an error
     split_hyphen = split_filename[0].split("-")
     if len(split_hyphen) < 2:
-        raise ValueError("Error reading metadata from filename. The expected format is {site}-{instrument}.{number}.C")
-
-    site = split_hyphen[0]
-    instrument = split_hyphen[1]
+        site = split_hyphen[0]
+        instrument = "unknown"
+        # raise ValueError("Error reading metadata from filename. The expected format is {site}-{instrument}.{number}.C")
+    else:
+        site = split_hyphen[0]
+        instrument = split_hyphen[1]
 
     metadata = {}
     metadata["site"] = site

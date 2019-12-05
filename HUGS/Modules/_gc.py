@@ -1,10 +1,10 @@
-from enum import Enum as _Enum
+from enum import Enum
 
 __all__ = ["GC"]
 
 # Enum or read from JSON?
 # JSON might be easier to change in the future
-class sampling_period(_Enum):
+class sampling_period(Enum):
     GCMD = 75
     GCMS = 1200
     MEDUSA = 1200
@@ -27,6 +27,15 @@ class GC:
         self._creation_datetime = None
         self._stored = False
         self._datasources = []
+        # Keyed by name - allows retrieval of UUID from name
+        self._datasource_names = {}
+        # Keyed by UUID - allows retrieval of name by UUID
+        self._datasource_uuids = {}
+        # Hashes of previously uploaded files
+        self._file_hashes = {}
+        # Site codes for inlet readings
+        self._site_codes = {}
+        self._params = {}
 
     def is_null(self):
         """ Check if this is a null object
@@ -34,7 +43,7 @@ class GC:
             Returns:
                 bool: True if object is null
         """
-        return self._datasources is None
+        return len(self._datasource_uuids) == 0
 
     @staticmethod
     def exists(bucket=None):
@@ -42,19 +51,18 @@ class GC:
             store
 
             Args:
-                uuid (str): UUID of GC object
                 bucket (dict, default=None): Bucket for data storage
             Returns:
                 bool: True if object exists
         """
-        from HUGS.ObjectStore import exists as _exists
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import exists
+        from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
 
         key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
-        return _exists(bucket=bucket, key=key)
+        return exists(bucket=bucket, key=key)
 
     @staticmethod
     def create():
@@ -63,10 +71,10 @@ class GC:
             Returns:
                 GC: GC object 
         """
-        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
+        from Acquire.ObjectStore import get_datetime_now
 
         gc = GC()
-        gc._creation_datetime = _get_datetime_now()
+        gc._creation_datetime = get_datetime_now()
 
         return gc
 
@@ -83,10 +91,10 @@ class GC:
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         data = {}
-        # data["uuid"] = self._uuid
         data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
         data["stored"] = self._stored
-        data["datasources"] = self._datasources
+        data["datasource_uuids"] = self._datasource_uuids
+        data["datasource_names"] = self._datasource_names
 
         return data
 
@@ -100,17 +108,15 @@ class GC:
         """ 
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
 
-        if data is None or len(data) == 0:
+        if not data:
             return GC()
         
         gc = GC()
-        # gc._uuid = data["uuid"]
         gc._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        stored = data["stored"]
-        gc._datasources = data["datasources"]
-
+        gc._datasource_uuids = data["datasource_uuids"]
+        gc._datasource_names = data["datasource_names"]
         gc._stored = False
-        
+
         return gc
 
     def save(self, bucket=None):
@@ -140,8 +146,6 @@ class GC:
         """ Load a GC object from the object store
 
             Args:
-                uuid (str): UUID of GC object
-                key (str, default=None): Key of object in object store
                 bucket (dict, default=None): Bucket to store object
             Returns:
                 Datasource: Datasource object created from JSON
@@ -162,7 +166,8 @@ class GC:
         return GC.from_data(data=data, bucket=bucket)
 
     @staticmethod
-    def read_file(data_filepath, precision_filepath):
+    def read_file(data_filepath, precision_filepath, source_name, site, instrument_name="GCMD", 
+                    source_id=None, overwrite=False):
         """ Reads a GC data file by creating a GC object and associated datasources
 
             Args:
@@ -173,28 +178,34 @@ class GC:
                 GC: GC object
 
         """
-        from Acquire.ObjectStore import create_uuid as _create_uuid
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        from HUGS.Processing import assign_data, lookup_gas_datasources
+        import json
 
-        from HUGS.Processing import create_datasources as _create_datasources
+        gc = GC.load()
 
-        if not GC.exists():
-            gc = GC.create()
-        else:
-            gc = GC.load()
+        # TODO - I feel this is messy, should be improved and the _test_data function
+        # removed, create a json folder so there's a proper structure?
+        # Load in the parameters dictionary for processing data
+        
+        # params_file = _test_data() + "/process_gcwerks_parameters.json"
+        # with open(params_file, "r") as f:
+        #     gc._params = json.load(f)
+        # Load in the params for code_site, site_code dictionaries for selection
+        # of inlets from the above parameters
+        
 
-        print("Remember to update the instrument!")
-        # Where to get this from? User input?
-        site = "CGO"
-        instrument_name = "GCMD"
-
+        
         data, species, metadata = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                                                 site=site, instrument=instrument_name)
 
-        split_data = gc.split(data=data, site=site, species=species, metadata=metadata)
+        gas_data = gc.split(data=data, site=site, species=species, metadata=metadata)
+
+        # lookup_results = lookup_gas_datasources(gas_data=gas_data, source_name=source_name, source_id=source_id)
+        lookup_results = lookup_gas_datasources(lookup_dict=gc._datasource_names, gas_data=gas_data,
+                                                source_name=source_name, source_id=source_id)
     
         # Create Datasources, save them to the object store and get their UUIDs
-        datasource_uuids = _create_datasources(split_data)
+        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
         # Add the Datasources to the list of datasources associated with this object
         gc.add_datasources(datasource_uuids)
         # Save object to object store
@@ -202,6 +213,32 @@ class GC:
 
         # Return the UUIDs of the datasources in which the data was stored
         return datasource_uuids
+
+    # TODO - move this out to a module so we don't have it in two places, just
+    # pass in the dict it searches
+    # def lookup_datasources(self, lookup_dict, gas_data, source_name=None, source_id=None):
+    #     """ Check which datasources hold data from this source
+
+    #         Args: 
+    #             gas_data (list): Gas data to process
+    #             source_name (str)
+    #         Returns:
+    #             dict: Dictionary keyed by source_name. Value of Datasource UUID
+    #     """
+    #     # If we already have data from these datasources then return that UUID
+    #     # otherwise return False
+    #     if source_id is not None:
+    #         raise NotImplementedError()
+
+    #     results = {}
+
+    #     for species in gas_data:
+    #         datasource_name = source_name + "_" + species
+    #         results[species] = {}
+    #         results[species]["uuid"] = self._datasource_names.get(datasource_name, False)
+    #         results[species]["name"] = datasource_name
+
+    #     return results
 
     def read_data(self, data_filepath, precision_filepath, site, instrument):
         """ Read data from the data and precision files
@@ -216,17 +253,12 @@ class GC:
 
                 Tuple contains species name, species metadata, datasource_uuid and dataframe
         """
-        import json as _json
         from pandas import read_csv as _read_csv
         from pandas import datetime as _pd_datetime
         from pandas import Timedelta as _pd_Timedelta
 
         from HUGS.Processing import read_metadata
 
-        # Load in the parameters dictionary for processing data
-        params_file = _test_data() + "/process_gcwerks_parameters.json"
-        with open(params_file, "r") as FILE:
-            self._params = _json.load(FILE)
 
         # Read header
         header = _read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
@@ -327,35 +359,40 @@ class GC:
 
                 Tuple of species name (str), metadata (dict), datasource_uuid (str), data (Pandas.DataFrame)
         """
-        from fnmatch import fnmatch as _fnmatch
-        from itertools import compress as _compress
-        from uuid import uuid4 as _uuid4
+        from fnmatch import fnmatch
+        from itertools import compress
 
+        
+        site_code = self.get_site_code(site)
         # Read inlets from the parameters dictionary
-        expected_inlets = self.get_inlets(site=site)
+        expected_inlets = self.get_inlets(site_code=site_code)
         # Get the inlets in the dataframe
         try:
             data_inlets = data["Inlet"].unique()
         except KeyError:
-            raise KeyError("Unable to read inlets from data, please ensure this data is of the GC type"
-                            "expected by this processing module")
-            
+            raise KeyError("Unable to read inlets from data, please ensure this data is of the GC \
+                                    type expected by this processing module")
+        # TODO - ask Matt/Rachel about inlets
+        matching_inlets = data_inlets
 
-        # Check that each inlet in data_inlet matches one that's given by parameters file
-        for data_inlet in data_inlets:
-            match = [_fnmatch(data_inlet, inlet) for inlet in expected_inlets]
-            if True in match:
-                # Filter the expected inlets by the ones we've found in data
-                # If none of them match processing below will not proceed
-                matching_inlets = list(_compress(data_inlets, match))
-            else:
-                raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
-                                  data and inlet in parameters file.")
+        # # For now just add air to the expected inlets
+        # expected_inlets.append("air")
+        # # Check that each inlet in data_inlet matches one that's given by parameters file
+        # for data_inlet in data_inlets:
+        #     match = [fnmatch(data_inlet, inlet) for inlet in expected_inlets]
+        #     if True in match:
+        #         # Filter the expected inlets by the ones we've found in data
+        #         # If none of them match processing below will not proceed
+        #         matching_inlets = list(compress(data_inlets, match))
+        #     else:
+        #         raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
+        #                           data and inlet in parameters file.")
 
         # TODO - where to get Datasource UUIDs from?
         # Also what to do in case of multiple inlets - each of these will have a unique ID
         # But may be of the same spec ?
         gas_data = []
+        combined_data = {}
 
         for spec in species:
             # Check if the data for this spec is all NaNs
@@ -383,12 +420,10 @@ class GC:
                     inlet_data = data.loc[data["Inlet"] == inlet]
                     dataframe = inlet_data[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
                     dataframe = dataframe.dropna(axis="index", how="any")
-                    # TODO - change me
-                    datasource_uuid = _uuid4()
-            
-                gas_data.append((spec, spec_metadata, datasource_uuid, dataframe))
+
+                combined_data[spec] = {"metadata": spec_metadata, "data": dataframe}
         
-        return gas_data
+        return combined_data
 
     def get_precision(self, instrument):
         """ Get the precision of the instrument in seconds
@@ -399,9 +434,12 @@ class GC:
                 int: Precision of instrument in seconds
 
         """
+        if not self._params:
+            self.load_params()
+
         return self._params["GC"]["sampling_period"][instrument]
 
-    def get_inlets(self, site):
+    def get_inlets(self, site_code):
         """ Get the inlets used at this site
 
             Args:
@@ -409,17 +447,58 @@ class GC:
             Returns:
                 list: List of inlets
         """
-        return self._params["GC"][site]["inlets"]
+        if not self._params:
+            self.load_params()
+
+        return self._params["GC"][site_code]["inlets"]
+
+    def load_params(self):
+        """ Load the parameters from file
+
+            Returns:
+                None
+        """
+        import json
+
+        params_file = _test_data() + "/process_gcwerks_parameters.json"
+        with open(params_file, "r") as f:
+            self._params = json.load(f)
+
+    def get_site_code(self, site):
+        """ Get the site code
+
+            Args:
+                site (str): Name of site
+            Returns:
+                str: Site code
+        """
+        import json
+
+        if not self._site_codes:
+            site_codes_json = _test_data() + "/site_codes.json"
+            with open(site_codes_json, "r") as f:
+                d = json.load(f)
+                self._site_codes = d["name_code"]
+
+        try:
+            site_code = self._site_codes[site.lower()]
+        except KeyError:
+            raise KeyError("Site not recognized")
+        
+        return site_code
 
     def add_datasources(self, datasource_uuids):
         """ Add the passed list of Datasources to the current list
 
             Args:
-                datasource_uuids (list): List of Datasource UUIDs
+                datasource_uuids (dict): Dict of Datasource UUIDs
             Returns:
                 None
         """
-        self._datasources.extend(datasource_uuids)
+        self._datasource_names.update(datasource_uuids)
+        # Invert the dictionary to update the dict keyed by UUID
+        uuid_keyed = {v: k for k, v in datasource_uuids.items()}
+        self._datasource_uuids.update(uuid_keyed)
 
     def datasources(self):
         """ Return the list of Datasources for this object
@@ -427,7 +506,7 @@ class GC:
             Returns:
                 list: List of Datasources
         """
-        return self._datasources
+        return self._datasource_uuids.keys()
 
     def remove_datasource(self, uuid):
         """ Remove the Datasource with the given uuid from the list 
@@ -436,7 +515,7 @@ class GC:
             Args:
                 uuid (str): UUID of Datasource to be removed
         """
-        self._datasources.remove(uuid)
+        del self._datasource_uuids[uuid]
 
     def clear_datasources(self):
         """ Remove all Datasources from the object
@@ -444,6 +523,8 @@ class GC:
             Returns:
                 None
         """
-        self._datasources = []
+        self._datasource_uuids.clear()
+        self._datasource_names.clear()
+        self._file_hashes.clear()
             
 

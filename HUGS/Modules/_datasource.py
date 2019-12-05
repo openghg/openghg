@@ -14,9 +14,8 @@ class Datasource:
         self._uuid = None
         self._name = None
         self._creation_datetime = None
-        self._labels = {}
 
-        self._metadata = None
+        self._metadata = {}
         self._parent = None
         # These may be unnecessary?
         self._instrument = None
@@ -27,7 +26,8 @@ class Datasource:
         self._start_datetime = None
         self._end_datetime = None
         self._stored = False
-        self._data_keys = []
+        self._data_keys = {}
+        self._data_type = None
 
     @staticmethod
     def create(name, data=None, **kwargs):
@@ -36,7 +36,7 @@ class Datasource:
             Args:
                 name (str): Name for Datasource
                 data (list, default=None): List of Pandas.Dataframes
-                **kwargs (dict): Dictionary saved as the labels for this object
+                **kwargs (dict): Dictionary saved as the metadata for this object
             Returns:
                 Datasource
 
@@ -45,18 +45,15 @@ class Datasource:
             This would allow some elasticity to the datasources
                 
         """        
-        from Acquire.ObjectStore import create_uuid as _create_uuid
-        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+        from Acquire.ObjectStore import create_uuid, get_datetime_now, string_to_datetime
 
         d = Datasource()
         d._name = name
-        d._uuid = _create_uuid()
-        d._creation_datetime = _get_datetime_now()
-                
+        d._uuid = create_uuid()
+        d._creation_datetime = get_datetime_now()
         # Any need to parse these for safety?
-        d._labels = kwargs
-        d._labels["gas"] = name
+        # d._metadata = kwargs
+        d._metadata["source_name"] = name
         
         if data is not None:
             # This could be a list of dataframes
@@ -64,8 +61,8 @@ class Datasource:
             # Just store these as time stamps?
             # Get the first and last datetime from the list of dataframes
             # TODO - update this as each dataframe may have different start and end dates
-            d._start_datetime = _string_to_datetime(data[0].first_valid_index())
-            d._end_datetime = _string_to_datetime(data[-1].last_valid_index())
+            d._start_datetime = string_to_datetime(data[0].first_valid_index())
+            d._end_datetime = string_to_datetime(data[-1].last_valid_index())
         
         return d
 
@@ -93,8 +90,8 @@ class Datasource:
         """
         return self._end_datetime
 
-    def add_label(self, key, value):
-        """ Add a label to the label dictionary with the key value pair
+    def add_metadata(self, key, value):
+        """ Add a label to the metadata dictionary with the key value pair
             This will overwrite any previous entry stored at that key.
 
             Args:
@@ -103,83 +100,154 @@ class Datasource:
             Returns:
                 None
         """
-        self._labels[key.lower()] = value.lower()
+        self._metadata[key.lower()] = value.lower()
 
-    def add_data(self, metadata, data):
+    def add_data(self, metadata, data, data_type=None, overwrite=False):
         """ Add data to this Datasource and segment the data by size.
             The data is stored as a tuple of the data and the daterange it covers.
 
             Args:
                 metadata (dict): Metadata on the data for this Datasource
                 data (Pandas.DataFrame): Data
-            Returns:
+                data_type (str, default=None): Placeholder for combination of this fn
+                with add_footprint_data in the future
+                overwrite (bool, default=False): Overwrite existing data
                 None
         """
-        from pandas import Grouper as _Grouper
-        from HUGS.Processing import get_split_frequency as _get_split_frequency
+        from pandas import Grouper
+        from HUGS.Processing import get_split_frequency
 
         # Store the metadata as labels
-        for k, v in metadata.items():
-            self.add_label(key=k, value=v)
+        # for k, v in metadata.items():
+        #     self.add_metadata(key=k, value=v)
 
-        freq = _get_split_frequency(data)
+        # Ensure metadata values are all lowercase
+        metadata = {k: v.lower() for k,v in metadata.items()}
+        self._metadata.update(metadata)
+
+        # Add in a type record for timeseries data
+        # Can possibly combine this function and the add_footprint (and other)
+        # functions in the future
+        # Store the hashes of data we've seen previously in a dict?
+        # Then also check that the data we're trying to input doesn't overwrite the data we
+        # currently have
+        # Be easiest to first check the dates covered by the data?
+
+        # Check the daterange covered by this data and if we have an overlap
+        # 
+        if self._data:
+            start_data, end_data = self.daterange()
+            start_new, end_new = self.get_dataframe_daterange(data)
+
+            # Check if there's overlap of data
+            if start_new >= start_data and end_new <= end_data and overwrite is False:
+                raise ValueError("The provided data overlaps dates covered by existing data")
+
+        # Need to check here if we've seen this data before
+        # Can we do this before splitting the
+        freq = get_split_frequency(data)
         # Split into sections by splitting frequency
-        group = data.groupby(_Grouper(freq=freq))
+        group = data.groupby(Grouper(freq=freq))
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
+        self.add_metadata(key="data_type", value="timeseries")
+        self._data_type = "timeseries"
+        # Use daterange() to update the recorded values
+        self.update_daterange()
 
-
-    def get_dataframe_daterange(self, dataframe):
-        """ Returns the daterange for the passed dataframe
+    def add_footprint_data(self, metadata, data, overwrite=False):
+        """ Add footprint data
+            The data is stored as a tuple of the data and the daterange it covers.
 
             Args:
-                dataframe (Pandas.DataFrame): Dataframe to parse
+                metadata (dict): Metadata on the data for this Datasource
+                data (xarray.Dataset): Footprint data
             Returns:
-                tuple (datetime, datetime): Start and end datetimes for dataframe
+                None
         """
-        import datetime as _datetime
+        self._metadata.update(metadata)
+        self.add_metadata(key="data_type", value="footprint")
+        self._data_type = "footprint"
+        
+        start, end = self.get_dataset_daterange(data)
+        
+        if self._data:
+            start_existing, end_existing = self.daterange()
+            # Check if there's overlap of data
+            if start >= start_existing and end <= end_existing and overwrite is False:
+                raise ValueError("The provided data overlaps dates covered by existing data")
+        
+        # Really we should just concatenate the Datasets?
+        # Concatenated datasets would be be better when we move to zarr
+        # but as we're still using NetCDF this current methods works best
 
-        start = dataframe.first_valid_index()
-        end = dataframe.last_valid_index()
+        # TODO - here could I create a struct to hold this data?
+        # Could be cleaner than trying to ensure people / me remember
+        # that this is a list of tuple(dataset, tuple) ?
+        self._data.append((data, (start, end)))
+        self.update_daterange()
+
+    def get_dataframe_daterange(self, dataframe):
+        """ Returns the daterange for the passed DataFrame
+
+            Args:
+                dataframe (Pandas.DataFrame): DataFrame to parse
+            Returns:
+                tuple (datetime, datetime): Start and end datetimes for DataSet
+        """
+        from pandas import DatetimeIndex
+        from pandas import to_datetime
+        from Acquire.ObjectStore import datetime_to_datetime
+        
+        if not isinstance(dataframe.index, DatetimeIndex):
+            raise TypeError("Only DataFrames with a DatetimeIndex must be passed")
+        
+        # This seems a bit long winded but we end up with standard Python datetime objects
+        # that are timezone aware and set to UTC
+        start = datetime_to_datetime(to_datetime(dataframe.first_valid_index()))
+        end = datetime_to_datetime(to_datetime(dataframe.last_valid_index()))
 
         return start, end
 
-    def add_metadata(self, metadata):
-        """ Add metadata to this object
+    def get_dataset_daterange(self, dataset):
+        """ Get the daterange for the passed DataSet
 
             Args:
-                metadata (Metadata): Metadata object
-        """
-        self._metadata = metadata
+                dataset (xarray.DataSet): DataSet to parse
+            Returns:
+                tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
 
+        """
+        from xarray import Dataset
+        from pandas import Timestamp
+        from Acquire.ObjectStore import datetime_to_datetime
+
+        if not isinstance(dataset, Dataset):
+            raise TypeError("Only xarray DataSet types can be processed")
+
+        start = datetime_to_datetime(Timestamp(dataset.time[0].values).to_pydatetime())
+        end = datetime_to_datetime(Timestamp(dataset.time[-1].values).to_pydatetime())
+
+        return start, end
 
     @staticmethod
     def exists(datasource_id, bucket=None):
-        """ Uses an ID of some kind to query whether or not this is a new
-            Datasource and should be created
-
-            Check if a datasource with this ID is already stored in the object store
-
-            WIP
-
-            TODO - update this when I have a clearer idea of how to ID datasources
+        """ Check if a datasource with this ID is already stored in the object store
 
             Args:
                 datasource_id (str): ID of datasource created from Data / given in data
             Returns:
                 bool: True if Datasource exists 
         """
-        from HUGS.ObjectStore import exists as _exists
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from HUGS.ObjectStore import exists, get_bucket
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
 
         key = "%s/uuid/%s" % (Datasource._data_root, datasource_id)
         
-        # Query object store for Datasource
-        return _exists(bucket=bucket, key=key)
+        return exists(bucket=bucket, key=key)
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -197,15 +265,16 @@ class Datasource:
         if self.is_null():
             return {}
 
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        from Acquire.ObjectStore import datetime_to_string
 
         data = {}
         data["UUID"] = self._uuid
         data["name"] = self._name
-        data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
-        data["labels"] = self._labels
+        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
+        data["metadata"] = self._metadata
         data["stored"] = self._stored
         data["data_keys"] = self._data_keys
+        data["data_type"] = self._data_type
 
         return data
 
@@ -215,18 +284,77 @@ class Datasource:
 
             Args:
                 bucket (dict): Bucket containing data
-                uuid (str): UUID for Datasource 
+                key (str): Key for data
             Returns:
                 Pandas.Dataframe: Dataframe from stored HDF file
         """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from HUGS.ObjectStore import get_dated_object as _get_dated_object
+        from HUGS.ObjectStore import get_dated_object
 
-        data = _get_dated_object(bucket, key)
+        data = get_dated_object(bucket, key)
 
         return Datasource.hdf_to_dataframe(data)
 
-    # The save_dataframe function was moved to be part of save()
+
+    @staticmethod
+    def load_dataset(bucket, key):
+        """ Loads a xarray Dataset from the passed key for creation of a Datasource object
+
+            Currently this function gets binary data back from the object store, writes it
+            to a temporary file and then gets xarray to read from this file. 
+
+            This is done in a long winded way due to xarray not being able to create a Dataset
+            from binary data at the moment.
+
+            Args:
+                bucket (dict): Bucket containing data
+                key (str): Key for data
+            Returns:
+                xarray.Dataset: Dataset from NetCDF file
+        """
+        from Acquire.ObjectStore import ObjectStore
+        from xarray import open_dataset
+        import tempfile
+
+        data = ObjectStore.get_object(bucket, key)
+
+        # TODO - is there a cleaner way of doing this?
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path =  f"{tmpdir}/tmp.nc"
+            with open(tmp_path, "wb") as f:
+                f.write(data)
+
+            ds = open_dataset(tmp_path)
+
+            return ds
+
+    # These functions don't work, placeholders for when it's possible to get 
+    # an in memory NetCDF4 file
+    # def dataset_to_netcdf(data):
+    #     """ Write the passed dataset to a compressed in-memory NetCDF file
+    #     """
+    #     import netCDF4
+    #     import xarray
+
+    #     store = xarray.backends.NetCDF4DataStore(data)
+    #     nc4_ds = netCDF4.Dataset(store)
+    #     nc_buf = nc4_ds.close()
+
+    # def netcdf_to_dataset(data):
+    #     """ Converts the binary data in data to xarray.Dataset
+
+    #         Args:
+    #             data: Binary data
+    #         Returns:
+    #             xarray.Dataset: Dataset created from data
+    #     """
+    #     import netCDF4
+    #     import xarray
+
+    #     nc4_ds = netCDF4.Dataset("in_memory.nc", memory=data)
+    #     store = xarray.backends.NetCDF4DataStore(nc4_ds)
+    #     return xarray.open_dataset(store)
+
+
 
     # Modified from
     # https://github.com/pandas-dev/pandas/issues/9246
@@ -242,15 +370,12 @@ class Datasource:
             Returns:
                 bytes: HDF5 file as bytes object
         """
-        from pandas import HDFStore as _HDFStore
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        from Acquire.ObjectStore import get_datetime_now_to_string
+        from pandas import HDFStore
 
-        with _HDFStore("write.hdf", mode="w", driver="H5FD_CORE", driver_core_backing_store=0,
+        with HDFStore("write.hdf", mode="w", driver="H5FD_CORE", driver_core_backing_store=0,
                         complevel=6, complib="blosc:blosclz") as out:
             
             out["data"] = data
-            # Copy the data and close the file to check if this works
             return out._handle.get_file_image()
 
     @staticmethod
@@ -265,13 +390,11 @@ class Datasource:
             Returns:
                 Pandas.Dataframe: Dataframe read from HDF5 file buffer
         """
-        from pandas import HDFStore as _HDFStore
-        from pandas import read_hdf as _read_hdf
-        from Acquire.ObjectStore import get_datetime_now_to_string
+        from pandas import HDFStore, read_hdf
 
-        with _HDFStore("read.hdf", mode="r", driver="H5FD_CORE", driver_core_backing_store=0,
+        with HDFStore("read.hdf", mode="r", driver="H5FD_CORE", driver_core_backing_store=0,
                         driver_core_image=hdf_data) as data:
-            return _read_hdf(data)
+            return read_hdf(data)
 
     @staticmethod
     def from_data(bucket, data, shallow):
@@ -283,7 +406,7 @@ class Datasource:
             Returns:
                 Datasource: Datasource created from JSON
         """
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
+        from Acquire.ObjectStore import string_to_datetime
 
         if data is None or len(data) == 0:
             return Datasource()
@@ -291,15 +414,24 @@ class Datasource:
         d = Datasource()
         d._uuid = data["UUID"]
         d._name = data["name"]
-        d._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        d._labels = data["labels"]
+        d._creation_datetime = string_to_datetime(data["creation_datetime"])
+        d._metadata = data["metadata"]
         d._stored = data["stored"]
         d._data_keys = data["data_keys"]
         d._data = []
+        d._data_type = data["data_type"]
         
         if d._stored and not shallow:
             for key in d._data_keys:
-                d._data.append(Datasource.load_dataframe(bucket, key))
+                daterange = d._data_keys[key].split("_")
+                start =  string_to_datetime(daterange[0])
+                end = string_to_datetime(daterange[1])
+                if d._data_type == "timeseries":
+                    d._data.append((Datasource.load_dataframe(bucket, key), (start,end)))
+                elif d._data_type == "footprint":
+                    d._data.append((Datasource.load_dataset(bucket, key), (start,end)))
+
+        d._stored = False
 
         return d
 
@@ -314,32 +446,60 @@ class Datasource:
         if self.is_null():
             return
 
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        import tempfile
+        from Acquire.ObjectStore import datetime_to_string, ObjectStore
+        from HUGS.ObjectStore import get_bucket
+        # from zarr import Blosc
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
+
+        # For now we'll get the data type from the metadata
+        data_type = self._metadata["data_type"]
 
         if self._data is not None:
             for data, daterange in self._data:
                 start, end = daterange
-                daterange_str = "".join([_datetime_to_string(start), "_", _datetime_to_string(end)])
+                daterange_str = "".join([datetime_to_string(start), "_", datetime_to_string(end)])
                 data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
-                self._data_keys.append(data_key)
-                _ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
+                self._data_keys[data_key] = daterange_str
+                if self._data_type == "timeseries":
+                    ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
+                # TODO - for now just create a temporary directory - will have to update Acquire
+                # or work on a PR for xarray to allow returning a NetCDF as bytes
+                elif self._data_type == "footprint":   
+                    with tempfile.TemporaryDirectory() as tmpdir:
+                        filepath = f"{tmpdir}/temp.nc"
+                        data.to_netcdf(filepath)
+                        ObjectStore.set_object_from_file(bucket, data_key, filepath)
+                else:
+                    raise NotImplementedError("Not implemented")
+                
+                # TODO - tidy or remove this
+                # Leftover from trying out converting to zarr with compression, will leave for now
+                # Set the compression type and level for each variable
+                # For some reason conversion to zarr seems to increase the amount of space
+                # the data takes, this could be due to compression in the NetCDF file.
+                # Compressing using zstd with a compression level of 3 seems to be a good trade-off
+                # of size and compression time
+                # encodings = {}
+                # for k in data.keys():
+                #     encodings[k] = {"compressor": Blosc(cname='zstd', clevel=3)}
+                # # Convert to zarr format and compress
+                # data = data.to_zarr(consolidated=True, encoding=encodings)
 
-            self._stored = True
+                # encodings = {}
+                # for k in data.keys():
+                #     encodings[k] = {"zlib": True, "complevel": 3}
+        
+                # Convert to zarr format and compress
+                # data = data.to_zarr(consolidated=True, encoding=encodings)
+                # data.to_netcdf(filepath, encoding=encodings)        
 
+        self._stored = True
 
         datasource_key = "%s/uuid/%s" % (Datasource._datasource_root, self._uuid)
-        _ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
-        
-        # encoded_name = _string_to_encoded(self._name)
-        # name_key = "%s/name/%s/%s" % (Datasource._datasource_root, encoded_name, self._uuid)
-        # _ObjectStore.set_string_object(bucket=bucket, key=name_key, string_data=self._uuid)
-
+        ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
 
     @staticmethod
     def load(bucket=None, uuid=None, key=None, shallow=False):
@@ -369,7 +529,6 @@ class Datasource:
             key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
 
         data = _get_object_json(bucket=bucket, key=key)
-
         return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
 
     @staticmethod
@@ -387,7 +546,6 @@ class Datasource:
         from HUGS.ObjectStore import get_dated_object_json as _get_dated_object_json
 
         key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
-
         data = _get_dated_object_json(bucket=bucket, key=key)
 
         return data["name"]
@@ -402,14 +560,11 @@ class Datasource:
             Returns:
                 str: UUID for the Datasource
         """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
+        from Acquire.ObjectStore import ObjectStore, string_to_encoded
 
-        encoded_name = _string_to_encoded(name)
-
+        encoded_name = string_to_encoded(name)
         prefix = "%s/name/%s" % (Datasource._datasource_root, encoded_name)
-
-        uuid = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
+        uuid = ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
 
         if len(uuid) > 1:
             raise ValueError("There should only be one Datasource associated with this name")
@@ -420,38 +575,85 @@ class Datasource:
         """ Get the data stored in this Datasource
 
             Returns:
-                Pandas.Dataframe: Dataframe stored in this object
+                list: List of tuples of Pandas.DataFrame and start, end datetime tuple
         """
         return self._data
 
-    def daterange(self):
-        """ Get the daterange this Datasource covers as a string
+    def sort_data(self):
+        """ Sorts the data in the data list
+
+            TODO: Could this be better handled using an OrderedDict?
 
             Returns:
-                str: Daterange as string 
+                None
         """
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        from operator import itemgetter
+        # Data list elements contain a tuple of
+        # (data,(start_datetime, end_datetime))
+        # Could also check to make sure we don't have overlapping dateranges?
+        self._data = sorted(self._data, key=itemgetter(1,0))
 
-        if self._start_datetime is None or self._end_datetime is None:
-            if self._data is not None:
-                # TODO - this is clunky - better way?
-                self._start_datetime = self._data[0][1][0]
-                self._end_datetime = self._data[-1][1][1]
+    def update_daterange(self):
+        """ Update the dates stored by this Datasource
+
+            TODO - cleaner way of doing this?
+
+            Returns:
+                None
+        """
+        from Acquire.ObjectStore import datetime_to_datetime
+
+        if self._data is not None:
+            # Sort the data by date
+            self.sort_data()
+            data_type = self._data_type
+            if data_type == "timeseries":
+                self._start_datetime = datetime_to_datetime(self._data[0][0].first_valid_index())
+                self._end_datetime = datetime_to_datetime(self._data[-1][0].last_valid_index())
+            elif data_type == "footprint":
+                # TODO - this feels messy
+                start, _ = self.get_dataset_daterange(self._data[0][0])
+                _, end = self.get_dataset_daterange(self._data[-1][0])
+                self._start_datetime = datetime_to_datetime(start)
+                self._end_datetime = datetime_to_datetime(end)
             else:
-                raise ValueError("Cannot get daterange with no data")
-                
-        return "".join([_datetime_to_string(self._start_datetime), "_", _datetime_to_string(self._end_datetime)])
+                raise NotImplementedError("Only CRDS, GC and footprint data currently recognized")
+        else:
+            raise ValueError("Cannot get daterange with no data")
 
-    def search_labels(self, search_term):
-        """ Search the values of the labels of this Datasource for search_term
+    def daterange(self):
+        """ Get the daterange the data in this Datasource covers as tuple
+            of start, end datetime objects
+
+            Returns:
+                tuple (datetime, datetime): Start, end datetimes
+        """
+        return self._start_datetime, self._end_datetime
+
+    def daterange_str(self):    
+        """ Get the daterange this Datasource covers as a string in
+            the form start_end
+
+            Returns:
+                str: Daterange covered by this Datasource
+        """
+        from Acquire.ObjectStore import datetime_to_string
+
+        start, end = self.daterange()
+        return "".join([datetime_to_string(start), "_", datetime_to_string(end)])
+
+    def search_metadata(self, search_term):
+        """ Search the values of the metadata of this Datasource for search_term
 
             Args:
-                search_term (str): String to search for in labels
+                search_term (str): String to search for in metadata
             Returns:
                 bool: True if found else False
         """
-        for v in self._labels.values():
-            if v == search_term.lower():
+        search_term = search_term.lower()
+
+        for v in self._metadata.values():
+            if v == search_term:
                 return True
 
         return False
@@ -462,7 +664,7 @@ class Datasource:
             Returns:
                 str: Species of this Datasource
         """
-        return self._labels["species"]
+        return self._metadata["species"]
 
     def inlet(self):
         """ Returns the inlet of this Datasource
@@ -470,11 +672,11 @@ class Datasource:
             Returns:
                 str: Inlet of this Datasource
         """
-        return self._labels["inlet"]
+        return self._metadata["inlet"]
 
     def site(self):
-        if "site" in self._labels:
-            return self._labels["site"]
+        if "site" in self._metadata:
+            return self._metadata["site"]
         else:
             return "NA"
         
@@ -486,10 +688,28 @@ class Datasource:
         """
         return self._uuid
 
-    def labels(self):
-        """ Retur the labels of this Datasource
+    def metadata(self):
+        """ Retur the metadata of this Datasource
 
             Returns:
-                dict: Labels of Datasource
+                dict: Metadata of Datasource
         """
-        return self._labels
+        return self._metadata
+
+    def set_id(self, uid):
+        """ Set the UUID for this Datasource
+
+            Args:
+                id (str): UUID
+            Returns:
+                None
+        """
+        self._uuid = uid
+
+    def data_type(self):
+        """ Returns the data type held by this Datasource
+
+            Returns:
+                str: Data type held by Datasource
+        """
+        return self._data_type

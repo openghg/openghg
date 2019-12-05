@@ -3,7 +3,6 @@ from Acquire.Service import get_this_service
 
 from HUGS.Processing import process_data
 
-
 def process(args):
     """ Take a PAR from an uploaded file and process the data
 
@@ -28,6 +27,8 @@ def process(args):
 
     data_secret = hugs.decrypt_data(data_secret)
     data_filename = data_par.resolve(secret=data_secret)
+    # Here we're downloading the data to the tmp directory
+    # Be good if we could load it directly from the object store
     data_file = data_filename.download(dir="/tmp")
 
     if data_type == "GC":
@@ -36,9 +37,21 @@ def process(args):
         precision_secret = hugs.decrypt_data(precision_secret)
         precision_filename = precision_par.resolve(precision_secret)
         precision_file = precision_filename.download(dir="/tmp")
+        site = args["site"]
+        instrument = args["instrument"]
     else:
         precision_file = None
+        site = None
+        instrument = None
 
-    results = process_data(data_file=data_file, precision_filepath=precision_file, data_type=data_type)
+    if "overwrite" in args:
+        overwrite = args["overwrite"]
+    else:
+        overwrite = False
+
+    source_name = args["source_name"]
+
+    results = process_data(data_file=data_file, source_name=source_name, precision_filepath=precision_file, 
+                            data_type=data_type, site=site, instrument_name=instrument, overwrite=overwrite)
 
     return {"results": results}

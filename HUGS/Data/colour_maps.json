@@ -1,0 +1,39 @@
+{
+  "tableau20":
+  {
+      "Blue":"#4E79A7",
+      "Light Blue":"#A0CBE8",
+      "Orange":"#F28E2B",
+      "Light Orange":"#FFBE7D",
+      "Green":"#59A14F",
+      "Light Green":"#8CD17D",
+      "Yellow-Green":"#B6992D",
+      "Yellow":"#F1CE63",
+      "Yellow":"#499894",
+      "Light Teal":"#86BCB6",
+      "Red":"#E15759",
+      "Pink":"#FF9D9A",
+      "Dark Gray":"#79706E",
+      "Light Gray":"#BAB0AC",
+      "Pink":"#D37295",
+      "Light Pink":"#FABFD2",
+      "Purple":"#B07AA1",
+      "Light Purple":"#D4A6C8",
+      "Brown":"#9D7660",
+      "Light Orange":"#D7B5A6"
+  },
+
+  "colour_blind":
+  {
+    "Blue": "#1170aa",
+    "Orange": "#fc7d0b",
+    "Light Gray": "#a3acb9",
+    "Dark Gray": "#57606c",
+    "Blue": "#5fa2ce",
+    "Brown": "#c85200",
+    "Gray": "#7b848f",
+    "Light Blue": "#a3cce9",
+    "Light Orange": "#ffbc79",
+    "Very Light Gray": "#c8d0d9"
+  }
+}
