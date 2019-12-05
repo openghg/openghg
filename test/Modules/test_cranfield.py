@@ -13,8 +13,8 @@ from Acquire.ObjectStore import datetime_to_datetime
 @pytest.fixture(autouse=True)
 def before_tests():
     bucket = get_local_bucket(empty=True)
-    crds = Cranfield.create()
-    crds.save()
+    cranfield = Cranfield.create()
+    cranfield.save()
 
 def test_read_file():
     dir_path = os.path.dirname(__file__)
@@ -35,6 +35,8 @@ def test_read_file():
     co_data = data[1][0][0]
     co2_data = data[2][0][0]
 
+    assert len(uuids) == 3
+
     # print(co_data.head())
     assert ch4_data["ch4"][0] == pytest.approx(2585.6510)
     assert ch4_data["ch4 variability"][0] == pytest.approx(75.502187065)
@@ -44,3 +46,21 @@ def test_read_file():
 
     assert co2_data["co2"][0] == pytest.approx(460.573223)
     assert co2_data["co2 variability"][0] == pytest.approx(0.226956417)
+
+def test_read_data():
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/Cranfield_CRDS"
+    filename = "thames_barrier_cumulative_calibrated_hourly_means_TEST.csv"
+
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    cranfield = Cranfield.load()
+
+    combined_data = cranfield.read_data(data_filepath=filepath)
+
+    print(sorted(combined_data.keys()))
+    
+    assert len(combined_data) == 3
+    # assert sorted(combined_data.keys()) == 
+
+    assert False
