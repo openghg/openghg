@@ -30,7 +30,7 @@ class Cranfield:
             Returns:
                 bool: True if object is null
         """
-        return self._datasources is None
+        return self._datasource_names is None
 
     @staticmethod
     def create():
@@ -65,8 +65,8 @@ class Cranfield:
 
         cranfield = Cranfield.load()
         
-        file_hash = hash_file(filepath=data_filepaths)
-        if file_hash in cranfield_file_hashes and not overwrite:
+        file_hash = hash_file(filepath=data_filepath)
+        if file_hash in cranfield._file_hashes and not overwrite:
             raise ValueError(f"This file has been uploaded previously with the filename : {cranfield._file_hashes[file_hash]}")
         
         # Ensure we have a string
@@ -116,7 +116,7 @@ class Cranfield:
         data = read_csv(data_filepath, parse_dates=["Date"], index_col = "Date")
 
         data = data.rename(columns = {"Methane/ppm": "ch4",
-                `                     "Methane stdev/ppm": "ch4 variability",
+                                     "Methane stdev/ppm": "ch4 variability",
                                         "CO2/ppm": "co2",
                                         "CO2 stdev/ppm": "co2 variability",
                                         "CO/ppm": "co",
@@ -135,17 +135,23 @@ class Cranfield:
         metadata["time_resolution"] = "1_hour"
         metadata["height"] = "10magl"
         
+        # TODO - this feels fragile
         species = [col for col in data.columns if " " not in col]
         
         combined_data = {}
-        for sp in species:
+        # Number of columns of data for each species
+        n_cols = 2
+        for n, sp in enumerate(species):
+        # for sp in species:
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
             species_metadata["species"] = sp
 
-            cols = [col for col in data.columns if sp in col]
-            gas_data = data[cols]
-
+            # Here we don't want to match the co in co2
+            # For now we'll just have 2 columns for each species
+            # cols = [col for col in data.columns if sp in col]
+            gas_data = data.iloc[:, n*n_cols:(n+1)*n_cols]
+            # gas_data = data[cols]
             combined_data[sp] = {"metadata": species_metadata, "data": gas_data}
 
         return combined_data
@@ -159,13 +165,14 @@ class Cranfield:
         """
         from Acquire.ObjectStore import datetime_to_string
 
-        d = {}
-        # These should be able to stay the same
-        d["creation_datetime"] = datetime_to_string(self._creation_datetime)
-        d["stored"] = self._stored
-        d["datasources"] = self._datasources
+        data = {}
+        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
+        data["stored"] = self._stored
+        data["datasource_uuids"] = self._datasource_uuids
+        data["datasource_names"] = self._datasource_names
+        data["file_hashes"] = self._file_hashes
     
-        return d
+        return data
 
     @staticmethod
     def from_data(data, bucket=None):
@@ -187,10 +194,15 @@ class Cranfield:
             bucket = get_bucket()
         
         c = Cranfield()
-        c._creation_datetime = string_to_datetime(data["creation_datetime"])
-        c._datasources = data["datasources"]
-        c._stored = False
 
+        c._creation_datetime = string_to_datetime(data["creation_datetime"])
+        stored = data["stored"]
+
+        c._datasource_uuids = data["datasource_uuids"]
+        c._datasource_names = data["datasource_names"]
+        c._file_hashes = data["file_hashes"]
+        c._stored = False
+        
         return c
 
     def save(self, bucket=None):
@@ -265,7 +277,10 @@ class Cranfield:
             Returns:
                 None
         """
-        self._datasources.extend(datasource_uuids)
+        self._datasource_names.update(datasource_uuids)
+        # Invert the dictionary to update the dict keyed by UUID
+        uuid_keyed = {v: k for k, v in datasource_uuids.items()}
+        self._datasource_uuids.update(uuid_keyed)
 
     def uuid(self):
         """ Return the UUID of this object
