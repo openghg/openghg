@@ -216,8 +216,10 @@ class CRDS:
         # either create a new Datasource or add the data to an existing source
 
         # Take hash of file and save it's hash so we know we've read it already
+        # TODO - this should be expanded to check dates for the uploaded data
+        # That would have to be done during processing
         file_hash = hash_file(filepath=data_filepath)
-        if file_hash in crds._file_hashes:
+        if file_hash in crds._file_hashes and not overwrite:
             raise ValueError(f"This file has been uploaded previously with the filename : {crds._file_hashes[file_hash]}")
         
         data_filepath = str(data_filepath)
