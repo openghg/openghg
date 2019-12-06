@@ -256,7 +256,7 @@ class GC:
         from HUGS.Processing import read_metadata
 
 
-        # Read header
+        # Read header   
         header = _read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
         # Create a function to parse the datetime in the data file
@@ -267,7 +267,7 @@ class GC:
                          parse_dates=[[1, 2, 3, 4, 5]], date_parser=parser)
         data.index.name = "Datetime"
 
-        metadata = read_metadata(filename=data_filepath, data=data, data_type="GC")
+        metadata = read_metadata(filepath=data_filepath, data=data, data_type="GC")
 
         units = {}
         scale = {}

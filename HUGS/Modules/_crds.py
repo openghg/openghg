@@ -1,8 +1,6 @@
 # from _paths import RootPaths
 __all__ = ["CRDS"]
 
-
-
 class CRDS:
     """ Interface for processing CRDS data
 
@@ -93,17 +91,17 @@ class CRDS:
             Returns:
                 CRDS: CRDS object created from data
         """
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import string_to_datetime
+        from HUGS.ObjectStore import get_bucket
 
         if data is None or len(data) == 0:
             return CRDS()
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
         
         c = CRDS()
-        c._creation_datetime = _string_to_datetime(data["creation_datetime"])
+        c._creation_datetime = string_to_datetime(data["creation_datetime"])
         c._datasource_uuids = data["datasource_uuids"]
         c._datasource_names = data["datasource_names"]
         c._file_hashes = data["file_hashes"]
@@ -127,7 +125,7 @@ class CRDS:
         crds_key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
 
         self._stored = True
-        _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
+        ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
     @staticmethod
     def load(bucket=None):
@@ -198,6 +196,7 @@ class CRDS:
         from HUGS.Processing import assign_data, lookup_gas_datasources
         from HUGS.Util import hash_file
         import os
+        from pathlib import Path
 
         crds = CRDS.load()
         # here we check the source id from the interface or the source_name
@@ -212,13 +211,12 @@ class CRDS:
             raise ValueError(f"This file has been uploaded previously with the filename : {crds._file_hashes[file_hash]}")
         
         data_filepath = Path(data_filepath)
-        filename = Path.name
+        filename = data_filepath.name
 
-        filename = data_filepath.split("/")[-1] 
         gas_data = crds.read_data(data_filepath=data_filepath)
 
         if not source_name:
-            source_name = data_filepath.stem
+            source_name = filename.stem
 
         # Check to see if we've had data from these Datasources before
         # TODO - currently just using a simple naming system here - update to use 
@@ -250,7 +248,6 @@ class CRDS:
 
         # Store the hash as the key for easy searching, store the filename as well for
         # ease of checking by user
-        filename = data_filepath.split("/")[-1]
         crds._file_hashes[file_hash] = filename
 
         crds.save()
@@ -329,7 +326,7 @@ class CRDS:
 
         header_rows = 2
         # Create metadata here
-        metadata = read_metadata(filename=data_filepath, data=data, data_type="CRDS")
+        metadata = read_metadata(filepath=data_filepath, data=data, data_type="CRDS")
 
         # data_list = []
 

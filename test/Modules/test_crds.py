@@ -9,6 +9,10 @@ from HUGS.ObjectStore import get_local_bucket, get_object_names
 from Acquire.ObjectStore import string_to_datetime
 from Acquire.ObjectStore import datetime_to_datetime
 
+import logging
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
+
 # @pytest.fixture(scope="session")
 # def data():
 #     filename = "bsd.picarro.1minute.248m.dat"
@@ -19,24 +23,34 @@ from Acquire.ObjectStore import datetime_to_datetime
 #     return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
 
 @pytest.fixture(autouse=True)
-def before_tests():
-    crds = CRDS.create()
-    crds.save()
-
-def test_read_file():
+def crds():
+    bucket = get_local_bucket(empty=True)
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
     filename = "hfd.picarro.1minute.100m_min.dat"
 
     filepath = os.path.join(dir_path, test_data, filename)
-    bucket = get_local_bucket(empty=True)
-
     CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
-
     crds = CRDS.load()
+
+    return crds
+
+def test_read_file(crds):
+    # dir_path = os.path.dirname(__file__)
+    # test_data = "../data/proc_test_data/CRDS"
+    # filename = "hfd.picarro.1minute.100m_min.dat"
+
+    # filepath = os.path.join(dir_path, test_data, filename)
+    # bucket = get_local_bucket(empty=True)
+
+    # CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+
+    # crds = CRDS.load()
 
     # Get the data from the object store and ensure it's been read correctly
     datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
+
+    assert len(datasources) == 3
 
     data_one = datasources[0].data()
     assert data_one[0][0]["ch4 count"].iloc[0] == pytest.approx(1993.83)
@@ -56,34 +70,27 @@ def test_read_file():
     assert data_three[0][0]["co n_meas"].iloc[0] == pytest.approx(19.0)
 
 
-def test_data_persistence():
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/CRDS"
-    filename = "hfd.picarro.1minute.100m_min.dat"
+def test_data_persistence(crds):
+    # dir_path = os.path.dirname(__file__)
+    # test_data = "../data/proc_test_data/CRDS"
+    # filename = "hfd.picarro.1minute.100m_min.dat"
 
-    filepath = os.path.join(dir_path, test_data, filename)
-    bucket = get_local_bucket(empty=True)
-
-    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
-
-    crds = CRDS.load()
-
-    first_store = crds.datasources()
-
-    crds.save()
-
-    crds = CRDS.load()
-
-    print(crds.datasources)
+    # filepath = os.path.join(dir_path, test_data, filename)
+    # bucket = get_local_bucket(empty=True)
 
     # CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+
+    # crds = CRDS.load()
+
+    first_store = crds.datasources()
+    crds.save()
+    crds = CRDS.load()
 
     second_store = crds.datasources()
     
     assert first_store == second_store
 
-
-def test_data_overlap_raises():
+def test_seen_before_raises():
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
     filename = "hfd.picarro.1minute.100m_min.dat"
@@ -102,40 +109,27 @@ def test_data_overlap_raises():
         CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
 
-# def test_read_folder():
-#     folder_path = "/home/gar/Documents/Devel/hugs/raw_data/CRDS_picarro"
-#     CRDS.read_folder(folder_path=folder_path)
-#     bucket = get_local_bucket()
-#     objs = get_object_names(bucket=bucket)
+def test_seen_before_overwrite():
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filename = "hfd.picarro.1minute.100m_min.dat"
 
-#     # print(objs)
+    filepath = os.path.join(dir_path, test_data, filename)
+    bucket = get_local_bucket(empty=True)
 
-#     assert False
+    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
-# @pytest.fixture
-# def mock_uuid(monkeypatch):
-#     def mock_uuid():
-#         return mocked_uuid
+    crds = CRDS.load()
+    first_store = crds.datasources()
+    crds.save()
+    crds = CRDS.load()
 
-#     monkeypatch.setattr(uuid, 'uuid4', mock_uuid)
+    with pytest.raises(ValueError):
+        CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m", overwrite=True)
 
-# @pytest.fixture
-# def crds(mock_uuid):
-#     filename = "bsd.picarro.1minute.248m.dat"
-#     dir_path = os.path.dirname(__file__)
-#     test_data = "../data/proc_test_data/CRDS"
-#     filepath = os.path.join(dir_path, test_data, filename)
 
-#     return CRDS.read_file(data_filepath=filepath)
-
-# def test_read_file(crds):
-#     start = datetime.datetime(2014,1,30,10,52,30)
-#     end = datetime.datetime(2014, 1, 30, 14, 20, 30)
-
-#     assert crds._start_datetime == start
-#     assert crds._end_datetime == end
-#     assert crds._uuid == mocked_uuid
-
+# def test_to_data():
+    
 
 # def test_to_data(crds):
 #     crds_dict = crds.to_data()
@@ -187,15 +181,3 @@ def test_data_overlap_raises():
 #     assert loaded_one.equals(one)
 #     assert loaded_two.equals(two)
 #     assert loaded_three.equals(three)
-    
-
-
-
-
-
-
-
-
-
-
-

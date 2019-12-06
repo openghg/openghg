@@ -348,3 +348,7 @@ as data, daterange : {start:start, end:end} ?
 Improve the search_results, have data keys, site code/name etc, need an improved key for the download results, only going to get longer
 with more information
 
+2019-12-06
+
+Check if the data uploaded before matches the data in existing datasource - check the name of the datasource and compare it to those on file, 
+check overlap. If overwrite, assign the data to the same datasources to prevent new ones being created
