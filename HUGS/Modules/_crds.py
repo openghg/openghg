@@ -1,11 +1,7 @@
 # from _paths import RootPaths
 __all__ = ["CRDS"]
 
-# TODO - look into what's causing the logging messages in the first place
-# This does stop them
-import logging
-mpl_logger = logging.getLogger("matplotlib")
-mpl_logger.setLevel(logging.WARNING)
+
 
 class CRDS:
     """ Interface for processing CRDS data
@@ -108,9 +104,6 @@ class CRDS:
         
         c = CRDS()
         c._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        stored = data["stored"]
-
-        # c._datasources = data["datasources"]
         c._datasource_uuids = data["datasource_uuids"]
         c._datasource_names = data["datasource_names"]
         c._file_hashes = data["file_hashes"]
@@ -125,15 +118,11 @@ class CRDS:
             Returns:
                 None
         """
-        if self.is_null():
-            return
-
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import ObjectStore
+        from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
 
         crds_key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
 
@@ -222,11 +211,14 @@ class CRDS:
         if file_hash in crds._file_hashes and not overwrite:
             raise ValueError(f"This file has been uploaded previously with the filename : {crds._file_hashes[file_hash]}")
         
-        data_filepath = str(data_filepath)
+        data_filepath = Path(data_filepath)
+        filename = Path.name
+
         filename = data_filepath.split("/")[-1] 
         gas_data = crds.read_data(data_filepath=data_filepath)
 
-        source_name = os.path.splitext(filename)[0]
+        if not source_name:
+            source_name = data_filepath.stem
 
         # Check to see if we've had data from these Datasources before
         # TODO - currently just using a simple naming system here - update to use 
@@ -297,7 +289,7 @@ class CRDS:
             dataframes
 
             Args:
-                data (Pandas.Dataframe): Dataframe containing all data
+                data_filepath (pathlib.Path): Path of datafile
             Returns:
                 tuple (str, str, list): Name of gas, ID of Datasource of this data and a list Pandas DataFrames for the 
                 date-split gas data

@@ -213,9 +213,6 @@ class Cranfield:
             Returns:
                 None
         """
-        if self.is_null():
-            return
-
         from Acquire.ObjectStore import ObjectStore
         from HUGS.ObjectStore import get_bucket
 

@@ -133,7 +133,7 @@ def hash_file(filepath):
         Taken from https://stackoverflow.com/a/22058673
 
         Args:
-            filepath (str): Path to file
+            filepath (pathlib.Path): Path to file
         Returns:
             str: SHA1 hash
     """

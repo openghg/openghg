@@ -85,9 +85,6 @@ class GC:
             Returns:
                 dict: Dictionary version of object
         """
-        if self.is_null():
-            return {}
-
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         data = {}
@@ -95,6 +92,7 @@ class GC:
         data["stored"] = self._stored
         data["datasource_uuids"] = self._datasource_uuids
         data["datasource_names"] = self._datasource_names
+        data["file_hashes"] = self._file_hashes
 
         return data
 
@@ -115,6 +113,7 @@ class GC:
         gc._creation_datetime = _string_to_datetime(data["creation_datetime"])
         gc._datasource_uuids = data["datasource_uuids"]
         gc._datasource_names = data["datasource_names"]
+        gc._file_hashes = data["file_hashes"]
         gc._stored = False
 
         return gc
@@ -123,23 +122,20 @@ class GC:
         """ Save this GC object in the object store
 
             Args:
-                bucket (dict): Bucket for data storage
+                bucket (dict, default=None): Bucket for data storage
             Returns:
                 None
         """
-        if self.is_null():
-            return
-
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import ObjectStore
+        from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
+        
+        gc_key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
 
         self._stored = True
-        gc_key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
-        _ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
+        ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
 
     @staticmethod
     def load(bucket=None):
