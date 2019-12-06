@@ -265,7 +265,7 @@ class Cranfield:
         if bucket is None:
             bucket = get_bucket()
 
-        key = "%s/uuid/%s" % (Cranfield._crds_root, Cranfield._crds_uuid)
+        key = "%s/uuid/%s" % (Cranfield._cranfield_root, Cranfield._cranfield_uuid)
 
         return exists(bucket=bucket, key=key)
 
