@@ -293,7 +293,7 @@ class Cranfield:
             Returns:
                 list: List of Datasources
         """
-        return self._datasource_uuids.keys()
+        return self._datasource_names
 
     def remove_datasource(self, uuid):
         """ Remove the Datasource with the given uuid from the list 

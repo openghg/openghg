@@ -167,8 +167,8 @@ class GC:
         """ Reads a GC data file by creating a GC object and associated datasources
 
             Args:
-                data_filepath (str): Path of data file
-                precision_filepath (str): Path of precision file
+                data_filepath (str, pathlib.Path): Path of data file
+                precision_filepath (str, pathlib.Path): Path of precision file
             Returns:
                 TODO - should this really return anything?
                 GC: GC object
@@ -176,6 +176,7 @@ class GC:
         """
         from HUGS.Processing import assign_data, lookup_gas_datasources
         import json
+        from pathlib import Path
 
         gc = GC.load()
 
@@ -188,9 +189,9 @@ class GC:
         #     gc._params = json.load(f)
         # Load in the params for code_site, site_code dictionaries for selection
         # of inlets from the above parameters
-        
+        if not isinstance(data_filepath, Path):
+            data_filepath = Path(data_filepath)
 
-        
         data, species, metadata = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                                                 site=site, instrument=instrument_name)
 
@@ -240,8 +241,8 @@ class GC:
         """ Read data from the data and precision files
 
             Args:
-                data_filepath (str): Path of data file
-                precision_filepath (str): Path of precision file
+                data_filepath (pathlib.Path): Path of data file
+                precision_filepath (pathlib.Path): Path of precision file
                 site (str): Name of site
                 instrument (str): Identifying data for instrument 
             Returns:
@@ -252,9 +253,7 @@ class GC:
         from pandas import read_csv as _read_csv
         from pandas import datetime as _pd_datetime
         from pandas import Timedelta as _pd_Timedelta
-
         from HUGS.Processing import read_metadata
-
 
         # Read header   
         header = _read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
@@ -318,7 +317,7 @@ class GC:
         """ Read GC precision file
 
             Args: 
-                filepath (str): Path of precision file
+                filepath (pathlib.Path): Path of precision file
             Returns:
                 tuple (Pandas.DataFrame, list): Precision DataFrame and list of species in
                 precision data
@@ -502,7 +501,7 @@ class GC:
             Returns:
                 list: List of Datasources
         """
-        return self._datasource_uuids.keys()
+        return self._datasource_names
 
     def remove_datasource(self, uuid):
         """ Remove the Datasource with the given uuid from the list 

@@ -38,19 +38,18 @@ def cranfield_obj():
 def test_read_file(cranfield_obj):
     # Get the data from the object store and ensure it's been read correctly
     # Here we sort by the names of the gases so hopefully this won't break
-
     uuids = cranfield_obj.datasources()
-    datasources = [Datasource.load(uuid=uuid, shallow=False) for _, uuid in sorted(uuids.items())]
-    
-    data = [d.data() for d in datasources]
 
-    ch4_data = data[0][0][0]
-    co_data = data[1][0][0]
-    co2_data = data[2][0][0]
+    ch4_datasouce = Datasource.load(uuid=uuids["thames_barrier_cumulative_calibrated_hourly_means_TEST_ch4"], shallow=False)
+    co2_datasouce = Datasource.load(uuid=uuids["thames_barrier_cumulative_calibrated_hourly_means_TEST_co2"], shallow=False)
+    co_datasouce = Datasource.load(uuid=uuids["thames_barrier_cumulative_calibrated_hourly_means_TEST_co"], shallow=False)
+
+    ch4_data = ch4_datasouce.data()[0][0]
+    co2_data = co2_datasouce.data()[0][0]
+    co_data = co_datasouce.data()[0][0]
 
     assert len(uuids) == 3
 
-    # print(co_data.head())
     assert ch4_data["ch4"][0] == pytest.approx(2585.6510)
     assert ch4_data["ch4 variability"][0] == pytest.approx(75.502187065)
 
@@ -137,4 +136,4 @@ def test_add_datasources(cranfield_obj):
     
     cranfield_obj.add_datasources(new_datasources)
 
-    assert sorted(list(cranfield_obj.datasources())) == sorted(list(new_datasources.values()))
+    assert cranfield_obj.datasources() == new_datasources

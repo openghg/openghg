@@ -70,6 +70,8 @@ def test_save(mock_uuid2):
 
     datasource = Datasource.create(name="test_name", instrument="test_instrument", site="test_site", network="test_network")
 
+    datasource.add_metadata(key="data_type", value="timeseries")
+
     datasource.save(bucket)
 
     prefix = "%s/uuid/%s" % (Datasource._datasource_root, datasource._uuid)
@@ -133,10 +135,6 @@ def test_from_data(mock_uuid):
 
     assert new_datasource._name == "test_name_two"
     assert new_datasource._uuid == mocked_uuid
-
-    assert new_datasource._labels["instrument"] == "test_instrument_two"
-    assert new_datasource._labels["site"] == "test_site_two"
-    assert new_datasource._labels["network"] == "test_network_two"
 
 
 

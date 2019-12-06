@@ -1,6 +1,7 @@
 # Testing the GC class
 import datetime
 import pytest
+from pathlib import Path
 import pandas as pd
 import os
 import uuid
@@ -20,16 +21,12 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def data_path():
-    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.C"
+    # This feels messy
+    return Path(__file__).resolve().parent.joinpath("../data/proc_test_data/GC/capegrim-medusa.18.C")
 
 @pytest.fixture(scope="session")
 def precision_path():
-    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.precisions.C"
-
-# @pytest.fixture
-# def gc():
-#     gc = GC.create()
-#     gas_data = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument)
+    return Path(__file__).resolve().parent.joinpath("../data/proc_test_data/GC/capegrim-medusa.18.precisions.C")
 
 @pytest.fixture
 def gc():
@@ -44,6 +41,9 @@ def test_read_data(data_path, precision_path):
     # Capegrim
     site = "CGO"
     instrument = "GCMD"
+
+    data_path = Path(data_path)
+    precision_path = Path(precision_path)
 
     gc = GC.create()
     gas_data, species, metadata = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument)
@@ -91,7 +91,7 @@ def test_split(data_path, precision_path):
 
     gc = GC.create()
     data, species, metadata = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument)
-    metadata = read_metadata(filename=data_path, data=None, data_type="GC")
+    metadata = read_metadata(filepath=data_path, data=None, data_type="GC")
     gas_data = gc.split(data=data, site=site, species=species, metadata=metadata)
 
     metadata = gas_data["NF3"]["metadata"]

@@ -9,3 +9,4 @@ pandas
 tables
 voila
 xarray
+zarr

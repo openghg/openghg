@@ -49,27 +49,29 @@ def crds():
     return crds
 
 def test_read_file(crds):
-    # Get the data from the object store and ensure it's been read correctly
-    datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
+    uuids = crds.datasources()
+    
+    assert len(uuids) == 3
 
-    assert len(datasources) == 3
+    ch4_datasouce = Datasource.load(uuid=uuids["hfd_picarro_100m_ch4"], shallow=False)
+    co2_datasouce = Datasource.load(uuid=uuids["hfd_picarro_100m_co2"], shallow=False)
+    co_datasouce = Datasource.load(uuid=uuids["hfd_picarro_100m_co"], shallow=False)
 
-    data_one = datasources[0].data()
-    assert data_one[0][0]["ch4 count"].iloc[0] == pytest.approx(1993.83)
-    assert data_one[0][0]["ch4 stdev"].iloc[0] == pytest.approx(1.555)
-    assert data_one[0][0]["ch4 n_meas"].iloc[0] == pytest.approx(19.0)
+    ch4_data = ch4_datasouce.data()[0][0]
+    co2_data = co2_datasouce.data()[0][0]
+    co_data = co_datasouce.data()[0][0]
 
-    data_two = datasources[1].data()
+    assert ch4_data["ch4 count"].iloc[0] == pytest.approx(1993.83)
+    assert ch4_data["ch4 stdev"].iloc[0] == pytest.approx(1.555)
+    assert ch4_data["ch4 n_meas"].iloc[0] == pytest.approx(19.0)
 
-    assert data_two[0][0]["co2 count"].iloc[0] == pytest.approx(414.21)
-    assert data_two[0][0]["co2 stdev"].iloc[0] == pytest.approx(0.109)
-    assert data_two[0][0]["co2 n_meas"].iloc[0] == pytest.approx(19.0)
+    assert co2_data["co2 count"].iloc[0] == pytest.approx(414.21)
+    assert co2_data["co2 stdev"].iloc[0] == pytest.approx(0.109)
+    assert co2_data["co2 n_meas"].iloc[0] == pytest.approx(19.0)
 
-    data_three = datasources[2].data()
-
-    assert data_three[0][0]["co count"].iloc[0] == pytest.approx(214.28)
-    assert data_three[0][0]["co stdev"].iloc[0] == pytest.approx(4.081)
-    assert data_three[0][0]["co n_meas"].iloc[0] == pytest.approx(19.0)
+    assert co_data["co count"].iloc[0] == pytest.approx(214.28)
+    assert co_data["co stdev"].iloc[0] == pytest.approx(4.081)
+    assert co_data["co n_meas"].iloc[0] == pytest.approx(19.0)
 
 def test_read_data():
 
@@ -189,7 +191,7 @@ def test_gas_info(crds, hfd_filepath):
     data = pd.read_csv(hfd_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"],
                      parse_dates=[[0, 1]])
 
-    n_gases, n_cols = crds._gas_info(data=data)
+    n_gases, n_cols = crds.gas_info(data=data)
 
     assert n_gases == 3
     assert n_cols == 3
@@ -208,4 +210,4 @@ def test_add_datasources(crds):
 
     crds.add_datasources(new_datasources)
 
-    assert sorted(list(crds.datasources())) == sorted(list(new_datasources.values()))
+    assert crds.datasources() == new_datasources
