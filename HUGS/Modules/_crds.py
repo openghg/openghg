@@ -254,31 +254,6 @@ class CRDS:
 
         return datasource_uuids
 
-    # Moved to processing/search.py
-    # def lookup_datasources(self, gas_data, source_name=None, source_id=None):
-    #     """ Check which datasources
-
-    #         Args: 
-    #             gas_data (list): Gas data to process
-    #             source_name (str)
-    #         Returns:
-    #             dict: Dictionary keyed by source_name. Value of Datasource UUID
-    #     """
-    #     # If we already have data from these datasources then return that UUID
-    #     # otherwise return False
-    #     if source_id is not None:
-    #         raise NotImplementedError()
-
-    #     results = {}
-
-    #     for species in gas_data:
-    #         datasource_name = source_name + "_" + species
-    #         results[species] = {}
-    #         results[species]["uuid"] = self._datasource_names.get(datasource_name, False)
-    #         results[species]["name"] = datasource_name
-
-    #     return results
-
     def read_data(self, data_filepath):
         """ Separates the gases stored in the dataframe in 
             separate dataframes and returns a dictionary of gases
@@ -375,7 +350,6 @@ class CRDS:
             head_row = data.head(1)
 
             gases = {}
-
             # Loop over the gases and find each unique value
             for column in head_row.columns:
                 s = head_row[column][0]
@@ -400,7 +374,7 @@ class CRDS:
                 bool: True if data can be read
 
         """
-        read_metadata()
+        raise NotImplementedError("Not yet implemented")
 
     def add_datasources(self, datasource_uuids):
         """ Add the passed list of Datasources to the current list

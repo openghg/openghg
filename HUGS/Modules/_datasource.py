@@ -136,7 +136,9 @@ class Datasource:
         # Check the daterange covered by this data and if we have an overlap
         # 
         if self._data:
+            # Exisiting data in Datsource
             start_data, end_data = self.daterange()
+            # This is the data that we may want to add to the Datasource
             start_new, end_new = self.get_dataframe_daterange(data)
 
             # Check if there's overlap of data
@@ -628,6 +630,9 @@ class Datasource:
             Returns:
                 tuple (datetime, datetime): Start, end datetimes
         """
+        if not self._start_datetime and self._data:
+            self.update_daterange()
+
         return self._start_datetime, self._end_datetime
 
     def daterange_str(self):    
