@@ -18,8 +18,6 @@ class Search:
         args["locations"] = locations
         args["data_type"] = data_type
 
-        print(search_terms, locations)
-
         if start_datetime:
             args["start_datetime"] = _datetime_to_string(start_datetime)
         if end_datetime:

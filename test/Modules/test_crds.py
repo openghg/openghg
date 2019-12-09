@@ -38,7 +38,23 @@ def before_tests():
 #     print(len(datasources))
 
 #     assert False
+# def test_labels():
+#     dir_path = os.path.dirname(__file__)
+#     test_data = "../data/proc_test_data/CRDS"
+#     filename = "hfd.picarro.1minute.100m_min.dat"
 
+#     filepath = os.path.join(dir_path, test_data, filename)
+#     bucket = get_local_bucket(empty=True)
+
+#     CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+
+#     crds = CRDS.load()
+
+#     # Get the data from the object store and ensure it's been read correctly
+#     datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
+
+#     for d in datasources:
+#         print(d._labels)
 
 def test_read_file():
     dir_path = os.path.dirname(__file__)
@@ -48,27 +64,76 @@ def test_read_file():
     filepath = os.path.join(dir_path, test_data, filename)
     bucket = get_local_bucket(empty=True)
 
-    crds = CRDS.read_file(data_filepath=filepath)
+    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+
+    crds = CRDS.load()
 
     # Get the data from the object store and ensure it's been read correctly
     datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
 
     data_one = datasources[0].data()
-    assert data_one[0]["ch4 count"].iloc[0] == pytest.approx(1993.83)
-    assert data_one[0]["ch4 stdev"].iloc[0] == pytest.approx(1.555)
-    assert data_one[0]["ch4 n_meas"].iloc[0] == pytest.approx(19.0)
+    assert data_one[0][0]["ch4 count"].iloc[0] == pytest.approx(1993.83)
+    assert data_one[0][0]["ch4 stdev"].iloc[0] == pytest.approx(1.555)
+    assert data_one[0][0]["ch4 n_meas"].iloc[0] == pytest.approx(19.0)
 
     data_two = datasources[1].data()
 
-    assert data_two[0]["co2 count"].iloc[0] == pytest.approx(414.21)
-    assert data_two[0]["co2 stdev"].iloc[0] == pytest.approx(0.109)
-    assert data_two[0]["co2 n_meas"].iloc[0] == pytest.approx(19.0)
+    assert data_two[0][0]["co2 count"].iloc[0] == pytest.approx(414.21)
+    assert data_two[0][0]["co2 stdev"].iloc[0] == pytest.approx(0.109)
+    assert data_two[0][0]["co2 n_meas"].iloc[0] == pytest.approx(19.0)
 
     data_three = datasources[2].data()
 
-    assert data_three[0]["co count"].iloc[0] == pytest.approx(214.28)
-    assert data_three[0]["co stdev"].iloc[0] == pytest.approx(4.081)
-    assert data_three[0]["co n_meas"].iloc[0] == pytest.approx(19.0)
+    assert data_three[0][0]["co count"].iloc[0] == pytest.approx(214.28)
+    assert data_three[0][0]["co stdev"].iloc[0] == pytest.approx(4.081)
+    assert data_three[0][0]["co n_meas"].iloc[0] == pytest.approx(19.0)
+
+
+def test_data_persistence():
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filename = "hfd.picarro.1minute.100m_min.dat"
+
+    filepath = os.path.join(dir_path, test_data, filename)
+    bucket = get_local_bucket(empty=True)
+
+    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+
+    crds = CRDS.load()
+
+    first_store = crds.datasources()
+
+    crds.save()
+
+    crds = CRDS.load()
+
+    print(crds.datasources)
+
+    # CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+
+    second_store = crds.datasources()
+    
+    assert first_store == second_store
+
+
+def test_data_overlap_raises():
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filename = "hfd.picarro.1minute.100m_min.dat"
+
+    filepath = os.path.join(dir_path, test_data, filename)
+    bucket = get_local_bucket(empty=True)
+
+    CRDS.read_file(data_filepath=filepath,
+                          source_name="hfd_picarro_100m")
+
+    crds = CRDS.load()
+    first_store = crds.datasources()
+    crds.save()
+    crds = CRDS.load()
+
+    with pytest.raises(ValueError):
+        CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
 
 # def test_read_folder():

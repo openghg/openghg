@@ -3,6 +3,9 @@ import os
 import pytest
 import uuid
 import pandas as pd
+import xarray
+import zarr
+
 
 from Acquire.ObjectStore import ObjectStore
 from Acquire.ObjectStore import string_to_encoded
@@ -75,6 +78,31 @@ def test_save(mock_uuid2):
 
     assert objs[0].split("/")[-1] == mocked_uuid2
 
+def test_save_footprint():
+    bucket = get_local_bucket(empty=True)
+    
+    metadata = {"test": "testing123"}
+
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data"
+    filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    data = xarray.open_dataset(filepath)
+
+    datasource = Datasource.create(name="test_name")
+    datasource.add_footprint_data(metadata=metadata, data=data)
+    datasource.save()
+
+    prefix = "%s/uuid/%s" % (Datasource._datasource_root, datasource._uuid)
+    objs = ObjectStore.get_all_object_names(bucket, prefix)
+
+    datasource_2 = Datasource.load(bucket=bucket, key=objs[0])
+
+    data = datasource_2._data[0][0]
+    assert float(data.pressure[0].values) == pytest.approx(1023.971)
+    assert float(data.pressure[2].values) == pytest.approx(1009.940)
+    assert float(data.pressure[-1].values) == pytest.approx(1021.303)
 
 def test_creation(mock_uuid, datasource):
     assert datasource._uuid == mocked_uuid

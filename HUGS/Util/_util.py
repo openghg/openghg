@@ -3,7 +3,8 @@
 """
 
 __all__ = ["url_join", "get_daterange_str", "get_datetime_epoch", 
-            "get_datetime_now", "get_datetime", "unanimous", "load_object"]
+            "get_datetime_now", "get_datetime", "unanimous", "load_object",
+            "hash_file"]
 
 def url_join(*args):
     """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
@@ -36,6 +37,7 @@ def get_daterange_str(start, end):
     end_fmt = end.strftime("%Y%m%d")
 
     return start_fmt + "_" + end_fmt
+
 
 def get_datetime_epoch():
     """ Returns the UNIX epoch time
@@ -112,9 +114,42 @@ def load_object(class_name):
     module_path = "HUGS.Modules"
     class_name = str(class_name).upper()
 
-    # Although __import__ is not usually recommended, here we want to use the
-    # fromlist argument that import_module doesn't support
-    module_object = __import__(name=module_path, fromlist=class_name)
-    target_class = getattr(module_object, class_name)
+    # Here we try upper and lowercase for the module
+    try:
+        # Although __import__ is not usually recommended, here we want to use the
+        # fromlist argument that import_module doesn't support
+        module_object = __import__(name=module_path, fromlist=class_name)
+        target_class = getattr(module_object, class_name)
+    except AttributeError:
+        class_name = class_name.lower().capitalize()
+        module_object = __import__(name=module_path, fromlist=class_name)
+        target_class = getattr(module_object, class_name)
 
     return target_class.load()
+
+def hash_file(filepath):
+    """ Opens the file at filepath and calculates its SHA1 hash
+
+        Taken from https://stackoverflow.com/a/22058673
+
+        Args:
+            filepath (str): Path to file
+        Returns:
+            str: SHA1 hash
+    """
+    import hashlib
+
+    # Lets read stuff in 64kb chunks
+    BUF_SIZE = 65536 
+    sha1 = hashlib.sha1()
+
+    with open(filepath, 'rb') as f:
+        while True:
+            data = f.read(BUF_SIZE)
+            if not data:
+                break
+            sha1.update(data)
+
+    return sha1.hexdigest()
+
+

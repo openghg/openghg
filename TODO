@@ -282,3 +282,69 @@ Then offer download of the selected data
 Start setting up Datasource IDs for selected data sources
 Currently data from the same site at different heights will be returned as being the same data and will
 break the retrieval code - multiple indexes with the same value
+
+
+
+
+2019-09-02
+
+Currently for timeseries data Datasources are created using the create_datasource fn in the segment module
+For other types of data we need to create datsources in another way.
+
+For now I'll create the Datasources within the Footprint class and add these to the list of available data
+
+
+2019-10-10
+
+Look at an inverse dictionary for searching labels so a list won't have to be searched
+when search_labels() is run. Don't actually use the keys in the labels dict really.
+
+
+
+
+2019-10-16
+
+Why do large files fail to upload?
+After 3 calls to process the function seems to fail - what's causing this?
+
+
+2019-10-17
+
+I'm going to try un-pinning the version of the fdk from fdk==0.0.35 and see if that fixes the error in the
+RemoteFunctionCallError: Cannot call remote function 'process' as 'https://hugs.acquire-aaai.com/t/hugs'. Invalid error code 502 returned. Message:
+b'{"message":"error receiving function response"}\n'
+
+This was reported on a GitHub issue 
+
+/home/opc/acquire/services/base_image
+
+
+Client version: 0.5.22 is not latest: 0.5.90
+Server version:  0.3.602
+
+Managed to stop the server process and can't get it start again
+
+When returning search results add more to the dictionary returend so we hav more metadata to differentiate between dataosources
+to plot / analyse
+
+
+2019-10-21
+
+Need to think more about improving the search functionality - currently searching for CH4 at a site with multiple 
+heights will just return a load of data that may be from different heights. I've added the inlet or height to the key 
+for now but it would be better to return the metadata with a more unique key. This about a better way to do this.
+
+
+With zarr, each NetCDF is separated into chunks and written to separate files. Metadata is stored in json format.
+Using Acquire we need to either pass it bytes or a filepath for it to read. Will just continue using NetCDFs for now until
+I can add functionality to Acquire to improve its compatibility with zarr stores.
+
+
+Instead of a struct to store the data in self._data in the Datasource just create a dictionary that's keyed
+as data, daterange : {start:start, end:end} ?
+
+2019-11-12
+
+Improve the search_results, have data keys, site code/name etc, need an improved key for the download results, only going to get longer
+with more information
+

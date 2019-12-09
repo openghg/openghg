@@ -1,6 +1,6 @@
 
 def retrieve(args):
-    """ Calls the HUGS function to retrieve data stored at the given keyd
+    """ Calls the HUGS function to retrieve data stored at the given key
         and combine them into a single Pandas DataFrame for download / visualization
 
         Args:

@@ -3,12 +3,12 @@ import os
 import pytest
 # import matplotlib.pyplot as plt
 
-from HUGS.Modules import CRDS, GC
+from HUGS.Modules import CRDS, GC, Footprint
 from HUGS.Modules import Datasource
 from HUGS.ObjectStore import get_local_bucket, get_object_names
 from HUGS.Processing import in_daterange, key_to_daterange
 from HUGS.Processing import recombine_sections, search
-from HUGS.Util import get_datetime, load_object
+from HUGS.Util import get_datetime, load_object, get_datetime_epoch, get_datetime_now
                             
 
 from Acquire.ObjectStore import datetime_to_string
@@ -21,6 +21,19 @@ from Acquire.ObjectStore import datetime_to_datetime
 #     crds = CRDS.create()
 #     crds.save()
 
+
+@pytest.fixture(scope="session")
+def gc_obj():
+    bucket = get_local_bucket(empty=False)
+    data_file = "capegrim-medusa.18.C"
+    prec_file = "capegrim-medusa.18.precisions.C"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/GC"
+    data_filepath = os.path.join(dir_path, test_data, data_file)
+    prec_filepath = os.path.join(dir_path, test_data, prec_file)
+
+    GC.read_file(data_filepath=data_filepath, precision_filepath=prec_filepath, site="capegrim", source_name="capegrim-medusa.18", instrument_name="medusa")
+
 @pytest.fixture(scope="session")
 def crds_obj():
     filename = "bsd.picarro.1minute.248m.dat"
@@ -28,25 +41,66 @@ def crds_obj():
     test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
 
-    return CRDS.read_file(filepath)
+    return CRDS.read_file(filepath, source_name="bsd.picarro.1minute.248m")
 
 @pytest.fixture(scope="session")
 def crds_read():
-    bucket = get_local_bucket(empty=True)
+    bucket = get_local_bucket(empty=False)
     test_data = "../data/search_data"
     folder_path = os.path.join(os.path.dirname(__file__), test_data)
     CRDS.read_folder(folder_path=folder_path)
 
+# @pytest.fixture(scope="session")
+# def footprint_read():
+#     test_data = "../data"
+#     filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
+#     filepath = os.path.join(os.path.dirname(__file__), filename)
+#     metadata = {"name": "WAO-20magl_EUROPE"}
+#     Footprint.read_file(filepath=filepath, metadata=metadata)
 
-def test_load_object(crds_obj):
-    bucket = get_local_bucket()
-    crds_obj.save(bucket)
-    uuid = crds_obj.uuid()
-    class_name = "crds"
-    obj = load_object(class_name=class_name)
+def test_search_GC():
+    search_terms = []
+    locations = []
+    data_type = "GC"
+    start = None
+    end = None
 
-    assert isinstance(obj, CRDS)
-    assert obj.uuid() == crds_obj.uuid()
+    bucket = get_local_bucket(empty=False)
+    data_file = "capegrim-medusa.18.C"
+    prec_file = "capegrim-medusa.18.precisions.C"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/GC"
+    data_filepath = os.path.join(dir_path, test_data, data_file)
+    prec_filepath = os.path.join(dir_path, test_data, prec_file)
+
+    datasources = GC.read_file(data_filepath=data_filepath, precision_filepath=prec_filepath, site="capegrim", source_name="capegrim-medusa.18", instrument_name="medusa")
+
+    results = search(search_terms=search_terms, locations=locations, data_type=data_type, require_all=False, 
+                        start_datetime=start, end_datetime=end)
+
+    assert results["capegrim_nf3"][0].split("/")[-1] == '2018-01-01T02:24:00_2018-01-31T23:33:00'
+
+    assert "capegrim_nf3" in results
+    assert "capegrim_cf4" in results
+    assert "capegrim_pfc-116" in results
+    assert "capegrim_pfc-218" in results
+    assert "capegrim_pfc-318" in results
+    assert "capegrim_c4f10" in results
+    assert "capegrim_c6f14" in results
+    assert "capegrim_sf6" in results
+    assert "capegrim_so2f2" in results
+
+    assert len(datasources) == 56
+
+# def test_load_object(crds_obj):
+#     bucket = get_local_bucket()
+#     crds_obj.save(bucket)
+#     uuid = crds_obj.uuid()
+#     class_name = "crds"
+#     obj = load_object(class_name=class_name)
+
+#     assert isinstance(obj, CRDS)
+#     assert obj.uuid() == crds_obj.uuid()
 
 
 def test_location_search(crds_read):
@@ -124,11 +178,25 @@ def test_search_require_all():
 
     assert len(results["bsd_108m_co2_picarro"]) == 3
 
+def test_search_footprints():
+    bucket = get_local_bucket(empty=True)
+    test_data = "../data/emissions"
+    filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
+    filepath = os.path.join(os.path.dirname(__file__), test_data, filename)
+    metadata = {"name": "WAO-20magl_EUROPE"}
+    source_name = "WAO-20magl_EUROPE"
+    datasource_uuids = Footprint.read_file(filepath=filepath, metadata=metadata, source_name=source_name)
 
+    data_type = "footprint"
+    search_terms = []
+    locations = []
 
+    start = get_datetime_epoch()
+    end = get_datetime_now()
 
+    results = search(search_terms=search_terms, locations=locations, data_type=data_type, start_datetime=start, end_datetime=end)
 
-
+    assert len(results["footprints"]) == 1
 
 
 
