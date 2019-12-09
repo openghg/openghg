@@ -46,6 +46,7 @@ class Datasource:
                 
         """        
         from Acquire.ObjectStore import create_uuid, get_datetime_now, string_to_datetime
+        from HUGS.Util import timestamp_tzaware
 
         d = Datasource()
         d._name = name
@@ -56,13 +57,15 @@ class Datasource:
         d._metadata["source_name"] = name
         
         if data is not None:
+            # We expect a list
+            data = [data]
             # This could be a list of dataframes
             d._data = data
             # Just store these as time stamps?
             # Get the first and last datetime from the list of dataframes
             # TODO - update this as each dataframe may have different start and end dates
-            d._start_datetime = string_to_datetime(data[0].first_valid_index())
-            d._end_datetime = string_to_datetime(data[-1].last_valid_index())
+            d._start_datetime = timestamp_tzaware(data[0].first_valid_index())
+            d._end_datetime = timestamp_tzaware(data[-1].last_valid_index())
         
         return d
 
@@ -100,6 +103,7 @@ class Datasource:
             Returns:
                 None
         """
+        value = str(value)
         self._metadata[key.lower()] = value.lower()
 
     def add_data(self, metadata, data, data_type=None, overwrite=False):
@@ -199,37 +203,39 @@ class Datasource:
                 tuple (datetime, datetime): Start and end datetimes for DataSet
         """
         from pandas import DatetimeIndex
-        from pandas import to_datetime
-        from Acquire.ObjectStore import datetime_to_datetime
-        
+        from HUGS.Util import timestamp_tzaware
+
         if not isinstance(dataframe.index, DatetimeIndex):
             raise TypeError("Only DataFrames with a DatetimeIndex must be passed")
-        
+
+        # Here we want to make the pandas Timestamps timezone aware
         # This seems a bit long winded but we end up with standard Python datetime objects
         # that are timezone aware and set to UTC
-        start = datetime_to_datetime(to_datetime(dataframe.first_valid_index()))
-        end = datetime_to_datetime(to_datetime(dataframe.last_valid_index()))
+        start = timestamp_tzaware(dataframe.first_valid_index())
+        end = timestamp_tzaware(dataframe.last_valid_index())
 
         return start, end
 
     def get_dataset_daterange(self, dataset):
-        """ Get the daterange for the passed DataSet
+        """ Get the daterange for the passed Dataset
 
             Args:
-                dataset (xarray.DataSet): DataSet to parse
+                dataset (xarray.DataSet): Dataset to parse
             Returns:
                 tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
 
         """
         from xarray import Dataset
         from pandas import Timestamp
-        from Acquire.ObjectStore import datetime_to_datetime
 
         if not isinstance(dataset, Dataset):
-            raise TypeError("Only xarray DataSet types can be processed")
+            raise TypeError("Only xarray Dataset types can be processed")
 
-        start = datetime_to_datetime(Timestamp(dataset.time[0].values).to_pydatetime())
-        end = datetime_to_datetime(Timestamp(dataset.time[-1].values).to_pydatetime())
+        if dataset.time:
+            start = Timestamp(dataset.time[0].values, tz="UTC")
+            end = Timestamp(dataset.time[-1].values, tz="UTC")
+        else:
+            raise AttributeError("This dataset does not have a time attribute, unable to read date range")
 
         return start, end
 
@@ -238,7 +244,7 @@ class Datasource:
         """ Check if a datasource with this ID is already stored in the object store
 
             Args:
-                datasource_id (str): ID of datasource created from Data / given in data
+                datasource_id (str): ID of datasource created from data
             Returns:
                 bool: True if Datasource exists 
         """
@@ -247,7 +253,7 @@ class Datasource:
         if bucket is None:
             bucket = get_bucket()
 
-        key = "%s/uuid/%s" % (Datasource._data_root, datasource_id)
+        key = "%s/uuid/%s" % (Datasource._datasource_root, datasource_id)
         
         return exists(bucket=bucket, key=key)
 
@@ -405,6 +411,8 @@ class Datasource:
             Args:
                 bucket (dict): Bucket containing data
                 data (dict): JSON data
+                shallow (bool): Load only the JSON data, do not retrieve
+                data from the object store
             Returns:
                 Datasource: Datasource created from JSON
         """
@@ -457,7 +465,7 @@ class Datasource:
             bucket = get_bucket()
 
         # For now we'll get the data type from the metadata
-        data_type = self._metadata["data_type"]
+        # data_type = self._metadata["data_type"]        
 
         if self._data is not None:
             for data, daterange in self._data:
@@ -469,7 +477,7 @@ class Datasource:
                     ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
                 # TODO - for now just create a temporary directory - will have to update Acquire
                 # or work on a PR for xarray to allow returning a NetCDF as bytes
-                elif self._data_type == "footprint":   
+                elif self._data_type == "footprint":
                     with tempfile.TemporaryDirectory() as tmpdir:
                         filepath = f"{tmpdir}/temp.nc"
                         data.to_netcdf(filepath)
@@ -603,21 +611,22 @@ class Datasource:
             Returns:
                 None
         """
-        from Acquire.ObjectStore import datetime_to_datetime
+        # from Acquire.ObjectStore import datetime_to_datetime
+        from HUGS.Util import timestamp_tzaware
 
         if self._data is not None:
             # Sort the data by date
             self.sort_data()
             data_type = self._data_type
             if data_type == "timeseries":
-                self._start_datetime = datetime_to_datetime(self._data[0][0].first_valid_index())
-                self._end_datetime = datetime_to_datetime(self._data[-1][0].last_valid_index())
+                self._start_datetime = timestamp_tzaware(self._data[0][0].first_valid_index())
+                self._end_datetime = timestamp_tzaware(self._data[-1][0].last_valid_index())
             elif data_type == "footprint":
                 # TODO - this feels messy
                 start, _ = self.get_dataset_daterange(self._data[0][0])
                 _, end = self.get_dataset_daterange(self._data[-1][0])
-                self._start_datetime = datetime_to_datetime(start)
-                self._end_datetime = datetime_to_datetime(end)
+                self._start_datetime = timestamp_tzaware(start)
+                self._end_datetime = timestamp_tzaware(end)
             else:
                 raise NotImplementedError("Only CRDS, GC and footprint data currently recognized")
         else:
