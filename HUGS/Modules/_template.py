@@ -1,19 +1,24 @@
 
-__all__ = ["Template"]
+__all__ = ["TEMPLATE"]
+
+### To use this template replace:
+# - TEMPLATE with new data name in all upper case e.g. CRDS
+# - template with new data name in all lower case e.g. crds
+# - CHANGEME with a new fixed uuid (at the moment)
 
 # TODO - look into what's causing the logging messages in the first place
 # This does stop them
 
-class Template:
-    """ Interface for processnig Template data
+class TEMPLATE:
+    """ Interface for processnig TEMPLATE data
 
-        Instances of Template should be created using the
-        CRDS.create() function
+        Instances of TEMPLATE should be created using the
+        TEMPLATE.create() function
         
     """
-    _crds_root = "TEMPLATE"
+    _template_root = "TEMPLATE"
     # Use uuid.uuid4() to create a unique fixed UUID for this object
-    _crds_uuid = "CHANGEME"
+    _template_uuid = "CHANGEME" # CURRENTLY BEING FIXED HERE BUT WILL BE SET AUTOMATICALLY?
 
     def __init__(self):
         self._creation_datetime = None
@@ -33,14 +38,14 @@ class Template:
 
     @staticmethod
     def create():
-        """ This function should be used to create CRDS objects
+        """ This function should be used to create TEMPLATE objects
 
             Returns:
-                CRDS: CRDS object 
+                TEMPLATE: TEMPLATE object 
         """
         from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
 
-        c = CRDS()
+        c = TEMPLATE()
         c._creation_datetime = _get_datetime_now()
 
         return c
@@ -55,7 +60,7 @@ class Template:
         """
         from glob import glob as _glob
         from os import path as _path
-        from HUGS.Modules import CRDS as _CRDS
+        from HUGS.Modules import TEMPLATE as _TEMPLATE
 
         # This finds data files in sub-folders
         folder_path = _path.join(folder_path, "./*.dat")
@@ -67,12 +72,12 @@ class Template:
             raise FileNotFoundError("No data files found")
 
         for fp in filepaths:
-            Template.read_file(data_filepath=fp)
+            TEMPLATE.read_file(data_filepath=fp)
 
 
     @staticmethod
     def read_file(data_filepath):
-        """ Creates a CRDS object holding data stored within Datasources
+        """ Creates a TEMPLATE object holding data stored within Datasources
 
             TODO - currently only works with a single Datasource
 
@@ -86,8 +91,8 @@ class Template:
         from HUGS.Processing import create_datasources as _create_datasources
 
         # Load in the object from the object store
-        # This can be replaced with Template.create for testing
-        temp = Template.load()
+        # This can be replaced with TEMPLATE.create for testing
+        template = TEMPLATE.load()
 
         # Get the filename from the filepath
         filename = data_filepath.split("/")[-1]
@@ -128,7 +133,7 @@ class Template:
         from HUGS.Processing import read_metadata
 
         # Create metadata here
-        metadata = read_metadata(filename=data_filepath, data=data, data_type="CRDS")
+        metadata = read_metadata(filename=data_filepath, data=data, data_type="TEMPLATE")
 
         data_list = []
         for n in range(n_gases):
@@ -159,24 +164,24 @@ class Template:
 
     @staticmethod
     def from_data(data, bucket=None):
-        """ Create a CRDS object from data
+        """ Create a TEMPLATE object from data
 
             Args:
                 data (str): JSON data
                 bucket (dict, default=None): Bucket for data storage
             Returns:
-                CRDS: CRDS object created from data
+                TEMPLATE: TEMPLATE object created from data
         """
         from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
         from HUGS.ObjectStore import get_bucket as _get_bucket
 
         if data is None or len(data) == 0:
-            return CRDS()
+            return TEMPLATE()
 
         if bucket is None:
             bucket = _get_bucket()
         
-        c = CRDS()
+        c = TEMPLATE()
         c._creation_datetime = _string_to_datetime(data["creation_datetime"])
         c._datasources = data["datasources"]
         c._stored = False
@@ -201,18 +206,18 @@ class Template:
         if bucket is None:
             bucket = _get_bucket()
 
-        crds_key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
+        crds_key = "%s/uuid/%s" % (TEMPLATE._template_root, TEMPLATE._template_uuid)
 
         self._stored = True
         _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
     @staticmethod
     def load(bucket=None):
-        """ Load a CRDS object from the datastore using the passed
+        """ Load a TEMPLATE object from the datastore using the passed
             bucket and UUID
 
             Args:
-                uuid (str): UUID of CRDS object
+                uuid (str): UUID of TEMPLATE object
                 key (str, default=None): Key of object in object store
                 bucket (dict, default=None): Bucket to store object
             Returns:
@@ -224,10 +229,10 @@ class Template:
         if bucket is None:
             bucket = _get_bucket()
 
-        key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
+        key = "%s/uuid/%s" % (TEMPLATE._template_root, TEMPLATE._template_uuid)
         data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
-        return CRDS.from_data(data=data, bucket=bucket)
+        return TEMPLATE.from_data(data=data, bucket=bucket)
 
     @staticmethod
     def exists(bucket=None):
@@ -236,7 +241,7 @@ class Template:
             Args:
                 bucket (dict, default=None): Bucket for data storage
             Returns:
-                bool: True if CRDS object exists in object store
+                bool: True if TEMPLATE object exists in object store
         """
         from HUGS.ObjectStore import exists as _exists
         from HUGS.ObjectStore import get_bucket as _get_bucket
@@ -244,7 +249,7 @@ class Template:
         if bucket is None:
             bucket = _get_bucket()
 
-        key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
+        key = "%s/uuid/%s" % (TEMPLATE._template_root, TEMPLATE._template_uuid)
 
         return _exists(bucket=bucket, key=key)
 
@@ -264,7 +269,7 @@ class Template:
             Returns:
                 str: UUID of  object
         """
-        return CRDS._crds_uuid
+        return TEMPLATE._template_uuid
 
     def datasources(self):
         """ Return the list of Datasources for this object
