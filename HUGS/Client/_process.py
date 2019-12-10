@@ -21,7 +21,8 @@ class Process:
         else:
             self._service
 
-    def process_folder(self, user, folder_path, data_type, source_name=None, overwrite=False, extension="dat", hurls_url=None, storage_url=None):
+    def process_folder(self, user, folder_path, data_type, source_name=None, overwrite=False, extension="dat", 
+                        hugs_url=None, storage_url=None, instrument=None):
         """ Process the passed directory of data files
 
             Args:
@@ -37,12 +38,22 @@ class Process:
         from pathlib import Path
         import os
 
-        if data_type != "CRDS":
-            raise NotImplementedError("Only currently implemented for CRDS data type")
+        if data_type == "GC":
+            filepaths = []
+            # Find all files in 
+            for f in Path(folder_path).glob(f"**/*.C"):
+                if "precisions" in f.name:
+                    # Remove precisions section and ensure file exists
+                    data_filename = str(f).replace(".precisions", "")
+                    if Path(data_filename).exists():
+                        filepaths.append((Path(data_filename), f))
+        elif data_type == "CRDS":
+            filepaths = [f for f in Path(folder_path).glob(f'**/*.{extension}')]
+        else:
+            raise NotImplementedError("Currently only implemented for CRDS and GC data types")
 
-        filepaths = [f for f in Path(folder_path).glob(f'**/*.{extension}')]
-
-        return self.process_files(user=user, files=filepaths, data_type=data_type, source_name=source_name, overwrite=overwrite)
+        return self.process_files(user=user, files=filepaths, data_type=data_type, source_name=source_name, overwrite=overwrite,
+                                    instrument=instrument)
 
     # Find a better way to get this storage url in here, currently used for testing
     def process_files(self, user, files, data_type, source_name=None, overwrite=False, hugs_url=None, 
@@ -100,15 +111,16 @@ class Process:
         for file in files:
             if data_type.upper() == "GC":
                 # This is only used as a key when returning the Datasource UUIDs
+                filename = file[0].name
                 # This may be removed in the future as is currently only for testing
-                filename = file[0].split("/")[-1]
                 
                 if not source_name:
-                    source_name = filename.split(".")[0]
+                    source_name = os.path.splitext(filename)[0]
 
-                # TODO - update this
+                # TODO - update this so we get proper reading of parameters
+                # dictionary
                 if not site:
-                    site = source_name
+                    site = source_name.split(".")[0]
                 
                 filemeta = drive.upload(file[0])
                 par = PAR(location=filemeta.location(), user=user)
@@ -125,7 +137,7 @@ class Process:
                         "source_name":source_name, "overwrite": overwrite,
                         "site":site, "instrument":instrument }
             else:
-                filename = str(file).split("/")[-1]
+                filename = file.name
                 
                 filemeta = drive.upload(file)
                 par = PAR(location=filemeta.location(), user=user)

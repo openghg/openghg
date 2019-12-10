@@ -85,9 +85,6 @@ class GC:
             Returns:
                 dict: Dictionary version of object
         """
-        if self.is_null():
-            return {}
-
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         data = {}
@@ -95,6 +92,7 @@ class GC:
         data["stored"] = self._stored
         data["datasource_uuids"] = self._datasource_uuids
         data["datasource_names"] = self._datasource_names
+        data["file_hashes"] = self._file_hashes
 
         return data
 
@@ -115,6 +113,7 @@ class GC:
         gc._creation_datetime = _string_to_datetime(data["creation_datetime"])
         gc._datasource_uuids = data["datasource_uuids"]
         gc._datasource_names = data["datasource_names"]
+        gc._file_hashes = data["file_hashes"]
         gc._stored = False
 
         return gc
@@ -123,23 +122,20 @@ class GC:
         """ Save this GC object in the object store
 
             Args:
-                bucket (dict): Bucket for data storage
+                bucket (dict, default=None): Bucket for data storage
             Returns:
                 None
         """
-        if self.is_null():
-            return
-
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import ObjectStore
+        from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
+        
+        gc_key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
 
         self._stored = True
-        gc_key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
-        _ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
+        ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
 
     @staticmethod
     def load(bucket=None):
@@ -171,8 +167,8 @@ class GC:
         """ Reads a GC data file by creating a GC object and associated datasources
 
             Args:
-                data_filepath (str): Path of data file
-                precision_filepath (str): Path of precision file
+                data_filepath (str, pathlib.Path): Path of data file
+                precision_filepath (str, pathlib.Path): Path of precision file
             Returns:
                 TODO - should this really return anything?
                 GC: GC object
@@ -180,6 +176,7 @@ class GC:
         """
         from HUGS.Processing import assign_data, lookup_gas_datasources
         import json
+        from pathlib import Path
 
         gc = GC.load()
 
@@ -192,9 +189,9 @@ class GC:
         #     gc._params = json.load(f)
         # Load in the params for code_site, site_code dictionaries for selection
         # of inlets from the above parameters
-        
+        if not isinstance(data_filepath, Path):
+            data_filepath = Path(data_filepath)
 
-        
         data, species, metadata = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                                                 site=site, instrument=instrument_name)
 
@@ -244,8 +241,8 @@ class GC:
         """ Read data from the data and precision files
 
             Args:
-                data_filepath (str): Path of data file
-                precision_filepath (str): Path of precision file
+                data_filepath (pathlib.Path): Path of data file
+                precision_filepath (pathlib.Path): Path of precision file
                 site (str): Name of site
                 instrument (str): Identifying data for instrument 
             Returns:
@@ -256,11 +253,9 @@ class GC:
         from pandas import read_csv as _read_csv
         from pandas import datetime as _pd_datetime
         from pandas import Timedelta as _pd_Timedelta
-
         from HUGS.Processing import read_metadata
 
-
-        # Read header
+        # Read header   
         header = _read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
         # Create a function to parse the datetime in the data file
@@ -271,7 +266,7 @@ class GC:
                          parse_dates=[[1, 2, 3, 4, 5]], date_parser=parser)
         data.index.name = "Datetime"
 
-        metadata = read_metadata(filename=data_filepath, data=data, data_type="GC")
+        metadata = read_metadata(filepath=data_filepath, data=data, data_type="GC")
 
         units = {}
         scale = {}
@@ -322,7 +317,7 @@ class GC:
         """ Read GC precision file
 
             Args: 
-                filepath (str): Path of precision file
+                filepath (pathlib.Path): Path of precision file
             Returns:
                 tuple (Pandas.DataFrame, list): Precision DataFrame and list of species in
                 precision data
@@ -506,7 +501,7 @@ class GC:
             Returns:
                 list: List of Datasources
         """
-        return self._datasource_uuids.keys()
+        return self._datasource_names
 
     def remove_datasource(self, uuid):
         """ Remove the Datasource with the given uuid from the list 

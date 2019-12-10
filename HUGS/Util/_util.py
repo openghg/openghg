@@ -4,7 +4,7 @@
 
 __all__ = ["url_join", "get_daterange_str", "get_datetime_epoch", 
             "get_datetime_now", "get_datetime", "unanimous", "load_object",
-            "hash_file"]
+            "hash_file", "timestamp_tzaware"]
 
 def url_join(*args):
     """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
@@ -133,7 +133,7 @@ def hash_file(filepath):
         Taken from https://stackoverflow.com/a/22058673
 
         Args:
-            filepath (str): Path to file
+            filepath (pathlib.Path): Path to file
         Returns:
             str: SHA1 hash
     """
@@ -152,4 +152,20 @@ def hash_file(filepath):
 
     return sha1.hexdigest()
 
+
+def timestamp_tzaware(timestamp):
+    """ Returns the pandas Timestamp passed as a timezone (UTC) aware
+        Timestamp.
+
+        Args:
+            timestamp (pandas.Timestamp): Timezone naive 
+        Returns:
+            pandas.Timestamp: Timezone aware
+    """
+    if timestamp.tzinfo is None:
+        return timestamp.tz_localize(tz="UTC")
+    else:
+        return timestamp.tz_convert(tz="UTC")
+
+        
 

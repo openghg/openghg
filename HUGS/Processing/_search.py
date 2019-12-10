@@ -257,7 +257,7 @@ def append_keys(results, search_key, keys):
     return results
 
 
-def lookup_gas_datasources(lookup_dict, gas_data, source_name, source_id=None):
+def lookup_gas_datasources(lookup_dict, gas_data, source_name, source_id):
     """ Check if the passed data exists in the lookup dict
 
         Args: 

@@ -21,9 +21,9 @@ def get_object_names(bucket, prefix=None):
         Returns:
             list: List of keys in object store
     """
-    from Acquire.ObjectStore import ObjectStore as _ObjectStore
+    from Acquire.ObjectStore import ObjectStore
 
-    return _ObjectStore.get_all_object_names(bucket, prefix)
+    return ObjectStore.get_all_object_names(bucket, prefix)
 
 
 def get_dated_object(bucket, key):

@@ -1,12 +1,6 @@
 # from _paths import RootPaths
 __all__ = ["CRDS"]
 
-# TODO - look into what's causing the logging messages in the first place
-# This does stop them
-import logging
-mpl_logger = logging.getLogger("matplotlib")
-mpl_logger.setLevel(logging.WARNING)
-
 class CRDS:
     """ Interface for processing CRDS data
 
@@ -97,20 +91,17 @@ class CRDS:
             Returns:
                 CRDS: CRDS object created from data
         """
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import string_to_datetime
+        from HUGS.ObjectStore import get_bucket
 
         if data is None or len(data) == 0:
             return CRDS()
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
         
         c = CRDS()
-        c._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        stored = data["stored"]
-
-        # c._datasources = data["datasources"]
+        c._creation_datetime = string_to_datetime(data["creation_datetime"])
         c._datasource_uuids = data["datasource_uuids"]
         c._datasource_names = data["datasource_names"]
         c._file_hashes = data["file_hashes"]
@@ -125,20 +116,16 @@ class CRDS:
             Returns:
                 None
         """
-        if self.is_null():
-            return
-
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import ObjectStore
+        from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
 
         crds_key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
 
         self._stored = True
-        _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
+        ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
     @staticmethod
     def load(bucket=None):
@@ -208,6 +195,8 @@ class CRDS:
         """
         from HUGS.Processing import assign_data, lookup_gas_datasources
         from HUGS.Util import hash_file
+        import os
+        from pathlib import Path
 
         crds = CRDS.load()
         # here we check the source id from the interface or the source_name
@@ -215,13 +204,19 @@ class CRDS:
         # either create a new Datasource or add the data to an existing source
 
         # Take hash of file and save it's hash so we know we've read it already
+        # TODO - this should be expanded to check dates for the uploaded data
+        # That would have to be done during processing
         file_hash = hash_file(filepath=data_filepath)
-        if file_hash in crds._file_hashes:
+        if file_hash in crds._file_hashes and not overwrite:
             raise ValueError(f"This file has been uploaded previously with the filename : {crds._file_hashes[file_hash]}")
         
-        data_filepath = str(data_filepath)
-        filename = data_filepath.split("/")[-1] 
+        data_filepath = Path(data_filepath)
+        filename = data_filepath.name
+
         gas_data = crds.read_data(data_filepath=data_filepath)
+
+        if not source_name:
+            source_name = filename.stem
 
         # Check to see if we've had data from these Datasources before
         # TODO - currently just using a simple naming system here - update to use 
@@ -253,37 +248,11 @@ class CRDS:
 
         # Store the hash as the key for easy searching, store the filename as well for
         # ease of checking by user
-        filename = data_filepath.split("/")[-1]
         crds._file_hashes[file_hash] = filename
 
         crds.save()
 
         return datasource_uuids
-
-    # Moved to processing/search.py
-    # def lookup_datasources(self, gas_data, source_name=None, source_id=None):
-    #     """ Check which datasources
-
-    #         Args: 
-    #             gas_data (list): Gas data to process
-    #             source_name (str)
-    #         Returns:
-    #             dict: Dictionary keyed by source_name. Value of Datasource UUID
-    #     """
-    #     # If we already have data from these datasources then return that UUID
-    #     # otherwise return False
-    #     if source_id is not None:
-    #         raise NotImplementedError()
-
-    #     results = {}
-
-    #     for species in gas_data:
-    #         datasource_name = source_name + "_" + species
-    #         results[species] = {}
-    #         results[species]["uuid"] = self._datasource_names.get(datasource_name, False)
-    #         results[species]["name"] = datasource_name
-
-    #     return results
 
     def read_data(self, data_filepath):
         """ Separates the gases stored in the dataframe in 
@@ -292,7 +261,7 @@ class CRDS:
             dataframes
 
             Args:
-                data (Pandas.Dataframe): Dataframe containing all data
+                data_filepath (pathlib.Path): Path of datafile
             Returns:
                 tuple (str, str, list): Name of gas, ID of Datasource of this data and a list Pandas DataFrames for the 
                 date-split gas data
@@ -332,7 +301,7 @@ class CRDS:
 
         header_rows = 2
         # Create metadata here
-        metadata = read_metadata(filename=data_filepath, data=data, data_type="CRDS")
+        metadata = read_metadata(filepath=data_filepath, data=data, data_type="CRDS")
 
         # data_list = []
 
@@ -381,7 +350,6 @@ class CRDS:
             head_row = data.head(1)
 
             gases = {}
-
             # Loop over the gases and find each unique value
             for column in head_row.columns:
                 s = head_row[column][0]
@@ -406,7 +374,7 @@ class CRDS:
                 bool: True if data can be read
 
         """
-        read_metadata()
+        raise NotImplementedError("Not yet implemented")
 
     def add_datasources(self, datasource_uuids):
         """ Add the passed list of Datasources to the current list
@@ -437,7 +405,7 @@ class CRDS:
             Returns:
                 list: List of Datasources
         """
-        return self._datasource_uuids.keys()
+        return self._datasource_names
 
     def remove_datasource(self, uuid):
         """ Remove the Datasource with the given uuid from the list 

@@ -15,7 +15,7 @@ class VoilaInterface:
         # Create an Interface object, this handles the creation of ipywidgets and
         # widgets layout etc
         self._interface = Interface()
-        # Create the voila interface
+        # Create the widget boxes to use in the voila interface
         self._interface.voila_interface()
 
     def interface_module(self, module_name):
@@ -80,6 +80,7 @@ class VoilaInterface:
         """
         register_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["account_circle"]), "  Register"])])
         login_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["check_circle_outline"]), "  Login"])])
+        upload_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["fa-upload"]), "  Upload"])])
         search_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["search"]), "  Search"])])
         # map_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["search"]), "  Map"])])
         plot_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["fa-bar-chart"]), "  Plotting"])])
@@ -98,35 +99,56 @@ class VoilaInterface:
             # reg_layout.children = self.interface_module(module_name="search")
             reg_layout.children = self.search_select_layout()
 
+        def on_upload_click(widget, event, data):
+            reg_layout.children = self.interface_module(module_name="upload")
+
         # def on_map_click(widget, event, data):
         #     print(self.interface_module(module_name="map"))
         #     reg_layout.children = self.interface_module(module_name="map")
 
         def on_plot_click(widget, event, data):
             # print(self.interface_module(module_name="plot_1"))
-            reg_layout.children = self.interface_module(module_name="plot_1")
+            reg_layout.children = self.interface_module(module_name="plot_complete")
 
         register_nav.on_event("click", on_register_click)
         login_nav.on_event("click", on_login_click)
         search_nav.on_event("click", on_search_click)
         plot_nav.on_event("click", on_plot_click)
         # map_nav.on_event("click", on_map_click)
+        upload_nav.on_event("click", on_upload_click)
 
-        nav_items = [register_nav, login_nav, search_nav, plot_nav]
+        nav_items = [register_nav, login_nav, upload_nav, search_nav, plot_nav]
 
         nav_drawer = v.NavigationDrawer(v_model=True, children=nav_items)
 
+        toolbar = v.Toolbar(app=True, dark=True, class_="teal",
+                            children=[v.ToolbarTitle(class_="headline", children=["HUGS"])])
+
+        # Without using a template these mount_id's will be ignored
         nav_layout = v.Layout(_metadata={"mount_id": "content-nav"},  children=[nav_drawer])
         reg_layout = v.Layout(_metadata={"mount_id": "content-main"}, justify_start=True, align_center=True, children=[])
+        status_layout = v.Layout(_metadata={"mount_id": "content-status"}, children=self.interface_module(module_name="status_bar"))
 
+
+
+        # Here set the template to put this at the bottom in some kind of toolbar
+        # Appbar
+        # Content
+        # App
+
+        app_bar = v.AppBar(color="#CFD8DC", children=["HUGS Cloud"])
+
+# _metadata = {"mount_id": "content-status"},
         # Set the alignment of the reg_layout to align / justify left so not to move
         # align - vertical
         # justify - horizontal
 
         # toolbar_layout = v.Layout(children=[self.create_toolbar()])
-        
-        container = v.Container(class_="fill-height", fluid=True, children=[reg_layout])
+        # toolbar_container 
+        container = v.Container(class_="fill-height", fluid=True, children=[nav_layout, reg_layout])
         content = v.Content(children=[container])
+        
+        app = v.App(children=[app_bar, content])
 
         # bar_button = v.Btn(color='primary', children=['Close drawer'])
         # toolbar = v.Toolbar(app=True, dark=True, class_="teal", children=[v.ToolbarTitle(class_="headline", children=[bar_button, "HUGS"])])
@@ -141,11 +163,10 @@ class VoilaInterface:
         # app = v.App(children=[v.Layout(row=True, children=[nav_drawer, toolbar, content])])
         # app = v.App(children=[v.Layout(row=True, children=[nav_drawer, content])])
 
-        layout = v.Layout(justify="start", children=[nav_layout, reg_layout])
+        layout = v.Layout(justify="start", children=[nav_layout, reg_layout, status_layout])
 
-        return layout
+        return app
 
-    
     def search_select_layout(self):
         """ Creates the ipyvuetify layout for the searching and data selection
             widgets
@@ -174,6 +195,8 @@ class VoilaInterface:
 
         # selection_layout = v.Layout(row=True, wrap=True, align_center=True,
         #                             children=[search_layout, data_layout])
+
+        divider = v.Divider()
 
         container = v.Container(children=[search_row, data_row])
 

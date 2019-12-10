@@ -1,13 +1,18 @@
 import datetime
 import os
+import pandas as pd
+from pathlib import Path
 import pytest
 import uuid
 
 from HUGS.Modules import Datasource, CRDS
 from HUGS.ObjectStore import get_local_bucket, get_object_names
 
-from Acquire.ObjectStore import string_to_datetime
-from Acquire.ObjectStore import datetime_to_datetime
+from Acquire.ObjectStore import string_to_datetime, datetime_to_datetime, datetime_to_string
+
+import logging
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
 
 # @pytest.fixture(scope="session")
 # def data():
@@ -16,107 +21,104 @@ from Acquire.ObjectStore import datetime_to_datetime
 #     test_data = "../data/proc_test_data/CRDS"
 #     filepath = os.path.join(dir_path, test_data, filename)
 
+
 #     return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
 
 @pytest.fixture(autouse=True)
-def before_tests():
-    crds = CRDS.create()
-    crds.save()
-
-# def test_read_bsd():
-#     dir_path = os.path.dirname(__file__)
-#     test_data = "../data/search_data"
-#     filename = "bsd.picarro.1minute.108m.min.dat"
-
-#     filepath = os.path.join(dir_path, test_data, filename)
-#     bucket = get_local_bucket(empty=True)
-
-#     crds = CRDS.read_file(data_filepath=filepath)
-#     # Get the data from the object store and ensure it's been read correctly
-#     datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
-
-#     print(len(datasources))
-
-#     assert False
-# def test_labels():
-#     dir_path = os.path.dirname(__file__)
-#     test_data = "../data/proc_test_data/CRDS"
-#     filename = "hfd.picarro.1minute.100m_min.dat"
-
-#     filepath = os.path.join(dir_path, test_data, filename)
-#     bucket = get_local_bucket(empty=True)
-
-#     CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
-
-#     crds = CRDS.load()
-
-#     # Get the data from the object store and ensure it's been read correctly
-#     datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
-
-#     for d in datasources:
-#         print(d._labels)
-
-def test_read_file():
+def hfd_filepath():
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
     filename = "hfd.picarro.1minute.100m_min.dat"
 
     filepath = os.path.join(dir_path, test_data, filename)
+
+    return filepath
+
+
+@pytest.fixture(autouse=True)
+def crds():
     bucket = get_local_bucket(empty=True)
-
-    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
-
-    crds = CRDS.load()
-
-    # Get the data from the object store and ensure it's been read correctly
-    datasources = [Datasource.load(uuid=uuid, shallow=False) for uuid in crds.datasources()]
-
-    data_one = datasources[0].data()
-    assert data_one[0][0]["ch4 count"].iloc[0] == pytest.approx(1993.83)
-    assert data_one[0][0]["ch4 stdev"].iloc[0] == pytest.approx(1.555)
-    assert data_one[0][0]["ch4 n_meas"].iloc[0] == pytest.approx(19.0)
-
-    data_two = datasources[1].data()
-
-    assert data_two[0][0]["co2 count"].iloc[0] == pytest.approx(414.21)
-    assert data_two[0][0]["co2 stdev"].iloc[0] == pytest.approx(0.109)
-    assert data_two[0][0]["co2 n_meas"].iloc[0] == pytest.approx(19.0)
-
-    data_three = datasources[2].data()
-
-    assert data_three[0][0]["co count"].iloc[0] == pytest.approx(214.28)
-    assert data_three[0][0]["co stdev"].iloc[0] == pytest.approx(4.081)
-    assert data_three[0][0]["co n_meas"].iloc[0] == pytest.approx(19.0)
-
-
-def test_data_persistence():
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
     filename = "hfd.picarro.1minute.100m_min.dat"
 
     filepath = os.path.join(dir_path, test_data, filename)
-    bucket = get_local_bucket(empty=True)
-
     CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+    crds = CRDS.load()
+
+    return crds
+
+def test_read_file(crds):
+    uuids = crds.datasources()
+    
+    assert len(uuids) == 3
+
+    ch4_datasouce = Datasource.load(uuid=uuids["hfd_picarro_100m_ch4"], shallow=False)
+    co2_datasouce = Datasource.load(uuid=uuids["hfd_picarro_100m_co2"], shallow=False)
+    co_datasouce = Datasource.load(uuid=uuids["hfd_picarro_100m_co"], shallow=False)
+
+    ch4_data = ch4_datasouce.data()[0][0]
+    co2_data = co2_datasouce.data()[0][0]
+    co_data = co_datasouce.data()[0][0]
+
+    assert ch4_data["ch4 count"].iloc[0] == pytest.approx(1993.83)
+    assert ch4_data["ch4 stdev"].iloc[0] == pytest.approx(1.555)
+    assert ch4_data["ch4 n_meas"].iloc[0] == pytest.approx(19.0)
+
+    assert co2_data["co2 count"].iloc[0] == pytest.approx(414.21)
+    assert co2_data["co2 stdev"].iloc[0] == pytest.approx(0.109)
+    assert co2_data["co2 n_meas"].iloc[0] == pytest.approx(19.0)
+
+    assert co_data["co count"].iloc[0] == pytest.approx(214.28)
+    assert co_data["co stdev"].iloc[0] == pytest.approx(4.081)
+    assert co_data["co n_meas"].iloc[0] == pytest.approx(19.0)
+
+def test_read_data():
 
     crds = CRDS.load()
 
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filename = "tac.picarro.1minute.100m.test.dat"
+
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    filepath = Path(filepath)
+
+    combined = crds.read_data(data_filepath=filepath)
+
+    assert len(combined) == 2
+
+    assert list(combined.keys()) == ["ch4", "co2"]
+
+    ch4_metadata = combined["ch4"]["metadata"]
+
+    assert ch4_metadata["site"] == "tac"
+    assert ch4_metadata["instrument"] == "picarro"
+    assert ch4_metadata["time_resolution"] == "1_minute"
+    assert ch4_metadata["height"] == "100m"
+    assert ch4_metadata["port"] == "9"
+    assert ch4_metadata["type"] == "air"
+    assert ch4_metadata["species"] == "ch4"
+
+    ch4_data = combined["ch4"]["data"]
+
+    assert ch4_data.first_valid_index() == pd.Timestamp("2012-07-31 14:50:30")
+    assert ch4_data["ch4 count"].iloc[0] == pytest.approx(1905.28)
+    assert ch4_data["ch4 stdev"].iloc[0] == pytest.approx(0.268)
+    assert ch4_data["ch4 n_meas"].iloc[0] == pytest.approx(20)
+
+
+def test_data_persistence(crds):
     first_store = crds.datasources()
-
     crds.save()
-
     crds = CRDS.load()
-
-    print(crds.datasources)
-
-    # CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
     second_store = crds.datasources()
     
     assert first_store == second_store
 
-
-def test_data_overlap_raises():
+def test_seen_before_raises():
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
     filename = "hfd.picarro.1minute.100m_min.dat"
@@ -124,8 +126,7 @@ def test_data_overlap_raises():
     filepath = os.path.join(dir_path, test_data, filename)
     bucket = get_local_bucket(empty=True)
 
-    CRDS.read_file(data_filepath=filepath,
-                          source_name="hfd_picarro_100m")
+    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
     crds = CRDS.load()
     first_store = crds.datasources()
@@ -135,101 +136,78 @@ def test_data_overlap_raises():
     with pytest.raises(ValueError):
         CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
+def test_seen_before_overwrite():
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/CRDS"
+    filename = "hfd.picarro.1minute.100m_min.dat"
 
-# def test_read_folder():
-#     folder_path = "/home/gar/Documents/Devel/hugs/raw_data/CRDS_picarro"
-#     CRDS.read_folder(folder_path=folder_path)
-#     bucket = get_local_bucket()
-#     objs = get_object_names(bucket=bucket)
+    filepath = os.path.join(dir_path, test_data, filename)
+    bucket = get_local_bucket(empty=True)
 
-#     # print(objs)
+    uuids_first = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
 
-#     assert False
+    crds = CRDS.load()
+    first_store = crds.datasources()
+    crds.save()
+    crds = CRDS.load()
 
-# @pytest.fixture
-# def mock_uuid(monkeypatch):
-#     def mock_uuid():
-#         return mocked_uuid
+    # Read the same file in again
+    uuids_second = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m", overwrite=True)
 
-#     monkeypatch.setattr(uuid, 'uuid4', mock_uuid)
+    assert uuids_first == uuids_second
 
-# @pytest.fixture
-# def crds(mock_uuid):
-#     filename = "bsd.picarro.1minute.248m.dat"
-#     dir_path = os.path.dirname(__file__)
-#     test_data = "../data/proc_test_data/CRDS"
-#     filepath = os.path.join(dir_path, test_data, filename)
+def test_to_data(crds):
+    data = crds.to_data()
 
-#     return CRDS.read_file(data_filepath=filepath)
+    datasource_names = ["hfd_picarro_100m_co", "hfd_picarro_100m_ch4", "hfd_picarro_100m_co2"]
 
-# def test_read_file(crds):
-#     start = datetime.datetime(2014,1,30,10,52,30)
-#     end = datetime.datetime(2014, 1, 30, 14, 20, 30)
+    assert data["stored"] == False
+    assert sorted(data["datasource_names"]) == sorted(datasource_names)
+    assert list(data["file_hashes"].values()) == ["hfd.picarro.1minute.100m_min.dat"]
 
-#     assert crds._start_datetime == start
-#     assert crds._end_datetime == end
-#     assert crds._uuid == mocked_uuid
+def test_from_data(crds):
+    data = crds.to_data()
 
+    epoch = datetime_to_datetime(datetime.datetime(1970, 1, 1, 1, 1))
 
-# def test_to_data(crds):
-#     crds_dict = crds.to_data()
+    data["creation_datetime"] = datetime_to_string(epoch)
 
-#     assert crds_dict["UUID"] == "10000000-0000-0000-00000-000000000001"
-#     assert crds_dict["datasources"][0] == "10000000-0000-0000-00000-000000000001"
-#     assert crds_dict["metadata"]["site"] == "bsd"
-#     assert crds_dict["metadata"]["instrument"] == "picarro"
+    random_data1 = uuid.uuid4()
+    random_data2 = uuid.uuid4()
 
+    data["file_hashes"] = {"test1": random_data1, "test2": random_data2}
 
-# def test_from_data(crds):
-#     data = crds.to_data()
-#     new_crds = CRDS.from_data(data)
+    c = CRDS.from_data(data)
 
-#     start = datetime_to_datetime(datetime.datetime(2014, 1, 30, 10, 52, 30))
-#     end = datetime_to_datetime(datetime.datetime(2014, 1, 30, 14, 20, 30))
+    assert c._creation_datetime == epoch
+    assert sorted(c._datasource_names) == sorted(["hfd_picarro_100m_ch4",
+                                                  "hfd_picarro_100m_co2",
+                                                  "hfd_picarro_100m_co"])
 
-#     assert new_crds._start_datetime == start
-#     assert new_crds._end_datetime == end
-
-# def test_save_and_load():
-#     filename = "bsd.picarro.1minute.248m.dat"
-#     dir_path = os.path.dirname(__file__)
-#     test_data = "../data/proc_test_data/CRDS"
-#     filepath = os.path.join(dir_path, test_data, filename)
-
-#     crds = CRDS.read_file(data_filepath=filepath)
-
-#     bucket = get_local_bucket(empty=True)
-#     crds.save(bucket=bucket)
-
-#     # Get slice of data
-#     one = crds._datasources[0]._data[0].head(1)
-#     two = crds._datasources[1]._data[0].head(1)
-#     three = crds._datasources[2]._data[0].head(1)
-
-#     uuid = crds._uuid
-#     loaded_crds = CRDS.load(uuid=uuid, bucket=bucket)
-
-#     start = datetime_to_datetime(datetime.datetime(2014, 1, 30, 10, 52, 30))
-#     end = datetime_to_datetime(datetime.datetime(2014, 1, 30, 14, 20, 30))
-
-#     loaded_one = loaded_crds._datasources[0]._data[0].head(1)
-#     loaded_two = loaded_crds._datasources[1]._data[0].head(1)
-#     loaded_three = loaded_crds._datasources[2]._data[0].head(1)
-
-#     assert loaded_crds._start_datetime == start
-#     assert loaded_crds._end_datetime == end
-#     assert loaded_one.equals(one)
-#     assert loaded_two.equals(two)
-#     assert loaded_three.equals(three)
-    
+    assert c._file_hashes == {"test1": random_data1, "test2": random_data2}
 
 
+def test_gas_info(crds, hfd_filepath):
+    data = pd.read_csv(hfd_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"],
+                     parse_dates=[[0, 1]])
 
+    n_gases, n_cols = crds.gas_info(data=data)
 
+    assert n_gases == 3
+    assert n_cols == 3
 
+def test_clear_datasources(crds):
+    assert len(crds.datasources()) == 3
+    crds.clear_datasources()
+    assert len(crds.datasources()) == 0
 
+def test_add_datasources(crds):
+    crds.clear_datasources()
 
+    new_datasources = {'test1': 'f619755d-6c6d-4182-9e42-1ddf1c7e4eb6',
+                       'test2': '04f3aa66-bafb-4bb5-9409-8bd5b5c64527',
+                       'test3': 'eaff5063-a481-44d0-b8fa-1826666ad9db'}
 
+    crds.add_datasources(new_datasources)
 
-
-
+    assert crds.datasources() == new_datasources
