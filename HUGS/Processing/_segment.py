@@ -109,7 +109,6 @@ def get_split_frequency(data):
         Returns:
             str: String selecting frequency for data splitting by Groupby
     """
-
     data_size = data.memory_usage(deep=True).sum()
     # If the data is larger than this it will be split into
     # separate parts
