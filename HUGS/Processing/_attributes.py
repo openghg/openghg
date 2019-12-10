@@ -1,13 +1,9 @@
 __all__ = ["get_attributes"]
 
-def attributes(ds, species, site,
-               network = None,
-               global_attributes = None,
-               units = None,
-               scale = None,
-               sampling_period = None,
-               date_range = None,
-               global_attributes_default=None):
+
+
+def attributes(ds, species, site, network=None, global_attributes=None, units=None, scale=None, sampling_period=None,
+               date_range = None):
     """
     Format attributes for netCDF file
     Attributes of xarray DataSet are modified, and variable names are changed
@@ -44,168 +40,135 @@ def attributes(ds, species, site,
             If you only want an end date, just put a very early start date
             (e.g. ["1900-01-01", "2010-01-01"])
     """
+    import datetime
     from pathlib import Path
     # Rename all columns to lower case! Could this cause problems?
-    rename_dict = {var: var.lower() for var in ds.variables}
-    ds = ds.rename(rename_dict)
+    to_lower = {var: var.lower() for var in ds.variables}
+    ds = ds.rename(to_lower)
 
     data_path = Path(__file__).resolve().parent.joinpath("../Data/attributes.json")
+    
     with open(data_path, "r") as f:
             data = json.load(f)
+
             species_translator = data["species_translation"]
-
-    # # Rename species, if required
-    # rename_dict = {}
-    # for key in ds.variables:
-    #     if species.lower() in key:
-    #         if species.upper() in list(species_translator.keys()):
-    #             # Rename based on species_translator, if available
-    #             species_out = species_translator[species.upper()][0]
-    #         else:
-    #             # Rename species to be lower case and without hyphens
-    #             species_out = species.lower().replace("-", "")
-
-    #         rename_dict[key] = key.replace(species.lower(), species_out)
+            unit_species = data["unit_species"]
+            unit_species_long = data["unit_species_long"]
+            unit_interpret = data["unit_interpret"]
 
     species_upper = species.upper()
     species_lower = species.lower()
 
-    to_rename = [var for var in ds.variables if species_lower in var]
+    matched_keys = [var for var in ds.variables if species_lower in var]
 
     # If we don't have any variables to rename, raise an error
-    if not to_rename:
-        raise NameError(f"Cannot find speces {species} in Dataset variables")
+    if not matched_keys:
+        raise NameError(f"Cannot find species {species} in Dataset variables")
     
-    rename_dict = {}
-    for var in to_rename:
+    species_rename = {}
+    for var in matched_keys:
         if species_upper in species_translator:
-            new_label = species_translator[species_upper]["chem"]
+            species_label = species_translator[species_upper]["chem"]
         else:
-            new_label = species_lower.replace("-", "")
+            species_label = species_lower.replace("-", "")
         
-        rename_dict[var] = var.replace(species_lower, new_label)
+        species_rename[var] = var.replace(species_lower, species_label)
 
-    ds = ds.rename(rename_dict)
-
+    ds = ds.rename(species_rename)
 
     # Global attributes
-    #############################################
-
-    if global_attributes_default is None:
-        global_attributes_default =  {"Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-                                       "Source": "In situ measurements of air",
-                                       "Conventions": "CF-1.6"}
+    global_attributes_default =  {"Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
+                                    "Source": "In situ measurements of air",
+                                    "Conventions": "CF-1.6"}
 
     if global_attributes is None:
-        global_attributes = {}
-        for key in global_attributes_default:
-            global_attributes[key] = global_attributes_default[key]
+        global_attributes = global_attributes_default
     else:
-        for key in global_attributes_default:
-            global_attributes[key] = global_attributes_default[key]
+        global_attributes.update(global_attributes_default)
 
-    # Add some defaults
-    global_attributes["File created"] = str(dt.now())
+    global_attributes["File created"] = str(Timestamp.now(tz="UTC"))
+    global_attributes["Processed by"] = "auto@hugs-cloud.com"
+    global_attributes["species"] = species_label
+    if scale:
+        global_attributes["Calibration_scale"] = scale
+    else:
+        global_attributes["Calibration_scale"] = "unknown"
 
-    # Add user
-    global_attributes["Processed by"] = "%s@bristol.ac.uk" % getpass.getuser()
-
-
-    for key, values in global_attributes.items():
-        ds.attrs[key] = values
+    # Update the Dataset attributes
+    ds.attrs.update(global_attributes)
 
     # Add some site attributes
-    global_attributes_site = site_info_attributes(site.upper(), network)
-    if global_attributes_site is not None:
-        for key, values in global_attributes_site.items():
-            ds.attrs[key] = values
-
-    # Add calibration scale
-    if scale:
-        ds.attrs["Calibration_scale"] = scale
-    else:
-        ds.attrs["Calibration_scale"] = "unknown"
-
-    # Add species name
-    ds.attrs["species"] = species_out
+    site_attributes = _site_info_attributes(site.upper(), network)
+    ds.attrs.update(site_attributes)
 
     # Species-specific attributes
-    #############################################
-
     # Long name
-    if (species.upper()[0] == "D" and species.upper() != "DESFLURANE") or species.upper() == "APO":
-        sp_long = species_translator[species.upper()][1]
-    elif species.upper() == "RN":
+    if (species_upper.startswith("D") and species_upper != DESFLURANE) or species_upper == "APD":
+        sp_long = species_translator[species_upper]["name"]
+    elif species_upper == "RN":
         sp_long = "radioactivity_concentration_of_222Rn_in_air"
-    elif species.upper() in list(species_translator.keys()):
-        sp_long = "mole_fraction_of_" + species_translator[species.upper()][1] + "_in_air"
+    elif species_upper in species_translator:
+        sp_long = f"mole_fraction_of_{species_translator[species_upper]["name"]}_in_air"
     else:
-        sp_long = "mole_fraction_of_" + species_out + "_in_air"
+        sp_long = f"mole_fraction_of_{species_label}_in_air"
 
-    ancillary_variables = ""
-
+    ancillary_variables = []
+    
     for key in ds.variables:
-
-        if species_out in key:
-
+        if species in key:
             # Standard name attribute
             #ds[key].attrs["standard_name"]=key.replace(species_out, sp_long)
-            ds[key].attrs["long_name"]=key.replace(species_out, sp_long)
+            ds[key].attrs["long_name"] = key.replace(species_label, sp_long)
 
             # If units are required for variable, add attribute
-            if (key == species_out) or \
-                ("variability" in key) or \
-                ("repeatability" in key):
-                if units is None:
-                    ds[key].attrs["units"] = unit_species[species.upper()]
-                else:
-                    if units in list(unit_interpret.keys()):
+            if key == species_label or "variability" in key or "repeatability" in key:
+                if units:
+                    if units in unit_interpret:
                         ds[key].attrs["units"] = unit_interpret[units]
                     else:
                         ds[key].attrs["units"] = unit_interpret["else"]
+                else:
+                    ds[key].attrs["units"] = unit_species[species_upper]
 
-                # if units are non-standard, add explanation
-                if species.upper() in list(unit_species_long.keys()):
-                    ds[key].attrs["units_description"] = unit_species_long[species.upper()]
+                # If units are non-standard, add explanation
+                if species_upper in unit_species_long:
+                    ds[key].attrs["units_description"] = unit_species_long[species_upper]
 
             # Add to list of ancilliary variables
-            if key != species_out:
-                ancillary_variables += key + ", "
+            if key != species_label:
+                ancillary_variables.append(key)
 
     # Write ancilliary variable list
-    ds[species_out].attrs["ancilliary_variables"] = ancillary_variables.strip()
+    ds[species_out].attrs["ancilliary_variables"] = ", ".join(ancillary_variables)
 
     # Add quality flag attributes
-    ##################################
+    quality_flags = [key for key in ds.variables if " status_flag" in key]
 
-    flag_key = [key for key in ds.variables if " status_flag" in key]
-    if len(flag_key) > 0:
-        flag_key = flag_key[0]
-        ds[flag_key] = ds[flag_key].astype(int)
-        ds[flag_key].attrs = {"flag_meaning":
+    for key in quality_flags:
+        ds[key] = ds[key].astype(int)
+        ds[key].attrs = {"flag_meaning":
                               "0 = unflagged, 1 = flagged",
-                              "long_name":
-                              ds[species_out].attrs["long_name"] + " status_flag"}
+                              "long_name": f"{ds[species_label].attrs["long_name"]} status_flag"}
 
     # Add integration flag attributes
-    ##################################
+    integration_flags = [key for key in ds.variables if " integration_flag" in key]
 
-    flag_key = [key for key in ds.variables if " integration_flag" in key]
-    if len(flag_key) > 0:
-        flag_key = flag_key[0]
-        ds[flag_key] = ds[flag_key].astype(int)
-        ds[flag_key].attrs = {"flag_meaning":
-                              "0 = area, 1 = height",
-                              "standard_name":
-                              ds[species_out].attrs["long_name"] + " integration_flag",
-                              "comment":
-                              "GC peak integration method (by height or by area). " +
-                              "Does not indicate data quality"}
+    for key in integration_flags:
+        ds[key] = ds[key].astype(int)
+        ds[key].attrs = {"flag_meaning": "0 = area, 1 = height",
+                        "standard_name": f"{ds[species_out].attrs["long_name"]} integration_flag",
+                        "comment": "GC peak integration method (by height or by area). Does not indicate data quality"}
 
     # Set time encoding
-    #########################################
-
     # Check if there are duplicate time stamps
+    
+    # See this https://github.com/pydata/xarray/issues/2108
+    # if np.unique(ds.time):
+    
+    ####################
+    # Got to here
+    ####################
+
     if len(set(ds.time.values)) < len(ds.time.values):
         print("WARNING. Dupliate time stamps")
 
@@ -225,3 +188,57 @@ def attributes(ds, species, site,
         ds = ds.loc[dict(time = slice(*date_range))]
 
     return ds
+
+
+def _site_info_attributes(site, network=None):
+    """ Reads site attributes from JSON
+
+        Args:
+            site (str): Site code
+            network (str, default=None): Network name
+        Returns:
+            dict: Dictionary of site attributes
+    """
+    site = site.upper()
+    network = network.upper()
+    # Read site info file
+    data_filename = "acrg_site_info.json"
+    filepath = _get_datapath(filename=data_filename)
+
+    with open(site_info_file, "r") as f:
+        site_params = json.load(f)
+
+    attributes_list = {"longitude": "station_longitude",
+                       "latitude": "station_latitude",
+                       "long_name": "station_long_name",
+                       "height_station_masl": "station_height_masl"}
+
+    if not network:
+        network = site_params[site].keys()[0]
+
+    attributes = {}
+    if site in site_params:
+        for attr in attributes_list:
+            if attr in site_params[site][network]:
+                attr_key = attributes_list[attr] 
+
+                attributes[attr_key] = site_params[site][network][attr]
+
+    return attributes
+       
+    
+
+
+def _get_datapath(filename):
+    """ Returns the correct path to JSON files used for assigning attributes
+
+        Args:
+            filename (str): Name of JSON file
+        Returns:
+            pathlib.Path: Path of file
+    """
+    from pathlib import Path
+
+    filename = str(filename)
+
+    return Path(__file__).resolve().parent.joinpath(f"../Data/{filename}")

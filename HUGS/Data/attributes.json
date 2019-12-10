@@ -1,4 +1,32 @@
 {
+    "unit_species": {
+        "CO2": "1e-6",
+        "CH4": "1e-9",
+        "C2H6": "1e-9",
+        "N2O": "1e-9",
+        "CO": "1e-9",
+        "DCH4C13": "1",
+        "DCH4D": "1",
+        "DCO2C13": "1",
+        "DCO2C14": "1",
+        "DO2N2": "1",
+        "APO": "1"
+    },
+    "unit_species_long": {
+        "DCH4C13": "permil",
+        "DCH4D": "permil",
+        "DCO2C13": "permil",
+        "DCO2C14": "permil",
+        "DO2N2": "per meg",
+        "APO": "per meg"
+    },
+    "unit_interpret": {
+        "ppm": "1e-6",
+        "ppb": "1e-9",
+        "ppt": "1e-12",
+        "ppq": "1e-15",
+        "else": "unknown"
+    },
     "species_translation": {
         "CO2": {"chem": "co2", "name":"carbon_dioxide"},
         "CH4": {"chem": "ch4", "name":"methane"},
