@@ -1,0 +1,32 @@
+{
+    "species_translation": {
+        "CO2": {"chem": "co2", "name":"carbon_dioxide"},
+        "CH4": {"chem": "ch4", "name":"methane"},
+        "ETHANE": {"chem": "c2h6", "name":"ethane"},
+        "PROPANE": {"chem": "c3h8", "name":"propane"},
+        "C-PROPANE": {"chem": "cc3h8", "name":"cpropane"},
+        "BENZENE": {"chem": "c6h6", "name":"benzene"},
+        "TOLUENE": {"chem": "c6h5ch3", "name":"methylbenzene"},
+        "ETHENE": {"chem": "c2f4", "name":"ethene"},
+        "ETHYNE": {"chem": "c2h2", "name":"ethyne"},
+        "N2O": {"chem": "n2o", "name":"nitrous_oxide"},
+        "CO": {"chem": "co", "name":"carbon_monoxide"},
+        "H-1211": {"chem": "halon1211", "name":"halon1211"},
+        "H-1301": {"chem": "halon1301", "name":"halon1301"},
+        "H-2402": {"chem": "halon2402", "name":"halon2402"},
+        "PCE": {"chem": "c2cl4", "name":"tetrachloroethylene"},
+        "TCE": {"chem": "c2hcl3", "name":"trichloroethylene"},
+        "PFC-116": {"chem": "c2f6", "name":"hexafluoroethane"},
+        "PFC-218": {"chem": "c3f8", "name":"octafluoropropane"},
+        "PFC-318": {"chem": "c4f8", "name":"cyclooctafluorobutane"},
+        "F-113": {"chem": "cfc113", "name":"cfc113"},
+        "H2_PDD": {"chem": "h2", "name":"hydrogen"},
+        "NE_PDD": {"chem": "Ne", "name":"neon"},
+        "DO2N2": {"chem": "do2n2", "name":"ratio_of_oxygen_to_nitrogen"},
+        "DCH4C13": {"chem": "dch4c13", "name":"delta_ch4_c13"},
+        "DCH4D": {"chem": "dch4d", "name":"delta_ch4_d"},
+        "DCO2C13": {"chem": "dco2c13", "name":"delta_co2_c13"},
+        "DCO2C14": {"chem": "dco2c14", "name":"delta_co2_c14"},
+        "APO": {"chem": "apo", "name":"atmospheric_potential_oxygen"}
+    }
+}

@@ -173,7 +173,6 @@ class Datasource:
                 overwrite (bool, default=False): Overwrite existing data
                 None
         """
-        from pandas import Grouper
         from HUGS.Processing import get_split_frequency
         from xarray import Dataset
 
@@ -214,9 +213,6 @@ class Datasource:
         self._data_type = "timeseries"
         # Use daterange() to update the recorded values
         self.update_daterange()
-
-
-    
 
     def add_footprint_data(self, metadata, data, overwrite=False):
         """ Add footprint data
