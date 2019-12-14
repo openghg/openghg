@@ -113,9 +113,12 @@ def attributes(ds, species, site, network=None, global_attributes=None, units=No
         sp_long = f"mole_fraction_of_{species_label}_in_air"
 
     ancillary_variables = []
+
+    matched_keys = [var for var in ds.variables if species_lower in var.lower()]
     
     for key in ds.variables:
-        if species in key:
+        key = key.lower()
+        if species_lower in key:
             # Standard name attribute
             #ds[key].attrs["standard_name"]=key.replace(species_out, sp_long)
             ds[key].attrs["long_name"] = key.replace(species_label, sp_long)
@@ -161,21 +164,17 @@ def attributes(ds, species, site, network=None, global_attributes=None, units=No
 
     # Set time encoding
     # Check if there are duplicate time stamps
-    
-    # See this https://github.com/pydata/xarray/issues/2108
-    # if np.unique(ds.time):
-    
-    ####################
-    # Got to here
-    ####################
 
+    # I feel there should be a more pandas way of doing this
+    # but xarray doesn't currently have a duplicates method
+    # See this https://github.com/pydata/xarray/issues/2108
     if len(set(ds.time.values)) < len(ds.time.values):
         print("WARNING. Dupliate time stamps")
 
-    first_year = str(ds.time.to_pandas().index.to_pydatetime()[0].year)
+    first_year = pd.Timestamp(ds.time[0].values).year
 
-    ds.time.encoding = {"units": "seconds since " + \
-                        first_year + "-01-01 00:00:00"}
+    ds.time.encoding = {"units": f"seconds since {str(first_year)}-01-01 00:00:00"}
+
     ds.time.attrs["label"] = "left"
     ds.time.attrs["comment"] = "Time stamp corresponds to beginning of sampling period. " + \
                                "Time since midnight UTC of reference date. " + \
