@@ -24,10 +24,6 @@ class CRDS:
         # Holds parameters used for writing attributes to Datasets
         self._crds_params = {}
 
-      
-
-
-
     def is_null(self):
         """ Check if this is a null object
 
@@ -277,7 +273,6 @@ class CRDS:
         from pandas import read_csv as _read_csv
         from pandas import datetime as _pd_datetime
         from pandas import NaT as _pd_NaT
-        from uuid import uuid4 as _uuid4
 
         from HUGS.Processing import get_attributes
         from HUGS.Processing import read_metadata
@@ -291,9 +286,7 @@ class CRDS:
 
         data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"],
                             parse_dates=[[0,1]], date_parser=parse_date)
-        data.index.name = "Datetime"
-
-        # This may be a bit fragile as it'll only give us (usually) the lowercase site code
+        data.index.name = "time"
 
         filename = data_filepath.name
         source_name = filename.stem
@@ -308,16 +301,13 @@ class CRDS:
         # Get the number of gases in dataframe and number of columns of data present for each gas
         n_gases, n_cols = self._gas_info(data=data)
 
-        # # TODO - at the moment just create a new UUID for each gas
-        # datasource_ids = [_uuid4() for gas in range(n_gases)]
-
         header = data.head(2)
         skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
         header_rows = 2
         # Create metadata here
         metadata = read_metadata(filepath=data_filepath, data=data, data_type="CRDS")
-
+        # This dictionary is used to store the gas data and its associated metadata
         combined_data = {}
 
         for n in range(n_gases):
@@ -344,28 +334,17 @@ class CRDS:
 
             site_attributes = self.site_attributes(site=site, inlet=inlet)
 
-            ds_sp = attributes(ds_sp, sp, site.upper(),
-                               network=network,
-                               global_attributes=global_attributes,
-                               scale=scales[sp],
-                               sampling_period=60,
-                               date_range=date_range)
-
-            # gas_data = get_attributes(ds=gas_data, species=species, site=site, global_attributes=site_attributes,
-
+            # Write attributes to the new Dataset
             gas_data = get_attributes(ds=gas_data, species=species, site=site, network=network, 
-                                    global_attributes=site_attributes, sampling_period=60))
-                                    
+                                        global_attributes=site_attributes, sampling_period=60)
 
-
-            
+            # Here we could pull out the Dataset attributes and store them as JSON as well?
+                       
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
             species_metadata["species"] = species
 
             combined_data[species] = {"metadata": species_metadata, "data": gas_data}
-
-            # data_list.append((species, species_metadata, gas_data))
 
         return combined_data
 
