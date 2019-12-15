@@ -23,6 +23,9 @@ class CRDS:
         self._file_hashes = {}
         # Holds parameters used for writing attributes to Datasets
         self._crds_params = {}
+        
+        # Sampling period of CRDS data in seconds
+        self._sampling_period = 60
 
     def is_null(self):
         """ Check if this is a null object
@@ -185,7 +188,7 @@ class CRDS:
 
 
     @staticmethod
-    def read_file(data_filepath, source_name, source_id=None, overwrite=False):
+    def read_file(data_filepath, source_name, site=None, source_id=None, overwrite=False):
         """ Creates a CRDS object holding data stored within Datasources
 
             TODO - currently only works with a single Datasource
@@ -218,7 +221,14 @@ class CRDS:
         if not source_name:
             source_name = filename.stem
 
-        gas_data = crds.read_data(data_filepath=data_filepath)
+        if not site:
+            site = source_name.split(".")[0]
+
+        gas_data = crds.read_data(data_filepath=data_filepath, site=site)
+
+        # Assign attributes to data here makes it a lot easier to test
+        gas_data = crds.assign_attributes(data=gas_data)
+
 
         # Check to see if we've had data from these Datasources before
         # TODO - currently just using a simple naming system here - update to use 
@@ -256,7 +266,7 @@ class CRDS:
 
         return datasource_uuids
 
-    def read_data(self, data_filepath):
+    def read_data(self, data_filepath, site):
         """ Separates the gases stored in the dataframe in 
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
@@ -274,8 +284,7 @@ class CRDS:
         from pandas import datetime as _pd_datetime
         from pandas import NaT as _pd_NaT
 
-        from HUGS.Processing import get_attributes
-        from HUGS.Processing import read_metadata
+        from HUGS.Processing import get_attributes, read_metadata
 
         # Function to parse the datetime format found in the datafile
         def parse_date(date):
@@ -289,7 +298,8 @@ class CRDS:
         data.index.name = "time"
 
         filename = data_filepath.name
-        source_name = filename.stem
+        # At the moment we're using the filename as the source name
+        source_name = data_filepath.stem
         # -1 here as we've already removed the file extension
         # As we're not processing a list of datafiles here we'll only have one inlet
         inlet = source_name.split(".")[-1]
@@ -334,19 +344,65 @@ class CRDS:
 
             site_attributes = self.site_attributes(site=site, inlet=inlet)
 
-            # Write attributes to the new Dataset
-            gas_data = get_attributes(ds=gas_data, species=species, site=site, network=network, 
-                                        global_attributes=site_attributes, sampling_period=60)
+            # # Write attributes to the new Dataset
+            # gas_data = get_attributes(ds=gas_data, species=species, site=site, network=network, 
+            #                             global_attributes=site_attributes, sampling_period=self._sampling_period)
 
-            # Here we could pull out the Dataset attributes and store them as JSON as well?
-                       
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
             species_metadata["species"] = species
 
-            combined_data[species] = {"metadata": species_metadata, "data": gas_data}
+            combined_data[species] = {"metadata": species_metadata, "data": gas_data, "attributes": site_attributes}
 
         return combined_data
+
+    def assign_attributes(self, data, site, network=None):
+        """ Assign attributes to the data we've processed
+
+            Args:
+                combined_data (dict): Dictionary containing data, metadata and attributes
+            Returns:
+                dict: Dictionary of combined data with correct attributes assigned to Datasets
+        """
+        from HUGS.Processing import get_attributes
+
+        for species in data:
+            metadata = data[species]["metadata"]
+            site_attributes = data[species]["attributes"]
+
+            # TODO - save Dataset attributes to metadata for storage within Datasource
+
+            data[species]["data"] = get_attributes(ds=data[species]["data"], species=species, site=site, network=network,
+                                                            global_attributes=site_attributes, sampling_period=self._sampling_period)
+
+        return data
+
+
+    def acrg_assign_attributes(self, data, site, network=None):
+        """ Assign attributes to the data we've processed
+
+            Args:
+                combined_data (dict): Dictionary containing data, metadata and attributes
+            Returns:
+                dict: Dictionary of combined data with correct attributes assigned to Datasets
+        """
+        from HUGS.Processing import attributes
+        
+        for species in data:
+            metadata = data[species]["metadata"]
+            site_attributes = data[species]["attributes"]
+
+            # TODO - save Dataset attributes to metadata for storage within Datasource
+
+            # data[species]["data"] = get_attributes(ds=data[species]["data"], species=species, site=site, network=network,
+            #                                                 global_attributes=site_attributes, sampling_period=self._sampling_period)
+
+            ds = attributes(ds=data[species]["data"], species=species, site=site)
+
+            
+
+        return data
+
 
     def site_attributes(self, site, inlet):
         """ Gets the site specific attributes for writing to Datsets
@@ -358,13 +414,16 @@ class CRDS:
                 dict: Dictionaty of
         """
         if not self._crds_params:
+            from json import load
             from HUGS.Util import get_datapath
+
             filepath = get_datapath(filename="process_gcwerks_parameters.json")
 
             with open(filepath, "r") as f:
-                self._crds_params = json.load(f)
+                data = load(f)
+                self._crds_params = data["CRDS"]
 
-        attributes = self._crds_params[site]["global_attributes"]
+        attributes = self._crds_params[site.upper()]["global_attributes"]
         attributes["inlet_height_magl"] = inlet
         attributes["comment"] = self._crds_params["comment"]
 

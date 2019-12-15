@@ -1,8 +1,7 @@
 __all__ = ["get_attributes"]
 
-
 def get_attributes(ds, species, site, network=None, global_attributes=None, units=None, sampling_period=None,
-               date_range=None):
+                    date_range=None):
     """
     Format attributes for netCDF file
     Attributes of xarray DataSet are modified, and variable names are changed
@@ -40,6 +39,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
             (e.g. ["1900-01-01", "2010-01-01"])
     """
     import datetime
+    from json import load as json_load
     from pathlib import Path
     from pandas import Timestamp as pd_Timestamp
     from HUGS.Util import get_datapath
@@ -52,7 +52,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     data_path = get_datapath(filename=attributes_filename)
     
     with open(data_path, "r") as f:
-        data = json.load(f)
+        data = json_load(f)
 
         species_translator = data["species_translation"]
         unit_species = data["unit_species"]
@@ -116,7 +116,8 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     elif species_upper == "RN":
         sp_long = "radioactivity_concentration_of_222Rn_in_air"
     elif species_upper in species_translator:
-        sp_long = f"mole_fraction_of_{species_translator[species_upper]["name"]}_in_air"
+        name = species_translator[species_upper]["name"]
+        sp_long = f"mole_fraction_of_{name}_in_air"
     else:
         sp_long = f"mole_fraction_of_{species_label}_in_air"
 
@@ -128,7 +129,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
         key = key.lower()
         if species_lower in key:
             # Standard name attribute
-            #ds[key].attrs["standard_name"]=key.replace(species_out, sp_long)
+            #ds[key].attrs["standard_name"]=key.replace(species_label, sp_long)
             ds[key].attrs["long_name"] = key.replace(species_label, sp_long)
 
             # If units are required for variable, add attribute
@@ -149,26 +150,32 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
             if key != species_label:
                 ancillary_variables.append(key)
 
+    ds[species_label].attrs["ancilliary_variables"] = ", ".join(ancillary_variables)
+    
+    print(list(ds.variables))
+
+    return False
     # Write ancilliary variable list
-    ds[species_out].attrs["ancilliary_variables"] = ", ".join(ancillary_variables)
+
 
     # Add quality flag attributes
     quality_flags = [key for key in ds.variables if " status_flag" in key]
 
     for key in quality_flags:
         ds[key] = ds[key].astype(int)
+        long_name = ds[species_label].attrs["long_name"]
         ds[key].attrs = {"flag_meaning":
                         "0 = unflagged, 1 = flagged",
-                        "long_name": f"{ds[species_label].attrs["long_name"]} status_flag"}
+                        "long_name": f"{long_name} status_flag"}
 
     # Add integration flag attributes
     integration_flags = [key for key in ds.variables if " integration_flag" in key]
 
     for key in integration_flags:
         ds[key] = ds[key].astype(int)
-        
+        long_name = ds[species_label].attrs["long_name"]
         ds[key].attrs = {"flag_meaning": "0 = area, 1 = height",
-                        "standard_name": f"{ds[species_label].attrs["long_name"]} integration_flag",
+                        "standard_name": f"{long_name} integration_flag",
                         "comment": "GC peak integration method (by height or by area). Does not indicate data quality"}
 
     # Set time encoding
@@ -208,15 +215,19 @@ def _site_info_attributes(site, network=None):
             dict: Dictionary of site attributes
     """
     from HUGS.Util import get_datapath
+    from json import load as json_load
 
     site = site.upper()
-    network = network.upper()
+
+    if network:
+        network = network.upper()
+
     # Read site info file
     data_filename = "acrg_site_info.json"
     filepath = get_datapath(filename=data_filename)
 
-    with open(site_info_file, "r") as f:
-        site_params = json.load(f)
+    with open(filepath, "r") as f:
+        site_params = json_load(f)
 
     attributes_dict = {"longitude": "station_longitude",
                        "latitude": "station_latitude",
@@ -224,7 +235,7 @@ def _site_info_attributes(site, network=None):
                        "height_station_masl": "station_height_masl"}
 
     if not network:
-        network = site_params[site].keys()[0]
+        network = list(site_params[site].keys())[0]
 
     attributes = {}
     if site in site_params:

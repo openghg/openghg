@@ -10,3 +10,4 @@ from ._recombination import *
 from ._enums import *
 from ._process import *
 from ._attributes import *
+from ._acrg_attributes import *

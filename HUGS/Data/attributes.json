@@ -32,7 +32,7 @@
         "CH4": "NOAA-2004A",
         "N2O": "SIO-98",
         "CO": "Unknown"
-    }
+    },
     "species_translation": {
         "CO2": {"chem": "co2", "name":"carbon_dioxide"},
         "CH4": {"chem": "ch4", "name":"methane"},
