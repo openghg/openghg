@@ -4,7 +4,7 @@
 
 __all__ = ["url_join", "get_daterange_str", "get_datetime_epoch", 
             "get_datetime_now", "get_datetime", "unanimous", "load_object",
-            "hash_file", "timestamp_tzaware"]
+            "hash_file", "timestamp_tzaware", "get_datapath"]
 
 def url_join(*args):
     """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
@@ -168,4 +168,16 @@ def timestamp_tzaware(timestamp):
         return timestamp.tz_convert(tz="UTC")
 
         
+def get_datapath(filename):
+    """ Returns the correct path to JSON files used for assigning attributes
 
+        Args:
+            filename (str): Name of JSON file
+        Returns:
+            pathlib.Path: Path of file
+    """
+    from pathlib import Path
+
+    filename = str(filename)
+
+    return Path(__file__).resolve().parent.joinpath(f"../Data/{filename}")

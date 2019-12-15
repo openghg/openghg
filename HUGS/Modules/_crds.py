@@ -21,6 +21,12 @@ class CRDS:
         self._datasource_uuids = {}
         # Hashes of previously uploaded files
         self._file_hashes = {}
+        # Holds parameters used for writing attributes to Datasets
+        self._crds_params = {}
+
+      
+
+
 
     def is_null(self):
         """ Check if this is a null object
@@ -213,10 +219,10 @@ class CRDS:
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
 
-        gas_data = crds.read_data(data_filepath=data_filepath)
-
         if not source_name:
             source_name = filename.stem
+
+        gas_data = crds.read_data(data_filepath=data_filepath)
 
         # Check to see if we've had data from these Datasources before
         # TODO - currently just using a simple naming system here - update to use 
@@ -273,6 +279,7 @@ class CRDS:
         from pandas import NaT as _pd_NaT
         from uuid import uuid4 as _uuid4
 
+        from HUGS.Processing import get_attributes
         from HUGS.Processing import read_metadata
 
         # Function to parse the datetime format found in the datafile
@@ -286,12 +293,20 @@ class CRDS:
                             parse_dates=[[0,1]], date_parser=parse_date)
         data.index.name = "Datetime"
 
+        # This may be a bit fragile as it'll only give us (usually) the lowercase site code
+
+        filename = data_filepath.name
+        source_name = filename.stem
+        # -1 here as we've already removed the file extension
+        # As we're not processing a list of datafiles here we'll only have one inlet
+        inlet = source_name.split(".")[-1]
+
         # Drop any rows with NaNs
         # This is now done before creating metadata
         data = data.dropna(axis="rows", how="any")
 
         # Get the number of gases in dataframe and number of columns of data present for each gas
-        n_gases, n_cols = self.gas_info(data=data)
+        n_gases, n_cols = self._gas_info(data=data)
 
         # # TODO - at the moment just create a new UUID for each gas
         # datasource_ids = [_uuid4() for gas in range(n_gases)]
@@ -302,8 +317,6 @@ class CRDS:
         header_rows = 2
         # Create metadata here
         metadata = read_metadata(filepath=data_filepath, data=data, data_type="CRDS")
-
-        # data_list = []
 
         combined_data = {}
 
@@ -325,6 +338,27 @@ class CRDS:
             # Cast data to float64 / double
             gas_data = gas_data.astype("float64")
             
+            # Here we can convert the Dataframe to a Dataset and then write the attributes
+            # Load in the JSON we need to process attributes
+            gas_data = gas_data.to_xarray()
+
+            site_attributes = self.site_attributes(site=site, inlet=inlet)
+
+            ds_sp = attributes(ds_sp, sp, site.upper(),
+                               network=network,
+                               global_attributes=global_attributes,
+                               scale=scales[sp],
+                               sampling_period=60,
+                               date_range=date_range)
+
+            # gas_data = get_attributes(ds=gas_data, species=species, site=site, global_attributes=site_attributes,
+
+            gas_data = get_attributes(ds=gas_data, species=species, site=site, network=network, 
+                                    global_attributes=site_attributes, sampling_period=60))
+                                    
+
+
+            
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
             species_metadata["species"] = species
@@ -335,7 +369,29 @@ class CRDS:
 
         return combined_data
 
-    def gas_info(self, data):
+    def site_attributes(self, site, inlet):
+        """ Gets the site specific attributes for writing to Datsets
+
+            Args:
+                site (str): Site name
+                inlet (str): Inlet (example: 108m)
+            Returns:
+                dict: Dictionaty of
+        """
+        if not self._crds_params:
+            from HUGS.Util import get_datapath
+            filepath = get_datapath(filename="process_gcwerks_parameters.json")
+
+            with open(filepath, "r") as f:
+                self._crds_params = json.load(f)
+
+        attributes = self._crds_params[site]["global_attributes"]
+        attributes["inlet_height_magl"] = inlet
+        attributes["comment"] = self._crds_params["comment"]
+
+        return attributes
+
+    def _gas_info(self, data):
             """ Returns the number of columns of data for each gas
                 that is present in the dataframe
             
@@ -345,7 +401,7 @@ class CRDS:
                     tuple (int, int): Number of gases, number of
                     columns of data for each gas
             """
-            from HUGS.Util import unanimous as _unanimous
+            from HUGS.Util import unanimous
             # Slice the dataframe
             head_row = data.head(1)
 
@@ -357,7 +413,7 @@ class CRDS:
                     gases[s] = gases.get(s, 0) + 1
 
             # Check that we have the same number of columns for each gas
-            if not _unanimous(gases):
+            if not unanimous(gases):
                 raise ValueError("Each gas does not have the same number of columns. Please ensure data"
                                  "is of the CRDS type expected by this module")
 

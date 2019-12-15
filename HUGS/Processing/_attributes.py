@@ -1,9 +1,8 @@
 __all__ = ["get_attributes"]
 
 
-
-def attributes(ds, species, site, network=None, global_attributes=None, units=None, scale=None, sampling_period=None,
-               date_range = None):
+def get_attributes(ds, species, site, network=None, global_attributes=None, units=None, sampling_period=None,
+               date_range=None):
     """
     Format attributes for netCDF file
     Attributes of xarray DataSet are modified, and variable names are changed
@@ -42,19 +41,24 @@ def attributes(ds, species, site, network=None, global_attributes=None, units=No
     """
     import datetime
     from pathlib import Path
+    from pandas import Timestamp as pd_Timestamp
+    from HUGS.Util import get_datapath
+
     # Rename all columns to lower case! Could this cause problems?
     to_lower = {var: var.lower() for var in ds.variables}
     ds = ds.rename(to_lower)
 
-    data_path = Path(__file__).resolve().parent.joinpath("../Data/attributes.json")
+    attributes_filename = "attributes.json"
+    data_path = get_datapath(filename=attributes_filename)
     
     with open(data_path, "r") as f:
-            data = json.load(f)
+        data = json.load(f)
 
-            species_translator = data["species_translation"]
-            unit_species = data["unit_species"]
-            unit_species_long = data["unit_species_long"]
-            unit_interpret = data["unit_interpret"]
+        species_translator = data["species_translation"]
+        unit_species = data["unit_species"]
+        unit_species_long = data["unit_species_long"]
+        unit_interpret = data["unit_interpret"]
+        species_scales = data["species_scales"]
 
     species_upper = species.upper()
     species_lower = species.lower()
@@ -81,18 +85,22 @@ def attributes(ds, species, site, network=None, global_attributes=None, units=No
                                     "Source": "In situ measurements of air",
                                     "Conventions": "CF-1.6"}
 
-    if global_attributes is None:
-        global_attributes = global_attributes_default
-    else:
+    if global_attributes:
         global_attributes.update(global_attributes_default)
-
-    global_attributes["File created"] = str(Timestamp.now(tz="UTC"))
+    else:
+        global_attributes = global_attributes_default
+        
+    global_attributes["File created"] = str(pd_Timestamp.now(tz="UTC"))
     global_attributes["Processed by"] = "auto@hugs-cloud.com"
     global_attributes["species"] = species_label
-    if scale:
-        global_attributes["Calibration_scale"] = scale
+
+    # Scales used for specific species
+    if species_upper in species_scales:
+        scale = species_scales[species_upper]
     else:
-        global_attributes["Calibration_scale"] = "unknown"
+        scale = "unknown"
+
+    global_attributes["Calibration_scale"] = scale
 
     # Update the Dataset attributes
     ds.attrs.update(global_attributes)
@@ -150,16 +158,17 @@ def attributes(ds, species, site, network=None, global_attributes=None, units=No
     for key in quality_flags:
         ds[key] = ds[key].astype(int)
         ds[key].attrs = {"flag_meaning":
-                              "0 = unflagged, 1 = flagged",
-                              "long_name": f"{ds[species_label].attrs["long_name"]} status_flag"}
+                        "0 = unflagged, 1 = flagged",
+                        "long_name": f"{ds[species_label].attrs["long_name"]} status_flag"}
 
     # Add integration flag attributes
     integration_flags = [key for key in ds.variables if " integration_flag" in key]
 
     for key in integration_flags:
         ds[key] = ds[key].astype(int)
+        
         ds[key].attrs = {"flag_meaning": "0 = area, 1 = height",
-                        "standard_name": f"{ds[species_out].attrs["long_name"]} integration_flag",
+                        "standard_name": f"{ds[species_label].attrs["long_name"]} integration_flag",
                         "comment": "GC peak integration method (by height or by area). Does not indicate data quality"}
 
     # Set time encoding
@@ -171,7 +180,7 @@ def attributes(ds, species, site, network=None, global_attributes=None, units=No
     if len(set(ds.time.values)) < len(ds.time.values):
         print("WARNING. Dupliate time stamps")
 
-    first_year = pd.Timestamp(ds.time[0].values).year
+    first_year = pd_Timestamp(ds.time[0].values).year
 
     ds.time.encoding = {"units": f"seconds since {str(first_year)}-01-01 00:00:00"}
 
@@ -183,7 +192,7 @@ def attributes(ds, species, site, network=None, global_attributes=None, units=No
         ds.time.attrs["sampling_period_seconds"] = sampling_period
 
     # If a date range is specified, slice dataset
-    if date_range != None:
+    if date_range:
         ds = ds.loc[dict(time = slice(*date_range))]
 
     return ds
@@ -198,16 +207,18 @@ def _site_info_attributes(site, network=None):
         Returns:
             dict: Dictionary of site attributes
     """
+    from HUGS.Util import get_datapath
+
     site = site.upper()
     network = network.upper()
     # Read site info file
     data_filename = "acrg_site_info.json"
-    filepath = _get_datapath(filename=data_filename)
+    filepath = get_datapath(filename=data_filename)
 
     with open(site_info_file, "r") as f:
         site_params = json.load(f)
 
-    attributes_list = {"longitude": "station_longitude",
+    attributes_dict = {"longitude": "station_longitude",
                        "latitude": "station_latitude",
                        "long_name": "station_long_name",
                        "height_station_masl": "station_height_masl"}
@@ -217,27 +228,11 @@ def _site_info_attributes(site, network=None):
 
     attributes = {}
     if site in site_params:
-        for attr in attributes_list:
+        for attr in attributes_dict:
             if attr in site_params[site][network]:
-                attr_key = attributes_list[attr] 
+                attr_key = attributes_dict[attr]
 
                 attributes[attr_key] = site_params[site][network][attr]
 
     return attributes
-       
     
-
-
-def _get_datapath(filename):
-    """ Returns the correct path to JSON files used for assigning attributes
-
-        Args:
-            filename (str): Name of JSON file
-        Returns:
-            pathlib.Path: Path of file
-    """
-    from pathlib import Path
-
-    filename = str(filename)
-
-    return Path(__file__).resolve().parent.joinpath(f"../Data/{filename}")
