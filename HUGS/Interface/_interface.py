@@ -880,8 +880,6 @@ class Interface:
         for filename in data:
             binary_content = data[filename]["content"]
             # Write data to temporary path for the moment
-            tmpdir = tempfile.TemporaryDirectory()
-
             with tempfile.TemporaryDirectory() as tmpdir:
                 filepath = Path(tmpdir).joinpath(filename)
                 with open(filepath, "wb") as f:

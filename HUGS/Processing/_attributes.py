@@ -1,10 +1,11 @@
 __all__ = ["get_attributes"]
 
-def get_attributes(ds, species, site, network=None, global_attributes=None, units=None, sampling_period=None,
-                    date_range=None):
-    """
-    Format attributes for netCDF file
-    Attributes of xarray DataSet are modified, and variable names are changed
+def get_attributes(ds, species, site, network=None, global_attributes=None, units=None, sampling_period=None, date_range=None):
+    """ 
+    This function writes attributes to an xarray.Dataset so that they conform with 
+    the CF Convention v1.7
+    
+    Attributes of the xarray DataSet are modified, and variable names are changed
 
     If the species is a standard mole fraction then either:
         - species name will used in lower case in the file and variable names
@@ -22,9 +23,9 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
             dictionary
 
     Args:
-        ds (xarray dataset): Should contain variables such as "ch4", "ch4 repeatability".
+        ds (xarray.Dataset): Should contain variables such as "ch4", "ch4 repeatability".
             Must have a "time" dimension.
-        species (string): Species name. e.g. "CH4", "HFC-134a", "dCH4C13"
+        species (str): Species name. e.g. "CH4", "HFC-134a", "dCH4C13"
         site (string): Three-letter site code
 
         global_attribuates (dict, optional): Dictionary containing any info you want to
@@ -40,13 +41,19 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     """
     import datetime
     from json import load as json_load
-    from pathlib import Path
     from pandas import Timestamp as pd_Timestamp
+    from pathlib import Path
     from HUGS.Util import get_datapath
+    from xarray import Dataset as xr_Dataset
 
-    # Rename all columns to lower case! Could this cause problems?
-    to_lower = {var: var.lower() for var in ds.variables}
-    ds = ds.rename(to_lower)
+    if not isinstance(ds, xr_Dataset):
+        raise TypeError("This function only accepts xarray Datasets")
+
+    # Current CF Conventions (v1.7) demand that valid variable names
+    # begin with a letter and be composed of letters, digits and underscores
+    # Here variable names are also made lowercase to enable easier matching below
+    to_underscores = {var: var.lower().replace(" ", "_") for var in ds.variables}
+    ds = ds.rename(to_underscores)
 
     attributes_filename = "attributes.json"
     data_path = get_datapath(filename=attributes_filename)
@@ -54,11 +61,11 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     with open(data_path, "r") as f:
         data = json_load(f)
 
-        species_translator = data["species_translation"]
-        unit_species = data["unit_species"]
-        unit_species_long = data["unit_species_long"]
-        unit_interpret = data["unit_interpret"]
-        species_scales = data["species_scales"]
+    species_translator = data["species_translation"]
+    unit_species = data["unit_species"]
+    unit_species_long = data["unit_species_long"]
+    unit_interpret = data["unit_interpret"]
+    species_scales = data["species_scales"]
 
     species_upper = species.upper()
     species_lower = species.lower()
@@ -124,16 +131,20 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     ancillary_variables = []
 
     matched_keys = [var for var in ds.variables if species_lower in var.lower()]
+
+    # Write units as attributes to variables containing any of these
+    match_words = ["variability", "repeatability", "stdev", "count"]
     
     for key in ds.variables:
         key = key.lower()
         if species_lower in key:
             # Standard name attribute
-            #ds[key].attrs["standard_name"]=key.replace(species_label, sp_long)
+            # ds[key].attrs["standard_name"]=key.replace(species_label, sp_long)
             ds[key].attrs["long_name"] = key.replace(species_label, sp_long)
 
             # If units are required for variable, add attribute
-            if key == species_label or "variability" in key or "repeatability" in key:
+            # if key == species_label or "variability" in key or "repeatability" in key:
+            if key == species_label or any(word in key for word in match_words):
                 if units:
                     if units in unit_interpret:
                         ds[key].attrs["units"] = unit_interpret[units]
@@ -150,16 +161,13 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
             if key != species_label:
                 ancillary_variables.append(key)
 
-    ds[species_label].attrs["ancilliary_variables"] = ", ".join(ancillary_variables)
-    
-    print(list(ds.variables))
-
-    return False
+    # TODO - for the moment skip this step - check status of ancilliary vairables in standard
     # Write ancilliary variable list
-
+    # ds[species_label].attrs["ancilliary_variables"] = ", ".join(ancillary_variables)
 
     # Add quality flag attributes
-    quality_flags = [key for key in ds.variables if " status_flag" in key]
+    # NOTE - I've removed the whitespace before status_flag and integration_flag here
+    quality_flags = [key for key in ds.variables if "status_flag" in key]
 
     for key in quality_flags:
         ds[key] = ds[key].astype(int)
@@ -169,7 +177,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
                         "long_name": f"{long_name} status_flag"}
 
     # Add integration flag attributes
-    integration_flags = [key for key in ds.variables if " integration_flag" in key]
+    integration_flags = [key for key in ds.variables if "integration_flag" in key]
 
     for key in integration_flags:
         ds[key] = ds[key].astype(int)
@@ -191,12 +199,24 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
 
     ds.time.encoding = {"units": f"seconds since {str(first_year)}-01-01 00:00:00"}
 
-    ds.time.attrs["label"] = "left"
-    ds.time.attrs["comment"] = "Time stamp corresponds to beginning of sampling period. " + \
-                               "Time since midnight UTC of reference date. " + \
-                               "Note that sampling periods are approximate."
+    time_attributes = {}
+    time_attributes["label"] = "left"
+    time_attributes["standard_name"] = "time"
+    time_attributes["comment"] = "Time stamp corresponds to beginning of sampling period. " + \
+                                "Time since midnight UTC of reference date. " + \
+                                "Note that sampling periods are approximate."
+
     if sampling_period:
-        ds.time.attrs["sampling_period_seconds"] = sampling_period
+        time_attributes["sampling_period_seconds"] = sampling_period
+
+    ds.time.attrs.update(time_attributes)
+
+    # ds.time.attrs["label"] = "left"
+    # ds.time.attrs["comment"] = "Time stamp corresponds to beginning of sampling period. " + \
+    #                            "Time since midnight UTC of reference date. " + \
+    #                            "Note that sampling periods are approximate."
+    # if sampling_period:
+    #     ds.time.attrs["sampling_period_seconds"] = sampling_period
 
     # If a date range is specified, slice dataset
     if date_range:
@@ -233,6 +253,9 @@ def _site_info_attributes(site, network=None):
                        "latitude": "station_latitude",
                        "long_name": "station_long_name",
                        "height_station_masl": "station_height_masl"}
+
+    if site not in site_params:
+        raise ValueError("Invalid site passed. Please use a valid site code such as BSD for Bilsdale")
 
     if not network:
         network = list(site_params[site].keys())[0]
