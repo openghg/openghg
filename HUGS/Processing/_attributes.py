@@ -27,13 +27,13 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
             Must have a "time" dimension.
         species (str): Species name. e.g. "CH4", "HFC-134a", "dCH4C13"
         site (string): Three-letter site code
-
-        global_attribuates (dict, optional): Dictionary containing any info you want to
+        network (str, default=None): Network site is associated with
+        global_attribuates (dict, default=None): Dictionary containing any info you want to
             add to the file header (e.g. {"Contact": "Matt Rigby"})
-        units (string, optional): This routine will try to guess the units
+        units (str, default=None): This routine will try to guess the units
             unless this is specified. Options are in units_interpret
-        scale (string, optional): Calibration scale for file header.
-        sampling_period (int, optional): Number of seconds for which air
+        scale (str, default=None): Calibration scale for file header.
+        sampling_period (int, default=None): Number of seconds for which air
             sample is taken. Only for time variable attribute
         date_range (list of two strings, optional): Start and end date for output
             If you only want an end date, just put a very early start date
@@ -210,13 +210,6 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
         time_attributes["sampling_period_seconds"] = sampling_period
 
     ds.time.attrs.update(time_attributes)
-
-    # ds.time.attrs["label"] = "left"
-    # ds.time.attrs["comment"] = "Time stamp corresponds to beginning of sampling period. " + \
-    #                            "Time since midnight UTC of reference date. " + \
-    #                            "Note that sampling periods are approximate."
-    # if sampling_period:
-    #     ds.time.attrs["sampling_period_seconds"] = sampling_period
 
     # If a date range is specified, slice dataset
     if date_range:
