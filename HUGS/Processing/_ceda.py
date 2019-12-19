@@ -1,18 +1,22 @@
 """ This file contains functions used to ensure CEDA compliance
 
 """
-def get_upload_file(filepath=None, site=None, instrument=None, height=None, yaml=False, **kwargs):
+__all__ = ["create_upload_file"]
+
+def create_upload_file(filepath=None, site=None, instrument=None, height=None, write_yaml=False, date_range=None):
     """ Creates a JSON (with a yaml extension for CEDA reasons) object 
         for export for a CEDA upload
 
         Args:
-            filepath (str or Path, default=None): Path for file output. If file not
-            site (str): Name of site
-            instrument (str): Name of instrument
-            height (str): Height of instrument
-            date_range (tuple): Start, end Python datetime objects
+            filepath (str or Path, default=None): Path for file output. If file not passed a 
+            dictionary is returned
+            site (str, default=None): Three letter site code (such as BSD for Bilsdale)
+            instrument (str, default=None): Name of instrument
+            height (str, default=None): Height of instrument
+            write_yaml (bool, default=False): If True write to YAML, otherwise JSON file is written
+            date_range (tuple, default=None): Start, end Python datetime objects
         Returns:
-            str: Dictionary object serialised to YAML document
+            dict or None: Dictionary if no filepath is given, otherwise None
     """
     import json
     import yaml
@@ -33,15 +37,23 @@ def get_upload_file(filepath=None, site=None, instrument=None, height=None, yaml
     if not site:
         raise ValueError("Site must be given")
 
+    site = site.upper()
+    
+    # Ensure height is in the format we want
+    height = str(height).lower().replace(" ", "")
+    if not height.endswith("m"):
+        height = f"{height}m"
+
     site_title = ceda_comp[site]["title"]
     site_description = ceda_comp[site]["description"]
+    site_instrument = ceda_comp[site]["instruments"][instrument]
 
     data = {}
     # Lookup the site data in ceda_compliance dictionary for site_description etc
     data["title"] = site_title
     # Get this from a YAML file that has each site saved
     data["description"] = site_description
-    # Similarly load from YAML?
+    # Similarly load from YAML?yaml
     # Where site_authors is a dict containing authors
     data["authors"] = [{"firstname": "HUGS", "surname": "Cloud"},
                        {"firstname": "", "surname": ""},
@@ -50,7 +62,7 @@ def get_upload_file(filepath=None, site=None, instrument=None, height=None, yaml
     # Here we'll have to add in the degree notation?
     data["bbox"] = {"north": ceda_comp[site]["latitude"], "south": "",
                     "east": "", "west": ceda_comp[site]["longitude"]}
-
+    
     data["time_range"] = {"start": "2014-05-02 00:00:00",
                           "end": "2014-31-12 23:00:00"}
 
@@ -63,9 +75,10 @@ def get_upload_file(filepath=None, site=None, instrument=None, height=None, yaml
     data["project"] = {"catalogue_url": ceda_comp[site]["catalogue_url"], "title": site_title, "description": site_description,
                        "PI": {"firstname": "HUGS", "lastname": "Cloud"}, "funder": "NERC", "grant_number": "HUGS_Grant"}
 
-    data["instrument"] = {"catalogue_url": "Instrument url",
-                          "title": "Instrument title",
-                          "description": "Instrument description"}
+    data["instrument"] = {"catalogue_url": site_instrument["catalogue_url"],
+                          "title": site_instrument["title"],
+                          "description": site_instrument["description"],
+                          "height": height}
 
     # This is empty in the examples sent
     data["computation"] = {"catalogue_url": "",
@@ -74,9 +87,11 @@ def get_upload_file(filepath=None, site=None, instrument=None, height=None, yaml
 
     if filepath:
         with open(filepath, "w") as f:
-            if yaml:
+            if write_yaml:
+                print("Writing to yaml")
                 yaml.dump(data, stream=f, indent=4)
             else:
+                print("Writing to JSON")
                 json.dump(data, fp=f, indent=4)
 
         return None
