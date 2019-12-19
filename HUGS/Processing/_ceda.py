@@ -1,7 +1,7 @@
 """ This file contains functions used to ensure CEDA compliance
 
 """
-def get_upload_file(filepath=None, site=None, instrument=None, height=None, **kwargs):
+def get_upload_file(filepath=None, site=None, instrument=None, height=None, yaml=False, **kwargs):
     """ Creates a JSON (with a yaml extension for CEDA reasons) object 
         for export for a CEDA upload
 
@@ -74,7 +74,11 @@ def get_upload_file(filepath=None, site=None, instrument=None, height=None, **kw
 
     if filepath:
         with open(filepath, "w") as f:
-            json.dump(data, fp=f, indent=4)
+            if yaml:
+                yaml.dump(data, stream=f, indent=4)
+            else:
+                json.dump(data, fp=f, indent=4)
+
         return None
     else:
         return data
