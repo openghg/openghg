@@ -31,14 +31,13 @@ def data():
     filepath = Path(filepath)
 
     crds = CRDS.load()
-    combined_data = crds.read_data(data_filepath=filepath)
+    combined_data = crds.read_data(data_filepath=filepath, site="bsd")
     
     return combined_data
 
 @pytest.fixture
 def datasource():
-    return Datasource.create(name="test_name", instrument="test_instrument",
-                                site="test_site", network="test_network")
+    return Datasource(name="test_name", )
 
 @pytest.fixture
 def mock_uuid(monkeypatch):
@@ -59,20 +58,20 @@ def mock_uuid2(monkeypatch):
 
 
 def test_add_data(data):
-    d = Datasource.create(name="test") 
+    d = Datasource(name="test") 
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    assert ch4_data["ch4 count"].iloc[0] == pytest.approx(1960.24)
-    assert ch4_data["ch4 stdev"].iloc[0] == pytest.approx(0.236)
-    assert ch4_data["ch4 n_meas"].iloc[0] == pytest.approx(26.0)
+    assert ch4_data["ch4 count"][0] == pytest.approx(1960.24)
+    assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
+    assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
 
-    assert d._data[0][0]["ch4 count"].iloc[0] == ch4_data["ch4 count"].iloc[0]
-    assert d._data[0][0]["ch4 stdev"].iloc[0] == ch4_data["ch4 stdev"].iloc[0]
-    assert d._data[0][0]["ch4 n_meas"].iloc[0] == ch4_data["ch4 n_meas"].iloc[0]
+    assert d._data[0][0]["ch4 count"].equals(ch4_data["ch4 count"])
+    assert d._data[0][0]["ch4 stdev"].equals(ch4_data["ch4 stdev"])
+    assert d._data[0][0]["ch4 n_meas"].equals(ch4_data["ch4 n_meas"])
 
     datasource_metadata = d.metadata()
 
@@ -81,7 +80,7 @@ def test_add_data(data):
     assert datasource_metadata['instrument'] == 'picarro'
     assert datasource_metadata['port'] == '8'
     assert datasource_metadata['site'] == 'bsd'
-    assert datasource_metadata['source_name'] == 'test'
+    assert datasource_metadata['source_name'] == 'bsd.picarro.1minute.248m'
     assert datasource_metadata['species'] == 'ch4'
 
 def test_get_dataframe_daterange():
@@ -90,7 +89,7 @@ def test_get_dataframe_daterange():
     random_data = pd.DataFrame(data=np.random.randint(0, 100, size=(100, 4)), 
                     index=pd.date_range(epoch, epoch + datetime.timedelta(n_days-1), freq='D'), columns=list('ABCD'))
 
-    d = Datasource.create(name="test")
+    d = Datasource(name="test")
 
     start, end = d.get_dataframe_daterange(random_data)
 
@@ -101,7 +100,7 @@ def test_get_dataframe_daterange():
 def test_save(mock_uuid2):
     bucket = get_local_bucket()
 
-    datasource = Datasource.create(name="test_name", instrument="test_instrument", site="test_site", network="test_network")
+    datasource = Datasource(name="test_name")
     datasource.add_metadata(key="data_type", value="timeseries")
     datasource.save(bucket)
 
@@ -117,13 +116,13 @@ def test_save_footprint():
     metadata = {"test": "testing123"}
 
     dir_path = os.path.dirname(__file__)
-    test_data = "../data"
+    test_data = "../data/emissions"
     filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
     filepath = os.path.join(dir_path, test_data, filename)
 
     data = xarray.open_dataset(filepath)
 
-    datasource = Datasource.create(name="test_name")
+    datasource = Datasource(name="test_name")
     datasource.add_footprint_data(metadata=metadata, data=data)
     datasource.save()
 
@@ -133,6 +132,7 @@ def test_save_footprint():
     datasource_2 = Datasource.load(bucket=bucket, key=objs[0])
 
     data = datasource_2._data[0][0]
+
     assert float(data.pressure[0].values) == pytest.approx(1023.971)
     assert float(data.pressure[2].values) == pytest.approx(1009.940)
     assert float(data.pressure[-1].values) == pytest.approx(1021.303)
@@ -145,7 +145,7 @@ def test_add_metadata(datasource):
     assert datasource._metadata["bar"] == "456"
 
 def test_exists():
-    d = Datasource.create(name="testing")
+    d = Datasource(name="testing")
     d.save()
 
     exists = Datasource.exists(datasource_id=d.uuid())
@@ -153,14 +153,14 @@ def test_exists():
     assert exists == True
 
 def test_to_data(data):
-    d = Datasource.create(name="testing_123")
+    d = Datasource(name="testing_123")
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    assert ch4_data["ch4 count"].iloc[0] == pytest.approx(1960.24)
-    assert ch4_data["ch4 stdev"].iloc[0] == pytest.approx(0.236)
-    assert ch4_data["ch4 n_meas"].iloc[0] == pytest.approx(26.0)
+    assert ch4_data["ch4 count"][0] == pytest.approx(1960.24)
+    assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
+    assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
 
@@ -178,7 +178,7 @@ def test_to_data(data):
 
 
 def test_from_data(data):
-    d = Datasource.create(name="testing_123")
+    d = Datasource(name="testing_123")
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -210,7 +210,7 @@ def test_update_daterange():
     dated_data = pd.DataFrame(data=np.random.randint(0, 100, size=(n_days + 1, 4)), 
                                 index=pd.date_range(start, end, freq='D'))
 
-    d = Datasource.create(name="foo", data=dated_data)
+    d = Datasource(name="foo", data=dated_data)
 
     assert d._start_datetime == start
     assert d._end_datetime == end
@@ -233,7 +233,7 @@ def test_update_daterange():
     
 
 def test_load_dataframe(data):
-    d = Datasource.create(name="testing_123")
+    d = Datasource(name="testing_123")
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -271,7 +271,7 @@ def test_load_dataset():
 
     metadata = {"some": "metadata"}
 
-    d = Datasource.create("dataset_test")
+    d = Datasource("dataset_test")
     d.add_footprint_data(metadata=metadata, data=ds)
 
     d.save()
@@ -285,7 +285,7 @@ def test_load_dataset():
     assert loaded_ds.equals(ds)
 
 def test_search_metadata():
-    d = Datasource.create(name="test_search")
+    d = Datasource(name="test_search")
     
     d._metadata = {"unladen": "swallow", "spam": "beans"}
 

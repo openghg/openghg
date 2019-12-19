@@ -3,17 +3,21 @@ __all___ = ["Datasource"]
 class Datasource:
     """ This class handles all data sources such as sensors
 
-        Datasource objects should be created via Datasource.create()
     """
     _datasource_root = "datasource"
     _datavalues_root = "values"
     _data_root = "data"
 
-    def __init__(self):
-        """ Construct a null Datasource """
-        self._uuid = None
-        self._name = None
-        self._creation_datetime = None
+    def __init__(self, name=None, data=None):
+        """ Construct a Datasource 
+
+        """
+        from Acquire.ObjectStore import create_uuid, get_datetime_now, string_to_datetime
+        from HUGS.Util import timestamp_tzaware
+        
+        self._uuid = create_uuid()
+        self._name = name
+        self._creation_datetime = get_datetime_now()
 
         self._metadata = {}
         self._parent = None
@@ -21,53 +25,27 @@ class Datasource:
         self._instrument = None
         self._site = None
         self._network = None
+ 
         # Store of data
-        self._data = []
-        self._start_datetime = None
-        self._end_datetime = None
-        self._stored = False
-        self._data_keys = {}
-        self._data_type = None
-
-    @staticmethod
-    def create(name, data=None, **kwargs):
-        """ Create a new datasource
-        
-            Args:
-                name (str): Name for Datasource
-                data (list, default=None): List of Pandas.Dataframes
-                **kwargs (dict): Dictionary saved as the metadata for this object
-            Returns:
-                Datasource
-
-            TODO - add kwargs to this to allow extra (safely parsed)
-            arguments to be added to the dictionary?
-            This would allow some elasticity to the datasources
-                
-        """        
-        from Acquire.ObjectStore import create_uuid, get_datetime_now, string_to_datetime
-        from HUGS.Util import timestamp_tzaware
-
-        d = Datasource()
-        d._name = name
-        d._uuid = create_uuid()
-        d._creation_datetime = get_datetime_now()
-        # Any need to parse these for safety?
-        # d._metadata = kwargs
-        d._metadata["source_name"] = name
-        
-        if data is not None:
+        if data:
             # We expect a list
             data = [data]
             # This could be a list of dataframes
-            d._data = data
+            self._data = data
             # Just store these as time stamps?
             # Get the first and last datetime from the list of dataframes
             # TODO - update this as each dataframe may have different start and end dates
-            d._start_datetime = timestamp_tzaware(data[0].first_valid_index())
-            d._end_datetime = timestamp_tzaware(data[-1].last_valid_index())
-        
-        return d
+            # These should be passed in ordered
+            self._start_datetime = timestamp_tzaware(data[0].first_valid_index())
+            self._end_datetime = timestamp_tzaware(data[-1].last_valid_index())
+        else:
+            self._data = []
+            self._start_datetime = None
+            self._end_datetime = None
+ 
+        self._stored = False
+        self._data_keys = {}
+        self._data_type = None
 
     def is_null(self):
         """Return whether this object is null

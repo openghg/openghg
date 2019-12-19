@@ -1,4 +1,5 @@
 from enum import Enum
+from HUGS.Modules import BaseModule
 
 __all__ = ["GC"]
 
@@ -18,7 +19,7 @@ def _test_data():
     return path
 
 
-class GC:
+class GC(BaseModule):
     _gc_root = "GC"
     _gc_uuid = "8cba4797-510c-gcgc-8af1-e02a5ee57489"
 

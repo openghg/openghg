@@ -5,20 +5,15 @@ from HUGS.Modules import BaseModule
 
 class CRDS(BaseModule):
     """ Interface for processing CRDS data
-
-        Instances of CRDS should be created using the
-        CRDS.create() function
         
     """
-    _crds_root = "CRDS"
-    _crds_uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
+    _root = "CRDS"
+    _uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
 
     def __init__(self):
-        # Moved these here for now
-        self._root_key = CRDS._crds_root
-        self._uuid = CRDS._crds_uuid
+        from Acquire.ObjectStore import get_datetime_now
 
-        self._creation_datetime = None
+        self._creation_datetime = get_datetime_now()
         self._stored = False
         # self._datasources = []
         # Keyed by name - allows retrieval of UUID from name
@@ -29,50 +24,8 @@ class CRDS(BaseModule):
         self._file_hashes = {}
         # Holds parameters used for writing attributes to Datasets
         self._crds_params = {}
-        
         # Sampling period of CRDS data in seconds
         self._sampling_period = 60
-
-    # def is_null(self):
-    #     """ Check if this is a null object
-
-    #         Returns:
-    #             bool: True if object is null
-    #     """
-    #     return len(self._datasource_uuids) == 0
-
-    @staticmethod
-    def exists(bucket=None):
-        """ Query the object store to check if a CRDS object already exists
-
-            Args:
-                bucket (dict, default=None): Bucket for data storage
-            Returns:
-                bool: True if CRDS object exists in object store
-        """
-        from HUGS.ObjectStore import exists as _exists
-        from HUGS.ObjectStore import get_bucket as _get_bucket
-
-        if bucket is None:
-            bucket = _get_bucket()
-
-        key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
-
-        return _exists(bucket=bucket, key=key)
-
-    @staticmethod
-    def create():
-        """ This function should be used to create CRDS objects
-
-            Returns:
-                CRDS: CRDS object 
-        """
-        from Acquire.ObjectStore import get_datetime_now
-        
-        c = CRDS()
-        c._creation_datetime = get_datetime_now()
-
-        return c
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -105,7 +58,8 @@ class CRDS(BaseModule):
         from Acquire.ObjectStore import string_to_datetime
         from HUGS.ObjectStore import get_bucket
 
-        if data is None or len(data) == 0:
+        # If we get an empty data dict, return an empty object
+        if not data:
             return CRDS()
 
         if bucket is None:
@@ -133,7 +87,7 @@ class CRDS(BaseModule):
         if bucket is None:
             bucket = get_bucket()
 
-        crds_key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
+        crds_key = "%s/uuid/%s" % (CRDS._root, CRDS._uuid)
 
         self._stored = True
         ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
@@ -150,19 +104,19 @@ class CRDS(BaseModule):
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import ObjectStore
+        from HUGS.ObjectStore import get_bucket
 
         # TODO - these will have to be manually added on first setup
         # then this can be removed_root_key
         if not CRDS.exists():
-            return CRDS.create()
+            return CRDS()
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
 
-        key = "%s/uuid/%s" % (CRDS._crds_root, CRDS._crds_uuid)
-        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
+        key = "%s/uuid/%s" % (CRDS._root, CRDS._uuid)
+        data = ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
         return CRDS.from_data(data=data, bucket=bucket)
 
@@ -357,6 +311,7 @@ class CRDS(BaseModule):
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
             species_metadata["species"] = species
+            species_metadata["source_name"] = source_name
 
             combined_data[species] = {"metadata": species_metadata, "data": gas_data, "attributes": site_attributes}
 
@@ -497,7 +452,7 @@ class CRDS(BaseModule):
             Returns:
                 str: UUID of  object
         """
-        return CRDS._crds_uuid
+        return CRDS._uuid
 
     def datasources(self):
         """ Return the list of Datasources for this object
