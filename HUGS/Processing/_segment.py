@@ -63,6 +63,8 @@ def assign_data(gas_data, lookup_results, overwrite):
     # Need to allow UUID input here so we can add new data to existing Datasources easily without
     # relying on the naming method
 
+    # Use the attributes function here
+
     # TODO - simplify this
     for species in gas_data:
         metadata = gas_data[species]["metadata"]
@@ -109,7 +111,6 @@ def get_split_frequency(data):
         Returns:
             str: String selecting frequency for data splitting by Groupby
     """
-
     data_size = data.memory_usage(deep=True).sum()
     # If the data is larger than this it will be split into
     # separate parts

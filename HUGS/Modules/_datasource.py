@@ -106,7 +106,7 @@ class Datasource:
         value = str(value)
         self._metadata[key.lower()] = value.lower()
 
-    def add_data(self, metadata, data, data_type=None, overwrite=False):
+    def add_data_dataframe(self, metadata, data, data_type=None, overwrite=False):
         """ Add data to this Datasource and segment the data by size.
             The data is stored as a tuple of the data and the daterange it covers.
 
@@ -150,13 +150,65 @@ class Datasource:
                 raise ValueError("The provided data overlaps dates covered by existing data")
 
         # Need to check here if we've seen this data before
-        # Can we do this before splitting the
         freq = get_split_frequency(data)
         # Split into sections by splitting frequency
         group = data.groupby(Grouper(freq=freq))
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
         self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
+        self.add_metadata(key="data_type", value="timeseries")
+        self._data_type = "timeseries"
+        # Use daterange() to update the recorded values
+        self.update_daterange()
+
+    def add_data(self, metadata, data, data_type=None, overwrite=False):
+        """ Add data to this Datasource and segment the data by size.
+            The data is stored as a tuple of the data and the daterange it covers.
+
+            Args:
+                metadata (dict): Metadata on the data for this Datasource
+                data (Pandas.DataFrame): Data
+                data_type (str, default=None): Placeholder for combination of this fn
+                with add_footprint_data in the future
+                overwrite (bool, default=False): Overwrite existing data
+                None
+        """
+        from HUGS.Processing import get_split_frequency
+        from xarray import Dataset
+
+        # Store the metadata as labels
+        # for k, v in metadata.items():
+        #     self.add_metadata(key=k, value=v)
+
+        # Ensure metadata values are all lowercase
+        metadata = {k: v.lower() for k, v in metadata.items()}
+        self._metadata.update(metadata)
+
+        # Add in a type record for timeseries data
+        # Can possibly combine this function and the add_footprint (and other)
+        # functions in the future
+        # Store the hashes of data we've seen previously in a dict?
+        # Then also check that the data we're trying to input doesn't overwrite the data we
+        # currently have
+        # Be easiest to first check the dates covered by the data?
+
+        # Check the daterange covered by this data and if we have an overlap
+        if self._data:
+            # Exisiting data in Datsource
+            start_data, end_data = self.daterange()
+            # This is the data that we may want to add to the Datasource
+            start_new, end_new = self.get_dataset_daterange(data)
+
+            # Check if there's overlap of data
+            if start_new >= start_data and end_new <= end_data and overwrite is False:
+                raise ValueError("The provided data overlaps dates covered by existing data")
+
+        # Unsure how to assess size of Dataset without just writing to NetCDF
+        # Doesn't seem to be an xarray version of memory_usage
+        group = list(data.groupby("time.month"))
+        # Create a list tuples of the split dataset and the daterange it covers
+        # As some (years, months, weeks) may be empty we don't want those dataframes
+        self._data = [(g, self.get_dataset_daterange(g)) for _, g in group if len(g) > 0]
         self.add_metadata(key="data_type", value="timeseries")
         self._data_type = "timeseries"
         # Use daterange() to update the recorded values
@@ -436,10 +488,7 @@ class Datasource:
                 daterange = d._data_keys[key].split("_")
                 start =  string_to_datetime(daterange[0])
                 end = string_to_datetime(daterange[1])
-                if d._data_type == "timeseries":
-                    d._data.append((Datasource.load_dataframe(bucket, key), (start,end)))
-                elif d._data_type == "footprint":
-                    d._data.append((Datasource.load_dataset(bucket, key), (start,end)))
+                d._data.append((Datasource.load_dataset(bucket, key), (start,end)))
 
         d._stored = False
 
@@ -473,17 +522,16 @@ class Datasource:
                 daterange_str = "".join([datetime_to_string(start), "_", datetime_to_string(end)])
                 data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
                 self._data_keys[data_key] = daterange_str
-                if self._data_type == "timeseries":
-                    ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
+
                 # TODO - for now just create a temporary directory - will have to update Acquire
                 # or work on a PR for xarray to allow returning a NetCDF as bytes
-                elif self._data_type == "footprint":
-                    with tempfile.TemporaryDirectory() as tmpdir:
-                        filepath = f"{tmpdir}/temp.nc"
-                        data.to_netcdf(filepath)
-                        ObjectStore.set_object_from_file(bucket, data_key, filepath)
-                else:
-                    raise NotImplementedError("Not implemented")
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    filepath = f"{tmpdir}/temp.nc"
+                    data.to_netcdf(filepath)
+                    ObjectStore.set_object_from_file(bucket, data_key, filepath)
+
+                # if self._data_type == "timeseries":
+                #     ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
                 
                 # TODO - tidy or remove this
                 # Leftover from trying out converting to zarr with compression, will leave for now

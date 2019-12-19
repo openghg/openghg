@@ -1,0 +1,13 @@
+{
+    "BSD": {
+        "title": "Bilsdale Tall Tower",
+        "description": "Bilsdale (BSD) tall tower is in a remote area of the North York Moors National Park and is the first monitoring site in the northeast region of England.",
+        "latitude": 50,
+        "longitude": 0,
+        "lineage": "Data were collected by the University of Bristol and deposited at the Centre for Environmental Data Analysis (CEDA) for archiving.\n\n",
+        "quality": "Data are as given by the data provider, no quality control has been performed by the Centre for Environmental Data Analysis (CEDA)..\n\n",
+        "url": "http: //www.metoffice.gov.uk/research/monitoring/atmospheric-trends/sites/bilsdale",
+        "catalogue_url": "http: //www.metoffice.gov.uk/research/monitoring/atmospheric-trends/sites/bilsdale",
+        "instruments": {"instrument_A": {"title": "instrument_a", "description": "an_instrument", "catalogue_url":"example.com"}}
+    }
+}
