@@ -43,7 +43,7 @@ def crds():
     filename = "hfd.picarro.1minute.100m_min.dat"
 
     filepath = os.path.join(dir_path, test_data, filename)
-    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m", site="hfd")
     crds = CRDS.load()
 
     return crds
@@ -61,17 +61,18 @@ def test_read_file(crds):
     co2_data = co2_datasouce.data()[0][0]
     co_data = co_datasouce.data()[0][0]
 
-    assert ch4_data["ch4 count"].iloc[0] == pytest.approx(1993.83)
-    assert ch4_data["ch4 stdev"].iloc[0] == pytest.approx(1.555)
-    assert ch4_data["ch4 n_meas"].iloc[0] == pytest.approx(19.0)
+    # print(ch4_data.variables)
+    assert ch4_data["ch4_count"][0] == pytest.approx(1993.83)
+    assert ch4_data["ch4_stdev"][0] == pytest.approx(1.555)
+    assert ch4_data["ch4_n_meas"][0] == pytest.approx(19.0)
 
-    assert co2_data["co2 count"].iloc[0] == pytest.approx(414.21)
-    assert co2_data["co2 stdev"].iloc[0] == pytest.approx(0.109)
-    assert co2_data["co2 n_meas"].iloc[0] == pytest.approx(19.0)
+    assert co2_data["co2_count"][0] == pytest.approx(414.21)
+    assert co2_data["co2_stdev"][0] == pytest.approx(0.109)
+    assert co2_data["co2_n_meas"][0] == pytest.approx(19.0)
 
-    assert co_data["co count"].iloc[0] == pytest.approx(214.28)
-    assert co_data["co stdev"].iloc[0] == pytest.approx(4.081)
-    assert co_data["co n_meas"].iloc[0] == pytest.approx(19.0)
+    assert co_data["co_count"][0] == pytest.approx(214.28)
+    assert co_data["co_stdev"][0] == pytest.approx(4.081)
+    assert co_data["co_n_meas"][0] == pytest.approx(19.0)
 
 def test_read_data():
 
@@ -85,7 +86,7 @@ def test_read_data():
 
     filepath = Path(filepath)
 
-    combined = crds.read_data(data_filepath=filepath)
+    combined = crds.read_data(data_filepath=filepath, site="tac")
 
     assert len(combined) == 2
 
@@ -103,10 +104,10 @@ def test_read_data():
 
     ch4_data = combined["ch4"]["data"]
 
-    assert ch4_data.first_valid_index() == pd.Timestamp("2012-07-31 14:50:30")
-    assert ch4_data["ch4 count"].iloc[0] == pytest.approx(1905.28)
-    assert ch4_data["ch4 stdev"].iloc[0] == pytest.approx(0.268)
-    assert ch4_data["ch4 n_meas"].iloc[0] == pytest.approx(20)
+    assert ch4_data.time[0] == pd.Timestamp("2012-07-31 14:50:30")
+    assert ch4_data["ch4 count"][0] == pytest.approx(1905.28)
+    assert ch4_data["ch4 stdev"][0] == pytest.approx(0.268)
+    assert ch4_data["ch4 n_meas"][0] == pytest.approx(20)
 
 
 def test_data_persistence(crds):
@@ -126,7 +127,7 @@ def test_seen_before_raises():
     filepath = os.path.join(dir_path, test_data, filename)
     bucket = get_local_bucket(empty=True)
 
-    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m", site="hfd")
 
     crds = CRDS.load()
     first_store = crds.datasources()
@@ -134,7 +135,7 @@ def test_seen_before_raises():
     crds = CRDS.load()
 
     with pytest.raises(ValueError):
-        CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+        CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m", site="hfd")
 
 def test_seen_before_overwrite():
     dir_path = os.path.dirname(__file__)
@@ -144,7 +145,7 @@ def test_seen_before_overwrite():
     filepath = os.path.join(dir_path, test_data, filename)
     bucket = get_local_bucket(empty=True)
 
-    uuids_first = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m")
+    uuids_first = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m", site="hfd")
 
     crds = CRDS.load()
     first_store = crds.datasources()
@@ -152,7 +153,7 @@ def test_seen_before_overwrite():
     crds = CRDS.load()
 
     # Read the same file in again
-    uuids_second = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m", overwrite=True)
+    uuids_second = CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m", site="hfd", overwrite=True)
 
     assert uuids_first == uuids_second
 
@@ -191,7 +192,7 @@ def test_gas_info(crds, hfd_filepath):
     data = pd.read_csv(hfd_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"],
                      parse_dates=[[0, 1]])
 
-    n_gases, n_cols = crds.gas_info(data=data)
+    n_gases, n_cols = crds._gas_info(data=data)
 
     assert n_gases == 3
     assert n_cols == 3

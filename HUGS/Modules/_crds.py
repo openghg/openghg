@@ -1,7 +1,9 @@
 # from _paths import RootPaths
 __all__ = ["CRDS"]
 
-class CRDS:
+from HUGS.Modules import BaseModule
+
+class CRDS(BaseModule):
     """ Interface for processing CRDS data
 
         Instances of CRDS should be created using the
@@ -12,6 +14,10 @@ class CRDS:
     _crds_uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
 
     def __init__(self):
+        # Moved these here for now
+        self._root_key = CRDS._crds_root
+        self._uuid = CRDS._crds_uuid
+
         self._creation_datetime = None
         self._stored = False
         # self._datasources = []
@@ -27,13 +33,13 @@ class CRDS:
         # Sampling period of CRDS data in seconds
         self._sampling_period = 60
 
-    def is_null(self):
-        """ Check if this is a null object
+    # def is_null(self):
+    #     """ Check if this is a null object
 
-            Returns:
-                bool: True if object is null
-        """
-        return len(self._datasource_uuids) == 0
+    #         Returns:
+    #             bool: True if object is null
+    #     """
+    #     return len(self._datasource_uuids) == 0
 
     @staticmethod
     def exists(bucket=None):
@@ -148,7 +154,7 @@ class CRDS:
         from HUGS.ObjectStore import get_bucket as _get_bucket
 
         # TODO - these will have to be manually added on first setup
-        # then this can be removed
+        # then this can be removed_root_key
         if not CRDS.exists():
             return CRDS.create()
 
@@ -227,7 +233,7 @@ class CRDS:
         gas_data = crds.read_data(data_filepath=data_filepath, site=site)
 
         # Assign attributes to data here makes it a lot easier to test
-        gas_data = crds.assign_attributes(data=gas_data)
+        gas_data = crds.assign_attributes(data=gas_data, site=site)
 
 
         # Check to see if we've had data from these Datasources before
@@ -470,20 +476,20 @@ class CRDS:
         """
         raise NotImplementedError("Not yet implemented")
 
-    def add_datasources(self, datasource_uuids):
-        """ Add the passed list of Datasources to the current list
+    # def add_datasources(self, datasource_uuids):
+    #     """ Add the passed list of Datasources to the current list
 
-            Args:
-                datasource_uuids (list): List of Datasource UUIDs
-            Returns:
-                None
-        """
-        self._datasource_names.update(datasource_uuids)
-        # Invert the dictionary to update the dict keyed by UUID
-        uuid_keyed = {v:k for k, v in datasource_uuids.items()}
-        self._datasource_uuids.update(uuid_keyed)
-        # self._datasources.extend(datasource_uuids)
-        # print(self._datasource_names)
+    #         Args:
+    #             datasource_uuids (list): List of Datasource UUIDs
+    #         Returns:
+    #             None
+    #     """
+    #     self._datasource_names.update(datasource_uuids)
+    #     # Invert the dictionary to update the dict keyed by UUID
+    #     uuid_keyed = {v:k for k, v in datasource_uuids.items()}
+    #     self._datasource_uuids.update(uuid_keyed)
+    #     # self._datasources.extend(datasource_uuids)
+    #     # print(self._datasource_names)
 
     def uuid(self):
         """ Return the UUID of this object

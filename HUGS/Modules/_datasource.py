@@ -283,10 +283,10 @@ class Datasource:
         if not isinstance(dataset, Dataset):
             raise TypeError("Only xarray Dataset types can be processed")
 
-        if dataset.time:
+        try:
             start = Timestamp(dataset.time[0].values, tz="UTC")
             end = Timestamp(dataset.time[-1].values, tz="UTC")
-        else:
+        except:
             raise AttributeError("This dataset does not have a time attribute, unable to read date range")
 
         return start, end
@@ -662,21 +662,21 @@ class Datasource:
         # from Acquire.ObjectStore import datetime_to_datetime
         from HUGS.Util import timestamp_tzaware
 
-        if self._data is not None:
+        if self._data:
             # Sort the data by date
             self.sort_data()
             data_type = self._data_type
-            if data_type == "timeseries":
-                self._start_datetime = timestamp_tzaware(self._data[0][0].first_valid_index())
-                self._end_datetime = timestamp_tzaware(self._data[-1][0].last_valid_index())
-            elif data_type == "footprint":
-                # TODO - this feels messy
-                start, _ = self.get_dataset_daterange(self._data[0][0])
-                _, end = self.get_dataset_daterange(self._data[-1][0])
-                self._start_datetime = timestamp_tzaware(start)
-                self._end_datetime = timestamp_tzaware(end)
-            else:
-                raise NotImplementedError("Only CRDS, GC and footprint data currently recognized")
+            # if data_type == "timeseries":
+            #     self._start_datetime = timestamp_tzaware(self._data[0][0].first_valid_index())
+            #     self._end_datetime = timestamp_tzaware(self._data[-1][0].last_valid_index())
+            # elif data_type == "footprint":
+            # TODO - this feels messy
+            start, _ = self.get_dataset_daterange(self._data[0][0])
+            _, end = self.get_dataset_daterange(self._data[-1][0])
+            self._start_datetime = timestamp_tzaware(start)
+            self._end_datetime = timestamp_tzaware(end)
+            # else:
+            #     raise NotImplementedError("Only CRDS, GC and footprint data currently recognized")
         else:
             raise ValueError("Cannot get daterange with no data")
 

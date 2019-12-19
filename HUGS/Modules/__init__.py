@@ -2,6 +2,7 @@
     This module contains classes to describe objects such as Datasources on 
     sensor Instruments etc
 """
+from ._base import *
 from ._datasource import *
 from ._network import *
 from ._site import *
