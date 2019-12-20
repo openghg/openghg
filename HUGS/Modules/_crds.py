@@ -14,6 +14,7 @@ class CRDS(BaseModule):
         from Acquire.ObjectStore import get_datetime_now
 
         self._creation_datetime = get_datetime_now()
+
         self._stored = False
         # self._datasources = []
         # Keyed by name - allows retrieval of UUID from name
@@ -26,24 +27,6 @@ class CRDS(BaseModule):
         self._crds_params = {}
         # Sampling period of CRDS data in seconds
         self._sampling_period = 60
-
-    def to_data(self):
-        """ Return a JSON-serialisable dictionary of object
-            for storage in object store
-
-            Returns:
-                dict: Dictionary version of object
-        """
-        from Acquire.ObjectStore import datetime_to_string
-
-        data = {}
-        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_uuids"] = self._datasource_uuids
-        data["datasource_names"] = self._datasource_names
-        data["file_hashes"] = self._file_hashes
-
-        return data
 
     @staticmethod
     def from_data(data, bucket=None):
@@ -73,52 +56,52 @@ class CRDS(BaseModule):
         c._stored = False
         return c
 
-    def save(self, bucket=None):
-        """ Save the object to the object store
+    # def save(self, bucket=None):
+    #     """ Save the object to the object store
 
-            Args:
-                bucket (dict, default=None): Bucket for data
-            Returns:
-                None
-        """
-        from Acquire.ObjectStore import ObjectStore
-        from HUGS.ObjectStore import get_bucket
+    #         Args:
+    #             bucket (dict, default=None): Bucket for data
+    #         Returns:
+    #             None
+    #     """
+    #     from Acquire.ObjectStore import ObjectStore
+    #     from HUGS.ObjectStore import get_bucket
 
-        if bucket is None:
-            bucket = get_bucket()
+    #     if bucket is None:
+    #         bucket = get_bucket()
 
-        crds_key = "%s/uuid/%s" % (CRDS._root, CRDS._uuid)
+    #     crds_key = "%s/uuid/%s" % (CRDS._root, CRDS._uuid)
 
-        self._stored = True
-        ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
+    #     self._stored = True
+    #     ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
-    @staticmethod
-    def load(bucket=None):
-        """ Load a CRDS object from the datastore using the passed
-            bucket and UUID
+    # @staticmethod
+    # def load(bucket=None):
+    #     """ Load a CRDS object from the datastore using the passed
+    #         bucket and UUID
 
-            Args:
-                uuid (str): UUID of CRDS object
-                key (str, default=None): Key of object in object store
-                bucket (dict, default=None): Bucket to store object
-            Returns:
-                Datasource: Datasource object created from JSON
-        """
-        from Acquire.ObjectStore import ObjectStore
-        from HUGS.ObjectStore import get_bucket
+    #         Args:
+    #             uuid (str): UUID of CRDS object
+    #             key (str, default=None): Key of object in object store
+    #             bucket (dict, default=None): Bucket to store object
+    #         Returns:
+    #             Datasource: Datasource object created from JSON
+    #     """
+    #     from Acquire.ObjectStore import ObjectStore
+    #     from HUGS.ObjectStore import get_bucket
 
-        # TODO - these will have to be manually added on first setup
-        # then this can be removed_root_key
-        if not CRDS.exists():
-            return CRDS()
+    #     # TODO - these will have to be manually added on first setup
+    #     # then this can be removed_root_key
+    #     if not CRDS.exists():
+    #         return CRDS()
 
-        if bucket is None:
-            bucket = get_bucket()
+    #     if bucket is None:
+    #         bucket = get_bucket()
 
-        key = "%s/uuid/%s" % (CRDS._root, CRDS._uuid)
-        data = ObjectStore.get_object_from_json(bucket=bucket, key=key)
+    #     key = "%s/uuid/%s" % (CRDS._root, CRDS._uuid)
+    #     data = ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
-        return CRDS.from_data(data=data, bucket=bucket)
+    #     return CRDS.from_data(data=data, bucket=bucket)
 
     @staticmethod
     def read_folder(folder_path):
@@ -360,8 +343,6 @@ class CRDS(BaseModule):
 
             ds = attributes(ds=data[species]["data"], species=species, site=site)
 
-            
-
         return data
 
 
@@ -446,44 +427,44 @@ class CRDS(BaseModule):
     #     # self._datasources.extend(datasource_uuids)
     #     # print(self._datasource_names)
 
-    def uuid(self):
-        """ Return the UUID of this object
+    # def uuid(self):
+    #     """ Return the UUID of this object
 
-            Returns:
-                str: UUID of  object
-        """
-        return CRDS._uuid
+    #         Returns:
+    #             str: UUID of  object
+    #     """
+    #     return CRDS._uuid
 
-    def datasources(self):
-        """ Return the list of Datasources for this object
+    # def datasources(self):
+    #     """ Return the list of Datasources for this object
 
-            Returns:
-                list: List of Datasources
-        """
-        return self._datasource_names
+    #         Returns:
+    #             list: List of Datasources
+    #     """
+    #     return self._datasource_names
 
-    def remove_datasource(self, uuid):
-        """ Remove the Datasource with the given uuid from the list 
-            of Datasources
+    # def remove_datasource(self, uuid):
+    #     """ Remove the Datasource with the given uuid from the list 
+    #         of Datasources
 
-            Args:
-                uuid (str): UUID of Datasource to be removed
-        """
-        del self._datasource_uuids[uuid]
+    #         Args:
+    #             uuid (str): UUID of Datasource to be removed
+    #     """
+    #     del self._datasource_uuids[uuid]
 
-    def clear_datasources(self):
-        """ Remove all Datasources from the object
+    # def clear_datasources(self):
+    #     """ Remove all Datasources from the object
 
-            This will also clear any file hashes
+    #         This will also clear any file hashes
 
-            Returns:
-                None
-        """
-        self._datasource_uuids.clear()
-        self._datasource_names.clear()
-        self._file_hashes.clear()
+    #         Returns:
+    #             None
+    #     """
+    #     self._datasource_uuids.clear()
+    #     self._datasource_names.clear()
+    #     self._file_hashes.clear()
 
-        self.save()
+    #     self.save()
 
         
 

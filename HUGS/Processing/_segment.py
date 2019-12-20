@@ -77,7 +77,7 @@ def assign_data(gas_data, lookup_results, overwrite):
         if uuid:
             datasource = Datasource.load(uuid=uuid)
         else:
-            datasource = Datasource.create(name=name)
+            datasource = Datasource(name=name)
 
         # Store the name and datasource_id
         # self._species[gas_name] = datasource_id
