@@ -26,44 +26,73 @@ class BaseModule:
 
         return exists(bucket=bucket, key=key)
 
+    # @classmethod
+    # def to_data(cls):
+    #     """ Return a JSON-serialisable dictionary of object
+    #         for storage in object store
+
+    #         Returns:
+    #             dict: Dictionary version of object
+    #     """
+    #     from Acquire.ObjectStore import datetime_to_string
+
+    #     data = {}
+    #     data["creation_datetime"] = datetime_to_string(cls._creation_datetime)
+    #     data["stored"] = cls._stored
+    #     data["datasource_uuids"] = cls._datasource_uuids
+    #     data["datasource_names"] = cls._datasource_names
+    #     data["file_hashes"] = cls._file_hashes
+
+    #     return data
+
+    # @classmethod
+    # def save(cls, bucket=None):
+    #     """ Save the object to the object store
+
+    #         Args:
+    #             bucket (dict, default=None): Bucket for data
+    #         Returns:
+    #             None
+    #     """
+    #     from Acquire.ObjectStore import ObjectStore
+    #     from HUGS.ObjectStore import get_bucket
+
+    #     if bucket is None:
+    #         bucket = get_bucket()
+
+    #     key = f"{cls._root}/uuid/{cls._uuid}"
+
+    #     cls._stored = True
+    #     ObjectStore.set_object_from_json(bucket=bucket, key=key, data=cls.to_data())
+
     @classmethod
-    def to_data(cls):
-        """ Return a JSON-serialisable dictionary of object
-            for storage in object store
-
-            Returns:
-                dict: Dictionary version of object
-        """
-        from Acquire.ObjectStore import datetime_to_string
-
-        data = {}
-        data["creation_datetime"] = datetime_to_string(cls._creation_datetime)
-        data["stored"] = cls._stored
-        data["datasource_uuids"] = cls._datasource_uuids
-        data["datasource_names"] = cls._datasource_names
-        data["file_hashes"] = cls._file_hashes
-
-        return data
-
-    @classmethod
-    def save(cls, bucket=None):
-        """ Save the object to the object store
+    def from_data(cls, data, bucket=None):
+        """ Create an object from data
 
             Args:
-                bucket (dict, default=None): Bucket for data
+                data (str): JSON data
+                bucket (dict, default=None): Bucket for data storage
             Returns:
-                None
+                cls: Class object of cls type
         """
-        from Acquire.ObjectStore import ObjectStore
+        from Acquire.ObjectStore import string_to_datetime
         from HUGS.ObjectStore import get_bucket
+
+        # If we get an empty data dict, return an empty object
+        if not data:
+            raise ValueError("Unable to create object with empty dictionary")
 
         if bucket is None:
             bucket = get_bucket()
 
-        key = f"{cls._root}/uuid/{cls._uuid}"
+        c = cls()
+        c._creation_datetime = string_to_datetime(data["creation_datetime"])
+        c._datasource_uuids = data["datasource_uuids"]
+        c._datasource_names = data["datasource_names"]
+        c._file_hashes = data["file_hashes"]
+        c._stored = False
 
-        cls._stored = True
-        ObjectStore.set_object_from_json(bucket=bucket, key=key, data=cls.to_data())
+        return c
 
     @classmethod
     def load(cls, bucket=None):
@@ -71,8 +100,7 @@ class BaseModule:
             bucket and UUID
 
             Args:
-                uuid (str): UUID of CRDS object
-                key (str, default=None): Key of object in object store
+                inst (CRDS): CRDS instance
                 bucket (dict, default=None): Bucket to store object
             Returns:
                 Datasource: Datasource object created from JSON

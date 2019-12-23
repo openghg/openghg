@@ -30,7 +30,7 @@ def precision_path():
 
 @pytest.fixture
 def gc():
-    gc = GC.create()
+    gc = GC()
     gc._uuid = "123"
     gc._creation_datetime = datetime_to_datetime(datetime.datetime(1970,1,1))
     gc.save()
@@ -45,7 +45,7 @@ def test_read_data(data_path, precision_path):
     data_path = Path(data_path)
     precision_path = Path(precision_path)
 
-    gc = GC.create()
+    gc = GC()
     gas_data, species, metadata = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument)
 
     head_data = gas_data.head(1)
@@ -66,7 +66,7 @@ def test_read_data(data_path, precision_path):
 
 
 def test_read_precision(precision_path):
-    gc = GC.create()
+    gc = GC()
 
     precision, precision_series = gc.read_precision(precision_path)
 
@@ -89,7 +89,7 @@ def test_split(data_path, precision_path):
     site = "capegrim"
     instrument = "GCMD"
 
-    gc = GC.create()
+    gc = GC()
     data, species, metadata = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument)
     metadata = read_metadata(filepath=data_path, data=None, data_type="GC")
     gas_data = gc.split(data=data, site=site, species=species, metadata=metadata)
@@ -147,7 +147,7 @@ def test_save(gc):
     prefix = f""
     objs = get_object_names(bucket, prefix)
 
-    assert objs[0].split("/")[-1] == GC._gc_uuid
+    assert objs[0].split("/")[-1] == GC._uuid
 
 def test_load(gc):
     gc.save()
