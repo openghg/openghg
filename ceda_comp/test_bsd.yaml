@@ -1,0 +1,49 @@
+authors: !!python/tuple
+- - firstname: HUGS
+    surname: Cloud
+  - firstname: ''
+    surname: ''
+  - firstname: ''
+    surname: ''
+bbox:
+  east: ''
+  north: 50
+  south: ''
+  west: 0
+computation:
+  catalogue_url: ''
+  description: ''
+  title: ''
+description: Bilsdale (BSD) tall tower is in a remote area of the North York Moors
+  National Park and is the first monitoring site in the northeast region of England.
+docs:
+- title: Bilsdale Tall Tower
+  url: 'http: //www.metoffice.gov.uk/research/monitoring/atmospheric-trends/sites/bilsdale'
+instrument:
+  catalogue_url: Instrument url
+  description: Instrument description
+  title: Instrument title
+lineage: 'Data were collected by the University of Bristol and deposited at the Centre
+  for Environmental Data Analysis (CEDA) for archiving.
+
+
+  '
+project:
+  PI:
+    firstname: HUGS
+    lastname: Cloud
+  catalogue_url: 'http: //www.metoffice.gov.uk/research/monitoring/atmospheric-trends/sites/bilsdale'
+  description: Bilsdale (BSD) tall tower is in a remote area of the North York Moors
+    National Park and is the first monitoring site in the northeast region of England.
+  funder: NERC
+  grant_number: HUGS_Grant
+  title: Bilsdale Tall Tower
+quality: 'Data are as given by the data provider, no quality control has been performed
+  by the Centre for Environmental Data Analysis (CEDA)..
+
+
+  '
+time_range:
+  end: '2014-31-12 23:00:00'
+  start: '2014-05-02 00:00:00'
+title: Bilsdale Tall Tower
