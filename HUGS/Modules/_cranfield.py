@@ -151,7 +151,10 @@ class Cranfield:
             # For now we'll just have 2 columns for each species
             # cols = [col for col in data.columns if sp in col]
             gas_data = data.iloc[:, n*n_cols:(n+1)*n_cols]
-            # gas_data = data[cols]
+            
+            # Convert from a pandas DataFrame to an xarray Dataset
+            gas_data = gas_data.to_xarray()
+            
             combined_data[sp] = {"metadata": species_metadata, "data": gas_data}
 
         return combined_data
