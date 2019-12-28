@@ -12,8 +12,7 @@ class Datasource:
     _datavalues_root = "values"
     _data_root = "data"
 
-    def __init__(self, name=None, data=None):
-        
+    def __init__(self, name=None):
         from Acquire.ObjectStore import create_uuid, get_datetime_now, string_to_datetime
         from HUGS.Util import timestamp_tzaware
         
@@ -21,23 +20,10 @@ class Datasource:
         self._name = name
         self._creation_datetime = get_datetime_now()
         self._metadata = {}
-        self._parent = None
- 
-        # Store of data
-        if data:
-            # This could be a list of dataframes
-            self._data = data
-            # Just store these as time stamps?
-            # Get the first and last datetime from the list of dataframes
-            # TODO - update this as each dataframe may have different start and end dates
-            # These should be passed in ordered
-            self.update_daterange()
-            # self._start_datetime = timestamp_tzaware(data[0].first_valid_index())
-            # self._end_datetime = timestamp_tzaware(data[-1].last_valid_index())
-        else:
-            self._data = []
-            self._start_datetime = None
-            self._end_datetime = None
+        self._data = []
+
+        self._start_datetime = None
+        self._end_datetime = None
  
         self._stored = False
         self._data_keys = {}
@@ -160,7 +146,7 @@ class Datasource:
 
         # Check the daterange covered by this data and if we have an overlap
         if self._data:
-            # Exisiting data in Datsource
+            # Existing data in Datsource
             start_data, end_data = self.daterange()
             # This is the data that we may want to add to the Datasource
             start_new, end_new = self.get_dataset_daterange(data)
@@ -246,16 +232,17 @@ class Datasource:
         from xarray import Dataset
         from pandas import Timestamp
 
-        if not isinstance(dataset, Dataset):
-            raise TypeError("Only xarray Dataset types can be processed")
+        # if not isinstance(dataset, Dataset):
+        #     raise TypeError("Only xarray Dataset types can be processed")
 
         try:
             start = Timestamp(dataset.time[0].values, tz="UTC")
             end = Timestamp(dataset.time[-1].values, tz="UTC")
+            
+            return start, end
         except:
             raise AttributeError("This dataset does not have a time attribute, unable to read date range")
 
-        return start, end
 
     @staticmethod
     def exists(datasource_id, bucket=None):
@@ -616,26 +603,16 @@ class Datasource:
             Returns:
                 None
         """
-        # from Acquire.ObjectStore import datetime_to_datetime
         from HUGS.Util import timestamp_tzaware
 
         if self._data:
             # Sort the data by date
             self.sort_data()
-            data_type = self._data_type
-            # if data_type == "timeseries":
-            #     self._start_datetime = timestamp_tzaware(self._data[0][0].first_valid_index())
-            #     self._end_datetime = timestamp_tzaware(self._data[-1][0].last_valid_index())
-            # elif data_type == "footprint":
-            # TODO - this feels messy
+
             start, _ = self.get_dataset_daterange(self._data[0][0])
             _, end = self.get_dataset_daterange(self._data[-1][0])
             self._start_datetime = timestamp_tzaware(start)
             self._end_datetime = timestamp_tzaware(end)
-            # else:
-            #     raise NotImplementedError("Only CRDS, GC and footprint data currently recognized")
-        else:
-            raise ValueError("Cannot get daterange with no data")
 
     def daterange(self):
         """ Get the daterange the data in this Datasource covers as tuple
@@ -732,3 +709,12 @@ class Datasource:
                 str: Data type held by Datasource
         """
         return self._data_type
+
+    def data_keys(self):
+        """ Returns the object store keys where data related 
+            to this Datasource is stored
+
+            Returns:
+                dict: Dictionary keyed as key: daterange covered by key
+        """
+        return self._data_keys

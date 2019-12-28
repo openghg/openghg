@@ -201,66 +201,25 @@ def test_from_data(data):
 
     assert d_2.to_data() == d.to_data()
 
-def test_update_daterange():
-    start = pd.Timestamp(year=2018, month=1, day=1, tz="UTC")
-    end = pd.Timestamp(year=2019, month=1, day=1, tz="UTC")
-    
-    n_days = (end - start).days
-    
-    dated_data = pd.DataFrame(data=np.random.randint(0, 100, size=(n_days + 1, 4)), 
-                                index=pd.date_range(start, end, freq='D'))
-
-    d = Datasource(name="foo", data=dated_data)
-
-    assert d._start_datetime == start
-    assert d._end_datetime == end
-
-    new_start = pd.Timestamp(year=2017, month=1, day=1, tz="UTC")
-    new_end = pd.Timestamp(year=2019, month=12, day=31, tz="UTC")
-
-    new_n_days = (new_end - new_start).days
-
-    # Update the data
-    updated_data = pd.DataFrame(data=np.random.randint(0, 100, size=(new_n_days + 1, 4)),
-                              index=pd.date_range(new_start, new_end, freq='D'))
-
+def test_update_daterange(data):
     metadata = {"foo": "bar"}
 
-    d.add_data(metadata=metadata, data=updated_data)
-
-    assert d._start_datetime == new_start
-    assert d._end_datetime == new_end
+    d = Datasource(name="foo")
     
-
-def test_load_dataframe(data):
-    d = Datasource(name="testing_123")
-
-    metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
+
+    d.add_data(metadata=metadata, data=ch4_data)
+
+    assert d._start_datetime == pd.Timestamp("2014-01-30 10:52:30+00:00")
+    assert d._end_datetime == pd.Timestamp("2014-01-30 14:20:30+00:00")
+
+    ch4_short = ch4_data.head(40)
+
+    d.add_data(metadata=metadata, data=ch4_short, overwrite=True)
+
+    assert d._start_datetime == pd.Timestamp("2014-01-30 10:52:30+00:00")
+    assert d._end_datetime == pd.Timestamp("2014-01-30 13:22:30+00:00")
     
-    d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
-
-    d.save()
-
-    keys = list(d._data_keys.keys())
-
-    bucket = get_local_bucket()
-
-    df = Datasource.load_dataframe(bucket=bucket, key=keys[0])
-
-    assert df["ch4 count"].iloc[0] == pytest.approx(1960.24)
-    assert df["ch4 stdev"].iloc[0] == pytest.approx(0.236)
-    assert df["ch4 n_meas"].iloc[0] == pytest.approx(26.0)
-
-def test_dataframe_to_hdf():
-    random_data = pd.DataFrame(data=np.random.randint(0, 100, size=(100, 4)), columns=list('ABCD'))
-
-    hdf_data = Datasource.dataframe_to_hdf(data=random_data)
-
-    df = Datasource.hdf_to_dataframe(hdf_data=hdf_data)
-
-    assert df.equals(random_data)
-
 def test_load_dataset():
     filename = "WAO-20magl_EUROPE_201306_small.nc"
     dir_path = os.path.dirname(__file__)
@@ -272,6 +231,7 @@ def test_load_dataset():
     metadata = {"some": "metadata"}
 
     d = Datasource("dataset_test")
+    
     d.add_footprint_data(metadata=metadata, data=ds)
 
     d.save()
