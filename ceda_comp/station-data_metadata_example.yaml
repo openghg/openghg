@@ -1,0 +1,61 @@
+{
+  "title": "Penlee Point Atmospheric Observatory: Meteorological and chemical observations 2014-2017",
+  "description": " The Penlee Point Atmospheric Observatory (PPAO) was established by the Plymouth Marine Laboratory in May 2014 for long term observations of ocean-atmosphere interaction. The observatory is only a few tens of metres away from the water edge and 11m above mean sea level.\n\nThis dataset contains air temperature, dew point, wind speed and direction, rainfall, sulphur dioxide, ozone, carbon dioxide and methane measurements from Penlee Point Atmospheric Observatory from 2014-2017.\n\nAt the mouth of the Plymouth Sound, the site (50° 19.08' N, 4° 11.35' W) is exposed to marine air when the wind comes from 110° - 240°. Typical southwesterly winds tend to bring relatively clean background Atlantic air. In contrast, winds from the southeast are often contaminated by exhaust plumes from passing ships. The PPAO is in close proximity to marine sampling stations that form the Western Channel Observatory, enabling better understanding of the ocean-atmosphere coupling.",
+  "authors": [
+    {
+      "firstname": "",
+      "surname": "Plymouth Marine Laboratory (PML)"
+    },
+    {
+      "firstname": "Joe",
+      "surname": "Bloggs"
+    },
+    {
+      "firstname": "",
+      "surname": ""
+    }
+  ],
+  "bbox": {
+    "north": "50.3600°",
+    "south": "50.3600°",
+    "east": "-4.3500°",
+    "west": "-4.3500°"
+  },
+  "time_range": {
+    "start": "2014-05-02 00:00:00",
+    "end": "2014-31-12 23:00:00"
+  },
+  "lineage": "Data were collected by Plymouth Marine Laboratory and deposited at the Centre for Environmental Data Analysis (CEDA) for archiving.\n\n",
+  "quality": "Data are as given by the data provider, no quality control has been performed by the Centre for Environmental Data Analysis (CEDA)..\n\n",
+  "docs": [
+    {
+      "title": "Penlee Point Observatory",
+      "url": "http://www.westernchannelobservatory.org.uk/penlee/"
+    },
+    {
+      "title": "PML Penlee Point Observatory",
+      "url": "http://www.pml.ac.uk/Facilities/Atmospheric_Observatory"
+    }
+  ],
+  "project": {
+    "catalogue_url": "http://catalogue.ceda.ac.uk/uuid/583f546ddbbb49009675010b5e07a9fb",
+    "title": "Penlee Point Atmospheric Observatory",
+    "description": "The Penlee Point Atmospheric Observatory (PPAO) was established by the Plymouth Marine Laboratory in May 2014 for long term observations of ocean-atmosphere interaction. The observatory is only a few tens of metres away from the water edge and 11m above mean sea level.\n\nAt the mouth of the Plymouth Sound, the site (50° 19.08' N, 4° 11.35' W) is exposed to marine air when the wind comes from 110° - 240°. Typical southwesterly winds tend to bring relatively clean background Atlantic air. In contrast, winds from the southeast are often contaminated by exhaust plumes from passing ships. The PPAO is in close proximity to marine sampling stations that form the Western Channel Observatory, enabling better understanding of the ocean-atmosphere coupling.",
+    "PI": {
+      "firstname": "",
+      "lastname": "Plymouth Marine Laboratory (PML)"
+    },
+    "funder": "Plymouth Marine Laboratory (PML)",
+    "grant_number": ""
+  },
+  "instrument": {
+    "catalogue_url": "http://catalogue.ceda.ac.uk/uuid/a3b13d36bada49de8bcad42b9ef4840d",
+    "title": "Sulfur dioxide analyser",
+    "description": "Thermo Scientific model 43i Trace Level-Enhanced Pulsed Fluorescence SO2 analyzer; it measures SO2 concentration in the atmosphere"
+  },
+  "computation": {
+    "catalogue_url": "",
+    "title": "",
+    "description": ""
+  }
+}
