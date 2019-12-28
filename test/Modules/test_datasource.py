@@ -168,7 +168,7 @@ def test_to_data(data):
 
     metadata = obj_data["metadata"]
     assert obj_data["name"] == "testing_123"
-    assert metadata["source_name"] == "testing_123"
+    assert metadata["source_name"] == "bsd.picarro.1minute.248m"
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
     assert metadata["time_resolution"] == "1_minute"
