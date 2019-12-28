@@ -21,49 +21,9 @@ class BaseModule:
         if bucket is None:
             bucket = get_bucket()
 
-        # key = "%s/uuid/%s" % (obj._root_key, obj._uuid)
         key = f"{cls._root}/uuid/{cls._uuid}"
 
         return exists(bucket=bucket, key=key)
-
-    # @classmethod
-    # def to_data(cls):
-    #     """ Return a JSON-serialisable dictionary of object
-    #         for storage in object store
-
-    #         Returns:
-    #             dict: Dictionary version of object
-    #     """
-    #     from Acquire.ObjectStore import datetime_to_string
-
-    #     data = {}
-    #     data["creation_datetime"] = datetime_to_string(cls._creation_datetime)
-    #     data["stored"] = cls._stored
-    #     data["datasource_uuids"] = cls._datasource_uuids
-    #     data["datasource_names"] = cls._datasource_names
-    #     data["file_hashes"] = cls._file_hashes
-
-    #     return data
-
-    # @classmethod
-    # def save(cls, bucket=None):
-    #     """ Save the object to the object store
-
-    #         Args:
-    #             bucket (dict, default=None): Bucket for data
-    #         Returns:
-    #             None
-    #     """
-    #     from Acquire.ObjectStore import ObjectStore
-    #     from HUGS.ObjectStore import get_bucket
-
-    #     if bucket is None:
-    #         bucket = get_bucket()
-
-    #     key = f"{cls._root}/uuid/{cls._uuid}"
-
-    #     cls._stored = True
-    #     ObjectStore.set_object_from_json(bucket=bucket, key=key, data=cls.to_data())
 
     @classmethod
     def from_data(cls, data, bucket=None):
@@ -78,7 +38,6 @@ class BaseModule:
         from Acquire.ObjectStore import string_to_datetime
         from HUGS.ObjectStore import get_bucket
 
-        # If we get an empty data dict, return an empty object
         if not data:
             raise ValueError("Unable to create object with empty dictionary")
 
@@ -108,9 +67,6 @@ class BaseModule:
         from Acquire.ObjectStore import ObjectStore
         from HUGS.ObjectStore import get_bucket
 
-        # TODO - these will have to be manually added on first setup
-        # then this can be removed_root_key
-        #  NOTE - Note sure if this is the correct way to this, how to call the ctor?
         if not cls.exists():
             return cls()
         
