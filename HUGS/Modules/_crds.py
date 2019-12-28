@@ -178,8 +178,7 @@ class CRDS(BaseModule):
             Args:
                 data_filepath (pathlib.Path): Path of datafile
             Returns:
-                tuple (str, str, list): Name of gas, ID of Datasource of this data and a list Pandas DataFrames for the 
-                date-split gas data
+                dict: Dictionary containing metadata, data and attributes keys
         """
         from pandas import RangeIndex as _RangeIndex
         from pandas import concat as _concat
@@ -247,10 +246,6 @@ class CRDS(BaseModule):
 
             site_attributes = self.site_attributes(site=site, inlet=inlet)
 
-            # # Write attributes to the new Dataset
-            # gas_data = get_attributes(ds=gas_data, species=species, site=site, network=network, 
-            #                             global_attributes=site_attributes, sampling_period=self._sampling_period)
-
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
             species_metadata["species"] = species
@@ -278,30 +273,6 @@ class CRDS(BaseModule):
 
             data[species]["data"] = get_attributes(ds=data[species]["data"], species=species, site=site, network=network,
                                                             global_attributes=site_attributes, sampling_period=self._sampling_period)
-
-        return data
-
-
-    def acrg_assign_attributes(self, data, site, network=None):
-        """ Assign attributes to the data we've processed
-
-            Args:
-                combined_data (dict): Dictionary containing data, metadata and attributes
-            Returns:
-                dict: Dictionary of combined data with correct attributes assigned to Datasets
-        """
-        from HUGS.Processing import attributes
-        
-        for species in data:
-            metadata = data[species]["metadata"]
-            site_attributes = data[species]["attributes"]
-
-            # TODO - save Dataset attributes to metadata for storage within Datasource
-
-            # data[species]["data"] = get_attributes(ds=data[species]["data"], species=species, site=site, network=network,
-            #                                                 global_attributes=site_attributes, sampling_period=self._sampling_period)
-
-            ds = attributes(ds=data[species]["data"], species=species, site=site)
 
         return data
 

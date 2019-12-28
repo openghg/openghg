@@ -6,10 +6,9 @@ __all__ = ["TEMPLATE"]
 # - template with new data name in all lower case e.g. crds
 # - CHANGEME with a new fixed uuid (at the moment)
 
-# TODO - look into what's causing the logging messages in the first place
-# This does stop them
+from HUGS.Modules import BaseModule
 
-class TEMPLATE:
+class TEMPLATE(BaseModule):
     """ Interface for processnig TEMPLATE data
 
         Instances of TEMPLATE should be created using the
@@ -18,132 +17,24 @@ class TEMPLATE:
     """
     _template_root = "TEMPLATE"
     # Use uuid.uuid4() to create a unique fixed UUID for this object
-    _template_uuid = "CHANGEME" # CURRENTLY BEING FIXED HERE BUT WILL BE SET AUTOMATICALLY?
+    _template_uuid = "CHANGEME"
 
     def __init__(self):
-        self._creation_datetime = None
+        from Acquire.ObjectStore import get_datetime_now
+        
+        self._creation_datetime = get_datetime_now()
         self._stored = False
-        # Processed data
-        self._proc_data = None
-        # Datasource UUIDs
-        self._datasources = []
-
-    def is_null(self):
-        """ Check if this is a null object
-
-            Returns:
-                bool: True if object is null
-        """
-        return self._datasources is None
-
-    @staticmethod
-    def create():
-        """ This function should be used to create TEMPLATE objects
-
-            Returns:
-                TEMPLATE: TEMPLATE object 
-        """
-        from Acquire.ObjectStore import get_datetime_now as _get_datetime_now
-
-        c = TEMPLATE()
-        c._creation_datetime = _get_datetime_now()
-
-        return c
-
-
-    @staticmethod
-    def read_folder(folder_path, recursive=False):
-        """ Read all data matching filter in folder
-
-            Args:
-                folder_path (str): Path of folder
-        """
-        from glob import glob as _glob
-        from os import path as _path
-        from HUGS.Modules import TEMPLATE as _TEMPLATE
-
-        # This finds data files in sub-folders
-        folder_path = _path.join(folder_path, "./*.dat")
-        # This finds files in the current folder, get recursive
-        # folder_path = _path.join(folder_path, "*.dat")
-        filepaths = _glob(folder_path, recursive=True)
-
-        if len(filepaths) == 0:
-            raise FileNotFoundError("No data files found")
-
-        for fp in filepaths:
-            TEMPLATE.read_file(data_filepath=fp)
-
-
-    @staticmethod
-    def read_file(data_filepath):
-        """ Creates a TEMPLATE object holding data stored within Datasources
-
-            TODO - currently only works with a single Datasource
-
-            Args:
-                filepath (str): Path of file to load
-            Returns:
-                None
-        """
-        from pandas import read_csv as _read_csv
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-        from HUGS.Processing import create_datasources as _create_datasources
-
-        # Load in the object from the object store
-        # This can be replaced with TEMPLATE.create for testing
-        template = TEMPLATE.load()
-
-        # Get the filename from the filepath
-        filename = data_filepath.split("/")[-1]
-
-        # This function should split the data into a format that
-        # can be given to the Datasources. See the read_data function for this format
-        gas_data = template.read_data(data_filepath=data_filepath)
-
-        # Create Datasources, save them to the object store and get their UUIDs
-        datasource_uuids = _create_datasources(gas_data)
-
-        # Add the Datasources to the list of datasources associated with this object
-        template.add_datasources(datasource_uuids)
-
-        template.save()
-
-        return template
-
-    def read_data(self, data_filepath):
-        """ Separates the gases stored in the dataframe in 
-            separate dataframes and returns a dictionary of gases
-            with an assigned UUID as gas:UUID and a list of the processed
-            dataframes
-
-            Args:
-                data (Pandas.Dataframe): Dataframe containing all data
-            Returns:
-                tuple (str, str, list): Name of gas, ID of Datasource of this data and a list Pandas DataFrames for the 
-                date-split gas data
-        """
-        from pandas import RangeIndex as _RangeIndex
-        from pandas import concat as _concat
-        from pandas import read_csv as _read_csv
-        from pandas import datetime as _pd_datetime
-        from pandas import NaT as _pd_NaT
-        from uuid import uuid4 as _uuid4
-
-        from HUGS.Processing import read_metadata
-
-        # Create metadata here
-        metadata = read_metadata(filename=data_filepath, data=data, data_type="TEMPLATE")
-
-        data_list = []
-        for n in range(n_gases):
-            # Create a copy of the metadata dict
-            species_metadata = metadata.copy()
-            species_metadata["species"] = species
-
-            data_list.append((species, species_metadata, datasource_id, gas_data))
-
-        return data_list
+        # self._datasources = []
+        # Keyed by name - allows retrieval of UUID from name
+        self._datasource_names = {}
+        # Keyed by UUID - allows retrieval of name by UUID
+        self._datasource_uuids = {}
+        # Hashes of previously uploaded files
+        self._file_hashes = {}
+        # Holds parameters used for writing attributes to Datasets
+        self._template_params = {}
+        # Sampling period of TEMPLATE data in seconds
+        self._sampling_period = 60
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -152,41 +43,15 @@ class TEMPLATE:
             Returns:
                 dict: Dictionary version of object
         """
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
+        from Acquire.ObjectStore import datetime_to_string
 
         d = {}
         # These should be able to stay the same
-        d["creation_datetime"] = _datetime_to_string(self._creation_datetime)
+        d["creation_datetime"] = datetime_to_string(self._creation_datetime)
         d["stored"] = self._stored
         d["datasources"] = self._datasources
     
         return d
-
-    @staticmethod
-    def from_data(data, bucket=None):
-        """ Create a TEMPLATE object from data
-
-            Args:
-                data (str): JSON data
-                bucket (dict, default=None): Bucket for data storage
-            Returns:
-                TEMPLATE: TEMPLATE object created from data
-        """
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
-        from HUGS.ObjectStore import get_bucket as _get_bucket
-
-        if data is None or len(data) == 0:
-            return TEMPLATE()
-
-        if bucket is None:
-            bucket = _get_bucket()
-        
-        c = TEMPLATE()
-        c._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        c._datasources = data["datasources"]
-        c._stored = False
-
-        return c
 
     def save(self, bucket=None):
         """ Save the object to the object store
@@ -196,85 +61,131 @@ class TEMPLATE:
             Returns:
                 None
         """
-        if self.is_null():
-            return
-
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import ObjectStore, string_to_encoded
+        from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
 
-        crds_key = "%s/uuid/%s" % (TEMPLATE._template_root, TEMPLATE._template_uuid)
+        key = "%s/uuid/%s" % (TEMPLATE._template_root, TEMPLATE._template_uuid)
 
         self._stored = True
-        _ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
+        ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
 
     @staticmethod
-    def load(bucket=None):
-        """ Load a TEMPLATE object from the datastore using the passed
-            bucket and UUID
+    def read_folder(folder_path, recursive=False):
+        """ Read all data matching filter in folder
 
             Args:
-                uuid (str): UUID of TEMPLATE object
-                key (str, default=None): Key of object in object store
-                bucket (dict, default=None): Bucket to store object
-            Returns:
-                Datasource: Datasource object created from JSON
+                folder_path (str): Path of folder
         """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from glob import glob
+        from os import path
+        from HUGS.Modules import TEMPLATE as _TEMPLATE
 
-        if bucket is None:
-            bucket = _get_bucket()
+        # This finds data files in sub-folders
+        folder_path = path.join(folder_path, "./*.dat")
+        # This finds files in the current folder, get recursive
+        # folder_path = _path.join(folder_path, "*.dat")
+        filepaths = glob(folder_path, recursive=True)
 
-        key = "%s/uuid/%s" % (TEMPLATE._template_root, TEMPLATE._template_uuid)
-        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
+        if not filepaths:
+            raise FileNotFoundError("No data files found")
 
-        return TEMPLATE.from_data(data=data, bucket=bucket)
+        for fp in filepaths:
+            TEMPLATE.read_file(data_filepath=fp)
 
-    @staticmethod
-    def exists(bucket=None):
-        """ Query the object store to check if a template object already exists
+     @staticmethod
+    def read_file(data_filepath, source_name, site=None, source_id=None, overwrite=False):
+        """ Creates a TEMPLATE object holding data stored within Datasources
 
             Args:
-                bucket (dict, default=None): Bucket for data storage
+                filepath (str or Path): Path of file to load
             Returns:
-                bool: True if TEMPLATE object exists in object store
+                list: UUIDs of Datasources data has been assigned to
         """
-        from HUGS.ObjectStore import exists as _exists
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from HUGS.Processing import assign_data, lookup_gas_datasources
+        from HUGS.Util import hash_file
+        from pathlib import Path
+        import os
 
-        if bucket is None:
-            bucket = _get_bucket()
+        template = TEMPLATE.load()
 
-        key = "%s/uuid/%s" % (TEMPLATE._template_root, TEMPLATE._template_uuid)
+        # Check if the file has been uploaded already
+        file_hash = hash_file(filepath=data_filepath)
+        if file_hash in template._file_hashes and not overwrite:
+            raise ValueError(f"This file has been uploaded previously with the filename : {template._file_hashes[file_hash]}")
+        
+        data_filepath = Path(data_filepath)
+        filename = data_filepath.name
 
-        return _exists(bucket=bucket, key=key)
+        if not source_name:
+            source_name = filename.stem
 
-    def add_datasources(self, datasource_uuids):
-        """ Add the passed list of Datasources to the current list
+        if not site:
+            site = source_name.split(".")[0]
+
+        # This should return xarray Datasets
+        gas_data = template.read_data(data_filepath=data_filepath, site=site)
+
+        # Assign attributes to the xarray Datasets here data here makes it a lot easier to test
+        gas_data = template.assign_attributes(data=gas_data, site=site)
+
+        # Check if we've got data from these sources before
+        lookup_results = lookup_gas_datasources(lookup_dict=template._datasource_names, gas_data=gas_data, 
+                                                source_name=source_name, source_id=source_id)
+
+        # Assign the data to the correct datasources
+        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
+
+        # Add the Datasources to the list of datasources associated with this object
+        template.add_datasources(datasource_uuids)
+
+        # Store the hash as the key for easy searching, store the filename as well for
+        # ease of checking by user
+        template._file_hashes[file_hash] = filename
+
+        template.save()
+
+        return datasource_uuids
+
+    def read_data(self, data_filepath, site):
+        """ Separates the gases stored in the dataframe in 
+            separate dataframes and returns a dictionary of gases
+            with an assigned UUID as gas:UUID and a list of the processed
+            dataframes
 
             Args:
-                datasource_uuids (list): List of Datasource UUIDs
+                data_filepath (pathlib.Path): Path of datafile
             Returns:
-                None
+                dict: Dictionary containing attributes, data and metadata keys
         """
-        self._datasources.extend(datasource_uuids)
+        from pandas import RangeIndex
+        from pandas import concat
+        from pandas import read_csv
+        from pandas import datetime
+        from pandas import NaT
 
-    def uuid(self):
-        """ Return the UUID of this object
+        from HUGS.Processing import get_attributes, read_metadata
 
-            Returns:
-                str: UUID of  object
-        """
-        return TEMPLATE._template_uuid
+        metadata = read_metadata(filepath=data_filepath, data=data, data_type="TEMPLATE")
+        # This dictionary is used to store the gas data and its associated metadata
+        combined_data = {}
 
-    def datasources(self):
-        """ Return the list of Datasources for this object
+        for n in range(n_gases):
+            # Here we can convert the Dataframe to a Dataset and then write the attributes
+            # Load in the JSON we need to process attributes
+            gas_data = gas_data.to_xarray()
 
-            Returns:
-                list: List of Datasources
-        """
-        return self._datasources
+            site_attributes = self.site_attributes(site=site, inlet=inlet)
+
+            # Create a copy of the metadata dict
+            species_metadata = metadata.copy()
+            species_metadata["species"] = species
+            species_metadata["source_name"] = source_name
+
+            combined_data[species] = {"metadata": species_metadata, "data": gas_data, "attributes": site_attributes}
+
+        return combined_data
+
+    
