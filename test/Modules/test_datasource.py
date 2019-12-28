@@ -58,7 +58,7 @@ def mock_uuid2(monkeypatch):
 
 
 def test_add_data(data):
-    d = Datasource(name="test") 
+    d = Datasource(name="test")
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -168,7 +168,7 @@ def test_to_data(data):
 
     metadata = obj_data["metadata"]
     assert obj_data["name"] == "testing_123"
-    assert metadata["source_name"] == "testing_123"
+    assert metadata["source_name"] == "bsd.picarro.1minute.248m"
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
     assert metadata["time_resolution"] == "1_minute"
@@ -193,7 +193,7 @@ def test_from_data(data):
     d_2 = Datasource.from_data(bucket=bucket, data=obj_data, shallow=False)
 
     metadata = d_2.metadata()
-    assert metadata["source_name"] == "testing_123"
+    assert metadata["source_name"] == "bsd.picarro.1minute.248m"
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
     assert metadata["time_resolution"] == "1_minute"

@@ -25,13 +25,17 @@ class Datasource:
         self._instrument = None
         self._site = None
         self._network = None
+
+        # We expect a list of data
+        data = [data]
  
         # Store of data
         if data:
             # We expect a list
-            data = [data]
             # This could be a list of dataframes
             self._data = data
+
+            print(data)
             # Just store these as time stamps?
             # Get the first and last datetime from the list of dataframes
             # TODO - update this as each dataframe may have different start and end dates
