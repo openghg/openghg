@@ -1,47 +1,39 @@
 __all___ = ["Datasource"]
 
 class Datasource:
-    """ This class handles all data sources such as sensors
+    """ A Datasource holds data relating to a single source, such as a specific species
+        at a certain height on a specific instrument
 
+        Args:
+            name (str, default=None): Name of Datasource
+            data (list, default=None): List of xarray Datasets sorted by date
     """
     _datasource_root = "datasource"
     _datavalues_root = "values"
     _data_root = "data"
 
     def __init__(self, name=None, data=None):
-        """ Construct a Datasource 
-
-        """
+        
         from Acquire.ObjectStore import create_uuid, get_datetime_now, string_to_datetime
         from HUGS.Util import timestamp_tzaware
         
         self._uuid = create_uuid()
         self._name = name
         self._creation_datetime = get_datetime_now()
-
         self._metadata = {}
         self._parent = None
-        # These may be unnecessary?
-        self._instrument = None
-        self._site = None
-        self._network = None
-
-        # We expect a list of data
-        data = [data]
  
         # Store of data
         if data:
-            # We expect a list
             # This could be a list of dataframes
             self._data = data
-
-            print(data)
             # Just store these as time stamps?
             # Get the first and last datetime from the list of dataframes
             # TODO - update this as each dataframe may have different start and end dates
             # These should be passed in ordered
-            self._start_datetime = timestamp_tzaware(data[0].first_valid_index())
-            self._end_datetime = timestamp_tzaware(data[-1].last_valid_index())
+            self.update_daterange()
+            # self._start_datetime = timestamp_tzaware(data[0].first_valid_index())
+            # self._end_datetime = timestamp_tzaware(data[-1].last_valid_index())
         else:
             self._data = []
             self._start_datetime = None
@@ -50,14 +42,6 @@ class Datasource:
         self._stored = False
         self._data_keys = {}
         self._data_type = None
-
-    def is_null(self):
-        """Return whether this object is null
-        
-            Returns:
-                bool: True if object is null
-        """
-        return self._uuid is None
 
     def start_datetime(self):
         """ Returns the starting datetime for the data in this Datasource
@@ -304,9 +288,6 @@ class Datasource:
             Returns:
                 dict: Dictionary version of object
         """
-        if self.is_null():
-            return {}
-
         from Acquire.ObjectStore import datetime_to_string
 
         data = {}
@@ -484,9 +465,6 @@ class Datasource:
             Returns:
                 None
         """
-        if self.is_null():
-            return
-
         import tempfile
         from Acquire.ObjectStore import datetime_to_string, ObjectStore
         from HUGS.ObjectStore import get_bucket
@@ -554,21 +532,19 @@ class Datasource:
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from HUGS.ObjectStore import get_dated_object as _get_dated_object
-        from HUGS.ObjectStore import get_object_json as _get_object_json
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import ObjectStore
+        from HUGS.ObjectStore import get_bucket, get_object_json
 
         if uuid is None and key is None:
             raise ValueError("Both uuid and key cannot be None")
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
         
         if not key:
             key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
 
-        data = _get_object_json(bucket=bucket, key=key)
+        data = get_object_json(bucket=bucket, key=key)
         return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
 
     @staticmethod
@@ -582,11 +558,10 @@ class Datasource:
             Returns:
                 str: UUID for the Datasource
         """
-        # from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from HUGS.ObjectStore import get_dated_object_json as _get_dated_object_json
+        from HUGS.ObjectStore import get_dated_object_json
 
         key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
-        data = _get_dated_object_json(bucket=bucket, key=key)
+        data = get_dated_object_json(bucket=bucket, key=key)
 
         return data["name"]
 
