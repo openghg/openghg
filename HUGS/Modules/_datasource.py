@@ -128,38 +128,49 @@ class Datasource:
         from HUGS.Processing import get_split_frequency
         from xarray import Dataset
 
-        # Store the metadata as labels
-        # for k, v in metadata.items():
-        #     self.add_metadata(key=k, value=v)
-
         # Ensure metadata values are all lowercase
         metadata = {k: v.lower() for k, v in metadata.items()}
         self._metadata.update(metadata)
 
-        # Add in a type record for timeseries data
-        # Can possibly combine this function and the add_footprint (and other)
-        # functions in the future
-        # Store the hashes of data we've seen previously in a dict?
-        # Then also check that the data we're trying to input doesn't overwrite the data we
-        # currently have
-        # Be easiest to first check the dates covered by the data?
+        # For now just create a new version each time data is added
+        # Need to check what daterange the new data covers
+        # If it covers a greater period of time than the current data
+        # Just use the new data
+        # If it covers a different period / take the other data as well
+        # and keep it in the new version so "latest" has all available data
+        # Maybe this can be overridden so we just add the new data in and ignore
+        # the old
+        group = list(data.groupby("time.month"))
+        additional_data = [(g, self.get_dataset_daterange(g)) for _, g in group if len(g) > 0]
 
-        # Check the daterange covered by this data and if we have an overlap
         if self._data:
             # Existing data in Datsource
-            start_data, end_data = self.daterange()
+            start_current, end_current = self.daterange()
             # This is the data that we may want to add to the Datasource
             start_new, end_new = self.get_dataset_daterange(data)
 
-            # Check if there's overlap of data
-            if start_new >= start_data and end_new <= end_data and overwrite is False:
-                raise ValueError("The provided data overlaps dates covered by existing data")
+            # Here we need to iterate over both self._data and additional_data
+            # TODO - better way of doing this?
+            for data, daterange in self._data:
+                # If the new data
 
+            
+            # Check if there's overlap of data
+            if start_new >= start_current and end_new <= end_current and overwrite is False:
+                # raise ValueError("The provided data overlaps dates covered by existing data")
+                # Here we discard the data that overlaps the new data and take the other versions of the data
+                # raise ValueError("Overlapping data")
+
+
+        else:
+            # 
         # Unsure how to assess size of Dataset without just writing to NetCDF
         # Doesn't seem to be an xarray version of memory_usage
         group = list(data.groupby("time.month"))
         # Create a list tuples of the split dataset and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
+        
+        # TODO - how to imrove this? Use dictionary with the daterange str as the key?
         self._data = [(g, self.get_dataset_daterange(g)) for _, g in group if len(g) > 0]
         self.add_metadata(key="data_type", value="timeseries")
         self._data_type = "timeseries"
@@ -466,8 +477,15 @@ class Datasource:
         if self._data is not None:
             for data, daterange in self._data:
                 start, end = daterange
+                
                 daterange_str = "".join([datetime_to_string(start), "_", datetime_to_string(end)])
-                data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
+
+                # Each time we save this Datasource we'll create a new version, update it each time the
+                # add data function is run? Or each time the save function is run?
+                # 
+
+                data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{daterange_str}"
+                # TODO - here add in versioning check
                 self._data_keys[data_key] = daterange_str
 
                 # TODO - for now just create a temporary directory - will have to update Acquire
@@ -572,6 +590,18 @@ class Datasource:
             raise ValueError("There should only be one Datasource associated with this name")
         
         return uuid[0].split("/")[-1]
+
+    def version_data(self):
+        """ Check the version of the data passed and and check what we want
+            to do.
+
+            1. Update current data
+            2. Create a new "current" record and push the current back to v(n) where n is the number
+            of times data has been added to this Datasource
+            3. Clear data - this seems a bit dangerous to add, could just delete the whole datasource instead?
+        """
+
+
 
     def data(self):
         """ Get the data stored in this Datasource
