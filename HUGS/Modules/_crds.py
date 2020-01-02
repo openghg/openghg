@@ -276,7 +276,6 @@ class CRDS(BaseModule):
 
         return data
 
-
     def site_attributes(self, site, inlet):
         """ Gets the site specific attributes for writing to Datsets
 
@@ -284,7 +283,7 @@ class CRDS(BaseModule):
                 site (str): Site name
                 inlet (str): Inlet (example: 108m)
             Returns:
-                dict: Dictionaty of
+                dict: Dictionary of attributes
         """
         if not self._crds_params:
             from json import load

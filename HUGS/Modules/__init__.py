@@ -11,3 +11,4 @@ from ._gc import *
 from ._cranfield import *
 from ._footprint import *
 from ._lookup import *
+from ._thamesbarrier import *

@@ -1,19 +1,14 @@
-from HUGS.Modules import BaseModule
 
-__all__ = ["TEMPLATE"]
+__all__ = ["ThamesBarrier"]
 
-### To use this template replace:
-# - TEMPLATE with new data name in all upper case e.g. CRDS
-# - template with new data name in all lower case e.g. crds
-# - CHANGEME with a new fixed uuid (at the moment)
 
-class TEMPLATE(BaseModule):
-    """ Interface for processing TEMPLATE data
-        
+class ThamesBarrier(BaseModule):
+    """ Interface for processing ThamesBarrier data
+
     """
-    _template_root = "TEMPLATE"
+    _tb_root = "ThamesBarrier"
     # Use uuid.uuid4() to create a unique fixed UUID for this object
-    _template_uuid = "CHANGEME"
+    _tb_uuid = "e708ab3f-ade5-402a-a491-979095d8f7ad"
 
     def __init__(self):
         from Acquire.ObjectStore import get_datetime_now
@@ -28,9 +23,9 @@ class TEMPLATE(BaseModule):
         # Hashes of previously uploaded files
         self._file_hashes = {}
         # Holds parameters used for writing attributes to Datasets
-        self._template_params = {}
-        # Sampling period of TEMPLATE data in seconds
-        self._sampling_period = 60
+        self._tb_params = {}
+        # Sampling period of  data in seconds
+        self._sampling_period = "NA"
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -63,7 +58,7 @@ class TEMPLATE(BaseModule):
         if bucket is None:
             bucket = get_bucket()
 
-        key = f"{TEMPLATE._template_root}/uuid/{TEMPLATE._template_uuid}"
+        key = f"{ThamesBarrier._tb_root}/uuid/{ThamesBarrier._tb_uuid}"
 
         self._stored = True
         ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
@@ -93,14 +88,14 @@ class TEMPLATE(BaseModule):
         if not filepaths:
             raise FileNotFoundError("No data files found")
 
-        for fp in filepaths:
-            datasource_uuids[fp] = TEMPLATE.read_file(data_filepath=fp)
+         for fp in filepaths:
+            datasource_uuids[fp] = ThamesBarrier.read_file(data_filepath=fp)
         
         return datasource_uuids
-             
+
     @staticmethod
-    def read_file(data_filepath, source_name, site=None, source_id=None, overwrite=False):
-        """ Reads TEMPLATE data files and returns the UUIDS of the Datasources
+    def read_file(data_filepath, source_name, species, source_id=None, overwrite=False):
+        """ Reads ThamesBarrier data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
             Args:
@@ -108,52 +103,50 @@ class TEMPLATE(BaseModule):
             Returns:
                 list: UUIDs of Datasources data has been assigned to
         """
-        from HUGS.Processing import assign_data, lookup_gas_datasources
+        from HUGS.Processing import assign_data, lookup_gas_datasources, get_attributes
         from HUGS.Util import hash_file
         from pathlib import Path
         import os
 
-        template = TEMPLATE.load()
+        tb = ThamesBarrier.load()
 
         # Check if the file has been uploaded already
         file_hash = hash_file(filepath=data_filepath)
-        if file_hash in template._file_hashes and not overwrite:
-            raise ValueError(f"This file has been uploaded previously with the filename : {template._file_hashes[file_hash]}")
+        if file_hash in tb._file_hashes and not overwrite:
+            raise ValueError(f"This file has been uploaded previously with the filename : {tb._file_hashes[file_hash]}")
         
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
 
-        if not source_name:
-            source_name = filename.stem
+        site = "TMB"
 
-        if not site:
-            site = source_name.split(".")[0]
+        gas_data = tb.read_data(data_filepath=data_filepath)
 
-        # This should return xarray Datasets
-        gas_data = template.read_data(data_filepath=data_filepath, site=site)
+        for sp in gas_data:
+            units = tb._tb_params["unit_species"][sp]
+            scale = tb._tb_params["scale"][sp]
+            gas_data[sp]["data"] = get_attributes(ds=gas_data[sp]["data"], species=species, site=site, units=units, scale=scale)
 
-        # Assign attributes to the xarray Datasets here data here makes it a lot easier to test
-        gas_data = template.assign_attributes(data=gas_data, site=site)
 
         # Check if we've got data from these sources before
-        lookup_results = lookup_gas_datasources(lookup_dict=template._datasource_names, gas_data=gas_data, 
+        lookup_results = lookup_gas_datasources(lookup_dict=tb._datasource_names, gas_data=gas_data, 
                                                 source_name=source_name, source_id=source_id)
 
         # Assign the data to the correct datasources
         datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
 
         # Add the Datasources to the list of datasources associated with this object
-        template.add_datasources(datasource_uuids)
+        tb.add_datasources(datasource_uuids)
 
         # Store the hash as the key for easy searching, store the filename as well for
         # ease of checking by user
-        template._file_hashes[file_hash] = filename
+        tb._file_hashes[file_hash] = filename
 
-        template.save()
+        tb.save()
 
         return datasource_uuids
 
-    def read_data(self, data_filepath, site):
+    def read_data(self, data_filepath, species):
         """ Separates the gases stored in the dataframe in 
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
@@ -164,28 +157,61 @@ class TEMPLATE(BaseModule):
             Returns:
                 dict: Dictionary containing attributes, data and metadata keys
         """
-        from pandas import RangeIndex, concat, read_csv, datetime, NaT
-       
+        from pandas import read_csv
+        from xarray import Dataset
         from HUGS.Processing import get_attributes, read_metadata
 
-        metadata = read_metadata(filepath=data_filepath, data=data, data_type="TEMPLATE")
-        # This dictionary is used to store the gas data and its associated metadata
-        combined_data = {}
+        data = read_csv(data_filepath, parse_dates=[0], index_col=0)
+        
+        #rename columns        
+        rename_dict = {}
+        rename_dict[species_label[species]] = species
 
-        for n in range(n_gases):
-            # Here we can convert the Dataframe to a Dataset and then write the attributes
-            # Load in the JSON we need to process attributes
-            gas_data = gas_data.to_xarray()
+        if "CH4" in data.columns:
+            rename_dict = {"Methane": "CH4"}
 
-            site_attributes = self.site_attributes(site=site, inlet=inlet)
+        data = data.rename(columns=rename_dict)
+        data.index.name = "Time"
 
-            # Create a copy of the metadata dict
-            species_metadata = metadata.copy()
-            species_metadata["species"] = species
-            species_metadata["source_name"] = source_name
+        if not self._tb_params:
+            self.load_params()
+            
+        processed_data = Dataset.from_dataframe(data.loc[:, [species]].sort_index())
+        
+        #convert methane to ppb
+        if species == "CH4":
+            processed_data[species] *= 1000
+        
+        # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate when averaging    
+        processed_data["{} variability".format(species)] = processed_data[species] * 0.
 
-            combined_data[species] = {"metadata": species_metadata, "data": gas_data, "attributes": site_attributes}
+        site_attributes = self.site_attributes()
 
-        return combined_data
+        data = {}
+        # TODO - add in metadata reading
+        data[species] = {"metadata": {}, "data": processed_data, "attributes": site_attributes}
 
-    
+        return data
+            
+
+    def site_attributes(self):
+        """ Gets the site specific attributes for writing to Datsets
+
+            Returns:
+                dict: Dictionary of site attributes
+        """
+        if not self._tb_params:
+            from json import load
+            from HUGS.Util import get_datapath
+
+            filepath = get_datapath(filename="attributes.json")
+
+            with open(filepath, "r") as f:
+                data = load(f)
+                self._tb_params = data["TMB"]
+
+        attributes = self._tb_params["global_attributes"]
+        attributes["inlet_height_magl"] = data["inlet"]
+        attributes["instrument"] = data["instrument"]
+
+        return attributes
