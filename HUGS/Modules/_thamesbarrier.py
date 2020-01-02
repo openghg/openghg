@@ -1,3 +1,4 @@
+from HUGS.Modules import BaseModule
 
 __all__ = ["ThamesBarrier"]
 
@@ -88,7 +89,7 @@ class ThamesBarrier(BaseModule):
         if not filepaths:
             raise FileNotFoundError("No data files found")
 
-         for fp in filepaths:
+        for fp in filepaths:
             datasource_uuids[fp] = ThamesBarrier.read_file(data_filepath=fp)
         
         return datasource_uuids
@@ -122,6 +123,7 @@ class ThamesBarrier(BaseModule):
 
         gas_data = tb.read_data(data_filepath=data_filepath)
 
+        # At the moment we only have a single species, do some data files have multiple?
         for sp in gas_data:
             units = tb._tb_params["unit_species"][sp]
             scale = tb._tb_params["scale"][sp]
@@ -211,7 +213,7 @@ class ThamesBarrier(BaseModule):
                 self._tb_params = data["TMB"]
 
         attributes = self._tb_params["global_attributes"]
-        attributes["inlet_height_magl"] = data["inlet"]
-        attributes["instrument"] = data["instrument"]
+        attributes["inlet_height_magl"] = self._tb_params["inlet"]
+        attributes["instrument"] = self._tb_params["instrument"]
 
         return attributes
