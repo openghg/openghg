@@ -41,13 +41,14 @@ class TEMPLATE(BaseModule):
         """
         from Acquire.ObjectStore import datetime_to_string
 
-        d = {}
-        # These should be able to stay the same
-        d["creation_datetime"] = datetime_to_string(self._creation_datetime)
-        d["stored"] = self._stored
-        d["datasources"] = self._datasources
-    
-        return d
+        data = {}
+        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
+        data["stored"] = self._stored
+        data["datasource_uuids"] = self._datasource_uuids
+        data["datasource_names"] = self._datasource_names
+        data["file_hashes"] = self._file_hashes
+
+        return data
 
     def save(self, bucket=None):
         """ Save the object to the object store
