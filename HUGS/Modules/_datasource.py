@@ -20,7 +20,7 @@ class Datasource:
         self._name = name
         self._creation_datetime = get_datetime_now()
         self._metadata = {}
-        self._data = []
+        self._data = {}
 
         self._start_datetime = None
         self._end_datetime = None
@@ -140,41 +140,86 @@ class Datasource:
         # and keep it in the new version so "latest" has all available data
         # Maybe this can be overridden so we just add the new data in and ignore
         # the old
-        group = list(data.groupby("time.month"))
-        additional_data = [(g, self.get_dataset_daterange(g)) for _, g in group if len(g) > 0]
+        grouped = list(data.groupby("time.month"))
+        # additional_data = [(g, self.get_dataset_daterange(g)) for _, g in grouped if len(g) > 0]
 
+        # Use a dictionary keyed with the daterange covered by each segment of data
+        additional_data = {}
+        # Check if there's data in the group and add the data to the dictionary
+        for _, data in grouped:
+            if data:
+                daterange_str = self.get_dataset_daterange_str(dataset=data)
+                additional_data[daterange_str] = data
+
+        # Data will have been sorted by month previously. We need to loop over self._data and save the
+        # timeframes for which we have data
+
+        # # TODO - rework this, seems very long winded
         if self._data:
-            # Existing data in Datsource
-            start_current, end_current = self.daterange()
-            # This is the data that we may want to add to the Datasource
-            start_new, end_new = self.get_dataset_daterange(data)
+            # Find the ranges we don't already have data for
+            new_dateranges = [daterange for daterange in additional_data if daterange not in self._data]
+            # Get the data we currently have that isn't in the new data
+            # Get 
+            current_only = [daterange for daterange in self._data if daterange not in new_dateranges]
 
-            # Here we need to iterate over both self._data and additional_data
-            # TODO - better way of doing this?
-            for data, daterange in self._data:
-                # If the new data
+            updated_data = {}
+            for n in new_dateranges:
+                updated_data[n] = additional_data[n]
+            for c in current_only:
+                updated_data[c] = self._data[c]
+
+            self._data = updated_data
+        else:
+            self._data = additional_data
+
+
+        #     # Get the dateranges we already have
+        #     current_months = [(*daterange) for _, daterange in self._data]
+            
+        #     current_months = []
+        #     for _, daterange in self._data:
+        #         start, end = daterange
+        #         dr = pd_daterange(start=start, end=end)
+        #         current_months.append(dr)
+
+        #     # Months in new data
+        #     new_months = [(*daterange) for _, daterange in additional_data]
+
+        #     unseen = [n for n in new_months if n not in current_months]
+           
+
+        #     # Existing data in Datsource
+        #     # start_current, end_current = self.daterange()
+        #     # This is the data that we may want to add to the Datasource
+        #     # start_new, end_new = self.get_dataset_daterange(data)
+
+        #     # Here we need to iterate over both self._data and additional_data
+        #     # TODO - better way of doing this?
+        #     for data, daterange in self._data:
+        #         # If the new data
+
 
             
-            # Check if there's overlap of data
-            if start_new >= start_current and end_new <= end_current and overwrite is False:
-                # raise ValueError("The provided data overlaps dates covered by existing data")
-                # Here we discard the data that overlaps the new data and take the other versions of the data
-                # raise ValueError("Overlapping data")
+        #     # Check if there's overlap of data
+        #     if start_new >= start_current and end_new <= end_current and overwrite is False:
+        #         # raise ValueError("The provided data overlaps dates covered by existing data")
+        #         # Here we discard the data that overlaps the new data and take the other versions of the data
+        #         # raise ValueError("Overlapping data")
 
 
-        else:
-            # 
-        # Unsure how to assess size of Dataset without just writing to NetCDF
-        # Doesn't seem to be an xarray version of memory_usage
-        group = list(data.groupby("time.month"))
-        # Create a list tuples of the split dataset and the daterange it covers
-        # As some (years, months, weeks) may be empty we don't want those dataframes
+        # else:
+        #     # 
+        # # Unsure how to assess size of Dataset without just writing to NetCDF
+        # # Doesn't seem to be an xarray version of memory_usage
+        # group = list(data.groupby("time.month"))
+        # # Create a list tuples of the split dataset and the daterange it covers
+        # # As some (years, months, weeks) may be empty we don't want those dataframes
         
-        # TODO - how to imrove this? Use dictionary with the daterange str as the key?
-        self._data = [(g, self.get_dataset_daterange(g)) for _, g in group if len(g) > 0]
+        # # TODO - how to imrove this? Use dictionary with the daterange str as the key?
+        # self._data = [(g, self.get_dataset_daterange(g)) for _, g in group if len(g) > 0]
         self.add_metadata(key="data_type", value="timeseries")
         self._data_type = "timeseries"
-        # Use daterange() to update the recorded values
+        # # Use daterange() to update the recorded values
         self.update_daterange()
 
     def add_footprint_data(self, metadata, data, overwrite=False):
@@ -254,6 +299,16 @@ class Datasource:
         except:
             raise AttributeError("This dataset does not have a time attribute, unable to read date range")
 
+    def get_dataset_daterange_str(self, dataset):
+        start, end = self.get_dataset_daterange(dataset=dataset)
+
+        # Tidy the string and concatenate them
+        start = str(start).replace(" ", "-")
+        end = str(end).replace(" ", "-")
+
+        daterange_str = start + "_" + end
+
+        return daterange_str
 
     @staticmethod
     def exists(datasource_id, bucket=None):
@@ -474,17 +529,15 @@ class Datasource:
         # For now we'll get the data type from the metadata
         # data_type = self._metadata["data_type"]        
 
-        if self._data is not None:
-            for data, daterange in self._data:
-                start, end = daterange
-                
-                daterange_str = "".join([datetime_to_string(start), "_", datetime_to_string(end)])
+        if self._data:
+            for daterange in self._data:
+                # daterange_str = "".join([datetime_to_string(start), "_", datetime_to_string(end)])
+                daterange_str = daterange
 
                 # Each time we save this Datasource we'll create a new version, update it each time the
                 # add data function is run? Or each time the save function is run?
-                # 
 
-                data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{daterange_str}"
+                data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{daterange}"
                 # TODO - here add in versioning check
                 self._data_keys[data_key] = daterange_str
 
@@ -614,7 +667,7 @@ class Datasource:
     def sort_data(self):
         """ Sorts the data in the data list
 
-            TODO: Could this be better handled using an OrderedDict?
+            TODO - Remove ? this should be redundant now
 
             Returns:
                 None
@@ -636,11 +689,11 @@ class Datasource:
         from HUGS.Util import timestamp_tzaware
 
         if self._data:
-            # Sort the data by date
-            self.sort_data()
+            keys = sorted(self._data.keys())
 
-            start, _ = self.get_dataset_daterange(self._data[0][0])
-            _, end = self.get_dataset_daterange(self._data[-1][0])
+            start = keys[0].split("_")[0]
+            end = keys[-1].split("_")[1]
+
             self._start_datetime = timestamp_tzaware(start)
             self._end_datetime = timestamp_tzaware(end)
 
