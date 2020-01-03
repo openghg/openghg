@@ -63,25 +63,27 @@ def test_add_data(data):
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    # assert ch4_data["ch4 count"][0] == pytest.approx(1960.24)
-    # assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
-    # assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
+    assert ch4_data["ch4 count"][0] == pytest.approx(1960.24)
+    assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
+    assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
 
-    # assert d._data[0][0]["ch4 count"].equals(ch4_data["ch4 count"])
-    # assert d._data[0][0]["ch4 stdev"].equals(ch4_data["ch4 stdev"])
-    # assert d._data[0][0]["ch4 n_meas"].equals(ch4_data["ch4 n_meas"])
+    daterange = "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
 
-    # datasource_metadata = d.metadata()
+    assert d._data[daterange]["ch4 count"].equals(ch4_data["ch4 count"])
+    assert d._data[daterange]["ch4 stdev"].equals(ch4_data["ch4 stdev"])
+    assert d._data[daterange]["ch4 n_meas"].equals(ch4_data["ch4 n_meas"])
 
-    # assert datasource_metadata['data_type'] == 'timeseries'
-    # assert datasource_metadata['height'] == '248m'
-    # assert datasource_metadata['instrument'] == 'picarro'
-    # assert datasource_metadata['port'] == '8'
-    # assert datasource_metadata['site'] == 'bsd'
-    # assert datasource_metadata['source_name'] == 'bsd.picarro.1minute.248m'
-    # assert datasource_metadata['species'] == 'ch4'
+    datasource_metadata = d.metadata()
+
+    assert datasource_metadata['data_type'] == 'timeseries'
+    assert datasource_metadata['height'] == '248m'
+    assert datasource_metadata['instrument'] == 'picarro'
+    assert datasource_metadata['port'] == '8'
+    assert datasource_metadata['site'] == 'bsd'
+    assert datasource_metadata['source_name'] == 'bsd.picarro.1minute.248m'
+    assert datasource_metadata['species'] == 'ch4'
 
 def test_get_dataframe_daterange():
     n_days = 100
@@ -123,15 +125,17 @@ def test_save_footprint():
     data = xarray.open_dataset(filepath)
 
     datasource = Datasource(name="test_name")
-    datasource.add_footprint_data(metadata=metadata, data=data)
+    datasource.add_data(metadata=metadata, data=data, data_type="footprint")
     datasource.save()
 
     prefix = "%s/uuid/%s" % (Datasource._datasource_root, datasource._uuid)
     objs = ObjectStore.get_all_object_names(bucket, prefix)
 
     datasource_2 = Datasource.load(bucket=bucket, key=objs[0])
-
-    data = datasource_2._data[0][0]
+    
+    date_key = "2013-06-02-00:00:00+00:00_2013-06-30-00:00:00+00:00"
+    
+    data = datasource_2._data[date_key]
 
     assert float(data.pressure[0].values) == pytest.approx(1023.971)
     assert float(data.pressure[2].values) == pytest.approx(1009.940)
@@ -217,6 +221,10 @@ def test_update_daterange(data):
 
     d.add_data(metadata=metadata, data=ch4_short, overwrite=True)
 
+    # TODO - why is the time not updating properly here?
+
+    assert False
+
     assert d._start_datetime == pd.Timestamp("2014-01-30 10:52:30+00:00")
     assert d._end_datetime == pd.Timestamp("2014-01-30 13:22:30+00:00")
     
@@ -232,7 +240,7 @@ def test_load_dataset():
 
     d = Datasource("dataset_test")
     
-    d.add_footprint_data(metadata=metadata, data=ds)
+    d.add_data(metadata=metadata, data=ds, data_type="footprint")
 
     d.save()
 
