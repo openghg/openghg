@@ -57,6 +57,17 @@ def mock_uuid2(monkeypatch):
     monkeypatch.setattr(uuid, 'uuid4', mock_uuid)
 
 
+def test_versioning(data):
+    d = Datasource(name="test")
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
+
+    d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
+
+    print(d._data_keys)
+
+    assert False
+
 def test_add_data(data):
     d = Datasource(name="test")
 

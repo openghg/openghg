@@ -155,6 +155,7 @@ class Datasource:
         for _, data in grouped:
             if data:
                 daterange_str = self.get_dataset_daterange_str(dataset=data)
+                print("\n\nIn add data ", daterange_str)
                 additional_data[daterange_str] = data
 
         # Data will have been sorted by month previously. We need to loop over self._data and save the
@@ -165,7 +166,6 @@ class Datasource:
             # Find the ranges we don't already have data for
             new_dateranges = [daterange for daterange in additional_data if daterange not in self._data]
             # Get the data we currently have that isn't in the new data
-            # Get 
             current_only = [daterange for daterange in self._data if daterange not in new_dateranges]
 
             updated_data = {}
@@ -173,6 +173,8 @@ class Datasource:
                 updated_data[n] = additional_data[n]
             for c in current_only:
                 updated_data[c] = self._data[c]
+
+            print("\n\nUpdated data: ", updated_data)
 
             self._data = updated_data
         else:
@@ -665,15 +667,15 @@ class Datasource:
                 None
         """
         from pandas import Timestamp
-        from HUGS.Util import timestamp_tzaware
 
         if self._data:
+            print("\n\n", self._data)
             keys = sorted(self._data.keys())
 
             start = keys[0].split("_")[0]
             end = keys[-1].split("_")[1]
 
-            print("Start end in update_daterange()", start, end)
+            print("\n\nStart end in update_daterange()", start, end)
 
             self._start_datetime = Timestamp(start, tz="UTC")
             self._end_datetime = Timestamp(end, tz="UTC")
