@@ -146,7 +146,7 @@ class Datasource:
         # Maybe this can be overridden so we just add the new data in and ignore
         # the old
 
-        # We expect a tuple below but won't group footprint data t the moment, so create one here
+        # We expect a tuple below but won't group footprint data at the moment, so create one here
         if data_type == "footprint":
             grouped = [(None, data)]
         else:
@@ -184,33 +184,6 @@ class Datasource:
         # # Use daterange() to update the recorded values
         self.update_daterange()
 
-    # def add_footprint_data(self, metadata, data, overwrite=False):
-    #     """ Add footprint data
-    #         The data is stored as a tuple of the data and the daterange it covers.
-
-    #         Args:
-    #             metadata (dict): Metadata on the data for this Datasource
-    #             data (xarray.Dataset): Footprint data
-    #         Returns:
-    #             None
-    #     """
-    #     self._metadata.update(metadata)
-    #     self.add_metadata(key="data_type", value="footprint")
-    #     self._data_type = "footprint"
-        
-    #     start, end = self.get_dataset_daterange(data)
-        
-    #     if self._data:
-    #         start_existing, end_existing = self.daterange()
-    #         # Check if there's overlap of data
-    #         if start >= start_existing and end <= end_existing and overwrite is False:
-    #             raise ValueError("The provided data overlaps dates covered by existing data")
-        
-    #     # Really we should just concatenate the Datasets?
-    #     # Concatenated datasets would be be better when we move to zarr
-    #     # but as we're still using NetCDF this current methods works best
-    #     self._data.append((data, (start, end)))
-    #     self.update_daterange()
 
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed DataFrame
@@ -245,9 +218,6 @@ class Datasource:
         """
         from xarray import Dataset
         from pandas import Timestamp
-
-        # if not isinstance(dataset, Dataset):
-        #     raise TypeError("Only xarray Dataset types can be processed")
 
         try:
             start = Timestamp(dataset.time[0].values, tz="UTC")
@@ -327,7 +297,6 @@ class Datasource:
         data = get_dated_object(bucket, key)
 
         return Datasource.hdf_to_dataframe(data)
-
 
     @staticmethod
     def load_dataset(bucket, key):
