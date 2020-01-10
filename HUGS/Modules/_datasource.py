@@ -116,6 +116,7 @@ class Datasource:
         # Use daterange() to update the recorded values
         self.update_daterange()
 
+
     def add_data(self, metadata, data, data_type=None, overwrite=False):
         """ Add data to this Datasource and segment the data by size.
             The data is stored as a tuple of the data and the daterange it covers.
@@ -129,6 +130,7 @@ class Datasource:
                 None
         """
         from HUGS.Processing import get_split_frequency
+        from HUGS.Util import date_overlap
         from xarray import Dataset
 
         # Ensure metadata values are all lowercase
@@ -150,90 +152,33 @@ class Datasource:
         else:
             grouped = list(data.groupby("time.month"))
 
-        # additional_data = [(g, self.get_dataset_daterange(g)) for _, g in grouped if len(g) > 0]
-
         # Use a dictionary keyed with the daterange covered by each segment of data
         additional_data = {}
         # Check if there's data in the group and add the data to the dictionary
         for _, data in grouped:
             if data:
                 daterange_str = self.get_dataset_daterange_str(dataset=data)
-
                 additional_data[daterange_str] = data
 
-        # Data will have been sorted by month previously. We need to loop over self._data and save the
-        # timeframes for which we have data
-
-        # # TODO - rework this, seems very long winded
         if self._data:
-            # At the moment this isn't clever enough to check if the dateranges overlap
-            print("We're in self._data")
-            # Find the ranges we don't already have data for
-            new_dateranges = [daterange for daterange in additional_data if daterange not in self._data]
-
-            print("New dateranges: ", new_dateranges)
-            # Get the data we currently have that isn't in the new data
-            current_only = [daterange for daterange in self._data if daterange not in new_dateranges]
-
-            print("Existing dateranges : ", current_only)
+            # We don't want the same data twice, this will be stored in previous versions
+            # Check for overlap between exisiting and new dateranges
+            to_keep = []
+            for current_daterange in self._data:
+                for new_daterange in additional_data:
+                    if not date_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
+                        to_keep.append(current_daterange)
 
             updated_data = {}
-            for n in new_dateranges:
-                updated_data[n] = additional_data[n]
-            for c in current_only:
-                updated_data[c] = self._data[c]
-
-            print("Updated data : ", updated_data.keys())
+            for k in to_keep:
+                updated_data[k] = self._data[k]
+            # Add in the additional new data
+            updated_data.update(additional_data)
 
             self._data = updated_data
         else:
             self._data = additional_data
 
-
-        #     # Get the dateranges we already have
-        #     current_months = [(*daterange) for _, daterange in self._data]
-            
-        #     current_months = []
-        #     for _, daterange in self._data:
-        #         start, end = daterange
-        #         dr = pd_daterange(start=start, end=end)
-        #         current_months.append(dr)
-
-        #     # Months in new data
-        #     new_months = [(*daterange) for _, daterange in additional_data]
-
-        #     unseen = [n for n in new_months if n not in current_months]
-           
-
-        #     # Existing data in Datsource
-        #     # start_current, end_current = self.daterange()
-        #     # This is the data that we may want to add to the Datasource
-        #     # start_new, end_new = self.get_dataset_daterange(data)
-
-        #     # Here we need to iterate over both self._data and additional_data
-        #     # TODO - better way of doing this?
-        #     for data, daterange in self._data:
-        #         # If the new data
-
-
-            
-        #     # Check if there's overlap of data
-        #     if start_new >= start_current and end_new <= end_current and overwrite is False:
-        #         # raise ValueError("The provided data overlaps dates covered by existing data")
-        #         # Here we discard the data that overlaps the new data and take the other versions of the data
-        #         # raise ValueError("Overlapping data")
-
-
-        # else:
-        #     # 
-        # # Unsure how to assess size of Dataset without just writing to NetCDF
-        # # Doesn't seem to be an xarray version of memory_usage
-        # group = list(data.groupby("time.month"))
-        # # Create a list tuples of the split dataset and the daterange it covers
-        # # As some (years, months, weeks) may be empty we don't want those dataframes
-        
-        # # TODO - how to imrove this? Use dictionary with the daterange str as the key?
-        # self._data = [(g, self.get_dataset_daterange(g)) for _, g in group if len(g) > 0]
         self.add_metadata(key="data_type", value="timeseries")
         self._data_type = "timeseries"
         # # Use daterange() to update the recorded values
@@ -585,6 +530,9 @@ class Datasource:
                 bucket (dict, default=None): Bucket to store object
                 uuid (str, default=None): UID of Datasource
                 name (str, default=None): Name of Datasource
+                shallow (bool, default=False): Only load JSON data, do not
+                read Datasets from object store. This will speed up creation
+                of the Datasource object.
             Returns:
                 Datasource: Datasource object created from JSON
         """
