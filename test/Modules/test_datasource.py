@@ -57,17 +57,6 @@ def mock_uuid2(monkeypatch):
     monkeypatch.setattr(uuid, 'uuid4', mock_uuid)
 
 
-def test_versioning(data):
-    d = Datasource(name="test")
-    metadata = data["ch4"]["metadata"]
-    ch4_data = data["ch4"]["data"]
-
-    d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
-
-    print(d._data_keys)
-
-    assert False
-
 def test_add_data(data):
     d = Datasource(name="test")
 
@@ -80,11 +69,9 @@ def test_add_data(data):
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
 
-    daterange = "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
-
-    assert d._data[daterange]["ch4 count"].equals(ch4_data["ch4 count"])
-    assert d._data[daterange]["ch4 stdev"].equals(ch4_data["ch4 stdev"])
-    assert d._data[daterange]["ch4 n_meas"].equals(ch4_data["ch4 n_meas"])
+    assert d._data[0][0]["ch4 count"].equals(ch4_data["ch4 count"])
+    assert d._data[0][0]["ch4 stdev"].equals(ch4_data["ch4 stdev"])
+    assert d._data[0][0]["ch4 n_meas"].equals(ch4_data["ch4 n_meas"])
 
     datasource_metadata = d.metadata()
 
@@ -95,6 +82,39 @@ def test_add_data(data):
     assert datasource_metadata['site'] == 'bsd'
     assert datasource_metadata['source_name'] == 'bsd.picarro.1minute.248m'
     assert datasource_metadata['species'] == 'ch4'
+
+
+def test_versioning(data):
+    # Take head of data
+    # Then add the full data, check versioning works correctly
+    metadata = {"foo": "bar"}
+
+    d = Datasource(name="foo")
+    
+    ch4_data = data["ch4"]["data"]
+
+    short = ch4_data.head(40)
+
+    d.add_data(metadata=metadata, data=short)
+
+    d.save()
+
+    d.add_data(metadata=metadata, data=ch4_data)
+
+    d.save()
+
+    d.add_data(metadata=metadata, data=ch4_data)
+
+    d.save()
+
+    d.add_data(metadata=metadata, data=ch4_data)
+
+    d.save()
+
+    print(d.versions())
+
+    assert False
+
 
 def test_get_dataframe_daterange():
     n_days = 100
@@ -136,17 +156,15 @@ def test_save_footprint():
     data = xarray.open_dataset(filepath)
 
     datasource = Datasource(name="test_name")
-    datasource.add_data(metadata=metadata, data=data, data_type="footprint")
+    datasource.add_footprint_data(metadata=metadata, data=data)
     datasource.save()
 
     prefix = "%s/uuid/%s" % (Datasource._datasource_root, datasource._uuid)
     objs = ObjectStore.get_all_object_names(bucket, prefix)
 
     datasource_2 = Datasource.load(bucket=bucket, key=objs[0])
-    
-    date_key = "2013-06-02-00:00:00+00:00_2013-06-30-00:00:00+00:00"
-    
-    data = datasource_2._data[date_key]
+
+    data = datasource_2._data[0][0]
 
     assert float(data.pressure[0].values) == pytest.approx(1023.971)
     assert float(data.pressure[2].values) == pytest.approx(1009.940)
@@ -216,7 +234,7 @@ def test_from_data(data):
 
     assert d_2.to_data() == d.to_data()
 
-def test_update_daterange(data):
+def test_update_daterange_replacement(data):
     metadata = {"foo": "bar"}
 
     d = Datasource(name="foo")
@@ -230,11 +248,9 @@ def test_update_daterange(data):
 
     ch4_short = ch4_data.head(40)
 
+    d._data = None
+
     d.add_data(metadata=metadata, data=ch4_short, overwrite=True)
-
-    # TODO - why is the time not updating properly here?
-
-    assert False
 
     assert d._start_datetime == pd.Timestamp("2014-01-30 10:52:30+00:00")
     assert d._end_datetime == pd.Timestamp("2014-01-30 13:22:30+00:00")
@@ -251,7 +267,7 @@ def test_load_dataset():
 
     d = Datasource("dataset_test")
     
-    d.add_data(metadata=metadata, data=ds, data_type="footprint")
+    d.add_footprint_data(metadata=metadata, data=ds)
 
     d.save()
 

@@ -81,7 +81,6 @@ class TEMPLATE(BaseModule):
         """
         from glob import glob
         from os import path
-        from HUGS.Modules import TEMPLATE as _TEMPLATE
 
         # This finds data files in sub-folders
         folder_path = path.join(folder_path, "./*.dat")

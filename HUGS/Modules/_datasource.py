@@ -13,6 +13,7 @@ class Datasource:
 
     def __init__(self, name=None):
         from Acquire.ObjectStore import create_uuid, get_datetime_now
+        from collections import defaultdict
         
         self._uuid = create_uuid()
         self._name = name
@@ -26,8 +27,10 @@ class Datasource:
 
         self._stored = False
         # This dictionary stored the keys for each version of data uploaded
-        self._data_keys = {}
+        self._data_keys = defaultdict(dict)
         self._data_type = None
+        # Hold information regarding the versions of the data
+        self._versions = {}
 
     def start_datetime(self):
         """ Returns the starting datetime for the data in this Datasource
@@ -155,7 +158,7 @@ class Datasource:
         for _, data in grouped:
             if data:
                 daterange_str = self.get_dataset_daterange_str(dataset=data)
-                print("\n\nIn add data ", daterange_str)
+
                 additional_data[daterange_str] = data
 
         # Data will have been sorted by month previously. We need to loop over self._data and save the
@@ -163,10 +166,16 @@ class Datasource:
 
         # # TODO - rework this, seems very long winded
         if self._data:
+            # At the moment this isn't clever enough to check if the dateranges overlap
+            print("We're in self._data")
             # Find the ranges we don't already have data for
             new_dateranges = [daterange for daterange in additional_data if daterange not in self._data]
+
+            print("New dateranges: ", new_dateranges)
             # Get the data we currently have that isn't in the new data
             current_only = [daterange for daterange in self._data if daterange not in new_dateranges]
+
+            print("Existing dateranges : ", current_only)
 
             updated_data = {}
             for n in new_dateranges:
@@ -174,7 +183,7 @@ class Datasource:
             for c in current_only:
                 updated_data[c] = self._data[c]
 
-            print("\n\nUpdated data: ", updated_data)
+            print("Updated data : ", updated_data.keys())
 
             self._data = updated_data
         else:
@@ -503,8 +512,8 @@ class Datasource:
         d._data_type = data["data_type"]
         
         if d._stored and not shallow:
-            for date_key in d._data_keys["latest"]:
-                data_key = d._data_keys["latest"][date_key]
+            for date_key in d._data_keys["latest"]["keys"]:
+                data_key = d._data_keys["latest"]["keys"][date_key]
                 d._data[date_key] = Datasource.load_dataset(bucket=bucket, key=data_key)
 
         d._stored = False
@@ -520,16 +529,20 @@ class Datasource:
                 None
         """
         import tempfile
-        from Acquire.ObjectStore import datetime_to_string, ObjectStore
+        from Acquire.ObjectStore import datetime_to_string, get_datetime_now_to_string, ObjectStore
         from HUGS.ObjectStore import get_bucket
 
         if not bucket:
             bucket = get_bucket()
 
         if self._data:
+            # Ensure we have the latest key
+            if "latest" not in self._data_keys:
+                self._data_keys["latest"] = {}
+
             # Backup the old data keys at "latest"
             version_str = f"v{str(len(self._data_keys))}"
-
+            # Store the keys for the new data
             new_keys = {}
             
             # Iterate over the keys (daterange string) of the data dictionary
@@ -550,8 +563,13 @@ class Datasource:
             if "latest" in self._data_keys:            
                 self._data_keys[version_str] = self._data_keys["latest"].copy()
 
-            self._data_keys["latest"] = new_keys
+            # Save the new keys and create a timestamp
+            self._data_keys[version_str]["keys"] = new_keys
+            self._data_keys[version_str]["timestamp"] = get_datetime_now_to_string()
             
+            # Link latest to the newest version
+            self._data_keys["latest"] = self._data_keys[version_str]
+
         self._stored = True
         datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
@@ -633,8 +651,7 @@ class Datasource:
             of times data has been added to this Datasource
             3. Clear data - this seems a bit dangerous to add, could just delete the whole datasource instead?
         """
-
-
+        raise NotImplementedError()
 
     def data(self):
         """ Get the data stored in this Datasource
@@ -652,11 +669,12 @@ class Datasource:
             Returns:
                 None
         """
-        from operator import itemgetter
-        # Data list elements contain a tuple of
-        # (data,(start_datetime, end_datetime))
-        # Could also check to make sure we don't have overlapping dateranges?
-        self._data = sorted(self._data, key=itemgetter(1,0))
+        raise NotImplementedError()
+        # from operator import itemgetter
+        # # Data list elements contain a tuple of
+        # # (data,(start_datetime, end_datetime))
+        # # Could also check to make sure we don't have overlapping dateranges?
+        # self._data = sorted(self._data, key=itemgetter(1,0))
 
     def update_daterange(self):
         """ Update the dates stored by this Datasource
@@ -669,13 +687,10 @@ class Datasource:
         from pandas import Timestamp
 
         if self._data:
-            print("\n\n", self._data)
             keys = sorted(self._data.keys())
 
             start = keys[0].split("_")[0]
             end = keys[-1].split("_")[1]
-
-            print("\n\nStart end in update_daterange()", start, end)
 
             self._start_datetime = Timestamp(start, tz="UTC")
             self._end_datetime = Timestamp(end, tz="UTC")
@@ -784,3 +799,15 @@ class Datasource:
                 dict: Dictionary keyed as key: daterange covered by key
         """
         return self._data_keys
+
+    def versions(self):
+        """ Return a summary of the versions of data stored for
+            this Datasource
+            
+            WIP
+
+            Returns:
+                dict: Dictionary of versions
+        """
+        return self._data_keys
+
