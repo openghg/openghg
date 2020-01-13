@@ -1,6 +1,7 @@
 __all__ = ["get_attributes"]
 
-def get_attributes(ds, species, site, network=None, global_attributes=None, units=None, sampling_period=None, date_range=None):
+def get_attributes(ds, species, site, network=None, global_attributes=None, units=None, scales=None, 
+                                                            sampling_period=None, date_range=None):
     """ 
     This function writes attributes to an xarray.Dataset so that they conform with 
     the CF Convention v1.7
@@ -32,7 +33,8 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
             add to the file header (e.g. {"Contact": "Matt Rigby"})
         units (str, default=None): This routine will try to guess the units
             unless this is specified. Options are in units_interpret
-        scale (str, default=None): Calibration scale for file header.
+        scales (dict, default=None): Calibration scale for species. A dictionary of the form species: scale should be provided.
+        For example scale = {"CH4": "WMO-CH4-X2004"}.
         sampling_period (int, default=None): Number of seconds for which air
             sample is taken. Only for time variable attribute
         date_range (list of two strings, optional): Start and end date for output
@@ -65,7 +67,11 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     unit_species = data["unit_species"]
     unit_species_long = data["unit_species_long"]
     unit_interpret = data["unit_interpret"]
-    species_scales = data["species_scales"]
+    
+    if scales:
+        species_scales = scales
+    else:
+        scales = {}
 
     species_upper = species.upper()
     species_lower = species.lower()
@@ -247,9 +253,6 @@ def _site_info_attributes(site, network=None):
                        "long_name": "station_long_name",
                        "height_station_masl": "station_height_masl"}
 
-    if site not in site_params:
-        raise ValueError("Invalid site passed. Please use a valid site code such as BSD for Bilsdale")
-
     if not network:
         network = list(site_params[site].keys())[0]
 
@@ -260,6 +263,9 @@ def _site_info_attributes(site, network=None):
                 attr_key = attributes_dict[attr]
 
                 attributes[attr_key] = site_params[site][network][attr]
+    else:
+        raise ValueError("Invalid site passed. Please use a valid site code such as BSD for Bilsdale")
+
 
     return attributes
     

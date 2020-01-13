@@ -7,9 +7,9 @@ class ThamesBarrier(BaseModule):
     """ Interface for processing ThamesBarrier data
 
     """
-    _tb_root = "ThamesBarrier"
+    _root = "ThamesBarrier"
     # Use uuid.uuid4() to create a unique fixed UUID for this object
-    _tb_uuid = "e708ab3f-ade5-402a-a491-979095d8f7ad"
+    _uuid = "e708ab3f-ade5-402a-a491-979095d8f7ad"
 
     def __init__(self):
         from Acquire.ObjectStore import get_datetime_now
@@ -60,7 +60,7 @@ class ThamesBarrier(BaseModule):
         if bucket is None:
             bucket = get_bucket()
 
-        key = f"{ThamesBarrier._tb_root}/uuid/{ThamesBarrier._tb_uuid}"
+        key = f"{ThamesBarrier._root}/uuid/{ThamesBarrier._uuid}"
 
         self._stored = True
         ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
@@ -96,7 +96,7 @@ class ThamesBarrier(BaseModule):
         return datasource_uuids
 
     @staticmethod
-    def read_file(data_filepath, source_name, species, source_id=None, overwrite=False):
+    def read_file(data_filepath, source_name, source_id=None, overwrite=False):
         """ Reads ThamesBarrier data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
@@ -120,16 +120,14 @@ class ThamesBarrier(BaseModule):
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
 
-        site = "TMB"
-
         gas_data = tb.read_data(data_filepath=data_filepath)
-
-        # At the moment we only have a single species, do some data files have multiple?
-        for sp in gas_data:
-            units = tb._tb_params["unit_species"][sp]
-            scale = tb._tb_params["scale"][sp]
-            gas_data[sp]["data"] = get_attributes(ds=gas_data[sp]["data"], species=species, site=site, units=units, scale=scale)
-
+        
+        for species in gas_data:
+            units = tb._tb_params["unit_species"][species]
+            scale = tb._tb_params["scale"][species]
+            # Unit scales used for each species
+            species_scales = tb._tb_params["scale"]
+            gas_data[species]["data"] = get_attributes(ds=gas_data[species]["data"], species=species, site="TMB", units=units, scales=species_scales)
 
         # Check if we've got data from these sources before
         lookup_results = lookup_gas_datasources(lookup_dict=tb._datasource_names, gas_data=gas_data, 
@@ -149,7 +147,7 @@ class ThamesBarrier(BaseModule):
 
         return datasource_uuids
 
-    def read_data(self, data_filepath, species):
+    def read_data(self, data_filepath):
         """ Separates the gases stored in the dataframe in 
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
@@ -162,39 +160,33 @@ class ThamesBarrier(BaseModule):
         """
         from pandas import read_csv
         from xarray import Dataset
-        from HUGS.Processing import get_attributes, read_metadata
 
         data = read_csv(data_filepath, parse_dates=[0], index_col=0)
-        
-        #rename columns        
-        rename_dict = {}
-        rename_dict[species_label[species]] = species
 
-        if "CH4" in data.columns:
-            rename_dict = {"Methane": "CH4"}
+        rename_dict = {}        
+        if "Methane" in data.columns:
+            rename_dict["Methane"] = "CH4"
 
         data = data.rename(columns=rename_dict)
         data.index.name = "Time"
 
-        if not self._tb_params:
-            self.load_params()
+        combined_data = {}
+        for species in data.columns:
+            processed_data = Dataset.from_dataframe(data.loc[:, [species]].sort_index())
             
-        processed_data = Dataset.from_dataframe(data.loc[:, [species]].sort_index())
-        
-        #convert methane to ppb
-        if species == "CH4":
-            processed_data[species] *= 1000
-        
-        # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate when averaging    
-        processed_data["{} variability".format(species)] = processed_data[species] * 0.
+            #convert methane to ppb
+            if species == "CH4":
+                processed_data[species] *= 1000
+            
+            # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate when averaging    
+            processed_data["{} variability".format(species)] = processed_data[species] * 0.
 
-        site_attributes = self.site_attributes()
+            site_attributes = self.site_attributes()
 
-        data = {}
-        # TODO - add in metadata reading
-        data[species] = {"metadata": {}, "data": processed_data, "attributes": site_attributes}
+            # TODO - add in metadata reading
+            combined_data[species] = {"metadata": {}, "data": processed_data, "attributes": site_attributes}
 
-        return data
+        return combined_data
             
 
     def site_attributes(self):

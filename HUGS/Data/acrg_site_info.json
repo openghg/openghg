@@ -1462,6 +1462,20 @@
       "longitude": 0.32127
     }
   },
+  "TMB": {
+    "TMB": {
+      "height": [
+        "5m"
+      ],
+      "height_name": [
+        "5magl"
+      ],
+      "height_station_masl": 5.0,
+      "latitude": 51.496769,
+      "long_name": "Thames Barrier, London, UK",
+      "longitude": 0.036995
+    }
+  },
   "TPD": {
     "EC": {
       "height": [
