@@ -148,17 +148,25 @@ class Datasource:
 
         # We expect a tuple below but won't group footprint data at the moment, so create one here
         if data_type == "footprint":
-            grouped = [(None, data)]
+            grouped_data = [(None, data)]
         else:
-            grouped = list(data.groupby("time.month"))
+            # Sort by year then sort by season - happy medium of splitting for now
+            year_group = list(data.groupby("time.year"))
+            year_data = [data for _, data in year_group if data]
+            
+            grouped_data = []
+            for year in year_data:
+                season_group = list(year.groupby("time.season"))
+                seasons = [data for _, data in season_group if data]
+                grouped_data.append(seasons)
 
         # Use a dictionary keyed with the daterange covered by each segment of data
         additional_data = {}
-        # Check if there's data in the group and add the data to the dictionary
-        for _, data in grouped:
-            if data:
-                daterange_str = self.get_dataset_daterange_str(dataset=data)
-                additional_data[daterange_str] = data
+
+        for year in grouped_data:
+            for month in year:
+                daterange_str = self.get_dataset_daterange_str(dataset=month)
+                additional_data[daterange_str] = month
 
         if self._data:
             # We don't want the same data twice, this will be stored in previous versions
@@ -181,7 +189,6 @@ class Datasource:
 
         self.add_metadata(key="data_type", value="timeseries")
         self._data_type = "timeseries"
-        # # Use daterange() to update the recorded values
         self.update_daterange()
 
 
@@ -200,8 +207,6 @@ class Datasource:
             raise TypeError("Only DataFrames with a DatetimeIndex must be passed")
 
         # Here we want to make the pandas Timestamps timezone aware
-        # This seems a bit long winded but we end up with standard Python datetime objects
-        # that are timezone aware and set to UTC
         start = timestamp_tzaware(dataframe.first_valid_index())
         end = timestamp_tzaware(dataframe.last_valid_index())
 

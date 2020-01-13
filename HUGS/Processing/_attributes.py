@@ -71,7 +71,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     if scales:
         species_scales = scales
     else:
-        scales = {}
+        species_scales = {}
 
     species_upper = species.upper()
     species_lower = species.lower()

@@ -11,9 +11,9 @@ class TEMPLATE(BaseModule):
     """ Interface for processing TEMPLATE data
         
     """
-    _template_root = "TEMPLATE"
+    _root = "TEMPLATE"
     # Use uuid.uuid4() to create a unique fixed UUID for this object
-    _template_uuid = "CHANGEME"
+    _uuid = "CHANGEME"
 
     def __init__(self):
         from Acquire.ObjectStore import get_datetime_now
@@ -64,7 +64,7 @@ class TEMPLATE(BaseModule):
         if bucket is None:
             bucket = get_bucket()
 
-        key = f"{TEMPLATE._template_root}/uuid/{TEMPLATE._template_uuid}"
+        key = f"{TEMPLATE._root}/uuid/{TEMPLATE._uuid}"
 
         self._stored = True
         ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
