@@ -354,3 +354,6 @@ with more information
 TODO
 
 Ensure the data list passed to the datasource is in a sorted format!
+
+
+Why is the time not updating correctly?
