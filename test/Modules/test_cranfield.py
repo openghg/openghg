@@ -44,9 +44,11 @@ def test_read_file(cranfield_obj):
     co2_datasouce = Datasource.load(uuid=uuids["thames_barrier_cumulative_calibrated_hourly_means_TEST_co2"], shallow=False)
     co_datasouce = Datasource.load(uuid=uuids["thames_barrier_cumulative_calibrated_hourly_means_TEST_co"], shallow=False)
 
-    ch4_data = ch4_datasouce.data()[0][0]
-    co2_data = co2_datasouce.data()[0][0]
-    co_data = co_datasouce.data()[0][0]
+    date_key = "2018-05-05-00:00:00+00:00_2018-05-13-16:00:00+00:00"
+    
+    ch4_data = ch4_datasouce._data[date_key]
+    co2_data = co2_datasouce._data[date_key]
+    co_data = co_datasouce._data[date_key]
 
     assert len(uuids) == 3
 

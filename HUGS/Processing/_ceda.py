@@ -88,10 +88,8 @@ def create_upload_file(filepath=None, site=None, instrument=None, height=None, w
     if filepath:
         with open(filepath, "w") as f:
             if write_yaml:
-                print("Writing to yaml")
                 yaml.dump(data, stream=f, indent=4)
             else:
-                print("Writing to JSON")
                 json.dump(data, fp=f, indent=4)
 
         return None
