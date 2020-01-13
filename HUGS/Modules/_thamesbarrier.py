@@ -161,25 +161,28 @@ class ThamesBarrier(BaseModule):
         from pandas import read_csv
         from xarray import Dataset
 
-        data = read_csv(data_filepath, parse_dates=[0], index_col=0)
+        data = read_csv(data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0)
+        # Drop NaNs from the data
+        data = data.dropna(axis="rows", how="any")
 
-        rename_dict = {}        
+        rename_dict = {}
         if "Methane" in data.columns:
             rename_dict["Methane"] = "CH4"
 
         data = data.rename(columns=rename_dict)
-        data.index.name = "Time"
+        data.index.name = "time"
 
         combined_data = {}
+        
         for species in data.columns:
-            processed_data = Dataset.from_dataframe(data.loc[:, [species]].sort_index())
-            
-            #convert methane to ppb
+            processed_data = data.loc[:, [species]].to_xarray()
+
+            # Convert methane to ppb
             if species == "CH4":
                 processed_data[species] *= 1000
             
             # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate when averaging    
-            processed_data["{} variability".format(species)] = processed_data[species] * 0.
+            processed_data["{} variability".format(species)] = processed_data[species] * 0.0
 
             site_attributes = self.site_attributes()
 

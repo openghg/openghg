@@ -34,7 +34,7 @@ def test_read_file():
 
     uuids = tb.read_file(data_filepath=filepath, source_name="TMB")
 
-    date_key = "2019-07-01-00:39:55+00:00_2019-07-31-23:59:55+00:00"
+    date_key = "2019-07-01-00:39:55+00:00_2019-07-31-23:44:55+00:00"
 
     ch4_ds = Datasource.load(uuid=uuids["TMB_CH4"])
     co2_ds = Datasource.load(uuid=uuids["TMB_CO2"])
@@ -56,6 +56,8 @@ def test_read_file():
     assert co_data["co"][0] == pytest.approx(0.08788712)
     assert co_data["co_variability"][0] == 0
 
+    print(co_data)
+
 
 def test_read_data():
     tb = ThamesBarrier()
@@ -69,18 +71,20 @@ def test_read_data():
     data = tb.read_data(data_filepath=filepath)
 
     attributes = {'data_owner': 'Valerio Ferracci', 'data_owner_email': 'V.Ferracci@cranfield.ac.uk', 
-    'Notes': '~5m above high tide water level, in tidal region of the Thames', 
-    'inlet_height_magl': '5 m', 'instrument': 'Picarro G2401'}
+                    'Notes': '~5m above high tide water level, in tidal region of the Thames', 
+                    'inlet_height_magl': '5 m', 'instrument': 'Picarro G2401'}
 
     assert sorted(list(data.keys())) == sorted(["CH4", "CO", "CO2"])
     assert data["CH4"]["attributes"] == attributes
     assert data["CH4"]["metadata"] == {}
 
+    ch4_data = data["CH4"]["data"]
 
+    assert ch4_data.time[0] == pd.Timestamp("2019-07-01T00:39:55.000000000")
+    assert ch4_data.time[-1] == pd.Timestamp("2019-08-01T00:10:30.000000000")
+    assert ch4_data["CH4"][0] == pytest.approx(1960.8357162)
+    assert ch4_data["CH4"][-1] == pytest.approx(2002.003717)
 
-
-
-    
 
 
 
