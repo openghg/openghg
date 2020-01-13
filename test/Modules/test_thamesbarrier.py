@@ -1,13 +1,14 @@
-import pytest
-from pathlib import Path
-
 import logging
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
+import pytest
+import os
+from pathlib import Path
+import pandas as pd
+
 from HUGS.Modules import Datasource, ThamesBarrier
 from HUGS.ObjectStore import get_local_bucket
-
 
 def test_site_attributes():
     tb = ThamesBarrier()
@@ -23,20 +24,64 @@ def test_site_attributes():
 def test_read_file():
     _ = get_local_bucket(empty=True)
 
-    filename = "7_Jul_2019_calibrated_data.csv"
-    data_path = "/home/gar/Documents/Devel/hugs/raw_data/thames_data"
-
-    filepath = Path(data_path).joinpath(filename)
-
     tb = ThamesBarrier()
 
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/ThamesBarrier"
+    filename = "thames_test_20190707.csv"
+
+    filepath = os.path.join(dir_path, test_data, filename)
+
     uuids = tb.read_file(data_filepath=filepath, source_name="TMB")
+
+    date_key = "2019-07-01-00:39:55+00:00_2019-07-31-23:59:55+00:00"
 
     ch4_ds = Datasource.load(uuid=uuids["TMB_CH4"])
     co2_ds = Datasource.load(uuid=uuids["TMB_CO2"])
     co_ds = Datasource.load(uuid=uuids["TMB_CO"])
 
-    print(ch4_ds._data)
+    ch4_data = ch4_ds._data[date_key]
+    co2_data = co2_ds._data[date_key]
+    co_data = co_ds._data[date_key]
+
+    assert ch4_data.time[0] == pd.Timestamp("2019-07-01T00:39:55.000000000")
+    assert ch4_data["ch4"][0] == pytest.approx(1960.835716)
+    assert ch4_data["ch4_variability"][0] == 0
+
+    assert co2_data.time[0] == pd.Timestamp("2019-07-01T00:39:55.000000000")
+    assert co2_data["co2"][0] == pytest.approx(417.973447)
+    assert co2_data["co2_variability"][0] == 0
+
+    assert co_data.time[0] == pd.Timestamp("2019-07-01T00:39:55.000000000")
+    assert co_data["co"][0] == pytest.approx(0.08788712)
+    assert co_data["co_variability"][0] == 0
+
+
+def test_read_data():
+    tb = ThamesBarrier()
+
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/proc_test_data/ThamesBarrier"
+    filename = "thames_test_20190707.csv"
+
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    data = tb.read_data(data_filepath=filepath)
+
+    attributes = {'data_owner': 'Valerio Ferracci', 'data_owner_email': 'V.Ferracci@cranfield.ac.uk', 
+    'Notes': '~5m above high tide water level, in tidal region of the Thames', 
+    'inlet_height_magl': '5 m', 'instrument': 'Picarro G2401'}
+
+    assert sorted(list(data.keys())) == sorted(["CH4", "CO", "CO2"])
+    assert data["CH4"]["attributes"] == attributes
+    assert data["CH4"]["metadata"] == {}
+
+
+
+
+
+    
+
 
 
 

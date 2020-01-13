@@ -66,9 +66,6 @@ def test_read_file(crds):
 
     assert ch4_data["ch4_count"][0].values == pytest.approx(1905.92)
 
-
-
-
     # print(ch4_data.variables)
     # assert ch4_data["ch4_count"][0] == pytest.approx(1993.83)
     # assert ch4_data["ch4_stdev"][0] == pytest.approx(1.555)
