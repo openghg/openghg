@@ -167,17 +167,11 @@ class NOAA(BaseModule):
             Returns:
                 dict: Dictionary containing attributes, data and metadata keys
         """
+        from HUGS.Util import read_header
         from pandas import read_csv, Timestamp
         import numpy as np
 
-        header = []
-        # Get the number of header lines
-        with open(data_filepath, "r") as f:
-            for line in f:
-                if line.startswith("#"):
-                    header.append(line)
-                else:
-                    break
+        header = read_header(filepath=data_filepath)
 
         column_names = header[-1][14:].split()
 
@@ -194,6 +188,7 @@ class NOAA(BaseModule):
                         "sample_minute": np.int,
                         "sample_seconds": np.int}
         
+        # Number of header lines to skip
         n_skip = len(header)
 
         data = read_csv(data_filepath, skiprows=n_skip, names=column_names, sep=r"\s+", dtype=data_types, parse_dates=date_parsing, 

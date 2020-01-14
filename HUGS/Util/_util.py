@@ -4,7 +4,8 @@
 
 __all__ = ["url_join", "get_daterange_str", "get_datetime_epoch", 
             "get_datetime_now", "get_datetime", "unanimous", "load_object",
-            "hash_file", "timestamp_tzaware", "get_datapath", "date_overlap"]
+            "hash_file", "timestamp_tzaware", "get_datapath", "date_overlap",
+            "read_header"]
 
 def url_join(*args):
     """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
@@ -208,3 +209,25 @@ def date_overlap(daterange_a, daterange_b):
         return True
     else:
         return False
+
+
+def read_header(filepath, comment_char="#"):
+    """ Reads the header lines denoted by the comment_char
+
+        Args:
+            filepath (str or Path): Path to file
+            comment_char (str, default="#"): Character that denotes a comment line
+            at the start of a file
+    """
+    comment_char = str(comment_char)
+
+    header = []
+    # Get the number of header lines
+    with open(data_filepath, "r") as f:
+        for line in f:
+            if line.startswith(comment_char):
+                header.append(line)
+            else:
+                break
+
+    return header
