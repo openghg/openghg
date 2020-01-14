@@ -13,3 +13,4 @@ from ._footprint import *
 from ._lookup import *
 from ._thamesbarrier import *
 from ._noaa import *
+from ._icos import *

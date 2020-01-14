@@ -223,7 +223,7 @@ def read_header(filepath, comment_char="#"):
 
     header = []
     # Get the number of header lines
-    with open(data_filepath, "r") as f:
+    with open(filepath, "r") as f:
         for line in f:
             if line.startswith(comment_char):
                 header.append(line)

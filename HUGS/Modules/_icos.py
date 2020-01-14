@@ -168,6 +168,7 @@ class ICOS(BaseModule):
                 dict: Dictionary containing attributes, data and metadata keys
         """
         from pandas import RangeIndex, concat, read_csv, datetime, NaT, Timestamp
+        import numpy as np
         from HUGS.Processing import get_attributes, read_metadata
         from HUGS.Util import read_header
 
@@ -182,7 +183,8 @@ class ICOS(BaseModule):
                 return NaT
 
         datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
-        use_cols = ["Day", "Month", "Year", "Hour", "Minute", str(species.lower()), "SamplingHeight", "Stdev", "NbPoints"]
+        # use_cols = ["Day", "Month", "Year", "Hour", "Minute", str(species.lower()), "SamplingHeight", "Stdev", "NbPoints"]
+        use_cols = ["Year", "Month", "Day", "Hour", "Minute", str(species.lower()), "Stdev", "NbPoints"]
         
         dtypes = {"Day": np.int,
                   "Month": np.int,
@@ -194,7 +196,7 @@ class ICOS(BaseModule):
                   "SamplingHeight": np.float,
                   "NbPoints": np.int}
 
-        data = read_csv(data_filepath, skiprows=n_skip, parse_dates=datetime_columns, index_col="time", 
+        data = read_csv(data_filepath, skiprows=n_skip, parse_dates=datetime_columns, index_col="time", sep=";"
                         usecols=use_cols, dtype=dtypes, na_values="-999.99")
 
         data = data[data[species.lower()] >= 0.0]
@@ -213,5 +215,14 @@ class ICOS(BaseModule):
 
         data = data.rename(columns=rename_dict)
 
+        combined_data = {}
 
+        site_attributes = {}
+
+        metadata = {}
+        metadata["species"] = species
+
+        combined_data[species] = {"metadata": metadata, "data": data, "attributes": site_attributes}
+
+        return data
 
