@@ -114,6 +114,7 @@ def test_to_data(gc):
     assert data["stored"] == True
     assert data["creation_datetime"] == datetime_to_string(datetime.datetime(1970,1,1))
 
+
 def test_from_data(gc):
     data = gc.to_data()
 

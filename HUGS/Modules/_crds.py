@@ -180,22 +180,18 @@ class CRDS(BaseModule):
             Returns:
                 dict: Dictionary containing metadata, data and attributes keys
         """
-        from pandas import RangeIndex as _RangeIndex
-        from pandas import concat as _concat
-        from pandas import read_csv as _read_csv
-        from pandas import datetime as _pd_datetime
-        from pandas import NaT as _pd_NaT
-
+        from pandas import RangeIndex, read_csv, NaT
+        from pandas import datetime as pd_datetime
         from HUGS.Processing import get_attributes, read_metadata
 
         # Function to parse the datetime format found in the datafile
         def parse_date(date):
             try:
-                return _pd_datetime.strptime(date, '%y%m%d %H%M%S')
+                return pd_datetime.strptime(date, '%y%m%d %H%M%S')
             except ValueError:
-                return _pd_NaT
+                return NaT
 
-        data = _read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"],
+        data = read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"],
                             parse_dates=[[0,1]], date_parser=parse_date)
         data.index.name = "time"
 
@@ -227,7 +223,7 @@ class CRDS(BaseModule):
             gas_data = data.iloc[:, skip_cols + n*n_cols: skip_cols + (n+1)*n_cols]
 
             # Reset the column numbers
-            gas_data.columns = _RangeIndex(gas_data.columns.size)
+            gas_data.columns = RangeIndex(gas_data.columns.size)
             species = gas_data[0][0]
             species = species.lower()
 
@@ -266,11 +262,9 @@ class CRDS(BaseModule):
         from HUGS.Processing import get_attributes
 
         for species in data:
-            metadata = data[species]["metadata"]
             site_attributes = data[species]["attributes"]
 
             # TODO - save Dataset attributes to metadata for storage within Datasource
-
             data[species]["data"] = get_attributes(ds=data[species]["data"], species=species, site=site, network=network,
                                                             global_attributes=site_attributes, sampling_period=self._sampling_period)
 

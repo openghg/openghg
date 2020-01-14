@@ -150,10 +150,11 @@ class Datasource:
         if data_type == "footprint":
             grouped_data = [(None, data)]
         else:
-            # Sort by year then sort by season - happy medium of splitting for now
+            # Group by year then by season
             year_group = list(data.groupby("time.year"))
             year_data = [data for _, data in year_group if data]
             
+            # TODO - improve this
             grouped_data = []
             for year in year_data:
                 season_group = list(year.groupby("time.season"))
