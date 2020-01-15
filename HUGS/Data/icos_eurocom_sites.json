@@ -1,0 +1,102 @@
+{
+    "MHD": {
+        "latitude": 53.32611,
+        "longitude": -9.90389
+    },
+    "RGL": {
+        "latitude": 51.997435,
+        "longitude": -2.5399
+    },
+    "TAC": {
+        "latitude": 52.51775,
+        "longitude": 1.13872
+    },
+    "CBW": {
+        "latitude": 58.97,
+        "longitude": -4.926
+    },
+    "HUN": {
+        "latitude": 46.95,
+        "longitude": 16.65
+    },
+    "HEI": {
+        "latitude": 49.417,
+        "longitude": 8.674
+    },
+    "KAS": {
+        "latitude": 49.232,
+        "longitude": 19.982
+    },
+    "LUT": {
+        "latitude": 53.404,
+        "longitude": 6.353
+    },
+    "PAL": {
+        "latitude": 67.973,
+        "longitude": 24.116
+    },
+    "SMR": {
+        "latitude": 61.847,
+        "longitude": 24.295
+    },
+    "SSL": {
+        "latitude": 47.92,
+        "longitude": 7.92
+    },
+    "LMP": {
+        "latitude": 35.52,
+        "longitude": 12.62
+    },
+    "OPE": {
+        "latitude": 48.562,
+        "longitude": 5.504
+    },
+    "TRN": {
+        "latitude": 47.965,
+        "longitude": 2.112
+    },
+    "WAO": {
+        "latitude": 52.95042,
+        "longitude": 1.12194
+    },
+    "CMN": {
+        "latitude": 44.193889,
+        "longitude": 10.701389
+    },
+    "JFJ": {
+        "latitude": 46.5475,
+        "longitude": 7.979167
+    },
+    "IZO": {
+        "latitude": 28.309,
+        "longitude": 16.499
+    },
+    "TTA": {
+        "latitude": 56.55511,
+        "longitude": -2.98598
+    },
+    "HFD": {
+        "latitude": 50.97675,
+        "longitude": 0.23048
+    },
+    "BIS": {
+        "latitude": 44.38,
+        "longitude": -1.23
+    },
+    "BIK": {
+        "latitude": 53.23,
+        "longitude": 23.01
+    },
+    "BIR": {
+        "latitude": 58.23,
+        "longitude": 8.15
+    },
+    "PRS": {
+        "latitude": 45.935,
+        "longitude": 7.7070
+    },
+    "SVB": {
+        "latitude": 64.14,
+        "longitude": 19.46
+    }
+}

@@ -2,11 +2,6 @@ from HUGS.Modules import BaseModule
 
 __all__ = ["EUROCOM"]
 
-### To use this template replace:
-# - EUROCOM with new data name in all upper case e.g. CRDS
-# - template with new data name in all lower case e.g. crds
-# - CHANGEME with a new fixed uuid (at the moment)
-
 class EUROCOM(BaseModule):
     """ Interface for processing EUROCOM data
 
@@ -118,12 +113,12 @@ class EUROCOM(BaseModule):
         from pathlib import Path
         import os
 
-        template = EUROCOM.load()
+        eurocom = EUROCOM.load()
 
         # Check if the file has been uploaded already
         file_hash = hash_file(filepath=data_filepath)
-        if file_hash in template._file_hashes and not overwrite:
-            raise ValueError(f"This file has been uploaded previously with the filename : {template._file_hashes[file_hash]}")
+        if file_hash in eurocom._file_hashes and not overwrite:
+            raise ValueError(f"This file has been uploaded previously with the filename : {eurocom._file_hashes[file_hash]}")
         
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
@@ -132,26 +127,26 @@ class EUROCOM(BaseModule):
             source_name = filename.stem
 
         if not site:
-            site = source_name.split(".")[0]
+            site = source_name.split("_")[0]
 
         # This should return xarray Datasets
-        gas_data = template.read_data(data_filepath=data_filepath, site=site)
+        gas_data = eurocom.read_data(data_filepath=data_filepath, site=site)
 
         # Check if we've got data from these sources before
-        lookup_results = lookup_gas_datasources(lookup_dict=template._datasource_names, gas_data=gas_data, 
+        lookup_results = lookup_gas_datasources(lookup_dict=eurocom._datasource_names, gas_data=gas_data, 
                                                 source_name=source_name, source_id=source_id)
 
         # Assign the data to the correct datasources
         datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
 
         # Add the Datasources to the list of datasources associated with this object
-        template.add_datasources(datasource_uuids)
+        eurocom.add_datasources(datasource_uuids)
 
         # Store the hash as the key for easy searching, store the filename as well for
         # ease of checking by user
-        template._file_hashes[file_hash] = filename
+        eurocom._file_hashes[file_hash] = filename
 
-        template.save()
+        eurocom.save()
 
         return datasource_uuids
 
@@ -216,11 +211,10 @@ class EUROCOM(BaseModule):
 
         site_attributes = self.site_attributes(site=site, inlet=inlet_height)
 
-        # try:
-        calibration_scale = self._eurocom_params["calibration"][site.upper()]
-        # except KeyError:
-        #     calibration_scale = {}
-        print(calibration_scale)
+        try:
+            calibration_scale = self._eurocom_params["calibration"][site]
+        except KeyError:
+            calibration_scale = {}
 
         gas_data = get_attributes(ds=data, species=species, site=site, scales=calibration_scale,
                                      global_attributes=site_attributes, units="ppm")
@@ -229,7 +223,8 @@ class EUROCOM(BaseModule):
         metadata = {}
         metadata["site"] = site
         metadata["species"] = species
-        metadata["inlet_height"] = inlet_height
+        metadata["inlet_height"] = site_attributes["inlet_height_m"]
+        # metadata["site_attributes"] = site_attributes
 
         combined_data[species] = {"metadata": metadata, "data": gas_data, "attributes": site_attributes}
 
@@ -263,7 +258,7 @@ class EUROCOM(BaseModule):
             else:
                 inlet = "NA"
 
-        attributes["inlet_height_m"] = inlet
+        attributes["inlet_height_m"] = str(inlet)
 
         return attributes
 

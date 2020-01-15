@@ -42,7 +42,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
             (e.g. ["1900-01-01", "2010-01-01"])
     """
     import datetime
-    from json import load as json_load
+    import json
     from pandas import Timestamp as pd_Timestamp
     from pathlib import Path
     from HUGS.Util import get_datapath
@@ -61,7 +61,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     data_path = get_datapath(filename=attributes_filename)
     
     with open(data_path, "r") as f:
-        data = json_load(f)
+        data = json.load(f)
 
     species_translator = data["species_translation"]
     unit_species = data["unit_species"]
@@ -116,13 +116,14 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     # TODO - at the moment the attributes.json needs updating to ensure all the correct
     # species are available. Some CO2 specific networks like EUROCOM just have the calibration
     # scale used and don't have a specific CO2 key, this should work temporarily
-    print(species_scales)
+    # TODO - check what's best practice for this kind of behaviour
     try:
         scale = species_scales[species_upper]
     except KeyError:
-        scale = species_scales
-
-    
+        if isinstance(species_scales, dict):
+            scale = json.dumps(species_scales)
+        else:
+            scale = "Unknown"
 
     global_attributes["Calibration_scale"] = scale
 
