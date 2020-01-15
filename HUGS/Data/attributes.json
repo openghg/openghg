@@ -160,9 +160,7 @@
             "Notes": "~5m above high tide water level, in tidal region of the Thames"
         }
     },
-
-    "NOAA":
-    {
+    "NOAA": {
         "unit_species": {
             "CH4": "ppb",
             "C2H6": "ppb",
@@ -187,6 +185,97 @@
         "global_attributes": {
             "data_owner": "Ed Dlugokencky, Gabrielle Petron (CO)",
             "data_owner_email": "ed.dlugokencky@noaa.gov, gabrielle.petron@noaa.gov"
+        }
+    },
+    "EUROCOM": {
+        "global_attributes": {
+            "origin": "Obspack_Drought_Rona_Thompson",
+            "citation": "See Obspack info for site",
+            "main_provider_name": "See Obspack",
+            "main_provider_affiliation": "See Obspack",
+            "main_provider_email": "See Obspack",
+            "fair_usage": "Contact dataprovider with Obspack details before use"
+        },
+        "instrument_dict": {
+            "MHD": "CRDS",
+            "RGL": "CRDS",
+            "TAC": "CRDS",
+            "CBW": "NDIR",
+            "HUN": "NDIR",
+            "HEI": "GC-FID",
+            "KAS": "GC-FID",
+            "LUT": "GC-FID",
+            "PAL": "NDIR",
+            "SMR": "CRDS",
+            "SSL": "NDIR",
+            "LMP": "NDIR",
+            "OPE": "CRDS",
+            "TRN": "GC-FID",
+            "WAO": "NDIR",
+            "CMN": "GC-FID",
+            "JFJ": "CRDS",
+            "BIS": "CRDS",
+            "BIK": "CRDS",
+            "BIR": "CRDS",
+            "IZO": "CRDS",
+            "PRS": "CRDS",
+            "TTA": "CRDS",
+            "HFD": "CRDS",
+            "SVB": "CRDS"
+        },
+        "intake_height": {
+            "MHD": 10,
+            "RGL": 90,
+            "TAC": 185,
+            "CBW": 207,
+            "HUN": 115,
+            "HEI": 30,
+            "KAS": 5,
+            "LUT": 60,
+            "PAL": 12,
+            "SMR": 125,
+            "SSL": 12,
+            "LMP": 10,
+            "OPE": 120,
+            "TRN": 180,
+            "WAO": 10,
+            "CMN": 12,
+            "JFJ": 10,
+            "BIS": 47,
+            "BIK": 300,
+            "BIR": 10,
+            "IZO": 10,
+            "PRS": 10,
+            "TTA": 222,
+            "HFD": 100,
+            "SVB": 150
+        },
+        "calibration_dict": {
+            "MHD": "695: WMOX2007; 41: Unknown,WMOX2007; 54: Unknown,WMOX2007",
+            "RGL": "WMO CO2 X2007",
+            "TAC": "WMO CO2 X2007",
+            "CBW": "WMO CO2 X2007",
+            "HUN": "WMO CO2 X2007",
+            "HEI": "WMO CO2 X2007",
+            "KAS": "WMO CO2 X2007",
+            "LUT": "WMO CO2 X2007",
+            "PAL": "WMO CO2 X2007",
+            "SMR": "311: WMOX2007",
+            "SSL": "WMO CO2 X2007",
+            "LMP": "WMO CO2 X2007",
+            "OPE": "728: WMOX2007; 187: WMOX2007; 75: Unknown,WMOX2007; 91: WMOX2007; 379: WMOX2007",
+            "TRN": "472: WMOX2007; 108: WMOX2007",
+            "WAO": "WMO CO2 X2007",
+            "CMN": "WMO CO2 X1993, WMO CO2 X2007",
+            "JFJ": "WMO CO2 X2007",
+            "BIS": "WMO CO2 X2007",
+            "BIK": "WMO CO2 X2007",
+            "BIR": "WMO CO2 X2007",
+            "IZO": "WMO CO2 X2007",
+            "PRS": "WMO CO2 X2007",
+            "TTA": "WMO CO2 X2007",
+            "HFD": "WMO CO2 X2007",
+            "SVB": "WMO CO2 X2007"
         }
     }
 }
