@@ -15,7 +15,7 @@ class VoilaInterface:
         # Create an Interface object, this handles the creation of ipywidgets and
         # widgets layout etc
         self._interface = Interface()
-        # Create the voila interface
+        # Create the widget boxes to use in the voila interface
         self._interface.voila_interface()
 
     def interface_module(self, module_name):
@@ -80,6 +80,7 @@ class VoilaInterface:
         """
         register_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["account_circle"]), "  Register"])])
         login_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["check_circle_outline"]), "  Login"])])
+        upload_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["fa-upload"]), "  Upload"])])
         search_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["search"]), "  Search"])])
         # map_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["search"]), "  Map"])])
         plot_nav = v.ListItem(children=[v.ListItemTitle(children=[v.Icon(children=["fa-bar-chart"]), "  Plotting"])])
@@ -98,6 +99,9 @@ class VoilaInterface:
             # reg_layout.children = self.interface_module(module_name="search")
             reg_layout.children = self.search_select_layout()
 
+        def on_upload_click(widget, event, data):
+            reg_layout.children = self.interface_module(module_name="upload")
+
         # def on_map_click(widget, event, data):
         #     print(self.interface_module(module_name="map"))
         #     reg_layout.children = self.interface_module(module_name="map")
@@ -111,8 +115,9 @@ class VoilaInterface:
         search_nav.on_event("click", on_search_click)
         plot_nav.on_event("click", on_plot_click)
         # map_nav.on_event("click", on_map_click)
+        upload_nav.on_event("click", on_upload_click)
 
-        nav_items = [register_nav, login_nav, search_nav, plot_nav]
+        nav_items = [register_nav, login_nav, upload_nav, search_nav, plot_nav]
 
         nav_drawer = v.NavigationDrawer(v_model=True, children=nav_items)
 

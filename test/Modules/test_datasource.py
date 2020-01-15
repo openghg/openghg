@@ -1,22 +1,24 @@
 import datetime
+import io
 import os
+from pathlib import Path
 import pytest
 import uuid
+import numpy as np
 import pandas as pd
+import tempfile
 import xarray
 import zarr
-
 
 from Acquire.ObjectStore import ObjectStore
 from Acquire.ObjectStore import string_to_encoded
 
 from HUGS.ObjectStore import get_dated_object
 from HUGS.ObjectStore import get_dated_object_json
-from HUGS.Modules import Datasource
+from HUGS.Modules import Datasource, CRDS
 from HUGS.ObjectStore import get_local_bucket
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
-
 mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
 
 @pytest.fixture(scope="session")
@@ -26,12 +28,16 @@ def data():
     test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
 
-    return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
+    filepath = Path(filepath)
+
+    crds = CRDS.load()
+    combined_data = crds.read_data(data_filepath=filepath, site="bsd")
+    
+    return combined_data
 
 @pytest.fixture
 def datasource():
-    return Datasource.create(name="test_name", instrument="test_instrument",
-                                site="test_site", network="test_network")
+    return Datasource(name="test_name", )
 
 @pytest.fixture
 def mock_uuid(monkeypatch):
@@ -51,25 +57,95 @@ def mock_uuid2(monkeypatch):
     monkeypatch.setattr(uuid, 'uuid4', mock_uuid)
 
 
-# @pytest.fixture(scope="session")
-# def save_data_in_store(mock_uuid):
-#     bucket = local_bucket.get_local_bucket()
-#     datasource = get_datasources(raw_data=data)[0]
-#     original_slice = datasource._data.head(1)
+def test_add_data(data):
+    d = Datasource(name="test")
 
-#     # data = Datasource.create(name="test_name", instrument="test_instrument", site="test_site",
-#     #                          network="test_network", data=datasource._data)
-#     # data.save(bucket)
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
 
-#     print("Save data in store uuid : ", datasource._uuid)
+    assert ch4_data["ch4 count"][0] == pytest.approx(1960.24)
+    assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
+    assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
 
-#     datasource.save(bucket)
+    d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
+
+    date_key = "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
+
+    return False
+
+    assert d._data[date_key]["ch4 count"].equals(ch4_data["ch4 count"])
+    assert d._data[date_key]["ch4 stdev"].equals(ch4_data["ch4 stdev"])
+    assert d._data[date_key]["ch4 n_meas"].equals(ch4_data["ch4 n_meas"])
+
+    datasource_metadata = d.metadata()
+
+    assert datasource_metadata['data_type'] == 'timeseries'
+    assert datasource_metadata['height'] == '248m'
+    assert datasource_metadata['instrument'] == 'picarro'
+    assert datasource_metadata['port'] == '8'
+    assert datasource_metadata['site'] == 'bsd'
+    assert datasource_metadata['source_name'] == 'bsd.picarro.1minute.248m'
+    assert datasource_metadata['species'] == 'ch4'
+
+
+def test_versioning(data):
+    # Take head of data
+    # Then add the full data, check versioning works correctly
+    metadata = {"foo": "bar"}
+
+    d = Datasource(name="foo")
+    # Fix the UUID for the tests
+    d._uuid = "4b91f73e-3d57-47e4-aa13-cb28c35d3b3d"
+    
+    ch4_data = data["ch4"]["data"]
+
+    v1 = ch4_data.head(20)
+    v2 = ch4_data.head(30)
+    v3 = ch4_data.head(40)
+
+    d.add_data(metadata=metadata, data=v1)
+
+    d.save()
+
+    d.add_data(metadata=metadata, data=v2)
+
+    d.save()
+
+    d.add_data(metadata=metadata, data=v3)
+
+    d.save()
+
+    keys = d.versions()
+
+    assert keys["v1"]["keys"]["2014-01-30-10:52:30+00:00_2014-01-30-12:20:30+00:00"] \
+                == 'data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2014-01-30-10:52:30+00:00_2014-01-30-12:20:30+00:00'
+
+    assert list(keys["v2"]["keys"].values()) == ["data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2014-01-30-10:52:30+00:00_2014-01-30-13:12:30+00:00"]
+
+    assert list(keys["v3"]["keys"].values()) ==  ['data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2014-01-30-10:52:30+00:00_2014-01-30-13:22:30+00:00']
+
+    assert keys["v3"]["keys"] == keys["latest"]["keys"]
+
+
+def test_get_dataframe_daterange():
+    n_days = 100
+    epoch = datetime.datetime(1970,1,1,1,1)
+    random_data = pd.DataFrame(data=np.random.randint(0, 100, size=(100, 4)), 
+                    index=pd.date_range(epoch, epoch + datetime.timedelta(n_days-1), freq='D'), columns=list('ABCD'))
+
+    d = Datasource(name="test")
+
+    start, end = d.get_dataframe_daterange(random_data)
+
+    assert start == pd.Timestamp("1970-01-01 01:01:00+0000")
+    assert end == pd.Timestamp("1970-04-10 01:01:00+0000")
+
 
 def test_save(mock_uuid2):
     bucket = get_local_bucket()
 
-    datasource = Datasource.create(name="test_name", instrument="test_instrument", site="test_site", network="test_network")
-
+    datasource = Datasource(name="test_name")
+    datasource.add_metadata(key="data_type", value="timeseries")
     datasource.save(bucket)
 
     prefix = "%s/uuid/%s" % (Datasource._datasource_root, datasource._uuid)
@@ -84,14 +160,14 @@ def test_save_footprint():
     metadata = {"test": "testing123"}
 
     dir_path = os.path.dirname(__file__)
-    test_data = "../data"
+    test_data = "../data/emissions"
     filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
     filepath = os.path.join(dir_path, test_data, filename)
 
     data = xarray.open_dataset(filepath)
 
-    datasource = Datasource.create(name="test_name")
-    datasource.add_footprint_data(metadata=metadata, data=data)
+    datasource = Datasource(name="test_name")
+    datasource.add_data(metadata=metadata, data=data, data_type="footprint")
     datasource.save()
 
     prefix = "%s/uuid/%s" % (Datasource._datasource_root, datasource._uuid)
@@ -99,44 +175,138 @@ def test_save_footprint():
 
     datasource_2 = Datasource.load(bucket=bucket, key=objs[0])
 
-    data = datasource_2._data[0][0]
+    date_key = "2013-06-02-00:00:00+00:00_2013-06-30-00:00:00+00:00"
+
+    data = datasource_2._data[date_key]
+
     assert float(data.pressure[0].values) == pytest.approx(1023.971)
     assert float(data.pressure[2].values) == pytest.approx(1009.940)
     assert float(data.pressure[-1].values) == pytest.approx(1021.303)
 
-def test_creation(mock_uuid, datasource):
-    assert datasource._uuid == mocked_uuid
-    assert datasource._name == "test_name"
-    # assert datasource._instrument == "test_instrument"
-    # assert datasource._site == "test_site"
-    # assert datasource._network == "test_network"
+def test_add_metadata(datasource):
+    datasource.add_metadata(key="foo", value=123)
+    datasource.add_metadata(key="bar", value=456)
+
+    assert datasource._metadata["foo"] == "123"
+    assert datasource._metadata["bar"] == "456"
+
+def test_exists():
+    d = Datasource(name="testing")
+    d.save()
+
+    exists = Datasource.exists(datasource_id=d.uuid())
+
+    assert exists == True
+
+def test_to_data(data):
+    d = Datasource(name="testing_123")
+
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
+
+    assert ch4_data["ch4 count"][0] == pytest.approx(1960.24)
+    assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
+    assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
+
+    d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
+
+    obj_data = d.to_data()
+
+    metadata = obj_data["metadata"]
+    assert obj_data["name"] == "testing_123"
+    assert metadata["source_name"] == "bsd.picarro.1minute.248m"
+    assert metadata["site"] == "bsd"
+    assert metadata["instrument"] == "picarro"
+    assert metadata["time_resolution"] == "1_minute"
+    assert metadata["height"] == "248m"
+    assert obj_data["data_type"] == "timeseries"
+    assert len(obj_data["data_keys"]) == 0
 
 
-def test_to_data(mock_uuid, datasource):
-    data = datasource.to_data()
+def test_from_data(data):
+    d = Datasource(name="testing_123")
 
-    assert data["UUID"] == mocked_uuid
-    assert data["name"] == "test_name"
-    # assert data["instrument"] == "test_instrument"
-    # assert data["site"] == "test_site"
-    # assert data["network"] == "test_network"
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
 
-def test_from_data(mock_uuid):
-    
-    datasource = Datasource.create(name="test_name_two", instrument="test_instrument_two",
-                                              site="test_site_two", network="test_network_two")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
+
+    obj_data = d.to_data()
 
     bucket = get_local_bucket()
 
-    data = datasource.to_data()
-    new_datasource = Datasource.from_data(bucket=bucket, data=datasource.to_data(), shallow=False)
+    # Create a new object with the data from d
+    d_2 = Datasource.from_data(bucket=bucket, data=obj_data, shallow=False)
 
-    assert new_datasource._name == "test_name_two"
-    assert new_datasource._uuid == mocked_uuid
+    metadata = d_2.metadata()
+    assert metadata["source_name"] == "bsd.picarro.1minute.248m"
+    assert metadata["site"] == "bsd"
+    assert metadata["instrument"] == "picarro"
+    assert metadata["time_resolution"] == "1_minute"
+    assert metadata["height"] == "248m"
 
-    assert new_datasource._labels["instrument"] == "test_instrument_two"
-    assert new_datasource._labels["site"] == "test_site_two"
-    assert new_datasource._labels["network"] == "test_network_two"
+    assert d_2.to_data() == d.to_data()
+
+def test_update_daterange_replacement(data):
+    metadata = {"foo": "bar"}
+
+    d = Datasource(name="foo")
+    
+    ch4_data = data["ch4"]["data"]
+
+    d.add_data(metadata=metadata, data=ch4_data)
+
+    assert d._start_datetime == pd.Timestamp("2014-01-30 10:52:30+00:00")
+    assert d._end_datetime == pd.Timestamp("2014-01-30 14:20:30+00:00")
+
+    ch4_short = ch4_data.head(40)
+
+    d._data = None
+
+    d.add_data(metadata=metadata, data=ch4_short, overwrite=True)
+
+    assert d._start_datetime == pd.Timestamp("2014-01-30 10:52:30+00:00")
+    assert d._end_datetime == pd.Timestamp("2014-01-30 13:22:30+00:00")
+    
+def test_load_dataset():
+    filename = "WAO-20magl_EUROPE_201306_small.nc"
+    dir_path = os.path.dirname(__file__)
+    test_data = "../data/emissions"
+    filepath = os.path.join(dir_path, test_data, filename)
+
+    ds = xarray.load_dataset(filepath)
+
+    metadata = {"some": "metadata"}
+
+    d = Datasource("dataset_test")
+    
+    d.add_data(metadata=metadata, data=ds, data_type="footprint")
+
+    d.save()
+
+    keys = d._data_keys["latest"]["keys"]
+
+    key = list(keys.values())[0]
+    
+    bucket = get_local_bucket()
+
+    loaded_ds = Datasource.load_dataset(bucket=bucket, key=key)
+
+    assert loaded_ds.equals(ds)
+
+def test_search_metadata():
+    d = Datasource(name="test_search")
+    
+    d._metadata = {"unladen": "swallow", "spam": "eggs"}
+
+    assert d.search_metadata("swallow") == True
+    assert d.search_metadata("eggs") == True
+    assert d.search_metadata("eggs") == True
+    assert d.search_metadata("Swallow") == True
+
+    assert d.search_metadata("beans") == False
+    assert d.search_metadata("flamingo") == False
+
 
 
 

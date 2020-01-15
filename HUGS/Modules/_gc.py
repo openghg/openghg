@@ -1,4 +1,5 @@
 from enum import Enum
+from HUGS.Modules import BaseModule
 
 __all__ = ["GC"]
 
@@ -18,13 +19,14 @@ def _test_data():
     return path
 
 
-class GC:
-    _gc_root = "GC"
-    _gc_uuid = "8cba4797-510c-gcgc-8af1-e02a5ee57489"
+class GC(BaseModule):
+    _root = "GC"
+    _uuid = "8cba4797-510c-gcgc-8af1-e02a5ee57489"
 
     def __init__(self):
-        # self._uuid = None
-        self._creation_datetime = None
+        from Acquire.ObjectStore import get_datetime_now
+
+        self._creation_datetime = get_datetime_now()
         self._stored = False
         self._datasources = []
         # Keyed by name - allows retrieval of UUID from name
@@ -37,47 +39,6 @@ class GC:
         self._site_codes = {}
         self._params = {}
 
-    def is_null(self):
-        """ Check if this is a null object
-
-            Returns:
-                bool: True if object is null
-        """
-        return len(self._datasource_uuids) == 0
-
-    @staticmethod
-    def exists(bucket=None):
-        """ Check if a GC object is already saved in the object 
-            store
-
-            Args:
-                bucket (dict, default=None): Bucket for data storage
-            Returns:
-                bool: True if object exists
-        """
-        from HUGS.ObjectStore import exists
-        from HUGS.ObjectStore import get_bucket
-
-        if bucket is None:
-            bucket = get_bucket()
-
-        key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
-        return exists(bucket=bucket, key=key)
-
-    @staticmethod
-    def create():
-        """ This function should be used to create GC objects
-
-            Returns:
-                GC: GC object 
-        """
-        from Acquire.ObjectStore import get_datetime_now
-
-        gc = GC()
-        gc._creation_datetime = get_datetime_now()
-
-        return gc
-
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
             for storage in object store
@@ -85,9 +46,6 @@ class GC:
             Returns:
                 dict: Dictionary version of object
         """
-        if self.is_null():
-            return {}
-
         from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
 
         data = {}
@@ -95,75 +53,28 @@ class GC:
         data["stored"] = self._stored
         data["datasource_uuids"] = self._datasource_uuids
         data["datasource_names"] = self._datasource_names
+        data["file_hashes"] = self._file_hashes
 
         return data
-
-    @staticmethod
-    def from_data(data, bucket=None):
-        """ Create a GC object from data
-
-            Args:
-                data (dict): JSON data
-                bucket (dict, default=None): Bucket for data storage
-        """ 
-        from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
-
-        if not data:
-            return GC()
-        
-        gc = GC()
-        gc._creation_datetime = _string_to_datetime(data["creation_datetime"])
-        gc._datasource_uuids = data["datasource_uuids"]
-        gc._datasource_names = data["datasource_names"]
-        gc._stored = False
-
-        return gc
 
     def save(self, bucket=None):
         """ Save this GC object in the object store
 
             Args:
-                bucket (dict): Bucket for data storage
+                bucket (dict, default=None): Bucket for data storage
             Returns:
                 None
         """
-        if self.is_null():
-            return
-
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import ObjectStore
+        from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
-            bucket = _get_bucket()
+            bucket = get_bucket()
+        
+        gc_key = "%s/uuid/%s" % (GC._root, GC._uuid)
 
         self._stored = True
-        gc_key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
-        _ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
-
-    @staticmethod
-    def load(bucket=None):
-        """ Load a GC object from the object store
-
-            Args:
-                bucket (dict, default=None): Bucket to store object
-            Returns:
-                Datasource: Datasource object created from JSON
-        """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from HUGS.ObjectStore import get_bucket as _get_bucket
-
-        if not GC.exists():
-            return GC.create()
-
-        if bucket is None:
-            bucket = _get_bucket()
-        
-        key = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
-            
-        data = _ObjectStore.get_object_from_json(bucket=bucket, key=key)
-        
-        return GC.from_data(data=data, bucket=bucket)
+        ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
 
     @staticmethod
     def read_file(data_filepath, precision_filepath, source_name, site, instrument_name="GCMD", 
@@ -171,8 +82,8 @@ class GC:
         """ Reads a GC data file by creating a GC object and associated datasources
 
             Args:
-                data_filepath (str): Path of data file
-                precision_filepath (str): Path of precision file
+                data_filepath (str, pathlib.Path): Path of data file
+                precision_filepath (str, pathlib.Path): Path of precision file
             Returns:
                 TODO - should this really return anything?
                 GC: GC object
@@ -180,6 +91,7 @@ class GC:
         """
         from HUGS.Processing import assign_data, lookup_gas_datasources
         import json
+        from pathlib import Path
 
         gc = GC.load()
 
@@ -192,9 +104,9 @@ class GC:
         #     gc._params = json.load(f)
         # Load in the params for code_site, site_code dictionaries for selection
         # of inlets from the above parameters
-        
+        if not isinstance(data_filepath, Path):
+            data_filepath = Path(data_filepath)
 
-        
         data, species, metadata = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                                                 site=site, instrument=instrument_name)
 
@@ -244,8 +156,8 @@ class GC:
         """ Read data from the data and precision files
 
             Args:
-                data_filepath (str): Path of data file
-                precision_filepath (str): Path of precision file
+                data_filepath (pathlib.Path): Path of data file
+                precision_filepath (pathlib.Path): Path of precision file
                 site (str): Name of site
                 instrument (str): Identifying data for instrument 
             Returns:
@@ -256,11 +168,9 @@ class GC:
         from pandas import read_csv as _read_csv
         from pandas import datetime as _pd_datetime
         from pandas import Timedelta as _pd_Timedelta
-
         from HUGS.Processing import read_metadata
 
-
-        # Read header
+        # Read header   
         header = _read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
         # Create a function to parse the datetime in the data file
@@ -271,7 +181,7 @@ class GC:
                          parse_dates=[[1, 2, 3, 4, 5]], date_parser=parser)
         data.index.name = "Datetime"
 
-        metadata = read_metadata(filename=data_filepath, data=data, data_type="GC")
+        metadata = read_metadata(filepath=data_filepath, data=data, data_type="GC")
 
         units = {}
         scale = {}
@@ -322,23 +232,23 @@ class GC:
         """ Read GC precision file
 
             Args: 
-                filepath (str): Path of precision file
+                filepath (pathlib.Path): Path of precision file
             Returns:
                 tuple (Pandas.DataFrame, list): Precision DataFrame and list of species in
                 precision data
         """
-        from pandas import read_csv as _read_csv
-        from pandas import datetime as _pd_datetime
+        from pandas import read_csv
+        from pandas import datetime as pd_datetime
 
         # Function for parsing datetime
-        def parser(date): return _pd_datetime.strptime(date, '%y%m%d')
+        def parser(date): return pd_datetime.strptime(date, '%y%m%d')
 
         # Read precision species
-        precision_header = _read_csv(filepath, skiprows=3, nrows=1, header=None, sep=r"\s+")
+        precision_header = read_csv(filepath, skiprows=3, nrows=1, header=None, sep=r"\s+")
 
         precision_species = precision_header.values[0][1:].tolist()
 
-        precision = _read_csv(filepath, skiprows=5, header=None, sep=r"\s+",
+        precision = read_csv(filepath, skiprows=5, header=None, sep=r"\s+",
                                 index_col=0, parse_dates=[0], date_parser=parser)
         precision.index.name = "Datetime"
         # Drop any duplicates from the index
@@ -361,7 +271,6 @@ class GC:
         """
         from fnmatch import fnmatch
         from itertools import compress
-
         
         site_code = self.get_site_code(site)
         # Read inlets from the parameters dictionary
@@ -486,45 +395,3 @@ class GC:
             raise KeyError("Site not recognized")
         
         return site_code
-
-    def add_datasources(self, datasource_uuids):
-        """ Add the passed list of Datasources to the current list
-
-            Args:
-                datasource_uuids (dict): Dict of Datasource UUIDs
-            Returns:
-                None
-        """
-        self._datasource_names.update(datasource_uuids)
-        # Invert the dictionary to update the dict keyed by UUID
-        uuid_keyed = {v: k for k, v in datasource_uuids.items()}
-        self._datasource_uuids.update(uuid_keyed)
-
-    def datasources(self):
-        """ Return the list of Datasources for this object
-
-            Returns:
-                list: List of Datasources
-        """
-        return self._datasource_uuids.keys()
-
-    def remove_datasource(self, uuid):
-        """ Remove the Datasource with the given uuid from the list 
-            of Datasources
-
-            Args:
-                uuid (str): UUID of Datasource to be removed
-        """
-        del self._datasource_uuids[uuid]
-
-    def clear_datasources(self):
-        """ Remove all Datasources from the object
-
-            Returns:
-                None
-        """
-        self._datasource_uuids.clear()
-        self._datasource_names.clear()
-        self._file_hashes.clear()
-            
-

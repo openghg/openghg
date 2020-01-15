@@ -9,14 +9,16 @@ from datetime import datetime
 import functools
 import ipywidgets as widgets
 import ipyleaflet
-from HUGS.Client import Retrieve, Search
+from HUGS.Client import Retrieve, Search, Process
 from HUGS.Interface import generate_password
 import json
 import numpy as np
 import os
 import pandas as pd
+from pathlib import Path
 import matplotlib
 import random
+import tempfile
 
 __all__ = ["Interface"]
 
@@ -39,12 +41,15 @@ class Interface:
         self._search_results = None
         # This is the order in which they'll be shown (if created)
         self._module_list = ["register", "login", "search", "selection", "download", 
-                            "map", "plot_window", "plot_controls", "plot_complete", "status_bar"]
+                            "map", "plot_window", "plot_controls", "plot_complete", 
+                            "status_bar", "upload"]
         # Maybe just made _widgets a defaultdict(list) as originally thought?
         self._widgets = collections.defaultdict(widgets.VBox)
 
         # Number of plots created
         self._n_figs = 0
+        # User
+        self._user = None
 
         # Styles - maybe these can be moved somewhere else?
         self.table_style = {'description_width': 'initial'}
@@ -155,15 +160,13 @@ class Interface:
         # login_button_box.layout.object_position = "right"
         login_link_box = widgets.Output()
 
-        user = None
-
         def login(a):
-            global user
-            user = User(username=username_text.value, identity_url=f"{self._base_url}/identity")
+            self._user = User(username=username_text.value, identity_url=f"{self._base_url}/identity")
 
             with login_link_box:
                 # print(username_text.value)
-                response = user.request_login()
+                response = self._user.request_login()
+                self._user.wait_for_login()
 
             # if user.wait_for_login():
             #     status_text.value = f"<font color='green'>Login success</font>"
@@ -171,10 +174,9 @@ class Interface:
             #     status_text.value = f"<font color='red'>Login failure</font>"
 
         login_button.on_click(login)
-        login_widgets = [username_text, spacer,
-                         login_button, status_text, login_link_box]
+        login_widgets = [username_text, spacer, login_button, status_text, login_link_box]
 
-        return user, login_widgets
+        return login_widgets
 
     def create_search_box(self):
         """ Create the searching interface
@@ -215,8 +217,7 @@ class Interface:
                 status_box_success = f"<font color='green'>Success</font>"
                 self.set_status(status_text=status_box_success)
                 # TODO - see how the layout works with voila for side-by-side list and map boxes
-                # self.add_widgets(section="selection", _widgets=self.create_selection_box(date_keys=date_keys, 
-                #                                                                             search_results=search_results))
+                self.add_widgets(section="selection", _widgets=self.create_selection_box(search_results=search_results))
                 self.add_widgets(section="download", _widgets=self.create_download_box(search_results=search_results))
             else:
                 status_box_error = f"<font color='red'>No results</font>"
@@ -237,7 +238,7 @@ class Interface:
             Returns:
                 list: List containing a HBox (WIP)
         """    
-        # split_button = widgets.Button(description="Split", button_style="info", layout=self.table_layout)
+        split_button = widgets.Button(description="Split", button_style="info", layout=self.table_layout)
         list_button = widgets.Button(description="List selection", button_style="info", layout=self.table_layout)
         map_button = widgets.Button(description="Map selection", button_style="info", layout=self.table_layout)
 
@@ -253,11 +254,11 @@ class Interface:
             self.add_widgets(section="download", _widgets=widgets.VBox())
             self.add_widgets(section="map", _widgets=self.create_map_box(search_results=search_results))
 
-        # split_button.on_click(split_click)
+        split_button.on_click(split_click)
         list_button.on_click(list_click)
         map_button.on_click(map_click)
         
-        buttons = [list_button, map_button]
+        buttons = [split_button, list_button, map_button]
         button_box = widgets.HBox(children=buttons)
 
         return [button_box]
@@ -271,7 +272,7 @@ class Interface:
         list_widgets = self.create_download_box(search_results=search_results)
         map_widgets = self.create_map_box(search_results=search_results)
 
-        combined = widgets.HBox(children=list_widgets+map_widgets)
+        combined = widgets.VBox(children=list_widgets+map_widgets)
 
         return combined
 
@@ -283,7 +284,8 @@ class Interface:
             Returns:
                 list: List of download widgets
         """
-        header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=self.table_layout)
+        header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=self.date_layout)
+        # header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=self.table_layout)
         header_label_gas = widgets.HTML(value=f"<b>Gas</b>", layout=self.table_layout)
         header_label_dates = widgets.HTML(value=f"<b>Dates</b>", layout=self.date_layout)
         header_label_select = widgets.HTML(value=f"<b>Select</b>", layout=self.checkbox_layout)
@@ -757,6 +759,140 @@ class Interface:
 
         return [site_map]
 
+    def create_fileselector(self, *args):
+        header_layout = widgets.Layout(display='flex',flex_flow='row')
+
+        table_layout = widgets.Layout(display='flex',flex_flow='row')
+
+        main_layout = widgets.Layout(
+            display='flex',
+            flex_flow='row',
+            align_items='stretch',
+            width='100%',
+            justify_content='space-between'
+        )
+
+        header_label_filename = widgets.HTML(value=f"<b>Filename</b>", layout=header_layout)
+        header_label_datatype = widgets.HTML(value=f"<b>Data type</b>", layout=header_layout)
+        header_label_select = widgets.HTML(value=f"<b>Select</b>", layout=header_layout)
+
+        filenames = []
+        data_types = []
+        checkboxes = []
+
+        # This holds the binary data passed by the FileUpload widget
+        data = {}
+
+        data_type_list = ["CRDS", "GC"]
+
+        files = ["file1 is really how fdfd",
+                "file1 is really howfdfdf ", "file1 is really how"]
+
+        def clear_checkboxes(*args):
+            for c in checkboxes:
+                c.value = False
+
+        def upload_data(*args):
+            # We want to add some metadata to the dictionary
+            # to_upload = selection_button.value.copy()
+            # Add in the data type of the 
+            uuids = self.process_data(data=selection_button.value)
+
+            with output:
+                print(uuids)
+
+
+        def update_filelist(*args):
+            """ Update the list of files to be selected for upload
+            
+            """
+            if self._user and self._user.is_logged_in()
+                upload_button.disabled = False
+                
+            for filename in selection_button.value.keys():
+                filenames.append(widgets.HTML(
+                    value=f"{filename}", layout=widgets.Layout(flex='1 1 auto', width='auto')))
+                data_types.append(widgets.Dropdown(options=data_type_list, value="GC",
+                                                layout=widgets.Layout(flex='1 1 auto', width='auto')))
+                checkboxes.append(widgets.Checkbox(
+                    value=True, layout=widgets.Layout(flex='1 1 auto', width='auto')))
+
+            filename_box = widgets.VBox(children=filenames)
+            datatype_box = widgets.VBox(children=data_types)
+            checkbox_box = widgets.VBox(children=checkboxes)
+
+            list_box.children = [filename_box, datatype_box, checkbox_box]
+
+        header = widgets.HBox(children=[header_label_filename, header_label_datatype, header_label_select], 
+                                layout=main_layout)
+
+        filename_box = widgets.VBox(children=filenames)
+        datatype_box = widgets.VBox(children=data_types)
+        checkbox_box = widgets.VBox(children=checkboxes)
+
+        # list_box = widgets.HBox(children=[filename_box, datatype_box, checkbox_box], layout=main_layout)
+        list_box = widgets.HBox(children=[], layout=main_layout)
+
+        file_selector = widgets.VBox(children=[header, list_box])
+
+        # Now create file selector button and clear, upload buttons
+
+        selection_button = widgets.FileUpload(description="Select")
+        clear_button = widgets.Button(button_style="danger", description="Clear")
+        upload_button = widgets.Button(button_style="primary", description="Upload", disabled=True)
+
+        # TODO - disable the upload button until the user is logged in
+        selection_button.observe(update_filelist, names="value")
+
+        clear_button.on_click(clear_checkboxes)
+        upload_button.on_click(upload_data)
+
+        button_box = widgets.VBox(children=[selection_button, widgets.HBox(children=[clear_button, upload_button])], 
+                                    layout=main_layout)
+
+        output = widgets.Output()
+        output_box = widgets.VBox(children=[self._spacer, output])
+
+        complete = widgets.VBox(children=[file_selector, button_box, output_box])
+
+        return complete
+
+    def process_data(self, data):
+        """ Process the data passed by the FileUpload widget and 
+            pass to the HUGS processing functions
+
+            Args:
+                user (Acquire User): Authorised User object
+                data (dict): Dictionary created by FileUpload widget containing
+                file metadata and binary content
+            Returns:
+                dict: Dictionary containing Datasource UUIDs for processed data
+        """
+        if self._user is None or not self._user.is_logged_in():
+            # Raise or return a warning message here?
+            raise ValueError("User must be logged in to upload data")
+
+        # Create a process object to interact with HUGS
+        process = Process(service_url=self._base_url)
+
+        datasource_uuids = {}
+        
+        for filename in data:
+            binary_content = data[filename]["content"]
+            # Write data to temporary path for the moment
+            with tempfile.TemporaryDirectory() as tmpdir:
+                filepath = Path(tmpdir).joinpath(filename)
+                with open(filepath, "wb") as f:
+                    f.write(binary_content)
+                    
+                # Upload the file to
+                uuids = process.process_files(user=self._user, files=filepath, data_type="CRDS")
+                datasource_uuids.update(uuids)
+
+        return datasource_uuids
+
+
+
     # Will this force an update ?
     def update_statusbar(self, status_name, text):
 
@@ -854,17 +990,16 @@ class Interface:
         return [self._widgets[module_name]]
 
     def voila_interface(self):
-        """ Creates the interface for use in voila
+        """ Creates the interface for use with the voila interface
 
             Returns:
                 None
         """
         self.add_widgets(section="register", _widgets=self.create_registration_box())
-        # TODO - How to handle user here? Just assign to self._user or something?
-        user, login_box = self.create_login_box()
-        self.add_widgets(section="login", _widgets=login_box)
+        self.add_widgets(section="login", _widgets=self.create_login_box())
         self.add_widgets(section="search", _widgets=self.create_search_box())
-        self.add_widgets(section="status_bar", _widgets=[widgets.HTML(value="Woo")])
+        self.add_widgets(section="upload", _widgets=self.create_fileselector())
+        # self.add_widgets(section="status_bar", _widgets=[widgets.HTML(value="Woo")])
 
 
     def show_interface(self, new_user=False):
@@ -878,8 +1013,7 @@ class Interface:
             # widget_list.append(self.create_user())
             self.add_widgets(section="register", _widgets=self.create_registration_box())
 
-        user, login_box = self.create_login_box()
-        self.add_widgets(section="login", _widgets=login_box)
+        self.add_widgets(section="login", _widgets=self.create_login_box())
 
         self.add_widgets(section="search", _widgets=self.create_search_box())
 

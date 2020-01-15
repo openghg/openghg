@@ -21,6 +21,8 @@ def process_data(data_file, source_name, precision_filepath=None, data_type="CRD
     # Load in the the class used to process the data file/s
     processing_obj = _load_object(class_name=data_type)
 
+    # TODO - improve this so the correct module is loaded - maybe don't rely on the above?
+
     if data_type == "CRDS":
         datasource_uuids = processing_obj.read_file(data_filepath=data_file, source_name=source_name, overwrite=overwrite)
     elif data_type == "GC":

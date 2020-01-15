@@ -1,23 +1,22 @@
 
 __all__ = ["read_metadata"]
 
-def read_metadata(filename, data, data_type):
+def read_metadata(filepath, data, data_type):
         """ Process the metadata and create a JSON serialisable 
             dictionary for saving to object store
 
             Args:
-                filename (str): Filename to process
+                filepath (pathlib.Path): Filename to process
                 data (Pandas.DataFrame): Raw data
                 data_type (str): Data typw (CRDS, GC etc) to parse
             Returns:
                 dict: Dictionary of metadata
         """
-        from HUGS.Processing import DataTypes as _DataTypes
+        from HUGS.Processing import DataTypes
 
-        # In case we're passed a filepath, just take the filename
-        filename = filename.split("/")[-1]
+        filename = filepath.name
 
-        data_type = _DataTypes[data_type.upper()].name
+        data_type = DataTypes[data_type.upper()].name
 
         if data_type == "CRDS":
             metadata = _parse_CRDS(filename=filename, data=data)

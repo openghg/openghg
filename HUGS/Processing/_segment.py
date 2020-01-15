@@ -46,12 +46,10 @@ __all__ = ["get_split_frequency", "create_footprint_datasources", "assign_data"]
 def assign_data(gas_data, lookup_results, overwrite):
     """ Create or get an existing Datasource for each gas in the file
 
-        TODO - currently this function will only take data from a single Datasource
-        
         Args:
-            gas_data (list): List of tuples gas name, datasource_id, Pandas.Dataframe
+            gas_data (dict): Dictionary containing data and metadata for species
         Returns:
-            list: List of UUIDs
+            dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
     """
     from HUGS.Modules import Datasource
 
@@ -62,6 +60,8 @@ def assign_data(gas_data, lookup_results, overwrite):
     # Rely on site_species for now via name lookup?
     # Need to allow UUID input here so we can add new data to existing Datasources easily without
     # relying on the naming method
+
+    # Use the attributes function here
 
     # TODO - simplify this
     for species in gas_data:
@@ -75,10 +75,8 @@ def assign_data(gas_data, lookup_results, overwrite):
         if uuid:
             datasource = Datasource.load(uuid=uuid)
         else:
-            datasource = Datasource.create(name=name)
+            datasource = Datasource(name=name)
 
-        # Store the name and datasource_id
-        # self._species[gas_name] = datasource_id
         # Add the dataframe to the datasource
         datasource.add_data(metadata=metadata, data=data, overwrite=overwrite)
         # Save Datasource to object store
@@ -109,7 +107,6 @@ def get_split_frequency(data):
         Returns:
             str: String selecting frequency for data splitting by Groupby
     """
-
     data_size = data.memory_usage(deep=True).sum()
     # If the data is larger than this it will be split into
     # separate parts

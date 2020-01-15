@@ -1,78 +1,36 @@
 __all___ = ["Datasource"]
 
 class Datasource:
-    """ This class handles all data sources such as sensors
+    """ A Datasource holds data relating to a single source, such as a specific species
+        at a certain height on a specific instrument
 
-        Datasource objects should be created via Datasource.create()
+        Args:
+            name (str, default=None): Name of Datasource
     """
     _datasource_root = "datasource"
     _datavalues_root = "values"
     _data_root = "data"
 
-    def __init__(self):
-        """ Construct a null Datasource """
-        self._uuid = None
-        self._name = None
-        self._creation_datetime = None
-
+    def __init__(self, name=None):
+        from Acquire.ObjectStore import create_uuid, get_datetime_now
+        from collections import defaultdict
+        
+        self._uuid = create_uuid()
+        self._name = name
+        self._creation_datetime = get_datetime_now()
         self._metadata = {}
-        self._parent = None
-        # These may be unnecessary?
-        self._instrument = None
-        self._site = None
-        self._network = None
-        # Store of data
-        self._data = []
+        # Dictionary keyed by daterange of data in each Dataset
+        self._data = {}
+
         self._start_datetime = None
         self._end_datetime = None
+
         self._stored = False
-        self._data_keys = {}
+        # This dictionary stored the keys for each version of data uploaded
+        self._data_keys = defaultdict(dict)
         self._data_type = None
-
-    @staticmethod
-    def create(name, data=None, **kwargs):
-        """ Create a new datasource
-        
-            Args:
-                name (str): Name for Datasource
-                data (list, default=None): List of Pandas.Dataframes
-                **kwargs (dict): Dictionary saved as the metadata for this object
-            Returns:
-                Datasource
-
-            TODO - add kwargs to this to allow extra (safely parsed)
-            arguments to be added to the dictionary?
-            This would allow some elasticity to the datasources
-                
-        """        
-        from Acquire.ObjectStore import create_uuid, get_datetime_now, string_to_datetime
-
-        d = Datasource()
-        d._name = name
-        d._uuid = create_uuid()
-        d._creation_datetime = get_datetime_now()
-        # Any need to parse these for safety?
-        # d._metadata = kwargs
-        d._metadata["source_name"] = name
-        
-        if data is not None:
-            # This could be a list of dataframes
-            d._data = data
-            # Just store these as time stamps?
-            # Get the first and last datetime from the list of dataframes
-            # TODO - update this as each dataframe may have different start and end dates
-            d._start_datetime = string_to_datetime(data[0].first_valid_index())
-            d._end_datetime = string_to_datetime(data[-1].last_valid_index())
-        
-        return d
-
-    def is_null(self):
-        """Return whether this object is null
-        
-            Returns:
-                bool: True if object is null
-        """
-        return self._uuid is None
+        # Hold information regarding the versions of the data
+        self._versions = {}
 
     def start_datetime(self):
         """ Returns the starting datetime for the data in this Datasource
@@ -100,9 +58,10 @@ class Datasource:
             Returns:
                 None
         """
+        value = str(value)
         self._metadata[key.lower()] = value.lower()
 
-    def add_data(self, metadata, data, data_type=None, overwrite=False):
+    def add_data_dataframe(self, metadata, data, data_type=None, overwrite=False):
         """ Add data to this Datasource and segment the data by size.
             The data is stored as a tuple of the data and the daterange it covers.
 
@@ -136,7 +95,9 @@ class Datasource:
         # Check the daterange covered by this data and if we have an overlap
         # 
         if self._data:
+            # Exisiting data in Datsource
             start_data, end_data = self.daterange()
+            # This is the data that we may want to add to the Datasource
             start_new, end_new = self.get_dataframe_daterange(data)
 
             # Check if there's overlap of data
@@ -144,7 +105,6 @@ class Datasource:
                 raise ValueError("The provided data overlaps dates covered by existing data")
 
         # Need to check here if we've seen this data before
-        # Can we do this before splitting the
         freq = get_split_frequency(data)
         # Split into sections by splitting frequency
         group = data.groupby(Grouper(freq=freq))
@@ -156,37 +116,82 @@ class Datasource:
         # Use daterange() to update the recorded values
         self.update_daterange()
 
-    def add_footprint_data(self, metadata, data, overwrite=False):
-        """ Add footprint data
+
+    def add_data(self, metadata, data, data_type=None, overwrite=False):
+        """ Add data to this Datasource and segment the data by size.
             The data is stored as a tuple of the data and the daterange it covers.
 
             Args:
                 metadata (dict): Metadata on the data for this Datasource
-                data (xarray.Dataset): Footprint data
-            Returns:
+                data (Pandas.DataFrame): Data
+                data_type (str, default=None): Placeholder for combination of this fn
+                with add_footprint_data in the future
+                overwrite (bool, default=False): Overwrite existing data
                 None
         """
-        self._metadata.update(metadata)
-        self.add_metadata(key="data_type", value="footprint")
-        self._data_type = "footprint"
-        
-        start, end = self.get_dataset_daterange(data)
-        
-        if self._data:
-            start_existing, end_existing = self.daterange()
-            # Check if there's overlap of data
-            if start >= start_existing and end <= end_existing and overwrite is False:
-                raise ValueError("The provided data overlaps dates covered by existing data")
-        
-        # Really we should just concatenate the Datasets?
-        # Concatenated datasets would be be better when we move to zarr
-        # but as we're still using NetCDF this current methods works best
+        from HUGS.Processing import get_split_frequency
+        from HUGS.Util import date_overlap
+        from xarray import Dataset
 
-        # TODO - here could I create a struct to hold this data?
-        # Could be cleaner than trying to ensure people / me remember
-        # that this is a list of tuple(dataset, tuple) ?
-        self._data.append((data, (start, end)))
+        # Ensure metadata values are all lowercase
+        metadata = {k: v.lower() for k, v in metadata.items()}
+        self._metadata.update(metadata)
+
+        # For now just create a new version each time data is added
+        # Need to check what daterange the new data covers
+        # If it covers a greater period of time than the current data
+        # Just use the new data
+        # If it covers a different period / take the other data as well
+        # and keep it in the new version so "latest" has all available data
+        # Maybe this can be overridden so we just add the new data in and ignore
+        # the old
+
+        # We expect a tuple below but won't group footprint data at the moment, so create one here
+        if data_type == "footprint":
+            grouped_data = [(None, data)]
+        else:
+            # Group by year then by season
+            year_group = list(data.groupby("time.year"))
+            year_data = [data for _, data in year_group if data]
+            
+            # TODO - improve this
+            grouped_data = []
+            for year in year_data:
+                season_group = list(year.groupby("time.season"))
+                seasons = [data for _, data in season_group if data]
+                grouped_data.append(seasons)
+
+        # Use a dictionary keyed with the daterange covered by each segment of data
+        additional_data = {}
+
+        for year in grouped_data:
+            for month in year:
+                daterange_str = self.get_dataset_daterange_str(dataset=month)
+                additional_data[daterange_str] = month
+
+        if self._data:
+            # We don't want the same data twice, this will be stored in previous versions
+            # Check for overlap between exisiting and new dateranges
+            to_keep = []
+            for current_daterange in self._data:
+                for new_daterange in additional_data:
+                    if not date_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
+                        to_keep.append(current_daterange)
+
+            updated_data = {}
+            for k in to_keep:
+                updated_data[k] = self._data[k]
+            # Add in the additional new data
+            updated_data.update(additional_data)
+
+            self._data = updated_data
+        else:
+            self._data = additional_data
+
+        self.add_metadata(key="data_type", value="timeseries")
+        self._data_type = "timeseries"
         self.update_daterange()
+
 
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed DataFrame
@@ -197,55 +202,63 @@ class Datasource:
                 tuple (datetime, datetime): Start and end datetimes for DataSet
         """
         from pandas import DatetimeIndex
-        from pandas import to_datetime
-        from Acquire.ObjectStore import datetime_to_datetime
-        
+        from HUGS.Util import timestamp_tzaware
+
         if not isinstance(dataframe.index, DatetimeIndex):
             raise TypeError("Only DataFrames with a DatetimeIndex must be passed")
-        
-        # This seems a bit long winded but we end up with standard Python datetime objects
-        # that are timezone aware and set to UTC
-        start = datetime_to_datetime(to_datetime(dataframe.first_valid_index()))
-        end = datetime_to_datetime(to_datetime(dataframe.last_valid_index()))
+
+        # Here we want to make the pandas Timestamps timezone aware
+        start = timestamp_tzaware(dataframe.first_valid_index())
+        end = timestamp_tzaware(dataframe.last_valid_index())
 
         return start, end
 
     def get_dataset_daterange(self, dataset):
-        """ Get the daterange for the passed DataSet
+        """ Get the daterange for the passed Dataset
 
             Args:
-                dataset (xarray.DataSet): DataSet to parse
+                dataset (xarray.DataSet): Dataset to parse
             Returns:
                 tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
 
         """
         from xarray import Dataset
         from pandas import Timestamp
-        from Acquire.ObjectStore import datetime_to_datetime
 
-        if not isinstance(dataset, Dataset):
-            raise TypeError("Only xarray DataSet types can be processed")
+        try:
+            start = Timestamp(dataset.time[0].values, tz="UTC")
+            end = Timestamp(dataset.time[-1].values, tz="UTC")
+            
+            return start, end
+        except:
+            raise AttributeError("This dataset does not have a time attribute, unable to read date range")
 
-        start = datetime_to_datetime(Timestamp(dataset.time[0].values).to_pydatetime())
-        end = datetime_to_datetime(Timestamp(dataset.time[-1].values).to_pydatetime())
+    def get_dataset_daterange_str(self, dataset):
+        start, end = self.get_dataset_daterange(dataset=dataset)
 
-        return start, end
+        # Tidy the string and concatenate them
+        start = str(start).replace(" ", "-")
+        end = str(end).replace(" ", "-")
+
+        daterange_str = start + "_" + end
+
+        return daterange_str
 
     @staticmethod
     def exists(datasource_id, bucket=None):
         """ Check if a datasource with this ID is already stored in the object store
 
             Args:
-                datasource_id (str): ID of datasource created from Data / given in data
+                datasource_id (str): ID of datasource created from data
             Returns:
                 bool: True if Datasource exists 
         """
         from HUGS.ObjectStore import exists, get_bucket
 
-        if bucket is None:
+        if not bucket:
             bucket = get_bucket()
 
-        key = "%s/uuid/%s" % (Datasource._data_root, datasource_id)
+        key = "%s/uuid/%s" % (Datasource._datasource_root, datasource_id)
         
         return exists(bucket=bucket, key=key)
 
@@ -262,9 +275,6 @@ class Datasource:
             Returns:
                 dict: Dictionary version of object
         """
-        if self.is_null():
-            return {}
-
         from Acquire.ObjectStore import datetime_to_string
 
         data = {}
@@ -293,7 +303,6 @@ class Datasource:
         data = get_dated_object(bucket, key)
 
         return Datasource.hdf_to_dataframe(data)
-
 
     @staticmethod
     def load_dataset(bucket, key):
@@ -403,12 +412,13 @@ class Datasource:
             Args:
                 bucket (dict): Bucket containing data
                 data (dict): JSON data
+                shallow (bool): Load only the JSON data, do not retrieve data from the object store
             Returns:
                 Datasource: Datasource created from JSON
         """
         from Acquire.ObjectStore import string_to_datetime
 
-        if data is None or len(data) == 0:
+        if not data:
             return Datasource()
 
         d = Datasource()
@@ -418,18 +428,13 @@ class Datasource:
         d._metadata = data["metadata"]
         d._stored = data["stored"]
         d._data_keys = data["data_keys"]
-        d._data = []
+        d._data = {}
         d._data_type = data["data_type"]
         
         if d._stored and not shallow:
-            for key in d._data_keys:
-                daterange = d._data_keys[key].split("_")
-                start =  string_to_datetime(daterange[0])
-                end = string_to_datetime(daterange[1])
-                if d._data_type == "timeseries":
-                    d._data.append((Datasource.load_dataframe(bucket, key), (start,end)))
-                elif d._data_type == "footprint":
-                    d._data.append((Datasource.load_dataset(bucket, key), (start,end)))
+            for date_key in d._data_keys["latest"]["keys"]:
+                data_key = d._data_keys["latest"]["keys"][date_key]
+                d._data[date_key] = Datasource.load_dataset(bucket=bucket, key=data_key)
 
         d._stored = False
 
@@ -443,62 +448,51 @@ class Datasource:
             Returns:
                 None
         """
-        if self.is_null():
-            return
-
         import tempfile
-        from Acquire.ObjectStore import datetime_to_string, ObjectStore
+        from Acquire.ObjectStore import datetime_to_string, get_datetime_now_to_string, ObjectStore
         from HUGS.ObjectStore import get_bucket
-        # from zarr import Blosc
 
-        if bucket is None:
+        if not bucket:
             bucket = get_bucket()
 
-        # For now we'll get the data type from the metadata
-        data_type = self._metadata["data_type"]
+        if self._data:
+            # Ensure we have the latest key
+            if "latest" not in self._data_keys:
+                self._data_keys["latest"] = {}
 
-        if self._data is not None:
-            for data, daterange in self._data:
-                start, end = daterange
-                daterange_str = "".join([datetime_to_string(start), "_", datetime_to_string(end)])
-                data_key = "%s/uuid/%s/%s" % (Datasource._data_root, self._uuid, daterange_str)
-                self._data_keys[data_key] = daterange_str
-                if self._data_type == "timeseries":
-                    ObjectStore.set_object(bucket, data_key, Datasource.dataframe_to_hdf(data))
+            # Backup the old data keys at "latest"
+            version_str = f"v{str(len(self._data_keys))}"
+            # Store the keys for the new data
+            new_keys = {}
+            
+            # Iterate over the keys (daterange string) of the data dictionary
+            for daterange in self._data:
+                data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
+
+                new_keys[daterange] = data_key
+                data = self._data[daterange]
+
                 # TODO - for now just create a temporary directory - will have to update Acquire
                 # or work on a PR for xarray to allow returning a NetCDF as bytes
-                elif self._data_type == "footprint":   
-                    with tempfile.TemporaryDirectory() as tmpdir:
-                        filepath = f"{tmpdir}/temp.nc"
-                        data.to_netcdf(filepath)
-                        ObjectStore.set_object_from_file(bucket, data_key, filepath)
-                else:
-                    raise NotImplementedError("Not implemented")
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    filepath = f"{tmpdir}/temp.nc"
+                    data.to_netcdf(filepath)
+                    ObjectStore.set_object_from_file(bucket, data_key, filepath)
                 
-                # TODO - tidy or remove this
-                # Leftover from trying out converting to zarr with compression, will leave for now
-                # Set the compression type and level for each variable
-                # For some reason conversion to zarr seems to increase the amount of space
-                # the data takes, this could be due to compression in the NetCDF file.
-                # Compressing using zstd with a compression level of 3 seems to be a good trade-off
-                # of size and compression time
-                # encodings = {}
-                # for k in data.keys():
-                #     encodings[k] = {"compressor": Blosc(cname='zstd', clevel=3)}
-                # # Convert to zarr format and compress
-                # data = data.to_zarr(consolidated=True, encoding=encodings)
+            # Copy the last version
+            if "latest" in self._data_keys:            
+                self._data_keys[version_str] = self._data_keys["latest"].copy()
 
-                # encodings = {}
-                # for k in data.keys():
-                #     encodings[k] = {"zlib": True, "complevel": 3}
-        
-                # Convert to zarr format and compress
-                # data = data.to_zarr(consolidated=True, encoding=encodings)
-                # data.to_netcdf(filepath, encoding=encodings)        
+            # Save the new keys and create a timestamp
+            self._data_keys[version_str]["keys"] = new_keys
+            self._data_keys[version_str]["timestamp"] = get_datetime_now_to_string()
+            
+            # Link latest to the newest version
+            self._data_keys["latest"] = self._data_keys[version_str]
 
         self._stored = True
+        datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
-        datasource_key = "%s/uuid/%s" % (Datasource._datasource_root, self._uuid)
         ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
 
     @staticmethod
@@ -511,24 +505,25 @@ class Datasource:
                 bucket (dict, default=None): Bucket to store object
                 uuid (str, default=None): UID of Datasource
                 name (str, default=None): Name of Datasource
+                shallow (bool, default=False): Only load JSON data, do not
+                read Datasets from object store. This will speed up creation
+                of the Datasource object.
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from Acquire.ObjectStore import ObjectStore as _ObjectStore
-        from HUGS.ObjectStore import get_dated_object as _get_dated_object
-        from HUGS.ObjectStore import get_object_json as _get_object_json
-        from HUGS.ObjectStore import get_bucket as _get_bucket
+        from Acquire.ObjectStore import ObjectStore
+        from HUGS.ObjectStore import get_bucket, get_object_json
 
-        if uuid is None and key is None:
+        if not uuid and not key:
             raise ValueError("Both uuid and key cannot be None")
 
-        if bucket is None:
-            bucket = _get_bucket()
+        if not bucket:
+            bucket = get_bucket()
         
         if not key:
             key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
 
-        data = _get_object_json(bucket=bucket, key=key)
+        data = get_object_json(bucket=bucket, key=key)
         return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
 
     @staticmethod
@@ -542,11 +537,10 @@ class Datasource:
             Returns:
                 str: UUID for the Datasource
         """
-        # from Acquire.ObjectStore import string_to_encoded as _string_to_encoded
-        from HUGS.ObjectStore import get_dated_object_json as _get_dated_object_json
+        from HUGS.ObjectStore import get_dated_object_json
 
         key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
-        data = _get_dated_object_json(bucket=bucket, key=key)
+        data = get_dated_object_json(bucket=bucket, key=key)
 
         return data["name"]
 
@@ -571,6 +565,17 @@ class Datasource:
         
         return uuid[0].split("/")[-1]
 
+    def version_data(self):
+        """ Check the version of the data passed and and check what we want
+            to do.
+
+            1. Update current data
+            2. Create a new "current" record and push the current back to v(n) where n is the number
+            of times data has been added to this Datasource
+            3. Clear data - this seems a bit dangerous to add, could just delete the whole datasource instead?
+        """
+        raise NotImplementedError()
+
     def data(self):
         """ Get the data stored in this Datasource
 
@@ -582,16 +587,17 @@ class Datasource:
     def sort_data(self):
         """ Sorts the data in the data list
 
-            TODO: Could this be better handled using an OrderedDict?
+            TODO - Remove ? this should be redundant now
 
             Returns:
                 None
         """
-        from operator import itemgetter
-        # Data list elements contain a tuple of
-        # (data,(start_datetime, end_datetime))
-        # Could also check to make sure we don't have overlapping dateranges?
-        self._data = sorted(self._data, key=itemgetter(1,0))
+        raise NotImplementedError()
+        # from operator import itemgetter
+        # # Data list elements contain a tuple of
+        # # (data,(start_datetime, end_datetime))
+        # # Could also check to make sure we don't have overlapping dateranges?
+        # self._data = sorted(self._data, key=itemgetter(1,0))
 
     def update_daterange(self):
         """ Update the dates stored by this Datasource
@@ -601,25 +607,16 @@ class Datasource:
             Returns:
                 None
         """
-        from Acquire.ObjectStore import datetime_to_datetime
+        from pandas import Timestamp
 
-        if self._data is not None:
-            # Sort the data by date
-            self.sort_data()
-            data_type = self._data_type
-            if data_type == "timeseries":
-                self._start_datetime = datetime_to_datetime(self._data[0][0].first_valid_index())
-                self._end_datetime = datetime_to_datetime(self._data[-1][0].last_valid_index())
-            elif data_type == "footprint":
-                # TODO - this feels messy
-                start, _ = self.get_dataset_daterange(self._data[0][0])
-                _, end = self.get_dataset_daterange(self._data[-1][0])
-                self._start_datetime = datetime_to_datetime(start)
-                self._end_datetime = datetime_to_datetime(end)
-            else:
-                raise NotImplementedError("Only CRDS, GC and footprint data currently recognized")
-        else:
-            raise ValueError("Cannot get daterange with no data")
+        if self._data:
+            keys = sorted(self._data.keys())
+
+            start = keys[0].split("_")[0]
+            end = keys[-1].split("_")[1]
+
+            self._start_datetime = Timestamp(start, tz="UTC")
+            self._end_datetime = Timestamp(end, tz="UTC")
 
     def daterange(self):
         """ Get the daterange the data in this Datasource covers as tuple
@@ -628,6 +625,9 @@ class Datasource:
             Returns:
                 tuple (datetime, datetime): Start, end datetimes
         """
+        if not self._start_datetime and self._data:
+            self.update_daterange()
+
         return self._start_datetime, self._end_datetime
 
     def daterange_str(self):    
@@ -713,3 +713,24 @@ class Datasource:
                 str: Data type held by Datasource
         """
         return self._data_type
+
+    def data_keys(self):
+        """ Returns the object store keys where data related 
+            to this Datasource is stored
+
+            Returns:
+                dict: Dictionary keyed as key: daterange covered by key
+        """
+        return self._data_keys
+
+    def versions(self):
+        """ Return a summary of the versions of data stored for
+            this Datasource
+            
+            WIP
+
+            Returns:
+                dict: Dictionary of versions
+        """
+        return self._data_keys
+

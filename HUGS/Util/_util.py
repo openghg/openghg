@@ -4,7 +4,7 @@
 
 __all__ = ["url_join", "get_daterange_str", "get_datetime_epoch", 
             "get_datetime_now", "get_datetime", "unanimous", "load_object",
-            "hash_file"]
+            "hash_file", "timestamp_tzaware", "get_datapath", "date_overlap"]
 
 def url_join(*args):
     """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
@@ -133,7 +133,7 @@ def hash_file(filepath):
         Taken from https://stackoverflow.com/a/22058673
 
         Args:
-            filepath (str): Path to file
+            filepath (pathlib.Path): Path to file
         Returns:
             str: SHA1 hash
     """
@@ -153,3 +153,58 @@ def hash_file(filepath):
     return sha1.hexdigest()
 
 
+def timestamp_tzaware(timestamp):
+    """ Returns the pandas Timestamp passed as a timezone (UTC) aware
+        Timestamp.
+
+        Args:
+            timestamp (pandas.Timestamp): Timezone naive 
+        Returns:
+            pandas.Timestamp: Timezone aware
+    """
+    if timestamp.tzinfo is None:
+        return timestamp.tz_localize(tz="UTC")
+    else:
+        return timestamp.tz_convert(tz="UTC")
+
+        
+def get_datapath(filename):
+    """ Returns the correct path to JSON files used for assigning attributes
+
+        Args:
+            filename (str): Name of JSON file
+        Returns:
+            pathlib.Path: Path of file
+    """
+    from pathlib import Path
+
+    filename = str(filename)
+
+    return Path(__file__).resolve().parent.joinpath(f"../Data/{filename}")
+
+
+def date_overlap(daterange_a, daterange_b):
+    """ Check if daterange_a is within daterange_b
+
+        Args:
+            daterange_a (str): Timezone aware daterange string. Example:
+            2014-01-30-10:52:30+00:00_2014-01-30-13:22:30+00:00
+            daterange_b (str): As daterange_a
+        Returns:
+            bool: True if daterange included
+    """
+    from pandas import Timestamp
+
+    daterange_a = daterange_a.split("_")
+    daterange_b = daterange_b.split("_")
+
+    start_a = Timestamp(ts_input=daterange_a[0], tz="UTC")
+    end_a = Timestamp(ts_input=daterange_a[1], tz="UTC")
+
+    start_b = Timestamp(ts_input=daterange_b[0], tz="UTC")
+    end_b = Timestamp(ts_input=daterange_b[1], tz="UTC")
+
+    if start_b >= start_a and end_a <= end_b:
+        return True
+    else:
+        return False

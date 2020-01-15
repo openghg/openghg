@@ -1,6 +1,7 @@
 # Testing the GC class
 import datetime
 import pytest
+from pathlib import Path
 import pandas as pd
 import os
 import uuid
@@ -12,33 +13,28 @@ from HUGS.ObjectStore import get_local_bucket
 from HUGS.ObjectStore import get_object_names
 from HUGS.Util import get_datetime_epoch
 
+# TODO - look into what's causing the logging messages in the first place
+# This does stop them
+import logging
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
+
 @pytest.fixture(scope="session")
 def data_path():
-    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.C"
+    # This feels messy
+    return Path(__file__).resolve().parent.joinpath("../data/proc_test_data/GC/capegrim-medusa.18.C")
 
 @pytest.fixture(scope="session")
 def precision_path():
-    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.precisions.C"
+    return Path(__file__).resolve().parent.joinpath("../data/proc_test_data/GC/capegrim-medusa.18.precisions.C")
 
 @pytest.fixture
 def gc():
-    gc = GC.create()
-    gas_data = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument)
-
-gc_fixed_uuid = GC._gc_uuid
-
-@pytest.fixture
-def mock_uuid(monkeypatch):
-    def mock_uuid():
-        return gc_fixed_uuid
-
-    monkeypatch.setattr(uuid, 'uuid4', mock_uuid)
-
-@pytest.fixture
-def gc(mock_uuid):
-    gc = GC.create()
+    gc = GC()
     gc._uuid = "123"
     gc._creation_datetime = datetime_to_datetime(datetime.datetime(1970,1,1))
+    gc.save()
+
     return gc
 
 def test_read_data(data_path, precision_path):
@@ -46,7 +42,10 @@ def test_read_data(data_path, precision_path):
     site = "CGO"
     instrument = "GCMD"
 
-    gc = GC.create()
+    data_path = Path(data_path)
+    precision_path = Path(precision_path)
+
+    gc = GC()
     gas_data, species, metadata = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument)
 
     head_data = gas_data.head(1)
@@ -67,7 +66,7 @@ def test_read_data(data_path, precision_path):
 
 
 def test_read_precision(precision_path):
-    gc = GC.create()
+    gc = GC()
 
     precision, precision_series = gc.read_precision(precision_path)
 
@@ -90,9 +89,9 @@ def test_split(data_path, precision_path):
     site = "capegrim"
     instrument = "GCMD"
 
-    gc = GC.create()
+    gc = GC()
     data, species, metadata = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument)
-    metadata = read_metadata(filename=data_path, data=None, data_type="GC")
+    metadata = read_metadata(filepath=data_path, data=None, data_type="GC")
     gas_data = gc.split(data=data, site=site, species=species, metadata=metadata)
 
     metadata = gas_data["NF3"]["metadata"]
@@ -109,9 +108,7 @@ def test_split(data_path, precision_path):
     # assert False
 
 
-def test_to_data():
-    gc = GC.create()
-
+def test_to_data(gc):
     data = gc.to_data()
 
     assert data["stored"] == True
@@ -121,21 +118,37 @@ def test_to_data():
 def test_from_data(gc):
     data = gc.to_data()
 
+    epoch = datetime_to_datetime(datetime.datetime(1970, 1, 1, 1, 1))
+    data["creation_datetime"] = datetime_to_string(epoch)
+
+    random_data1 = uuid.uuid4()
+    random_data2 = uuid.uuid4()
+
+    test_hashes = {"test1": random_data1, "test2": random_data2}
+    test_datasources = {"datasource1": random_data1, "datasource2": random_data2}
+
+    data["file_hashes"] = test_hashes
+    data["datasource_names"] = test_datasources
+    data["datasource_uuids"] = test_datasources
+
     gc_new = GC.from_data(data)
 
     assert gc_new._stored == False
-    assert gc_new._creation_datetime == datetime_to_datetime(datetime.datetime(1970,1,1))
+    assert gc_new._creation_datetime == epoch
+    assert gc_new._datasource_names == test_datasources
+    assert gc_new._datasource_uuids == test_datasources
+    assert gc_new._file_hashes == test_hashes
 
 
 def test_save(gc):
+    bucket = get_local_bucket(empty=True)
+
     gc.save()
 
-    bucket = get_local_bucket()
-    prefix = "%s/uuid/%s" % (GC._gc_root, GC._gc_uuid)
+    prefix = f""
     objs = get_object_names(bucket, prefix)
 
-    assert objs[0].split("/")[-1] == GC._gc_uuid
-
+    assert objs[0].split("/")[-1] == GC._uuid
 
 def test_load(gc):
     gc.save()

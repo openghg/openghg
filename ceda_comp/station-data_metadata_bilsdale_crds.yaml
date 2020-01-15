@@ -1,0 +1,61 @@
+{
+  "title": "Bilsdale Tall Tower, North Yorkshire",
+  "description": "Bilsdale (BSD) tall tower is in a remote area of the North York Moors National Park and is the first monitoring site in the northeast region of England. The closest large conurbations are York and Middlesbrough, located 30 miles south and 16 miles northeast, respectively. The tower is on a high plateau overlooking green valleys used mainly for livestock (sheep and cattle). Air samples are taken from a line sampling 108 meters up a tall tower for all gases. CO2, CH4 and CO are also measured at a height of 248 m and 42 m above ground level. Due to the sites location, far from strong sources of local pollution, measurements from this site will be used to calculate emission maps of trace gas species in the UK in combination with other measurement stations in the UK (Ridge Hill, Tacolneston and Heathfield) and Ireland (Mace Head).",
+  "authors": [
+    {
+      "firstname": "",
+      "surname": "University of Bristol (UOB)"
+    },
+    {
+      "firstname": "Simon",
+      "surname": "O'Doherty"
+    },
+    {
+      "firstname": "Aoife",
+      "surname": "Grant"
+    }
+  ],
+  "bbox": {
+    "north": "54.3590°",
+    "south": "",
+    "east": "",
+    "west": "1.1500°"
+  },
+  "time_range": {
+    "start": "2014-01-01 00:00:00",
+    "end": "2017-30-11 23:00:00"
+  },
+  "lineage": "Data were collected by the University of Bristol and deposited at the Centre for Environmental Data Analysis (CEDA) for archiving.\n\n",
+  "quality": "Data are as given by the data provider, no quality control has been performed by the Centre for Environmental Data Analysis (CEDA)..\n\n",
+  "docs": [
+    {
+      "title": "Bilsdale Tall Tower",
+      "url": "http://www.metoffice.gov.uk/research/monitoring/atmospheric-trends/sites/bilsdale"
+    },
+    {
+      "title": "",
+      "url": ""
+    }
+  ],
+  "project": {
+    "catalogue_url": "http://catalogue.ceda.ac.uk/uuid/9fb1936a4a434befb772c53f79259fe7?search_url=%2F%253Fq%253DGAUGE%26sort_by%253D",
+    "title": "Bilsdale Tall Tower",
+    "description": "Bilsdale tall tower is in a remote area of the North York Moors National Park and is the first monitoring site in the northeast region of England. The closest large conurbations are York and Middlesbrough, located 30 miles south and 16 miles northeast, respectively. The tower is on a high plateau overlooking green valleys used mainly for livestock (sheep and cattle). Air samples are taken from a line sampling 108 meters up a tall tower for all gases. CO2, CH4 and CO are also measured at a height of 248 m and 42 m above ground level. Due to the sites location, far from strong sources of local pollution, measurements from this site will be used to calculate emission maps of trace gas species in the UK in combination with other measurement stations in the UK (Ridge Hill, Tacolneston and Heathfield) and Ireland (Mace Head)",
+    "PI": {
+      "firstname": "Simon O'Doherty",
+      "lastname": "University of Bristol (UOB)"
+    },
+    "funder": "Natural Environmental Research Council (NERC) and Business Energy and Industrial Strategy (BEIS)",
+    "grant_number": "NE/K002449/1NERC and TRN1028/06/2015"
+  },
+  "instrument": {
+    "catalogue_url": "",
+    "title": "Cavity Ring Down Spectrometer (CRDS)",
+    "description": "Cavity Ring Down Spectrometer G2401 Picarro Inc., USA, measuring CO2, CH4 and CO at high frequency (3 Hz)"
+  },
+  "computation": {
+    "catalogue_url": "",
+    "title": "",
+    "description": ""
+  }
+}

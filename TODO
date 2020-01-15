@@ -348,3 +348,17 @@ as data, daterange : {start:start, end:end} ?
 Improve the search_results, have data keys, site code/name etc, need an improved key for the download results, only going to get longer
 with more information
 
+2019-12-06
+
+
+TODO
+
+Ensure the data list passed to the datasource is in a sorted format!
+
+2020-01-16
+
+What's happening with the fn deploy in the deploy_all script?
+
+Fixed by manually running the deploy scripts in acquire
+
+Fix the selection of the processing class in _process.py under Processing
