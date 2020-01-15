@@ -77,12 +77,15 @@ class Process:
         """
         from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
         import os
+        from pathlib import Path
 
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
         if not isinstance(files, list):
             files = [files]
+
+        files = [Path(filepath) for filepath in files]
 
         if data_type.upper() == "GC":
             if not all(isinstance(item, tuple) for item in files):
