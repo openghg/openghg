@@ -355,5 +355,10 @@ TODO
 
 Ensure the data list passed to the datasource is in a sorted format!
 
+2020-01-16
 
-Why is the time not updating correctly?
+What's happening with the fn deploy in the deploy_all script?
+
+Fixed by manually running the deploy scripts in acquire
+
+Fix the selection of the processing class in _process.py under Processing
