@@ -107,11 +107,22 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     global_attributes["Processed by"] = "auto@hugs-cloud.com"
     global_attributes["species"] = species_label
 
-    # Scales used for specific species
-    if species_upper in species_scales:
+    # # Scales used for specific species
+    # if species_upper in species_scales:
+    #     scale = species_scales[species_upper]
+    # else:
+    #     scale = "unknown"
+
+    # TODO - at the moment the attributes.json needs updating to ensure all the correct
+    # species are available. Some CO2 specific networks like EUROCOM just have the calibration
+    # scale used and don't have a specific CO2 key, this should work temporarily
+    print(species_scales)
+    try:
         scale = species_scales[species_upper]
-    else:
-        scale = "unknown"
+    except KeyError:
+        scale = species_scales
+
+    
 
     global_attributes["Calibration_scale"] = scale
 

@@ -175,12 +175,10 @@ class ICOS(BaseModule):
         # metadata = read_metadata(filepath=data_filepath, data=data, data_type="ICOS")
         header = read_header(filepath=data_filepath)
         n_skip = len(header)-1
+        species = "co2"
 
-        def parse_date(date):
-            try:
-                return pd_datetime.strptime(date, "%Y %m %d %H %M")
-            except ValueError:
-                return NaT
+        def date_parser(year, month, day, hour, minute):
+            return Timestamp(year, month, day, hour, minute)
 
         datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
         # use_cols = ["Day", "Month", "Year", "Hour", "Minute", str(species.lower()), "SamplingHeight", "Stdev", "NbPoints"]
@@ -196,7 +194,7 @@ class ICOS(BaseModule):
                   "SamplingHeight": np.float,
                   "NbPoints": np.int}
 
-        data = read_csv(data_filepath, skiprows=n_skip, parse_dates=datetime_columns, index_col="time", sep=";"
+        data = read_csv(data_filepath, skiprows=n_skip, parse_dates=datetime_columns, index_col="time", sep=";",
                         usecols=use_cols, dtype=dtypes, na_values="-999.99")
 
         data = data[data[species.lower()] >= 0.0]

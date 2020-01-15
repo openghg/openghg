@@ -249,9 +249,9 @@
             "TTA": 222,
             "HFD": 100,
             "SVB": 150
-        },
-        "calibration_dict": {
-            "MHD": "695: WMOX2007; 41: Unknown,WMOX2007; 54: Unknown,WMOX2007",
+        },  
+        "calibration": {
+            "MHD": {"695": "WMOX2007", "41": "Unknown,WMOX2007", "54": "Unknown,WMOX2007"},
             "RGL": "WMO CO2 X2007",
             "TAC": "WMO CO2 X2007",
             "CBW": "WMO CO2 X2007",
@@ -263,8 +263,8 @@
             "SMR": "311: WMOX2007",
             "SSL": "WMO CO2 X2007",
             "LMP": "WMO CO2 X2007",
-            "OPE": "728: WMOX2007; 187: WMOX2007; 75: Unknown,WMOX2007; 91: WMOX2007; 379: WMOX2007",
-            "TRN": "472: WMOX2007; 108: WMOX2007",
+            "OPE": {"728": "WMOX2007", "187": "WMOX2007", "75": "Unknown,WMOX2007", "91": "WMOX2007", "379": "WMOX2007"},
+            "TRN": {"472": "WMOX2007", "108": "WMOX2007"},
             "WAO": "WMO CO2 X2007",
             "CMN": "WMO CO2 X1993, WMO CO2 X2007",
             "JFJ": "WMO CO2 X2007",
