@@ -29,7 +29,7 @@ def retrieve(args):
 
         if return_type == "json":
             dataset_dict = combined.to_dict()
-            json_data = json_dumps(dataset_dict, indent=4))
+            json_data = json_dumps(dataset_dict, indent=4)
             combined_data[key] = json_data
         else:
             raise NotImplementedError("Not yet implemented")
