@@ -1,5 +1,10 @@
+import logging
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
+
 import datetime
 import os
+from pathlib import Path
 import pandas as pd
 import pytest
 # import xarray
@@ -20,34 +25,35 @@ def precision_path():
 def test_recombination_CRDS():
     _ = get_local_bucket(empty=True)
 
-    crds = CRDS.create()
-    crds.save()
+    crds = CRDS.load()
+
     # filename = "bsd.picarro.1minute.248m.dat"
     filename = "hfd.picarro.1minute.100m_min.dat"
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)
     
-    crds = CRDS.read_file(filepath)
+    filepath = Path(filepath)
 
-    gas_data = crds.read_data(data_filepath=filepath)
+    uuids = CRDS.read_file(filepath)
 
-    # Date from the processing function, before being passed to the
-    # Datasources for segmentation by date
-    complete_data = gas_data[2][3]
+    gas_data = crds.read_data(data_filepath=filepath, site="HFD")
 
-    gas_name = "co"
+    ch4_data_read = gas_data["ch4"]["data"]
+
+    gas_name = "ch4"
     location = "hfd"
     data_type = "CRDS"
 
     keys = search(search_terms=gas_name, locations=location, data_type=data_type)
 
-    recombined_dataframes = recombine_sections(data_keys=keys)
+    to_download = keys["hfd_ch4_100m_min"]["keys"]
 
-    assert len(keys) == 1
-    assert list(recombined_dataframes.keys())[0] == "hfd_co"
-    assert complete_data.equals(recombined_dataframes["hfd_co"])
+    ch4_data_recombined = recombine_sections(data_keys=to_download)
 
+    ch4_data_recombined.attrs = {}
 
+    assert ch4_data_read.time.equals(ch4_data_recombined.time)
+    assert ch4_data_read["ch4 count"].equals(ch4_data_recombined["ch4_count"])
 
 
