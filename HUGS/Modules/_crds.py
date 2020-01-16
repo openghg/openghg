@@ -91,7 +91,7 @@ class CRDS(BaseModule):
         return results
 
     @staticmethod
-    def read_file(data_filepath, source_name, site=None, source_id=None, overwrite=False):
+    def read_file(data_filepath, source_name=None, site=None, source_id=None, overwrite=False):
         """ Creates a CRDS object holding data stored within Datasources
 
             TODO - currently only works with a single Datasource
@@ -106,6 +106,8 @@ class CRDS(BaseModule):
         import os
         from pathlib import Path
 
+        data_filepath = Path(data_filepath)
+
         crds = CRDS.load()
         # here we check the source id from the interface or the source_name
         # Check that against the lookup table and then we can decide if we want to 
@@ -116,13 +118,12 @@ class CRDS(BaseModule):
         # That would have to be done during processing
         file_hash = hash_file(filepath=data_filepath)
         if file_hash in crds._file_hashes and not overwrite:
-            raise ValueError(f"This file has been uploaded previously with the filename : {crds._file_hashes[file_hash]}")
+            raise ValueError(f"This file has been uploaded previously with the filename : {crds._file_hashes[file_hash]}.")
         
-        data_filepath = Path(data_filepath)
         filename = data_filepath.name
 
         if not source_name:
-            source_name = filename.stem
+            source_name = data_filepath.stem
 
         if not site:
             site = source_name.split(".")[0]

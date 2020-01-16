@@ -9,8 +9,8 @@ def retrieve(args):
             dict: Dictionary of results
 
     """
-    from HUGS.Processing import recombine_sections as _recombine_sections
-    from collections import defaultdict as _defaultdict
+    from HUGS.Processing import recombine_sections
+    from json import dumps as json_dumps
 
     if "keys" in args:
         key_dict = args["keys"]
@@ -25,10 +25,12 @@ def retrieve(args):
     # Recombine the data by key and save to a dictionary for returning
     combined_data = {}
     for key in key_dict:
-        combined = _recombine_sections(key_dict[key])
+        combined = recombine_sections(key_dict[key])
 
         if return_type == "json":
-            combined_data[key] = combined.to_json()
+            dataset_dict = combined.to_dict()
+            json_data = json_dumps(dataset_dict, indent=4))
+            combined_data[key] = json_data
         else:
             raise NotImplementedError("Not yet implemented")
 

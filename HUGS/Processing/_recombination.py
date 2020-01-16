@@ -15,22 +15,29 @@ def recombine_sections(data_keys):
         Returns:
             Pandas.Dataframe or list: Combined dataframes
     """
-    from pandas import concat as _concat
-    from HUGS.ObjectStore import get_object as _get_object
-    from HUGS.ObjectStore import get_bucket as _get_bucket
-    from HUGS.Modules import Datasource as _Datasource
+    # from pandas import concat as _concat
+    from xarray import concat as xr_concat
+    from HUGS.ObjectStore import get_bucket
+    from HUGS.Modules import Datasource
 
-    bucket = _get_bucket()
+    bucket = get_bucket()
 
-    data = [_Datasource.load_dataframe(bucket=bucket, key=k) for k in data_keys]
+    data = [Datasource.load_dataset(bucket=bucket, key=k) for k in data_keys]
 
-    combined = _concat(data, axis="rows")
+    combined = xr_concat(data, dim="time")
+
+    combined = combined.sortby("time")
+
+    # Check for duplicates?
+    # This is taken from https://stackoverflow.com/questions/51058379/drop-duplicate-times-in-xarray
+    # _, index = np.unique(f['time'], return_index=True)
+    # f.isel(time=index)
+
     # Check that the dataframe's index is sorted by date
-    if not combined.index.is_monotonic_increasing:
-        combined = combined.sort_index()
+    # if not combined.time.is_monotonic_increasing:
+    #     combined = combined.sortby("time")
 
-    if not combined.index.is_unique:
-        raise ValueError("Dataframe index is not unique")
-
+    # if not combined.index.is_unique:
+    #     raise ValueError("Dataframe index is not unique")
     
     return combined

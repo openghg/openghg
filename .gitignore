@@ -116,6 +116,8 @@ source/storage/credentials/*.pem
 source/base_image/Acquire/*
 user/notebooks/.ipynb_checkpoints/
 *secret_key*
+services/hugs_service/credentials
+*.pem
 
 .DS_Store
 

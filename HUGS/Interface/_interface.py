@@ -806,7 +806,7 @@ class Interface:
             """ Update the list of files to be selected for upload
             
             """
-            if self._user and self._user.is_logged_in()
+            if self._user and self._user.is_logged_in():
                 upload_button.disabled = False
                 
             for filename in selection_button.value.keys():
