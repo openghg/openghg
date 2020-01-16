@@ -22,10 +22,7 @@ def process_data(data_file, source_name, precision_filepath=None, data_type="CRD
     processing_obj = load_object(class_name=data_type)
 
     # TODO - improve this so the correct module is loaded - maybe don't rely on the above?
-
-    if data_type == "CRDS":
-        datasource_uuids = processing_obj.read_file(data_filepath=data_file, source_name=source_name, overwrite=overwrite)
-    elif data_type == "GC":
+    if data_type == "GC":
         if site is None:
             raise ValueError("Site must be specified when reading GC data")
 
@@ -33,6 +30,7 @@ def process_data(data_file, source_name, precision_filepath=None, data_type="CRD
                                                     source_name=source_name, instrument_name=instrument_name, site=site, 
                                                     overwrite=overwrite)
     else:
-        datasource_uuids = processing_obj.read_file()
+        datasource_uuids = processing_obj.read_file(data_filepath=data_file, site=site, source_name=source_name, 
+                                                                                                overwrite=overwrite)
 
     return datasource_uuids
