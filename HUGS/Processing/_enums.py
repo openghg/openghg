@@ -13,3 +13,7 @@ class RootPaths(_Enum):
 class DataTypes(_Enum):
     CRDS = "CRDS"
     GC = "GC"
+    EUROCOM = "EUROCOM"
+    NOAA = "NOAA"
+    THAMESBARRIER = "THAMESBARRIER"
+    CRANFIELD = "CRANFIELD"

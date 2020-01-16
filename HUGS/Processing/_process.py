@@ -14,12 +14,12 @@ def process_data(data_file, source_name, precision_filepath=None, data_type="CRD
         Returns:
             list: List of Datasources
     """
-    from HUGS.Processing import DataTypes as _DataTypes
-    from HUGS.Util import load_object as _load_object
+    from HUGS.Processing import DataTypes
+    from HUGS.Util import load_object
 
-    data_type = _DataTypes[data_type.upper()].name
+    data_type = DataTypes[data_type.upper()].name
     # Load in the the class used to process the data file/s
-    processing_obj = _load_object(class_name=data_type)
+    processing_obj = load_object(class_name=data_type)
 
     # TODO - improve this so the correct module is loaded - maybe don't rely on the above?
 
@@ -32,5 +32,7 @@ def process_data(data_file, source_name, precision_filepath=None, data_type="CRD
         datasource_uuids = processing_obj.read_file(data_filepath=data_file, precision_filepath=precision_filepath,
                                                     source_name=source_name, instrument_name=instrument_name, site=site, 
                                                     overwrite=overwrite)
+    else:
+        datasource_uuids = processing_obj.read_file()
 
     return datasource_uuids
