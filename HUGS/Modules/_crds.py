@@ -115,8 +115,8 @@ class CRDS(BaseModule):
         # TODO - this should be expanded to check dates for the uploaded data
         # That would have to be done during processing
         file_hash = hash_file(filepath=data_filepath)
-        if file_hash in crds._file_hashes: # and overwrite == False:
-            raise ValueError(f"This file has been uploaded previously with the filename : {crds._file_hashes[file_hash]}. Overwrite = {overwrite}")
+        if file_hash in crds._file_hashes and not overwrite:
+            raise ValueError(f"This file has been uploaded previously with the filename : {crds._file_hashes[file_hash]}.")
         
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
