@@ -356,7 +356,7 @@ class Datasource:
     #         Returns:
     #             xarray.Dataset: Dataset created from data
     #     """
-    #     import netCDF4
+    #     import netCDF4c
     #     import xarray
 
     #     nc4_ds = netCDF4.Dataset("in_memory.nc", memory=data)
