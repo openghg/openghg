@@ -1,11 +1,13 @@
-FROM chryswoods/acquire-base:latest
+FROM chryswoods/hugs-base:latest
 
 WORKDIR /function
 USER root
 
 ADD requirements.txt .
 
-RUN pip3 install --target /python/ --no-cache --no-cache-dir \
+RUN pip3 install -U pip
+
+RUN pip3 install --upgrade --target /python/ --no-cache --no-cache-dir \
                  -r requirements.txt && \
     rm -fr ~/.cache/pip /tmp* requirements.txt func.yaml Dockerfile .venv
 
