@@ -362,3 +362,10 @@ What's happening with the fn deploy in the deploy_all script?
 Fixed by manually running the deploy scripts in acquire
 
 Fix the selection of the processing class in _process.py under Processing
+
+I updated the func.yaml for some of the HUGS services and now it doesn't work with the older version of FDK, see diffs
+
+HUGS base image docker build wasn't working as the compile was returning an error code. Pushed a fix to devel that fixes this.
+Now need to run build and push in base_image to get the docker image built. May need to change the func.yamls back to the older version for 
+compatibility with fdk 0.0.35
+
