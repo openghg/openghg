@@ -1,8 +1,9 @@
 schema_version: 20180708
 name: hugs-root
-version: 0.0.48
+version: 0.0.51
 runtime: docker
 type: sync
+memory: 1024
 timeout: 20
 triggers:
 - name: root
