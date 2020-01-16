@@ -101,9 +101,9 @@
         "38magl",
         "24magl",
         "4magl"
-      ], 
-      "height_station_masl": 85.0, 
-      "latitude": -2.1441, 
+      ],
+      "height_station_masl": 85.0,
+      "latitude": -2.1441,
       "longitude": -58.9999
     }
   },
@@ -1054,7 +1054,7 @@
       ],
       "height_station_masl": 2590.0,
       "latitude": -1.588,
-      "long_name" : "Mugogo, Rwanda",
+      "long_name": "Mugogo, Rwanda",
       "longitude": 29.565
     }
   },
@@ -1072,15 +1072,19 @@
       "longitude": -118.0586
     }
   },
-  "NDAO" : {
+  "NDAO": {
     "MPI": {
-        "long_name" : "Namib Desert Atmospheric Observatory",
-        "height": ["21m"],
-        "height_name": ["21m"],
-        "height_station_masl": 408.0,
-        "latitude": -23.563,
-        "longitude": 15.046}
-
+      "long_name": "Namib Desert Atmospheric Observatory",
+      "height": [
+        "21m"
+      ],
+      "height_name": [
+        "21m"
+      ],
+      "height_station_masl": 408.0,
+      "latitude": -23.563,
+      "longitude": 15.046
+    }
   },
   "NMY": {
     "UHei": {
@@ -1219,10 +1223,12 @@
   "SDZ": {
     "AGAGE": {
       "height": [
-        "80m", "10m"
+        "80m",
+        "10m"
       ],
       "height_name": [
-        "80magl", "10magl"
+        "80magl",
+        "10magl"
       ],
       "height_station_masl": 287.0,
       "latitude": 40.65,
@@ -1647,6 +1653,36 @@
       "latitude": 78.925,
       "long_name": "Zeppelin, Ny Alesund, Norway",
       "longitude": 11.92222
+    }
+  },
+  "BIS": {
+    "EUROCOM": {
+      "latitude": 44.38,
+      "longitude": -1.23
+    }
+  },
+  "BIK": {
+    "EUROCOM": {
+      "latitude": 53.23,
+      "longitude": 23.01
+    }
+  },
+  "BIR": {
+    "EUROCOM": {
+      "latitude": 58.23,
+      "longitude": 8.15
+    }
+  },
+  "PRS": {
+    "EUROCOM": {
+      "latitude": 45.935,
+      "longitude": 7.707
+    }
+  },
+  "SVB": {
+    "EUROCOM": {
+      "latitude": 64.14,
+      "longitude": 19.46
     }
   }
 }
