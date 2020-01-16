@@ -47,10 +47,8 @@ class Process:
                     data_filename = str(f).replace(".precisions", "")
                     if Path(data_filename).exists():
                         filepaths.append((Path(data_filename), f))
-        elif data_type == "CRDS":
-            filepaths = [f for f in Path(folder_path).glob(f'**/*.{extension}')]
         else:
-            raise NotImplementedError("Currently only implemented for CRDS and GC data types")
+            filepaths = [f for f in Path(folder_path).glob(f'**/*.{extension}')]
 
         return self.process_files(user=user, files=filepaths, data_type=data_type, source_name=source_name, overwrite=overwrite,
                                     instrument=instrument)

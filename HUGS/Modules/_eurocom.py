@@ -124,7 +124,7 @@ class EUROCOM(BaseModule):
         filename = data_filepath.name
 
         if not source_name:
-            source_name = filename.stem
+            source_name = data_filepath.stem
 
         if not site:
             site = source_name.split("_")[0]
@@ -184,7 +184,7 @@ class EUROCOM(BaseModule):
         species = "co2"
 
         def date_parser(year, month, day, hour, minute):
-            return Timestamp(year, month, day, hour, minute)
+            return Timestamp(year=year, month=month, day=day, hour=hour, minute=minute)
 
         datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
         use_cols = ["Day", "Month", "Year", "Hour", "Minute", str(species.lower()), "SamplingHeight", "Stdev", "NbPoints"]
