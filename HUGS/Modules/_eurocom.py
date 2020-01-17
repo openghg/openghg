@@ -216,8 +216,7 @@ class EUROCOM(BaseModule):
         except KeyError:
             calibration_scale = {}
 
-        gas_data = get_attributes(ds=data, species=species, site=site, scales=calibration_scale,
-                                     global_attributes=site_attributes, units="ppm")
+        gas_data = get_attributes(ds=data, species=species, site=site, global_attributes=site_attributes, units="ppm")
 
         # Create a copy of the metadata dict
         metadata = {}
