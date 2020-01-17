@@ -202,8 +202,8 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                 results = append_keys(results=results, search_key=search_key, keys=data_list)
                 results[search_key]["metadata"] = datasource.metadata()
                 # results["footprints"].extend(data_list)
-    else:
-        raise NotImplementedError("Only time series and footprint data can be searched for currently")
+    # else:
+    #     raise NotImplementedError("Only time series and footprint data can be searched for currently")
 
     # Here we can add the daterange key to the search results
     # TODO - can this just be taken more easily from the Datasource?
