@@ -95,7 +95,7 @@ class NOAA(BaseModule):
         return datasource_uuids
 
     @staticmethod
-    def read_file(data_filepath, species, source_name=None, site=None, source_id=None, overwrite=False):
+    def read_file(data_filepath, species=None, source_name=None, site=None, source_id=None, overwrite=False):
         """ Reads NOAA data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
@@ -119,14 +119,16 @@ class NOAA(BaseModule):
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
 
-        if not source_name:
+        if species is None:
+            species = filename.split("_")[0].upper()
+
+        if source_name is None:
             source_name = data_filepath.stem
             source_name = source_name.split("-")[0]
 
         gas_data = noaa.read_data(data_filepath=data_filepath, species=species)
 
-        # Site read from Dataframe
-        if not site:
+        if site is None:
             site = gas_data[species]["metadata"]["site"]
 
         for species in gas_data:
