@@ -97,20 +97,20 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     if require_all:
         single_key = "_".join(sorted(search_terms))
 
-    if data_type == "GC" or data_type == "CRDS":
-        # First we find the Datasources from locations we want to narrow down our search
-        location_sources = _defaultdict(list)
-        # If we have locations to search
-        if locations:
-            for location in locations:
-                for datasource in datasources:
-                    if datasource.search_metadata(location):
-                        location_sources[location].append(datasource)
-        # If we have an empty list of locations, search everywhere
-        # TODO - this feels clunky
-        else:
+    # if data_type == "GC" or data_type == "CRDS":
+    # First we find the Datasources from locations we want to narrow down our search
+    location_sources = _defaultdict(list)
+    # If we have locations to search
+    if locations:
+        for location in locations:
             for datasource in datasources:
-                location_sources[datasource.site()].append(datasource)
+                if datasource.search_metadata(location):
+                    location_sources[location].append(datasource)
+    # If we have an empty list of locations, search everywhere
+    # TODO - this feels clunky
+    else:
+        for datasource in datasources:
+            location_sources[datasource.site()].append(datasource)
 
 
     # elif data_type == "FOOTPRINT":
@@ -140,14 +140,19 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
     # Here we could create a dictionary keyed by inlet, location, height etc and the height we require
 
     # Return the metadata for each datasource as an extension to the key?
-    if data_type == "GC" or data_type == "CRDS":
+    if data_type != "FOOTPRINT":
         if search_terms:
             for search_term in search_terms:
                 for location in location_sources:
                     for datasource in location_sources[location]:
                         if datasource.search_metadata(search_term):
-                            prefix = "data/uuid/%s" % datasource.uuid()
+                            # Get the latest version string from the Datasource
+                            version_str = datasource.latest_version()
+                            uuid = datasource.uuid()
+                            
+                            prefix = f"data/uuid/{uuid}/{version_str}"
                             data_list = _get_object_names(bucket=bucket, prefix=prefix)
+                            
                             # Get the Dataframes that are within the required date range
                             in_date = [d for d in data_list if in_daterange(d, start_datetime, end_datetime)]
                             
@@ -188,7 +193,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
                     results = append_keys(results=results, search_key=search_key, keys=in_date)
                     results[search_key]["metadata"] = datasource.metadata()
                     # results[search_key].extend(in_date)
-    elif data_type == "FOOTPRINT":
+    else:
         # For now get all footprints
         for datasource in datasources:
             if datasource.data_type() == "footprint":

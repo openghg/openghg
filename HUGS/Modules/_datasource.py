@@ -30,6 +30,8 @@ class Datasource:
         self._data_keys = defaultdict(dict)
         self._data_type = None
         # Hold information regarding the versions of the data
+        # Currently unused
+        self._latest_version = None
         self._versions = {}
 
     def start_datetime(self):
@@ -285,6 +287,7 @@ class Datasource:
         data["stored"] = self._stored
         data["data_keys"] = self._data_keys
         data["data_type"] = self._data_type
+        data["latest_version"] = self._latest_version
 
         return data
 
@@ -430,6 +433,7 @@ class Datasource:
         d._data_keys = data["data_keys"]
         d._data = {}
         d._data_type = data["data_type"]
+        d._latest_version = data["latest_version"]
         
         if d._stored and not shallow:
             for date_key in d._data_keys["latest"]["keys"]:
@@ -489,6 +493,7 @@ class Datasource:
             
             # Link latest to the newest version
             self._data_keys["latest"] = self._data_keys[version_str]
+            self._latest_version = version_str
 
         self._stored = True
         datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"
@@ -733,4 +738,13 @@ class Datasource:
                 dict: Dictionary of versions
         """
         return self._data_keys
+
+    def latest_version(self):
+        """ Return the string of the latest version 
+
+            Returns:
+                str: Latest version
+        """
+        return self._latest_version
+        
 
