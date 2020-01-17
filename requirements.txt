@@ -6,6 +6,7 @@ matplotlib
 netcdf4
 numpy
 pandas
+scipy
 tables
 voila
 xarray
