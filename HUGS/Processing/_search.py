@@ -21,6 +21,10 @@ class DataType(_Enum):
     CRDS = "CRDS"
     GC = "GC"
     FOOTPRINT = "FOOTPRINT"
+    NOAA = "NOAA"
+    EUROCOM = "EUROCOM"
+    THAMESBARRIER = "THAMESBARRIER"
+    ICOS = "ICOS"
 
 def search(search_terms, locations, data_type, require_all=False, start_datetime=None, end_datetime=None):
     """ Search for gas data (optionally within a daterange)
