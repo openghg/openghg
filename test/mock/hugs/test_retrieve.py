@@ -33,7 +33,7 @@ def crds(authenticated_user):
     args = {"authorisation": auth.to_data(),
             "par": {"data": par.to_data()},
             "par_secret": {"data": par_secret},
-            "data_type": "CRDS"}
+            "data_type": "CRDS", "source_name": "bsd.picarro.1minute.248m"}
 
     response = hugs.call_function(function="process", args=args)
 
@@ -47,8 +47,14 @@ def test_retrieve(authenticated_user, crds):
 
     search_results = search_obj.search(search_terms=search_term, locations=location, data_type=data_type)
 
+    key = list(search_results.keys())[0]
+    to_download = {"bsd_co": search_results[key]["keys"]}
+
     retrieve_obj = Retrieve(service_url="hugs")
-    data = retrieve_obj.retrieve(keys=search_results)
+
+    data = retrieve_obj.retrieve(keys=to_download)
+
+    assert False
 
     # Here we get some JSON data that can be converted back into a DataFrame
     df = read_json(data["bsd_co"])

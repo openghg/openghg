@@ -22,13 +22,21 @@ def retrieve(args):
     else:
         return_type = "json"
 
-    # Recombine the data by key and save to a dictionary for returning
+    if not isinstance(key_dict, dict):
+        raise TypeError("Keys must be passed in dictionary format. For example {bsd_co2: [key_list]}")
+    
     combined_data = {}
     for key in key_dict:
         combined = recombine_sections(key_dict[key])
 
         if return_type == "json":
             dataset_dict = combined.to_dict()
+
+            # Need to convert the time data to string and then back again on the other side
+            # See https://github.com/pydata/xarray/issues/2656
+            # TODO - fix this
+            print(dataset_dict)
+
             json_data = json_dumps(dataset_dict, indent=4)
             combined_data[key] = json_data
         else:
