@@ -890,6 +890,14 @@
             "longitude": -154.82
         }
     },
+    "KZD": {
+        "NOAA": {
+            "height_station_masl": 595.0,
+            "latitude": 44.0839,
+            "long_name": "Sary Taukum, Kazakhstan",
+            "longitude": 86.8712
+        }
+    },
     "LEF": {
         "NOAA": {
             "height": [
@@ -1125,8 +1133,22 @@
             "longitude": 5.504
         }
     },
+    "OXK": {
+        "NOAA": {
+            "height": [
+                "10m"
+            ],
+            "height_name": [
+                "10magl"
+            ],
+            "height_station_masl": 1022.0,
+            "latitude": 50.0301,
+            "long_name": "Ochsenkopf, Germany",
+            "longitude": 11.8084
+        }
+    },
     "ORG": {
-        "ALE": {
+        "NOAA": {
             "height": [
                 "10m"
             ],
