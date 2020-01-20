@@ -18,8 +18,12 @@ class Retrieve:
             Args:
                 keys (dict): Dictionary of object store keys
             Returns:
-                dict: Dictionary of results at key results
+                dict: Dictionary of xarray Datasets
         """
+        from Acquire.ObjectStore import string_to_datetime
+        from xarray import Dataset
+        from json import loads
+
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
@@ -29,7 +33,23 @@ class Retrieve:
 
         response = self._service.call_function(function="retrieve", args=args)
 
-        return response["results"]
+        response_data = response["results"]
+
+        # Convert the string passed to dict
+        for key in response_data:
+            response_data[key] = loads(response_data[key])
+
+        datasets = {}
+        for key in response_data:
+            # We need to convert the datetime string back to datetime objects here
+            datetime_data = response_data[key]["coords"]["time"]["data"]
+
+            for i, _ in enumerate(datetime_data):
+                datetime_data[i] = string_to_datetime(datetime_data[i])
+
+            datasets[key] = Dataset.from_dict(response_data[key])
+
+        return datasets
 
     def service(self):
         return self._service

@@ -10,6 +10,7 @@ def retrieve(args):
 
     """
     from HUGS.Processing import recombine_sections
+    from Acquire.ObjectStore import datetime_to_string
     from json import dumps as json_dumps
 
     if "keys" in args:
@@ -34,8 +35,10 @@ def retrieve(args):
 
             # Need to convert the time data to string and then back again on the other side
             # See https://github.com/pydata/xarray/issues/2656
-            # TODO - fix this
-            print(dataset_dict)
+            datetime_data = dataset_dict["coords"]["time"]["data"]
+            # Convert the datetime object to string
+            for i, _ in enumerate(datetime_data):
+                datetime_data[i] = datetime_to_string(datetime_data[i])
 
             json_data = json_dumps(dataset_dict, indent=4)
             combined_data[key] = json_data
