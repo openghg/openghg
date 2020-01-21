@@ -23,6 +23,7 @@ class Retrieve:
         from Acquire.ObjectStore import string_to_datetime
         from xarray import Dataset
         from json import loads
+        import warnings
 
         if self._service is None:
             raise PermissionError("Cannot use a null service")
@@ -47,7 +48,12 @@ class Retrieve:
             for i, _ in enumerate(datetime_data):
                 datetime_data[i] = string_to_datetime(datetime_data[i])
 
-            datasets[key] = Dataset.from_dict(response_data[key])
+            # TODO - catch FutureWarnings here that may affect voila behaviour
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                
+                json_data = response_data[key]
+                datasets[key] = Dataset.from_dict(json_data)
 
         return datasets
 

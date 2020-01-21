@@ -1,4 +1,10 @@
+import logging
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
+
+
 import pytest
+import pandas as pd
 import os
 from pandas import read_json, Timestamp
 
@@ -52,16 +58,23 @@ def test_retrieve(authenticated_user, crds):
 
     retrieve_obj = Retrieve(service_url="hugs")
 
-    data = retrieve_obj.retrieve(keys=to_download)
+    response = retrieve_obj.retrieve(keys=to_download)
 
-    assert False
+    data = response["bsd_co"]
 
-    # Here we get some JSON data that can be converted back into a DataFrame
-    df = read_json(data["bsd_co"])
+    del data.attrs["File created"]
 
-    head = df.head(1)
+    assert data.time[0] == pd.Timestamp("2014-01-30T10:52:30")
+    assert data.co_count[0] == pytest.approx(204.62)
+    assert data.attrs == {'data_owner': "Simon O'Doherty", 'data_owner_email': 's.odoherty@bristol.ac.uk', 'inlet_height_magl': '248m_6', 'comment': 'Cavity ring-down measurements. Output from GCWerks', 'Conditions of use': 'Ensure that you contact the data owner at the outset of your project.',
+                          'Source': 'In situ measurements of air', 'Conventions': 'CF-1.6', 'Processed by': 'auto@hugs-cloud.com', 'species': 'co', 'Calibration_scale': '{}', 'station_longitude': -1.15033, 'station_latitude': 54.35858, 'station_long_name': 'Bilsdale, UK', 'station_height_masl': 380.0}
 
-    assert head.first_valid_index() == Timestamp("2014-01-30 10:52:30")
-    assert head["co count"].iloc[0] == 204.62
-    assert head["co stdev"].iloc[0] == 6.232
-    assert head["co n_meas"].iloc[0] == 26
+    # # Here we get some JSON data that can be converted back into a DataFrame
+    # df = read_json(data["bsd_co"])
+
+    # head = df.head(1)
+
+    # assert head.first_valid_index() == Timestamp("2014-01-30 10:52:30")
+    # assert head["co count"].iloc[0] == 204.62
+    # assert head["co stdev"].iloc[0] == 6.232
+    # assert head["co n_meas"].iloc[0] == 26
