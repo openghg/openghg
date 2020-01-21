@@ -5,7 +5,7 @@
 __all__ = ["url_join", "get_daterange_str", "get_datetime_epoch", 
             "get_datetime_now", "get_datetime", "unanimous", "load_object",
             "hash_file", "timestamp_tzaware", "get_datapath", "date_overlap",
-            "read_header"]
+            "read_header", "load_hugs_json"]
 
 def url_join(*args):
     """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
@@ -182,6 +182,24 @@ def get_datapath(filename):
     filename = str(filename)
 
     return Path(__file__).resolve().parent.joinpath(f"../Data/{filename}")
+
+
+def load_hugs_json(filename):
+    """ Returns a dictionary created from the HUGS JSON at filename
+
+        Args:
+            filename (str): Name of JSON file
+        Returns:
+            dict: Dictionary created from JSON
+    """
+    from json import load
+
+    path = get_datapath(filename)
+    
+    with open(path, "r") as f:
+        data = load(f)
+
+    return data
 
 
 def date_overlap(daterange_a, daterange_b):
