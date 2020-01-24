@@ -51,6 +51,8 @@ class Interface:
         # User
         self._user = None
 
+        self._to_plot = {}
+
         # Styles - maybe these can be moved somewhere else?
         self.table_style = {'description_width': 'initial'}
         self.table_layout = {'width': '100px', 'min_width': '100px','height': '28px', 'min_height': '28px'}
@@ -82,20 +84,24 @@ class Interface:
         # self._tableau20 = list(matplotlib.cm.tab20.colors)
         # self._colour_blind = list(data["colour_blind"].values())
 
+        self._tableau10 = ['#4E79A7','#F28E2B','#E15759','#76B7B2','#59A14F'] #,'#EDC948','#B07AA1','#FF9DA7','#9C755F','#BAB0AC']
         self._tableau20 = [matplotlib.colors.rgb2hex(colour) for colour in matplotlib.cm.tab20.colors]
         self._colour_blind = self._tableau20
 
-    def rand_colors(self, colour_blind=False):
+    def rand_colors(self, tab_set="10", colour_blind=False):
         """ Get a random set of colours
 
             Returns:
-                list: A random list of Tableau20 colours
+                list: A random list of colours
         """
+        if tab_set == "10":
+            colours = self._tableau10.copy()
+        else:
+            colours = self._tableau20.copy()
+
         # Need to copy as shuffle shuffles in-place
         if colour_blind:
             colours = self._colour_blind.copy()
-        else:
-            colours = self._tableau20.copy()
 
         random.shuffle(colours)
 
@@ -428,7 +434,7 @@ class Interface:
 
     #     return start_date, end_date
 
-    def create_plotting_box(self, selected_results, data, plot_number=1):
+    def create_plotting_interface(self, selected_results, data, plot_number=1):
         """ Create the window for plotting the downloaded data
 
             Args:
@@ -599,6 +605,371 @@ class Interface:
         # self._plot_box.append(plot_box)
 
         return plot_widgets
+
+
+    def plotting_interface(self, selected_results, data, plot_number=1):
+        """ Create the window for plotting the downloaded data
+
+            Args:
+                selected_results (dict): Dictionary of selected search results
+                data (dict): Dictionary of data as JSON format
+                plot_number (int, default=1): Plot number to add to figure
+            Returns:
+                list: List of widgets
+
+            TODO
+            1. Implement adding new plots to create a grid
+            2. Editing of plots ?
+            3. Adding new overlays to axes
+            4. Updating axis titles, adding figure titles etc
+        """
+        # Create some checkboxes
+        plot_checkboxes = []
+        plot_keys = []
+
+        site_labels = []
+        date_labels = []
+        gas_labels = []
+
+        box_layout = widgets.Layout(display='flex',
+                                    flex_flow='column',
+                                    align_items='flex-start',
+                                    width='60%')
+
+        select_layout = widgets.Layout(display='flex',
+                            flex_flow='row',
+                            align_items='flex-end',
+                            width='98%')
+
+        # TODO - pull this out into a function that can be used here and in create_download_box
+        header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=box_layout)
+        header_label_gas = widgets.HTML(value=f"<b>Species</b>", layout=box_layout)
+        header_label_select = widgets.HTML(value=f"<b></b>", layout=box_layout)
+
+        for key in selected_results:
+            start_date = selected_results[key]["start_date"]
+            end_date = selected_results[key]["end_date"]
+            dates = f"{start_date} to {end_date}"
+
+            gas_name = selected_results[key]["metadata"]["species"].upper()
+            gas_label = widgets.Label(value=gas_name, layout=box_layout)
+
+            site_code = selected_results[key]["metadata"]["site"]
+            site_text = f'{self._site_locations[site_code.upper()]["name"]} ({site_code.upper()})'
+            site_label = widgets.Label(value=site_text)
+
+            plot_keys.append(key)
+            plot_checkboxes.append(widgets.Checkbox(value=False))
+
+            site_labels.append(site_label)
+            gas_labels.append(gas_label)
+
+        select_instruction = widgets.HTML(value="<b>Select data: </b>", layout=box_layout)
+
+        header_box = widgets.HBox(children=[header_label_site, header_label_gas, header_label_select], layout=select_layout)
+
+        site_vbox = widgets.VBox(children=site_labels, layout=box_layout)
+        gas_vbox = widgets.VBox(children=gas_labels, layout=box_layout)
+        checkbox_vbox = widgets.VBox(children=plot_checkboxes, layout=box_layout)
+
+        dynamic_box = widgets.HBox(children=[site_vbox, gas_vbox, checkbox_vbox])
+
+        # Edit box - for modifying plot types
+        # Dropdown line/scatter
+        # If line - linewidth
+        # If scatter - marker size
+
+        # Get the colors now so they don't change each time plot is clicked
+        colors = self.rand_colors()
+        # Enable/disable legend
+
+        # Plot button
+        plot_button = widgets.Button(description="Plot", button_style="success", layout=self.table_layout)
+        spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
+
+        button_box = widgets.VBox(children=[plot_button, spacer, spacer])
+
+        # ui_box = widgets.VBox(children=[horiz_select, plot_box])
+
+        # Cleaner way of doing this?
+        arg_dict = {plot_keys[i]: checkbox for i, checkbox in enumerate(plot_checkboxes)}
+
+        # For some reason the datetimeindex of the dataframes isn't being preserved
+        # and we're getting an unnamed column for the first column and a numbered index
+        # But only on export of the dataframe to csv, otherwise just get the standard
+        # 'co count', 'co stdev', 'co n_meas'
+
+        def on_plot_clicked(a):
+            # Get the data for ticked checkboxes
+            self._to_plot = {key: data[key] for key in arg_dict if arg_dict[key].value is True}
+            plot_data(to_plot=self._to_plot)
+
+        # Create a dropdown to select which part of the dataframe
+        # to plot, count, stddev etc
+
+        x_scale = bq.DateScale()
+        y_scale = bq.LinearScale()
+        scales = {"x": x_scale, "y": y_scale}
+
+        ax = bq.Axis(label="Date", label_offset="50px", scale=x_scale, grid_lines="none")
+        ay = bq.Axis(label="Count", label_offset="50px", scale=y_scale, orientation="vertical", grid_lines="none")
+        axes = [ax, ay]
+
+        def plot_data(to_plot):
+            """ 
+                Each key in the data dict is a dataframe
+            """
+
+            marks = []
+            for i, key in enumerate(to_plot):
+                data = to_plot[key]
+
+                species = data.attrs["species"].upper()
+                site_name = data.attrs["station_long_name"]
+
+                # single_color = [random.choice(colors)]
+
+                single_color = [self._tableau10[i]]
+
+                mark = bq.Lines(scales=scales, colors=single_color, stroke_width=1, labels=[site_name], display_legend=True)
+
+                mark.x = data.time
+                # TODO - can modify this to be able to add error bars etc
+                mark.y = data["ch4_count"]
+
+                ay.label = f"{species} (nmol/mol)"
+
+                marks.append(mark)
+
+                start_date = pd.Timestamp(data["time"][0].values)
+                end_date = pd.Timestamp(data["time"][-1].values)
+
+                dates = pd.date_range(start_date, end_date, freq='M')
+                options = [(date.strftime('%d %b %Y'), date) for date in dates]
+                index = (0, len(options)-1)
+
+                selection_range_slider.options = options
+                selection_range_slider.index = index
+
+            figure.marks = marks
+            figure.axes = axes
+
+        # lines = bq.Lines(x=np.arange(100), y=np.cumsum(np.random.randn(2, 100), axis=1), scales=scales)
+        # lines = bq.Lines(scales=scales, colors=self.rand_colors())
+        figure = bq.Figure(marks=[], axes=[], animation_duration=1000)
+        figure.layout.width = "auto"
+        figure.layout.height = "auto"
+        figure.layout.min_height = "500px"
+
+        spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
+
+        # first_key = list(self._to_plot.keys())[0]
+        # Timestamps for initial values
+        start_date = pd.Timestamp("2012-01-01")
+        end_date = pd.Timestamp("2019-01-01")
+
+        dates = pd.date_range(start_date, end_date, freq='M')
+        options = [(date.strftime('%d %b %Y'), date) for date in dates]
+        index = (0, len(options)-1)
+
+        selection_range_slider = widgets.SelectionRangeSlider(
+                                        options=options,
+                                        index=index,
+                                        description='Select date',
+                                        orientation='horizontal',
+                                        layout={'width': '500px'}
+                                    )
+        def update_scale(dates):
+            start, end = dates
+
+            x_scale.min = start
+            x_scale.max = end
+
+        centre_layout = widgets.Layout(display='flex', flex_flow='column', align_items='center', width='100%')
+
+        slider = widgets.interactive(update_scale, dates=selection_range_slider)
+
+        figure_box = widgets.VBox(children=[figure, slider], layout=centre_layout)
+
+        plot_widgets = [header_box, dynamic_box, figure_box, button_box]
+
+        plot_box = widgets.VBox(children=plot_widgets)
+
+        plot_button.on_click(on_plot_clicked)
+
+        self._n_figs += 1
+
+        # Need to update the plotting selection box each time download is called
+
+        # Here have a function that just adds a whole new box to the box this has created
+        # Have a VBox that contains the first, then update to append each plot to the grid
+        # Each time we just append a new vbox to the list of boxes here
+
+        # self._plot_box = [header_box, dynamic_box, figure, button_box]
+
+        # # Initially just create a single plot
+        # plot_box = widgets.VBox(children=plot_widgets)
+        # self._plot_box.append(plot_box)
+
+        return plot_box
+
+    # def plotting_interface(self, selected_results, data, plot_number=1):
+    #     """ Create the window for plotting the downloaded data
+
+    #         Args:
+    #             selected_results (dict): Dictionary of selected search results
+    #             data (dict): Dictionary of data as JSON format
+    #             plot_number (int, default=1): Plot number to add to figure
+    #         Returns:
+    #             list: List of widgets
+
+    #         TODO
+    #         1. Implement adding new plots to create a grid
+    #         2. Editing of plots ?
+    #         3. Adding new overlays to axes
+    #         4. Updating axis titles, adding figure titles etc
+    #     """
+    #     # Create some checkboxes
+    #     plot_checkboxes = []
+    #     plot_keys = []
+
+    #     site_labels = []
+    #     date_labels = []
+    #     gas_labels = []
+
+    #     # TODO - pull this out into a function that can be used here and in create_download_box
+    #     header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=self.table_layout)
+    #     header_label_select = widgets.HTML(value=f"<b>Select</b>", layout=self.checkbox_layout)
+
+    #     site_data = collections.defaultdict(dict)
+    #     for key in selected_results:
+    #         species = selected_results[key]["metadata"]["species"].upper()
+    #         site = selected_results[key]["metadata"]["site"].upper()
+
+    #         if site not in site_data:
+    #             site_data[site]["species_list"] = [species]
+    #         else:
+    #             site_data[site]["species_list"].append(species)
+
+    #         # Key to access the data
+    #         site_data[site][species] = key
+
+    #     # Make the selectio menus
+    #     selection_widgets = {}
+    #     for site in site_data:
+    #         site_text = f'{self._site_locations[site.upper()]["name"]} ({site.upper()})'
+    #         site_label = widgets.Label(value=site_text)
+
+    #         selection_box = widgets.Dropdown(
+    #             options=site_data[site]["species_list"],
+    #             value=site_data[site]["species_list"][0],
+    #             description='Species',
+    #             disabled=False
+    #         )
+
+    #         selection_widgets[site] = [site_label, selection_box]
+
+
+    #     return selection_widgets
+
+    #     select_instruction = widgets.HTML(value="<b>Select data: </b>", layout=self.table_layout)
+
+    #     # Get the colors now so they don't change each time plot is clicked
+    #     colors = self.rand_colors()
+    #     # Enable/disable legend
+
+    #     # Plot button
+    #     plot_button = widgets.Button(description="Plot", button_style="success", layout=self.table_layout)
+    #     spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
+
+    #     button_box = widgets.VBox(children=[plot_button, spacer, spacer])
+
+    #     def on_plot_clicked(a):
+    #         keys = []
+    #         for site in selection_widgets:
+    #             species = 
+
+
+
+    #         # Get the data for ticked checkboxes
+    #         to_plot = {key: data[key] for key in site_data if arg_dict[key].value is True}
+    #         plot_data(to_plot=to_plot)
+
+
+
+
+
+    #     # For some reason the datetimeindex of the dataframes isn't being preserved
+    #     # and we're getting an unnamed column for the first column and a numbered index
+    #     # But only on export of the dataframe to csv, otherwise just get the standard
+    #     # 'co count', 'co stdev', 'co n_meas'
+
+
+    #     # Create a dropdown to select which part of the dataframe
+    #     # to plot, count, stddev etc
+
+    #     def plot_data(to_plot):
+    #         """ 
+    #             Each key in the data dict is a dataframe
+    #         """
+    #         # Modify here so user can select line, scatter
+    #         # Marker size etc
+    #         plot_style = plot_dropdown.value
+
+    #         x_scale = bq.DateScale()
+    #         y_scale = bq.LinearScale()
+    #         scales = {"x": x_scale, "y": y_scale}
+
+    #         ax = bq.Axis(label="Date", scale=x_scale, grid_lines="none")
+    #         ay = bq.Axis(label="Count", scale=y_scale, orientation="vertical", grid_lines="none")
+    #         axes = [ax, ay]
+
+    #         marks = []
+    #         for key in to_plot:
+    #             single_color = [random.choice(colors)]
+
+    #             if plot_style == "Line":
+    #                 mark = bq.Lines(scales=scales, colors=single_color, stroke_width=marker_size.value)
+    #             else:
+    #                 mark = bq.Scatter(scales=scales, colors=single_color, stroke_width=marker_size.value)
+
+    #             mark.x = to_plot[key].index
+    #             # TODO - can modify this to be able to add error bars etc
+    #             mark.y = to_plot[key].iloc[:, 0]
+
+    #             marks.append(mark)
+
+    #         figure.marks = marks
+    #         figure.axes = axes
+
+    #     # lines = bq.Lines(x=np.arange(100), y=np.cumsum(np.random.randn(2, 100), axis=1), scales=scales)
+    #     # lines = bq.Lines(scales=scales, colors=self.rand_colors())
+    #     figure = bq.Figure(marks=[], axes=[], animation_duration=1000)
+    #     figure.layout.width = "auto"
+    #     figure.layout.height = "auto"
+    #     figure.layout.min_height = "500px"
+
+    #     spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
+
+    #     plot_widgets = [header_box, dynamic_box, spacer, figure, button_box]
+
+    #     plot_button.on_click(on_plot_clicked)
+
+    #     self._n_figs += 1
+
+    #     # Need to update the plotting selection box each time download is called
+
+    #     # Here have a function that just adds a whole new box to the box this has created
+    #     # Have a VBox that contains the first, then update to append each plot to the grid
+    #     # Each time we just append a new vbox to the list of boxes here
+
+    #     # self._plot_box = [header_box, dynamic_box, figure, button_box]
+
+    #     # # Initially just create a single plot
+    #     # plot_box = widgets.VBox(children=plot_widgets)
+    #     # self._plot_box.append(plot_box)
+
+    #     return plot_widgets
 
     def plot_controller(self, selected_results, data):
         """ This function controls the gridding of plots 

@@ -33,9 +33,14 @@
             "longitude": 0.1745
         },
         "SMA": {
-            "long_name": "Highfield Tower",
+            "long_name": "St Mary's",
             "latitude": 51.5044,
             "longitude": -0.3056
+        },
+        "RHO": {
+            "long_name": "Royal Holloway",
+            "latitude": 51.427582,
+            "longitude": -0.562780
         }
     }
 }
