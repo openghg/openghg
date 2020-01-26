@@ -8,6 +8,7 @@ setuptools.setup(
     version="0.0.3",
     author="Gareth Jones",
     author_email="g.m.jones@bristol.ac.uk",
+    data_files = [('', ['HUGS/Data/*.json'])],
     description="A HUb for greenhouse Gas Data Science",
     long_description=long_description,
     long_description_content_type="text/markdown",
