@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="hugs",
-    version="0.0.2",
+    version="0.0.3",
     author="Gareth Jones",
     author_email="g.m.jones@bristol.ac.uk",
     description="A HUb for greenhouse Gas Data Science",

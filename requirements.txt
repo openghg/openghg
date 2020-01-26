@@ -1,4 +1,6 @@
-bqplot
+bqplot==0.11.9
+cachetools
+cryptography
 ipyleaflet
 ipyvuetify
 ipywidgets
@@ -6,8 +8,13 @@ matplotlib
 netcdf4
 numpy
 pandas
+pyotp
+pytz
+PyYAML
+qrcode[pil]
+requests
 scipy
 tables
+tblib
 voila
 xarray
-zarr
