@@ -10,6 +10,10 @@ setuptools.setup(
     author_email="g.m.jones@bristol.ac.uk",
     description="A HUb for greenhouse Gas Data Science",
     include_package_data=True,
+    package_data={
+        # If any package contains *.txt files, include them:
+        "": ["*.json"],
+    },
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/chryswoods/hugs",
