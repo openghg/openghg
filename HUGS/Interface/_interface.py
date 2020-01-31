@@ -757,9 +757,9 @@ class Interface:
         # lines = bq.Lines(x=np.arange(100), y=np.cumsum(np.random.randn(2, 100), axis=1), scales=scales)
         # lines = bq.Lines(scales=scales, colors=self.rand_colors())
         figure = bq.Figure(marks=[], axes=[], animation_duration=1000)
-        # figure.layout.width = "auto"
-        # figure.layout.height = "auto"
-        # figure.layout.min_height = "500px"
+        figure.layout.width = "auto"
+        figure.layout.height = "auto"
+        figure.layout.min_height = "500px"
 
         spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
 
