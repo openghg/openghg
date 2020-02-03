@@ -796,9 +796,13 @@ class Interface:
 
         slider = widgets.interactive(update_scale, dates=selection_range_slider)
 
-        figure_box = widgets.VBox(children=[figure, slider], layout=centre_layout)
+        figure_box = widgets.VBox(children=[figure])
 
-        plot_widgets = [header_box, dynamic_box, figure_box, button_box]
+        slider_box = widgets.VBox(children=[slider], layout=centre_layout)
+
+        combined_box = widgets.VBox(children=[figure_box, slider_box])
+
+        plot_widgets = [header_box, dynamic_box, combined_box, button_box]
 
         plot_box = widgets.VBox(children=plot_widgets)
 
