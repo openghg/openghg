@@ -823,7 +823,7 @@
             "height_station_masl": 2367.0,
             "latitude": 28.3,
             "long_name": "Izana, Tenerife",
-            "longitude": 16.5
+            "longitude": -16.5
         }
     },
     "IZO": {
@@ -834,7 +834,7 @@
             "height_station_masl": 2372.0,
             "latitude": 28.309,
             "long_name": "Izana, Tenerife",
-            "longitude": 16.499
+            "longitude": -16.499
         }
     },
     "JFJ": {
@@ -1180,6 +1180,8 @@
             "height": [
                 "20m"
             ],
+            "latitude": 28,
+            "longitude": -175,
             "height_name": [
                 "20magl"
             ],
@@ -1369,8 +1371,10 @@
             "height_name": [
                 "10magl"
             ],
+            "latitude": 66.0,
+            "longitude": 2.0,
             "height_station_masl": 0.0,
-            "long_name": "Ocean Station M"
+            "long_name": "Ocean Station M, Norway"
         }
     },
     "STR": {

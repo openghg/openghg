@@ -51,6 +51,8 @@ class Interface:
         # User
         self._user = None
 
+        self._data = {}
+
         self._to_plot = {}
 
         # Styles - maybe these can be moved somewhere else?
@@ -655,7 +657,7 @@ class Interface:
             gas_label = widgets.Label(value=gas_name, layout=box_layout)
 
             site_code = selected_results[key]["metadata"]["site"]
-            site_text = f'{self._site_locations[site_code.upper()]["name"]} ({site_code.upper()})'
+            site_text = f'{self._site_locations[site_code.upper()]["long_name"]} ({site_code.upper()})'
             site_label = widgets.Label(value=site_text)
 
             plot_keys.append(key)
@@ -725,17 +727,22 @@ class Interface:
                 data = to_plot[key]
 
                 species = data.attrs["species"].upper()
-                site_name = data.attrs["station_long_name"]
+                # site_name = data.attrs["station_long_name"]
+                site_name = key.split("_")[0].upper()
 
                 # single_color = [random.choice(colors)]
 
-                single_color = [self._tableau10[i]]
+                # single_color = [self._tableau10[i]]
+
+                single_color = random.choice(self._tableau10)
 
                 mark = bq.Lines(scales=scales, colors=single_color, stroke_width=1, labels=[site_name], display_legend=True)
 
                 mark.x = data.time
                 # TODO - can modify this to be able to add error bars etc
-                mark.y = data["ch4_count"]
+                data_key = f"{species.lower()}"
+
+                mark.y = data[data_key]
 
                 ay.label = f"{species} (nmol/mol)"
 
@@ -1103,7 +1110,7 @@ class Interface:
             site_codes = {self._site_codes[s.lower()] for s in self._selected_sites}
             # If the site codes above are in the search_results' keys, add these to the dictionary
             to_download = {key: search_results[key] for key in search_results for s in site_codes if s.lower() in key}
-            self.download_data(download_keys=to_download)
+            self.download_data(selected_results=to_download)
 
         # Create a marker for each site we have results for, on the marker show the
         # species etc we have data for
@@ -1129,6 +1136,137 @@ class Interface:
         download_button.on_click(download_click)
 
         return [site_map]
+
+    def mapbox_notebook(self, search_results, site_data, center, zoom, data_type="EUROCOM"):
+        """ Create the mapping box for selection of site data from the map
+            
+            Args:
+                search_results (dict): Dictionary containing search results
+                sites (dict): Dictionary of site data
+            Returns:
+                list: List containing an ipyleaflet map (may be expanded to include
+                other widgets)
+        """
+        # Parse the search results and extract dates, site locations etc
+        site_locations = collections.defaultdict(dict)
+        self._site_locations = site_data
+        
+        for key in search_results:
+            # TODO - refactor this to work with the new search results
+            # Key such as bsd_co, bsd_co2
+            split_key = key.split("_")
+            location = search_results[key]["metadata"]["site"]
+            location = location.upper()
+
+            species = search_results[key]["metadata"]["species"]
+            species = species.upper()
+
+            start = search_results[key]["start_date"].rstrip("+00:00")
+            end = search_results[key]["end_date"].rstrip("+00:00")
+
+            # This is generally bad practice but I haven't put all the sites in the
+            # site data JSON yet
+            if location in site_locations:
+                site_locations[location]["species"].append(species)
+            else:
+                # if data_type == "NOAA":
+                #     network_key = list(site_data[location].keys())[0]
+                #     local_site = site_data[location][network_key]
+                # else:
+                local_site = site_data[location]
+
+                site_locations[location]["species"] = [species]
+                site_locations[location]["location"] = local_site["latitude"], local_site["longitude"]
+                site_locations[location]["name"] = location
+                site_locations[location]["long_name"] = local_site["long_name"]
+                site_locations[location]["dates"] = f"{start} to {end}"
+
+
+        # Now we can create the map with the data parsed from the search results
+        site_map = ipyleaflet.Map(center=center, zoom=zoom)
+
+        # We only want to select each site once
+        self._selected_sites = set()
+
+        # self._selected_sites = {}
+
+        # These widgets are overlain on the map itself
+        button_layout = widgets.Layout(min_width='80px', max_width='120px')
+        download_layout = widgets.Layout(min_width='80px', max_width='100px')
+
+        clear_button = widgets.Button(description="Clear selection", layout=button_layout)
+        clear_control = ipyleaflet.WidgetControl(widget=clear_button, position='bottomleft')
+
+        reset_button = widgets.Button(description="Reset map", layout=button_layout)
+        reset_control = ipyleaflet.WidgetControl(widget=reset_button, position="bottomleft")
+
+        selected_text = widgets.HTML(value="")
+        selected_control = ipyleaflet.WidgetControl(widget=selected_text, position="topright")
+
+        download_button = widgets.Button(description="Download", disabled=True, layout=download_layout)
+        download_control = ipyleaflet.WidgetControl(widget=download_button, position="bottomright")
+
+        site_map.add_control(clear_control)
+        site_map.add_control(reset_control)
+        site_map.add_control(selected_control)
+        site_map.add_control(download_control)
+
+        # Now need a box that gets updated when the user selects a site
+        centre_layout = widgets.Layout(display='flex', flex_flow='column', align_items='center', width='100%')
+        fig_box = widgets.VBox(children=[])
+
+        def site_select(r, **kwargs):
+            self._selected_sites.clear()
+            self._selected_sites.add(r)
+            selected_text.value = "Sites selected : " + ", ".join(list(self._selected_sites))
+            download_button.disabled = False
+
+        def clear_selection(a):
+            self._selected_sites.clear()
+            selected_text.value = ""
+            download_button.disabled = True
+            fig_box.children = []
+
+        def reset_map(a):
+            site_map.center = center
+            site_map.zoom = zoom
+        
+        def download_click(a):
+            # Get the selected site's codes from the dict
+            # site_codes = {self._site_codes[s.lower()] for s in self._selected_sites}
+            # If the site codes above are in the search_results' keys, add these to the dictionary
+            to_download = {key: search_results[key] for key in search_results for s in self._selected_sites if s.lower() in key}
+            self._data = self.download_data(selected_results=to_download)
+            plotting_widgets = self.plotting_interface(selected_results=to_download, data=self._data)
+
+            fig_box.children = [plotting_widgets]
+
+        # Create a marker for each site we have results for, on the marker show the
+        # species etc we have data for
+        for site in site_locations:
+            latitude, longitude = site_locations[site]["location"]
+            name = site_locations[site]["name"]
+            long_name = site_locations[site]["long_name"]
+
+            mark = ipyleaflet.Marker(location=(latitude, longitude), name=name, draggable=False)
+            # These are added to the HTML in the popup of the marker
+            species = ", ".join(site_locations[site]["species"])
+            dates = site_locations[site]["dates"]
+
+            html_string = "<br/>".join([(f"<b>{long_name} ({name})</b>"), "Species: ", species.upper(), "Data covering: ", dates])
+            mark.popup = widgets.HTML(value=html_string)
+            # We want to pass the name of the site selected to the site_select function
+            mark.on_click(functools.partial(site_select, r=mark.name))
+
+            site_map.add_layer(mark)
+
+        reset_button.on_click(reset_map)
+        clear_button.on_click(clear_selection)
+        download_button.on_click(download_click)
+
+        # plot_box = widgets.VBox(children=[site_map, fig_box])
+
+        return [site_map, fig_box]
 
     def create_fileselector(self, *args):
         header_layout = widgets.Layout(display='flex',flex_flow='row')
@@ -1281,7 +1419,7 @@ class Interface:
             Args:
                 download_keys (dict): Dictionary 
             Returns:
-                None
+                dict: Dictionary of data
         """
         # Create a Retrieve object to interact with the HUGS Cloud object store
         retrieve = Retrieve(service_url=self._base_url)
@@ -1293,22 +1431,18 @@ class Interface:
         # self.update_statusbar(status_name="download_status", text="Downloading...")
 
         # Update the status bar
-        if data:
-            # Convert the JSON into Dataframes
-            for key in data:
-                data[key] = pd.read_json(data[key])
-
-            retrieve_success = f"<font color='green'>Retrieval complete</font>"
-            self.set_status(status_text=retrieve_success)
-            # Create the plotting box
-            # self.add_widgets(section="plot_1", _widgets=self.create_plotting_box(selected_results=selected_results, data=data))
-            # If we have new data clear the old plotting box
-            # self.clear_widgets(section="plot_1")
-            # Recreate the plot controller window
-            self.add_widgets(section="plot_complete", _widgets=self.plot_controller(selected_results=selected_results, data=data))
-        else:
-            data_error = f"<font color='red'>No data downloaded</font>"
-            self.set_status(status_text=data_error)
+        # if data:
+        #     retrieve_success = f"<font color='green'>Retrieval complete</font>"
+        #     # self.set_status(status_text=retrieve_success)
+        #     # Create the plotting box
+        #     # self.add_widgets(section="plot_1", _widgets=self.create_plotting_box(selected_results=selected_results, data=data))
+        #     # If we have new data clear the old plotting box
+        #     # self.clear_widgets(section="plot_1")
+        #     # Recreate the plot controller window
+        #     # self.add_widgets(section="plot_complete", _widgets=self.plot_controller(selected_results=selected_results, data=data))
+        # else:
+        #     data_error = f"<font color='red'>No data downloaded</font>"
+        #     # self.set_status(status_text=data_error)
 
         return data
 
