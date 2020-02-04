@@ -672,6 +672,12 @@ class Interface:
 
         site_vbox = widgets.VBox(children=site_labels, layout=box_layout)
         gas_vbox = widgets.VBox(children=gas_labels, layout=box_layout)
+
+        checkbox_layout = widgets.Layout(display='flex',
+                            flex_flow='row',
+                            align_items='flex-end',
+                            width='75%')
+
         checkbox_vbox = widgets.VBox(children=plot_checkboxes, layout=box_layout)
 
         dynamic_box = widgets.HBox(children=[site_vbox, gas_vbox, checkbox_vbox])
@@ -717,6 +723,8 @@ class Interface:
         ay = bq.Axis(label="Count", label_offset="50px", scale=y_scale, orientation="vertical", grid_lines="none")
         axes = [ax, ay]
 
+        used_colours = []
+
         def plot_data(to_plot):
             """ 
                 Each key in the data dict is a dataframe
@@ -730,9 +738,13 @@ class Interface:
                 # site_name = data.attrs["station_long_name"]
                 site_name = key.split("_")[0].upper()
 
-                # single_color = [self._tableau10[i]]
-                # Just changed this
-                single_color = [random.choice(self._tableau10)]
+                color_choice = random.choice(self._tableau10)
+                while color_choice in used_colours:
+                    color_choice = random.choice(self._tableau10)
+
+                used_colours.append(color_choice)
+                
+                single_color = [color_choice]
 
                 mark = bq.Lines(scales=scales, colors=single_color, stroke_width=1, labels=[site_name], display_legend=True)
 
@@ -759,6 +771,8 @@ class Interface:
             figure.marks = marks
             figure.axes = axes
 
+            used_colours.clear()
+
         # lines = bq.Lines(x=np.arange(100), y=np.cumsum(np.random.randn(2, 100), axis=1), scales=scales)
         # lines = bq.Lines(scales=scales, colors=self.rand_colors())
         figure = bq.Figure(marks=[], axes=[], animation_duration=1000)
@@ -782,8 +796,8 @@ class Interface:
                                         index=index,
                                         description='Select date',
                                         orientation='horizontal',
-                                        layout={'width': '500px'}
-                                    )
+                                        layout={'width': '500px'})
+
         def update_scale(dates):
             start, end = dates
 
@@ -1146,8 +1160,7 @@ class Interface:
                 search_results (dict): Dictionary containing search results
                 sites (dict): Dictionary of site data
             Returns:
-                list: List containing an ipyleaflet map (may be expanded to include
-                other widgets)
+                tuple: ipyleafet.Map, list
         """
         # Parse the search results and extract dates, site locations etc
         site_locations = collections.defaultdict(dict)
@@ -1163,8 +1176,9 @@ class Interface:
             species = search_results[key]["metadata"]["species"]
             species = species.upper()
 
-            start = search_results[key]["start_date"].rstrip("+00:00")
-            end = search_results[key]["end_date"].rstrip("+00:00")
+            # We only want the date parts of the datetimes
+            start = search_results[key]["start_date"][:10]
+            end = search_results[key]["end_date"][:10]
 
             # This is generally bad practice but I haven't put all the sites in the
             # site data JSON yet
@@ -1218,7 +1232,9 @@ class Interface:
         fig_box = widgets.VBox(children=[])
 
         def site_select(r, **kwargs):
-            self._selected_sites.clear()
+            if len(self._selected_sites) > 1:
+                self._selected_sites.clear()
+
             self._selected_sites.add(r)
             selected_text.value = "Sites selected : " + ", ".join(list(self._selected_sites))
             download_button.disabled = False
@@ -1268,7 +1284,9 @@ class Interface:
 
         # plot_box = widgets.VBox(children=[site_map, fig_box])
 
-        return [site_map, fig_box]
+        fig_box.layout.max_width = "50%"
+
+        return site_map, fig_box
 
     def create_fileselector(self, *args):
         header_layout = widgets.Layout(display='flex',flex_flow='row')
@@ -1296,8 +1314,8 @@ class Interface:
 
         data_type_list = ["CRDS", "GC"]
 
-        files = ["file1 is really how fdfd",
-                "file1 is really howfdfdf ", "file1 is really how"]
+        files = ["file1",
+                "file2", "file3"]
 
         def clear_checkboxes(*args):
             for c in checkboxes:
