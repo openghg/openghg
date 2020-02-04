@@ -324,18 +324,20 @@ class Datasource:
                 xarray.Dataset: Dataset from NetCDF file
         """
         from Acquire.ObjectStore import ObjectStore
-        from xarray import open_dataset
+        from xarray import load_dataset
         import tempfile
+        from pathlib import Path
 
         data = ObjectStore.get_object(bucket, key)
 
         # TODO - is there a cleaner way of doing this?
         with tempfile.TemporaryDirectory() as tmpdir:
-            tmp_path =  f"{tmpdir}/tmp.nc"
+            tmp_path = Path(tmpdir).joinpath("tmp.nc")
+
             with open(tmp_path, "wb") as f:
                 f.write(data)
 
-            ds = open_dataset(tmp_path)
+            ds = load_dataset(tmp_path)
 
             return ds
 

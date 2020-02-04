@@ -730,11 +730,9 @@ class Interface:
                 # site_name = data.attrs["station_long_name"]
                 site_name = key.split("_")[0].upper()
 
-                # single_color = [random.choice(colors)]
-
                 # single_color = [self._tableau10[i]]
-
-                single_color = random.choice(self._tableau10)
+                # Just changed this
+                single_color = [random.choice(self._tableau10)]
 
                 mark = bq.Lines(scales=scales, colors=single_color, stroke_width=1, labels=[site_name], display_legend=True)
 
