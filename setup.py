@@ -9,23 +9,18 @@ setuptools.setup(
     author="Gareth Jones",
     author_email="g.m.jones@bristol.ac.uk",
     description="A HUb for greenhouse Gas Data Science",
-    include_package_data=True,
-    package_data={
-        # If any package contains *.txt files, include them:
-        "": ["*.json"],
-    },
+    data_files=[{"Data", ["HUGS/Data/acrg_with_locations.json"]}]
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/chryswoods/hugs",
-    packages=setuptools.find_packages(),
+    # packages=setuptools.find_packages(),
+    packages=['HUGS'],
+    package_dir={'HUGS': 'HUGS'},
+    package_data={'HUGS': ['HUGS/Data/*.json']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: TBA",
         "Operating System :: OS Independent",
-    ],
-    install_requires=[
-        "acquire",
-        "tables",
     ],
     python_requires=">=3.6",
 )
