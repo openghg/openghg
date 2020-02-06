@@ -633,20 +633,25 @@ class Interface:
         date_labels = []
         gas_labels = []
 
-        box_layout = widgets.Layout(display='flex',
+        site_layout = widgets.Layout(display='flex',
                                     flex_flow='column',
                                     align_items='flex-start',
-                                    width='60%')
+                                    width='80%')
+
+        species_layout = widgets.Layout(display='flex',
+                                     flex_flow='column',
+                                     align_items='center',
+                                     width='40%')
 
         select_layout = widgets.Layout(display='flex',
-                            flex_flow='row',
-                            align_items='flex-end',
-                            width='98%')
+                            flex_flow='column',
+                            align_items='center',
+                            width='80%')
 
         # TODO - pull this out into a function that can be used here and in create_download_box
-        header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=box_layout)
-        header_label_gas = widgets.HTML(value=f"<b>Species</b>", layout=box_layout)
-        header_label_select = widgets.HTML(value=f"<b></b>", layout=box_layout)
+        header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=site_layout)
+        header_label_gas = widgets.HTML(value=f"<b>Species</b>", layout=species_layout)
+        header_label_select = widgets.HTML(value=f"<b></b>", layout=select_layout)
 
         for key in selected_results:
             start_date = selected_results[key]["start_date"]
@@ -654,31 +659,31 @@ class Interface:
             dates = f"{start_date} to {end_date}"
 
             gas_name = selected_results[key]["metadata"]["species"].upper()
-            gas_label = widgets.Label(value=gas_name, layout=box_layout)
+            gas_label = widgets.Label(value=gas_name)
 
             site_code = selected_results[key]["metadata"]["site"]
             site_text = f'{self._site_locations[site_code.upper()]["long_name"]} ({site_code.upper()})'
             site_label = widgets.Label(value=site_text)
 
             plot_keys.append(key)
-            plot_checkboxes.append(widgets.Checkbox(value=False))
+            plot_checkboxes.append(widgets.Checkbox(value=True))
 
             site_labels.append(site_label)
             gas_labels.append(gas_label)
 
-        select_instruction = widgets.HTML(value="<b>Select data: </b>", layout=box_layout)
+        select_instruction = widgets.HTML(value="<b>Select data: </b>")
 
-        header_box = widgets.HBox(children=[header_label_site, header_label_gas, header_label_select], layout=select_layout)
+        header_box = widgets.HBox(children=[header_label_site, header_label_gas, header_label_select])
 
-        site_vbox = widgets.VBox(children=site_labels, layout=box_layout)
-        gas_vbox = widgets.VBox(children=gas_labels, layout=box_layout)
+        site_vbox = widgets.VBox(children=site_labels, layout=site_layout)
+        gas_vbox = widgets.VBox(children=gas_labels, layout=species_layout)
 
         checkbox_layout = widgets.Layout(display='flex',
                             flex_flow='row',
                             align_items='flex-end',
                             width='75%')
 
-        checkbox_vbox = widgets.VBox(children=plot_checkboxes, layout=box_layout)
+        checkbox_vbox = widgets.VBox(children=plot_checkboxes, layout=select_layout)
 
         dynamic_box = widgets.HBox(children=[site_vbox, gas_vbox, checkbox_vbox])
 
@@ -762,7 +767,7 @@ class Interface:
                 end_date = pd.Timestamp(data["time"][-1].values)
 
                 dates = pd.date_range(start_date, end_date, freq='M')
-                options = [(date.strftime('%d %b %Y'), date) for date in dates]
+                options = [(date.strftime(' %Y-%m-%d '), date) for date in dates]
                 index = (0, len(options)-1)
 
                 selection_range_slider.options = options
@@ -788,7 +793,7 @@ class Interface:
         end_date = pd.Timestamp("2019-01-01")
 
         dates = pd.date_range(start_date, end_date, freq='M')
-        options = [(date.strftime('%d %b %Y'), date) for date in dates]
+        options = [(date.strftime('%d %m %Y'), date) for date in dates]
         index = (0, len(options)-1)
 
         selection_range_slider = widgets.SelectionRangeSlider(
@@ -814,11 +819,14 @@ class Interface:
 
         combined_box = widgets.VBox(children=[figure_box, slider_box])
 
-        plot_widgets = [header_box, dynamic_box, combined_box, button_box]
+        plot_widgets = [spacer, spacer, dynamic_box, combined_box, button_box]
 
         plot_box = widgets.VBox(children=plot_widgets)
 
         plot_button.on_click(on_plot_clicked)
+
+        # Plot straight away        
+        on_plot_clicked(a="a")
 
         self._n_figs += 1
 
@@ -1204,9 +1212,7 @@ class Interface:
         # We only want to select each site once
         self._selected_sites = set()
 
-        # self._selected_sites = {}
-
-        # These widgets are overlain on the map itself
+        # These widgets are overlaid on the map itself
         button_layout = widgets.Layout(min_width='80px', max_width='120px')
         download_layout = widgets.Layout(min_width='80px', max_width='100px')
 
@@ -1281,8 +1287,6 @@ class Interface:
         reset_button.on_click(reset_map)
         clear_button.on_click(clear_selection)
         download_button.on_click(download_click)
-
-        # plot_box = widgets.VBox(children=[site_map, fig_box])
 
         fig_box.layout.max_width = "50%"
 
