@@ -25,7 +25,7 @@ class SSHConnect:
         self._hostkey = None
 
     def connect(self, username, hostname):
-        """ Use Paramiko to connoect the hostname
+        """ Use Paramiko to connect the hostname
 
             Args:
                 user (str): Username for login
