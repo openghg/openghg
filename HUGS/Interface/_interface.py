@@ -755,7 +755,10 @@ class Interface:
 
                 mark.x = data.time
                 # TODO - can modify this to be able to add error bars etc
+
                 data_key = f"{species.lower()}"
+                if data_key not in data:
+                    data_key = f"{species.lower()}_count"
 
                 mark.y = data[data_key]
 
