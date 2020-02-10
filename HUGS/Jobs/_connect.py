@@ -8,7 +8,7 @@ import traceback
 # See this for tests
 # https://pypi.org/project/mock-ssh-server/
 
-__all__ == ["SSHConnect"]
+# __all__ == ["SSHConnect"]
 
 class SSHConnect:
     """ Use Paramiko to connect to an SSH server
@@ -31,15 +31,36 @@ class SSHConnect:
                 user (str): Username for login
                 hostname (str): Hostname of server. This can also be an IP address
                 key_path (Path or str): Path to private key
+            Returns:
+                None
         """
         with paramiko.SSHClient() as client:
             client.load_system_host_keys()
             # This automatically searches for keys to use, otherwise we can pass in a key_filename
             client.connect(hostname=hostname, port=22, username=username)
+
+            sftp = client.open_sftp()
             
             # Using these the folders must exist already
-            r = sftp.put("demo_sftp.py", "demo_sftp_folder/demo_sftp.py")
-            s = sftp.get("demo_sftp_folder/README", "README_demo_sftp")
+            r = sftp.put("test_script.sh", "test_script.sh")
+            # s = sftp.get("demo_sftp_folder/README", "README_demo_sftp")
+
+            print(r)
+
+
+    def write_script(self, path, script):
+        """ Write the job script to the remote server
+
+            Args:
+                path (str, Path): Path to write script
+                script (str): Script to write
+            Returns:
+                None
+        """
+        pass
+
+
+
 
         # with paramiko.Transport((hostname, self._port)) as t:
         #     username = "sshtest"
