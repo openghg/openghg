@@ -56,6 +56,25 @@ class SSHConnect:
         self._client.load_system_host_keys()
         self._client.connect(hostname=hostname, port=22, username=username)
 
+    def run_command(self, commands):
+        """ Run commands on the remote server
+
+            Args:
+                commands (str, list): Command(s) to be run on the remote server
+            Returns:
+                list: List of tuples of stdin, stdout and stderr for each command
+        """
+        responses = []
+
+        if not isinstance(commands, list):
+            commands = [commands]
+
+        for c in commands:
+            stdin, stdout, stderr = self._client.exec_command(c)
+            responses.append((stdin, stdout, stderr))
+
+        return responses
+
     def write_files(self, files, remote_dir=None):
         """ Write the job script to the remote server
 
@@ -91,5 +110,3 @@ class SSHConnect:
                 remote_path = filepath.name
 
             r = sftp.put(localpath=filepath, remotepath=remote_path)
-
-            print(r)

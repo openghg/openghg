@@ -60,10 +60,13 @@ def run_job(job_data, username, hostname):
         {run_command}
             """)
         
-        files = [jobscript_path]
+        files = ["/home/gar/Documents/run_test.py"]
         
         sc.connect(username=username, hostname=hostname)
         sc.write_files(files=files, remote_dir="first_job")
+        response = sc.run_command(commands="nohup python run_test.py &")
+
+        print(response)
         
 
 
