@@ -9,16 +9,16 @@ from HUGS.Jobs import SSHConnect
 def data_watchdog():
     pass
 
-def run_job(job_data):
+def run_job(job_data, username, hostname):
     """ Set a job to run on a HPC service
 
         Args:
             job_data (dict): Dictionary containing data needed to run the job
             such as the run command, number of nodes, number of tasks etc
 
-            TODO - improve this 
+            TODO - improve this
         Returns:
-            None ? 
+            None
     """
     bc4_partitions = ['cpu_test', 'dcv', 'gpu', 'gpu_veryshort', 'hmem', 'serial', 'test', 'veryshort']
 
@@ -40,31 +40,31 @@ def run_job(job_data):
     # service = job_data["service"]
 
     if not memory_req.endswith("G"):
-        raise ValueError("Memory requirements must be in gigabytes and end with a G i.e. 16G")
+        raise ValueError("Memory requirements must be in gigabytes and end with a G i.e. 128G")
 
     # Create a dated and named filename and path in the user's home dir
     date_str = datetime.now().strftime("%Y%m%d-%H%M%S")
-    filename = f"run_job__{name}_{date_str}.sh"
+    filename = f"run_job_{name}_{date_str}.sh"
 
-    with open(filepath, 'w') as rsh:
-        rsh.write(f"""#!/bin/bash
-    #SBATCH --partition={"test"}
-    #SBATCH --nodes={n_nodes}
-    #SBATCH --ntasks-per-node={n_tasks_per_node}
-    #SBATCH --cpus-per-task={n_cpus_per_task}
-    #SBATCH --time={job_duration}
-    #SBATCH --mem={memory_req}
-    {run_command}
-        """)
+    with tempfile.TemporaryDirectory() as tmpdir, SSHConnect() as sc:
+        jobscript_path = Path(tmpdir).joinpath(filename) 
 
-    sc = SSHConnect()
-    sc.connect(username="wm19361", hostname="bc4login.acrc.bris.ac.uk")
-    sc.
-
-
-    
-
-    # Now we need to connec to the HPC cluster and set the job running
+        with open(jobscript_path, 'w') as rsh:
+            rsh.write(f"""#!/bin/bash
+        #SBATCH --partition={"test"}
+        #SBATCH --nodes={n_nodes}
+        #SBATCH --ntasks-per-node={n_tasks_per_node}
+        #SBATCH --cpus-per-task={n_cpus_per_task}
+        #SBATCH --time={job_duration}
+        #SBATCH --mem={memory_req}
+        {run_command}
+            """)
+        
+        files = [jobscript_path]
+        
+        sc.connect(username=username, hostname=hostname)
+        sc.write_files(files=files, remote_dir="first_job")
+        
 
 
 

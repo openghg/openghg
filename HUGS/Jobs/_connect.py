@@ -4,13 +4,14 @@ import os
 import socket
 import sys
 import traceback
+from pathlib import Path
 
 # See this for tests
 # https://pypi.org/project/mock-ssh-server/
 
-__all__ == ["SSHConnect"]
+# __all__ == ["SSHConnect"]
 
-class SSHConnect():
+class SSHConnect:
     """ Use Paramiko to connect to an SSH server
 
         This class can be used as a context manager
@@ -23,10 +24,9 @@ class SSHConnect():
 
     def __init__(self):
         self._host_keys = {}
-        self._use_GSSAPI = False  # enable GSS-API / SSPI authentication
-        self._DoGSSAPIKeyExchange = False
         self._port = 22
         self._hostkey = None
+        # This will be the paramiko.SSHClient object
         self._client = None
 
     def close(self):
@@ -54,65 +54,42 @@ class SSHConnect():
         self._client = paramiko.SSHClient()
         
         self._client.load_system_host_keys()
-        # This automatically searches for keys to use, otherwise we can pass in a key_filename
         self._client.connect(hostname=hostname, port=22, username=username)
 
-    def write_files(self, path, files):
+    def write_files(self, files, remote_dir=None):
         """ Write the job script to the remote server
 
             Args:
-                path (str, Path): Path to write script, if this does not exist it
-                will be created if possible
-                file (list): List of files to write
+                files (list): List of paths of files to transfer
+                path (str, default=None): Path to write script, if not passed the script
+                will be written to the user's home directory
             Returns:
                 None
         """
         sftp = self._client.open_sftp()
-        
-        # Using these the folders must exist already
-        r = sftp.put("test_script.sh", "test_script.sh")
-        # s = sftp.get("demo_sftp_folder/README", "README_demo_sftp")
 
-        print(r)
-        pass
+        if not isinstance(files, list):
+            files = [files]
 
+        # Conver to pathlib.Path objects for easier handling
+        files = [Path(f) for f in files]
 
+        if remote_dir is not None:
+            remote_dir = Path(remote_dir)
+            try:
+                sftp.mkdir(str(remote_dir))
+            except IOError:
+                # This probably means the directory already exists
+                # TODO - better way of handling this error?
+                pass
+                
+        for filepath in files:
+            # Here we only want the filename
+            if remote_dir is not None:
+                remote_path = remote_dir.joinpath(filepath.name).name
+            else:
+                remote_path = filepath.name
 
+            r = sftp.put(localpath=filepath, remotepath=remote_path)
 
-        # with paramiko.Transport((hostname, self._port)) as t:
-        #     username = "sshtest"
-        #     password = "Ilovesshtesting123"
-
-        #     t.connect(self._hostkey, username, password, gss_host=socket.getfqdn(hostname), gss_auth=self._use_GSSAPI, gss_kex=self._DoGSSAPIKeyExchange)
-
-        #     t.connect()
-        #     sftp = paramiko.SFTPClient.from_transport(t)
-
-            # Use SFTP to copy files
-            # SSH to copy
-
-            # try:
-            #     sftp.mkdir("demo_sftp_folder")
-            # except IOError:
-            #     print("(assuming demo_sftp_folder/ already exists)")
-            # with sftp.open("demo_sftp_folder/README", "w") as f:
-            #     f.write("This was created by demo_sftp.py.\n")
-            # with open("demo_sftp.py", "r") as f:
-            #     data = f.read()
-            # sftp.open("demo_sftp_folder/demo_sftp.py", "w").write(data)
-            # # print("created demo_sftp_folder/ on the server")
-
-            # # Using these the folders must exist already
-            # sftp.put("demo_sftp.py", "demo_sftp_folder/demo_sftp.py")
-            # sftp.get("demo_sftp_folder/README", "README_demo_sftp")
-
-
-# if __name__ == "__main__":
-#     c = SSHConnect()
-
-#     username = "sshtest"
-#     # hostname = "bc4login.acrc.bris.ac.uk"
-#     hostname = "127.0.0.1"
-#     keypath = "/home/gar/.ssh/id_rsa"
-
-#     c.connect(username=username, hostname=hostname)
+            print(r)

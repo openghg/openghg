@@ -1,35 +1,33 @@
+from Acquire.Client import Authorisation, PAR
+from Acquire.Service import get_this_service
+
+from HUGS.Jobs import run_job
 
 def job_runner(args):
     from HUGS.Jobs import SSHConnect
     from .test_fn import test_function
     import yaml
 
+    auth = args["authorisation"]
+    authorisation = Authorisation.from_data(auth)
+
     # Take the PAR and write some data to it
-    par = args["drive_par"]
+    par = PAR.from_data(args["par"])
+    par_secret = args["par_secret"]
 
-    # Need a template script
+    # Verify that this process had authorisation to be called
+    authorisation.verify("job_runner")
 
-    # Create a function that reads a JSON file that contains the data
-    # Need to copy the PAR as JSON
-    # Copy the created JSON, template script and any data to BC4
-    # Run the script to create the job and watch the folder for data creation
+    hugs = get_this_service(need_private_access=True)
 
-    # SSH into BC4
-
+    par_secret = hugs.decrypt_data(par_secret)
     
+    # This gives us access to the cloud drive through the PAR
+    drive = par.resolve(secret=par_secret)
 
-    # Set a job running - get its ID ?
+    job_data = args["requirements"]
 
-    # Get the job script to run and watch the output file and write that data to the correct PAR.
-    # Will need to create a script on the fly?
-
+    # Upload any input files we need to be using to the cloud drive
+    results = run_job(job_data=job_data, username="sshtest", hostname="127.0.0.1")
     
-
-    search_terms = args["search_terms"]
-    locations = args["locations"]
-    data_type = args["data_type"]vue
-
-    results = _hugs_search(search_terms=search_terms, locations=locations, data_type=data_type,
-                           start_datetime=start_datetime, end_datetime=end_datetime)
-
-    return {"results": results}
+    return {"results": 1}

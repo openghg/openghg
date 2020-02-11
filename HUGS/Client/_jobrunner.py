@@ -1,6 +1,13 @@
 __all__ = ["JobRunner"]
 
 class JobRunner:
+    """ An interface to the the jobrunner service on the HUGS platform.
+
+        This class is used to run jobs on both local and cloud based HPC clusters
+
+        Args:
+            service_url (str): URL of service
+    """
     def __init__(self, service_url):
         from Acquire.Client import Wallet
 
@@ -9,17 +16,23 @@ class JobRunner:
         self._service = wallet.get_service(service_url=f"{service_url}/hugs")
         self._service_url = service_url
 
-    def create_job(self, auth_user, job_name, requirements):
+    def create_job(self, auth_user, requirements, hugs_url=None, storage_url=None):
         """ Create a job
 
             Args:
                 auth_user (Acquire.User): Authenticated Acquire user
-                job_name (str): Name of job
-                requirements (dict): Dictionary containing requested resources
+                requirements (dict): Dictionary containing job details and requested resources
+
+                The following keys are required:
+                    "name", "run_command", "partition", "n_nodes", "n_tasks_per_node", "n_cpus_per_task", "memory_req", "job_duration"
+                where partition must be one of:
+                    "cpu_test", "dcv", "gpu", "gpu_veryshort", "hmem", "serial", "test", "veryshort"
+
                 Example:
-                    requirements = {"cores": 16, "memory": 128G, "duration": 12h}
-                For a job running with 16 cores and requesting 128 GB of memory for 12 hours
-                (if duration is required)
+                    requirements = {"name": "test_job, "n_nodes": 2, "n_tasks_per_node": 2, "n_cpus_per_task": 2, "memory": "128G", ...}
+
+                hugs_url (str): URL of HUGS service
+                storage_url (str): URL of storage service
             Returns:
                 dict: Dictionary containing information regarding job running on resource
                 This will contain the PAR for access for data upload and download. 
@@ -30,6 +43,15 @@ class JobRunner:
 
         if self._service is None:
             raise PermissionError("Cannot use a null service")
+
+        if not isinstance(dict, requirements):
+            raise TypeError("requirements must be a dictionary of type ")
+
+        if storage_url is None:
+            storage_url = self._service_url + "/storage"
+
+        if hugs_url is None:
+            hugs_url = self._service_url + "/hugs"
 
         # Get an authorisaton to pass to the service
         hugs = Service(service_url=hugs_url)
@@ -59,11 +81,13 @@ class JobRunner:
         par_lifetime = datetime.datetime.now() + datetime.timedelta(days=1)
 
         par = PAR(location=location, user=auth_user, expires_datetime=par_lifetime)
+        par_secret = hugs.encrypt_data(par.secret())
 
         args = {}
-        args["job_name"] = job_name
+        
         args["requirements"] = requirements
-        args["drive_par"] = par.to_data()
+        args["par"] = par.to_data()
+        args["par_secret"] = par_secret
 
         response = self._service.call_function(function="job_runner", args=args)
 

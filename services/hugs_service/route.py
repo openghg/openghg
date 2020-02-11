@@ -36,9 +36,9 @@ def hugs_functions(function, args):
     if function == "status":
         from hugs_service.status import status
         return status()
-    if function == "job_runner":
-        from hugs_service.jobrunner import jobrunner
-        return jobrunner(args)
+    if function == "jobrunner":
+        from hugs_service.jobrunner import job_runner
+        return job_runner(args)
     else:
         from admin.handler import MissingFunctionError
         raise MissingFunctionError()
