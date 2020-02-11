@@ -8,14 +8,18 @@ import traceback
 # See this for tests
 # https://pypi.org/project/mock-ssh-server/
 
-# __all__ == ["SSHConnect"]
+__all__ == ["SSHConnect"]
 
-class SSHConnect:
+class SSHConnect():
     """ Use Paramiko to connect to an SSH server
 
-        Not sure if this needs to be a class
-
+        This class can be used as a context manager
     """
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
 
     def __init__(self):
         self._host_keys = {}
@@ -23,6 +27,19 @@ class SSHConnect:
         self._DoGSSAPIKeyExchange = False
         self._port = 22
         self._hostkey = None
+        self._client = None
+
+    def close(self):
+        """ Calls close on the paramiko SSHClient instance used
+            the SSH connection
+
+            Returns:
+                None
+        """
+        try:
+            self._client.close()
+        except AttributeError:
+            return
 
     def connect(self, username, hostname):
         """ Use Paramiko to connect the hostname
@@ -34,29 +51,29 @@ class SSHConnect:
             Returns:
                 None
         """
-        with paramiko.SSHClient() as client:
-            client.load_system_host_keys()
-            # This automatically searches for keys to use, otherwise we can pass in a key_filename
-            client.connect(hostname=hostname, port=22, username=username)
+        self._client = paramiko.SSHClient()
+        
+        self._client.load_system_host_keys()
+        # This automatically searches for keys to use, otherwise we can pass in a key_filename
+        self._client.connect(hostname=hostname, port=22, username=username)
 
-            sftp = client.open_sftp()
-            
-            # Using these the folders must exist already
-            r = sftp.put("test_script.sh", "test_script.sh")
-            # s = sftp.get("demo_sftp_folder/README", "README_demo_sftp")
-
-            print(r)
-
-
-    def write_script(self, path, script):
+    def write_files(self, path, files):
         """ Write the job script to the remote server
 
             Args:
-                path (str, Path): Path to write script
-                script (str): Script to write
+                path (str, Path): Path to write script, if this does not exist it
+                will be created if possible
+                file (list): List of files to write
             Returns:
                 None
         """
+        sftp = self._client.open_sftp()
+        
+        # Using these the folders must exist already
+        r = sftp.put("test_script.sh", "test_script.sh")
+        # s = sftp.get("demo_sftp_folder/README", "README_demo_sftp")
+
+        print(r)
         pass
 
 
