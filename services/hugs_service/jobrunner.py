@@ -4,6 +4,9 @@ from Acquire.Service import get_this_service
 from HUGS.Jobs import run_job
 
 def job_runner(args):
+    """ Service function that gets called by the Client job_runner
+
+    """
     from HUGS.Jobs import SSHConnect
     from .test_fn import test_function
     import yaml
@@ -29,5 +32,7 @@ def job_runner(args):
 
     # Upload any input files we need to be using to the cloud drive
     results = run_job(job_data=job_data, username="sshtest", hostname="127.0.0.1")
-    
-    return {"results": 1}
+
+    print(results)
+
+    return results

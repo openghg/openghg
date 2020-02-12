@@ -18,7 +18,7 @@ def run_job(job_data, username, hostname):
 
             TODO - improve this
         Returns:
-            None
+            dict: Dictionary of responses to commands executing when running the job
     """
     bc4_partitions = ['cpu_test', 'dcv', 'gpu', 'gpu_veryshort', 'hmem', 'serial', 'test', 'veryshort']
 
@@ -60,13 +60,16 @@ def run_job(job_data, username, hostname):
         {run_command}
             """)
         
-        files = ["/home/gar/Documents/run_test.py"]
-        
+        # Here we'll only copy the files we've created
+        # Other input files will be copied from the cloud drive by the 
+        # script we're passing
+        files = [jobscript_path]
+
         sc.connect(username=username, hostname=hostname)
         sc.write_files(files=files, remote_dir="first_job")
-        response = sc.run_command(commands="nohup python run_test.py &")
+        response_list = sc.run_command(commands="nohup python run_test.py &")
 
-        print(response)
+    return response_list
         
 
 

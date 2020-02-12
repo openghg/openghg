@@ -24,7 +24,7 @@ class JobRunner:
                 requirements (dict): Dictionary containing job details and requested resources
 
                 The following keys are required:
-                    "name", "run_command", "partition", "n_nodes", "n_tasks_per_node", "n_cpus_per_task", "memory_req", "job_duration"
+                    "ame", "run_command", "partition", "n_nodes", "n_tasks_per_node", "n_cpus_per_task", "memory_req", "job_duration"
                 where partition must be one of:
                     "cpu_test", "dcv", "gpu", "gpu_veryshort", "hmem", "serial", "test", "veryshort"
 
@@ -91,11 +91,15 @@ class JobRunner:
 
         response = self._service.call_function(function="job_runner", args=args)
 
-        results = {}
-        results["response"] = response
-        results["par"] = par.to_data()
+        print(response)
 
-        return results
+        return False
+
+        # results = {}
+        # results["response"] = response
+        # results["par"] = par.to_data()
+
+        # return results
 
     def service(self):
         return self._service

@@ -64,16 +64,22 @@ class SSHConnect:
             Returns:
                 list: List of tuples of stdin, stdout and stderr for each command
         """
-        responses = []
+        responses = {}
 
         if not isinstance(commands, list):
             commands = [commands]
 
         for c in commands:
             stdin, stdout, stderr = self._client.exec_command(c)
-            responses.append((stdin, stdout, stderr))
+            
+            # Get bytes from the objects and convert to str
+            stdout = stdout.read().decode("utf-8")
+            stderr = stderr.read().decode("utf-8")
+
+            responses[c] = {"stdout": stdout, "stderr": stderr}
 
         return responses
+
 
     def write_files(self, files, remote_dir=None):
         """ Write the job script to the remote server

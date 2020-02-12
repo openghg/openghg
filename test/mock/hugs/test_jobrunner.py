@@ -1,3 +1,8 @@
+import logging
+p_logger = logging.getLogger("parmiko")
+p_logger.setLevel(logging.WARNING)
+
+
 import datetime
 import mockssh
 import pytest
