@@ -44,10 +44,22 @@ def run_job(job_data, username, hostname):
 
     # Create a dated and named filename and path in the user's home dir
     date_str = datetime.now().strftime("%Y%m%d-%H%M%S")
-    filename = f"run_job_{name}_{date_str}.sh"
+    name_date = f"{name}_{date_str}"
+    script_filename = f"run_job_{name_date}.sh"
+
+    # Create a JSON file that will hold the job parameters
+    json_dict = {}
+    json_dict["job_name"] = f"job_{name}_{date_str}"
+    json_dict["script_filename"] = script_filename
+    json_dict["par"] = job_data["par"]
+    json_filename = f"job_data_{name_date}.json"
 
     with tempfile.TemporaryDirectory() as tmpdir, SSHConnect() as sc:
-        jobscript_path = Path(tmpdir).joinpath(filename) 
+        jobscript_path = Path(tmpdir).joinpath(script_filename)
+        json_path = Path(tmpdir).joinpath(json_filename)
+
+        with open(json_path, "w") as jf:
+            json.dump(obj=json_dict, fp=jf, indent=4)
 
         with open(jobscript_path, 'w') as rsh:
             rsh.write(f"""#!/bin/bash
@@ -59,15 +71,17 @@ def run_job(job_data, username, hostname):
         #SBATCH --mem={memory_req}
         {run_command}
             """)
-        
+
         # Here we'll only copy the files we've created
         # Other input files will be copied from the cloud drive by the 
         # script we're passing
-        files = [jobscript_path]
+        
+        # TODO - add in controller script here
+        files = [jobscript_path, json_path]
 
         sc.connect(username=username, hostname=hostname)
         sc.write_files(files=files, remote_dir="first_job")
-        response_list = sc.run_command(commands="nohup python run_test.py &")
+        response_list = sc.run_command(commands=f"python job_controller.py {json_filename} &")
 
     return response_list
         

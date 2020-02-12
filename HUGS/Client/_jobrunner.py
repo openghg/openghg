@@ -81,13 +81,13 @@ class JobRunner:
         par_lifetime = datetime.datetime.now() + datetime.timedelta(days=1)
 
         par = PAR(location=location, user=auth_user, expires_datetime=par_lifetime)
-        par_secret = hugs.encrypt_data(par.secret())
+        # par_secret = hugs.encrypt_data(par.secret())
 
         args = {}
         
         args["requirements"] = requirements
         args["par"] = par.to_data()
-        args["par_secret"] = par_secret
+        # args["par_secret"] = par_secret
 
         response = self._service.call_function(function="job_runner", args=args)
 
