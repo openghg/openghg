@@ -13,6 +13,7 @@ from HUGS.Client import Process
 from HUGS.ObjectStore import get_local_bucket
 from Acquire.Client import User, Drive, Service, StorageCreds, PAR, Authorisation, Location
 from HUGS.Client import JobRunner
+from HUGS.Jobs import JobDrive
 
 @pytest.fixture(scope="session")
 def tempdir(tmpdir_factory):
@@ -77,6 +78,11 @@ def test_jobrunner(authenticated_user, tempdir):
     args["authorisation"] = auth.to_data()
 
     response = hugs.call_function(function="jobrunner", args=args)
+    
+    # Get a drive
+    drive = JobDrive(PAR=par)
+
+    print(drive.list_files())
 
     print(response)
     

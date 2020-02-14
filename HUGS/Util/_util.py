@@ -169,7 +169,7 @@ def timestamp_tzaware(timestamp):
         return timestamp.tz_convert(tz="UTC")
 
         
-def get_datapath(filename):
+def get_datapath(filename, directory=None):
     """ Returns the correct path to JSON files used for assigning attributes
 
         Args:
@@ -181,8 +181,10 @@ def get_datapath(filename):
 
     filename = str(filename)
 
-    return Path(__file__).resolve().parent.joinpath(f"../Data/{filename}")
-
+    if directory is None:
+        return Path(__file__).resolve().parent.parent.joinpath(f"Data/{filename}")
+    else:
+        return Path(__file__).resolve().parent.parent.joinpath(f"Data/{directory}/{filename}")
 
 def load_hugs_json(filename):
     """ Returns a dictionary created from the HUGS JSON at filename

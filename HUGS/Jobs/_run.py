@@ -52,6 +52,7 @@ def run_job(username, hostname, job_data):
     json_dict["job_data"] = job_data
     json_dict["script_filename"] = script_filename
     json_dict["par"] = job_data["par"]
+    json_dict["par_secret"] = job_data["par_secret"]
 
     json_filename = f"job_data_{name_date}.json"
 
@@ -77,14 +78,14 @@ def run_job(username, hostname, job_data):
 
         # Here we'll only copy the files we've created
         # Other input files will be copied from the cloud drive by the  script we're passing
-        job_controller = get_datapath(filename="bc4_template.py")
+        job_controller = get_datapath(filename="bc4_template.py", directory="job_controllers")
 
         # TODO - add in controller script here
         files = [jobscript_path, json_path, job_controller]
 
         sc.connect(username=username, hostname=hostname)
         sc.write_files(files=files, remote_dir="first_job")
-        response_list = sc.run_command(commands=f"python job_controller.py {json_filename} &")
+        response_list = sc.run_command(commands=f"python bc4_template.py {json_filename} &")
 
     return response_list
         

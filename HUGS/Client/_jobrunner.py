@@ -24,7 +24,7 @@ class JobRunner:
                 requirements (dict): Dictionary containing job details and requested resources
 
                 The following keys are required:
-                    "ame", "run_command", "partition", "n_nodes", "n_tasks_per_node", "n_cpus_per_task", "memory_req", "job_duration"
+                    "name", "run_command", "partition", "n_nodes", "n_tasks_per_node", "n_cpus_per_task", "memory_req", "job_duration"
                 where partition must be one of:
                     "cpu_test", "dcv", "gpu", "gpu_veryshort", "hmem", "serial", "test", "veryshort"
 
@@ -43,9 +43,6 @@ class JobRunner:
 
         if self._service is None:
             raise PermissionError("Cannot use a null service")
-
-        if not isinstance(dict, requirements):
-            raise TypeError("requirements must be a dictionary of type ")
 
         if storage_url is None:
             storage_url = self._service_url + "/storage"

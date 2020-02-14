@@ -26,6 +26,7 @@ def job_runner(args):
     job_data = args["requirements"]
     # Pass the PAR through to allow use in the control script
     job_data["par"] = args["par"]
+    job_data["par_secret"] = args["par_secret"]
 
     # Upload any input files we need to be using to the cloud drive
     results = run_job(username="sshtest", hostname="127.0.0.1", job_data=job_data)
