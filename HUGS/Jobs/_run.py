@@ -4,6 +4,7 @@ from pathlib import Path
 import tempfile
 
 from HUGS.Jobs import SSHConnect
+from HUGS.Util import get_datapath
 
 def run_job(username, hostname, job_data):
     """ Set a job to run on a HPC service
@@ -75,11 +76,9 @@ def run_job(username, hostname, job_data):
             """)
 
         # Here we'll only copy the files we've created
-        # Other input files will be copied from the cloud drive by the 
-        # script we're passing
+        # Other input files will be copied from the cloud drive by the  script we're passing
+        job_controller = get_datapath(filename="bc4_template.py")
 
-        job_controller = Path(__file__).joinpath("../Data/job_controllers/bc4_template.py")
-        
         # TODO - add in controller script here
         files = [jobscript_path, json_path, job_controller]
 
