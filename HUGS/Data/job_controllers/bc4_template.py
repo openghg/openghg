@@ -2,8 +2,7 @@ import argparse
 import json
 from pathlib import Path
 
-""" Controls a job 
-
+""" Controls a job running on a local / cloud HPC cluster
 
 """
 
@@ -17,13 +16,13 @@ def data_watchdog():
     """
     pass
 
+
 parser = argparse.ArgumentParser(description='Run and watch a job on a HPC resource')
 parser.add_argument("j", help="JSON data filename")
 args = parser.parse_args()
 
-
-json_data = args.j
-with open(json_data, "r") as f:
+json_filename = args.j
+with open(json_filename, "r") as f:
     job_data = json.load(f)
 
 job_name = json_data["job_name"]
@@ -41,12 +40,14 @@ for f in folders:
 # Use the PAR (pre-authenticated request) to access the cloud drive
 # where the input data has been uploaded (if needed) and output data will 
 # be stored
-
 par = PAR.from_data(par_data)
-
 par_drive = par.resolve()
 
-files = par_drive.list_files()
+files = par_drive.list_files(dir="input")
+
+
+
+# Download the input files
 
 
 

@@ -21,12 +21,13 @@ def job_runner(args):
     
     # This gives us access to the cloud drive through the PAR
     # drive = par.resolve(secret=par_secret)
-    drive = par.resolve()
+    # drive = par.resolve()
 
     job_data = args["requirements"]
+    # Pass the PAR through to allow use in the control script
     job_data["par"] = args["par"]
 
     # Upload any input files we need to be using to the cloud drive
-    results = run_job(job_data=job_data, username="sshtest", hostname="127.0.0.1")
+    results = run_job(username="sshtest", hostname="127.0.0.1", job_data=job_data)
 
     return results

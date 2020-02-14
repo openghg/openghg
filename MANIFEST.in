@@ -1,0 +1,10 @@
+include README.md
+include MANIFEST.in
+include setup.py
+
+graft HUGS
+
+global-exclude *.pickle
+global-exclude *.pyc
+global-exclude *.pyd
+global-exclude .git*

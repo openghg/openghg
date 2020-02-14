@@ -5,11 +5,7 @@ import tempfile
 
 from HUGS.Jobs import SSHConnect
 
-# Load in the template
-def data_watchdog():
-    pass
-
-def run_job(job_data, username, hostname):
+def run_job(username, hostname, job_data):
     """ Set a job to run on a HPC service
 
         Args:
@@ -20,6 +16,7 @@ def run_job(job_data, username, hostname):
         Returns:
             dict: Dictionary of responses to commands executing when running the job
     """
+    # Maybe this can be passed in / read from JSON depending on the service selected
     bc4_partitions = ['cpu_test', 'dcv', 'gpu', 'gpu_veryshort', 'hmem', 'serial', 'test', 'veryshort']
 
     name = job_data["name"]
@@ -28,7 +25,7 @@ def run_job(job_data, username, hostname):
     
     if partition not in bc4_partitions:
         raise ValueError(f"Invalid partition selected. Please select from one of the following :\n{bc4_partitions}")
-    # Need to create a job script from the paramters
+
     n_nodes = job_data["n_nodes"]
     n_tasks_per_node = job_data["n_tasks_per_node"]
     n_cpus_per_task = job_data["n_cpus_per_task"]
@@ -38,7 +35,8 @@ def run_job(job_data, username, hostname):
 
     # TODO - in the future this can set whether we use BC4/CitC etc
     # service = job_data["service"]
-
+    
+    # This feels a bit clunky
     if not memory_req.endswith("G"):
         raise ValueError("Memory requirements must be in gigabytes and end with a G i.e. 128G")
 
@@ -49,11 +47,15 @@ def run_job(job_data, username, hostname):
 
     # Create a JSON file that will hold the job parameters
     json_dict = {}
-    json_dict["job_name"] = f"job_{name}_{date_str}"
+    json_dict["job_name"] = f"job_{name_date}"
+    json_dict["job_data"] = job_data
     json_dict["script_filename"] = script_filename
     json_dict["par"] = job_data["par"]
+
     json_filename = f"job_data_{name_date}.json"
 
+    # Here we want to write the jobscript and job parameters to file before transferring
+    # to the cluster
     with tempfile.TemporaryDirectory() as tmpdir, SSHConnect() as sc:
         jobscript_path = Path(tmpdir).joinpath(script_filename)
         json_path = Path(tmpdir).joinpath(json_filename)
@@ -75,9 +77,11 @@ def run_job(job_data, username, hostname):
         # Here we'll only copy the files we've created
         # Other input files will be copied from the cloud drive by the 
         # script we're passing
+
+        job_controller = Path(__file__).joinpath("../Data/job_controllers/bc4_template.py")
         
         # TODO - add in controller script here
-        files = [jobscript_path, json_path]
+        files = [jobscript_path, json_path, job_controller]
 
         sc.connect(username=username, hostname=hostname)
         sc.write_files(files=files, remote_dir="first_job")
