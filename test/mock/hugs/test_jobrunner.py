@@ -68,19 +68,19 @@ def test_jobrunner(authenticated_user, tempdir):
     par_lifetime = datetime.datetime.now() + datetime.timedelta(days=1)
 
     par = PAR(location=location, user=authenticated_user, expires_datetime=par_lifetime)
-    par_secret = hugs.encrypt_data(par.secret())
+    # par_secret = hugs.encrypt_data(par.secret())
 
     args = {}
 
     args["requirements"] = reqs
     args["par"] = par.to_data()
-    args["par_secret"] = par_secret
+    # args["par_secret"] = par_secret
     args["authorisation"] = auth.to_data()
 
-    response = hugs.call_function(function="jobrunner", args=args)
+    response = hugs.call_function(function="job_runner", args=args)
     
     # Get a drive
-    drive = JobDrive(PAR=par)
+    # drive = JobDrive(PAR=par)
 
     print(drive.list_files())
 

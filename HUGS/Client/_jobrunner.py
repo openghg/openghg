@@ -24,12 +24,14 @@ class JobRunner:
                 requirements (dict): Dictionary containing job details and requested resources
 
                 The following keys are required:
-                    "name", "run_command", "partition", "n_nodes", "n_tasks_per_node", "n_cpus_per_task", "memory_req", "job_duration"
+                    "name", "run_command", "partition", "n_nodes", "n_tasks_per_node", 
+                    "n_cpus_per_task", "memory_req", "job_duration"
                 where partition must be one of:
                     "cpu_test", "dcv", "gpu", "gpu_veryshort", "hmem", "serial", "test", "veryshort"
 
                 Example:
-                    requirements = {"name": "test_job, "n_nodes": 2, "n_tasks_per_node": 2, "n_cpus_per_task": 2, "memory": "128G", ...}
+                    requirements = {"name": "test_job, "n_nodes": 2, "n_tasks_per_node": 2, 
+                                    "n_cpus_per_task": 2, "memory": "128G", ...}
 
                 hugs_url (str): URL of HUGS service
                 storage_url (str): URL of storage service

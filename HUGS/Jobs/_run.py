@@ -52,7 +52,7 @@ def run_job(username, hostname, job_data):
     json_dict["job_data"] = job_data
     json_dict["script_filename"] = script_filename
     json_dict["par"] = job_data["par"]
-    json_dict["par_secret"] = job_data["par_secret"]
+    # json_dict["par_secret"] = job_data["par_secret"]
 
     json_filename = f"job_data_{name_date}.json"
 

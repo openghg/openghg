@@ -17,18 +17,20 @@ def job_runner(args):
     authorisation.verify("job_runner")
 
     # hugs = get_this_service(need_private_access=True)
+
+    print(args)
+
+
+    # par_secret = args["par_secret"]
     # par_secret = hugs.decrypt_data(par_secret)
     
-    # This gives us access to the cloud drive through the PAR
-    # drive = par.resolve(secret=par_secret)
-    # drive = par.resolve()
-
     job_data = args["requirements"]
-    # Pass the PAR through to allow use in the control script
+    # # Pass the PAR through to allow use in the control script
     job_data["par"] = args["par"]
-    job_data["par_secret"] = args["par_secret"]
+    # Pass the decrypted PAR secret here as we're on the server already
+    # job_data["par_secret"] = par_secret 
 
-    # Upload any input files we need to be using to the cloud drive
+    # # Upload any input files we need to be using to the cloud drive
     results = run_job(username="sshtest", hostname="127.0.0.1", job_data=job_data)
 
     return results
