@@ -20,7 +20,7 @@ def job_runner(args):
     # # Pass the PAR through to allow use in the control script
     job_data["par"] = args["par"]
     # Pass the decrypted PAR secret here as we're on the server already
-    job_data["par_secret"] = args["par_secret"]
+    job_data["par_secret"] = hugs.decrypt_data(args["par_secret"])
 
     password = args["password"]
     password = hugs.decrypt_data(password)

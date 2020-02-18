@@ -20,6 +20,8 @@ def run_job(username, hostname, password, job_data):
     # Maybe this can be passed in / read from JSON depending on the service selected
     bc4_partitions = ['cpu_test', 'dcv', 'gpu', 'gpu_veryshort', 'hmem', 'serial', 'test', 'veryshort']
 
+    # These are used to write the Slurm script
+    # This is a WIP, I might be reinventing the wheel here, check before doing any more
     name = job_data["name"]
     run_command = job_data["run_command"]
     partition = job_data["partition"]
@@ -30,20 +32,18 @@ def run_job(username, hostname, password, job_data):
     n_nodes = job_data["n_nodes"]
     n_tasks_per_node = job_data["n_tasks_per_node"]
     n_cpus_per_task = job_data["n_cpus_per_task"]
-    # This is in GB
+    # This shuold be in GB
     memory_req = job_data["memory_req"]
-    job_duration = job_data["job_duration"]
 
-    # TODO - in the future this can set whether we use BC4/CitC etc
-    # service = job_data["service"]
-    
-    # This feels a bit clunky
     if not memory_req.endswith("G"):
         raise ValueError("Memory requirements must be in gigabytes and end with a G i.e. 128G")
+    
+    job_duration = job_data["job_duration"]
 
     # Create a dated and named filename and path in the user's home dir
     date_str = datetime.now().strftime("%Y%m%d-%H%M%S")
     name_date = f"{name}_{date_str}"
+    # Name for the Slurm job script
     script_filename = f"run_job_{name_date}.sh"
 
     # Create a JSON file that will hold the job parameters
@@ -54,6 +54,7 @@ def run_job(username, hostname, password, job_data):
     json_dict["par"] = job_data["par"]
     json_dict["par_secret"] = job_data["par_secret"]
 
+    # Name of file to write JSON data to for transfer to server
     json_filename = f"job_data_{name_date}.json"
 
     # Here we want to write the jobscript and job parameters to file before transferring
@@ -66,7 +67,7 @@ def run_job(username, hostname, password, job_data):
             json.dump(obj=json_dict, fp=jf, indent=4)
 
         with open(jobscript_path, 'w') as rsh:
-            rsh.write(f"""#!/bin/bashpassword
+            rsh.write(f"""#!/bin/bash
         #SBATCH --partition={"test"}
         #SBATCH --nodes={n_nodes}
         #SBATCH --ntasks-per-node={n_tasks_per_node}
@@ -78,12 +79,14 @@ def run_job(username, hostname, password, job_data):
 
         # Here we'll only copy the files we've created
         # Other input files will be copied from the cloud drive by the  script we're passing
-        job_controller = get_datapath(filename="bc4_template.py", directory="job_controllers")
+        job_controller_path = get_datapath(filename="bc4_template.py", directory="job_controllers")
 
-        # TODO - add in controller script here
-        files = [jobscript_path, json_path, job_controller]
+        files = [jobscript_path, json_path, job_controller_path]
 
-        sc.connect(username=username, hostname=hostname, keypath="/home/fnuser/runner_key", password=password)
+        # TODO - I feel this shouldn't be hardwired, it probably won't change in the Docker image, but ?
+        keypath = "/home/fnuser/runner_key"
+
+        sc.connect(username=username, hostname=hostname, keypath=keypath, password=password)
         sc.write_files(files=files, remote_dir="first_job")
         response_list = sc.run_command(commands=f"python bc4_template.py {json_filename} &")
 
