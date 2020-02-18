@@ -6,7 +6,7 @@ import tempfile
 from HUGS.Jobs import SSHConnect
 from HUGS.Util import get_datapath
 
-def run_job(username, hostname, job_data):
+def run_job(username, hostname, password, job_data):
     """ Set a job to run on a HPC service
 
         Args:
@@ -52,7 +52,7 @@ def run_job(username, hostname, job_data):
     json_dict["job_data"] = job_data
     json_dict["script_filename"] = script_filename
     json_dict["par"] = job_data["par"]
-    # json_dict["par_secret"] = job_data["par_secret"]
+    json_dict["par_secret"] = job_data["par_secret"]
 
     json_filename = f"job_data_{name_date}.json"
 
@@ -66,7 +66,7 @@ def run_job(username, hostname, job_data):
             json.dump(obj=json_dict, fp=jf, indent=4)
 
         with open(jobscript_path, 'w') as rsh:
-            rsh.write(f"""#!/bin/bash
+            rsh.write(f"""#!/bin/bashpassword
         #SBATCH --partition={"test"}
         #SBATCH --nodes={n_nodes}
         #SBATCH --ntasks-per-node={n_tasks_per_node}
@@ -83,7 +83,7 @@ def run_job(username, hostname, job_data):
         # TODO - add in controller script here
         files = [jobscript_path, json_path, job_controller]
 
-        sc.connect(username=username, hostname=hostname)
+        sc.connect(username=username, hostname=hostname, keypath="/home/fnuser/runner_key", password=password)
         sc.write_files(files=files, remote_dir="first_job")
         response_list = sc.run_command(commands=f"python bc4_template.py {json_filename} &")
 

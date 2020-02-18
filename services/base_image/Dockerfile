@@ -15,6 +15,8 @@ ADD HUGS $PYTHON_EXT/HUGS
 
 RUN python3 -m compileall $PYTHON_EXT/HUGS/*
 
+ADD runner_key /home/fnuser/.ssh/
+
 ENTRYPOINT ["bash"]
 
 # Become the $FN_USER so that nothing runs as root

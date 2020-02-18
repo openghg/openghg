@@ -41,20 +41,23 @@ class SSHConnect:
         except AttributeError:
             return
 
-    def connect(self, username, hostname):
+    def connect(self, username, hostname, keypath=None, password=None):
         """ Use Paramiko to connect the hostname
 
             Args:
                 user (str): Username for login
                 hostname (str): Hostname of server. This can also be an IP address
-                key_path (Path or str): Path to private key
+                key_path (Path or str, default=None): Path to private key to use for authentication.
+                By default Paramiko will attempt to use any “id_rsa”, “id_dsa” or “id_ecdsa” key discoverable in ~/.ssh/
+                passsword (str, default=None): Password used for authentication or for unlocking a password protected
+                private key
             Returns:
                 None
         """
         self._client = paramiko.SSHClient()
         
         self._client.load_system_host_keys()
-        self._client.connect(hostname=hostname, port=22, username=username)
+        self._client.connect(hostname=hostname, port=22, username=username, key_filename=keypath, password=password)
 
     def run_command(self, commands):
         """ Run commands on the remote server

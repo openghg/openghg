@@ -130,3 +130,6 @@ test_tmp/
 raw_data/
 
 .gitconfig
+runner.txt
+services/base_image/runner_key
+keys/

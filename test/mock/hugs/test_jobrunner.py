@@ -3,6 +3,7 @@ p_logger = logging.getLogger("parmiko")
 p_logger.setLevel(logging.WARNING)
 
 
+
 import datetime
 import mockssh
 import pytest
@@ -11,7 +12,8 @@ import uuid
 
 from HUGS.Client import Process
 from HUGS.ObjectStore import get_local_bucket
-from Acquire.Client import User, Drive, Service, StorageCreds, PAR, Authorisation, Location
+from Acquire.Client import ACLRule, User, Drive, Service, StorageCreds, PAR, Authorisation, Location
+from Acquire.ObjectStore import ObjectStore
 from HUGS.Client import JobRunner
 from HUGS.Jobs import JobDrive
 
@@ -34,7 +36,6 @@ def server():
         yield s
 
 def test_jobrunner(authenticated_user, tempdir):
-
     reqs = {}
 
     reqs["name"] = "test_name"
@@ -64,26 +65,23 @@ def test_jobrunner(authenticated_user, tempdir):
     # and another to the server to allow writing of result data
     drive_guid = drive.metadata().guid()
     location = Location(drive_guid=drive_guid)
-    
+
     par_lifetime = datetime.datetime.now() + datetime.timedelta(days=1)
+    par = PAR(location=location, user=authenticated_user, expires_datetime=par_lifetime, aclrule=ACLRule.writer())
+    par_secret = hugs.encrypt_data(par.secret())
 
-    par = PAR(location=location, user=authenticated_user, expires_datetime=par_lifetime)
-    # par_secret = hugs.encrypt_data(par.secret())
-
+    password = os.environ["RUNNER_PWD"]
+    encrypted_password = hugs.encrypt_data(password)
+    
     args = {}
-
-    args["requirements"] = reqs
-    args["par"] = par.to_data()
-    # args["par_secret"] = par_secret
     args["authorisation"] = auth.to_data()
-
+    args["par"] = par.to_data()
+    args["par_secret"] = par_secret
+    args["requirements"] = reqs
+    args["password"] = encrypted_password
+    
     response = hugs.call_function(function="job_runner", args=args)
     
-    # Get a drive
-    # drive = JobDrive(PAR=par)
-
-    print(drive.list_files())
-
     print(response)
     
     assert False
