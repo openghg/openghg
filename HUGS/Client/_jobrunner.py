@@ -16,12 +16,11 @@ class JobRunner:
         self._service = wallet.get_service(service_url=f"{service_url}/hugs")
         self._service_url = service_url
 
-    def create_job(self, auth_user, requirements, hugs_url=None, storage_url=None):
+    def create_job(self, auth_user, requirements, key_password, hugs_url=None, storage_url=None):
         """ Create a job
 
             Args:
                 auth_user (Acquire.User): Authenticated Acquire user
-                requirements (dict): Dictionary containing job details and requested resources
 
                 The following keys are required:
                     "name", "run_command", "partition", "n_nodes", "n_tasks_per_node", 
@@ -33,6 +32,12 @@ class JobRunner:
                     requirements = {"name": "test_job, "n_nodes": 2, "n_tasks_per_node": 2, 
                                     "n_cpus_per_task": 2, "memory": "128G", ...}
 
+                requirements (dict): Dictionary containing job details and requested resources
+                key_password (str): Password for private key used to access the HPC
+
+                TODO - having to pass in a password and get it through to Paramiko seems
+                long winded, is there a better way to do this?
+``
                 hugs_url (str): URL of HUGS service
                 storage_url (str): URL of storage service
             Returns:
@@ -80,13 +85,18 @@ class JobRunner:
         par_lifetime = datetime.datetime.now() + datetime.timedelta(days=1)
 
         par = PAR(location=location, user=auth_user, expires_datetime=par_lifetime)
-        # par_secret = hugs.encrypt_data(par.secret())
+        par_secret = hugs.encrypt_data(par.secret())
 
+        # Currently using an enviornment variable for testing
+        password = os.environ["RUNNER_PWD"]
+        encrypted_password = hugs.encrypt_data(password)
+    
         args = {}
-        
-        args["requirements"] = requirements
+        args["authorisation"] = auth.to_data()
         args["par"] = par.to_data()
-        # args["par_secret"] = par_secret
+        args["par_secret"] = par_secret
+        args["requirements"] = requirements
+        args["key_password"] = encrypted_password
 
         response = self._service.call_function(function="job_runner", args=args)
 

@@ -10,10 +10,10 @@ def run_job(username, hostname, password, job_data):
     """ Set a job to run on a HPC service
 
         Args:
-            job_data (dict): Dictionary containing data needed to run the job
-            such as the run command, number of nodes, number of tasks etc
-
-            TODO - improve this
+            username (str): Username for HPC cluster
+            hostname (str): Hostname of HPC cluster
+            password (str): Password to unlock private key used to access cluster
+            job_data (dict): Data to run job
         Returns:
             dict: Dictionary of responses to commands executing when running the job
     """
@@ -84,7 +84,7 @@ def run_job(username, hostname, password, job_data):
         files = [jobscript_path, json_path, job_controller_path]
 
         # TODO - I feel this shouldn't be hardwired, it probably won't change in the Docker image, but ?
-        keypath = "/home/fnuser/runner_key"
+        keypath = "/home/fnuser/.ssh/runner_key"
 
         sc.connect(username=username, hostname=hostname, keypath=keypath, password=password)
         sc.write_files(files=files, remote_dir="first_job")
