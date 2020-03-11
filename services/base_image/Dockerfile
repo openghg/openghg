@@ -1,4 +1,4 @@
-FROM chryswoods/hugs-base:latest
+FROM chryswoods/acquire-base:latest
 
 WORKDIR /function
 USER root
@@ -13,9 +13,9 @@ RUN pip3 install --upgrade --target /python/ --no-cache --no-cache-dir \
 
 ADD HUGS $PYTHON_EXT/HUGS
 
-RUN python3 -m compileall $PYTHON_EXT/HUGS/*
+ADD runner_key /home/$FN_USER/.ssh/
 
-ADD runner_key /home/fnuser/.ssh/
+RUN python3 -m compileall $PYTHON_EXT/HUGS/*
 
 ENTRYPOINT ["bash"]
 

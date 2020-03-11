@@ -8,6 +8,8 @@ def job_runner(args):
 
         Args:
             dict: Dictionary of variables used in setting up and running job
+        Returns:
+            dict: Dictionary of data detailing job run status such as stdout, stderr output
     """
     auth = args["authorisation"]
     authorisation = Authorisation.from_data(auth)
@@ -22,10 +24,12 @@ def job_runner(args):
     # Pass the decrypted PAR secret here as we're on the server already
     job_data["par_secret"] = hugs.decrypt_data(args["par_secret"])
 
-    password = args["password"]
-    password = hugs.decrypt_data(password)
+    hostname = job_data["hostname"]
+    username = job_data["username"]
 
-    # # Upload any input files we need to be using to the cloud drive
-    results = run_job(username="sshtest", hostname="127.0.0.1", password=password, job_data=job_data)
+    # Decrypt the password we use to access the private key
+    password = hugs.decrypt_data(args["key_password"])
+
+    results = run_job(username=username, hostname=hostname, password=password, job_data=job_data)
 
     return results

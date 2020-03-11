@@ -29,15 +29,15 @@ class JobRunner:
                     "cpu_test", "dcv", "gpu", "gpu_veryshort", "hmem", "serial", "test", "veryshort"
 
                 Example:
-                    requirements = {"name": "test_job, "n_nodes": 2, "n_tasks_per_node": 2, 
-                                    "n_cpus_per_task": 2, "memory": "128G", ...}
+                    requirements = {"hostname": hostname, "username": username, "name": "test_job, "n_nodes": 2, 
+                                    "n_tasks_per_node": 2, "n_cpus_per_task": 2, "memory": "128G", ...}
 
                 requirements (dict): Dictionary containing job details and requested resources
                 key_password (str): Password for private key used to access the HPC
 
                 TODO - having to pass in a password and get it through to Paramiko seems
                 long winded, is there a better way to do this?
-``
+
                 hugs_url (str): URL of HUGS service
                 storage_url (str): URL of storage service
             Returns:
@@ -88,8 +88,11 @@ class JobRunner:
         par_secret = hugs.encrypt_data(par.secret())
 
         # Currently using an enviornment variable for testing
-        password = os.environ["RUNNER_PWD"]
-        encrypted_password = hugs.encrypt_data(password)
+        # password = os.environ["RUNNER_PWD"]
+
+        # Encrypt the password we use to decrypt the private key used to access the HPC cluster
+        # TODO - is this a sensible way of doing this?
+        encrypted_password = hugs.encrypt_data(key_password)
     
         args = {}
         args["authorisation"] = auth.to_data()
@@ -100,15 +103,11 @@ class JobRunner:
 
         response = self._service.call_function(function="job_runner", args=args)
 
-        print(response)
-
-        return False
-
         # results = {}
         # results["response"] = response
         # results["par"] = par.to_data()
 
-        # return results
+        return response
 
     def service(self):
         return self._service

@@ -78,7 +78,7 @@ def test_jobrunner(authenticated_user, tempdir):
     args["par"] = par.to_data()
     args["par_secret"] = par_secret
     args["requirements"] = reqs
-    args["password"] = encrypted_password
+    args["key_password"] = encrypted_password
     
     response = hugs.call_function(function="job_runner", args=args)
     
