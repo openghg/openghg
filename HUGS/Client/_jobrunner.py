@@ -23,7 +23,7 @@ class JobRunner:
                 auth_user (Acquire.User): Authenticated Acquire user
 
                 The following keys are required:
-                    "name", "run_command", "partition", "n_nodes", "n_tasks_per_node", 
+                    "hostname", "username", "name", "run_command", "partition", "n_nodes", "n_tasks_per_node", 
                     "n_cpus_per_task", "memory_req", "job_duration"
                 where partition must be one of:
                     "cpu_test", "dcv", "gpu", "gpu_veryshort", "hmem", "serial", "test", "veryshort"
@@ -63,7 +63,9 @@ class JobRunner:
         creds = StorageCreds(user=auth_user, service_url=storage_url)
 
         # Append a shortened UUID to the job name to ensure we don't multiple drives with the same name
-        short_uuid = create_uuid(short_uuid=True)
+        short_uuid = create_uuid(short_uid=True)
+
+        job_name = requirements["name"]
         job_name = f"{job_name.lower()}_{short_uuid}"
         
         # Create a cloud drive for the input and output data to be written to
