@@ -38,7 +38,7 @@ def run():
     print(job_name)
     
     with open("some_rands.txt", "w") as f:
-        f.write(rands)
+        f.write(str(rands))
 
     # # Make the job folders at the location of this file
     # job_path = Path(__file__).resolve().parent.joinpath(job_name)

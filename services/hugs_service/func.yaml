@@ -1,6 +1,6 @@
 schema_version: 20180708
 name: hugs-root
-version: 0.0.61
+version: 0.0.68
 runtime: docker
 type: sync
 memory: 1024

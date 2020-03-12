@@ -92,7 +92,7 @@ def run_job(username, hostname, password, job_data, known_host=False):
         # sc.write_files(files=files, remote_dir="first_job")
         sc.write_files(files=files)
         
-        response_list = sc.run_command(commands=f"python bc4_template.py {json_filename} &")
+        response_list = sc.run_command(commands=f"python3 bc4_template.py {json_filename} &")
 
     return response_list
         
