@@ -1,5 +1,7 @@
 import argparse
 import json
+import random
+
 from pathlib import Path
 
 from Acquire.Client import PAR
@@ -18,44 +20,53 @@ def data_watchdog():
     """
     pass
 
+def run():
+    parser = argparse.ArgumentParser(description='Run and watch a job on a HPC resource')
+    parser.add_argument("j", help="JSON data filename")
+    args = parser.parse_args()
 
-parser = argparse.ArgumentParser(description='Run and watch a job on a HPC resource')
-parser.add_argument("j", help="JSON data filename")
-args = parser.parse_args()
+    json_filename = args.j
+    with open(json_filename, "r") as f:
+        job_data = json.load(f)
 
-json_filename = args.j
-with open(json_filename, "r") as f:
-    job_data = json.load(f)
+    job_name = job_data["job_name"]
+    script_file = job_data["script_filename"]
+    par_data = job_data["par"]
 
-job_name = job_data["job_name"]
-script_file = job_data["script_filename"]
-par_data = job_data["par"]
+    rands = [random.randint(0,10) for _ in range(50)]
 
-# Make the job folders at the location of this file
-job_path = Path(__file__).resolve().parent.joinpath(job_name)
+    print(job_name)
+    
+    with open("some_rands.txt", "w") as f:
+        f.write(rands)
 
-folders = ["input", "output", "logs"]
-for f in folders:
-    fpath = job_path.joinpath(f)
-    fpath.mkdir(parents=True)
+    # # Make the job folders at the location of this file
+    # job_path = Path(__file__).resolve().parent.joinpath(job_name)
 
-# Use the PAR (pre-authenticated request) to access the cloud drive
-# where the input data has been uploaded (if needed) and output data will 
-# be stored
-par = PAR.from_data(par_data)
-par_drive = par.resolve()
+    # folders = ["input", "output", "logs"]
+    # for f in folders:
+    #     fpath = job_path.joinpath(f)
+    #     fpath.mkdir(parents=True)
 
-files = par_drive.list_files(dir="input")
+    # # Use the PAR (pre-authenticated request) to access the cloud drive
+    # # where the input data has been uploaded (if needed) and output data will 
+    # # be stored
+    # par = PAR.from_data(par_data)
+    # par_drive = par.resolve()
+
+    # files = par_drive.list_files(dir="input")
+
+
+if __name__ == "__main__":
+    run()
+
+
 
 
 
 # Download the input files
 
 
-
-
-
-    
 
     
 

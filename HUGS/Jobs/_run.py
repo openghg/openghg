@@ -46,9 +46,11 @@ def run_job(username, hostname, password, job_data, known_host=False):
     # Name for the Slurm job script
     script_filename = f"run_job_{name_date}.sh"
 
+    job_name = f"job_{name_date}"
+
     # Create a JSON file that will hold the job parameters
     json_dict = {}
-    json_dict["job_name"] = f"job_{name_date}"
+    json_dict["job_name"] = job_name
     json_dict["job_data"] = job_data
     json_dict["script_filename"] = script_filename
     json_dict["par"] = job_data["par"]
@@ -87,7 +89,9 @@ def run_job(username, hostname, password, job_data, known_host=False):
         keypath = "/home/fnuser/.ssh/runner_key"
 
         sc.connect(username=username, hostname=hostname, keypath=keypath, password=password, known_host=known_host)
-        sc.write_files(files=files, remote_dir="first_job")
+        # sc.write_files(files=files, remote_dir="first_job")
+        sc.write_files(files=files)
+        
         response_list = sc.run_command(commands=f"python bc4_template.py {json_filename} &")
 
     return response_list
