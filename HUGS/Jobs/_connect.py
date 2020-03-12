@@ -41,7 +41,7 @@ class SSHConnect:
         except AttributeError:
             return
 
-    def connect(self, username, hostname, keypath=None, password=None):
+    def connect(self, username, hostname, keypath=None, password=None, known_host=False):
         """ Use Paramiko to connect the hostname
 
             Args:
@@ -55,8 +55,13 @@ class SSHConnect:
                 None
         """
         self._client = paramiko.SSHClient()
-        
         self._client.load_system_host_keys()
+
+        # If we haven't connected to the host before the host's fingerprint will not be in the known_hosts file, 
+        # this lets us override the fingerprint checking 
+        if not known_host:
+            self._client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        
         self._client.connect(hostname=hostname, port=22, username=username, key_filename=keypath, password=password)
 
     def run_command(self, commands):
