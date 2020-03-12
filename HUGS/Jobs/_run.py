@@ -6,7 +6,7 @@ import tempfile
 from HUGS.Jobs import SSHConnect
 from HUGS.Util import get_datapath
 
-def run_job(username, hostname, password, job_data):
+def run_job(username, hostname, password, job_data, known_host=False):
     """ Set a job to run on a HPC service
 
         Args:
@@ -86,7 +86,7 @@ def run_job(username, hostname, password, job_data):
         # TODO - I feel this shouldn't be hardwired, it probably won't change in the Docker image, but ?
         keypath = "/home/fnuser/.ssh/runner_key"
 
-        sc.connect(username=username, hostname=hostname, keypath=keypath, password=password)
+        sc.connect(username=username, hostname=hostname, keypath=keypath, password=password, known_host=known_host)
         sc.write_files(files=files, remote_dir="first_job")
         response_list = sc.run_command(commands=f"python bc4_template.py {json_filename} &")
 

@@ -27,9 +27,15 @@ def job_runner(args):
     hostname = job_data["hostname"]
     username = job_data["username"]
 
+    # Have we used this server before?
+    try:
+        known_host = job_data["known_host"]
+    except:
+        known_host = False
+
     # Decrypt the password we use to access the private key
     password = hugs.decrypt_data(args["key_password"])
 
-    results = run_job(username=username, hostname=hostname, password=password, job_data=job_data)
+    results = run_job(username=username, hostname=hostname, password=password, job_data=job_data, known_host=known_host)
 
     return results
