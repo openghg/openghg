@@ -88,9 +88,12 @@ class JobRunner:
 
         # Create an ACL rule for this PAR so we can read and write to it
         aclrule = ACLRule.owner()
+
         
         par = PAR(location=location, user=auth_user, aclrule=aclrule, expires_datetime=par_lifetime)
-        par_secret = hugs.encrypt_data(par.secret())
+        
+        par_secret = par.secret()
+        encryped_par_secret = hugs.encrypt_data(par_secret)
 
         # Currently using an enviornment variable for testing
         # password = os.environ["RUNNER_PWD"]
@@ -104,7 +107,7 @@ class JobRunner:
         args = {}
         args["authorisation"] = auth.to_data()
         args["par"] = par_data
-        args["par_secret"] = par_secret
+        args["par_secret"] = encryped_par_secret
         args["requirements"] = requirements
         args["key_password"] = encrypted_password
 
