@@ -87,11 +87,9 @@ class JobRunner:
         par_lifetime = datetime.datetime.now() + datetime.timedelta(days=1)
 
         # Create an ACL rule for this PAR so we can read and write to it
-        acl = ACL(is_writeable=true) 
+        acl = ACL(is_writeable=True, is_readable=True)
         
-        acl_rules = ACLRules.owner(auth_user.guid()))
-
-        par = PAR(location=location, user=auth_user, aclrule=acl_rules, expires_datetime=par_lifetime)
+        par = PAR(location=location, user=auth_user, aclrule=acl, expires_datetime=par_lifetime)
         par_secret = hugs.encrypt_data(par.secret())
 
         # Currently using an enviornment variable for testing
