@@ -54,9 +54,13 @@ def run():
     
     drive = par.resolve(secret=par_secret)
 
-    drive.upload("some_rands.txt")
+    filemeta = drive.upload("some_rands.txt")
 
     files = drive.list_files()
+
+    with open("returned_data.txt", "w") as w:
+        w.write(str(filemeta))
+        w.write(str(files))
 
     print(files)
 
