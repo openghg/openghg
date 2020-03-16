@@ -44,7 +44,7 @@ class JobRunner:
                 dict: Dictionary containing information regarding job running on resource
                 This will contain the PAR for access for data upload and download. 
         """
-        from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds, Location, ACLRules
+        from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds, Location, ACLRule
         from Acquire.ObjectStore import create_uuid
         import datetime
 
@@ -87,9 +87,9 @@ class JobRunner:
         par_lifetime = datetime.datetime.now() + datetime.timedelta(days=1)
 
         # Create an ACL rule for this PAR so we can read and write to it
-        acl = ACL(is_writeable=True, is_readable=True)
+        aclrule = ACLRule.owner()
         
-        par = PAR(location=location, user=auth_user, aclrule=acl, expires_datetime=par_lifetime)
+        par = PAR(location=location, user=auth_user, aclrule=aclrule, expires_datetime=par_lifetime)
         par_secret = hugs.encrypt_data(par.secret())
 
         # Currently using an enviornment variable for testing
