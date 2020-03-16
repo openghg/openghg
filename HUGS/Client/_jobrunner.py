@@ -98,19 +98,22 @@ class JobRunner:
         # Encrypt the password we use to decrypt the private key used to access the HPC cluster
         # TODO - is this a sensible way of doing this?
         encrypted_password = hugs.encrypt_data(key_password)
+
+        par_data = par.to_data()
     
         args = {}
         args["authorisation"] = auth.to_data()
-        args["par"] = par.to_data()
+        args["par"] = par_data
         args["par_secret"] = par_secret
         args["requirements"] = requirements
         args["key_password"] = encrypted_password
 
-        response = self._service.call_function(function="job_runner", args=args)
+        function_response = self._service.call_function(function="job_runner", args=args)
 
-        # results = {}
-        # results["response"] = response
-        # results["par"] = par.to_data()
+        response = {}
+        response["function_response"] = function_response
+        response["par"] = par_data
+        response["par_secret"] = par_secret
 
         return response
 
