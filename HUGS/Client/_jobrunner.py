@@ -16,7 +16,7 @@ class JobRunner:
         self._service = wallet.get_service(service_url=f"{service_url}/hugs")
         self._service_url = service_url
 
-    def create_job(self, auth_user, requirements, key_password, hugs_url=None, storage_url=None):
+    def create_job(self, auth_user, requirements, key_password, data_files, hugs_url=None, storage_url=None):
         """ Create a job
 
             Args:
@@ -34,6 +34,9 @@ class JobRunner:
 
                 requirements (dict): Dictionary containing job details and requested resources
                 key_password (str): Password for private key used to access the HPC
+                data_files (dict): Data file(s) to be uploaded to the cloud drive to 
+                run the simulation. Simulation code files should be given in the "app" key and data
+                files in the "data" key
 
                 TODO - having to pass in a password and get it through to Paramiko seems
                 long winded, is there a better way to do this?
@@ -47,6 +50,7 @@ class JobRunner:
         from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds, Location, ACLRule
         from Acquire.ObjectStore import create_uuid
         import datetime
+        import os
 
         if self._service is None:
             raise PermissionError("Cannot use a null service")
@@ -56,6 +60,12 @@ class JobRunner:
 
         if hugs_url is None:
             hugs_url = self._service_url + "/hugs"
+
+        if not isinstance(data_files["app"], list):
+            data_files["app"] = [data_files["app"]]
+
+        if not isinstance(data_files["data"], list):
+            data_files["data"] = [data_files["data"]]
 
         # Get an authorisaton to pass to the service
         hugs = Service(service_url=hugs_url)
@@ -70,8 +80,27 @@ class JobRunner:
         
         # Create a cloud drive for the input and output data to be written to
         drive = Drive(creds=creds, name=job_name)
-        auth = Authorisation(resource="job_runner", user=auth_user)
 
+        # Check the size of the files and if we want to use the chunk uploader
+        # Now we want to upload the files to the cloud drive we've created for this job
+        chunk_limit = 50*1024*1024
+
+        # Store the metadata for the uploaded files
+        uploaded_files = {}
+        # These probably won't be very big so don't check their size
+        for f in data_files["app"]:
+            file_meta = drive.upload(f, dir="app")
+            uploaded_files["app"][f] = file_meta
+
+        for f in data_files["data"]:
+            if filesize < chunk_limit:
+                    file_meta = drive.upload(f, dir="data")
+                else:
+                    file_meta = drive.chunk_upload(f, dir="data")
+
+                uploaded_files["data"][f] = file_meta
+
+        auth = Authorisation(resource="job_runner", user=auth_user)
         # Create a PAR with a long lifetime here and return a version to the user
         # and another to the server to allow writing of result data
         drive_guid = drive.metadata().guid()
@@ -88,15 +117,10 @@ class JobRunner:
 
         # Create an ACL rule for this PAR so we can read and write to it
         aclrule = ACLRule.owner()
-
-        
         par = PAR(location=location, user=auth_user, aclrule=aclrule, expires_datetime=par_lifetime)
-        
+       
         par_secret = par.secret()
         encryped_par_secret = hugs.encrypt_data(par_secret)
-
-        # Currently using an enviornment variable for testing
-        # password = os.environ["RUNNER_PWD"]
 
         # Encrypt the password we use to decrypt the private key used to access the HPC cluster
         # TODO - is this a sensible way of doing this?
@@ -117,6 +141,7 @@ class JobRunner:
         response["function_response"] = function_response
         response["par"] = par_data
         response["par_secret"] = par_secret
+        response["uploaded_files"] = uploaded_files
 
         return response
 

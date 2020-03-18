@@ -1,6 +1,7 @@
 import argparse
 import json
 import random
+import subprocess
 
 from pathlib import Path
 
@@ -33,28 +34,51 @@ def run():
     script_file = job_data["script_filename"]
     par_data = job_data["par"]
     par_secret = job_data["par_secret"]
+    
+    try:
+        compilation_command = job_data["compilation_command"]
+    except:
+        compilation_command = None
 
-    rands = [random.random() for _ in range(100)]
-
-    with open("some_rands.txt", "w") as f:
-        f.write(str(rands))
+    run_command = job_data["run_command"]
 
     # Make the job folders at the location of this file
-    # job_path = Path(__file__).resolve().parent.joinpath(job_name)
+    job_path = Path(__file__).resolve().parent.joinpath(job_name)
 
-    # folders = ["input", "output", "logs"]
-    # for f in folders:
-    #     fpath = job_path.joinpath(f)
-    #     fpath.mkdir(parents=True)
+    # Make the output folder
+    fpath = job_path.joinpath("output")
+    fpath.mkdir(parents=True)
+
+    par = PAR.from_data(data=par_data)
+    drive = par.resolve(secret=par_secret)
+
+    # Download any data files and moved them to the input folders
+    files = drive.list_files()
+    for f in files:
+        filename = f.filename()
+        drive.download(filename=filename, dir=job_path)
+
+    # Split the compilation command
+    if compilation_command is not None:
+        cmd_list = compilation_command.split()
+        # Run the compilation command and set the current working directory
+        # to our application code location in "app"
+        res = subprocess.run(cmd_list, cwd="app", stderr=True)
+        
+        if res.returncode != 0:
+            raise subprocess.CalledProcessError("Compilation error : ", res.stderr)
+
+    run_command = run_command.split()
+    # Run the actual code
+    runcmd_res = subprocess.run(run_command, cwd="app", stderr=True)
+
+    if runcmd_res.returncode != 0:
+        raise subprocess.CalledProcessError("Error running application : ", runcmd_res.stderr)
 
     # Use the PAR (pre-authenticated request) to access the cloud drive
     # where the input data has been uploaded (if needed) and output data will 
     # be stored
-    par = PAR.from_data(data=par_data)
-    
-    drive = par.resolve(secret=par_secret)
-
-    filemeta = drive.upload("some_rands.txt")
+    filemeta = drive.upload("../output/some_rands.txt", dir="output")
 
     files = drive.list_files()
 
@@ -62,21 +86,7 @@ def run():
         w.write(str(filemeta))
         w.write(str(files))
 
-    print(files)
 
 
 if __name__ == "__main__":
     run()
-
-
-
-
-
-# Download the input files
-
-
-
-    
-
-
-    

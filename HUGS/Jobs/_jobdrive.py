@@ -6,18 +6,18 @@ class JobDrive:
     """" This is used to upload files to the cloud drive for use in a
         HPC job
 
-        This could just be repeating functionality from Acquire though
-        Maybe remove this?
-
         Args:
-            PAR: An Acquire PAR (Pre-Authenticated Request) used to
-            access the cloud drive
+            par (Acquire.Client.PAR): Pre-authenticated request for access to cloud drive
+            par_secret (str): Secret / password to access the PAR
     """
-    def __init__(self, PAR):
-        self._drive = None
-        self._PAR  = PAR
-        self._drive = PAR.resolve()
+    def __init__(self, par, par_secret=None):
+        if not isinstance(par, PAR):
+            raise TypeError("par argument must be of type Acquire.Client.PAR")
 
+        self._par = par
+        self._par_secret = par_secret
+        self._drive = par.resolve(secret=par_secret)
+    
     def upload(self, files, directory="input"):
         """ Upload files to the cloud drive that's accessed using the Acquire
             PAR
