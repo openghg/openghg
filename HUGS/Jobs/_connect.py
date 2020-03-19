@@ -104,7 +104,7 @@ class SSHConnect:
         if not isinstance(files, list):
             files = [files]
 
-        # Conver to pathlib.Path objects for easier handling
+        # Convert to pathlib.Path objects for easier handling
         files = [Path(f) for f in files]
 
         if remote_dir is not None:
@@ -119,8 +119,9 @@ class SSHConnect:
         for filepath in files:
             # Here we only want the filename
             if remote_dir is not None:
-                remote_path = remote_dir.joinpath(filepath.name)
+                remote_path = str(remote_dir.joinpath(filepath.name))
             else:
                 remote_path = filepath.name
 
-            r = sftp.put(localpath=filepath, remotepath=remote_path)
+            # Hopefully paramiko will support Path objects in the near future
+            r = sftp.put(localpath=str(filepath), remotepath=remote_path)
