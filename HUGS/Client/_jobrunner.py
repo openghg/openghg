@@ -105,7 +105,7 @@ class JobRunner:
                 else:
                     file_meta = drive.chunk_upload(f, dir="data")
 
-                    uploaded_files["data"][f] = file_meta
+                uploaded_files["data"][f] = file_meta
         except KeyError:
             pass
 
@@ -150,7 +150,7 @@ class JobRunner:
         response["function_response"] = function_response
         response["par"] = par_data
         response["par_secret"] = par_secret
-        response["uploaded_files"] = uploaded_files
+        response["upload_data"] = uploaded_files
 
         return response
 

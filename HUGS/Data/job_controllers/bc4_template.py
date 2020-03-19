@@ -42,11 +42,8 @@ def run():
 
     run_command = job_data["run_command"]
 
-    # Make the job folders at the location of this file
-    job_path = Path(__file__).resolve().parent.joinpath(job_name)
-
     # Make the output folder
-    fpath = job_path.joinpath("output")
+    fpath = job_path = Path(__file__).resolve().parent.joinpath("output")
     fpath.mkdir(parents=True)
 
     par = PAR.from_data(data=par_data)
@@ -56,21 +53,21 @@ def run():
     files = drive.list_files()
     for f in files:
         filename = f.filename()
-        drive.download(filename=filename, dir=job_path)
+        drive.download(filename=filename)
 
     # Split the compilation command
     if compilation_command is not None:
         cmd_list = compilation_command.split()
         # Run the compilation command and set the current working directory
         # to our application code location in "app"
-        res = subprocess.run(cmd_list, cwd="app", stderr=True)
+        res = subprocess.run(cmd_list, stderr=True)
         
         if res.returncode != 0:
             raise subprocess.CalledProcessError("Compilation error : ", res.stderr)
 
     run_command = run_command.split()
     # Run the actual code
-    runcmd_res = subprocess.run(run_command, cwd="app", stderr=True)
+    runcmd_res = subprocess.run(run_command, stderr=True)
 
     if runcmd_res.returncode != 0:
         raise subprocess.CalledProcessError("Error running application : ", runcmd_res.stderr)
@@ -78,7 +75,7 @@ def run():
     # Use the PAR (pre-authenticated request) to access the cloud drive
     # where the input data has been uploaded (if needed) and output data will 
     # be stored
-    filemeta = drive.upload("../output/some_rands.txt", dir="output")
+    filemeta = drive.upload("output/some_rands.txt", dir="output")
 
     files = drive.list_files()
 
