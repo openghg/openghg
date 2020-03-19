@@ -119,7 +119,7 @@ class SSHConnect:
         for filepath in files:
             # Here we only want the filename
             if remote_dir is not None:
-                remote_path = remote_dir.joinpath(filepath.name).name
+                remote_path = remote_dir.joinpath(filepath.name)
             else:
                 remote_path = filepath.name
 
