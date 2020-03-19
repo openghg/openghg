@@ -31,8 +31,16 @@ class JobDrive:
         if not isinstance(files, list):
             files = [files]
 
+        # 50 MB in bytes
+        chunk_limit = 50*1024*1024
+
+       # We might not have any data files to upload
         for f in files:
-            self._drive.upload(filename=f, dir=directory)
+            filesize = os.path.getsize(f)
+            if filesize < chunk_limit:
+                file_meta = self._drive.upload(filename=f, dir=directory)
+            else:
+                file_meta = self._drive.chunk_upload(filename=f, dir=directory)
 
     def list_files(self):
         """ List files in drive

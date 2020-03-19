@@ -1,4 +1,5 @@
 import argparse
+import glob
 import json
 import random
 import subprocess
@@ -75,18 +76,8 @@ def run():
     if runcmd_res.returncode != 0:
         raise subprocess.CalledProcessError("Error running application : ", runcmd_res.stderr)
 
-    # Use the PAR (pre-authenticated request) to access the cloud drive
-    # where the input data has been uploaded (if needed) and output data will 
-    # be stored
-    filemeta = drive.upload("output/some_rands.txt", dir="output")
-
-    files = drive.list_files()
-
-    with open("returned_data.txt", "w") as w:
-        w.write(str(filemeta))
-        w.write(str(files))
-
-
+    # Upload everything in the output directory to the cloud drive
+    drive.upload("output")
 
 if __name__ == "__main__":
     run()

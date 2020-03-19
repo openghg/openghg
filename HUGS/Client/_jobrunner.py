@@ -100,6 +100,8 @@ class JobRunner:
         # We might not have any data files to upload
         try:    
             for f in data_files["data"]:
+                filesize = os.path.getsize(f)
+                
                 if filesize < chunk_limit:
                     file_meta = drive.upload(f, dir="data")
                 else:
