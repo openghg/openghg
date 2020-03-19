@@ -23,9 +23,9 @@ def run_job(username, hostname, password, job_data, known_host=False):
     # These are used to write the Slurm script
     # This is a WIP, I might be reinventing the wheel here, check before doing any more
     name = job_data["name"]
-    run_command = job_data["run_command"]
+    job_sched_command = job_data["job_sched_command"]
     partition = job_data["partition"]
-    
+
     if partition not in bc4_partitions:
         raise ValueError(f"Invalid partition selected. Please select from one of the following :\n{bc4_partitions}")
 
@@ -57,6 +57,7 @@ def run_job(username, hostname, password, job_data, known_host=False):
     json_dict["par_secret"] = job_data["par_secret"]
     json_dict["run_command"] = job_data["run_command"]
     
+    
     try:
         json_dict["compilation_command"] = job_data["compilation_command"]
     except KeyError:
@@ -76,13 +77,13 @@ def run_job(username, hostname, password, job_data, known_host=False):
 
         with open(jobscript_path, 'w') as rsh:
             rsh.write(f"""#!/bin/bash
-        #SBATCH --partition={"test"}
+        #SBATCH --partition={partition}
         #SBATCH --nodes={n_nodes}
         #SBATCH --ntasks-per-node={n_tasks_per_node}
         #SBATCH --cpus-per-task={n_cpus_per_task}
         #SBATCH --time={job_duration}
         #SBATCH --mem={memory_req}
-        {run_command}
+        {job_sched_command}
             """)
 
         # Here we'll only copy the files we've created

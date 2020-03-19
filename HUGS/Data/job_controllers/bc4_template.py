@@ -37,10 +37,13 @@ def run():
     
     try:
         compilation_command = job_data["compilation_command"]
-    except:
+    except KeyError:
         compilation_command = None
 
-    run_command = job_data["run_command"]
+    try:
+        run_command = job_data["run_command"]
+    except KeyError:
+        run_command = f"sbatch {script_filename}"
 
     # Make the output folder
     fpath = job_path = Path(__file__).resolve().parent.joinpath("output")

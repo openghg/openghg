@@ -132,4 +132,5 @@ raw_data/
 .gitconfig
 runner.txt
 services/base_image/runner_key
+services/base_image/pass_key
 keys/

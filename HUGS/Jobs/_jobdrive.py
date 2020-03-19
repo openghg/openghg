@@ -54,10 +54,10 @@ class JobDrive:
         if not isinstance(files, list):
             files = [files]
 
-        if local_dir is None:
-            date_str = datetime.now().strftime("%Y%m%d-%H%M%S")
-            folder_name = f"drive_download_{date_str}"
-            local_dir = Path.home().joinpath(folder_name)
+        # if local_dir is None:
+        #     date_str = datetime.now().strftime("%Y%m%d-%H%M%S")
+        #     folder_name = f"drive_download_{date_str}"
+        #     local_dir = Path.home().joinpath(folder_name).mkdir()
 
         file_metadata = {}
         for fname in files:
