@@ -55,6 +55,12 @@ def run_job(username, hostname, password, job_data, known_host=False):
     json_dict["script_filename"] = script_filename
     json_dict["par"] = job_data["par"]
     json_dict["par_secret"] = job_data["par_secret"]
+    json_dict["run_command"] = job_data["run_command"]
+    
+    try:
+        json_dict["compilation_command"] = job_data["compilation_command"]
+    except KeyError:
+        pass
 
     # Name of file to write JSON data to for transfer to server
     json_filename = f"job_data_{name_date}.json"

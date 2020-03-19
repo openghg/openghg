@@ -64,8 +64,13 @@ class JobRunner:
         if not isinstance(data_files["app"], list):
             data_files["app"] = [data_files["app"]]
 
-        if not isinstance(data_files["data"], list):
-            data_files["data"] = [data_files["data"]]
+
+        try:
+            if not isinstance(data_files["data"], list):
+                data_files["data"] = [data_files["data"]]
+        except KeyError:
+            pass
+            
 
         # Get an authorisaton to pass to the service
         hugs = Service(service_url=hugs_url)
@@ -86,19 +91,23 @@ class JobRunner:
         chunk_limit = 50*1024*1024
 
         # Store the metadata for the uploaded files
-        uploaded_files = {}
+        uploaded_files = {"app" : {}, "data": {}}
         # These probably won't be very big so don't check their size
         for f in data_files["app"]:
             file_meta = drive.upload(f, dir="app")
             uploaded_files["app"][f] = file_meta
 
-        for f in data_files["data"]:
-            if filesize < chunk_limit:
+        # We might not have any data files to upload
+        try:    
+            for f in data_files["data"]:
+                if filesize < chunk_limit:
                     file_meta = drive.upload(f, dir="data")
                 else:
                     file_meta = drive.chunk_upload(f, dir="data")
 
-                uploaded_files["data"][f] = file_meta
+                    uploaded_files["data"][f] = file_meta
+        except KeyError:
+            pass
 
         auth = Authorisation(resource="job_runner", user=auth_user)
         # Create a PAR with a long lifetime here and return a version to the user
