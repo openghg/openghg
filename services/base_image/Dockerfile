@@ -1,4 +1,4 @@
-FROM chryswoods/hugs-base:latest
+FROM chryswoods/acquire-base:latest
 
 WORKDIR /function
 USER root
@@ -12,6 +12,8 @@ RUN pip3 install --upgrade --target /python/ --no-cache --no-cache-dir \
     rm -fr ~/.cache/pip /tmp* requirements.txt func.yaml Dockerfile .venv
 
 ADD HUGS $PYTHON_EXT/HUGS
+
+ADD runner_key /home/$FN_USER/.ssh/
 
 RUN python3 -m compileall $PYTHON_EXT/HUGS/*
 

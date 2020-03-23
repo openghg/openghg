@@ -5,3 +5,4 @@ netcdf4
 tables
 tblib
 uvloop
+paramiko
