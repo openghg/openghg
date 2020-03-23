@@ -2,11 +2,6 @@ from HUGS.Modules import BaseModule
 
 __all__ = ["ICOS"]
 
-### To use this template replace:
-# - ICOS with new data name in all upper case e.g. CRDS
-# - template with new data name in all lower case e.g. crds
-# - CHANGEME with a new fixed uuid (at the moment)
-
 class ICOS(BaseModule):
     """ Interface for processing ICOS data
         
@@ -113,12 +108,12 @@ class ICOS(BaseModule):
         from pathlib import Path
         import os
 
-        template = ICOS.load()
+        icos = ICOS.load()
 
         # Check if the file has been uploaded already
         file_hash = hash_file(filepath=data_filepath)
-        if file_hash in template._file_hashes and not overwrite:
-            raise ValueError(f"This file has been uploaded previously with the filename : {template._file_hashes[file_hash]}")
+        if file_hash in icos._file_hashes and not overwrite:
+            raise ValueError(f"This file has been uploaded previously with the filename : {icos._file_hashes[file_hash]}")
         
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
@@ -130,26 +125,26 @@ class ICOS(BaseModule):
             site = source_name.split(".")[0]
 
         # This should return xarray Datasets
-        gas_data = template.read_data(data_filepath=data_filepath, site=site)
+        gas_data = icos.read_data(data_filepath=data_filepath, site=site)
 
         # Assign attributes to the xarray Datasets here data here makes it a lot easier to test
-        gas_data = template.assign_attributes(data=gas_data, site=site)
+        gas_data = icos.assign_attributes(data=gas_data, site=site)
 
         # Check if we've got data from these sources before
-        lookup_results = lookup_gas_datasources(lookup_dict=template._datasource_names, gas_data=gas_data, 
+        lookup_results = lookup_gas_datasources(lookup_dict=icos._datasource_names, gas_data=gas_data, 
                                                 source_name=source_name, source_id=source_id)
 
         # Assign the data to the correct datasources
         datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
 
         # Add the Datasources to the list of datasources associated with this object
-        template.add_datasources(datasource_uuids)
+        icos.add_datasources(datasource_uuids)
 
         # Store the hash as the key for easy searching, store the filename as well for
         # ease of checking by user
-        template._file_hashes[file_hash] = filename
+        icos._file_hashes[file_hash] = filename
 
-        template.save()
+        icos.save()
 
         return datasource_uuids
 
