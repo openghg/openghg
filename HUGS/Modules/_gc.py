@@ -83,13 +83,11 @@ class GC(BaseModule):
 
         data_filepath = Path(data_filepath)
 
-        data, species, metadata = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
+        gas_data = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
                                                 site=site, instrument=instrument_name)
-        
-        gas_data = gc.split_species(data=data, site=site, species=species, metadata=metadata)
-        
-        # Assogm attributes to the data for CF compliant NetCDFs
 
+        # Assign attributes to the data for CF compliant NetCDFs
+        gas_data = gc.assign_attributes(data=gas_data, site=site)
 
         lookup_results = lookup_gas_datasources(lookup_dict=gc._datasource_names, gas_data=gas_data,
                                                 source_name=source_name, source_id=source_id)
@@ -180,8 +178,10 @@ class GC(BaseModule):
 
         data = data.set_index("new_time", inplace=False, drop=True)
         data.index.name = "Datetime"
+
+        gas_data = self.split_species(data=data, site=site, species=species, metadata=metadata)
         
-        return (data, species, metadata)
+        return gas_data
 
     def read_precision(self, filepath):
         """ Read GC precision file
@@ -226,9 +226,10 @@ class GC(BaseModule):
         from fnmatch import fnmatch
         from itertools import compress
         
-        site_code = self.get_site_code(site)
+        # site_code = self.get_site_code(site)
+
         # Read inlets from the parameters dictionary
-        expected_inlets = self.get_inlets(site_code=site_code)
+        expected_inlets = self.get_inlets(site_code=site)
         # Get the inlets in the dataframe
         try:
             data_inlets = data["Inlet"].unique()
@@ -251,10 +252,6 @@ class GC(BaseModule):
         #         raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
         #                           data and inlet in parameters file.")
 
-        # TODO - where to get Datasource UUIDs from?
-        # Also what to do in case of multiple inlets - each of these will have a unique ID
-        # But may be of the same spec ?
-        gas_data = []
         combined_data = {}
 
         for spec in species:
@@ -284,13 +281,13 @@ class GC(BaseModule):
                     dataframe = inlet_data[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
                     dataframe = dataframe.dropna(axis="index", how="any")
 
-                attributes = self.site_attributes(site=site_code, inlet=inlet)
+                attributes = self.site_attributes(site=site, inlet=inlet)
 
                 combined_data[spec] = {"metadata": spec_metadata, "data": dataframe, "attributes": attributes}
 
         return combined_data
 
-      def assign_attributes(self, data, site, network=None):
+    def assign_attributes(self, data, site, network=None):
         """ Assign attributes to the data we've processed
 
             Args:
@@ -340,12 +337,12 @@ class GC(BaseModule):
             Returns:
                 None
         """
-        import json
+        from json import load
         from HUGS.Util import get_datapath
 
         params_file = get_datapath(filename="process_gcwerks_parameters.json")
 
-        with open(filepath, "r") as f:
+        with open(params_file, "r") as f:
             data = load(f)
             self._gc_params = data["GC"]
 
@@ -357,13 +354,13 @@ class GC(BaseModule):
             Returns:
                 str: Site code
         """
-        import json
+        from json import load
         from HUGS.Util import get_datapath
 
         if not self._site_codes:
             site_codes_json = get_datapath(filename="site_codes.json")
             with open(site_codes_json, "r") as f:
-                d = json.load(f)
+                d = load(f)
                 self._site_codes = d["name_code"]
 
         try:
