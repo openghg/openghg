@@ -57,8 +57,12 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     to_underscores = {var: var.lower().replace(" ", "_") for var in ds.variables}
     ds = ds.rename(to_underscores)
 
-    attributes_filename = "attributes.json"
-    data_path = get_datapath(filename=attributes_filename)
+    species_attrs_filepath = get_datapath(filename="species_attributes.json")
+
+    with open(species_attrs_filepath, "r") as f:
+        species_attrs = json.load(f)
+
+    data_path = get_datapath(filename="attributes.json")
     
     with open(data_path, "r") as f:
         data = json.load(f)
@@ -163,13 +167,21 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
             # If units are required for variable, add attribute
             # if key == species_label or "variability" in key or "repeatability" in key:
             if key == species_label or any(word in key for word in match_words):
-                if units:
+                if units is not None:
                     if units in unit_interpret:
                         ds[key].attrs["units"] = unit_interpret[units]
                     else:
                         ds[key].attrs["units"] = unit_interpret["else"]
                 else:
-                    ds[key].attrs["units"] = unit_species[species_upper]
+                    try:
+                        ds[key].attrs["units"] = unit_species[species_upper]
+                    except KeyError:
+                        try:
+                            ds[key].attrs["units"] = species_attrs[species_upper]["units"]
+                        except KeyError:
+                            raise KeyError(f"Unable to find units for {species_upper}. Please supply them using the 'units' \
+                                            argument.")
+
 
                 # If units are non-standard, add explanation
                 if species_upper in unit_species_long:
@@ -250,9 +262,6 @@ def _site_info_attributes(site, network=None):
 
     site = site.upper()
 
-    if network:
-        network = network.upper()
-
     # Read site info file
     data_filename = "acrg_site_info.json"
     filepath = get_datapath(filename=data_filename)
@@ -260,13 +269,15 @@ def _site_info_attributes(site, network=None):
     with open(filepath, "r") as f:
         site_params = json_load(f)
 
+    if network is None:
+        network = list(site_params[site].keys())[0]
+    else:
+        network = network.upper()
+
     attributes_dict = {"longitude": "station_longitude",
                        "latitude": "station_latitude",
                        "long_name": "station_long_name",
                        "height_station_masl": "station_height_masl"}
-
-    if not network:
-        network = list(site_params[site].keys())[0]
 
     attributes = {}
     if site in site_params:

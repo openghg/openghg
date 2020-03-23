@@ -37,6 +37,15 @@ def gc():
 
     return gc
 
+def test_read_file(data_path, precision_path):
+    uuids = GC.read_file(data_filepath=data_path, precision_filepath=precision_path, source_name="capegrim_medusa", site="CGO")
+
+    print(uuids)
+    
+    
+
+
+
 def test_read_data(data_path, precision_path):
     # Capegrim
     site = "CGO"

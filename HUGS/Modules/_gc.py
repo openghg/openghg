@@ -177,7 +177,7 @@ class GC(BaseModule):
         data["new_time"] = data.index - pd_Timedelta(seconds=self._sampling_period/2.0)
 
         data = data.set_index("new_time", inplace=False, drop=True)
-        data.index.name = "Datetime"
+        data.index.name = "time"
 
         gas_data = self.split_species(data=data, site=site, species=species, metadata=metadata)
         
@@ -267,23 +267,26 @@ class GC(BaseModule):
                 spec_metadata["inlet"] = inlet
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
-                    dataframe = data[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
-                    dataframe = dataframe.dropna(axis="index", how="any")
+                    spec_data = data[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
+                    spec_data = spec_data.dropna(axis="index", how="any")
                 elif "date" in inlet:
                     dates = inlet.split("_")[1:]
                     slice_dict = {time: slice(dates[0], dates[1])}
                     data_sliced = data.loc(slice_dict)
-                    dataframe = data_sliced[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
-                    dataframe = dataframe.dropna(axis="index", how="any")
+                    spec_data = data_sliced[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
+                    spec_data = spec_data.dropna(axis="index", how="any")
                 else:
                     # Take only data for this inlet from the dataframe
                     inlet_data = data.loc[data["Inlet"] == inlet]
-                    dataframe = inlet_data[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
-                    dataframe = dataframe.dropna(axis="index", how="any")
+                    spec_data = inlet_data[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
+                    spec_data = spec_data.dropna(axis="index", how="any")
 
                 attributes = self.site_attributes(site=site, inlet=inlet)
 
-                combined_data[spec] = {"metadata": spec_metadata, "data": dataframe, "attributes": attributes}
+                # We want an xarray Dataset
+                spec_data = spec_data.to_xarray()
+
+                combined_data[spec] = {"metadata": spec_metadata, "data": spec_data, "attributes": attributes}
 
         return combined_data
 
