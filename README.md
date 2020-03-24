@@ -1,36 +1,14 @@
-## Clone
+## Install
 
-Please clone Acquire into the same top level directory so the folder structure looks like this
+Please clone the HUGS repository to your computer using 
 
-```
-/a_directory
-	/acquire # Cloned Acquire folder
-	/hugs    # Cloned HUGS folder
-
-```
-
-`git clone https://github.com/chryswoods/acquire.git`
 `git clone https://github.com/chryswoods/hugs.git`
 
-Move into the acquire folder and change to the `devel` branch
+Change into the `hugs` directory and then install using `pip`
 
-`git checkout devel`
+`pip install .`
 
-Now move into the hugs directory and change to the `devel` branch
-
-`git checkout devel`
-
-
-## Install dependencies
-
-Change into the `acquire` directory and run
-
-`pip install -r requirements.txt` 
-or 
-`conda install --file requirements.txt`
-
-Then do the same in the `hugs` directory.
-
+HUGS will soon be available on `PyPi` for installation using `pip`.
 
 ## Post-install
 
@@ -51,7 +29,3 @@ Now test your newly created account using the `login.ipynb` notebook.
 ## Use HUGS
 
 A simple graphical interface to the HUGS service is available in the `HGUS_interface.ipynb` notebook within the `user/notebooks` directory. Please scroll down until you see the 'Scroll to here' text and then do Cell -> Run All Above from the toolbar. A simple GUI that allows interaction with functions running on the cloud should appear.
-
-### Clearing Datasources
-
-Please remember to click the `Clear Datasources` button before uploading the BSD and HFD data files. This must be done as Datasources are still being assigned random UUIDs. This leads to the same data being written to multiple Datasources and errors when recombining data. This will be fixed with the assignment of fixed UUIDs for specific Datasources.
