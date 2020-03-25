@@ -1,4 +1,9 @@
-# Testing the GC class
+# TODO - look into what's causing the logging messages in the first place
+# This does stop them
+import logging
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
+
 import datetime
 import pytest
 from pathlib import Path
@@ -12,12 +17,6 @@ from HUGS.Processing import read_metadata
 from HUGS.ObjectStore import get_local_bucket
 from HUGS.ObjectStore import get_object_names
 from HUGS.Util import get_datetime_epoch
-
-# TODO - look into what's causing the logging messages in the first place
-# This does stop them
-import logging
-mpl_logger = logging.getLogger("matplotlib")
-mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def data_path():
