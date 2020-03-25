@@ -1,9 +1,11 @@
-""" This file contains functions used to ensure CEDA compliance
+""" This file contains functions used to export data in compliant formats for archiving with
+    facilities such as CEDA
+
 
 """
-__all__ = ["create_upload_file"]
+__all__ = ["get_ceda_file"]
 
-def create_upload_file(filepath=None, site=None, instrument=None, height=None, write_yaml=False, date_range=None):
+def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_yaml=False, date_range=None):
     """ Creates a JSON (with a yaml extension for CEDA reasons) object 
         for export for a CEDA upload
 
@@ -95,3 +97,53 @@ def create_upload_file(filepath=None, site=None, instrument=None, height=None, w
         return None
     else:
         return data
+
+def export_compliant(data, filepath=None):
+    """ Check the passed data is CF compliant and if a filepath is passed
+        export to a NetCDF file
+
+        Args:
+            data (xarray.Dataset): Data to export
+            filepath (str): Path to export data file
+        Returns:
+            xarray.Dataset or None
+    """
+    import pathlib
+    import subprocess
+    import tempfile
+
+    # If we don't have a filepath to write the NetCDF to we write to a temporary file
+    if filepath is None:
+        tmpfile = tempfile.NamedTemporaryFile()
+        data.to_netcdf(tmpfile)
+        commands = ["cfchecks", tmpfile.name]
+    else:
+        filepath = Path(filepath).absolute()
+        data.to_netcdf(filepath)
+        commands = ["cfchecks", filepath]
+
+    res = subprocess.run(commands, stderr=True)
+
+    tmpfile.close()
+
+    if res.returncode != 0:
+        raise subprocess.CalledProcessError("Compilation error : ", res.stderr)
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
