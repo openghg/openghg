@@ -1,3 +1,8 @@
+# TODO - look into what's causing the logging messages in the first place
+import logging
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
+
 # Testing the GC class
 import datetime
 import pytest
@@ -12,12 +17,6 @@ from HUGS.Processing import read_metadata
 from HUGS.ObjectStore import get_local_bucket
 from HUGS.ObjectStore import get_object_names
 from HUGS.Util import get_datetime_epoch
-
-# TODO - look into what's causing the logging messages in the first place
-# This does stop them
-import logging
-mpl_logger = logging.getLogger("matplotlib")
-mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def data_path():
@@ -105,8 +104,6 @@ def test_split(data_path, precision_path):
     assert head_data["NF3 status_flag"].iloc[0] == 0
     assert head_data["NF3 integration_flag"].iloc[0] == 0
     assert head_data["Inlet"].iloc[0] == "75m_4"
-    # assert False
-
 
 def test_to_data(gc):
     data = gc.to_data()
