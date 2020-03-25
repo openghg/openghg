@@ -226,6 +226,17 @@ class GC(BaseModule):
         """
         from fnmatch import fnmatch
         from itertools import compress
+
+        print(site, instrument, species)
+        print("Data : ", data)
+
+        # data = data.resample("W").sum()
+
+        print("\n\n\n\n Inlets : ", data["Inlet"])
+
+
+        data.to_hdf("/home/gar/test.hdf5", key="test_data", complevel=9)
+
         
         # site_code = self.get_site_code(site)
 
