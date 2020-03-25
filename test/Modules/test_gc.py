@@ -1,9 +1,9 @@
 # TODO - look into what's causing the logging messages in the first place
+# This does stop them
 import logging
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
-# Testing the GC class
 import datetime
 import pytest
 from pathlib import Path
@@ -36,6 +36,26 @@ def gc():
 
     return gc
 
+def test_read_file(data_path, precision_path):
+    uuids = GC.read_file(data_filepath=data_path, precision_filepath=precision_path, source_name="capegrim_medusa", site="CGO")
+
+    assert len(uuids) == 56
+
+    first_nine = ['capegrim_medusa_C4F10',
+                  'capegrim_medusa_C6F14',
+                  'capegrim_medusa_CCl4',
+                  'capegrim_medusa_CF4',
+                  'capegrim_medusa_CFC-11',
+                  'capegrim_medusa_CFC-112',
+                  'capegrim_medusa_CFC-113',
+                  'capegrim_medusa_CFC-114',
+                  'capegrim_medusa_CFC-115',
+                  'capegrim_medusa_CFC-12']
+
+    key_list = sorted(list(uuids.keys()))[:10]
+
+    assert first_nine == key_list
+
 def test_read_data(data_path, precision_path):
     # Capegrim
     site = "CGO"
@@ -45,23 +65,32 @@ def test_read_data(data_path, precision_path):
     precision_path = Path(precision_path)
 
     gc = GC()
-    gas_data, species, metadata = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument)
+    data = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument)
 
-    head_data = gas_data.head(1)
-    tail_data = gas_data.tail(1)
+    propane_data = data["propane"]["data"]
 
-    assert head_data.first_valid_index() == pd.Timestamp("2018-01-01 00:23:22.500")
+    head_data = propane_data.head(1)
+    tail_data = propane_data.tail(1)
+
+    assert head_data.first_valid_index() == pd.Timestamp("2018-01-01 02:33:22.500")
+    assert head_data["propane"].iloc[0] == pytest.approx(5.458)
     assert head_data["propane repeatability"].iloc[0] == 0.22325
-    assert head_data["c-propane repeatability"].iloc[0] == 0.10063
 
     assert tail_data.first_valid_index() == pd.Timestamp("2018-01-31 23:42:22.500")
+    assert tail_data["propane"].iloc[0] == 4.136
     assert tail_data["propane repeatability"].iloc[0] == 0.16027
-    assert tail_data["c-propane repeatability"].iloc[0] == 0.06071
+
+    species = list(data.keys())
 
     assert species[:8] == ['NF3', 'CF4', 'PFC-116', 'PFC-218', 'PFC-318', 'C4F10', 'C6F14', 'SF6'] 
 
-    assert metadata["site"] == "capegrim"
-    assert metadata["instrument"] == "medusa"
+    attributes = {'data_owner': 'Paul Krummel', 'data_owner_email': 'paul.krummel@csiro.au', 
+                    'inlet_height_magl': '75m_4', 
+                    'comment': {'GCMD': 'Gas chromatograph measurements. Output from GCWerks.',
+                    'GCMS': 'Gas chromatograph-mass spectrometer measurements. Output from GCWerks.', 
+                    'medusa': 'Medusa measurements. Output from GCWerks. See Miller et al. (2008).'}}
+
+    assert data["NF3"]["attributes"] == attributes
 
 
 def test_read_precision(precision_path):
@@ -82,28 +111,36 @@ def test_read_precision(precision_path):
     assert precision_head.iloc[0,5] == 10
     assert precision_head.iloc[0,7] == 10
     assert precision_head.iloc[0,10] == 0.00565
-    
+
+# TODO - write a new test for this function  
 def test_split(data_path, precision_path):
-    # Capegrim
-    site = "capegrim"
+    site = "CGO"
     instrument = "GCMD"
 
-    gc = GC()
-    data, species, metadata = gc.read_data(data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument)
-    metadata = read_metadata(filepath=data_path, data=None, data_type="GC")
-    gas_data = gc.split(data=data, site=site, species=species, metadata=metadata)
+    data_path = Path(__file__).resolve().parent.joinpath("../data/proc_test_data/GC/test_split_data.hdf")
+   # Load in the test data
+    df = pd.read_hdf(data_path)
 
-    metadata = gas_data["NF3"]["metadata"]
-    data = gas_data["NF3"]["data"]
+    species = ['NF3', 'CF4', 'PFC-116', 'PFC-218', 'PFC-318', 'C4F10', 'C6F14', 'SF6', 'SO2F2', 'SF5CF3', 
+               'HFC-23', 'HFC-32', 'HFC-125', 'HFC-134a', 'HFC-143a', 'HFC-152a', 'HFC-227ea', 'HFC-236fa', 
+               'HFC-245fa', 'HFC-365mfc', 'HFC-4310mee', 'HCFC-22', 'HCFC-123', 'HCFC-124', 'HCFC-132b', 'HCFC-133a', 'HCFC-141b',
+               'HCFC-142b', 'CFC-11', 'CFC-12', 'CFC-13', 'CFC-112', 'CFC-113', 'CFC-114', 'CFC-115', 'H-1211', 'H-1301', 'H-2402', 
+               'CH3Cl', 'CH3Br', 'CH3I', 'CH2Cl2', 'CHCl3', 'CCl4', 'CH2Br2', 'CHBr3', 'CH3CCl3', 'TCE', 'PCE', 'ethyne', 'ethene', 
+               'ethane', 'propane', 'c-propane', 'benzene', 'toluene', 'COS', 'desflurane']
 
-    assert metadata == {'inlet': '75m_4', 'instrument': 'medusa', 'site': 'capegrim', 'species': 'NF3'}
+    metadata = {"foo": "bar"}
     
-    head_data = data.head(1)
-    assert head_data["NF3"].iloc[0] == pytest.approx(1.603)
-    assert head_data["NF3 repeatability"].iloc[0] == pytest.approx(0.02531)
-    assert head_data["NF3 status_flag"].iloc[0] == 0
-    assert head_data["NF3 integration_flag"].iloc[0] == 0
-    assert head_data["Inlet"].iloc[0] == "75m_4"
+    gc = GC.load()
+
+    data = gc.split_species(data=df, site=site, instrument=instrument, species=species, metadata=metadata)
+
+    sorted_species = ['C4F10', 'C6F14', 'CCl4', 'CF4', 'CFC-11',
+                      'CFC-112', 'CFC-113', 'CFC-114', 'CFC-115', 'CFC-12']
+
+    assert len(data) == 56
+
+    assert sorted(list(data.keys()))[:10] == sorted_species
+
 
 def test_to_data(gc):
     data = gc.to_data()

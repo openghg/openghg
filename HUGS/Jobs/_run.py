@@ -57,7 +57,6 @@ def run_job(username, hostname, password, job_data, known_host=False):
     json_dict["par_secret"] = job_data["par_secret"]
     json_dict["run_command"] = job_data["run_command"]
     
-    
     try:
         json_dict["compilation_command"] = job_data["compilation_command"]
     except KeyError:
@@ -99,7 +98,7 @@ def run_job(username, hostname, password, job_data, known_host=False):
         # sc.write_files(files=files, remote_dir="first_job")
         sc.write_files(files=files, remote_dir=job_name)
         
-        response_list = sc.run_command(commands=f"cd {job_name}; python3 bc4_template.py {json_filename}")
+        response_list = sc.run_command(commands=f"cd {job_name}; python3 bc4_template.py {json_filename} &")
 
     return response_list
         

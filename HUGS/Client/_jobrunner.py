@@ -70,7 +70,6 @@ class JobRunner:
                 data_files["data"] = [data_files["data"]]
         except KeyError:
             pass
-            
 
         # Get an authorisaton to pass to the service
         hugs = Service(service_url=hugs_url)
@@ -101,7 +100,7 @@ class JobRunner:
         try:    
             for f in data_files["data"]:
                 filesize = os.path.getsize(f)
-                
+
                 if filesize < chunk_limit:
                     file_meta = drive.upload(f, dir="data")
                 else:

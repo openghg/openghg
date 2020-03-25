@@ -42,6 +42,7 @@
         "directory_output" : "/data/shared/obs_2018",
         "BSD" : {
             "gcwerks_site_name": "bilsdale",
+            "long_name": "Bilsdale, UK",
             "inlets": ["108m", "42m", "248m"],
             "global_attributes": {
                 "data_owner": "Simon O'Doherty",
@@ -50,6 +51,8 @@
         },
         "CGO" : {
             "gcwerks_site_name": "capegrim",
+            "long_name": "Cape Grim, Tasmania, Australia",
+            
             "inlets": ["7?m*", "10m*"],
             "inlet_label": ["70m", "10m"],
             "global_attributes": {
@@ -59,6 +62,7 @@
         },
         "CPT" : {
             "gcwerks_site_name": "capepoint",
+            "long_name": "Cape Point, South Africa",
             "inlets": ["any"],
             "inlet_label": ["3m"],
             "global_attributes": {
@@ -68,6 +72,7 @@
         },
         "HFD" : {
             "gcwerks_site_name": "heathfield",
+            "long_name": "Heathfield, UK",
             "inlets": ["100m", "50m"],
             "global_attributes": {
                 "data_owner": "Simon O'Doherty",
@@ -76,6 +81,7 @@
         },
         "GSN" : {
             "gcwerks_site_name": "gosan",
+            "long_name": "Gosan, South Korea",
             "inlets": ["any"],
             "inlet_label": ["10m"],
             "global_attributes": {
@@ -85,6 +91,7 @@
         },
         "JFJ" : {
             "gcwerks_site_name": "jungfraujoch",
+            "long_name": "Jungfraujoch, Switzerland",
             "inlets": ["any"],
             "inlet_label": ["10m"],
             "global_attributes": {
@@ -94,6 +101,7 @@
         },
         "CMN" : {
             "gcwerks_site_name": "mtecimone",
+            "long_name": "Monte Cimone, Italy",
             "inlets": ["air"],
             "inlet_label": ["10m"],
             "global_attributes": {
@@ -103,6 +111,7 @@
         },
         "MHD" : {
             "gcwerks_site_name": "macehead",
+            "long_name": "Macehead, Ireland",
             "inlets": ["10m"],
             "global_attributes": {
                 "data_owner": "Simon O'Doherty",
@@ -111,6 +120,7 @@
         },
         "RGL" : {
             "gcwerks_site_name": "ridgehill",
+            "long_name": "Ridgehill, UK",
             "inlets": ["90m", "45m"],
             "global_attributes": {
                 "data_owner": "Simon O'Doherty",
@@ -119,6 +129,7 @@
         },
         "RPB" : {
             "gcwerks_site_name": "barbados",
+            "long_name": "Ragged Point, Barbados",
             "inlets": ["any"],
             "inlet_label": ["10m"],
             "global_attributes": {
@@ -128,6 +139,7 @@
         },
         "SDZ" : {
             "gcwerks_site_name": "shangdianzi",
+            "long_name": "Shangdianzi, China",
             "inlets": ["date_20000101_20150101", "date_20150101_21000101"],
             "inlet_label": ["10m", "80m"],
             "global_attributes": {
@@ -137,6 +149,7 @@
         },
         "SIO" : {
             "gcwerks_site_name": "sio",
+            "long_name": "Scripps Institue of Oceanography, California",
             "inlets": ["any"],
             "inlet_label": ["10m"],
             "global_attributes": {
@@ -146,6 +159,7 @@
         },
         "SMO" : {
             "gcwerks_site_name": "samoa",
+            "long_name": "Cape Matatula, American Samoa",
             "inlets": ["any"],
             "inlet_label": ["10m"],
             "global_attributes": {
@@ -155,6 +169,7 @@
         },
         "TAC" : {
             "gcwerks_site_name": "tacolneston",
+            "long_name": "Tacolneston Tower, UK",
             "inlets": ["100m", "54m", "185m"],
             "global_attributes": {
                 "data_owner": "Simon O'Doherty",
@@ -163,6 +178,7 @@
         },
         "THD" : {
             "gcwerks_site_name": "trinidadhead",
+            "long_name": "Trinidad Head, California",
             "inlets": ["any"],
             "inlet_label": ["10m"],
             "global_attributes": {
@@ -172,6 +188,7 @@
         },
         "TTA" : {
             "gcwerks_site_name": "angus",
+            "long_name": "Angus Tower, UK",
             "inlets": ["222m"],
             "global_attributes": {
                 "data_owner": "Simon O'Doherty",
@@ -180,6 +197,7 @@
         },
         "ZEP" : {
             "gcwerks_site_name": "zeppelin",
+            "long_name": "Zeppelin, Ny Alesund, Norway",
             "inlets": ["air"],
             "inlet_label": ["16m"],
             "global_attributes": {

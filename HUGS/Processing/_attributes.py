@@ -57,8 +57,12 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     to_underscores = {var: var.lower().replace(" ", "_") for var in ds.variables}
     ds = ds.rename(to_underscores)
 
-    attributes_filename = "attributes.json"
-    data_path = get_datapath(filename=attributes_filename)
+    species_attrs_filepath = get_datapath(filename="species_attributes.json")
+
+    with open(species_attrs_filepath, "r") as f:
+        species_attrs = json.load(f)
+
+    data_path = get_datapath(filename="attributes.json")
     
     with open(data_path, "r") as f:
         data = json.load(f)
@@ -136,7 +140,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
 
     # Species-specific attributes
     # Long name
-    if (species_upper.startswith("D") and species_upper != DESFLURANE) or species_upper == "APD":
+    if (species_upper.startswith("D") and species_upper != "DESFLURANE") or species_upper == "APD":
         sp_long = species_translator[species_upper]["name"]
     elif species_upper == "RN":
         sp_long = "radioactivity_concentration_of_222Rn_in_air"
@@ -152,24 +156,33 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
 
     # Write units as attributes to variables containing any of these
     match_words = ["variability", "repeatability", "stdev", "count"]
-    
+
     for key in ds.variables:
         key = key.lower()
-        if species_lower in key:
+
+        if species_label in key:
             # Standard name attribute
             # ds[key].attrs["standard_name"]=key.replace(species_label, sp_long)
             ds[key].attrs["long_name"] = key.replace(species_label, sp_long)
 
             # If units are required for variable, add attribute
-            # if key == species_label or "variability" in key or "repeatability" in key:
             if key == species_label or any(word in key for word in match_words):
-                if units:
+                if units is not None:
                     if units in unit_interpret:
                         ds[key].attrs["units"] = unit_interpret[units]
                     else:
                         ds[key].attrs["units"] = unit_interpret["else"]
                 else:
-                    ds[key].attrs["units"] = unit_species[species_upper]
+                    # TODO - merge these species attributes into a single simpler JSON
+                    try:
+                        ds[key].attrs["units"] = unit_species[species_upper]
+                    except KeyError:
+                        try:
+                            ds[key].attrs["units"] = species_attrs[species_label.upper()]["units"]
+                        except KeyError:
+                            ds[key].attrs["units"] = "NA"
+                            # raise KeyError(f"Unable to find units for {species_upper} with label {species_label}. \
+                            #                 Please supply them using the 'units' argument.")
 
                 # If units are non-standard, add explanation
                 if species_upper in unit_species_long:
@@ -179,7 +192,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
             if key != species_label:
                 ancillary_variables.append(key)
 
-    # TODO - for the moment skip this step - check status of ancilliary vairables in standard
+    # TODO - for the moment skip this step - check status of ancilliary variables in standard
     # Write ancilliary variable list
     # ds[species_label].attrs["ancilliary_variables"] = ", ".join(ancillary_variables)
 
@@ -187,9 +200,15 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     # NOTE - I've removed the whitespace before status_flag and integration_flag here
     quality_flags = [key for key in ds.variables if "status_flag" in key]
 
+    # Not getting long_name for c2f6
+
     for key in quality_flags:
         ds[key] = ds[key].astype(int)
-        long_name = ds[species_label].attrs["long_name"]
+        try:
+            long_name = ds[species_label].attrs["long_name"]
+        except KeyError:
+            raise KeyError(key, quality_flags)
+
         ds[key].attrs = {"flag_meaning":
                         "0 = unflagged, 1 = flagged",
                         "long_name": f"{long_name} status_flag"}
@@ -210,6 +229,8 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     # I feel there should be a more pandas way of doing this
     # but xarray doesn't currently have a duplicates method
     # See this https://github.com/pydata/xarray/issues/2108
+    
+    # TODO - fix this - just remove duplicates?
     if len(set(ds.time.values)) < len(ds.time.values):
         print("WARNING. Dupliate time stamps")
 
@@ -250,9 +271,6 @@ def _site_info_attributes(site, network=None):
 
     site = site.upper()
 
-    if network:
-        network = network.upper()
-
     # Read site info file
     data_filename = "acrg_site_info.json"
     filepath = get_datapath(filename=data_filename)
@@ -260,13 +278,15 @@ def _site_info_attributes(site, network=None):
     with open(filepath, "r") as f:
         site_params = json_load(f)
 
+    if network is None:
+        network = list(site_params[site].keys())[0]
+    else:
+        network = network.upper()
+
     attributes_dict = {"longitude": "station_longitude",
                        "latitude": "station_latitude",
                        "long_name": "station_long_name",
                        "height_station_masl": "station_height_masl"}
-
-    if not network:
-        network = list(site_params[site].keys())[0]
 
     attributes = {}
     if site in site_params:
