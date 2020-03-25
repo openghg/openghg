@@ -227,17 +227,11 @@ class GC(BaseModule):
         from fnmatch import fnmatch
         from itertools import compress
 
-        print(site, instrument, species)
-        print("Data : ", data)
+        import pandas as pd
 
-        # data = data.resample("W").sum()
+        # Create a list tuples of the split dataframe and the daterange it covers
+        # As some (years, months, weeks) may be empty we don't want those dataframes
 
-        print("\n\n\n\n Inlets : ", data["Inlet"])
-
-
-        data.to_hdf("/home/gar/test.hdf5", key="test_data", complevel=9)
-
-        
         # site_code = self.get_site_code(site)
 
         # Read inlets from the parameters dictionary

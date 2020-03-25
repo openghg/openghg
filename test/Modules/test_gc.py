@@ -115,15 +115,12 @@ def test_read_precision(precision_path):
 
 # TODO - write a new test for this function  
 def test_split(data_path, precision_path):
-    # Capegrim
     site = "CGO"
     instrument = "GCMD"
 
     data_path = Path(__file__).resolve().parent.joinpath("../data/proc_test_data/GC/test_split_data.hdf")
    # Load in the test data
     df = pd.read_hdf(data_path)
-
-    # print(df["Inlet"])
 
     species = ['NF3', 'CF4', 'PFC-116', 'PFC-218', 'PFC-318', 'C4F10', 'C6F14', 'SF6', 'SO2F2', 'SF5CF3', 
                'HFC-23', 'HFC-32', 'HFC-125', 'HFC-134a', 'HFC-143a', 'HFC-152a', 'HFC-227ea', 'HFC-236fa', 
@@ -138,10 +135,12 @@ def test_split(data_path, precision_path):
 
     data = gc.split_species(data=df, site=site, instrument=instrument, species=species, metadata=metadata)
 
-    print(data)
+    sorted_species = ['C4F10', 'C6F14', 'CCl4', 'CF4', 'CFC-11',
+                      'CFC-112', 'CFC-113', 'CFC-114', 'CFC-115', 'CFC-12']
 
-    assert False
+    assert len(data) == 56
 
+    assert sorted(list(data.keys()))[:10] == sorted_species
 
 
 def test_to_data(gc):
