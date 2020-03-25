@@ -179,7 +179,7 @@ class GC(BaseModule):
         data = data.set_index("new_time", inplace=False, drop=True)
         data.index.name = "time"
 
-        gas_data = self.split_species(data=data, site=site, species=species, metadata=metadata)
+        gas_data = self.split_species(data=data, site=site, species=species, instrument=instrument, metadata=metadata)
         
         return gas_data
 
@@ -212,12 +212,13 @@ class GC(BaseModule):
 
         return precision, precision_species
 
-    def split_species(self, data, site, species, metadata):
+    def split_species(self, data, site, instrument, species, metadata):
         """ Splits the species into separate dataframe into sections to be stored within individual Datasources
 
             Args:
                 data (Pandas.DataFrame): DataFrame of raw data
                 site (str): Name of site from which this data originates
+                instrument (str): Name of instrument
                 species (list): List of species contained in data
                 metadata (dict): Dictionary of metadata
             Returns:
@@ -281,7 +282,7 @@ class GC(BaseModule):
                     spec_data = inlet_data[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
                     spec_data = spec_data.dropna(axis="index", how="any")
 
-                attributes = self.site_attributes(site=site, inlet=inlet)
+                attributes = self.site_attributes(site=site, inlet=inlet, instrument=instrument)
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
@@ -373,7 +374,7 @@ class GC(BaseModule):
         
         return site_code
 
-    def site_attributes(self, site, inlet):
+    def site_attributes(self, site, inlet, instrument):
         """ Gets the site specific attributes for writing to Datsets
 
             Args:
@@ -384,9 +385,13 @@ class GC(BaseModule):
         """
         if not self._gc_params:
             self.load_params()
-            
+        
         attributes = self._gc_params[site.upper()]["global_attributes"]
         attributes["inlet_height_magl"] = inlet
-        attributes["comment"] = self._gc_params["comment"]
+        try:
+            attributes["comment"] = self._gc_params["comment"][instrument]
+        except KeyError:
+            valid_instruments = list(self._gc_params["comment"].keys())
+            raise KeyError(f"Invalid instrument passed, valid instruments : {valid_instruments}")
 
         return attributes
