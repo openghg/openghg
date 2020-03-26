@@ -3,7 +3,7 @@
 
 
 """
-__all__ = ["get_ceda_file"]
+__all__ = ["get_ceda_file", "export_compliant"]
 
 def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_yaml=False, date_range=None):
     """ Creates a JSON (with a yaml extension for CEDA reasons) object 
@@ -108,26 +108,44 @@ def export_compliant(data, filepath=None):
         Returns:
             xarray.Dataset or None
     """
-    import pathlib
+    from cfcheck import chkFiles
+    from contextlib import redirect_stdout
+    import io
+    from pathlib import Path
     import subprocess
     import tempfile
 
     # If we don't have a filepath to write the NetCDF to we write to a temporary file
+    # TODO - modify cf-checker to allow checking of Datasets?
     if filepath is None:
-        tmpfile = tempfile.NamedTemporaryFile()
-        data.to_netcdf(tmpfile)
-        commands = ["cfchecks", tmpfile.name]
+        tmpfile = tempfile.NamedTemporaryFile(suffix=".nc")
+        check_file = tmpfile.name
     else:
         filepath = Path(filepath).absolute()
-        data.to_netcdf(filepath)
-        commands = ["cfchecks", filepath]
+        check_file = filepath
 
-    res = subprocess.run(commands, stderr=True)
+    data.to_netcdf(check_file)
+    
+    # Here we capture the stdout from the chkFiles function which will include any useful error messages
+    c = io.StringIO()
+    with redirect_stdout(c):
+        results = chkFiles(files=check_file, silent=False)
 
-    tmpfile.close()
+    try:
+        tmpfile.close()
+    except NameError:
+        pass
 
-    if res.returncode != 0:
-        raise subprocess.CalledProcessError("Compilation error : ", res.stderr)
+    stdout_capture = c.getvalue()
+
+    # Return the useful error messages if we get any
+    if results["FATAL"] or results["ERROR"]:
+        return {"results": results, "errors": stdout_capture}
+        # raise ValueError(f"{results["FATAL"]} fatal and {results["ERROR"]} non-fatal errors found. Please
+        #                 make changes to ensure your file is compliant.")
+        
+    if filepath is None:
+        return data
     
 
 
