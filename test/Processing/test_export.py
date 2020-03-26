@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import json
 from pathlib import Path
 import os
@@ -5,9 +6,10 @@ from pathlib import Path
 import pytest
 import tempfile
 import yaml
+from xarray import open_dataset
 
 from HUGS.Processing import get_ceda_file, export_compliant
-from HUGS.Modules import CRDS
+from HUGS.Modules import CRDS, GC
 from HUGS.ObjectStore import get_local_bucket, get_object_names
 
 def test_get_ceda_file_raises_no_args():
@@ -79,25 +81,39 @@ def test_get_ceda_file_height_correctness():
 
 
 def test_export_compliant_without_file():
-    crds = CRDS.load()
+    data_path = Path(__file__).resolve().parent.joinpath("../data/cf_compliant.nc")
 
-    bucket = get_local_bucket(empty=True)
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/CRDS"
-    filename = "hfd.picarro.1minute.100m_min.dat"
+    test_data = open_dataset(data_path)
 
-    filepath = Path(__file__).parent.resolve().joinpath(test_data, filename)
+    results, data = export_compliant(data=test_data)
 
-    # filepath = os.path.join(dir_path, test_data, filename)
+    correct_results = {'FATAL': 0, 'ERROR': 0, 'WARN': 1, 'INFO': 2, 'VERSION': 6}
 
-    gas_data = crds.read_data(data_filepath=filepath, site="hfd")
-
-    data = crds.assign_attributes(data=gas_data, site="hfd")
-
-    # print(data.keys())
-
-    compliant_data = export_compliant(data=data["ch4"]["data"])
-
-    # with tempfile.NamedTemporaryFile() as tmpfile:
+    assert results == correct_results
 
 
+def test_export_non_compliant_without_file():
+    data_path = Path(__file__).resolve().parent.joinpath("../data/non_cf_compliant.nc")
+
+    test_data = open_dataset(data_path)
+
+    with pytest.raises(ValueError):
+        results = export_compliant(data=test_data)
+
+
+def test_export_compliant_with_file(tmpdir):
+    data_path = Path(__file__).resolve().parent.joinpath("../data/cf_compliant.nc")
+
+    test_data = open_dataset(data_path)
+
+    tmp_filepath = Path(tmpdir).joinpath("test_compliance.nc")
+
+    results = export_compliant(data=test_data, filepath=tmp_filepath)
+
+    correct_results = {'FATAL': 0, 'ERROR': 0, 'WARN': 1, 'INFO': 2, 'VERSION': 6}
+
+    assert results == correct_results
+
+    written_ds = open_dataset(tmp_filepath)
+
+    assert written_ds.equals(test_data)

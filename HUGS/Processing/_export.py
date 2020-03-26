@@ -18,7 +18,8 @@ def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_
             write_yaml (bool, default=False): If True write to YAML, otherwise JSON file is written
             date_range (tuple, default=None): Start, end Python datetime objects
         Returns:
-            dict or None: Dictionary if no filepath is given, otherwise None
+            dict: Dictionary for upload to CEDA
+            
     """
     import json
     import yaml
@@ -106,9 +107,10 @@ def export_compliant(data, filepath=None):
             data (xarray.Dataset): Data to export
             filepath (str): Path to export data file
         Returns:
-            xarray.Dataset or None
+            dict or tuple (dict, xarray.Dataset): Results dictionary or results dictionary and data
+            if no filepath for writing is passed
     """
-    from cfcheck import chkFiles
+    from cfchecker import chkFiles
     from contextlib import redirect_stdout
     import io
     from pathlib import Path
@@ -122,7 +124,7 @@ def export_compliant(data, filepath=None):
         check_file = tmpfile.name
     else:
         filepath = Path(filepath).absolute()
-        check_file = filepath
+        check_file = str(filepath)
 
     data.to_netcdf(check_file)
     
@@ -130,6 +132,8 @@ def export_compliant(data, filepath=None):
     c = io.StringIO()
     with redirect_stdout(c):
         results = chkFiles(files=check_file, silent=False)
+
+    results = dict(results)
 
     try:
         tmpfile.close()
@@ -140,12 +144,16 @@ def export_compliant(data, filepath=None):
 
     # Return the useful error messages if we get any
     if results["FATAL"] or results["ERROR"]:
-        return {"results": results, "errors": stdout_capture}
-        # raise ValueError(f"{results["FATAL"]} fatal and {results["ERROR"]} non-fatal errors found. Please
-        #                 make changes to ensure your file is compliant.")
-        
+        # Clean the error messages
+        stdout_capture = stdout_capture.replace("\n", " ")
+        # raise ValueError(f"{results["FATAL"]}") # fatal and {results["ERROR"]} non-fatal errors found")
+        raise ValueError(f"{results['FATAL']} fatal and {results['ERROR']} non-fatal errors found.\
+             Please make changes to ensure your file is compliant.\n\n {stdout_capture}")
+    
     if filepath is None:
-        return data
+        return results, data
+    else:
+        return results
     
 
 
