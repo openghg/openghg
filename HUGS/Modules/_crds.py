@@ -228,8 +228,8 @@ class CRDS(BaseModule):
             species = gas_data[0][0]
             species = species.lower()
 
-            column_names = ["", "stdev", "n_meas"]
-            column_labels = ["%s %s" % (species, l) for l in column_names]
+            column_labels = [species, f"{species} stdev", f"{species} n_meas"]
+
             # Name columns
             gas_data = gas_data.set_axis(column_labels, axis='columns', inplace=False)
             # Drop the first two rows now we have the name

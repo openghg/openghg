@@ -167,9 +167,14 @@ class Datasource:
         additional_data = {}
 
         for year in grouped_data:
-            for month in year:
-                daterange_str = self.get_dataset_daterange_str(dataset=month)
-                additional_data[daterange_str] = month
+            if data_type == "footprint":
+                footprint_data = grouped_data[0][1]
+                daterange_str = self.get_dataset_daterange_str(dataset=footprint_data)
+                additional_data[daterange_str] = footprint_data
+            else:
+                for month in year:
+                    daterange_str = self.get_dataset_daterange_str(dataset=month)
+                    additional_data[daterange_str] = month
 
         if self._data:
             # We don't want the same data twice, this will be stored in previous versions
@@ -224,7 +229,6 @@ class Datasource:
                 tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
 
         """
-        from xarray import Dataset
         from pandas import Timestamp
 
         try:

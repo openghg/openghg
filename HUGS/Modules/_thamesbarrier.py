@@ -127,7 +127,8 @@ class ThamesBarrier(BaseModule):
             scale = tb._tb_params["scale"][species]
             # Unit scales used for each species
             species_scales = tb._tb_params["scale"]
-            gas_data[species]["data"] = get_attributes(ds=gas_data[species]["data"], species=species, site="TMB", units=units, scales=species_scales)
+            gas_data[species]["data"] = get_attributes(ds=gas_data[species]["data"], species=species, site="TMB", 
+                                                        units=units, scale=species_scales)
 
         # Check if we've got data from these sources before
         lookup_results = lookup_gas_datasources(lookup_dict=tb._datasource_names, gas_data=gas_data, 

@@ -56,14 +56,13 @@ def mock_uuid2(monkeypatch):
 
     monkeypatch.setattr(uuid, 'uuid4', mock_uuid)
 
-
 def test_add_data(data):
     d = Datasource(name="test")
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    assert ch4_data["ch4 count"][0] == pytest.approx(1960.24)
+    assert ch4_data["ch4"][0] == pytest.approx(1960.24)
     assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
     assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
 
@@ -73,7 +72,7 @@ def test_add_data(data):
 
     return False
 
-    assert d._data[date_key]["ch4 count"].equals(ch4_data["ch4 count"])
+    assert d._data[date_key]["ch4"].equals(ch4_data["ch4"])
     assert d._data[date_key]["ch4 stdev"].equals(ch4_data["ch4 stdev"])
     assert d._data[date_key]["ch4 n_meas"].equals(ch4_data["ch4 n_meas"])
 
@@ -148,7 +147,7 @@ def test_save(mock_uuid2):
     datasource.add_metadata(key="data_type", value="timeseries")
     datasource.save(bucket)
 
-    prefix = "%s/uuid/%s" % (Datasource._datasource_root, datasource._uuid)
+    prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
 
     objs = ObjectStore.get_all_object_names(bucket, prefix)
 
@@ -170,7 +169,7 @@ def test_save_footprint():
     datasource.add_data(metadata=metadata, data=data, data_type="footprint")
     datasource.save()
 
-    prefix = "%s/uuid/%s" % (Datasource._datasource_root, datasource._uuid)
+    prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
     objs = ObjectStore.get_all_object_names(bucket, prefix)
 
     datasource_2 = Datasource.load(bucket=bucket, key=objs[0])
@@ -204,7 +203,7 @@ def test_to_data(data):
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    assert ch4_data["ch4 count"][0] == pytest.approx(1960.24)
+    assert ch4_data["ch4"][0] == pytest.approx(1960.24)
     assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
     assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
 

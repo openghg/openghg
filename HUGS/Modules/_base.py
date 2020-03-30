@@ -108,6 +108,9 @@ class BaseModule:
         """
         return list(self._datasource_uuids.keys())
 
+    def datasource_names(self):
+        return self._datasource_names
+
     def remove_datasource(self, uuid):
         """ Remove the Datasource with the given uuid from the list 
             of Datasources

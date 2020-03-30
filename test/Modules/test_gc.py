@@ -130,7 +130,13 @@ def test_split(data_path, precision_path):
     
     gc = GC.load()
 
-    data = gc.split_species(data=df, site=site, instrument=instrument, species=species, metadata=metadata)
+    units = {}
+    scale = {}
+    for s in species:
+        units[s] = "test_units"
+        scale[s] = "test_scale"
+
+    data = gc.split_species(data=df, site=site, instrument=instrument, species=species, metadata=metadata, units=units, scale=scale)
 
     sorted_species = ['C4F10', 'C6F14', 'CCl4', 'CF4', 'CFC-11',
                       'CFC-112', 'CFC-113', 'CFC-114', 'CFC-115', 'CFC-12']
