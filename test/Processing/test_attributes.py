@@ -122,3 +122,47 @@ def test_crds_attributes():
             
         
         
+# def test_old_new_attrs():
+#     import sys
+#     sys.path.insert(0, "/home/gar/Documents/Devel/acrg")
+#     # from HUGS.Processing import acrg_attributes 
+#     from acrg_obs.utils import attributes
+
+#     _ = get_local_bucket(empty=True)
+
+#     crds = CRDS.load()
+
+#     dir_path = os.path.dirname(__file__)
+#     test_data = "../data/proc_test_data/CRDS"
+#     filename = "tac.picarro.1minute.100m.test.dat"
+
+#     filepath = os.path.join(dir_path, test_data, filename)
+
+#     filepath = Path(filepath)
+
+#     combined = crds.read_data(data_filepath=filepath, site="tac")
+
+#     ch4_data_orig = combined["ch4"]["data"]
+
+
+#     # # Get my attributes
+#     site_attributes = combined["ch4"]["attributes"]
+
+#     ch4_data = get_attributes(ds=ch4_data_orig, species="ch4", site="tac", global_attributes=site_attributes, units="ppm", scale="test_scale")
+
+#     ch4_data_acrg = attributes(ds=ch4_data_orig, species="ch4", global_attributes=site_attributes, site="tac", units="ppm", scale="test_scale")
+
+#     # assert False
+
+#     del ch4_data.attrs["Processed by"]
+#     del ch4_data_acrg.attrs["Processed by"]
+#     del ch4_data.attrs["File created"]
+#     del ch4_data_acrg.attrs["File created"]
+
+#     print(ch4_data.attrs, "\n\n\n")
+
+#     print(ch4_data_acrg.attrs)
+
+#     assert ch4_data.attrs == ch4_data_acrg.attrs
+
+    

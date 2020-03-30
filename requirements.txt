@@ -1,5 +1,6 @@
 bqplot==0.11.9
 cachetools
+git+git://github.com/gareth-j/cf-checker@addChkFilesFn#egg=cfcheker
 cryptography
 ipyleaflet
 ipyvuetify

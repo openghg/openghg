@@ -72,13 +72,13 @@ def test_read_data(data_path, precision_path):
     head_data = propane_data.head(1)
     tail_data = propane_data.tail(1)
 
-    assert head_data.first_valid_index() == pd.Timestamp("2018-01-01 02:33:22.500")
-    assert head_data["propane"].iloc[0] == pytest.approx(5.458)
-    assert head_data["propane repeatability"].iloc[0] == 0.22325
+    assert head_data.time[0] == pd.Timestamp("2018-01-01 02:33:22.500")
+    assert head_data["propane"][0] == pytest.approx(5.458)
+    assert head_data["propane repeatability"][0] == 0.22325
 
-    assert tail_data.first_valid_index() == pd.Timestamp("2018-01-31 23:42:22.500")
-    assert tail_data["propane"].iloc[0] == 4.136
-    assert tail_data["propane repeatability"].iloc[0] == 0.16027
+    assert tail_data.time[0] == pd.Timestamp("2018-01-31 23:42:22.500")
+    assert tail_data["propane"][0] == 4.136
+    assert tail_data["propane repeatability"][0] == 0.16027
 
     species = list(data.keys())
 
@@ -86,9 +86,7 @@ def test_read_data(data_path, precision_path):
 
     attributes = {'data_owner': 'Paul Krummel', 'data_owner_email': 'paul.krummel@csiro.au', 
                     'inlet_height_magl': '75m_4', 
-                    'comment': {'GCMD': 'Gas chromatograph measurements. Output from GCWerks.',
-                    'GCMS': 'Gas chromatograph-mass spectrometer measurements. Output from GCWerks.', 
-                    'medusa': 'Medusa measurements. Output from GCWerks. See Miller et al. (2008).'}}
+                    'comment':'Gas chromatograph measurements. Output from GCWerks.'}
 
     assert data["NF3"]["attributes"] == attributes
 

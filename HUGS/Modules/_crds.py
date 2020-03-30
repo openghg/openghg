@@ -238,7 +238,6 @@ class CRDS(BaseModule):
             gas_data = gas_data.astype("float64")
             
             # Here we can convert the Dataframe to a Dataset and then write the attributes
-            # Load in the JSON we need to process attributes
             gas_data = gas_data.to_xarray()
 
             site_attributes = self.site_attributes(site=site, inlet=inlet)

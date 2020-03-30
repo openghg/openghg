@@ -179,7 +179,8 @@ class GC(BaseModule):
         data = data.set_index("new_time", inplace=False, drop=True)
         data.index.name = "time"
 
-        gas_data = self.split_species(data=data, site=site, species=species, instrument=instrument, metadata=metadata)
+        gas_data = self.split_species(data=data, site=site, species=species, 
+                                    instrument=instrument, metadata=metadata, units=units, scale=scale)
         
         return gas_data
 
@@ -212,7 +213,7 @@ class GC(BaseModule):
 
         return precision, precision_species
 
-    def split_species(self, data, site, instrument, species, metadata):
+    def split_species(self, data, site, instrument, species, metadata, units, scale):
         """ Splits the species into separate dataframe into sections to be stored within individual Datasources
 
             Args:
@@ -221,6 +222,8 @@ class GC(BaseModule):
                 instrument (str): Name of instrument
                 species (list): List of species contained in data
                 metadata (dict): Dictionary of metadata
+                units (dict): Dictionary of units for each species
+                scale (dict): Dictionary of scales for each species
             Returns:
                 dict: Dataframe of gas data and metadata
         """
@@ -261,13 +264,16 @@ class GC(BaseModule):
         combined_data = {}
 
         for spec in species:
-            # Check if the data for this spec is all NaNs
+            # Skip this species if the data is all NaNs
             if data[spec].isnull().all():
                 continue
 
             # Create a copy of metadata for local modification
             spec_metadata = metadata.copy()
+            
             spec_metadata["species"] = spec
+            spec_metadata["units"] = units[spec]
+            spec_metadata["scale"] = scale[spec]
 
             for inlet in matching_inlets:
                 spec_metadata["inlet"] = inlet
@@ -292,7 +298,10 @@ class GC(BaseModule):
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
 
-                combined_data[spec] = {"metadata": spec_metadata, "data": spec_data, "attributes": attributes}
+                combined_data[spec] = {}
+                combined_data[spec]["metadata"] = spec_metadata
+                combined_data[spec]["data"] = spec_data
+                combined_data[spec]["attributes"] = attributes
 
         return combined_data
 
@@ -308,9 +317,12 @@ class GC(BaseModule):
 
         for species in data:
             site_attributes = data[species]["attributes"]
+            units = data[species]["metadata"]["units"]
+            scale = data[species]["metadata"]["scale"]
 
-            data[species]["data"] = get_attributes(ds=data[species]["data"], species=species, site=site, network=network,
-                                                            global_attributes=site_attributes, sampling_period=self._sampling_period)
+            data[species]["data"] = get_attributes(ds=data[species]["data"], species=species, site=site, network=network, units=units, 
+                                                    scale=scale, global_attributes=site_attributes, sampling_period=self._sampling_period)
+
         return data
 
     def get_precision(self, instrument):

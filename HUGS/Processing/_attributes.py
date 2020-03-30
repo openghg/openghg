@@ -1,6 +1,6 @@
 __all__ = ["get_attributes"]
 
-def get_attributes(ds, species, site, network=None, global_attributes=None, units=None, scales=None, 
+def get_attributes(ds, species, site, network=None, global_attributes=None, units=None, scale=None, 
                                                             sampling_period=None, date_range=None):
     """ 
     This function writes attributes to an xarray.Dataset so that they conform with 
@@ -33,8 +33,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
             add to the file header (e.g. {"Contact": "Matt Rigby"})
         units (str, default=None): This routine will try to guess the units
             unless this is specified. Options are in units_interpret
-        scales (dict, default=None): Calibration scale for species. A dictionary of the form species: scale should be provided.
-        For example scale = {"CH4": "WMO-CH4-X2004"}.
+        scale (str, default=None): Calibration scale for species. 
         sampling_period (int, default=None): Number of seconds for which air
             sample is taken. Only for time variable attribute
         date_range (list of two strings, optional): Start and end date for output
@@ -71,11 +70,6 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     unit_species = data["unit_species"]
     unit_species_long = data["unit_species_long"]
     unit_interpret = data["unit_interpret"]
-    
-    if scales:
-        species_scales = scales
-    else:
-        species_scales = {}
 
     species_upper = species.upper()
     species_lower = species.lower()
@@ -111,25 +105,10 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     global_attributes["Processed by"] = "auto@hugs-cloud.com"
     global_attributes["species"] = species_label
 
-    # # Scales used for specific species
-    # if species_upper in species_scales:
-    #     scale = species_scales[species_upper]
-    # else:
-    #     scale = "unknown"
-
-    # TODO - at the moment the attributes.json needs updating to ensure all the correct
-    # species are available. Some CO2 specific networks like EUROCOM just have the calibration
-    # scale used and don't have a specific CO2 key, this should work temporarily
-    # TODO - check what's best practice for this kind of behaviour
-    try:
-        scale = species_scales[species_upper]
-    except KeyError:
-        if isinstance(species_scales, dict):
-            scale = json.dumps(species_scales)
-        else:
-            scale = "Unknown"
-
-    global_attributes["Calibration_scale"] = scale
+    if scale is None:
+        global_attributes["Calibration_scale"] = "unknown"
+    else:
+        global_attributes["Calibration_scale"] = scale
 
     # Update the Dataset attributes
     ds.attrs.update(global_attributes)
