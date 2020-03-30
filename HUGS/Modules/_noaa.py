@@ -135,7 +135,8 @@ class NOAA(BaseModule):
             units = noaa._noaa_params["unit_species"][species]
             scale = noaa._noaa_params["scale"][species]
             # Unit scales used for each species
-            species_scales = noaa._noaa_params["scale"]
+            species_scales = noaa._noaa_params["scale"][species.upper()]
+
             gas_data[species]["data"] = get_attributes(ds=gas_data[species]["data"], species=species, site="TMB", units=units, 
                                                         scale=species_scales)
 

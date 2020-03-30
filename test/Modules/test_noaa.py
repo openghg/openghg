@@ -81,7 +81,7 @@ def test_read_file():
     assert co_ds._data[date_key].time[0] == pd.Timestamp("2017-03-25T02:00:00.000000000")
     assert file_attrs == netcdf_attrs
 
-    datasources = noaa.datasources()
+    datasources = noaa.datasource_names()
 
     assert "co_pocn25_surface_CO" in datasources
     assert noaa._file_hashes["48ba8d093008359d836b3928bf4c9793fa564fee"] == "co_pocn25_surface-flask_1_ccgg_event.txt"

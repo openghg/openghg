@@ -20,8 +20,11 @@ def test_read_data():
 
     data  = icos.read_data(data_filepath=filepath, species="CO2")
 
-    print(data)
+    co2_data = data["co2"]["data"]
+
+    assert co2_data["co2"][0].values == pytest.approx(401.645)
+    assert co2_data["co2 variability"][0].values == pytest.approx(0.087)
+    assert co2_data["co2 number_of_observations"][0].values == 13
     
-    assert False
 
 

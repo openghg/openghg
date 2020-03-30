@@ -45,21 +45,12 @@ def crds_obj():
 
 @pytest.fixture(scope="session")
 def crds_read():
-    bucket = get_local_bucket(empty=False)
+    bucket = get_local_bucket(empty=True)
     test_data = "../data/search_data"
     folder_path = os.path.join(os.path.dirname(__file__), test_data)
     CRDS.read_folder(folder_path=folder_path)
 
-# @pytest.fixture(scope="session")
-# def footprint_read():
-#     test_data = "../data"
-#     filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
-#     filepath = os.path.join(os.path.dirname(__file__), filename)
-#     metadata = {"name": "WAO-20magl_EUROPE"}
-#     Footprint.read_file(filepath=filepath, metadata=metadata)
-
 def test_search_GC():
-    search_terms = []
     locations = []
     data_type = "GC"
     start = None
@@ -73,34 +64,21 @@ def test_search_GC():
     data_filepath = os.path.join(dir_path, test_data, data_file)
     prec_filepath = os.path.join(dir_path, test_data, prec_file)
 
-    datasources = GC.read_file(data_filepath=data_filepath, precision_filepath=prec_filepath, site="capegrim", source_name="capegrim-medusa.18", instrument_name="medusa")
+    GC.read_file(data_filepath=data_filepath, precision_filepath=prec_filepath, site="CGO", 
+                                source_name="capegrim-medusa", instrument_name="medusa")
 
-    results = search(search_terms=search_terms, locations=locations, data_type=data_type, require_all=False, 
+    results = search(search_terms=["NF3"], locations=locations, data_type=data_type, require_all=False, 
                         start_datetime=start, end_datetime=end)
 
-    assert results["capegrim_nf3"][0].split("/")[-1] == '2018-01-01T02:24:00_2018-01-31T23:33:00'
+    nf3_results = results["capegrim_NF3_75m_4"]
 
-    assert "capegrim_nf3" in results
-    assert "capegrim_cf4" in results
-    assert "capegrim_pfc-116" in results
-    assert "capegrim_pfc-218" in results
-    assert "capegrim_pfc-318" in results
-    assert "capegrim_c4f10" in results
-    assert "capegrim_c6f14" in results
-    assert "capegrim_sf6" in results
-    assert "capegrim_so2f2" in results
+    metadata = {'site': 'capegrim', 'instrument': 'medusa', 
+                'species': 'nf3', 'units': 'ppt', 'scale': 'sio-12', 
+                'inlet': '75m_4', 'data_type': 'timeseries'}
 
-    assert len(datasources) == 56
-
-# def test_load_object(crds_obj):
-#     bucket = get_local_bucket()
-#     crds_obj.save(bucket)
-#     uuid = crds_obj.uuid()
-#     class_name = "crds"
-#     obj = load_object(class_name=class_name)
-
-#     assert isinstance(obj, CRDS)
-#     assert obj.uuid() == crds_obj.uuid()
+    assert nf3_results["metadata"] == metadata
+    assert nf3_results["start_date"] == "2018-01-01-02:24:00+00:00"
+    assert nf3_results["end_date"] == "2018-01-31-23:33:00+00:00"
 
 
 def test_location_search(crds_read):
@@ -114,19 +92,18 @@ def test_location_search(crds_read):
     results = search(search_terms=search_terms, locations=locations, data_type=data_type, require_all=False, 
                     start_datetime=start, end_datetime=end)
 
-    assert "bsd_co2" in results
-    assert "hfd_co2" in results
-    assert "tac_co2" in results
-    assert "bsd_ch4" in results
-    assert "hfd_ch4" in results
-    assert "tac_ch4" in results
+    results_list = sorted(list(results.keys()))
 
-    assert len(results["bsd_co2"]) == 6
-    assert len(results["hfd_co2"]) == 7
-    assert len(results["tac_co2"]) == 8
-    assert len(results["bsd_ch4"]) == 6
-    assert len(results["hfd_ch4"]) == 7
-    assert len(results["tac_ch4"]) == 8
+    expected = sorted(['bsd_co2_108m', 'hfd_co2_100m', 'tac_co2_100m', 'bsd_ch4_108m', 'hfd_ch4_100m', 'tac_ch4_100m'])
+
+    assert results_list == expected
+    
+    assert len(results["bsd_co2_108m"]["keys"]) == 23
+    assert len(results["hfd_co2_100m"]["keys"]) == 25
+    assert len(results["tac_co2_100m"]["keys"]) == 30
+    assert len(results["bsd_ch4_108m"]["keys"]) == 23
+    assert len(results["hfd_ch4_100m"]["keys"]) == 25
+    assert len(results["tac_ch4_100m"]["keys"]) == 30
 
 def test_search_no_search_terms(crds_read):
     data_type = "CRDS"

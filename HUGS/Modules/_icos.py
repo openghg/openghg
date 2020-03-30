@@ -176,8 +176,7 @@ class ICOS(BaseModule):
             return Timestamp(year, month, day, hour, minute)
 
         datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
-        # use_cols = ["Day", "Month", "Year", "Hour", "Minute", str(species.lower()), "SamplingHeight", "Stdev", "NbPoints"]
-        # use_cols = ["Year", "Month", "Day", "Hour", "Minute", str(species.lower()), "Stdev", "NbPoints"]
+        
         use_cols = ["Year", "Month", "Day", "Hour", "Minute", str(species.lower()), "Stdev", "NbPoints"]
         
         dtypes = {"Day": np.int,
@@ -202,12 +201,13 @@ class ICOS(BaseModule):
         if not data.index.is_monotonic_increasing:
             data.sort_index()
 
-        # Rename columns
-        rename_dict = {species.lower(): species.upper(),
-                        "Stdev": species.upper() + " variability",
-                        "NbPoints": species.upper() + " number_of_observations"}
+        rename_dict = {"Stdev": species + " variability",
+                        "NbPoints": species + " number_of_observations"}
 
         data = data.rename(columns=rename_dict)
+
+        # Conver to xarray Dataset
+        data = data.to_xarray()
 
         combined_data = {}
 
@@ -218,5 +218,5 @@ class ICOS(BaseModule):
 
         combined_data[species] = {"metadata": metadata, "data": data, "attributes": site_attributes}
 
-        return data
+        return combined_data
 

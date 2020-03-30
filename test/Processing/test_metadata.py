@@ -1,18 +1,17 @@
 import pandas as pd
 import pytest
-import os
+from pathlib import Path
 
 from HUGS.Processing import read_metadata
 
 def test_parse_CRDS():
     filename = "hfd.picarro.1minute.100m_min.dat"
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/CRDS"
-    filepath = os.path.join(dir_path, test_data, filename)
+
+    filepath = Path(__file__).resolve().parent.joinpath("../data/proc_test_data/CRDS/").joinpath(filename)
 
     data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+") 
 
-    metadata = read_metadata(filename=filename, data=data, data_type="CRDS")
+    metadata = read_metadata(filepath=filepath, data=data, data_type="CRDS")
 
     assert metadata["site"] == "hfd"
     assert metadata["instrument"] == "picarro"
@@ -22,8 +21,9 @@ def test_parse_CRDS():
 
 def test_parse_GC():
     filename = "capegrim-medusa.18.C"
+    filepath = Path(__file__).resolve().parent.joinpath("../data/proc_test_data/GC/").joinpath(filename)
 
-    metadata = read_metadata(filename=filename, data=None, data_type="GC")
+    metadata = read_metadata(filepath=filepath, data=None, data_type="GC")
 
     assert metadata["site"] == "capegrim"
     assert metadata["instrument"] == "medusa"
