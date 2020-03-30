@@ -19,9 +19,9 @@ def test_read_data():
     icos = ICOS.load()
 
     data  = icos.read_data(data_filepath=filepath, species="CO2")
-    
-    print(data)
 
+    print(data)
+    
     assert False
 
 
