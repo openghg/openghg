@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/wm19361/HUGS/_apis/build/status/hugs-cloud.hugs?branchName=devel)](https://dev.azure.com/wm19361/HUGS/_build/latest?definitionId=1&branchName=devel)
+
 ## Install
 
 Please clone the HUGS repository to your computer using 
