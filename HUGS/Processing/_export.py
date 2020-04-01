@@ -3,7 +3,7 @@
 
 
 """
-__all__ = ["get_ceda_file", "export_compliant"]
+__all__ = ["get_ceda_file"]
 
 def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_yaml=False, date_range=None):
     """ Creates a JSON (with a yaml extension for CEDA reasons) object 

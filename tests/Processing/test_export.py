@@ -8,7 +8,7 @@ import tempfile
 import yaml
 from xarray import open_dataset
 
-from HUGS.Processing import get_ceda_file, export_compliant
+from HUGS.Processing import get_ceda_file
 from HUGS.Modules import CRDS, GC
 from HUGS.ObjectStore import get_local_bucket, get_object_names
 

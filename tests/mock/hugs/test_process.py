@@ -20,7 +20,7 @@ def run_before_tests():
 
 def get_test_folder(filename):
     dir_path = os.path.dirname(__file__)
-    test_folder = "../../../test/data/search_data"
+    test_folder = "../../../tests/data/search_data"
     return os.path.join(dir_path, test_folder, filename)
 
 
@@ -67,7 +67,7 @@ def test_process_CRDS(authenticated_user, tempdir):
 
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
-    filepath = os.path.join(os.path.dirname(__file__), "../../../test/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat")
+    filepath = os.path.join(os.path.dirname(__file__), "../../../tests/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat")
     filemeta = drive.upload(filepath)
 
     par = PAR(location=filemeta.location(), user=authenticated_user)
@@ -98,8 +98,8 @@ def test_process_GC(authenticated_user, tempdir):
 
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
-    data_filepath = os.path.join(os.path.dirname(__file__), "../../../test/data/proc_test_data/GC/capegrim-medusa.18.C")
-    precision_filepath = os.path.join(os.path.dirname(__file__), "../../../test/data/proc_test_data/GC/capegrim-medusa.18.precisions.C")
+    data_filepath = os.path.join(os.path.dirname(__file__), "../../../tests/data/proc_test_data/GC/capegrim-medusa.18.C")
+    precision_filepath = os.path.join(os.path.dirname(__file__), "../../../tests/data/proc_test_data/GC/capegrim-medusa.18.precisions.C")
 
     data_meta = drive.upload(data_filepath)
     precision_meta = drive.upload(precision_filepath)
