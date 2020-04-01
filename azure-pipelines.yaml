@@ -43,6 +43,7 @@ jobs:
     displayName: 'Clone Acquire for services folder required for tests'
 
   - script: |
+      pip install pandas --force --upgrade
       pip install pytest
       pip install pytest-cov
       python -m pytest --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
