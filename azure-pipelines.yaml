@@ -33,26 +33,37 @@ jobs:
   - script: python -m pip install --upgrade pip && pip install -r requirements.txt && pip install -r test-requirements.txt
     displayName: 'Install dependencies'
 
- # Run tests
-  - bash: pytest
-    displayName: Run tests
+  - script: |
+      pip install pytest
+      pip install pytest-cov
+      pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+    displayName: 'Test with pytest'
+
 
   - task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testResultsFiles: '**/test-*.xml'
+    testRunTitle: 'Publish test results for Python $(python.version)'
+
+  - task: PublishCodeCoverageResults@1
     inputs:
-      testResultsFiles: '**/test-results.xml'
-      testRunTitle: 'Python $(python.version)'
-    condition: succeededOrFailed()
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+      reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-- job: 'Publish'
-  dependsOn: 'Test'
-  pool:
-    vmImage: 'Ubuntu-16.04'
 
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.x'
-      architecture: 'x64'
 
-  - script: python setup.py sdist
-    displayName: 'Build sdist'
+# - job: 'Publish'
+#   dependsOn: 'Test'
+#   pool:
+#     vmImage: 'Ubuntu-16.04'
+
+#   steps:
+#   - task: UsePythonVersion@0
+#     inputs:
+#       versionSpec: '3.x'
+#       architecture: 'x64'
+
+#   - script: python setup.py sdist
+#     displayName: 'Build sdist'
