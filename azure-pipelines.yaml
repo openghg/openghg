@@ -6,7 +6,7 @@
 variables:
   package: hugs
   srcDirectory: HUGS
-  testsDirectory: tests
+  testsDirectory: .
 
 trigger:
 - devel
@@ -36,7 +36,6 @@ jobs:
  # Run tests
   - bash: pytest
     displayName: Run tests
-    workingDirectory: $(testsDirectory)
 
   - task: PublishTestResults@2
     inputs:
