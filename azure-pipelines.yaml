@@ -36,7 +36,7 @@ jobs:
       pip install -r test-requirements.txt
     displayName: 'Install dependencies'
 
-  - script: git clone -b testStore https://github.com/gareth-j/acquire.git ../
+  - script: git clone -b testStore https://github.com/gareth-j/acquire.git ../acquire
     displayName: 'Clone Acquire for services folder required for tests'
 
   - script: |
