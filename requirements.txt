@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-acquire
-=======
 git+git://github.com/gareth-j/acquire@testStore#egg=Acquire
->>>>>>> devel
 bqplot==0.11.9
 cachetools
 git+git://github.com/gareth-j/cf-checker@removeBasestring#egg=cfchecker
