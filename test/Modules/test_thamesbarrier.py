@@ -34,7 +34,7 @@ def test_read_file():
 
     uuids = tb.read_file(data_filepath=filepath, source_name="TMB")
 
-    date_key = "2019-07-01-00:39:55+00:00_2019-07-31-23:44:55+00:00"
+    date_key = "2019-07-01-00:39:55+00:00_2019-08-01-00:10:30+00:00"
 
     ch4_ds = Datasource.load(uuid=uuids["TMB_CH4"])
     co2_ds = Datasource.load(uuid=uuids["TMB_CO2"])
@@ -55,8 +55,6 @@ def test_read_file():
     assert co_data.time[0] == pd.Timestamp("2019-07-01T00:39:55.000000000")
     assert co_data["co"][0] == pytest.approx(0.08788712)
     assert co_data["co_variability"][0] == 0
-
-    print(co_data)
 
 
 def test_read_data():

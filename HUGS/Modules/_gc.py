@@ -179,7 +179,8 @@ class GC(BaseModule):
         data = data.set_index("new_time", inplace=False, drop=True)
         data.index.name = "time"
 
-        gas_data = self.split_species(data=data, site=site, species=species, metadata=metadata)
+        gas_data = self.split_species(data=data, site=site, species=species, 
+                                    instrument=instrument, metadata=metadata, units=units, scale=scale)
         
         return gas_data
 
@@ -212,20 +213,28 @@ class GC(BaseModule):
 
         return precision, precision_species
 
-    def split_species(self, data, site, species, metadata):
+    def split_species(self, data, site, instrument, species, metadata, units, scale):
         """ Splits the species into separate dataframe into sections to be stored within individual Datasources
 
             Args:
                 data (Pandas.DataFrame): DataFrame of raw data
                 site (str): Name of site from which this data originates
+                instrument (str): Name of instrument
                 species (list): List of species contained in data
                 metadata (dict): Dictionary of metadata
+                units (dict): Dictionary of units for each species
+                scale (dict): Dictionary of scales for each species
             Returns:
                 dict: Dataframe of gas data and metadata
         """
         from fnmatch import fnmatch
         from itertools import compress
-        
+
+        import pandas as pd
+
+        # Create a list tuples of the split dataframe and the daterange it covers
+        # As some (years, months, weeks) may be empty we don't want those dataframes
+
         # site_code = self.get_site_code(site)
 
         # Read inlets from the parameters dictionary
@@ -255,13 +264,16 @@ class GC(BaseModule):
         combined_data = {}
 
         for spec in species:
-            # Check if the data for this spec is all NaNs
+            # Skip this species if the data is all NaNs
             if data[spec].isnull().all():
                 continue
 
             # Create a copy of metadata for local modification
             spec_metadata = metadata.copy()
+            
             spec_metadata["species"] = spec
+            spec_metadata["units"] = units[spec]
+            spec_metadata["scale"] = scale[spec]
 
             for inlet in matching_inlets:
                 spec_metadata["inlet"] = inlet
@@ -281,12 +293,15 @@ class GC(BaseModule):
                     spec_data = inlet_data[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
                     spec_data = spec_data.dropna(axis="index", how="any")
 
-                attributes = self.site_attributes(site=site, inlet=inlet)
+                attributes = self.site_attributes(site=site, inlet=inlet, instrument=instrument)
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
 
-                combined_data[spec] = {"metadata": spec_metadata, "data": spec_data, "attributes": attributes}
+                combined_data[spec] = {}
+                combined_data[spec]["metadata"] = spec_metadata
+                combined_data[spec]["data"] = spec_data
+                combined_data[spec]["attributes"] = attributes
 
         return combined_data
 
@@ -302,9 +317,12 @@ class GC(BaseModule):
 
         for species in data:
             site_attributes = data[species]["attributes"]
+            units = data[species]["metadata"]["units"]
+            scale = data[species]["metadata"]["scale"]
 
-            data[species]["data"] = get_attributes(ds=data[species]["data"], species=species, site=site, network=network,
-                                                            global_attributes=site_attributes, sampling_period=self._sampling_period)
+            data[species]["data"] = get_attributes(ds=data[species]["data"], species=species, site=site, network=network, units=units, 
+                                                    scale=scale, global_attributes=site_attributes, sampling_period=self._sampling_period)
+
         return data
 
     def get_precision(self, instrument):
@@ -373,7 +391,7 @@ class GC(BaseModule):
         
         return site_code
 
-    def site_attributes(self, site, inlet):
+    def site_attributes(self, site, inlet, instrument):
         """ Gets the site specific attributes for writing to Datsets
 
             Args:
@@ -384,9 +402,13 @@ class GC(BaseModule):
         """
         if not self._gc_params:
             self.load_params()
-            
+        
         attributes = self._gc_params[site.upper()]["global_attributes"]
         attributes["inlet_height_magl"] = inlet
-        attributes["comment"] = self._gc_params["comment"]
+        try:
+            attributes["comment"] = self._gc_params["comment"][instrument]
+        except KeyError:
+            valid_instruments = list(self._gc_params["comment"].keys())
+            raise KeyError(f"Invalid instrument passed, valid instruments : {valid_instruments}")
 
         return attributes

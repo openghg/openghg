@@ -159,13 +159,13 @@ class Footprint:
                 None
         """
         import os
-        import xarray
+        import xarray as xr
         from HUGS.Modules import Datasource
         from HUGS.Processing import lookup_footprint_datasources
 
         footprint = Footprint.load()
 
-        dataset = xarray.open_dataset(filepath)
+        dataset = xr.open_dataset(filepath)
 
         # We can save this metadata within the NetCDF file?
         # Read metadata from the netCDF file
@@ -177,7 +177,7 @@ class Footprint:
         
         datasource_names = footprint.datasource_names()
         lookup_results = lookup_footprint_datasources(lookup_dict=datasource_names, source_name=source_name)
-   
+
         datasource_uuids = footprint.assign_data(lookup_results=lookup_results, source_name=source_name, data=dataset,
                                                  metadata=metadata)
         
@@ -185,8 +185,6 @@ class Footprint:
         
         footprint.save()
 
-        return datasource_uuids
- 
     def assign_data(self, lookup_results, source_name, data, metadata, overwrite=False):
         """ Assign data to a new or existing Datasource
 
@@ -209,12 +207,12 @@ class Footprint:
             if uuid:
                 datasource = Datasource.load(uuid=uuid)
             else:
-                datasource = Datasource.create(name=name)
+                datasource = Datasource(name=name)
 
-            datasource.add_footprint_data(metadata=metadata, data=data)
+            datasource.add_data(metadata=metadata, data=data, data_type="footprint")
             datasource.save()
 
-        uuids[name] = datasource.uuid()
+            uuids[name] = datasource.uuid()
 
         return uuids
 

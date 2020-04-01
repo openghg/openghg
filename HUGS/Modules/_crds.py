@@ -194,6 +194,7 @@ class CRDS(BaseModule):
 
         data = read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"],
                             parse_dates=[[0,1]], date_parser=parse_date)
+
         data.index.name = "time"
 
         filename = data_filepath.name
@@ -228,8 +229,8 @@ class CRDS(BaseModule):
             species = gas_data[0][0]
             species = species.lower()
 
-            column_names = ["count", "stdev", "n_meas"]
-            column_labels = ["%s %s" % (species, l) for l in column_names]
+            column_labels = [species, f"{species} stdev", f"{species} n_meas"]
+
             # Name columns
             gas_data = gas_data.set_axis(column_labels, axis='columns', inplace=False)
             # Drop the first two rows now we have the name
@@ -238,7 +239,6 @@ class CRDS(BaseModule):
             gas_data = gas_data.astype("float64")
             
             # Here we can convert the Dataframe to a Dataset and then write the attributes
-            # Load in the JSON we need to process attributes
             gas_data = gas_data.to_xarray()
 
             site_attributes = self.site_attributes(site=site, inlet=inlet)
@@ -246,6 +246,7 @@ class CRDS(BaseModule):
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
             species_metadata["species"] = species
+
             species_metadata["source_name"] = source_name
 
             combined_data[species] = {"metadata": species_metadata, "data": gas_data, "attributes": site_attributes}
@@ -291,7 +292,7 @@ class CRDS(BaseModule):
                 self._crds_params = data["CRDS"]
 
         attributes = self._crds_params[site.upper()]["global_attributes"]
-        attributes["inlet_height_magl"] = inlet
+        attributes["inlet_height_magl"] = inlet.split("_")[0]
         attributes["comment"] = self._crds_params["comment"]
 
         return attributes

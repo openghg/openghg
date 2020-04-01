@@ -201,6 +201,7 @@ def search(search_terms, locations, data_type, require_all=False, start_datetime
         # For now get all footprints
         for datasource in datasources:
             if datasource.data_type() == "footprint":
+                search_key = single_key
                 prefix = "data/uuid/%s" % datasource.uuid()
                 data_list = _get_object_names(bucket=bucket, prefix=prefix)
                 results = append_keys(results=results, search_key=search_key, keys=data_list)

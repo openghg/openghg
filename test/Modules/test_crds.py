@@ -50,8 +50,8 @@ def crds():
     
 
 def test_read_file(crds):
-    uuids = crds.datasources()
-    
+    uuids = crds.datasource_names()
+
     assert len(uuids) == 3
 
     ch4_datasouce = Datasource.load(uuid=uuids["hfd_picarro_100m_ch4"], shallow=False)
@@ -64,15 +64,15 @@ def test_read_file(crds):
     co2_data = co2_datasouce._data[date_key]
     co_data = co_datasouce._data[date_key]
     
-    assert ch4_data["ch4_count"][0].values == pytest.approx(1993.83)
+    assert ch4_data["ch4"][0].values == pytest.approx(1993.83)
     assert ch4_data["ch4_stdev"][0].values == pytest.approx(1.555)
     assert ch4_data["ch4_n_meas"][0].values == pytest.approx(19.0)
 
-    assert co2_data["co2_count"][0] == pytest.approx(414.21)
+    assert co2_data["co2"][0] == pytest.approx(414.21)
     assert co2_data["co2_stdev"][0] == pytest.approx(0.109)
     assert co2_data["co2_n_meas"][0] == pytest.approx(19.0)
 
-    assert co_data["co_count"][0] == pytest.approx(214.28)
+    assert co_data["co"][0] == pytest.approx(214.28)
     assert co_data["co_stdev"][0] == pytest.approx(4.081)
     assert co_data["co_n_meas"][0] == pytest.approx(19.0)
 
@@ -107,7 +107,7 @@ def test_read_data():
     ch4_data = combined["ch4"]["data"]
 
     assert ch4_data.time[0] == pd.Timestamp("2012-07-31 14:50:30")
-    assert ch4_data["ch4 count"][0] == pytest.approx(1905.28)
+    assert ch4_data["ch4"][0] == pytest.approx(1905.28)
     assert ch4_data["ch4 stdev"][0] == pytest.approx(0.268)
     assert ch4_data["ch4 n_meas"][0] == pytest.approx(20)
 
@@ -213,4 +213,4 @@ def test_add_datasources(crds):
 
     crds.add_datasources(new_datasources)
 
-    assert crds.datasources() == new_datasources
+    assert sorted(crds.datasources()) == sorted(list(new_datasources.values()))

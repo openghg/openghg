@@ -23,4 +23,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
+    install_requires=["numpy", "netCDF4", "cfunits"]
 )

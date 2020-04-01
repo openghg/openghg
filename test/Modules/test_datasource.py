@@ -56,24 +56,23 @@ def mock_uuid2(monkeypatch):
 
     monkeypatch.setattr(uuid, 'uuid4', mock_uuid)
 
-
 def test_add_data(data):
     d = Datasource(name="test")
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    assert ch4_data["ch4 count"][0] == pytest.approx(1960.24)
+    assert ch4_data["ch4"][0] == pytest.approx(1960.24)
     assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
     assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
+    d.add_data(metadata=metadata, data=ch4_data)
 
     date_key = "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
 
     return False
 
-    assert d._data[date_key]["ch4 count"].equals(ch4_data["ch4 count"])
+    assert d._data[date_key]["ch4"].equals(ch4_data["ch4"])
     assert d._data[date_key]["ch4 stdev"].equals(ch4_data["ch4 stdev"])
     assert d._data[date_key]["ch4 n_meas"].equals(ch4_data["ch4 n_meas"])
 
@@ -148,7 +147,7 @@ def test_save(mock_uuid2):
     datasource.add_metadata(key="data_type", value="timeseries")
     datasource.save(bucket)
 
-    prefix = "%s/uuid/%s" % (Datasource._datasource_root, datasource._uuid)
+    prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
 
     objs = ObjectStore.get_all_object_names(bucket, prefix)
 
@@ -170,7 +169,7 @@ def test_save_footprint():
     datasource.add_data(metadata=metadata, data=data, data_type="footprint")
     datasource.save()
 
-    prefix = "%s/uuid/%s" % (Datasource._datasource_root, datasource._uuid)
+    prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
     objs = ObjectStore.get_all_object_names(bucket, prefix)
 
     datasource_2 = Datasource.load(bucket=bucket, key=objs[0])
@@ -204,11 +203,11 @@ def test_to_data(data):
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    assert ch4_data["ch4 count"][0] == pytest.approx(1960.24)
+    assert ch4_data["ch4"][0] == pytest.approx(1960.24)
     assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
     assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
 
     obj_data = d.to_data()
 
@@ -229,7 +228,7 @@ def test_from_data(data):
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
 
     obj_data = d.to_data()
 
@@ -246,6 +245,15 @@ def test_from_data(data):
     assert metadata["height"] == "248m"
 
     assert d_2.to_data() == d.to_data()
+
+def test_incorrect_datatype_raises(data):
+    d = Datasource(name="testing_123")
+
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
+
+    with pytest.raises(TypeError):
+        d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
 
 def test_update_daterange_replacement(data):
     metadata = {"foo": "bar"}

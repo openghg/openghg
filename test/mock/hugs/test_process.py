@@ -18,7 +18,7 @@ def run_before_tests():
     _ = get_local_bucket(empty=True)
 
 
-def test_folder(filename):
+def get_test_folder(filename):
     dir_path = os.path.dirname(__file__)
     test_folder = "../../../test/data/search_data"
     return os.path.join(dir_path, test_folder, filename)
@@ -31,7 +31,7 @@ def test_process_CRDS_files(authenticated_user):
     _ = hugs.call_function(function="clear_datasources", args={})
 
     files = ["bsd.picarro.1minute.108m.min.dat", "hfd.picarro.1minute.100m.min.dat", "tac.picarro.1minute.100m.min.dat"]
-    filepaths = [test_folder(f) for f in files]
+    filepaths = [get_test_folder(f) for f in files]
 
     process = Process(service_url=service_url) 
 
@@ -62,7 +62,7 @@ def test_process_CRDS_files(authenticated_user):
 
 
 def test_process_CRDS(authenticated_user, tempdir):
-    crds = CRDS.create()
+    crds = CRDS.load()
     crds.save()
 
     creds = StorageCreds(user=authenticated_user, service_url="storage")
@@ -80,17 +80,20 @@ def test_process_CRDS(authenticated_user, tempdir):
     args = {"authorisation": auth.to_data(),
             "par": {"data": par.to_data()},
             "par_secret": {"data": par_secret},
-            "data_type": "CRDS"}
+            "data_type": "CRDS", "source_name": "bsd.picarro.1minute.248m"}
 
     response = hugs.call_function(function="process", args=args)
-
-    print(response)
     
-    assert False
+    expected_keys = ['bsd.picarro.1minute.248m_ch4',
+                    'bsd.picarro.1minute.248m_co',
+                    'bsd.picarro.1minute.248m_co2']
+
+    assert sorted(response["results"].keys()) == expected_keys
+
 
 
 def test_process_GC(authenticated_user, tempdir):
-    gc = GC.create()
+    gc = GC.load()
     gc.save()
 
     creds = StorageCreds(user=authenticated_user, service_url="storage")
@@ -113,8 +116,21 @@ def test_process_GC(authenticated_user, tempdir):
     args = {"authorisation": auth.to_data(),
             "par": {"data": data_par.to_data(), "precision": precision_par.to_data()},
             "par_secret": {"data": data_secret, "precision": precision_secret},
-            "data_type": "GC"}
+            "data_type": "GC", "source_name": "capegrim-medusa", "site": "CGO",
+            "instrument":"medusa"}
 
     response = hugs.call_function(function="process", args=args)
 
-    assert False
+    result_keys = (sorted(response["results"].keys()))[:8]
+
+    expected_keys =  ['capegrim-medusa_C4F10',
+                        'capegrim-medusa_C6F14',
+                        'capegrim-medusa_CCl4',
+                        'capegrim-medusa_CF4',
+                        'capegrim-medusa_CFC-11',
+                        'capegrim-medusa_CFC-112',
+                        'capegrim-medusa_CFC-113',
+                        'capegrim-medusa_CFC-114']
+
+    assert result_keys == expected_keys
+

@@ -54,6 +54,6 @@ def test_recombination_CRDS():
     ch4_data_recombined.attrs = {}
 
     assert ch4_data_read.time.equals(ch4_data_recombined.time)
-    assert ch4_data_read["ch4 count"].equals(ch4_data_recombined["ch4_count"])
+    assert ch4_data_read["ch4"].equals(ch4_data_recombined["ch4"])
 
 
