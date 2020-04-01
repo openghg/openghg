@@ -1,4 +1,6 @@
 import setuptools
+import sys
+
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -7,6 +9,9 @@ files = ["HUGS/*"]
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
+
+if sys.version_info.major == 3 and sys.version_info.minor == 6:
+    requirements.append("backports-datetime-fromisoformat")
 
 setuptools.setup(
     name="hugs",
