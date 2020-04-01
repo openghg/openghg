@@ -39,6 +39,7 @@ jobs:
   - script: |
       git clone -b testStore https://github.com/gareth-j/acquire.git ../acquire
       pip install -r ../acquire/requirements.txt
+      pip install oci retry
     displayName: 'Clone Acquire for services folder required for tests'
 
   - script: |

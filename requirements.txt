@@ -11,7 +11,6 @@ lazy_import
 matplotlib
 netcdf4
 numpy
-oci
 pandas
 paramiko
 pyotp
