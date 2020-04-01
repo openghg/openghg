@@ -66,7 +66,7 @@ def test_add_data(data):
     assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
     assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
+    d.add_data(metadata=metadata, data=ch4_data)
 
     date_key = "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
 
@@ -207,7 +207,7 @@ def test_to_data(data):
     assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
     assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
 
     obj_data = d.to_data()
 
@@ -228,7 +228,7 @@ def test_from_data(data):
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
 
     obj_data = d.to_data()
 
@@ -245,6 +245,15 @@ def test_from_data(data):
     assert metadata["height"] == "248m"
 
     assert d_2.to_data() == d.to_data()
+
+def test_incorrect_datatype_raises(data):
+    d = Datasource(name="testing_123")
+
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
+
+    with pytest.raises(TypeError):
+        d.add_data(metadata=metadata, data=ch4_data, data_type="CRDS")
 
 def test_update_daterange_replacement(data):
     metadata = {"foo": "bar"}

@@ -119,7 +119,7 @@ class Datasource:
         self.update_daterange()
 
 
-    def add_data(self, metadata, data, data_type=None, overwrite=False):
+    def add_data(self, metadata, data, data_type="timeseries", overwrite=False):
         """ Add data to this Datasource and segment the data by size.
             The data is stored as a tuple of the data and the daterange it covers.
 
@@ -135,8 +135,15 @@ class Datasource:
         from HUGS.Util import date_overlap
         from xarray import Dataset
 
+        data_types = ["footprint", "timeseries"]
+
+        if data_type not in data_types:
+            raise TypeError(f"Incorrect data type selected. Please select from one of {data_types}")
+
         # Ensure metadata values are all lowercase
-        metadata = {k: v.lower() for k, v in metadata.items()}
+        if data_type != "footprint":
+            metadata = {k: v.lower() for k, v in metadata.items()}
+            
         self._metadata.update(metadata)
 
         # For now just create a new version each time data is added
@@ -195,8 +202,13 @@ class Datasource:
         else:
             self._data = additional_data
 
-        self.add_metadata(key="data_type", value="timeseries")
-        self._data_type = "timeseries"
+        if data_type == "timeseries":
+            self._data_type = data_type
+            self.add_metadata(key="data_type", value=data_type)
+        else:
+            self._data_type = "footprint"
+            self.add_metadata(key="data_type", value="footprint")
+
         self.update_daterange()
 
 

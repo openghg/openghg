@@ -1,6 +1,7 @@
+git+git://github.com/gareth-j/acquire@testStore#egg=Acquire
 bqplot==0.11.9
 cachetools
-git+git://github.com/gareth-j/cf-checker@addChkFilesFn#egg=cfcheker
+git+git://github.com/gareth-j/cf-checker@removeBasestring#egg=cfchecker
 cryptography
 ipyleaflet
 ipyvuetify

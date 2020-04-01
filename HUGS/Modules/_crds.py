@@ -194,6 +194,7 @@ class CRDS(BaseModule):
 
         data = read_csv(data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"],
                             parse_dates=[[0,1]], date_parser=parse_date)
+
         data.index.name = "time"
 
         filename = data_filepath.name
@@ -245,6 +246,7 @@ class CRDS(BaseModule):
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
             species_metadata["species"] = species
+
             species_metadata["source_name"] = source_name
 
             combined_data[species] = {"metadata": species_metadata, "data": gas_data, "attributes": site_attributes}
@@ -290,7 +292,7 @@ class CRDS(BaseModule):
                 self._crds_params = data["CRDS"]
 
         attributes = self._crds_params[site.upper()]["global_attributes"]
-        attributes["inlet_height_magl"] = inlet
+        attributes["inlet_height_magl"] = inlet.split("_")[0]
         attributes["comment"] = self._crds_params["comment"]
 
         return attributes

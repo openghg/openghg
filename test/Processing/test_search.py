@@ -113,9 +113,25 @@ def test_search_no_search_terms(crds_read):
     results = search(search_terms=search_terms, locations=locations, data_type=data_type, require_all=False, 
                     start_datetime=None, end_datetime=None)
 
-    assert len(results["bsd_ch4"]) == 6
-    assert len(results["bsd_co2"]) == 6
-    assert len(results["bsd_co"]) == 6
+    ch4_meta = {'site': 'bsd', 'instrument': 'picarro', 'time_resolution': '1_minute', 
+                'height': '108m', 'port': '9', 'type': 'air', 'species': 'ch4', 
+                'source_name': 'bsd.picarro.1minute.108m.min', 'data_type': 'timeseries'}
+    
+    co2_meta = {'site': 'bsd', 'instrument': 'picarro', 'time_resolution': '1_minute', 
+                'height': '108m', 'port': '9', 'type': 'air', 'species': 'co2', 
+                'source_name': 'bsd.picarro.1minute.108m.min', 'data_type': 'timeseries'}
+    
+    co_meta = {'site': 'bsd', 'instrument': 'picarro', 'time_resolution': '1_minute', 
+                'height': '108m', 'port': '9', 'type': 'air', 'species': 'co', 
+                'source_name': 'bsd.picarro.1minute.108m.min', 'data_type': 'timeseries'}
+
+    assert results["bsd_ch4_108m"]["metadata"] == ch4_meta
+    assert results["bsd_co2_108m"]["metadata"] == co2_meta
+    assert results["bsd_co_108m"]["metadata"] == co_meta
+
+    assert len(results["bsd_ch4_108m"]) == 4
+    assert len(results["bsd_co2_108m"]) == 4
+    assert len(results["bsd_co_108m"]) == 4
 
 def test_search_no_locations(crds_read):
     data_type = "CRDS"
@@ -125,9 +141,26 @@ def test_search_no_locations(crds_read):
     results = search(search_terms=search_terms, locations=locations, data_type=data_type, require_all=False, 
                     start_datetime=None, end_datetime=None)
 
-    assert len(results["bsd_ch4"]) == 6
-    assert len(results["hfd_ch4"]) == 7
-    assert len(results["tac_ch4"]) == 8
+    bsd_meta = {'site': 'bsd', 'instrument': 'picarro', 'time_resolution': '1_minute', 
+                'height': '108m', 'port': '9', 'type': 'air', 'species': 'ch4', 
+                'source_name': 'bsd.picarro.1minute.108m.min', 'data_type': 'timeseries'}
+
+    hfd_meta = {'site': 'hfd', 'instrument': 'picarro', 'time_resolution': '1_minute', 
+                'height': '100m', 'port': '10', 'type': 'air', 'species': 'ch4', 
+                'source_name': 'hfd.picarro.1minute.100m.min', 'data_type': 'timeseries'}
+
+    tac_meta = {'site': 'tac', 'instrument': 'picarro', 'time_resolution': '1_minute', 
+                'height': '100m', 'port': '9', 'type': 'air', 'species': 'ch4', 
+                'source_name': 'tac.picarro.1minute.100m.min', 'data_type': 'timeseries'}
+
+
+    assert results["bsd_ch4_108m"]["metadata"] == bsd_meta
+    assert results["hfd_ch4_100m"]["metadata"] == hfd_meta
+    assert results["tac_ch4_100m"]["metadata"] == tac_meta
+
+    assert len(results["bsd_ch4_108m"]) == 4
+    assert len(results["hfd_ch4_100m"]) == 4
+    assert len(results["tac_ch4_100m"]) == 4
 
 def test_search_datetimes():
     data_type = "CRDS"
@@ -139,8 +172,29 @@ def test_search_datetimes():
 
     results = search(search_terms=search_terms, locations=locations, data_type=data_type, require_all=False, 
                     start_datetime=start, end_datetime=end)
+    
+    result_keys = results["bsd_co2_108m"]["keys"]
+    
+    expected_date_strings = ['2016-01-19-17:17:30+00:00_2016-12-31-23:52:30+00:00',
+                            '2016-03-01-02:22:30+00:00_2016-05-31-22:15:30+00:00',
+                            '2016-06-01-00:23:30+00:00_2016-08-31-23:58:30+00:00',
+                            '2016-09-01-02:48:30+00:00_2016-11-30-22:57:30+00:00']
 
-    assert results["bsd_co2"][0].split("/")[-1] == "2016-01-19T17:17:30_2016-12-31T23:52:30"
+    date_strings = sorted([v.split("/")[-1] for v in result_keys])
+
+    assert date_strings == expected_date_strings
+
+    metadata = results["bsd_co2_108m"]["metadata"]
+    
+    expected_metadata = {'site': 'bsd', 'instrument': 'picarro', 'time_resolution': '1_minute', 
+                'height': '108m', 'port': '9', 'type': 'air', 'species': 'co2', 
+                'source_name': 'bsd.picarro.1minute.108m.min', 'data_type': 'timeseries'}
+
+    assert metadata == expected_metadata
+    
+    assert results["bsd_co2_108m"]["start_date"] == "2016-01-19-17:17:30+00:00"
+    assert results["bsd_co2_108m"]["end_date"] == "2016-11-30-22:57:30+00:00"
+
 
 def test_search_require_all():
     data_type = "CRDS"
@@ -153,7 +207,32 @@ def test_search_require_all():
     results = search(search_terms=search_terms, locations=locations, data_type=data_type, require_all=True, 
                     start_datetime=start, end_datetime=end)
 
-    assert len(results["bsd_108m_co2_picarro"]) == 3
+    bsd_results = results["bsd_108m_co2_picarro_108m"]
+
+    assert bsd_results["metadata"]["site"] == "bsd"
+    assert bsd_results["metadata"]["species"] == "co2"
+    assert bsd_results["metadata"]["time_resolution"] == "1_minute"
+
+    assert bsd_results["start_date"] == "2016-01-19-17:17:30+00:00"
+    assert bsd_results["end_date"] == "2016-11-30-22:57:30+00:00"
+
+def test_search_bad_datatype_raises():
+    data_type = "foo"
+    search_terms = ["spam", "eggs", "terry"]
+    locations = ["tintagel"]
+
+    with pytest.raises(KeyError):
+        results = search(search_terms=search_terms, locations=locations, data_type=data_type)
+
+def test_search_nonsense_terms():
+    data_type = "CRDS"
+    search_terms = ["spam", "eggs", "terry"]
+    locations = ["tintagel"]
+    
+    results = search(search_terms=search_terms, locations=locations, data_type=data_type)
+
+    assert not results
+
 
 def test_search_footprints():
     bucket = get_local_bucket(empty=True)
@@ -162,24 +241,27 @@ def test_search_footprints():
     filepath = os.path.join(os.path.dirname(__file__), test_data, filename)
     metadata = {"name": "WAO-20magl_EUROPE"}
     source_name = "WAO-20magl_EUROPE"
-    datasource_uuids = Footprint.read_file(filepath=filepath, metadata=metadata, source_name=source_name)
+    Footprint.read_file(filepath=filepath, source_name=source_name)
+
+    fp = Footprint.load()
 
     data_type = "footprint"
-    search_terms = []
+    search_terms = ["WAO"]
     locations = []
 
-    start = get_datetime_epoch()
-    end = get_datetime_now()
+    expected_metadata = {'name': 'WAO-20magl_EUROPE', 'data_variables': ['fp', 'temperature', 'pressure', 
+                        'wind_speed', 'wind_direction', 'PBLH', 'release_lon', 'release_lat', 'particle_locations_n', 
+                        'particle_locations_e', 'particle_locations_s', 'particle_locations_w'], 
+                        'coordinates': ['time', 'lon', 'lat', 'lev', 'height'], 'data_type': 'footprint'}
 
-    results = search(search_terms=search_terms, locations=locations, data_type=data_type, start_datetime=start, end_datetime=end)
+    results = search(search_terms=search_terms, locations=locations, data_type=data_type, require_all=True)
 
-    assert len(results["footprints"]) == 1
-
-
-
-
-
-
+    expected_start = "2013-06-02-00:00:00+00:00"
+    expected_end = "2013-06-30-00:00:00+00:00"
+    
+    assert results["WAO"]["metadata"] == expected_metadata
+    assert results["WAO"]["start_date"] == expected_start
+    assert results["WAO"]["end_date"] == expected_end
 
 
 

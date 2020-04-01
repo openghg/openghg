@@ -1,8 +1,3 @@
-import logging
-mpl_logger = logging.getLogger("matplotlib")
-mpl_logger.setLevel(logging.WARNING)
-
-
 import pytest
 import pandas as pd
 import os
@@ -64,10 +59,16 @@ def test_retrieve(authenticated_user, crds):
 
     del data.attrs["File created"]
 
-    assert data.time[0] == pd.Timestamp("2014-01-30T10:52:30")
-    assert data.co_count[0] == pytest.approx(204.62)
-    assert data.attrs == {'data_owner': "Simon O'Doherty", 'data_owner_email': 's.odoherty@bristol.ac.uk', 'inlet_height_magl': '248m_6', 'comment': 'Cavity ring-down measurements. Output from GCWerks', 'Conditions of use': 'Ensure that you contact the data owner at the outset of your project.',
-                          'Source': 'In situ measurements of air', 'Conventions': 'CF-1.6', 'Processed by': 'auto@hugs-cloud.com', 'species': 'co', 'Calibration_scale': '{}', 'station_longitude': -1.15033, 'station_latitude': 54.35858, 'station_long_name': 'Bilsdale, UK', 'station_height_masl': 380.0}
+    expected_attributes = {'data_owner': "Simon O'Doherty", 'data_owner_email': 's.odoherty@bristol.ac.uk', 
+                            'inlet_height_magl': '248m',  'comment': 'Cavity ring-down measurements. Output from GCWerks', 
+                            'Conditions of use': 'Ensure that you contact the data owner at the outset of your project.',
+                            'Source': 'In situ measurements of air', 'Conventions': 'CF-1.6', 'Processed by': 'auto@hugs-cloud.com',
+                            'species': 'co', 'Calibration_scale': 'unknown', 'station_longitude': -1.15033, 
+                            'station_latitude': 54.35858, 'station_long_name': 'Bilsdale, UK', 'station_height_masl': 380.0}
+
+    assert data["time"][0] == pd.Timestamp("2014-01-30T10:52:30")
+    assert data["co"][0] == pytest.approx(204.62)
+    assert data.attrs == expected_attributes
 
     # # Here we get some JSON data that can be converted back into a DataFrame
     # df = read_json(data["bsd_co"])

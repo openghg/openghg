@@ -34,7 +34,7 @@ def load_crds(authenticated_user):
                                         hugs_url="hugs", storage_url="storage")
 
 
-def test_search_bsd(crds):
+def test_search_bsd(load_crds):
     search = Search(service_url="hugs")
 
     search_term = "co"
@@ -43,8 +43,15 @@ def test_search_bsd(crds):
 
     results = search.search(search_terms=search_term, locations=location, data_type=data_type)
 
-    assert len(results) == 1
-    assert sorted(results["bsd_co"])[0].split("/")[-1] == "2014-01-30T10:52:30_2014-01-30T14:20:30"
+    bsd_res = results["bsd_co_108m"]
+    
+    del bsd_res["metadata"]["source_name"]
+
+    expected_metadata = {'site': 'bsd', 'instrument': 'picarro', 'time_resolution': '1_minute', 
+                        'height': '108m', 'port': '9', 'type': 'air', 'species': 'co', 
+                        'data_type': 'timeseries'}
+
+    assert bsd_res["metadata"] == expected_metadata
 
 def test_search_multispecies_singlesite(load_crds):
     search = Search(service_url="hugs")
@@ -55,15 +62,10 @@ def test_search_multispecies_singlesite(load_crds):
 
     results = search.search(search_terms=search_term, locations=location, data_type=data_type)
 
-    assert len(results["bsd_co"]) == 6
-    assert len(results["bsd_co2"]) == 6
+    assert list(results.keys()) == ["bsd_co_108m", "bsd_co2_108m"]
 
-    assert sorted(results["bsd_co"])[0].split("/")[-1] == "2014-01-30T13:33:30_2014-12-31T22:23:30"
-    assert sorted(results["bsd_co"])[5].split("/")[-1] == "2019-01-01T04:44:30_2019-07-04T04:23:30"
-
-    assert sorted(results["bsd_co"])[0].split("/")[-1] == "2014-01-30T13:33:30_2014-12-31T22:23:30"
-    assert sorted(results["bsd_co"])[5].split("/")[-1] == "2019-01-01T04:44:30_2019-07-04T04:23:30"
-
+    assert len(results["bsd_co_108m"]["keys"]) == 23
+    assert len(results["bsd_co_108m"]["keys"]) == 23
 
 def test_search_multisite_co(load_crds):
     search = Search(service_url="hugs")
@@ -74,16 +76,24 @@ def test_search_multisite_co(load_crds):
 
     results = search.search(search_terms=search_term, locations=location, data_type=data_type)
 
-    assert len(results) == 2
+    assert list(results.keys()) == ['bsd_co_108m', 'hfd_co_100m']
 
-    assert len(results["bsd_co"]) == 6
-    assert len(results["hfd_co"]) == 7
+    key_dates = sorted(results["hfd_co_100m"]["keys"])[:10]
 
-    assert sorted(results["bsd_co"])[0].split("/")[-1] == "2014-01-30T13:33:30_2014-12-31T22:23:30"
-    assert sorted(results["bsd_co"])[5].split("/")[-1] == "2019-01-01T04:44:30_2019-07-04T04:23:30"
+    key_dates = [v.split("/")[-1] for v in key_dates]
 
-    assert sorted(results["hfd_co"])[0].split("/")[-1] == "2013-11-20T20:02:30_2013-12-31T22:54:30"
-    assert sorted(results["hfd_co"])[6].split("/")[-1] == "2019-01-01T02:55:30_2019-07-04T21:29:30" 
+    expected_dates = ['2013-11-20-20:02:30+00:00_2013-11-30-20:02:30+00:00',
+                    '2013-12-01-02:52:30+00:00_2013-12-31-22:54:30+00:00',
+                    '2014-01-01-02:01:30+00:00_2014-12-31-21:32:30+00:00',
+                    '2014-03-10-18:36:30+00:00_2014-05-31-23:58:30+00:00',
+                    '2014-06-01-03:05:30+00:00_2014-08-31-21:35:30+00:00',
+                    '2014-09-01-00:42:30+00:00_2014-11-30-21:38:30+00:00',
+                    '2015-01-01-00:42:30+00:00_2015-12-31-21:31:30+00:00',
+                    '2015-03-01-01:42:30+00:00_2015-05-31-22:00:30+00:00',
+                    '2015-06-01-01:10:30+00:00_2015-08-31-20:59:30+00:00',
+                    '2015-09-01-00:06:30+00:00_2015-11-30-22:06:30+00:00']
+
+    assert key_dates == expected_dates
 
 
 def test_search_multiplesite_multiplespecies(load_crds):
@@ -95,15 +105,16 @@ def test_search_multiplesite_multiplespecies(load_crds):
 
     results = search.search(search_terms=search_term, locations=location, data_type=data_type)
 
-    expected_keys = set(["bsd_ch4","bsd_co2","tac_co2","tac_ch4","hfd_ch4","hfd_co2"])
+    assert sorted(list(results.keys())) == ['bsd_ch4_108m',
+                                            'bsd_co2_108m',
+                                            'hfd_ch4_100m',
+                                            'hfd_co2_100m',
+                                            'tac_ch4_100m',
+                                            'tac_co2_100m']
 
-    assert set(results.keys()) == expected_keys
-
-    assert len(results["bsd_ch4"]) == 6
-    assert len(results["bsd_co2"]) == 6
-
-    assert len(results["hfd_ch4"]) == 7
-    assert len(results["hfd_co2"]) == 7
-
-    assert len(results["tac_ch4"]) == 8
-    assert len(results["tac_co2"]) == 8
+    assert len(results["bsd_ch4_108m"]["keys"]) == 23
+    assert len(results["hfd_ch4_100m"]["keys"]) == 25
+    assert len(results["tac_ch4_100m"]["keys"]) == 30
+    assert len(results["bsd_co2_108m"]["keys"]) == 23
+    assert len(results["hfd_co2_100m"]["keys"]) == 25
+    assert len(results["tac_co2_100m"]["keys"]) == 30

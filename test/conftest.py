@@ -12,6 +12,9 @@ sys.path.insert(0, os.path.abspath("services"))
 # Added for import of hugs from testing directory
 sys.path.insert(0, os.path.abspath("."))
 
+def pytest_configure(config):
+    config.addinivalue_line("markers", "slow: slow")
+
 # Added for import of Acquire services modules in tests
 # acquire_dir = os.getenv("ACQUIRE_DIR")
 
