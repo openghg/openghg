@@ -60,8 +60,8 @@ def create_search_box():
         split_locations = locations.value.replace(" ", "").split(",")
 
         #search = Search(service_url=base_url)
-        search_results = ["yah"] #search.search(search_terms=split_search_terms, locations=split_locations, 
-                                  #          data_type=data_type.value, start_datetime=start, end_datetime=end)
+        search_results = search.search(search_terms=split_search_terms, locations=split_locations, 
+                                        data_type=data_type.value, start_datetime=start, end_datetime=end)
 
         if search_results:
             # date_keys = _parse_results(search_results)
@@ -76,7 +76,7 @@ def create_search_box():
     search_button.on_click(call_search)
 
 
-    status_box.value = "Yahyah"
+    status_box.value = "Status"
     # # From here create a 
     # selected_data = []
 
@@ -92,7 +92,7 @@ def create_search_box():
 
     # data = None
     # def download_data(date_keys, selected_data):
-    #     print("Yahyahyah")
+    #     print("Download")
     #     update_statusbar("Downloading...")
 
     #     download_keys = {key: date_keys[key]["keys"] for key in selected_data}
