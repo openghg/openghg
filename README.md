@@ -28,4 +28,4 @@ Now test your newly created account using the `login.ipynb` notebook.
 
 ## Use HUGS
 
-A simple graphical interface to the HUGS service is available in the `HGUS_interface.ipynb` notebook within the `user/notebooks` directory. Please scroll down until you see the 'Scroll to here' text and then do Cell -> Run All Above from the toolbar. A simple GUI that allows interaction with functions running on the cloud should appear.
+A simple graphical interface to the HUGS service is available in the `HUGS_interface.ipynb` notebook within the `user/notebooks/interface` directory. Please scroll down until you see the 'Scroll to here' text and then do Cell -> Run All Above from the toolbar. A simple GUI that allows interaction with functions running on the cloud should appear.

@@ -1,6 +1,7 @@
 include README.md
 include MANIFEST.in
 include setup.py
+inlcude requirements.txt
 
 graft HUGS
 

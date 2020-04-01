@@ -80,40 +80,40 @@ def test_get_ceda_file_height_correctness():
 
 
 
-def test_export_compliant_without_file():
-    data_path = Path(__file__).resolve().parent.joinpath("../data/cf_compliant.nc")
+# def test_export_compliant_without_file():
+#     data_path = Path(__file__).resolve().parent.joinpath("../data/cf_compliant.nc")
 
-    test_data = open_dataset(data_path)
+#     test_data = open_dataset(data_path)
 
-    results, data = export_compliant(data=test_data)
+#     results, data = export_compliant(data=test_data)
 
-    correct_results = {'FATAL': 0, 'ERROR': 0, 'WARN': 1, 'INFO': 2, 'VERSION': 6}
+#     correct_results = {'FATAL': 0, 'ERROR': 0, 'WARN': 1, 'INFO': 2, 'VERSION': 6}
 
-    assert results == correct_results
-
-
-def test_export_non_compliant_without_file():
-    data_path = Path(__file__).resolve().parent.joinpath("../data/non_cf_compliant.nc")
-
-    test_data = open_dataset(data_path)
-
-    with pytest.raises(ValueError):
-        results = export_compliant(data=test_data)
+#     assert results == correct_results
 
 
-def test_export_compliant_with_file(tmpdir):
-    data_path = Path(__file__).resolve().parent.joinpath("../data/cf_compliant.nc")
+# def test_export_non_compliant_without_file():
+#     data_path = Path(__file__).resolve().parent.joinpath("../data/non_cf_compliant.nc")
 
-    test_data = open_dataset(data_path)
+#     test_data = open_dataset(data_path)
 
-    tmp_filepath = Path(tmpdir).joinpath("test_compliance.nc")
+#     with pytest.raises(ValueError):
+#         results = export_compliant(data=test_data)
 
-    results = export_compliant(data=test_data, filepath=tmp_filepath)
 
-    correct_results = {'FATAL': 0, 'ERROR': 0, 'WARN': 1, 'INFO': 2, 'VERSION': 6}
+# def test_export_compliant_with_file(tmpdir):
+#     data_path = Path(__file__).resolve().parent.joinpath("../data/cf_compliant.nc")
 
-    assert results == correct_results
+#     test_data = open_dataset(data_path)
 
-    written_ds = open_dataset(tmp_filepath)
+#     tmp_filepath = Path(tmpdir).joinpath("test_compliance.nc")
 
-    assert written_ds.equals(test_data)
+#     results = export_compliant(data=test_data, filepath=tmp_filepath)
+
+#     correct_results = {'FATAL': 0, 'ERROR': 0, 'WARN': 1, 'INFO': 2, 'VERSION': 6}
+
+#     assert results == correct_results
+
+#     written_ds = open_dataset(tmp_filepath)
+
+#     assert written_ds.equals(test_data)

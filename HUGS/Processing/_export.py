@@ -99,61 +99,61 @@ def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_
     else:
         return data
 
-def export_compliant(data, filepath=None):
-    """ Check the passed data is CF compliant and if a filepath is passed
-        export to a NetCDF file
+# def export_compliant(data, filepath=None):
+#     """ Check the passed data is CF compliant and if a filepath is passed
+#         export to a NetCDF file
 
-        Args:
-            data (xarray.Dataset): Data to export
-            filepath (str): Path to export data file
-        Returns:
-            dict or tuple (dict, xarray.Dataset): Results dictionary or results dictionary and data
-            if no filepath for writing is passed
-    """
-    from cfchecker import chkFiles
-    from contextlib import redirect_stdout
-    import io
-    from pathlib import Path
-    import subprocess
-    import tempfile
+#         Args:
+#             data (xarray.Dataset): Data to export
+#             filepath (str): Path to export data file
+#         Returns:
+#             dict or tuple (dict, xarray.Dataset): Results dictionary or results dictionary and data
+#             if no filepath for writing is passed
+#     """
+#     from cfchecker import chkFiles
+#     from contextlib import redirect_stdout
+#     import io
+#     from pathlib import Path
+#     import subprocess
+#     import tempfile
 
-    # If we don't have a filepath to write the NetCDF to we write to a temporary file
-    # TODO - modify cf-checker to allow checking of Datasets?
-    if filepath is None:
-        tmpfile = tempfile.NamedTemporaryFile(suffix=".nc")
-        check_file = tmpfile.name
-    else:
-        filepath = Path(filepath).absolute()
-        check_file = str(filepath)
+#     # If we don't have a filepath to write the NetCDF to we write to a temporary file
+#     # TODO - modify cf-checker to allow checking of Datasets?
+#     if filepath is None:
+#         tmpfile = tempfile.NamedTemporaryFile(suffix=".nc")
+#         check_file = tmpfile.name
+#     else:
+#         filepath = Path(filepath).absolute()
+#         check_file = str(filepath)
 
-    data.to_netcdf(check_file)
+#     data.to_netcdf(check_file)
     
-    # Here we capture the stdout from the chkFiles function which will include any useful error messages
-    c = io.StringIO()
-    with redirect_stdout(c):
-        results = chkFiles(files=check_file, silent=False)
+#     # Here we capture the stdout from the chkFiles function which will include any useful error messages
+#     c = io.StringIO()
+#     with redirect_stdout(c):
+#         results = chkFiles(files=check_file, silent=False)
 
-    results = dict(results)
+#     results = dict(results)
 
-    try:
-        tmpfile.close()
-    except NameError:
-        pass
+#     try:
+#         tmpfile.close()
+#     except NameError:
+#         pass
 
-    stdout_capture = c.getvalue()
+#     stdout_capture = c.getvalue()
 
-    # Return the useful error messages if we get any
-    if results["FATAL"] or results["ERROR"]:
-        # Clean the error messages
-        stdout_capture = stdout_capture.replace("\n", " ")
-        # raise ValueError(f"{results["FATAL"]}") # fatal and {results["ERROR"]} non-fatal errors found")
-        raise ValueError(f"{results['FATAL']} fatal and {results['ERROR']} non-fatal errors found.\
-             Please make changes to ensure your file is compliant.\n\n {stdout_capture}")
+#     # Return the useful error messages if we get any
+#     if results["FATAL"] or results["ERROR"]:
+#         # Clean the error messages
+#         stdout_capture = stdout_capture.replace("\n", " ")
+#         # raise ValueError(f"{results["FATAL"]}") # fatal and {results["ERROR"]} non-fatal errors found")
+#         raise ValueError(f"{results['FATAL']} fatal and {results['ERROR']} non-fatal errors found.\
+#              Please make changes to ensure your file is compliant.\n\n {stdout_capture}")
     
-    if filepath is None:
-        return results, data
-    else:
-        return results
+#     if filepath is None:
+#         return results, data
+#     else:
+#         return results
     
 
 

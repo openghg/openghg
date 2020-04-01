@@ -5,6 +5,9 @@ with open("README.md", "r") as fh:
 
 files = ["HUGS/*"]
 
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
 setuptools.setup(
     name="hugs",
     version="0.0.3",
@@ -23,5 +26,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
-    install_requires=["numpy", "netCDF4", "cfunits"]
+    install_requires=requirements
 )
