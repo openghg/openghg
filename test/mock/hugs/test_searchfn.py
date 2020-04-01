@@ -12,7 +12,7 @@ from Acquire.Client import User, Drive, Service, StorageCreds, PAR, Authorisatio
 
 @pytest.fixture(scope="session")
 def tempdir(tmpdir_factory):
-    d = tmpdir_factory.mktemp("")
+    d = tmpdir_factory.mktemp("tmp_searchfn")
     return str(d)
 
 @pytest.fixture(scope="session")

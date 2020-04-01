@@ -181,14 +181,14 @@ class CRDS(BaseModule):
             Returns:
                 dict: Dictionary containing metadata, data and attributes keys
         """
+        from datetime import datetime
         from pandas import RangeIndex, read_csv, NaT
-        from pandas import datetime as pd_datetime
         from HUGS.Processing import get_attributes, read_metadata
 
         # Function to parse the datetime format found in the datafile
         def parse_date(date):
             try:
-                return pd_datetime.strptime(date, '%y%m%d %H%M%S')
+                return datetime.strptime(date, '%y%m%d %H%M%S')
             except ValueError:
                 return NaT
 

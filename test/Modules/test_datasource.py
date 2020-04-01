@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 import tempfile
 import xarray
-import zarr
 
 from Acquire.ObjectStore import ObjectStore
 from Acquire.ObjectStore import string_to_encoded

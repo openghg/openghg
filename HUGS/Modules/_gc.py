@@ -115,8 +115,8 @@ class GC(BaseModule):
 
                 Tuple contains species name, species metadata, datasource_uuid and dataframe
         """
+        from datetime import datetime
         from pandas import read_csv
-        from pandas import datetime as pd_datetime
         from pandas import Timedelta as pd_Timedelta
         from HUGS.Processing import read_metadata
 
@@ -124,7 +124,8 @@ class GC(BaseModule):
         header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
         # Create a function to parse the datetime in the data file
-        def parser(date): return pd_datetime.strptime(date, '%Y %m %d %H %M')
+        def parser(date): 
+            return datetime.strptime(date, '%Y %m %d %H %M')
         # Read the data in and automatically create a datetime column from the 5 columns
         # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
         data = read_csv(data_filepath, skiprows=4, sep=r"\s+", index_col=["yyyy_mm_dd_hh_mi"],
@@ -194,10 +195,11 @@ class GC(BaseModule):
                 precision data
         """
         from pandas import read_csv
-        from pandas import datetime as pd_datetime
+        from datetime import datetime
 
         # Function for parsing datetime
-        def parser(date): return pd_datetime.strptime(date, '%y%m%d')
+        def parser(date): 
+            return datetime.strptime(date, '%y%m%d')
 
         # Read precision species
         precision_header = read_csv(filepath, skiprows=3, nrows=1, header=None, sep=r"\s+")
