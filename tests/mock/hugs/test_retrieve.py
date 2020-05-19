@@ -21,7 +21,7 @@ def crds(authenticated_user):
 
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
-    filepath = os.path.join(os.path.dirname(__file__), "../../../test/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat")
+    filepath = os.path.join(os.path.dirname(__file__), "../../../tests/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat")
     filemeta = drive.upload(filepath)
 
     par = PAR(location=filemeta.location(), user=authenticated_user)

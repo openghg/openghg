@@ -6,3 +6,4 @@ from ._credentials import *
 from ._download import *
 from ._interface import *
 from ._voilainterface import *  
+from ._upload import *

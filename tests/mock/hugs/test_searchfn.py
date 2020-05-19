@@ -22,7 +22,7 @@ def load_crds(authenticated_user):
 
     def test_folder(filename):
         dir_path = os.path.dirname(__file__)
-        test_folder = "../../../test/data/search_data"
+        test_folder = "../../../tests/data/search_data"
         return os.path.join(dir_path, test_folder, filename)
 
     files = ["bsd.picarro.1minute.108m.min.dat", "hfd.picarro.1minute.100m.min.dat", "tac.picarro.1minute.100m.min.dat"]

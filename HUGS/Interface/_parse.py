@@ -29,4 +29,4 @@ def get_download_keys(search_results, to_download):
         Returns:
             dict: Dictionary of keys to download. Keyed by item in to_download
     """
-    return {key: search_results[key] for key in to_download}
+    return {key: search_results[key]["keys"] for key in to_download}

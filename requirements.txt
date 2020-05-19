@@ -1,4 +1,5 @@
 Acquire @ git+git://github.com/gareth-j/acquire@testStore#egg=Acquire
+backports-datetime-fromisoformat
 bqplot==0.11.9
 cachetools
 # cfchecker @ git+git://github.com/gareth-j/cf-checker@removeBasestring#egg=cfchecker
@@ -6,10 +7,12 @@ cryptography
 ipyleaflet
 ipyvuetify
 ipywidgets
+lazy_import
 matplotlib
 netcdf4
 numpy
 pandas
+paramiko
 pyotp
 pytz
 PyYAML
