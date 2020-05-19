@@ -11,6 +11,7 @@ import ipywidgets as widgets
 import ipyleaflet
 from HUGS.Client import Retrieve, Search, Process
 from HUGS.Interface import generate_password
+from HUGS.Util import get_datapath, load_hugs_json
 import json
 import numpy as np
 import os
@@ -19,12 +20,15 @@ from pathlib import Path
 import matplotlib
 import random
 import tempfile
+import shutil
 
 __all__ = ["Interface"]
 
 class Interface:
     """ 
         Handles the creation of an interface for the HUGS platform
+
+        # TODO - this needs a lot of tidying and code removal
 
         WIP
 
@@ -50,7 +54,7 @@ class Interface:
         self._n_figs = 0
         # User
         self._user = None
-
+        self._tmpdir = None
         self._data = {}
 
         self._to_plot = {}
@@ -66,12 +70,14 @@ class Interface:
 
         self._spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
 
+        self._site_locations = load_hugs_json("acrg_with_locations.json")
+
         self._plot_box = []
 
         params_file = (os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../Data/site_codes.json")
         with open(params_file, "r") as f:
             data = json.load(f)
-            self._site_locations = data["locations"]
+            # self._site_locations = data["locations"]
             # Keyed name: code
             self._site_codes = data["name_code"]
             # Keyed code: name
@@ -89,6 +95,9 @@ class Interface:
         self._tableau10 = ['#4E79A7','#F28E2B','#E15759','#76B7B2','#59A14F'] #,'#EDC948','#B07AA1','#FF9DA7','#9C755F','#BAB0AC']
         self._tableau20 = [matplotlib.colors.rgb2hex(colour) for colour in matplotlib.cm.tab20.colors]
         self._colour_blind = self._tableau20
+
+    def get_user():
+        return self._user
 
     def rand_colors(self, tab_set="10", colour_blind=False):
         """ Get a random set of colours
@@ -152,6 +161,71 @@ class Interface:
 
         return [username_box, suggested_password, password_box, conf_password_box, spacer, register_button, output_box]
 
+    def upload_box(self):
+        type_widget = widgets.Dropdown(
+            options=["CRDS", "GC", "ICOS", "NOAA", "TB", "EUROCOM"],
+            description="Data type:",
+            disabled=False,
+        )
+
+        base_url = "https://hugs.acquire-aaai.com/t"
+
+
+        upload_widget = widgets.FileUpload(multiple=False, label="Select")
+        transfer_button = widgets.Button(
+            description="Transfer", button_style="info", layout=widgets.Layout(width="10%")
+        )
+
+        def do_upload(a):
+            if type_widget.value == False:
+                status_text.value = f"<font color='red'>Please select a data type</font>"
+                return
+
+            user = self.get_user()
+            data_type = type_widget.value
+
+            if not user.is_logged_in():
+                status_text.value = f"<font color='red'>User not logged in</font>"
+                return
+
+            # Here we get the data as bytes, write it to a tmp directory so we can
+            # process it using HUGS
+            # TODO - better processing method? Allow HUGS to accept bytes?
+            with tempfile.TemporaryDirectory() as tmpdir:
+                file_content = upload_widget.value
+                filename = list(file_content.keys())[0]
+                
+                data_bytes = file_content[filename]["content"]
+
+                tmp_filepath = Path(tmpdir).joinpath(filename) 
+
+                with open(tmp_filepath, "wb") as f:
+                   f.write(data_bytes)
+
+                p = Process(service_url=base_url)
+                result = p.process_files(user=user, files=tmp_filepath, data_type=data_type)
+
+                self._results = result
+
+                # Upload the file to HUGS
+                if result:
+                    status_text.value = f"<font color='green'>Upload successful</font>"
+                else:
+                    status_text.value = f"<font color='red'>Unable to process file</font>"
+
+        transfer_button.on_click(do_upload)
+
+        data_hbox = widgets.HBox(children=[type_widget, upload_widget, transfer_button])
+        status_text = widgets.HTML(value=f"<font color='#00BCD4'>Waiting for file</font>")
+
+
+        return widgets.VBox(children=[data_hbox, status_text])
+
+    def login(self):
+        w = self.create_login_box()
+
+        return widgets.VBox(children=w) 
+
     def create_login_box(self):
         """ Create a login box
 
@@ -186,13 +260,18 @@ class Interface:
 
         return login_widgets
 
+    def search(self):
+        w = self.create_search_box()
+
+        return widgets.VBox(children=w)
+
     def create_search_box(self):
         """ Create the searching interface
 
             Returns:
                 list: List of ipywidgets widgets
         """
-        search_terms = widgets.Text(value="", placeholder="Search", description="Search terms:", disabled=False)
+        search_terms = widgets.Text(value="", placeholder="Search", description="Species:", disabled=False)
         locations = widgets.Text(value="", placeholder="BSD, HFD", description="Locations:", disabled=False)
         data_type = widgets.Dropdown(options=["CRDS", "GC"], value="CRDS", description="Data type", disabled=False)
         search_button = widgets.Button(description="Search", button_style="success", layout=self.small_button_layout)
@@ -368,7 +447,7 @@ class Interface:
             # download_keys = {key: search_results[key]["keys"] for key in arg_dict if arg_dict[key].value is True}
             # If the tickbox is ticked, copy the selected values from the search results to pass to the download fn            
             selected_results = {key: search_results[key] for key in arg_dict if arg_dict if arg_dict[key].value is True}
-            self.download_data(selected_results=selected_results)
+            self.retrieve_data(selected_results=selected_results)
 
         def select_all(a):
             vals = [c.value for c in checkbox_objects]
@@ -1137,7 +1216,7 @@ class Interface:
             site_codes = {self._site_codes[s.lower()] for s in self._selected_sites}
             # If the site codes above are in the search_results' keys, add these to the dictionary
             to_download = {key: search_results[key] for key in search_results for s in site_codes if s.lower() in key}
-            self.download_data(selected_results=to_download)
+            self.retrieve_data(selected_results=to_download)
 
         # Create a marker for each site we have results for, on the marker show the
         # species etc we have data for
@@ -1175,7 +1254,9 @@ class Interface:
         """
         # Parse the search results and extract dates, site locations etc
         site_locations = collections.defaultdict(dict)
-        self._site_locations = site_data
+        
+        if(site_data):
+            self._site_locations = site_data
         
         for key in search_results:
             # TODO - refactor this to work with the new search results
@@ -1263,7 +1344,7 @@ class Interface:
             # site_codes = {self._site_codes[s.lower()] for s in self._selected_sites}
             # If the site codes above are in the search_results' keys, add these to the dictionary
             to_download = {key: search_results[key] for key in search_results for s in self._selected_sites if s.lower() in key}
-            self._data = self.download_data(selected_results=to_download)
+            self._data = self.retrieve_data(selected_results=to_download)
             plotting_widgets = self.plotting_interface(selected_results=to_download, data=self._data)
 
             fig_box.children = [plotting_widgets]
@@ -1427,7 +1508,37 @@ class Interface:
 
         return datasource_uuids
 
+    def download_link(self, data):
+        """ Write the passed data to a temporary NetCDF and create a link
+            for the user to download the created NetCDF file
 
+            Args:
+                data (xarray.Dataframe): Dataframe for download
+            Returns:
+                FileLink: FileLink for file download
+        """
+        from IPython.display import FileLink
+        
+        if(self._tmpdir):
+            self._tmpdir.cleanup()
+            self._tmpdir = tempfile.TemporaryDirectory()  
+        else:
+            self._tmpdir = tempfile.TemporaryDirectory()     
+
+        # If we have more than one Dataframe to download we create a bzip
+        filepaths = []
+        for key in data:
+            filepath = Path(self._tmpdir.name).joinpath(key).with_suffix(".nc")
+            data[key].to_netcdf(filepath)
+            filepaths.append(filepath)
+        
+        # If we have more than one file zip them
+        if len(filepaths) > 1:
+            archive_name = f"hugs_archive_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+            archive_path = shutil.make_archive(archive_name, "zip", self._tempdir.name)
+            return FileLink(archive_path)
+        else:
+            return FileLink(filepaths[0])
 
     # Will this force an update ?
     def update_statusbar(self, status_name, text):
@@ -1438,7 +1549,7 @@ class Interface:
         return False
         # self._widgets[status_name].value = f"Status: {text}"
 
-    def download_data(self, selected_results):
+    def retrieve_data(self, selected_results):
         """ Download the data in the selected keys from the object store
 
             Save the passed data as a temporary class member?
@@ -1532,6 +1643,7 @@ class Interface:
         self.add_widgets(section="search", _widgets=self.create_search_box())
         self.add_widgets(section="upload", _widgets=self.create_fileselector())
         # self.add_widgets(section="status_bar", _widgets=[widgets.HTML(value="Woo")])
+
 
 
     def show_interface(self, new_user=False):

@@ -1,5 +1,5 @@
-from ipywidgets import (GridspecLayout, GridBox, VBox, HBox, HTML, Layout, Text,
-                        Button, Output, Checkbox, Label)
+from ipywidgets import (GridspecLayout, GridBox, VBox, HBox, HTML, Layout,
+                        Text, Button, Output, Checkbox, Label)
 from random import randint
 from ipywidgets import HBox, VBox
 from pandas import read_json as pd_read_json
@@ -23,11 +23,7 @@ sys.path.insert(0, "../../../../acquire")
 
 __all__ = ["generate_password"]
 
-    
-def generate_password():
-    length=20
+
+def generate_password(length=20):
     selection = string.ascii_letters + string.digits
     return "".join(secrets.choice(selection) for _ in range(length))
-    
-
-

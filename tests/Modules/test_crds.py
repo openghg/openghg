@@ -90,6 +90,12 @@ def test_read_data():
 
     combined = crds.read_data(data_filepath=filepath, site="tac")
 
+    ch4_data = combined["ch4"]["data"].to_netcdf("/home/gar/ch4_data.nc")
+
+    print(type(ch4_data))
+
+    return False
+
     assert len(combined) == 2
 
     assert list(combined.keys()) == ["ch4", "co2"]
@@ -214,3 +220,4 @@ def test_add_datasources(crds):
     crds.add_datasources(new_datasources)
 
     assert sorted(crds.datasources()) == sorted(list(new_datasources.values()))
+

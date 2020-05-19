@@ -91,7 +91,7 @@ def create_search_box():
     #     status_bar.value = f"Status: {text}"
 
     # data = None
-    # def download_data(date_keys, selected_data):
+    # def retrieve_data(date_keys, selected_data):
     #     print("Download")
     #     update_statusbar("Downloading...")
 
@@ -115,7 +115,7 @@ def create_search_box():
     #     #     update_statusbar("No data downloaded")
 
     # # Here could update the status bar and call the download function
-    # # download_button.on_click(download_data)
+    # # download_button.on_click(retrieve_data)
     
     # out = widgets.interactive_output(select_data, arg_dict)
 
@@ -124,7 +124,7 @@ def create_search_box():
     return widgets.VBox(children=[search_vbox])
 
 
-def download_data(arg_dict):
+def retrieve_data(arg_dict):
     update_statusbar("Downloading...")
 
     download_keys = {key: date_keys[key]["keys"] for key in selected_data}
@@ -155,7 +155,7 @@ def download_data(arg_dict):
                 selected_data.append(key)
 
     # Here could update the status bar and call the download function
-    # download_button.on_click(download_data)
+    # download_button.on_click(retrieve_data)
     
     out = widgets.interactive_output(select_data, arg_dict)
 
@@ -267,7 +267,7 @@ def create_download_box(date_keys):
 
     download_button = widgets.Button(description="Download", button_style="success", layout=table_layout)
 
-    download_button.on_click(download_data)
+    download_button.on_click(retrieve_data)
     download_button_box = widgets.HBox(children=[download_button])
 
     status_bar = widgets.HTML(value="Status: Waiting...", layout=statusbar_layout)
