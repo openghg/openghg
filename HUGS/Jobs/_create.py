@@ -7,7 +7,7 @@ class JobCreator:
         WIP: Skeleton at the moment, will be filled out for use with multiple HPC
         resources/CitC
     """
-    
+
     def __init__(self):
         self._jobs = []
 

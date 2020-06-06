@@ -1,3 +1,1 @@
-
-from ._hugs_service import *
-
+from ._hugs_service import HugsService

@@ -22,7 +22,7 @@
 
 # def parse_results(results):
 #     """ Split the keys into a list of each key and the date that the data covers
-        
+
 #         Args:
 #             results (dict): Dictionary of search results
 #         Returns:
@@ -46,9 +46,9 @@
 # date_keys = None
 
 # # def call_search(x):
-# #     """ Call the search function and pass it the values 
+# #     """ Call the search function and pass it the values
 # #         in the text boxes
-            
+
 # #     """
 # #     from datetime import datetime
 # #     from Acquire.ObjectStore import datetime_to_string
@@ -85,7 +85,7 @@
 
 # # table_style={'description_width': 'initial'}
 # # table_layout={'width': '100px', 'min_width': '100px', 'height': '28px', 'min_height': '28px'}
-    
+
 # # date_layout={'width': '275px', 'min_width': '200px', 'height': '28px', 'min_height': '28px'}
 # # checkbox_layout={'width': '100px', 'min_width': '100px', 'height': '28px', 'min_height': '28px'}
 # # statusbar_layout={'width': '250px', 'min_width': '250px', 'height': '28px', 'min_height': '28px'}
@@ -173,7 +173,7 @@
 #     start_picker=widgets.DatePicker(description='Start date', disabled=False)
 #     end_picker=widgets.DatePicker(description='End date', disabled=False)
 
-   
+
 #     # Split search terms to create a list of terms
 #     split_search_terms=search_terms.value.replace(" ", "").split(",")
 #     split_locations=locations.value.replace(" ", "").split(",")
@@ -212,15 +212,8 @@
 #     search=Search(service_url=base_url)
 #     search_results=search.search(search_terms=search_terms, locations=locations,
 #                                  data_type=data_type.value, start_datetime=start, end_datetime=end)
-    
+
 #     return search_results
-
-
-
-
-
-
-
 
 
 # # search_children=[search_terms, locations, start_picker, end_picker, data_type,

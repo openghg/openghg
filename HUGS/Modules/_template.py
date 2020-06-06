@@ -1,23 +1,27 @@
 from HUGS.Modules import BaseModule
 
+# flake8: noqa
+
 __all__ = ["TEMPLATE"]
 
-### To use this template replace:
+# To use this template replace:
 # - TEMPLATE with new data name in all upper case e.g. CRDS
 # - template with new data name in all lower case e.g. crds
 # - CHANGEME with a new fixed uuid (at the moment)
 
+
 class TEMPLATE(BaseModule):
     """ Interface for processing TEMPLATE data
-        
+
     """
+
     _root = "TEMPLATE"
     # Use uuid.uuid4() to create a unique fixed UUID for this object
     _uuid = "CHANGEME"
 
     def __init__(self):
         from Acquire.ObjectStore import get_datetime_now
-        
+
         self._creation_datetime = get_datetime_now()
         self._stored = False
         # self._datasources = []
@@ -58,7 +62,7 @@ class TEMPLATE(BaseModule):
             Returns:
                 None
         """
-        from Acquire.ObjectStore import ObjectStore, string_to_encoded
+        from Acquire.ObjectStore import ObjectStore
         from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
@@ -96,11 +100,13 @@ class TEMPLATE(BaseModule):
 
         for fp in filepaths:
             datasource_uuids[fp] = TEMPLATE.read_file(data_filepath=fp)
-        
+
         return datasource_uuids
-             
+
     @staticmethod
-    def read_file(data_filepath, source_name, site=None, source_id=None, overwrite=False):
+    def read_file(
+        data_filepath, source_name, site=None, source_id=None, overwrite=False
+    ):
         """ Reads TEMPLATE data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
@@ -112,15 +118,17 @@ class TEMPLATE(BaseModule):
         from HUGS.Processing import assign_data, lookup_gas_datasources
         from HUGS.Util import hash_file
         from pathlib import Path
-        import os
 
         template = TEMPLATE.load()
 
         # Check if the file has been uploaded already
         file_hash = hash_file(filepath=data_filepath)
         if file_hash in template._file_hashes and not overwrite:
-            raise ValueError(f"This file has been uploaded previously with the filename : {template._file_hashes[file_hash]}")
-        
+            raise ValueError(
+                f"This file has been uploaded previously with the \
+                    filename: {template._file_hashes[file_hash]}"
+            )
+
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
 
@@ -137,11 +145,17 @@ class TEMPLATE(BaseModule):
         gas_data = template.assign_attributes(data=gas_data, site=site)
 
         # Check if we've got data from these sources before
-        lookup_results = lookup_gas_datasources(lookup_dict=template._datasource_names, gas_data=gas_data, 
-                                                source_name=source_name, source_id=source_id)
+        lookup_results = lookup_gas_datasources(
+            lookup_dict=template._datasource_names,
+            gas_data=gas_data,
+            source_name=source_name,
+            source_id=source_id,
+        )
 
         # Assign the data to the correct datasources
-        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
+        datasource_uuids = assign_data(
+            gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite
+        )
 
         # Add the Datasources to the list of datasources associated with this object
         template.add_datasources(datasource_uuids)
@@ -155,7 +169,7 @@ class TEMPLATE(BaseModule):
         return datasource_uuids
 
     def read_data(self, data_filepath, site):
-        """ Separates the gases stored in the dataframe in 
+        """ Separates the gases stored in the dataframe in
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
             dataframes
@@ -166,10 +180,11 @@ class TEMPLATE(BaseModule):
                 dict: Dictionary containing attributes, data and metadata keys
         """
         from pandas import RangeIndex, concat, read_csv, datetime, NaT
-       
         from HUGS.Processing import get_attributes, read_metadata
 
-        metadata = read_metadata(filepath=data_filepath, data=data, data_type="TEMPLATE")
+        metadata = read_metadata(
+            filepath=data_filepath, data=data, data_type="TEMPLATE"
+        )
         # This dictionary is used to store the gas data and its associated metadata
         combined_data = {}
 
@@ -185,8 +200,10 @@ class TEMPLATE(BaseModule):
             species_metadata["species"] = species
             species_metadata["source_name"] = source_name
 
-            combined_data[species] = {"metadata": species_metadata, "data": gas_data, "attributes": site_attributes}
+            combined_data[species] = {
+                "metadata": species_metadata,
+                "data": gas_data,
+                "attributes": site_attributes,
+            }
 
         return combined_data
-
-    

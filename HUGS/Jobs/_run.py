@@ -6,6 +6,7 @@ import tempfile
 from HUGS.Jobs import SSHConnect
 from HUGS.Util import get_datapath
 
+
 def run_job(username, hostname, password, job_data, known_host=False):
     """ Set a job to run on a HPC service
 
@@ -18,7 +19,16 @@ def run_job(username, hostname, password, job_data, known_host=False):
             dict: Dictionary of responses to commands executing when running the job
     """
     # Maybe this can be passed in / read from JSON depending on the service selected
-    bc4_partitions = ['cpu_test', 'dcv', 'gpu', 'gpu_veryshort', 'hmem', 'serial', 'test', 'veryshort']
+    bc4_partitions = [
+        "cpu_test",
+        "dcv",
+        "gpu",
+        "gpu_veryshort",
+        "hmem",
+        "serial",
+        "test",
+        "veryshort",
+    ]
 
     # These are used to write the Slurm script
     # This is a WIP, I might be reinventing the wheel here, check before doing any more
@@ -27,7 +37,9 @@ def run_job(username, hostname, password, job_data, known_host=False):
     partition = job_data["partition"]
 
     if partition not in bc4_partitions:
-        raise ValueError(f"Invalid partition selected. Please select from one of the following :\n{bc4_partitions}")
+        raise ValueError(
+            f"Invalid partition selected. Please select from one of the following :\n{bc4_partitions}"
+        )
 
     n_nodes = job_data["n_nodes"]
     n_tasks_per_node = job_data["n_tasks_per_node"]
@@ -36,8 +48,10 @@ def run_job(username, hostname, password, job_data, known_host=False):
     memory_req = job_data["memory_req"]
 
     if not memory_req.endswith("G"):
-        raise ValueError("Memory requirements must be in gigabytes and end with a G i.e. 128G")
-    
+        raise ValueError(
+            "Memory requirements must be in gigabytes and end with a G i.e. 128G"
+        )
+
     job_duration = job_data["job_duration"]
 
     # Create a dated and named filename and path in the user's home dir
@@ -56,7 +70,7 @@ def run_job(username, hostname, password, job_data, known_host=False):
     json_dict["par"] = job_data["par"]
     json_dict["par_secret"] = job_data["par_secret"]
     json_dict["run_command"] = job_data["run_command"]
-    
+
     try:
         json_dict["compilation_command"] = job_data["compilation_command"]
     except KeyError:
@@ -74,8 +88,9 @@ def run_job(username, hostname, password, job_data, known_host=False):
         with open(json_path, "w") as jf:
             json.dump(obj=json_dict, fp=jf, indent=4)
 
-        with open(jobscript_path, 'w') as rsh:
-            rsh.write(f"""#!/bin/bash
+        with open(jobscript_path, "w") as rsh:
+            rsh.write(
+                f"""#!/bin/bash
         #SBATCH --partition={partition}
         #SBATCH --nodes={n_nodes}
         #SBATCH --ntasks-per-node={n_tasks_per_node}
@@ -83,31 +98,32 @@ def run_job(username, hostname, password, job_data, known_host=False):
         #SBATCH --time={job_duration}
         #SBATCH --mem={memory_req}
         {job_sched_command}
-            """)
+            """
+            )
 
         # Here we'll only copy the files we've created
         # Other input files will be copied from the cloud drive by the  script we're passing
-        job_controller_path = get_datapath(filename="bc4_template.py", directory="job_controllers")
+        job_controller_path = get_datapath(
+            filename="bc4_template.py", directory="job_controllers"
+        )
 
         files = [jobscript_path, json_path, job_controller_path]
 
         # TODO - I feel this shouldn't be hardwired, it probably won't change in the Docker image, but ?
         keypath = "/home/fnuser/.ssh/runner_key"
 
-        sc.connect(username=username, hostname=hostname, keypath=keypath, password=password, known_host=known_host)
+        sc.connect(
+            username=username,
+            hostname=hostname,
+            keypath=keypath,
+            password=password,
+            known_host=known_host,
+        )
         # sc.write_files(files=files, remote_dir="first_job")
         sc.write_files(files=files, remote_dir=job_name)
-        
-        response_list = sc.run_command(commands=f"cd {job_name}; python3 bc4_template.py {json_filename} &")
+
+        response_list = sc.run_command(
+            commands=f"cd {job_name}; python3 bc4_template.py {json_filename} &"
+        )
 
     return response_list
-        
-
-
-
-
-
-    
-
-
-    

@@ -1,4 +1,3 @@
-
 from Acquire.Service import ServiceError as _ServiceError
 
 __all__ = ["HugsServiceError"]

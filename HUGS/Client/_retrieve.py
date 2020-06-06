@@ -1,4 +1,3 @@
-
 __all__ = ["Retrieve"]
 
 
@@ -7,8 +6,10 @@ class Retrieve:
     This class is used to retrieve the data that's found using the search function
     from the object store
     """
+
     def __init__(self, service_url=None):
         from Acquire.Client import Wallet as _Wallet
+
         wallet = _Wallet()
         self._service = wallet.get_service(service_url="%s/hugs" % service_url)
 
@@ -51,7 +52,7 @@ class Retrieve:
             # TODO - catch FutureWarnings here that may affect voila behaviour
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                
+
                 json_data = response_data[key]
                 datasets[key] = Dataset.from_dict(json_data)
 

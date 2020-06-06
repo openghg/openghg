@@ -1,8 +1,10 @@
-__all__ = ["status"]
+__all__ = ["Status"]
+
 
 class Status:
     def __init__(self, service_url=None):
         from Acquire.Client import Wallet as _Wallet
+
         wallet = _Wallet()
         self._service = wallet.get_service(service_url="%s/hugs" % service_url)
 
@@ -15,12 +17,7 @@ class Status:
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
-        try:
-            response = self._service.call_function(function="status")
-        except:
-            return False
-
-        return response
+        return self._service.call_function(function="status")
 
     def service(self):
         return self._service

@@ -2,21 +2,23 @@ from HUGS.Modules import BaseModule
 
 __all__ = ["EUROCOM"]
 
+
 class EUROCOM(BaseModule):
     """ Interface for processing EUROCOM data
 
         This is only a temporary module to processing the ICOS EUROCOM study data
 
         ICOS data processing will be done in the ICOS module
-        
+
     """
+
     _root = "EUROCOM"
     # Use uuid.uuid4() to create a unique fixed UUID for this object
     _uuid = "de3e5930-f995-48d7-b3b8-153112b626ee"
 
     def __init__(self):
         from Acquire.ObjectStore import get_datetime_now
-        
+
         self._creation_datetime = get_datetime_now()
         self._stored = False
         # self._datasources = []
@@ -57,7 +59,7 @@ class EUROCOM(BaseModule):
             Returns:
                 None
         """
-        from Acquire.ObjectStore import ObjectStore, string_to_encoded
+        from Acquire.ObjectStore import ObjectStore
         from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
@@ -95,11 +97,13 @@ class EUROCOM(BaseModule):
 
         for fp in filepaths:
             datasource_uuids[fp] = EUROCOM.read_file(data_filepath=fp)
-        
+
         return datasource_uuids
-             
+
     @staticmethod
-    def read_file(data_filepath, source_name, site=None, source_id=None, overwrite=False):
+    def read_file(
+        data_filepath, source_name, site=None, source_id=None, overwrite=False
+    ):
         """ Reads EUROCOM data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
@@ -111,15 +115,16 @@ class EUROCOM(BaseModule):
         from HUGS.Processing import assign_data, lookup_gas_datasources
         from HUGS.Util import hash_file
         from pathlib import Path
-        import os
 
         eurocom = EUROCOM.load()
 
         # Check if the file has been uploaded already
         file_hash = hash_file(filepath=data_filepath)
         if file_hash in eurocom._file_hashes and not overwrite:
-            raise ValueError(f"This file has been uploaded previously with the filename : {eurocom._file_hashes[file_hash]}")
-        
+            raise ValueError(
+                f"This file has been uploaded previously with the filename: {eurocom._file_hashes[file_hash]}"
+            )
+
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
 
@@ -133,11 +138,17 @@ class EUROCOM(BaseModule):
         gas_data = eurocom.read_data(data_filepath=data_filepath, site=site)
 
         # Check if we've got data from these sources before
-        lookup_results = lookup_gas_datasources(lookup_dict=eurocom._datasource_names, gas_data=gas_data, 
-                                                source_name=source_name, source_id=source_id)
+        lookup_results = lookup_gas_datasources(
+            lookup_dict=eurocom._datasource_names,
+            gas_data=gas_data,
+            source_name=source_name,
+            source_id=source_id,
+        )
 
         # Assign the data to the correct datasources
-        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
+        datasource_uuids = assign_data(
+            gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite
+        )
 
         # Add the Datasources to the list of datasources associated with this object
         eurocom.add_datasources(datasource_uuids)
@@ -151,7 +162,7 @@ class EUROCOM(BaseModule):
         return datasource_uuids
 
     def read_data(self, data_filepath, site, height=None):
-        """ Separates the gases stored in the dataframe in 
+        """ Separates the gases stored in the dataframe in
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
             dataframes
@@ -161,16 +172,15 @@ class EUROCOM(BaseModule):
             Returns:
                 dict: Dictionary containing attributes, data and metadata keys
         """
-        from pandas import RangeIndex, concat, read_csv, datetime, NaT, Timestamp
+        from pandas import read_csv, Timestamp
         import numpy as np
-        import xarray as xr
-        from HUGS.Processing import get_attributes, read_metadata
+        from HUGS.Processing import get_attributes
         from HUGS.Util import read_header
         from pathlib import Path
 
         data_filepath = Path(data_filepath)
 
-        filename = data_filepath.name 
+        filename = data_filepath.name
         inlet_height = filename.split("_")[1]
         if "m" not in inlet_height:
             inlet_height = None
@@ -180,32 +190,53 @@ class EUROCOM(BaseModule):
 
         # Read the header as lines starting with #
         header = read_header(data_filepath, comment_char="#")
-        n_skip = len(header)-1
+        n_skip = len(header) - 1
         species = "co2"
 
         def date_parser(year, month, day, hour, minute):
             return Timestamp(year=year, month=month, day=day, hour=hour, minute=minute)
 
         datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
-        use_cols = ["Day", "Month", "Year", "Hour", "Minute", str(species.lower()), "SamplingHeight", "Stdev", "NbPoints"]
-        
-        dtypes = {"Day": np.int,
-                  "Month": np.int,
-                  "Year": np.int,
-                  "Hour": np.int,
-                  "Minute": np.int,
-                  species.lower(): np.float,
-                  "Stdev": np.float,
-                  "SamplingHeight": np.float,
-                  "NbPoints": np.int}
+        use_cols = [
+            "Day",
+            "Month",
+            "Year",
+            "Hour",
+            "Minute",
+            str(species.lower()),
+            "SamplingHeight",
+            "Stdev",
+            "NbPoints",
+        ]
 
-        data = read_csv(data_filepath, skiprows=n_skip, parse_dates=datetime_columns, date_parser=date_parser, 
-                        index_col="time", sep=";", usecols=use_cols, dtype=dtypes, na_values="-999.99")
+        dtypes = {
+            "Day": np.int,
+            "Month": np.int,
+            "Year": np.int,
+            "Hour": np.int,
+            "Minute": np.int,
+            species.lower(): np.float,
+            "Stdev": np.float,
+            "SamplingHeight": np.float,
+            "NbPoints": np.int,
+        }
+
+        data = read_csv(
+            data_filepath,
+            skiprows=n_skip,
+            parse_dates=datetime_columns,
+            date_parser=date_parser,
+            index_col="time",
+            sep=";",
+            usecols=use_cols,
+            dtype=dtypes,
+            na_values="-999.99",
+        )
 
         data = data[data[species.lower()] >= 0.0]
         data = data.dropna(axis="rows", how="any")
         # Drop duplicate indices
-        data = data.loc[~data.index.duplicated(keep='first')]
+        data = data.loc[~data.index.duplicated(keep="first")]
         # Convert to xarray Dataset
         data = data.to_xarray()
 
@@ -216,16 +247,26 @@ class EUROCOM(BaseModule):
         except KeyError:
             calibration_scale = {}
 
-        gas_data = get_attributes(ds=data, species=species, site=site, global_attributes=site_attributes, units="ppm")
+        gas_data = get_attributes(
+            ds=data,
+            species=species,
+            site=site,
+            global_attributes=site_attributes,
+            units="ppm",
+        )
 
         # Create a copy of the metadata dict
         metadata = {}
         metadata["site"] = site
         metadata["species"] = species
         metadata["inlet_height"] = site_attributes["inlet_height_m"]
-        # metadata["site_attributes"] = site_attributes
+        metadata["calibration_scale"] = calibration_scale
 
-        combined_data[species] = {"metadata": metadata, "data": gas_data, "attributes": site_attributes}
+        combined_data[species] = {
+            "metadata": metadata,
+            "data": gas_data,
+            "attributes": site_attributes,
+        }
 
         return combined_data
 
@@ -250,7 +291,7 @@ class EUROCOM(BaseModule):
                 self._eurocom_params = data["EUROCOM"]
 
         attributes = self._eurocom_params["global_attributes"]
-        
+
         if not inlet:
             if site in self._eurocom_params["intake_height"]:
                 inlet = self._eurocom_params["intake_height"][site]
@@ -260,5 +301,3 @@ class EUROCOM(BaseModule):
         attributes["inlet_height_m"] = str(inlet)
 
         return attributes
-
-    

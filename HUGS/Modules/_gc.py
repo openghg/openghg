@@ -1,7 +1,7 @@
-from enum import Enum
 from HUGS.Modules import BaseModule
 
 __all__ = ["GC"]
+
 
 class GC(BaseModule):
     _root = "GC"
@@ -56,15 +56,22 @@ class GC(BaseModule):
 
         if bucket is None:
             bucket = get_bucket()
-        
+
         gc_key = "%s/uuid/%s" % (GC._root, GC._uuid)
 
         self._stored = True
         ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
 
     @staticmethod
-    def read_file(data_filepath, precision_filepath, source_name, site, instrument_name="GCMD", 
-                    source_id=None, overwrite=False):
+    def read_file(
+        data_filepath,
+        precision_filepath,
+        source_name,
+        site,
+        instrument_name="GCMD",
+        source_id=None,
+        overwrite=False,
+    ):
         """ Reads a GC data file by creating a GC object and associated datasources
 
             Args:
@@ -75,25 +82,34 @@ class GC(BaseModule):
                 GC: GC object
 
         """
-        from HUGS.Processing import assign_data, lookup_gas_datasources, get_attributes
-        import json
+        from HUGS.Processing import assign_data, lookup_gas_datasources
         from pathlib import Path
 
         gc = GC.load()
 
         data_filepath = Path(data_filepath)
 
-        gas_data = gc.read_data(data_filepath=data_filepath, precision_filepath=precision_filepath, 
-                                                site=site, instrument=instrument_name)
+        gas_data = gc.read_data(
+            data_filepath=data_filepath,
+            precision_filepath=precision_filepath,
+            site=site,
+            instrument=instrument_name,
+        )
 
         # Assign attributes to the data for CF compliant NetCDFs
         gas_data = gc.assign_attributes(data=gas_data, site=site)
 
-        lookup_results = lookup_gas_datasources(lookup_dict=gc._datasource_names, gas_data=gas_data,
-                                                source_name=source_name, source_id=source_id)
-    
+        lookup_results = lookup_gas_datasources(
+            lookup_dict=gc._datasource_names,
+            gas_data=gas_data,
+            source_name=source_name,
+            source_id=source_id,
+        )
+
         # Create Datasources, save them to the object store and get their UUIDs
-        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
+        datasource_uuids = assign_data(
+            gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite
+        )
         # Add the Datasources to the list of datasources associated with this object
         gc.add_datasources(datasource_uuids)
         # Save object to object store
@@ -109,7 +125,7 @@ class GC(BaseModule):
                 data_filepath (pathlib.Path): Path of data file
                 precision_filepath (pathlib.Path): Path of precision file
                 site (str): Name of site
-                instrument (str): Identifying data for instrument 
+                instrument (str): Identifying data for instrument
             Returns:
                 list: List of tuples (str, dict, str, Pandas.Dataframe)
 
@@ -120,16 +136,23 @@ class GC(BaseModule):
         from pandas import Timedelta as pd_Timedelta
         from HUGS.Processing import read_metadata
 
-        # Read header   
+        # Read header
         header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
         # Create a function to parse the datetime in the data file
-        def parser(date): 
-            return datetime.strptime(date, '%Y %m %d %H %M')
+        def parser(date):
+            return datetime.strptime(date, "%Y %m %d %H %M")
+
         # Read the data in and automatically create a datetime column from the 5 columns
         # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
-        data = read_csv(data_filepath, skiprows=4, sep=r"\s+", index_col=["yyyy_mm_dd_hh_mi"],
-                         parse_dates=[[1, 2, 3, 4, 5]], date_parser=parser)
+        data = read_csv(
+            data_filepath,
+            skiprows=4,
+            sep=r"\s+",
+            index_col=["yyyy_mm_dd_hh_mi"],
+            parse_dates=[[1, 2, 3, 4, 5]],
+            date_parser=parser,
+        )
         data.index.name = "Datetime"
 
         metadata = read_metadata(filepath=data_filepath, data=data, data_type="GC")
@@ -148,8 +171,12 @@ class GC(BaseModule):
                 # Add it to the dictionary for renaming later
                 columns_renamed[column] = gas_name + "_flag"
                 # Create 2 new columns based on the flag columns
-                data[gas_name + " status_flag"] = (data[column].str[0] != "-").astype(int)
-                data[gas_name + " integration_flag"] = (data[column].str[1] != "-").astype(int)
+                data[gas_name + " status_flag"] = (data[column].str[0] != "-").astype(
+                    int
+                )
+                data[gas_name + " integration_flag"] = (
+                    data[column].str[1] != "-"
+                ).astype(int)
 
                 col_shift = 4
                 units[gas_name] = header.iloc[1, col_loc + col_shift]
@@ -158,7 +185,10 @@ class GC(BaseModule):
                 # Ensure the units and scale have been read in correctly
                 # Have this in case the column shift between the header and data changes
                 if units[gas_name] == "--" or scale[gas_name] == "--":
-                    raise ValueError("Error reading units and scale, ensure columns are correct between header and dataframe")
+                    raise ValueError(
+                        "Error reading units and scale, ensure columns are correct \
+                        between header and dataframe"
+                    )
 
                 species.append(gas_name)
 
@@ -170,25 +200,38 @@ class GC(BaseModule):
 
         for sp in species:
             precision_index = precision_species.index(sp) * 2 + 1
-            data[sp + " repeatability"] = precision[precision_index].astype(float).reindex_like(data, method="pad")
+            data[sp + " repeatability"] = (
+                precision[precision_index]
+                .astype(float)
+                .reindex_like(data, method="pad")
+            )
 
         # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
         self._sampling_period = self.get_precision(instrument)
 
-        data["new_time"] = data.index - pd_Timedelta(seconds=self._sampling_period/2.0)
+        data["new_time"] = data.index - pd_Timedelta(
+            seconds=self._sampling_period / 2.0
+        )
 
         data = data.set_index("new_time", inplace=False, drop=True)
         data.index.name = "time"
 
-        gas_data = self.split_species(data=data, site=site, species=species, 
-                                    instrument=instrument, metadata=metadata, units=units, scale=scale)
-        
+        gas_data = self.split_species(
+            data=data,
+            site=site,
+            species=species,
+            instrument=instrument,
+            metadata=metadata,
+            units=units,
+            scale=scale,
+        )
+
         return gas_data
 
     def read_precision(self, filepath):
         """ Read GC precision file
 
-            Args: 
+            Args:
                 filepath (pathlib.Path): Path of precision file
             Returns:
                 tuple (Pandas.DataFrame, list): Precision DataFrame and list of species in
@@ -198,16 +241,25 @@ class GC(BaseModule):
         from datetime import datetime
 
         # Function for parsing datetime
-        def parser(date): 
-            return datetime.strptime(date, '%y%m%d')
+        def parser(date):
+            return datetime.strptime(date, "%y%m%d")
 
         # Read precision species
-        precision_header = read_csv(filepath, skiprows=3, nrows=1, header=None, sep=r"\s+")
+        precision_header = read_csv(
+            filepath, skiprows=3, nrows=1, header=None, sep=r"\s+"
+        )
 
         precision_species = precision_header.values[0][1:].tolist()
 
-        precision = read_csv(filepath, skiprows=5, header=None, sep=r"\s+",
-                                index_col=0, parse_dates=[0], date_parser=parser)
+        precision = read_csv(
+            filepath,
+            skiprows=5,
+            header=None,
+            sep=r"\s+",
+            index_col=0,
+            parse_dates=[0],
+            date_parser=parser,
+        )
 
         precision.index.name = "Datetime"
         # Drop any duplicates from the index
@@ -229,24 +281,21 @@ class GC(BaseModule):
             Returns:
                 dict: Dataframe of gas data and metadata
         """
-        from fnmatch import fnmatch
-        from itertools import compress
-
-        import pandas as pd
-
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
 
         # site_code = self.get_site_code(site)
 
         # Read inlets from the parameters dictionary
-        expected_inlets = self.get_inlets(site_code=site)
+        # expected_inlets = self.get_inlets(site_code=site)
         # Get the inlets in the dataframe
         try:
             data_inlets = data["Inlet"].unique()
         except KeyError:
-            raise KeyError("Unable to read inlets from data, please ensure this data is of the GC \
-                                    type expected by this processing module")
+            raise KeyError(
+                "Unable to read inlets from data, please ensure this data is of the GC \
+                                    type expected by this processing module"
+            )
         # TODO - ask Matt/Rachel about inlets
         matching_inlets = data_inlets
 
@@ -260,8 +309,8 @@ class GC(BaseModule):
         #         # If none of them match processing below will not proceed
         #         matching_inlets = list(compress(data_inlets, match))
         #     else:
-        #         raise ValueError("Inlet mismatch - please ensure correct site is selected. Mismatch between inlet in \
-        #                           data and inlet in parameters file.")
+        #         raise ValueError("Inlet mismatch - please ensure correct site is selected. \
+        #                           Mismatch between inlet in data and inlet in parameters file.")
 
         combined_data = {}
 
@@ -272,7 +321,7 @@ class GC(BaseModule):
 
             # Create a copy of metadata for local modification
             spec_metadata = metadata.copy()
-            
+
             spec_metadata["species"] = spec
             spec_metadata["units"] = units[spec]
             spec_metadata["scale"] = scale[spec]
@@ -281,21 +330,47 @@ class GC(BaseModule):
                 spec_metadata["inlet"] = inlet
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
-                    spec_data = data[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
+                    spec_data = data[
+                        [
+                            spec,
+                            spec + " repeatability",
+                            spec + " status_flag",
+                            spec + " integration_flag",
+                            "Inlet",
+                        ]
+                    ]
                     spec_data = spec_data.dropna(axis="index", how="any")
                 elif "date" in inlet:
                     dates = inlet.split("_")[1:]
-                    slice_dict = {time: slice(dates[0], dates[1])}
+                    slice_dict = {"time": slice(dates[0], dates[1])}
                     data_sliced = data.loc(slice_dict)
-                    spec_data = data_sliced[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
+                    spec_data = data_sliced[
+                        [
+                            spec,
+                            spec + " repeatability",
+                            spec + " status_flag",
+                            spec + " integration_flag",
+                            "Inlet",
+                        ]
+                    ]
                     spec_data = spec_data.dropna(axis="index", how="any")
                 else:
                     # Take only data for this inlet from the dataframe
                     inlet_data = data.loc[data["Inlet"] == inlet]
-                    spec_data = inlet_data[[spec, spec + " repeatability", spec + " status_flag",  spec + " integration_flag", "Inlet"]]
+                    spec_data = inlet_data[
+                        [
+                            spec,
+                            spec + " repeatability",
+                            spec + " status_flag",
+                            spec + " integration_flag",
+                            "Inlet",
+                        ]
+                    ]
                     spec_data = spec_data.dropna(axis="index", how="any")
 
-                attributes = self.site_attributes(site=site, inlet=inlet, instrument=instrument)
+                attributes = self.site_attributes(
+                    site=site, inlet=inlet, instrument=instrument
+                )
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
@@ -322,8 +397,16 @@ class GC(BaseModule):
             units = data[species]["metadata"]["units"]
             scale = data[species]["metadata"]["scale"]
 
-            data[species]["data"] = get_attributes(ds=data[species]["data"], species=species, site=site, network=network, units=units, 
-                                                    scale=scale, global_attributes=site_attributes, sampling_period=self._sampling_period)
+            data[species]["data"] = get_attributes(
+                ds=data[species]["data"],
+                species=species,
+                site=site,
+                network=network,
+                units=units,
+                scale=scale,
+                global_attributes=site_attributes,
+                sampling_period=self._sampling_period,
+            )
 
         return data
 
@@ -390,7 +473,7 @@ class GC(BaseModule):
             site_code = self._site_codes[site.lower()]
         except KeyError:
             raise KeyError("Site not recognized")
-        
+
         return site_code
 
     def site_attributes(self, site, inlet, instrument):
@@ -404,13 +487,15 @@ class GC(BaseModule):
         """
         if not self._gc_params:
             self.load_params()
-        
+
         attributes = self._gc_params[site.upper()]["global_attributes"]
         attributes["inlet_height_magl"] = inlet
         try:
             attributes["comment"] = self._gc_params["comment"][instrument]
         except KeyError:
             valid_instruments = list(self._gc_params["comment"].keys())
-            raise KeyError(f"Invalid instrument passed, valid instruments : {valid_instruments}")
+            raise KeyError(
+                f"Invalid instrument passed, valid instruments : {valid_instruments}"
+            )
 
         return attributes

@@ -1,4 +1,3 @@
-
 __all__ = ["ListObjects"]
 
 
@@ -6,9 +5,11 @@ class ListObjects:
     """This is a simple class to demonstrate client-server
        communication
     """
+
     def __init__(self, service_url=None):
         if service_url is not None:
             from Acquire.Client import Wallet as _Wallet
+
             wallet = _Wallet()
             self._service = wallet.get_service(service_url=service_url)
         else:
@@ -26,4 +27,3 @@ class ListObjects:
 
     def service(self):
         return self._service
-

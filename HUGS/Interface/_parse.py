@@ -1,7 +1,9 @@
 __all__ = ["parse_data", "get_download_keys"]
 
+
 def show_results(search_results):
     pass
+
 
 def parse_data(data):
     """ Converts the data from JSON to Pandas.DataFrames
@@ -18,6 +20,7 @@ def parse_data(data):
         dataframes[key] = read_json(data[key])
 
     return dataframes
+
 
 def get_download_keys(search_results, to_download):
     """ Creates a dictionary of keys to download

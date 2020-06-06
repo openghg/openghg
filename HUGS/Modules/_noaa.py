@@ -2,10 +2,12 @@ from HUGS.Modules import BaseModule
 
 __all__ = ["NOAA"]
 
+
 class NOAA(BaseModule):
     """ Interface for processing NOAA data
-        
+
     """
+
     _root = "NOAA"
     # Use uuid.uuid4() to create a unique fixed UUID for this object
     _uuid = "834316aa-a0a1-4b33-810a-7040615426b8"
@@ -53,7 +55,7 @@ class NOAA(BaseModule):
             Returns:
                 None
         """
-        from Acquire.ObjectStore import ObjectStore, string_to_encoded
+        from Acquire.ObjectStore import ObjectStore
         from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
@@ -95,7 +97,14 @@ class NOAA(BaseModule):
         return datasource_uuids
 
     @staticmethod
-    def read_file(data_filepath, species=None, source_name=None, site=None, source_id=None, overwrite=False):
+    def read_file(
+        data_filepath,
+        species=None,
+        source_name=None,
+        site=None,
+        source_id=None,
+        overwrite=False,
+    ):
         """ Reads NOAA data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
@@ -107,14 +116,15 @@ class NOAA(BaseModule):
         from HUGS.Processing import assign_data, lookup_gas_datasources, get_attributes
         from HUGS.Util import hash_file
         from pathlib import Path
-        import os
 
         noaa = NOAA.load()
 
         # Check if the file has been uploaded already
         file_hash = hash_file(filepath=data_filepath)
         if file_hash in noaa._file_hashes and not overwrite:
-            raise ValueError(f"This file has been uploaded previously with the filename : {noaa._file_hashes[file_hash]}")
+            raise ValueError(
+                f"This file has been uploaded previously with the filename : {noaa._file_hashes[file_hash]}"
+            )
 
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
@@ -133,19 +143,30 @@ class NOAA(BaseModule):
 
         for species in gas_data:
             units = noaa._noaa_params["unit_species"][species]
-            scale = noaa._noaa_params["scale"][species]
+            # scale = noaa._noaa_params["scale"][species]
             # Unit scales used for each species
             species_scales = noaa._noaa_params["scale"][species.upper()]
 
-            gas_data[species]["data"] = get_attributes(ds=gas_data[species]["data"], species=species, site="TMB", units=units, 
-                                                        scale=species_scales)
+            gas_data[species]["data"] = get_attributes(
+                ds=gas_data[species]["data"],
+                species=species,
+                site="TMB",
+                units=units,
+                scale=species_scales,
+            )
 
         # Check if we've got data from these sources before
-        lookup_results = lookup_gas_datasources(lookup_dict=noaa._datasource_names, gas_data=gas_data,
-                                                source_name=source_name, source_id=source_id)
+        lookup_results = lookup_gas_datasources(
+            lookup_dict=noaa._datasource_names,
+            gas_data=gas_data,
+            source_name=source_name,
+            source_id=source_id,
+        )
 
         # Assign the data to the correct datasources
-        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
+        datasource_uuids = assign_data(
+            gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite
+        )
 
         # Add the Datasources to the list of datasources associated with this object
         noaa.add_datasources(datasource_uuids)
@@ -159,7 +180,7 @@ class NOAA(BaseModule):
         return datasource_uuids
 
     def read_data(self, data_filepath, species, measurement_type="flask"):
-        """ Separates the gases stored in the dataframe in 
+        """ Separates the gases stored in the dataframe in
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
             dataframes
@@ -181,23 +202,42 @@ class NOAA(BaseModule):
         def date_parser(year, month, day, hour, minute, second):
             return Timestamp(year, month, day, hour, minute, second)
 
-        date_parsing = {"time": ["sample_year", "sample_month", "sample_day",
-                                 "sample_hour", "sample_minute", "sample_seconds"]}
+        date_parsing = {
+            "time": [
+                "sample_year",
+                "sample_month",
+                "sample_day",
+                "sample_hour",
+                "sample_minute",
+                "sample_seconds",
+            ]
+        }
 
-        data_types = {"sample_year": np.int,
-                        "sample_month": np.int,
-                        "sample_day": np.int,
-                        "sample_hour": np.int,
-                        "sample_minute": np.int,
-                        "sample_seconds": np.int}
-        
+        data_types = {
+            "sample_year": np.int,
+            "sample_month": np.int,
+            "sample_day": np.int,
+            "sample_hour": np.int,
+            "sample_minute": np.int,
+            "sample_seconds": np.int,
+        }
+
         # Number of header lines to skip
         n_skip = len(header)
 
-        data = read_csv(data_filepath, skiprows=n_skip, names=column_names, sep=r"\s+", dtype=data_types, parse_dates=date_parsing, 
-                        date_parser=date_parser, index_col="time", skipinitialspace=True)
+        data = read_csv(
+            data_filepath,
+            skiprows=n_skip,
+            names=column_names,
+            sep=r"\s+",
+            dtype=data_types,
+            parse_dates=date_parsing,
+            date_parser=date_parser,
+            index_col="time",
+            skipinitialspace=True,
+        )
 
-        data = data.loc[~data.index.duplicated(keep='first')]
+        data = data.loc[~data.index.duplicated(keep="first")]
 
         # Check if the index is sorted
         if not data.index.is_monotonic_increasing:
@@ -212,8 +252,8 @@ class NOAA(BaseModule):
         flag = []
         selection_flag = []
         for flag_str in data.analysis_flag:
-            flag.append(flag_str[0] == '.')
-            selection_flag.append(int(flag_str[1] != '.'))
+            flag.append(flag_str[0] == ".")
+            selection_flag.append(int(flag_str[1] != "."))
 
         combined_data = {}
 
@@ -222,14 +262,24 @@ class NOAA(BaseModule):
 
         data = data[data[species + "_status_flag"]]
 
-        data = data[["sample_latitude", "sample_longitude", "sample_altitude", "analysis_value", "analysis_uncertainty",
-                    species + "_selection_flag"]]
+        data = data[
+            [
+                "sample_latitude",
+                "sample_longitude",
+                "sample_altitude",
+                "analysis_value",
+                "analysis_uncertainty",
+                species + "_selection_flag",
+            ]
+        ]
 
-        rename_dict = {"analysis_value": species,
-                        "analysis_uncertainty": species + "_repeatability",
-                        "sample_longitude": "longitude",
-                        "sample_latitude": "latitude",
-                        "sample_altitude": "altitude"}
+        rename_dict = {
+            "analysis_value": species,
+            "analysis_uncertainty": species + "_repeatability",
+            "sample_longitude": "longitude",
+            "sample_latitude": "latitude",
+            "sample_altitude": "altitude",
+        }
 
         data = data.rename(columns=rename_dict, inplace=False)
 
@@ -242,11 +292,15 @@ class NOAA(BaseModule):
         metadata["site"] = site
         metadata["measurement_type"] = measurement_type
 
-        combined_data[species] = {"metadata": metadata, "data": data, "attributes": site_attributes}
+        combined_data[species] = {
+            "metadata": metadata,
+            "data": data,
+            "attributes": site_attributes,
+        }
 
         return combined_data
 
-    def site_attributes(self):  
+    def site_attributes(self):
         """ Gets the site specific attributes for writing to Datsets
 
             Returns:

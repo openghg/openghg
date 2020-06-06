@@ -1,14 +1,13 @@
-""" Module to load emissions maps and break them down into usable chunks
-    for saving as Datasources
-
-    
-"""
 __all__ = ["Footprint"]
 
+
 class Footprint:
+    """ Module to load emissions maps and break them down into usable chunks
+        for saving as Datasources
+    """
     _footprint_root = "footprint"
     _footprint_uuid = "8cba4797-510c-foot-print-e02a5ee57489"
-    
+
     def __init__(self):
         self._creation_datetime = None
         self._stored = None
@@ -29,7 +28,7 @@ class Footprint:
 
     @staticmethod
     def exists(bucket=None):
-        """ Check if a Footprint object is already saved in the object 
+        """ Check if a Footprint object is already saved in the object
             store
 
             Args:
@@ -45,7 +44,7 @@ class Footprint:
         key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_uuid)
 
         return exists(bucket=bucket, key=key)
-    
+
     @staticmethod
     def create():
         """ Used to create Footprint objects
@@ -57,9 +56,9 @@ class Footprint:
 
         footprint = Footprint()
         footprint._creation_datetime = get_datetime_now()
-        
+
         return footprint
-    
+
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
             for storage in object store
@@ -88,12 +87,12 @@ class Footprint:
             Args:
                 data (dict): JSON data
                 bucket (dict, default=None): Bucket for data storage
-        """ 
+        """
         from Acquire.ObjectStore import string_to_datetime
 
         if data is None or len(data) == 0:
             return Footprint()
-        
+
         footprint = Footprint()
         footprint._creation_datetime = string_to_datetime(data["creation_datetime"])
         footprint._datasource_uuids = data["datasource_uuids"]
@@ -141,12 +140,12 @@ class Footprint:
 
         if bucket is None:
             bucket = get_bucket()
-        
+
         key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_uuid)
         data = ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
         return Footprint.from_data(data=data, bucket=bucket)
-        
+
     @staticmethod
     def read_file(filepath, source_name):
         """ For a single footprint file we can break it down into chunks of a certain size
@@ -158,9 +157,7 @@ class Footprint:
             Returns:
                 None
         """
-        import os
         import xarray as xr
-        from HUGS.Modules import Datasource
         from HUGS.Processing import lookup_footprint_datasources
 
         footprint = Footprint.load()
@@ -174,15 +171,21 @@ class Footprint:
         # Update the user passed metadata with that extracted from the NetCDF
         file_metadata = footprint._read_metadata(dataset)
         metadata.update(file_metadata)
-        
-        datasource_names = footprint.datasource_names()
-        lookup_results = lookup_footprint_datasources(lookup_dict=datasource_names, source_name=source_name)
 
-        datasource_uuids = footprint.assign_data(lookup_results=lookup_results, source_name=source_name, data=dataset,
-                                                 metadata=metadata)
-        
+        datasource_names = footprint.datasource_names()
+        lookup_results = lookup_footprint_datasources(
+            lookup_dict=datasource_names, source_name=source_name
+        )
+
+        datasource_uuids = footprint.assign_data(
+            lookup_results=lookup_results,
+            source_name=source_name,
+            data=dataset,
+            metadata=metadata,
+        )
+
         footprint.add_datasources(datasource_uuids)
-        
+
         footprint.save()
 
     def assign_data(self, lookup_results, source_name, data, metadata, overwrite=False):
@@ -221,29 +224,25 @@ class Footprint:
 
             Args:
                 dataset (xarray.Dataset): Footprint Dataset
-           
-           Read the date range covered, data variables available, attributes, coordinates
+
+            Read the date range covered, data variables available, attributes, coordinates
 
         """
-        data_variables = list(dataset.var())
-        coordinates = list(dataset.coords)
-
         metadata = {}
         metadata["data_variables"] = list(dataset.var())
         metadata["coordinates"] = list(dataset.coords)
         metadata["data_type"] = "footprint"
-        
+
         return metadata
 
     def get_split_frequency(footprint_ds, split_freq="W"):
-        """
-            Currently unused
-        """
+        """ Currently unused """
 
-        group = footprint_ds.groupby("time.week")
+        # group = footprint_ds.groupby("time.week")
 
         # Get the Datasets for each week's worth of data
-        data = [g for _, g in group if len(g) > 0]
+        # data = [g for _, g in group if len(g) > 0]
+        raise NotImplementedError
 
     def datasources(self):
         """ Return the list of Datasources for this object
@@ -286,7 +285,6 @@ class Footprint:
 
     #         Args:
 
-
     #     """
 
     #     # Create a datasource for each footprint source
@@ -294,9 +292,3 @@ class Footprint:
     #         # create datasource
     #         # add_footprint data
     #     add_footprint_data
-
-
-
-
-
-        
