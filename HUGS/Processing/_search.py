@@ -43,7 +43,7 @@ def search(
     end_datetime=None,
 ):
     """ Search for gas data (optionally within a daterange)
-    
+
         Args:
             search_terms (string or list): Terms to search for in Datasources
             locations (string or list): Where to search for the terms in search_terms

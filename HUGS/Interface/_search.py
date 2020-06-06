@@ -4,6 +4,8 @@ __all__ = ["search_emissions", "get_emissions_data", "create_search_box", "test_
     Searching interface functions
 """
 
+# flake8: noqa
+
 from datetime import datetime
 from Acquire.ObjectStore import datetime_to_string
 from HUGS.Client import Search

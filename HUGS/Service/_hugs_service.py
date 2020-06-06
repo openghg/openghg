@@ -1,4 +1,3 @@
-import uuid as _uuid
 from copy import copy as _copy
 
 from Acquire.Service import Service as _Service
