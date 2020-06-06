@@ -162,7 +162,7 @@ class Cranfield:
             # Here we don't want to match the co in co2
             # For now we'll just have 2 columns for each species
             # cols = [col for col in data.columns if sp in col]
-            gas_data = data.iloc[:, n * n_cols: (n + 1) * n_cols]
+            gas_data = data.iloc[:, n * n_cols : (n + 1) * n_cols]
 
             # Convert from a pandas DataFrame to an xarray Dataset
             gas_data = gas_data.to_xarray()

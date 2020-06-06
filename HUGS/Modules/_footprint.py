@@ -5,6 +5,7 @@ class Footprint:
     """ Module to load emissions maps and break them down into usable chunks
         for saving as Datasources
     """
+
     _footprint_root = "footprint"
     _footprint_uuid = "8cba4797-510c-foot-print-e02a5ee57489"
 

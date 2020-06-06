@@ -243,7 +243,7 @@ class CRDS(BaseModule):
         for n in range(n_gases):
             # Slice the columns
             gas_data = data.iloc[
-                :, skip_cols + n * n_cols: skip_cols + (n + 1) * n_cols
+                :, skip_cols + n * n_cols : skip_cols + (n + 1) * n_cols
             ]
 
             # Reset the column numbers
