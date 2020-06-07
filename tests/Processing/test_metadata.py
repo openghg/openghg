@@ -1,15 +1,21 @@
-import pandas as pd
-import pytest
 from pathlib import Path
 
+import pandas as pd
+
 from HUGS.Processing import read_metadata
+
 
 def test_parse_CRDS():
     filename = "hfd.picarro.1minute.100m_min.dat"
 
-    filepath = Path(__file__).resolve().parent.joinpath("../data/proc_test_data/CRDS/").joinpath(filename)
+    filepath = (
+        Path(__file__)
+        .resolve()
+        .parent.joinpath("../data/proc_test_data/CRDS/")
+        .joinpath(filename)
+    )
 
-    data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+") 
+    data = pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
 
     metadata = read_metadata(filepath=filepath, data=data, data_type="CRDS")
 
@@ -19,9 +25,15 @@ def test_parse_CRDS():
     assert metadata["port"] == "10"
     assert metadata["type"] == "air"
 
+
 def test_parse_GC():
     filename = "capegrim-medusa.18.C"
-    filepath = Path(__file__).resolve().parent.joinpath("../data/proc_test_data/GC/").joinpath(filename)
+    filepath = (
+        Path(__file__)
+        .resolve()
+        .parent.joinpath("../data/proc_test_data/GC/")
+        .joinpath(filename)
+    )
 
     metadata = read_metadata(filepath=filepath, data=None, data_type="GC")
 

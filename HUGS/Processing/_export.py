@@ -5,12 +5,20 @@
 """
 __all__ = ["get_ceda_file"]
 
-def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_yaml=False, date_range=None):
-    """ Creates a JSON (with a yaml extension for CEDA reasons) object 
+
+def get_ceda_file(
+    filepath=None,
+    site=None,
+    instrument=None,
+    height=None,
+    write_yaml=False,
+    date_range=None,
+):
+    """ Creates a JSON (with a yaml extension for CEDA reasons) object
         for export for a CEDA upload
 
         Args:
-            filepath (str or Path, default=None): Path for file output. If file not passed a 
+            filepath (str or Path, default=None): Path for file output. If file not passed a
             dictionary is returned
             site (str, default=None): Three letter site code (such as BSD for Bilsdale)
             instrument (str, default=None): Name of instrument
@@ -19,7 +27,7 @@ def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_
             date_range (tuple, default=None): Start, end Python datetime objects
         Returns:
             dict: Dictionary for upload to CEDA
-            
+
     """
     import json
     import yaml
@@ -41,7 +49,7 @@ def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_
         raise ValueError("Site must be given")
 
     site = site.upper()
-    
+
     # Ensure height is in the format we want
     height = str(height).lower().replace(" ", "")
     if not height.endswith("m"):
@@ -58,16 +66,21 @@ def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_
     data["description"] = site_description
     # Similarly load from YAML?yaml
     # Where site_authors is a dict containing authors
-    data["authors"] = [{"firstname": "HUGS", "surname": "Cloud"},
-                       {"firstname": "", "surname": ""},
-                       {"firstname": "", "surname": ""}]
+    data["authors"] = [
+        {"firstname": "HUGS", "surname": "Cloud"},
+        {"firstname": "", "surname": ""},
+        {"firstname": "", "surname": ""},
+    ]
 
     # Here we'll have to add in the degree notation?
-    data["bbox"] = {"north": ceda_comp[site]["latitude"], "south": "",
-                    "east": "", "west": ceda_comp[site]["longitude"]}
-    
-    data["time_range"] = {"start": "2014-05-02 00:00:00",
-                          "end": "2014-31-12 23:00:00"}
+    data["bbox"] = {
+        "north": ceda_comp[site]["latitude"],
+        "south": "",
+        "east": "",
+        "west": ceda_comp[site]["longitude"],
+    }
+
+    data["time_range"] = {"start": "2014-05-02 00:00:00", "end": "2014-31-12 23:00:00"}
 
     # These can be loaded in from YAML / JSON
     data["lineage"] = ceda_comp[site]["lineage"]
@@ -75,18 +88,24 @@ def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_
 
     data["docs"] = [{"title": site_title, "url": ceda_comp[site]["url"]}]
 
-    data["project"] = {"catalogue_url": ceda_comp[site]["catalogue_url"], "title": site_title, "description": site_description,
-                       "PI": {"firstname": "HUGS", "lastname": "Cloud"}, "funder": "NERC", "grant_number": "HUGS_Grant"}
+    data["project"] = {
+        "catalogue_url": ceda_comp[site]["catalogue_url"],
+        "title": site_title,
+        "description": site_description,
+        "PI": {"firstname": "HUGS", "lastname": "Cloud"},
+        "funder": "NERC",
+        "grant_number": "HUGS_Grant",
+    }
 
-    data["instrument"] = {"catalogue_url": site_instrument["catalogue_url"],
-                          "title": site_instrument["title"],
-                          "description": site_instrument["description"],
-                          "height": height}
+    data["instrument"] = {
+        "catalogue_url": site_instrument["catalogue_url"],
+        "title": site_instrument["title"],
+        "description": site_instrument["description"],
+        "height": height,
+    }
 
     # This is empty in the examples sent
-    data["computation"] = {"catalogue_url": "",
-                           "title": "",
-                           "description": ""}
+    data["computation"] = {"catalogue_url": "", "title": "", "description": ""}
 
     if filepath:
         with open(filepath, "w") as f:
@@ -98,6 +117,7 @@ def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_
         return None
     else:
         return data
+
 
 # def export_compliant(data, filepath=None):
 #     """ Check the passed data is CF compliant and if a filepath is passed
@@ -127,7 +147,7 @@ def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_
 #         check_file = str(filepath)
 
 #     data.to_netcdf(check_file)
-    
+
 #     # Here we capture the stdout from the chkFiles function which will include any useful error messages
 #     c = io.StringIO()
 #     with redirect_stdout(c):
@@ -149,27 +169,8 @@ def get_ceda_file(filepath=None, site=None, instrument=None, height=None, write_
 #         # raise ValueError(f"{results["FATAL"]}") # fatal and {results["ERROR"]} non-fatal errors found")
 #         raise ValueError(f"{results['FATAL']} fatal and {results['ERROR']} non-fatal errors found.\
 #              Please make changes to ensure your file is compliant.\n\n {stdout_capture}")
-    
+
 #     if filepath is None:
 #         return results, data
 #     else:
 #         return results
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    

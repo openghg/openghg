@@ -1,9 +1,10 @@
-import tempfile
 import datetime
-import shutil
 import os
 
 from Acquire.ObjectStore import ObjectStore, use_testing_object_store_backend
+from Acquire.Service import ServiceAccountError
+
+__all__ = ["bucket_time", "get_local_bucket"]
 
 
 def bucket_time():
@@ -14,6 +15,7 @@ def bucket_time():
             str: A formatted version of datetime.now()
     """
     return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+
 
 def get_local_bucket(name=None, empty=False):
     """ Creates and returns a local bucket
@@ -30,11 +32,11 @@ def get_local_bucket(name=None, empty=False):
     # TODO - clean this up
     try:
         return get_service_account_bucket()
-    except:
+    except Exception:
         # Get the path of the user's home directory
         home_path = os.path.expanduser("~")
         hugs_test_buckets = "hugs_tmp/test_buckets"
-        
+
         local_buckets_dir = os.path.join(home_path, hugs_test_buckets)
 
         if name:
@@ -42,7 +44,7 @@ def get_local_bucket(name=None, empty=False):
 
         if empty:
             import shutil as _shutil
-            import os as _os
+
             # Remove the directory and recreate
             if os.path.isdir(local_buckets_dir):
                 _shutil.rmtree(local_buckets_dir)
@@ -55,11 +57,3 @@ def get_local_bucket(name=None, empty=False):
         bucket = ObjectStore.create_bucket(bucket=root_bucket, bucket_name="hugs_test")
 
         return bucket
-
-
-
-
-
-
-
-

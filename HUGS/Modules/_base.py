@@ -2,13 +2,14 @@
     modules inherit.
 """
 
+
 class BaseModule:
     def is_null(self):
         return not self.datasources
 
     @classmethod
     def exists(cls, bucket=None):
-        """ Check if a GC object is already saved in the object 
+        """ Check if a GC object is already saved in the object
             store
 
             Args:
@@ -69,7 +70,7 @@ class BaseModule:
 
         if not cls.exists():
             return cls()
-        
+
         if bucket is None:
             bucket = get_bucket()
 
@@ -77,7 +78,7 @@ class BaseModule:
         data = ObjectStore.get_object_from_json(bucket=bucket, key=key)
 
         return cls.from_data(data=data, bucket=bucket)
-    
+
     @classmethod
     def uuid(cls):
         """ Return the UUID of this object
@@ -112,7 +113,7 @@ class BaseModule:
         return self._datasource_names
 
     def remove_datasource(self, uuid):
-        """ Remove the Datasource with the given uuid from the list 
+        """ Remove the Datasource with the given uuid from the list
             of Datasources
 
             Args:

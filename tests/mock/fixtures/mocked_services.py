@@ -1,28 +1,25 @@
-
 ##########
 # This file defines all of the monkey-patching and fixtures which
 # are needed to run the mocked service tests
 ##########
 
-import pytest
 import os
 import sys
 import uuid
 
 import Acquire
 import Acquire.Stubs
-
+import pytest
 import requests as _original_requests
 
-from admin.handler import create_handler
-from identity.route import identity_functions
-from accounting.route import accounting_functions
 from access.route import access_functions
-from storage.route import storage_functions
+from accounting.route import accounting_functions
+from admin.handler import create_handler
 from compute.route import compute_functions
-from registry.route import registry_functions
-
 from hugs_service.route import hugs_functions
+from identity.route import identity_functions
+from registry.route import registry_functions
+from storage.route import storage_functions
 
 identity_handler = create_handler(identity_functions)
 accounting_handler = create_handler(accounting_functions)
@@ -50,6 +47,7 @@ def _get_wallet_dir(**kwargs):
 def _get_wallet_password(**kwargs):
     return pytest.my_global_wallet_password
 
+
 Acquire.Client._wallet._get_wallet_dir = _get_wallet_dir
 Acquire.Client._wallet._get_wallet_password = _get_wallet_password
 
@@ -62,6 +60,7 @@ class MockedRequests:
        handles switching between the different local object stores for
        each of the services
     """
+
     def __init__(self, status_code, content, encoding="utf-8"):
         self.status_code = status_code
         self.content = content
@@ -82,8 +81,7 @@ class MockedRequests:
         if "identity" not in _services:
             raise ValueError("NO SERVICES? %s" % str)
 
-        from Acquire.Service import push_testing_objstore, \
-            pop_testing_objstore
+        from Acquire.Service import push_testing_objstore, pop_testing_objstore
 
         if url.startswith("http://"):
             url = url[7:]
@@ -158,15 +156,19 @@ def _login_admin(service_url, username, password, otp):
 
     wallet = Wallet()
 
-    user = User(username=username, identity_url=service_url,
-                auto_logout=False)
+    user = User(username=username, identity_url=service_url, auto_logout=False)
 
     result = user.request_login()
     login_url = result["login_url"]
 
-    wallet.send_password(url=login_url, username=username,
-                         password=password, otpcode=otp.generate(),
-                         remember_password=False, remember_device=False)
+    wallet.send_password(
+        url=login_url,
+        username=username,
+        password=password,
+        otpcode=otp.generate(),
+        remember_password=False,
+        remember_device=False,
+    )
 
     user.wait_for_login()
 
@@ -214,13 +216,14 @@ def aaai_services(tmpdir_factory):
 
     registry_service = Service.from_data(response["service"])
     registry_otp = OTP(OTP.extract_secret(response["provisioning_uri"]))
-    registry_user = _login_admin("registry", "admin",
-                                 password, registry_otp)
-    responses["registry"] = {"service": registry_service,
-                             "user": registry_user,
-                             "response": response}
+    registry_user = _login_admin("registry", "admin", password, registry_otp)
+    responses["registry"] = {
+        "service": registry_service,
+        "user": registry_user,
+        "response": response,
+    }
 
-    assert(registry_service.registry_uid() == registry_service.uid())
+    assert registry_service.registry_uid() == registry_service.uid()
     service_uids = [registry_service.uid()]
 
     args["canonical_url"] = "identity"
@@ -229,30 +232,31 @@ def aaai_services(tmpdir_factory):
 
     identity_service = Service.from_data(response["service"])
     identity_otp = OTP(OTP.extract_secret(response["provisioning_uri"]))
-    identity_user = _login_admin("identity", "admin",
-                                 password, identity_otp)
-    responses["identity"] = {"service": identity_service,
-                             "user": identity_user,
-                             "response": response}
+    identity_user = _login_admin("identity", "admin", password, identity_otp)
+    responses["identity"] = {
+        "service": identity_service,
+        "user": identity_user,
+        "response": response,
+    }
 
-    assert(identity_service.registry_uid() == registry_service.uid())
-    assert(identity_service.uid() not in service_uids)
+    assert identity_service.registry_uid() == registry_service.uid()
+    assert identity_service.uid() not in service_uids
     service_uids.append(identity_service.uid())
 
     args["canonical_url"] = "accounting"
-    args["service_type"] = 'accounting'
-    response = call_function("accounting",
-                             function="admin/setup", args=args)
+    args["service_type"] = "accounting"
+    response = call_function("accounting", function="admin/setup", args=args)
     accounting_service = Service.from_data(response["service"])
     accounting_otp = OTP(OTP.extract_secret(response["provisioning_uri"]))
-    accounting_user = _login_admin("accounting", "admin", password,
-                                   accounting_otp)
-    responses["accounting"] = {"service": accounting_service,
-                               "user": accounting_user,
-                               "response": response}
+    accounting_user = _login_admin("accounting", "admin", password, accounting_otp)
+    responses["accounting"] = {
+        "service": accounting_service,
+        "user": accounting_user,
+        "response": response,
+    }
 
-    assert(accounting_service.registry_uid() == registry_service.uid())
-    assert(accounting_service.uid() not in service_uids)
+    assert accounting_service.registry_uid() == registry_service.uid()
+    assert accounting_service.uid() not in service_uids
     service_uids.append(accounting_service.uid())
 
     args["canonical_url"] = "access"
@@ -262,12 +266,14 @@ def aaai_services(tmpdir_factory):
     access_service = Service.from_data(response["service"])
     access_otp = OTP(OTP.extract_secret(response["provisioning_uri"]))
     access_user = _login_admin("access", "admin", password, access_otp)
-    responses["access"] = {"service": access_service,
-                           "user": access_user,
-                           "response": response}
+    responses["access"] = {
+        "service": access_service,
+        "user": access_user,
+        "response": response,
+    }
 
-    assert(access_service.registry_uid() == registry_service.uid())
-    assert(access_service.uid() not in service_uids)
+    assert access_service.registry_uid() == registry_service.uid()
+    assert access_service.uid() not in service_uids
     service_uids.append(access_service.uid())
 
     args["canonical_url"] = "compute"
@@ -277,12 +283,14 @@ def aaai_services(tmpdir_factory):
     compute_service = Service.from_data(response["service"])
     compute_otp = OTP(OTP.extract_secret(response["provisioning_uri"]))
     compute_user = _login_admin("compute", "admin", password, compute_otp)
-    responses["compute"] = {"service": compute_service,
-                            "user": compute_user,
-                            "response": response}
+    responses["compute"] = {
+        "service": compute_service,
+        "user": compute_user,
+        "response": response,
+    }
 
-    assert(compute_service.registry_uid() == registry_service.uid())
-    assert(compute_service.uid() not in service_uids)
+    assert compute_service.registry_uid() == registry_service.uid()
+    assert compute_service.uid() not in service_uids
     service_uids.append(compute_service.uid())
 
     args["canonical_url"] = "storage"
@@ -291,12 +299,14 @@ def aaai_services(tmpdir_factory):
     storage_service = Service.from_data(response["service"])
     storage_otp = OTP(OTP.extract_secret(response["provisioning_uri"]))
     storage_user = _login_admin("storage", "admin", password, storage_otp)
-    responses["storage"] = {"service": storage_service,
-                            "user": storage_user,
-                            "response": response}
+    responses["storage"] = {
+        "service": storage_service,
+        "user": storage_user,
+        "response": response,
+    }
 
-    assert(storage_service.registry_uid() == registry_service.uid())
-    assert(storage_service.uid() not in service_uids)
+    assert storage_service.registry_uid() == registry_service.uid()
+    assert storage_service.uid() not in service_uids
     service_uids.append(storage_service.uid())
 
     args["canonical_url"] = "hugs"
@@ -306,16 +316,18 @@ def aaai_services(tmpdir_factory):
     hugs_service = Service.from_data(response["service"])
     hugs_otp = OTP(OTP.extract_secret(response["provisioning_uri"]))
     hugs_user = _login_admin("hugs", "admin", password, hugs_otp)
-    responses["hugs"] = {"service": hugs_service,
-                         "user": hugs_user,
-                         "response": response}
+    responses["hugs"] = {
+        "service": hugs_service,
+        "user": hugs_user,
+        "response": response,
+    }
 
     resource = "trust_accounting_service %s" % accounting_service.uid()
-    args = {"service_url": accounting_service.canonical_url(),
-            "authorisation": Authorisation(user=access_user,
-                                           resource=resource).to_data()}
-    access_service.call_function(
-                    function="admin/trust_accounting_service", args=args)
+    args = {
+        "service_url": accounting_service.canonical_url(),
+        "authorisation": Authorisation(user=access_user, resource=resource).to_data(),
+    }
+    access_service.call_function(function="admin/trust_accounting_service", args=args)
 
     responses["_services"] = _services
 
@@ -330,9 +342,9 @@ def authenticated_user(aaai_services):
     username = str(uuid.uuid4())
     password = PrivateKey.random_passphrase()
 
-    result = User.register(username=username,
-                           password=password,
-                           identity_url="identity")
+    result = User.register(
+        username=username, password=password, identity_url="identity"
+    )
 
     otpsecret = result["otpsecret"]
     otp = OTP(otpsecret)
@@ -342,17 +354,21 @@ def authenticated_user(aaai_services):
 
     result = user.request_login()
 
-    assert(type(result) is dict)
+    assert type(result) is dict
 
     wallet = Wallet()
 
-    wallet.send_password(url=result["login_url"],
-                         username=username, password=password,
-                         otpcode=otp.generate(),
-                         remember_password=False, remember_device=False)
+    wallet.send_password(
+        url=result["login_url"],
+        username=username,
+        password=password,
+        otpcode=otp.generate(),
+        remember_password=False,
+        remember_device=False,
+    )
 
     user.wait_for_login()
 
-    assert(user.is_logged_in())
+    assert user.is_logged_in()
 
     return user

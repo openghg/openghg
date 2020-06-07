@@ -4,13 +4,26 @@
 import sys as _sys
 
 if _sys.version_info.major < 3:
+    raise ImportError("HUGS requires Python 3.6  minimum")
+
+if _sys.version_info.minor < 6:
     raise ImportError("HUGS requires Python 3.6 minimum")
 
-# from Acquire.ObjectStore import ObjectStore, ObjectStoreError
-# from Acquire.Service import get_service_account_bucket, \
-#     push_is_running_service, pop_is_running_service
+__all__ = [
+    "get_object_names",
+    "get_dated_object",
+    "get_object",
+    "get_dated_object_json",
+    "exists",
+    "get_object_json",
+    "get_abs_filepaths",
+    "get_md5",
+    "get_md5_bytes",
+    "hash_files",
+    "get_bucket",
+]
 
-# dateless_key = "/".join(key.split("/")[:-1])
+
 def get_object_names(bucket, prefix=None):
     """ List all the keys in the object store
 
@@ -29,9 +42,9 @@ def get_object_names(bucket, prefix=None):
 def get_dated_object(bucket, key):
     """ Removes the daterange from the passed key and uses the reduced
         key to get an object from the object store.
-    
+
         Wraps the Acquire get_object function
-            
+
         Args:
             bucket (dict): Bucket containing data
             key (str): Key for data in bucket
@@ -54,7 +67,7 @@ def get_object(bucket, key):
 
         Wraps the Acquire get_object function
 
-        Args:  
+        Args:
             bucket (dict): Bucket containing data
             key (str): Key for data in bucket
         Returns:
@@ -68,10 +81,10 @@ def get_object(bucket, key):
 def get_dated_object_json(bucket, key):
     """ Removes the daterange from the passed key and uses the reduced
         key to get an object from the object store.
-        
+
         Wraps the Acquire get_object_from_json function
 
-        Args:  
+        Args:
             bucket (dict): Bucket containing data
             key (str): Key for data in bucket
         Returns:
@@ -153,12 +166,13 @@ def get_md5(filename):
 
     """
     import hashlib as _hashlib
+
     # Size of buffer in bytes
     BUF_SIZE = 65536
     md5 = _hashlib.md5()
 
     # Read the file in 64 kB blocks
-    with open(filename, 'rb') as f:
+    with open(filename, "rb") as f:
         while True:
             data = f.read(BUF_SIZE)
             if not data:
@@ -183,15 +197,14 @@ def get_md5_bytes(data):
 
 
 def hash_files(file_list):
-    ''' Helper function to hash all the files in
+    """ Helper function to hash all the files in
         file_list using MD5
 
         Args:
             file_list (str): List of files to hash
         Returns:
             list: Returns a list of tuples in the form filename, md5_hash
-            
-    '''
+    """
     # Create a list of tuples for the original files
     hashes = []
 
@@ -203,31 +216,9 @@ def hash_files(file_list):
     return hashes
 
 
-def store_file(bucket, filepath):
-    """ Write file to the object store
-
-        Args:
-            filepath (str): Path of file to write
-            to object store
-        Returns:
-            None
-    """
-    import os as _os
-    # Get the filename from the filepath
-    filepath = file.split("/")[-1]
-    md5_hash = get_md5(filepath)
-    size = _os.path.getsize(filepath)
-    filename = filepath.split("/")[-1]
-#     # Add to object store
-    ObjectStore.set_object_from_file(bucket=bucket, key=filename, filename=filepath)
-
-    # Unsure if this or just no return value?
-    return filename, size, md5_hash
-
-
 def get_bucket(empty=False):
     """ Returns the HUGS bucket
-        
+
         Args:
             empty (bool, default=False): Get an empty bucket
         Returns:
@@ -236,33 +227,3 @@ def get_bucket(empty=False):
     from HUGS.ObjectStore import get_local_bucket as _get_local_bucket
 
     return _get_local_bucket(empty=empty)
-
-
-
-
-
-
-# def store_raw_data(bucket, filepath):
-#     """ Store the raw uploaded data with related metadata
-#         such as the uploader, upload date, file format provided
-#         by user etc
-
-#         Args:
-#             raw_bucket (bytes): The bucket to
-
-#         Returns:
-#             tuple (str, int, str): Filename stored, 
-#             size in bytes and the MD5 hash of the file
-
-#             Some kind of UUID?
-
-#     """
-#     # Get the size and MD5 of the file
-#     md5_hash = get_md5(filepath)
-#     size = os.path.getsize(filepath)
-#     filename = filepath.split("/")[-1]
-
-#     # Add to object store
-#     ObjectStore.set_object_from_file(bucket=bucket, key=filename, filename=filepath)
-
-# #     return filename, size, md5_

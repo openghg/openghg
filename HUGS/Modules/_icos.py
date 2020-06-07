@@ -2,16 +2,18 @@ from HUGS.Modules import BaseModule
 
 __all__ = ["ICOS"]
 
+
 class ICOS(BaseModule):
     """ Interface for processing ICOS data
-        
+
     """
+
     _root = "ICOS"
     _uuid = "3b8e169b-ea1a-4744-9b63-12a8eedd2281"
 
     def __init__(self):
         from Acquire.ObjectStore import get_datetime_now
-        
+
         self._creation_datetime = get_datetime_now()
         self._stored = False
         # self._datasources = []
@@ -52,7 +54,7 @@ class ICOS(BaseModule):
             Returns:
                 None
         """
-        from Acquire.ObjectStore import ObjectStore, string_to_encoded
+        from Acquire.ObjectStore import ObjectStore
         from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
@@ -90,11 +92,13 @@ class ICOS(BaseModule):
 
         for fp in filepaths:
             datasource_uuids[fp] = ICOS.read_file(data_filepath=fp)
-        
+
         return datasource_uuids
-             
+
     @staticmethod
-    def read_file(data_filepath, source_name, site=None, source_id=None, overwrite=False):
+    def read_file(
+        data_filepath, source_name, site=None, source_id=None, overwrite=False
+    ):
         """ Reads ICOS data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
@@ -106,15 +110,16 @@ class ICOS(BaseModule):
         from HUGS.Processing import assign_data, lookup_gas_datasources
         from HUGS.Util import hash_file
         from pathlib import Path
-        import os
 
         icos = ICOS.load()
 
         # Check if the file has been uploaded already
         file_hash = hash_file(filepath=data_filepath)
         if file_hash in icos._file_hashes and not overwrite:
-            raise ValueError(f"This file has been uploaded previously with the filename : {icos._file_hashes[file_hash]}")
-        
+            raise ValueError(
+                f"This file has been uploaded previously with the filename : {icos._file_hashes[file_hash]}"
+            )
+
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
 
@@ -131,11 +136,17 @@ class ICOS(BaseModule):
         gas_data = icos.assign_attributes(data=gas_data, site=site)
 
         # Check if we've got data from these sources before
-        lookup_results = lookup_gas_datasources(lookup_dict=icos._datasource_names, gas_data=gas_data, 
-                                                source_name=source_name, source_id=source_id)
+        lookup_results = lookup_gas_datasources(
+            lookup_dict=icos._datasource_names,
+            gas_data=gas_data,
+            source_name=source_name,
+            source_id=source_id,
+        )
 
         # Assign the data to the correct datasources
-        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
+        datasource_uuids = assign_data(
+            gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite
+        )
 
         # Add the Datasources to the list of datasources associated with this object
         icos.add_datasources(datasource_uuids)
@@ -149,7 +160,7 @@ class ICOS(BaseModule):
         return datasource_uuids
 
     def read_data(self, data_filepath, species, site=None):
-        """ Separates the gases stored in the dataframe in 
+        """ Separates the gases stored in the dataframe in
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
             dataframes
@@ -162,47 +173,68 @@ class ICOS(BaseModule):
             Returns:
                 dict: Dictionary containing attributes, data and metadata keys
         """
-        from pandas import RangeIndex, concat, read_csv, datetime, NaT, Timestamp
+        from pandas import read_csv, Timestamp
         import numpy as np
-        from HUGS.Processing import get_attributes, read_metadata
         from HUGS.Util import read_header
 
         # metadata = read_metadata(filepath=data_filepath, data=data, data_type="ICOS")
         header = read_header(filepath=data_filepath)
-        n_skip = len(header)-1
+        n_skip = len(header) - 1
         species = "co2"
 
         def date_parser(year, month, day, hour, minute):
             return Timestamp(year, month, day, hour, minute)
 
         datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
-        
-        use_cols = ["Year", "Month", "Day", "Hour", "Minute", str(species.lower()), "Stdev", "NbPoints"]
-        
-        dtypes = {"Day": np.int,
-                  "Month": np.int,
-                  "Year": np.int,
-                  "Hour": np.int,
-                  "Minute": np.int,
-                  species.lower(): np.float,
-                  "Stdev": np.float,
-                  "SamplingHeight": np.float,
-                  "NbPoints": np.int}
 
-        data = read_csv(data_filepath, skiprows=n_skip, parse_dates=datetime_columns, index_col="time", sep=" ",
-                        usecols=use_cols, dtype=dtypes, na_values="-999.99", date_parser=date_parser)
+        use_cols = [
+            "Year",
+            "Month",
+            "Day",
+            "Hour",
+            "Minute",
+            str(species.lower()),
+            "Stdev",
+            "NbPoints",
+        ]
+
+        dtypes = {
+            "Day": np.int,
+            "Month": np.int,
+            "Year": np.int,
+            "Hour": np.int,
+            "Minute": np.int,
+            species.lower(): np.float,
+            "Stdev": np.float,
+            "SamplingHeight": np.float,
+            "NbPoints": np.int,
+        }
+
+        data = read_csv(
+            data_filepath,
+            skiprows=n_skip,
+            parse_dates=datetime_columns,
+            index_col="time",
+            sep=" ",
+            usecols=use_cols,
+            dtype=dtypes,
+            na_values="-999.99",
+            date_parser=date_parser,
+        )
 
         data = data[data[species.lower()] >= 0.0]
 
         # Drop duplicate indices
-        data = data.loc[~data.index.duplicated(keep='first')]
+        data = data.loc[~data.index.duplicated(keep="first")]
 
         # Check if the index is sorted
         if not data.index.is_monotonic_increasing:
             data.sort_index()
 
-        rename_dict = {"Stdev": species + " variability",
-                        "NbPoints": species + " number_of_observations"}
+        rename_dict = {
+            "Stdev": species + " variability",
+            "NbPoints": species + " number_of_observations",
+        }
 
         data = data.rename(columns=rename_dict)
 
@@ -216,7 +248,10 @@ class ICOS(BaseModule):
         metadata = {}
         metadata["species"] = species
 
-        combined_data[species] = {"metadata": metadata, "data": data, "attributes": site_attributes}
+        combined_data[species] = {
+            "metadata": metadata,
+            "data": data,
+            "attributes": site_attributes,
+        }
 
         return combined_data
-

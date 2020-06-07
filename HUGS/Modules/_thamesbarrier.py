@@ -7,13 +7,14 @@ class ThamesBarrier(BaseModule):
     """ Interface for processing ThamesBarrier data
 
     """
+
     _root = "ThamesBarrier"
     # Use uuid.uuid4() to create a unique fixed UUID for this object
     _uuid = "e708ab3f-ade5-402a-a491-979095d8f7ad"
 
     def __init__(self):
         from Acquire.ObjectStore import get_datetime_now
-        
+
         self._creation_datetime = get_datetime_now()
         self._stored = False
         # self._datasources = []
@@ -54,7 +55,7 @@ class ThamesBarrier(BaseModule):
             Returns:
                 None
         """
-        from Acquire.ObjectStore import ObjectStore, string_to_encoded
+        from Acquire.ObjectStore import ObjectStore
         from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
@@ -92,7 +93,7 @@ class ThamesBarrier(BaseModule):
 
         for fp in filepaths:
             datasource_uuids[fp] = ThamesBarrier.read_file(data_filepath=fp)
-        
+
         return datasource_uuids
 
     @staticmethod
@@ -108,34 +109,46 @@ class ThamesBarrier(BaseModule):
         from HUGS.Processing import assign_data, lookup_gas_datasources, get_attributes
         from HUGS.Util import hash_file
         from pathlib import Path
-        import os
 
         tb = ThamesBarrier.load()
 
         # Check if the file has been uploaded already
         file_hash = hash_file(filepath=data_filepath)
         if file_hash in tb._file_hashes and not overwrite:
-            raise ValueError(f"This file has been uploaded previously with the filename : {tb._file_hashes[file_hash]}")
-        
+            raise ValueError(
+                f"This file has been uploaded previously with the filename : {tb._file_hashes[file_hash]}"
+            )
+
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
 
         gas_data = tb.read_data(data_filepath=data_filepath)
-        
+
         for species in gas_data:
             units = tb._tb_params["unit_species"][species]
-            scale = tb._tb_params["scale"][species]
+            # scale = tb._tb_params["scale"][species]
             # Unit scales used for each species
             species_scales = tb._tb_params["scale"][species]
-            gas_data[species]["data"] = get_attributes(ds=gas_data[species]["data"], species=species, site="TMB", 
-                                                        units=units, scale=species_scales)
+            gas_data[species]["data"] = get_attributes(
+                ds=gas_data[species]["data"],
+                species=species,
+                site="TMB",
+                units=units,
+                scale=species_scales,
+            )
 
         # Check if we've got data from these sources before
-        lookup_results = lookup_gas_datasources(lookup_dict=tb._datasource_names, gas_data=gas_data, 
-                                                source_name=source_name, source_id=source_id)
+        lookup_results = lookup_gas_datasources(
+            lookup_dict=tb._datasource_names,
+            gas_data=gas_data,
+            source_name=source_name,
+            source_id=source_id,
+        )
 
         # Assign the data to the correct datasources
-        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
+        datasource_uuids = assign_data(
+            gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite
+        )
 
         # Add the Datasources to the list of datasources associated with this object
         tb.add_datasources(datasource_uuids)
@@ -149,7 +162,7 @@ class ThamesBarrier(BaseModule):
         return datasource_uuids
 
     def read_data(self, data_filepath):
-        """ Separates the gases stored in the dataframe in 
+        """ Separates the gases stored in the dataframe in
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
             dataframes
@@ -160,9 +173,10 @@ class ThamesBarrier(BaseModule):
                 dict: Dictionary containing attributes, data and metadata keys
         """
         from pandas import read_csv
-        from xarray import Dataset
 
-        data = read_csv(data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0)
+        data = read_csv(
+            data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0
+        )
         # Drop NaNs from the data
         data = data.dropna(axis="rows", how="any")
 
@@ -174,24 +188,30 @@ class ThamesBarrier(BaseModule):
         data.index.name = "time"
 
         combined_data = {}
-        
+
         for species in data.columns:
             processed_data = data.loc[:, [species]].to_xarray()
 
             # Convert methane to ppb
             if species == "CH4":
                 processed_data[species] *= 1000
-            
-            # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate when averaging    
-            processed_data["{} variability".format(species)] = processed_data[species] * 0.0
+
+            # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate
+            # when averaging
+            processed_data["{} variability".format(species)] = (
+                processed_data[species] * 0.0
+            )
 
             site_attributes = self.site_attributes()
 
             # TODO - add in metadata reading
-            combined_data[species] = {"metadata": {}, "data": processed_data, "attributes": site_attributes}
+            combined_data[species] = {
+                "metadata": {},
+                "data": processed_data,
+                "attributes": site_attributes,
+            }
 
         return combined_data
-            
 
     def site_attributes(self):
         """ Gets the site specific attributes for writing to Datsets

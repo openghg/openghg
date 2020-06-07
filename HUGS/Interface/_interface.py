@@ -1,34 +1,37 @@
-""" 
-    A class to create the interface for HUGS
-    
+""" A class to create the interface for HUGS
 """
-import bqplot as bq
-from Acquire.Client import User
 import collections
-from datetime import datetime
 import functools
-import ipywidgets as widgets
-import ipyleaflet
-from HUGS.Client import Retrieve, Search, Process
-from HUGS.Interface import generate_password
-from HUGS.Util import get_datapath, load_hugs_json
 import json
-import numpy as np
 import os
-import pandas as pd
-from pathlib import Path
-import matplotlib
 import random
-import tempfile
 import shutil
+import tempfile
+from datetime import datetime
+from pathlib import Path
+
+import bqplot as bq
+import ipyleaflet
+import IPython
+import ipywidgets as widgets
+import matplotlib
+import pandas as pd
+from Acquire.Client import User
+
+from HUGS.Client import Process, Retrieve, Search
+from HUGS.Interface import generate_password
+from HUGS.Util import load_hugs_json
+
+# flake8: noqa
 
 __all__ = ["Interface"]
 
+
 class Interface:
-    """ 
+    """
         Handles the creation of an interface for the HUGS platform
 
-        # TODO - this needs a lot of tidying and code removal
+        # TODO - this needs a lot of tidying and code removal, kept for possible future reuse.
 
         WIP
 
@@ -38,15 +41,26 @@ class Interface:
         Each box creation function should return either an ipywidgets.VBox or HBox
         with a set layout
 
-        Can move the layouts to be class members ? 
+        Can move the layouts to be class members?
     """
+
     def __init__(self):
         self._base_url = "https://hugs.acquire-aaai.com/t"
         self._search_results = None
         # This is the order in which they'll be shown (if created)
-        self._module_list = ["register", "login", "search", "selection", "download", 
-                            "map", "plot_window", "plot_controls", "plot_complete", 
-                            "status_bar", "upload"]
+        self._module_list = [
+            "register",
+            "login",
+            "search",
+            "selection",
+            "download",
+            "map",
+            "plot_window",
+            "plot_controls",
+            "plot_complete",
+            "status_bar",
+            "upload",
+        ]
         # Maybe just made _widgets a defaultdict(list) as originally thought?
         self._widgets = collections.defaultdict(widgets.VBox)
 
@@ -60,21 +74,49 @@ class Interface:
         self._to_plot = {}
 
         # Styles - maybe these can be moved somewhere else?
-        self.table_style = {'description_width': 'initial'}
-        self.table_layout = {'width': '100px', 'min_width': '100px','height': '28px', 'min_height': '28px'}
-        self.date_layout = {'width': '275px', 'min_width': '200px','height': '28px', 'min_height': '28px'}
-        self.checkbox_layout = {'width': '100px', 'min_width': '100px', 'height': '28px', 'min_height': '28px'}
-        self.statusbar_layout = {'width': '250px', 'min_width': '250px', 'height': '28px', 'min_height': '28px'}
-        self.small_button_layout = widgets.Layout(min_width='80px', max_width='100px')
-        self.med_button_layout = widgets.Layout(min_width='80px', max_width='120px')
+        self.table_style = {"description_width": "initial"}
+        self.table_layout = {
+            "width": "100px",
+            "min_width": "100px",
+            "height": "28px",
+            "min_height": "28px",
+        }
+        self.date_layout = {
+            "width": "275px",
+            "min_width": "200px",
+            "height": "28px",
+            "min_height": "28px",
+        }
+        self.checkbox_layout = {
+            "width": "100px",
+            "min_width": "100px",
+            "height": "28px",
+            "min_height": "28px",
+        }
+        self.statusbar_layout = {
+            "width": "250px",
+            "min_width": "250px",
+            "height": "28px",
+            "min_height": "28px",
+        }
+        self.small_button_layout = widgets.Layout(min_width="80px", max_width="100px")
+        self.med_button_layout = widgets.Layout(min_width="80px", max_width="120px")
 
-        self._spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
+        self._spacer = widgets.VBox(
+            children=[
+                widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
+            ]
+        )
 
         self._site_locations = load_hugs_json("acrg_with_locations.json")
 
         self._plot_box = []
 
-        params_file = (os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../Data/site_codes.json")
+        params_file = (
+            os.path.dirname(os.path.abspath(__file__))
+            + os.path.sep
+            + "../Data/site_codes.json"
+        )
         with open(params_file, "r") as f:
             data = json.load(f)
             # self._site_locations = data["locations"]
@@ -83,20 +125,22 @@ class Interface:
             # Keyed code: name
             self._site_names = data["code_name"]
 
-        # colour_maps = (os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../Data/colour_maps.json")
-        # with open(colour_maps, "r") as f:
-        #     data = json.load(f)
-        #     self._tableau20 = list(data["tableau20"].values())
-        #     self._colour_blind = list(data["colour_blind"].values())
-
         # self._tableau20 = list(matplotlib.cm.tab20.colors)
         # self._colour_blind = list(data["colour_blind"].values())
 
-        self._tableau10 = ['#4E79A7','#F28E2B','#E15759','#76B7B2','#59A14F'] #,'#EDC948','#B07AA1','#FF9DA7','#9C755F','#BAB0AC']
-        self._tableau20 = [matplotlib.colors.rgb2hex(colour) for colour in matplotlib.cm.tab20.colors]
+        self._tableau10 = [
+            "#4E79A7",
+            "#F28E2B",
+            "#E15759",
+            "#76B7B2",
+            "#59A14F",
+        ]  # ,'#EDC948','#B07AA1','#FF9DA7','#9C755F','#BAB0AC']
+        self._tableau20 = [
+            matplotlib.colors.rgb2hex(colour) for colour in matplotlib.cm.tab20.colors
+        ]
         self._colour_blind = self._tableau20
 
-    def get_user():
+    def get_user(self):
         return self._user
 
     def rand_colors(self, tab_set="10", colour_blind=False):
@@ -123,7 +167,7 @@ class Interface:
 
         """
         return False
-    
+
     def create_registration_box(self):
         """
             User creation box
@@ -131,13 +175,21 @@ class Interface:
             Returns:
                 ipywidgets.VBox
         """
-        username_box = widgets.Text(value=None, placeholder="username", description="Username: ")
-        suggested_password = widgets.Label(value=f"Suggested password : {generate_password()}")
+        username_box = widgets.Text(
+            value=None, placeholder="username", description="Username: "
+        )
+        suggested_password = widgets.Label(
+            value=f"Suggested password : {generate_password()}"
+        )
         spacer = widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
         password_box = widgets.Password(description="Password: ", placeholder="")
         conf_password_box = widgets.Password(description="Confirm: ", placeholder="")
-        register_button = widgets.Button(description="Register", button_style="primary", layout=self.small_button_layout)
-        
+        register_button = widgets.Button(
+            description="Register",
+            button_style="primary",
+            layout=self.small_button_layout,
+        )
+
         status_text = "<font color='blue'>Enter credentials</font>"
         self.set_status(status_text=status_text)
 
@@ -146,20 +198,34 @@ class Interface:
 
         def register_user(a):
             if password_box.value != conf_password_box.value:
-                password_match_error = f"<font color='red'>Passwords do not match</font>"
+                password_match_error = (
+                    f"<font color='red'>Passwords do not match</font>"
+                )
                 self.set_status(status_text=password_match_error)
             else:
-                result = User.register(username=username_box.value, password=password_box.value, identity_url=f"{self._base_url}/identity")
+                result = User.register(
+                    username=username_box.value,
+                    password=password_box.value,
+                    identity_url=f"{self._base_url}/identity",
+                )
 
                 with output_box:
-                    display(result["qrcode"])
-                
+                    IPython.display(result["qrcode"])
+
                 qr_code_message = f"<font color='green'>Please scan QR code with authenticator app</font>"
                 self.set_status(status_text=qr_code_message)
 
         register_button.on_click(register_user)
 
-        return [username_box, suggested_password, password_box, conf_password_box, spacer, register_button, output_box]
+        return [
+            username_box,
+            suggested_password,
+            password_box,
+            conf_password_box,
+            spacer,
+            register_button,
+            output_box,
+        ]
 
     def upload_box(self):
         type_widget = widgets.Dropdown(
@@ -170,15 +236,18 @@ class Interface:
 
         base_url = "https://hugs.acquire-aaai.com/t"
 
-
         upload_widget = widgets.FileUpload(multiple=False, label="Select")
         transfer_button = widgets.Button(
-            description="Transfer", button_style="info", layout=widgets.Layout(width="10%")
+            description="Transfer",
+            button_style="info",
+            layout=widgets.Layout(width="10%"),
         )
 
         def do_upload(a):
-            if type_widget.value == False:
-                status_text.value = f"<font color='red'>Please select a data type</font>"
+            if type_widget.value is False:
+                status_text.value = (
+                    f"<font color='red'>Please select a data type</font>"
+                )
                 return
 
             user = self.get_user()
@@ -194,16 +263,18 @@ class Interface:
             with tempfile.TemporaryDirectory() as tmpdir:
                 file_content = upload_widget.value
                 filename = list(file_content.keys())[0]
-                
+
                 data_bytes = file_content[filename]["content"]
 
-                tmp_filepath = Path(tmpdir).joinpath(filename) 
+                tmp_filepath = Path(tmpdir).joinpath(filename)
 
                 with open(tmp_filepath, "wb") as f:
-                   f.write(data_bytes)
+                    f.write(data_bytes)
 
                 p = Process(service_url=base_url)
-                result = p.process_files(user=user, files=tmp_filepath, data_type=data_type)
+                result = p.process_files(
+                    user=user, files=tmp_filepath, data_type=data_type
+                )
 
                 self._results = result
 
@@ -211,20 +282,23 @@ class Interface:
                 if result:
                     status_text.value = f"<font color='green'>Upload successful</font>"
                 else:
-                    status_text.value = f"<font color='red'>Unable to process file</font>"
+                    status_text.value = (
+                        f"<font color='red'>Unable to process file</font>"
+                    )
 
         transfer_button.on_click(do_upload)
 
         data_hbox = widgets.HBox(children=[type_widget, upload_widget, transfer_button])
-        status_text = widgets.HTML(value=f"<font color='#00BCD4'>Waiting for file</font>")
-
+        status_text = widgets.HTML(
+            value=f"<font color='#00BCD4'>Waiting for file</font>"
+        )
 
         return widgets.VBox(children=[data_hbox, status_text])
 
     def login(self):
         w = self.create_login_box()
 
-        return widgets.VBox(children=w) 
+        return widgets.VBox(children=w)
 
     def create_login_box(self):
         """ Create a login box
@@ -232,22 +306,29 @@ class Interface:
             Returns:
                 tuple (User, list): Acquire.User and a list of ipywidgets
         """
-        login_text = widgets.HTML(value="<b>Please click the buton below to create a login link</b>")
-        username_text = widgets.Text(value=None, placeholder="username", description="Username: ")
-        status_text = widgets.HTML(value=f"<font color='black'>Waiting for login</font>")
+        username_text = widgets.Text(
+            value=None, placeholder="username", description="Username: "
+        )
+        status_text = widgets.HTML(
+            value=f"<font color='black'>Waiting for login</font>"
+        )
         spacer = widgets.Text(value=None)
         spacer.layout.visibility = "hidden"
-        login_button = widgets.Button(description="Login", button_style="success", layout=self.small_button_layout)
+        login_button = widgets.Button(
+            description="Login", button_style="success", layout=self.small_button_layout
+        )
         # login_button_box = widgets.HBox(children=[login_button])
         # login_button_box.layout.object_position = "right"
         login_link_box = widgets.Output()
 
         def login(a):
-            self._user = User(username=username_text.value, identity_url=f"{self._base_url}/identity")
+            self._user = User(
+                username=username_text.value, identity_url=f"{self._base_url}/identity"
+            )
 
             with login_link_box:
                 # print(username_text.value)
-                response = self._user.request_login()
+                self._user.request_login()
                 self._user.wait_for_login()
 
             # if user.wait_for_login():
@@ -256,7 +337,13 @@ class Interface:
             #     status_text.value = f"<font color='red'>Login failure</font>"
 
         login_button.on_click(login)
-        login_widgets = [username_text, spacer, login_button, status_text, login_link_box]
+        login_widgets = [
+            username_text,
+            spacer,
+            login_button,
+            status_text,
+            login_link_box,
+        ]
 
         return login_widgets
 
@@ -271,14 +358,26 @@ class Interface:
             Returns:
                 list: List of ipywidgets widgets
         """
-        search_terms = widgets.Text(value="", placeholder="Search", description="Species:", disabled=False)
-        locations = widgets.Text(value="", placeholder="BSD, HFD", description="Locations:", disabled=False)
-        data_type = widgets.Dropdown(options=["CRDS", "GC"], value="CRDS", description="Data type", disabled=False)
-        search_button = widgets.Button(description="Search", button_style="success", layout=self.small_button_layout)
-        start_picker = widgets.DatePicker(description='Start date', disabled=False)
-        end_picker = widgets.DatePicker(description='End date', disabled=False)
+        search_terms = widgets.Text(
+            value="", placeholder="Search", description="Species:", disabled=False
+        )
+        locations = widgets.Text(
+            value="", placeholder="BSD, HFD", description="Locations:", disabled=False
+        )
+        data_type = widgets.Dropdown(
+            options=["CRDS", "GC"],
+            value="CRDS",
+            description="Data type",
+            disabled=False,
+        )
+        search_button = widgets.Button(
+            description="Search",
+            button_style="success",
+            layout=self.small_button_layout,
+        )
+        start_picker = widgets.DatePicker(description="Start date", disabled=False)
+        end_picker = widgets.DatePicker(description="End date", disabled=False)
         spacer = widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
-        status_box = widgets.HTML(value="")
 
         def call_search(x):
             if start_picker.value:
@@ -296,24 +395,43 @@ class Interface:
             split_locations = locations.value.replace(" ", "").split(",")
 
             search = Search(service_url=self._base_url)
-            search_results = search.search(search_terms=split_search_terms, locations=split_locations,
-                                                data_type=data_type.value, start_datetime=start, end_datetime=end)
+            search_results = search.search(
+                search_terms=split_search_terms,
+                locations=split_locations,
+                data_type=data_type.value,
+                start_datetime=start,
+                end_datetime=end,
+            )
 
             if search_results:
                 # date_keys = self.parse_results(search_results=search_results)
                 status_box_success = f"<font color='green'>Success</font>"
                 self.set_status(status_text=status_box_success)
                 # TODO - see how the layout works with voila for side-by-side list and map boxes
-                self.add_widgets(section="selection", _widgets=self.create_selection_box(search_results=search_results))
-                self.add_widgets(section="download", _widgets=self.create_download_box(search_results=search_results))
+                self.add_widgets(
+                    section="selection",
+                    _widgets=self.create_selection_box(search_results=search_results),
+                )
+                self.add_widgets(
+                    section="download",
+                    _widgets=self.create_download_box(search_results=search_results),
+                )
             else:
                 status_box_error = f"<font color='red'>No results</font>"
                 self.set_status(status_text=status_box_error)
 
         search_button.on_click(call_search)
 
-        search_children = [search_terms, locations, start_picker, end_picker, data_type, spacer,
-                           search_button, self._spacer]
+        search_children = [
+            search_terms,
+            locations,
+            start_picker,
+            end_picker,
+            data_type,
+            spacer,
+            search_button,
+            self._spacer,
+        ]
 
         return search_children
 
@@ -324,27 +442,42 @@ class Interface:
 
             Returns:
                 list: List containing a HBox (WIP)
-        """    
-        split_button = widgets.Button(description="Split", button_style="info", layout=self.table_layout)
-        list_button = widgets.Button(description="List selection", button_style="info", layout=self.table_layout)
-        map_button = widgets.Button(description="Map selection", button_style="info", layout=self.table_layout)
+        """
+        split_button = widgets.Button(
+            description="Split", button_style="info", layout=self.table_layout
+        )
+        list_button = widgets.Button(
+            description="List selection", button_style="info", layout=self.table_layout
+        )
+        map_button = widgets.Button(
+            description="Map selection", button_style="info", layout=self.table_layout
+        )
 
         def split_click(a):
-            self.add_widgets(section="download", _widgets=self.create_split_box(search_results=search_results))
+            self.add_widgets(
+                section="download",
+                _widgets=self.create_split_box(search_results=search_results),
+            )
             self.add_widgets(section="map", _widgets=widgets.VBox())
 
         def list_click(a):
-            self.add_widgets(section="download", _widgets=self.create_download_box(search_results=search_results))
+            self.add_widgets(
+                section="download",
+                _widgets=self.create_download_box(search_results=search_results),
+            )
             self.add_widgets(section="map", _widgets=widgets.VBox())
 
         def map_click(a):
             self.add_widgets(section="download", _widgets=widgets.VBox())
-            self.add_widgets(section="map", _widgets=self.create_map_box(search_results=search_results))
+            self.add_widgets(
+                section="map",
+                _widgets=self.create_map_box(search_results=search_results),
+            )
 
         split_button.on_click(split_click)
         list_button.on_click(list_click)
         map_button.on_click(map_click)
-        
+
         buttons = [split_button, list_button, map_button]
         button_box = widgets.HBox(children=buttons)
 
@@ -359,13 +492,13 @@ class Interface:
         list_widgets = self.create_download_box(search_results=search_results)
         map_widgets = self.create_map_box(search_results=search_results)
 
-        combined = widgets.VBox(children=list_widgets+map_widgets)
+        combined = widgets.VBox(children=list_widgets + map_widgets)
 
         return combined
 
     def create_download_box(self, search_results):
         """ Creates the plotting box that holds the plotting buttons and windows
-            
+
             Args:
                 search_results (dict): Search results to be parsed for user information
             Returns:
@@ -374,8 +507,12 @@ class Interface:
         header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=self.date_layout)
         # header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=self.table_layout)
         header_label_gas = widgets.HTML(value=f"<b>Gas</b>", layout=self.table_layout)
-        header_label_dates = widgets.HTML(value=f"<b>Dates</b>", layout=self.date_layout)
-        header_label_select = widgets.HTML(value=f"<b>Select</b>", layout=self.checkbox_layout)
+        header_label_dates = widgets.HTML(
+            value=f"<b>Dates</b>", layout=self.date_layout
+        )
+        header_label_select = widgets.HTML(
+            value=f"<b>Select</b>", layout=self.checkbox_layout
+        )
 
         checkbox_objects = []
         search_keys = []
@@ -392,7 +529,6 @@ class Interface:
         #         Args:
         #             search_results (dict): Search results to parse
         #             checkbox (bool, default=True): Should checkboxes be ct
-                
 
         #     """
 
@@ -421,19 +557,34 @@ class Interface:
             site_labels.append(site_label)
             gas_labels.append(gas_label)
 
-        arg_dict = {search_keys[i]: checkbox for i, checkbox in enumerate(checkbox_objects)}
+        arg_dict = {
+            search_keys[i]: checkbox for i, checkbox in enumerate(checkbox_objects)
+        }
 
-        header_box = widgets.HBox(children=[header_label_site, header_label_gas, header_label_dates, header_label_select])
+        header_box = widgets.HBox(
+            children=[
+                header_label_site,
+                header_label_gas,
+                header_label_dates,
+                header_label_select,
+            ]
+        )
 
         site_vbox = widgets.VBox(children=site_labels)
         gas_vbox = widgets.VBox(children=gas_labels)
         dates_vbox = widgets.VBox(children=date_labels)
         checkbox_vbox = widgets.VBox(children=checkbox_objects)
 
-        dynamic_box = widgets.HBox(children=[site_vbox, gas_vbox, dates_vbox, checkbox_vbox])
+        dynamic_box = widgets.HBox(
+            children=[site_vbox, gas_vbox, dates_vbox, checkbox_vbox]
+        )
 
-        select_all_button = widgets.Button(description="Select all", button_style="info", layout=self.table_layout)
-        download_button = widgets.Button(description="Retrieve", button_style="success", layout=self.table_layout)
+        select_all_button = widgets.Button(
+            description="Select all", button_style="info", layout=self.table_layout
+        )
+        download_button = widgets.Button(
+            description="Retrieve", button_style="success", layout=self.table_layout
+        )
 
         # self._widgets["status_bar"] = widgets.HTML(value="Status: Waiting...", layout=statusbar_layout)
         # status_bar = self._widgets["status_bar"]
@@ -444,9 +595,14 @@ class Interface:
         # self.add_widgets(section="download_status", _widgets=status_bar)
 
         def on_download_click(a):
-            # download_keys = {key: search_results[key]["keys"] for key in arg_dict if arg_dict[key].value is True}
-            # If the tickbox is ticked, copy the selected values from the search results to pass to the download fn            
-            selected_results = {key: search_results[key] for key in arg_dict if arg_dict if arg_dict[key].value is True}
+            # If the tickbox is ticked, copy the selected values from the search
+            # results to pass to the download fn
+            selected_results = {
+                key: search_results[key]
+                for key in arg_dict
+                if arg_dict
+                if arg_dict[key].value is True
+            }
             self.retrieve_data(selected_results=selected_results)
 
         def select_all(a):
@@ -457,12 +613,13 @@ class Interface:
             else:
                 for c in checkbox_objects:
                     c.value = True
-                        
-        
+
         download_button.on_click(on_download_click)
         select_all_button.on_click(select_all)
 
-        download_button_box = widgets.VBox(children=[self._spacer, select_all_button, download_button])
+        download_button_box = widgets.VBox(
+            children=[self._spacer, select_all_button, download_button]
+        )
 
         download_widgets = [header_box, dynamic_box, download_button_box]
 
@@ -471,7 +628,7 @@ class Interface:
     # Need to add this date parsing to the search_results
     def parse_results(self, search_results):
         """ Split the keys into a dictionary of each key and the date that the data covers
-            
+
             Args:
                 search_results (dict): Dictionary of search results
             Returns:
@@ -505,7 +662,7 @@ class Interface:
     #     """
     #     if not isinstance(keys, list):
     #         keys = [keys]
-        
+
     #     keys = sorted(keys)
     #     start_key = keys[0]
     #     end_key = keys[-1]
@@ -542,8 +699,12 @@ class Interface:
         # TODO - pull this out into a function that can be used here and in create_download_box
         header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=self.table_layout)
         header_label_gas = widgets.HTML(value=f"<b>Gas</b>", layout=self.table_layout)
-        header_label_dates = widgets.HTML(value=f"<b>Dates</b>", layout=self.date_layout)
-        header_label_select = widgets.HTML(value=f"<b>Select</b>", layout=self.checkbox_layout)
+        header_label_dates = widgets.HTML(
+            value=f"<b>Dates</b>", layout=self.date_layout
+        )
+        header_label_select = widgets.HTML(
+            value=f"<b>Select</b>", layout=self.checkbox_layout
+        )
 
         for key in selected_results:
             start_date = selected_results[key]["start_date"]
@@ -551,10 +712,10 @@ class Interface:
             dates = f"{start_date} to {end_date}"
 
             date_label = widgets.Label(value=dates, layout=self.date_layout)
-    
+
             gas_name = selected_results[key]["metadata"]["species"]
             gas_label = widgets.Label(value=gas_name, layout=self.table_layout)
-            
+
             site_code = selected_results[key]["metadata"]["site"]
             site_text = f'{self._site_locations[site_code.upper()]["name"]} ({site_code.upper()})'
             site_label = widgets.Label(value=site_text, layout=self.table_layout)
@@ -566,29 +727,38 @@ class Interface:
             site_labels.append(site_label)
             gas_labels.append(gas_label)
 
-        select_instruction = widgets.HTML(value="<b>Select data: </b>", layout=self.table_layout)
-
-        select_box = widgets.HBox(children=[select_instruction])
-
-        header_box = widgets.HBox(children=[header_label_site, header_label_gas, header_label_dates, header_label_select])
+        header_box = widgets.HBox(
+            children=[
+                header_label_site,
+                header_label_gas,
+                header_label_dates,
+                header_label_select,
+            ]
+        )
 
         site_vbox = widgets.VBox(children=site_labels)
         gas_vbox = widgets.VBox(children=gas_labels)
         dates_vbox = widgets.VBox(children=date_labels)
         checkbox_vbox = widgets.VBox(children=plot_checkboxes)
 
-        dynamic_box = widgets.HBox(children=[site_vbox, gas_vbox, dates_vbox, checkbox_vbox])
+        dynamic_box = widgets.HBox(
+            children=[site_vbox, gas_vbox, dates_vbox, checkbox_vbox]
+        )
 
         # Edit box - for modifying plot types
         # Dropdown line/scatter
         # If line - linewidth
         # If scatter - marker size
-        
+
         # Get the colors now so they don't change each time plot is clicked
         colors = self.rand_colors()
         # Enable/disable legend
-        plot_dropdown = widgets.Dropdown(options=["Line", "Scatter"], value="Line", description="Plot style: ")
-        marker_size = widgets.IntSlider(value=2, min=1, max=5, step=1, description="Linewidth: ")
+        plot_dropdown = widgets.Dropdown(
+            options=["Line", "Scatter"], value="Line", description="Plot style: "
+        )
+        marker_size = widgets.IntSlider(
+            value=2, min=1, max=5, step=1, description="Linewidth: "
+        )
 
         def on_plot_change(a):
             if plot_dropdown.value == "Line":
@@ -601,15 +771,23 @@ class Interface:
         edit_box = widgets.HBox(children=[plot_dropdown, marker_size])
 
         # Plot button
-        plot_button = widgets.Button(description="Plot", button_style="success", layout=self.table_layout)
-        spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
+        plot_button = widgets.Button(
+            description="Plot", button_style="success", layout=self.table_layout
+        )
+        spacer = widgets.VBox(
+            children=[
+                widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
+            ]
+        )
 
         button_box = widgets.VBox(children=[plot_button, spacer, spacer])
 
         # ui_box = widgets.VBox(children=[horiz_select, plot_box])
 
         # Cleaner way of doing this?
-        arg_dict = {plot_keys[i]: checkbox for i, checkbox in enumerate(plot_checkboxes)}
+        arg_dict = {
+            plot_keys[i]: checkbox for i, checkbox in enumerate(plot_checkboxes)
+        }
 
         # For some reason the datetimeindex of the dataframes isn't being preserved
         # and we're getting an unnamed column for the first column and a numbered index
@@ -618,14 +796,16 @@ class Interface:
 
         def on_plot_clicked(a):
             # Get the data for ticked checkboxes
-            to_plot = {key: data[key] for key in arg_dict if arg_dict[key].value is True}
+            to_plot = {
+                key: data[key] for key in arg_dict if arg_dict[key].value is True
+            }
             plot_data(to_plot=to_plot)
 
         # Create a dropdown to select which part of the dataframe
         # to plot, count, stddev etc
 
         def plot_data(to_plot):
-            """ 
+            """
                 Each key in the data dict is a dataframe
             """
             # Modify here so user can select line, scatter
@@ -637,27 +817,37 @@ class Interface:
             scales = {"x": x_scale, "y": y_scale}
 
             ax = bq.Axis(label="Date", scale=x_scale, grid_lines="none")
-            ay = bq.Axis(label="Count", scale=y_scale, orientation="vertical", grid_lines="none")
-            axes = [ax,ay]
+            ay = bq.Axis(
+                label="Count", scale=y_scale, orientation="vertical", grid_lines="none"
+            )
+            axes = [ax, ay]
 
             marks = []
             for key in to_plot:
                 single_color = [random.choice(colors)]
 
                 if plot_style == "Line":
-                    mark = bq.Lines(scales=scales, colors=single_color, stroke_width=marker_size.value)
+                    mark = bq.Lines(
+                        scales=scales,
+                        colors=single_color,
+                        stroke_width=marker_size.value,
+                    )
                 else:
-                    mark = bq.Scatter(scales=scales, colors=single_color, stroke_width=marker_size.value)
-                    
+                    mark = bq.Scatter(
+                        scales=scales,
+                        colors=single_color,
+                        stroke_width=marker_size.value,
+                    )
+
                 mark.x = to_plot[key].index
                 # TODO - can modify this to be able to add error bars etc
-                mark.y = to_plot[key].iloc[:,0]
-                
+                mark.y = to_plot[key].iloc[:, 0]
+
                 marks.append(mark)
 
             figure.marks = marks
             figure.axes = axes
-  
+
         # lines = bq.Lines(x=np.arange(100), y=np.cumsum(np.random.randn(2, 100), axis=1), scales=scales)
         # lines = bq.Lines(scales=scales, colors=self.rand_colors())
         figure = bq.Figure(marks=[], axes=[], animation_duration=1000)
@@ -665,7 +855,11 @@ class Interface:
         figure.layout.height = "auto"
         figure.layout.min_height = "500px"
 
-        spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
+        spacer = widgets.VBox(
+            children=[
+                widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
+            ]
+        )
 
         plot_widgets = [header_box, dynamic_box, spacer, edit_box, figure, button_box]
 
@@ -680,15 +874,15 @@ class Interface:
         # Each time we just append a new vbox to the list of boxes here
 
         # self._plot_box = [header_box, dynamic_box, figure, button_box]
-        
+
         # # Initially just create a single plot
         # plot_box = widgets.VBox(children=plot_widgets)
         # self._plot_box.append(plot_box)
 
         return plot_widgets
 
-
     def plotting_interface(self, selected_results, data, plot_number=1):
+        # flake8: noqa
         """ Create the window for plotting the downloaded data
 
             Args:
@@ -712,20 +906,17 @@ class Interface:
         date_labels = []
         gas_labels = []
 
-        site_layout = widgets.Layout(display='flex',
-                                    flex_flow='column',
-                                    align_items='flex-start',
-                                    width='80%')
+        site_layout = widgets.Layout(
+            display="flex", flex_flow="column", align_items="flex-start", width="80%"
+        )
 
-        species_layout = widgets.Layout(display='flex',
-                                     flex_flow='column',
-                                     align_items='center',
-                                     width='40%')
+        species_layout = widgets.Layout(
+            display="flex", flex_flow="column", align_items="center", width="40%"
+        )
 
-        select_layout = widgets.Layout(display='flex',
-                            flex_flow='column',
-                            align_items='center',
-                            width='80%')
+        select_layout = widgets.Layout(
+            display="flex", flex_flow="column", align_items="center", width="80%"
+        )
 
         # TODO - pull this out into a function that can be used here and in create_download_box
         header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=site_layout)
@@ -752,15 +943,16 @@ class Interface:
 
         select_instruction = widgets.HTML(value="<b>Select data: </b>")
 
-        header_box = widgets.HBox(children=[header_label_site, header_label_gas, header_label_select])
+        header_box = widgets.HBox(
+            children=[header_label_site, header_label_gas, header_label_select]
+        )
 
         site_vbox = widgets.VBox(children=site_labels, layout=site_layout)
         gas_vbox = widgets.VBox(children=gas_labels, layout=species_layout)
 
-        checkbox_layout = widgets.Layout(display='flex',
-                            flex_flow='row',
-                            align_items='flex-end',
-                            width='75%')
+        checkbox_layout = widgets.Layout(
+            display="flex", flex_flow="row", align_items="flex-end", width="75%"
+        )
 
         checkbox_vbox = widgets.VBox(children=plot_checkboxes, layout=select_layout)
 
@@ -776,15 +968,23 @@ class Interface:
         # Enable/disable legend
 
         # Plot button
-        plot_button = widgets.Button(description="Plot", button_style="success", layout=self.table_layout)
-        spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
+        plot_button = widgets.Button(
+            description="Plot", button_style="success", layout=self.table_layout
+        )
+        spacer = widgets.VBox(
+            children=[
+                widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
+            ]
+        )
 
         button_box = widgets.VBox(children=[plot_button, spacer, spacer])
 
         # ui_box = widgets.VBox(children=[horiz_select, plot_box])
 
         # Cleaner way of doing this?
-        arg_dict = {plot_keys[i]: checkbox for i, checkbox in enumerate(plot_checkboxes)}
+        arg_dict = {
+            plot_keys[i]: checkbox for i, checkbox in enumerate(plot_checkboxes)
+        }
 
         # For some reason the datetimeindex of the dataframes isn't being preserved
         # and we're getting an unnamed column for the first column and a numbered index
@@ -793,7 +993,9 @@ class Interface:
 
         def on_plot_clicked(a):
             # Get the data for ticked checkboxes
-            self._to_plot = {key: data[key] for key in arg_dict if arg_dict[key].value is True}
+            self._to_plot = {
+                key: data[key] for key in arg_dict if arg_dict[key].value is True
+            }
             plot_data(to_plot=self._to_plot)
 
         # Create a dropdown to select which part of the dataframe
@@ -803,8 +1005,16 @@ class Interface:
         y_scale = bq.LinearScale()
         scales = {"x": x_scale, "y": y_scale}
 
-        ax = bq.Axis(label="Date", label_offset="50px", scale=x_scale, grid_lines="none")
-        ay = bq.Axis(label="Count", label_offset="50px", scale=y_scale, orientation="vertical", grid_lines="none")
+        ax = bq.Axis(
+            label="Date", label_offset="50px", scale=x_scale, grid_lines="none"
+        )
+        ay = bq.Axis(
+            label="Count",
+            label_offset="50px",
+            scale=y_scale,
+            orientation="vertical",
+            grid_lines="none",
+        )
         axes = [ax, ay]
 
         used_colours = []
@@ -827,10 +1037,16 @@ class Interface:
                     color_choice = random.choice(self._tableau10)
 
                 used_colours.append(color_choice)
-                
+
                 single_color = [color_choice]
 
-                mark = bq.Lines(scales=scales, colors=single_color, stroke_width=1, labels=[site_name], display_legend=True)
+                mark = bq.Lines(
+                    scales=scales,
+                    colors=single_color,
+                    stroke_width=1,
+                    labels=[site_name],
+                    display_legend=True,
+                )
 
                 mark.x = data.time
                 # TODO - can modify this to be able to add error bars etc
@@ -848,9 +1064,9 @@ class Interface:
                 start_date = pd.Timestamp(data["time"][0].values)
                 end_date = pd.Timestamp(data["time"][-1].values)
 
-                dates = pd.date_range(start_date, end_date, freq='M')
-                options = [(date.strftime(' %Y-%m-%d '), date) for date in dates]
-                index = (0, len(options)-1)
+                dates = pd.date_range(start_date, end_date, freq="M")
+                options = [(date.strftime(" %Y-%m-%d "), date) for date in dates]
+                index = (0, len(options) - 1)
 
                 selection_range_slider.options = options
                 selection_range_slider.index = index
@@ -867,23 +1083,28 @@ class Interface:
         figure.layout.height = "auto"
         figure.layout.min_height = "500px"
 
-        spacer = widgets.VBox(children=[widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))])
+        spacer = widgets.VBox(
+            children=[
+                widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
+            ]
+        )
 
         # first_key = list(self._to_plot.keys())[0]
         # Timestamps for initial values
         start_date = pd.Timestamp("2012-01-01")
         end_date = pd.Timestamp("2019-01-01")
 
-        dates = pd.date_range(start_date, end_date, freq='M')
-        options = [(date.strftime('%d %m %Y'), date) for date in dates]
-        index = (0, len(options)-1)
+        dates = pd.date_range(start_date, end_date, freq="M")
+        options = [(date.strftime("%d %m %Y"), date) for date in dates]
+        index = (0, len(options) - 1)
 
         selection_range_slider = widgets.SelectionRangeSlider(
-                                        options=options,
-                                        index=index,
-                                        description='Select date',
-                                        orientation='horizontal',
-                                        layout={'width': '500px'})
+            options=options,
+            index=index,
+            description="Select date",
+            orientation="horizontal",
+            layout={"width": "500px"},
+        )
 
         def update_scale(dates):
             start, end = dates
@@ -891,7 +1112,9 @@ class Interface:
             x_scale.min = start
             x_scale.max = end
 
-        centre_layout = widgets.Layout(display='flex', flex_flow='column', align_items='center', width='100%')
+        centre_layout = widgets.Layout(
+            display="flex", flex_flow="column", align_items="center", width="100%"
+        )
 
         slider = widgets.interactive(update_scale, dates=selection_range_slider)
 
@@ -907,7 +1130,7 @@ class Interface:
 
         plot_button.on_click(on_plot_clicked)
 
-        # Plot straight away        
+        # Plot straight away
         on_plot_clicked(a="a")
 
         self._n_figs += 1
@@ -982,7 +1205,6 @@ class Interface:
 
     #         selection_widgets[site] = [site_label, selection_box]
 
-
     #     return selection_widgets
 
     #     select_instruction = widgets.HTML(value="<b>Select data: </b>", layout=self.table_layout)
@@ -1000,29 +1222,22 @@ class Interface:
     #     def on_plot_clicked(a):
     #         keys = []
     #         for site in selection_widgets:
-    #             species = 
-
-
+    #             species =
 
     #         # Get the data for ticked checkboxes
     #         to_plot = {key: data[key] for key in site_data if arg_dict[key].value is True}
     #         plot_data(to_plot=to_plot)
-
-
-
-
 
     #     # For some reason the datetimeindex of the dataframes isn't being preserved
     #     # and we're getting an unnamed column for the first column and a numbered index
     #     # But only on export of the dataframe to csv, otherwise just get the standard
     #     # 'co count', 'co stdev', 'co n_meas'
 
-
     #     # Create a dropdown to select which part of the dataframe
     #     # to plot, count, stddev etc
 
     #     def plot_data(to_plot):
-    #         """ 
+    #         """
     #             Each key in the data dict is a dataframe
     #         """
     #         # Modify here so user can select line, scatter
@@ -1099,8 +1314,14 @@ class Interface:
         self._plot_box.clear()
 
         # Add plot button can be here
-        plot_window = widgets.VBox(children=self.create_plotting_box(selected_results=selected_results, data=data))
-        add_button = widgets.Button(description="Add plot", button_style="primary", layout=self.table_layout)
+        plot_window = widgets.VBox(
+            children=self.create_plotting_box(
+                selected_results=selected_results, data=data
+            )
+        )
+        add_button = widgets.Button(
+            description="Add plot", button_style="primary", layout=self.table_layout
+        )
         spacer = widgets.Text(value=None, layout=widgets.Layout(visibility="hidden"))
         # Add a number to the plot
 
@@ -1110,7 +1331,11 @@ class Interface:
             n_figs = self._n_figs - 1
 
             # Get current HBox
-            new_plot = widgets.VBox(children=self.create_plotting_box(selected_results=selected_results, data=data))
+            new_plot = widgets.VBox(
+                children=self.create_plotting_box(
+                    selected_results=selected_results, data=data
+                )
+            )
 
             if n_figs % 2 == 0:
                 current_box = self._plot_box[-1]
@@ -1122,7 +1347,6 @@ class Interface:
 
             self.add_widgets(section="plot_window", _widgets=self._plot_box)
 
-
         self._plot_box.append(plot_window)
 
         self.add_widgets(section="plot_window", _widgets=self._plot_box)
@@ -1131,9 +1355,8 @@ class Interface:
         add_button.on_click(add_window)
 
         complete = [self._widgets["plot_window"], self._widgets["plot_controls"]]
-        
+
         return complete
-        
 
     def create_map_box(self, search_results):
         """ Create the mapping box for selection of site data from the map
@@ -1163,7 +1386,10 @@ class Interface:
                 site_locations[location]["species"].append(species)
             else:
                 site_data = self._site_locations[location]
-                site_locations[location]["location"] = site_data["latitude"], site_data["longitude"]
+                site_locations[location]["location"] = (
+                    site_data["latitude"],
+                    site_data["longitude"],
+                )
                 site_locations[location]["species"] = [species]
                 site_locations[location]["name"] = site_data["name"]
                 site_locations[location]["dates"] = f"{start} to {end}"
@@ -1172,25 +1398,37 @@ class Interface:
         center = [54.2361, -4.548]
         zoom = 5
         site_map = ipyleaflet.Map(center=center, zoom=zoom)
-        
+
         # We only want to select each site once
         self._selected_sites = set()
 
         # These widgets are overlain on the map itself
-        button_layout = widgets.Layout(min_width='80px', max_width='120px')
-        download_layout = widgets.Layout(min_width='80px', max_width='100px')
+        button_layout = widgets.Layout(min_width="80px", max_width="120px")
+        download_layout = widgets.Layout(min_width="80px", max_width="100px")
 
-        clear_button = widgets.Button(description="Clear selection", layout=button_layout)
-        clear_control = ipyleaflet.WidgetControl(widget=clear_button, position='bottomleft')
+        clear_button = widgets.Button(
+            description="Clear selection", layout=button_layout
+        )
+        clear_control = ipyleaflet.WidgetControl(
+            widget=clear_button, position="bottomleft"
+        )
 
         reset_button = widgets.Button(description="Reset map", layout=button_layout)
-        reset_control = ipyleaflet.WidgetControl(widget=reset_button, position="bottomleft")
+        reset_control = ipyleaflet.WidgetControl(
+            widget=reset_button, position="bottomleft"
+        )
 
         selected_text = widgets.HTML(value="")
-        selected_control = ipyleaflet.WidgetControl(widget=selected_text, position="topright")
+        selected_control = ipyleaflet.WidgetControl(
+            widget=selected_text, position="topright"
+        )
 
-        download_button = widgets.Button(description="Download", disabled=True, layout=download_layout)
-        download_control = ipyleaflet.WidgetControl(widget=download_button, position="bottomright")
+        download_button = widgets.Button(
+            description="Download", disabled=True, layout=download_layout
+        )
+        download_control = ipyleaflet.WidgetControl(
+            widget=download_button, position="bottomright"
+        )
 
         site_map.add_control(clear_control)
         site_map.add_control(reset_control)
@@ -1199,7 +1437,9 @@ class Interface:
 
         def site_select(r, **kwargs):
             self._selected_sites.add(r)
-            selected_text.value = "Sites selected : " + ", ".join(list(self._selected_sites))
+            selected_text.value = "Sites selected : " + ", ".join(
+                list(self._selected_sites)
+            )
             download_button.disabled = False
 
         def clear_selection(a):
@@ -1215,7 +1455,12 @@ class Interface:
             # Get the selected site's codes from the dict
             site_codes = {self._site_codes[s.lower()] for s in self._selected_sites}
             # If the site codes above are in the search_results' keys, add these to the dictionary
-            to_download = {key: search_results[key] for key in search_results for s in site_codes if s.lower() in key}
+            to_download = {
+                key: search_results[key]
+                for key in search_results
+                for s in site_codes
+                if s.lower() in key
+            }
             self.retrieve_data(selected_results=to_download)
 
         # Create a marker for each site we have results for, on the marker show the
@@ -1225,12 +1470,22 @@ class Interface:
             latitude, longitude = site_locations[site]["location"]
             name = site_locations[site]["name"]
 
-            mark = ipyleaflet.Marker(location=(latitude, longitude), name=name, draggable=False)
+            mark = ipyleaflet.Marker(
+                location=(latitude, longitude), name=name, draggable=False
+            )
             # These are added to the HTML in the popup of the marker
             species = ", ".join(site_locations[site]["species"])
             dates = site_locations[site]["dates"]
 
-            html_string = "<br/>".join([(f"<b>{name}</b>"), "Species: ", species.upper(), "Data covering: ", dates])
+            html_string = "<br/>".join(
+                [
+                    (f"<b>{name}</b>"),
+                    "Species: ",
+                    species.upper(),
+                    "Data covering: ",
+                    dates,
+                ]
+            )
             mark.popup = widgets.HTML(value=html_string)
             # We want to pass the name of the site selected to the site_select function
             mark.on_click(functools.partial(site_select, r=mark.name))
@@ -1243,7 +1498,9 @@ class Interface:
 
         return [site_map]
 
-    def mapbox_notebook(self, search_results, site_data, center, zoom, data_type="EUROCOM"):
+    def mapbox_notebook(
+        self, search_results, site_data, center, zoom, data_type="EUROCOM"
+    ):
         """ Create the mapping box for selection of site data from the map
             
             Args:
@@ -1254,10 +1511,10 @@ class Interface:
         """
         # Parse the search results and extract dates, site locations etc
         site_locations = collections.defaultdict(dict)
-        
-        if(site_data):
+
+        if site_data:
             self._site_locations = site_data
-        
+
         for key in search_results:
             # TODO - refactor this to work with the new search results
             # Key such as bsd_co, bsd_co2
@@ -1284,11 +1541,13 @@ class Interface:
                 local_site = site_data[location]
 
                 site_locations[location]["species"] = [species]
-                site_locations[location]["location"] = local_site["latitude"], local_site["longitude"]
+                site_locations[location]["location"] = (
+                    local_site["latitude"],
+                    local_site["longitude"],
+                )
                 site_locations[location]["name"] = location
                 site_locations[location]["long_name"] = local_site["long_name"]
                 site_locations[location]["dates"] = f"{start} to {end}"
-
 
         # Now we can create the map with the data parsed from the search results
         site_map = ipyleaflet.Map(center=center, zoom=zoom)
@@ -1297,20 +1556,32 @@ class Interface:
         self._selected_sites = set()
 
         # These widgets are overlaid on the map itself
-        button_layout = widgets.Layout(min_width='80px', max_width='120px')
-        download_layout = widgets.Layout(min_width='80px', max_width='100px')
+        button_layout = widgets.Layout(min_width="80px", max_width="120px")
+        download_layout = widgets.Layout(min_width="80px", max_width="100px")
 
-        clear_button = widgets.Button(description="Clear selection", layout=button_layout)
-        clear_control = ipyleaflet.WidgetControl(widget=clear_button, position='bottomleft')
+        clear_button = widgets.Button(
+            description="Clear selection", layout=button_layout
+        )
+        clear_control = ipyleaflet.WidgetControl(
+            widget=clear_button, position="bottomleft"
+        )
 
         reset_button = widgets.Button(description="Reset map", layout=button_layout)
-        reset_control = ipyleaflet.WidgetControl(widget=reset_button, position="bottomleft")
+        reset_control = ipyleaflet.WidgetControl(
+            widget=reset_button, position="bottomleft"
+        )
 
         selected_text = widgets.HTML(value="")
-        selected_control = ipyleaflet.WidgetControl(widget=selected_text, position="topright")
+        selected_control = ipyleaflet.WidgetControl(
+            widget=selected_text, position="topright"
+        )
 
-        download_button = widgets.Button(description="Download", disabled=True, layout=download_layout)
-        download_control = ipyleaflet.WidgetControl(widget=download_button, position="bottomright")
+        download_button = widgets.Button(
+            description="Download", disabled=True, layout=download_layout
+        )
+        download_control = ipyleaflet.WidgetControl(
+            widget=download_button, position="bottomright"
+        )
 
         site_map.add_control(clear_control)
         site_map.add_control(reset_control)
@@ -1318,7 +1589,9 @@ class Interface:
         site_map.add_control(download_control)
 
         # Now need a box that gets updated when the user selects a site
-        centre_layout = widgets.Layout(display='flex', flex_flow='column', align_items='center', width='100%')
+        centre_layout = widgets.Layout(
+            display="flex", flex_flow="column", align_items="center", width="100%"
+        )
         fig_box = widgets.VBox(children=[])
 
         def site_select(r, **kwargs):
@@ -1326,7 +1599,9 @@ class Interface:
                 self._selected_sites.clear()
 
             self._selected_sites.add(r)
-            selected_text.value = "Sites selected : " + ", ".join(list(self._selected_sites))
+            selected_text.value = "Sites selected : " + ", ".join(
+                list(self._selected_sites)
+            )
             download_button.disabled = False
 
         def clear_selection(a):
@@ -1338,14 +1613,21 @@ class Interface:
         def reset_map(a):
             site_map.center = center
             site_map.zoom = zoom
-        
+
         def download_click(a):
             # Get the selected site's codes from the dict
             # site_codes = {self._site_codes[s.lower()] for s in self._selected_sites}
             # If the site codes above are in the search_results' keys, add these to the dictionary
-            to_download = {key: search_results[key] for key in search_results for s in self._selected_sites if s.lower() in key}
+            to_download = {
+                key: search_results[key]
+                for key in search_results
+                for s in self._selected_sites
+                if s.lower() in key
+            }
             self._data = self.retrieve_data(selected_results=to_download)
-            plotting_widgets = self.plotting_interface(selected_results=to_download, data=self._data)
+            plotting_widgets = self.plotting_interface(
+                selected_results=to_download, data=self._data
+            )
 
             fig_box.children = [plotting_widgets]
 
@@ -1356,12 +1638,22 @@ class Interface:
             name = site_locations[site]["name"]
             long_name = site_locations[site]["long_name"]
 
-            mark = ipyleaflet.Marker(location=(latitude, longitude), name=name, draggable=False)
+            mark = ipyleaflet.Marker(
+                location=(latitude, longitude), name=name, draggable=False
+            )
             # These are added to the HTML in the popup of the marker
             species = ", ".join(site_locations[site]["species"])
             dates = site_locations[site]["dates"]
 
-            html_string = "<br/>".join([(f"<b>{long_name} ({name})</b>"), "Species: ", species.upper(), "Data covering: ", dates])
+            html_string = "<br/>".join(
+                [
+                    (f"<b>{long_name} ({name})</b>"),
+                    "Species: ",
+                    species.upper(),
+                    "Data covering: ",
+                    dates,
+                ]
+            )
             mark.popup = widgets.HTML(value=html_string)
             # We want to pass the name of the site selected to the site_select function
             mark.on_click(functools.partial(site_select, r=mark.name))
@@ -1377,20 +1669,24 @@ class Interface:
         return site_map, fig_box
 
     def create_fileselector(self, *args):
-        header_layout = widgets.Layout(display='flex',flex_flow='row')
+        header_layout = widgets.Layout(display="flex", flex_flow="row")
 
-        table_layout = widgets.Layout(display='flex',flex_flow='row')
+        table_layout = widgets.Layout(display="flex", flex_flow="row")
 
         main_layout = widgets.Layout(
-            display='flex',
-            flex_flow='row',
-            align_items='stretch',
-            width='100%',
-            justify_content='space-between'
+            display="flex",
+            flex_flow="row",
+            align_items="stretch",
+            width="100%",
+            justify_content="space-between",
         )
 
-        header_label_filename = widgets.HTML(value=f"<b>Filename</b>", layout=header_layout)
-        header_label_datatype = widgets.HTML(value=f"<b>Data type</b>", layout=header_layout)
+        header_label_filename = widgets.HTML(
+            value=f"<b>Filename</b>", layout=header_layout
+        )
+        header_label_datatype = widgets.HTML(
+            value=f"<b>Data type</b>", layout=header_layout
+        )
         header_label_select = widgets.HTML(value=f"<b>Select</b>", layout=header_layout)
 
         filenames = []
@@ -1402,8 +1698,7 @@ class Interface:
 
         data_type_list = ["CRDS", "GC"]
 
-        files = ["file1",
-                "file2", "file3"]
+        files = ["file1", "file2", "file3"]
 
         def clear_checkboxes(*args):
             for c in checkboxes:
@@ -1412,12 +1707,11 @@ class Interface:
         def upload_data(*args):
             # We want to add some metadata to the dictionary
             # to_upload = selection_button.value.copy()
-            # Add in the data type of the 
+            # Add in the data type of the
             uuids = self.process_data(data=selection_button.value)
 
             with output:
                 print(uuids)
-
 
         def update_filelist(*args):
             """ Update the list of files to be selected for upload
@@ -1425,14 +1719,26 @@ class Interface:
             """
             if self._user and self._user.is_logged_in():
                 upload_button.disabled = False
-                
+
             for filename in selection_button.value.keys():
-                filenames.append(widgets.HTML(
-                    value=f"{filename}", layout=widgets.Layout(flex='1 1 auto', width='auto')))
-                data_types.append(widgets.Dropdown(options=data_type_list, value="GC",
-                                                layout=widgets.Layout(flex='1 1 auto', width='auto')))
-                checkboxes.append(widgets.Checkbox(
-                    value=True, layout=widgets.Layout(flex='1 1 auto', width='auto')))
+                filenames.append(
+                    widgets.HTML(
+                        value=f"{filename}",
+                        layout=widgets.Layout(flex="1 1 auto", width="auto"),
+                    )
+                )
+                data_types.append(
+                    widgets.Dropdown(
+                        options=data_type_list,
+                        value="GC",
+                        layout=widgets.Layout(flex="1 1 auto", width="auto"),
+                    )
+                )
+                checkboxes.append(
+                    widgets.Checkbox(
+                        value=True, layout=widgets.Layout(flex="1 1 auto", width="auto")
+                    )
+                )
 
             filename_box = widgets.VBox(children=filenames)
             datatype_box = widgets.VBox(children=data_types)
@@ -1440,8 +1746,14 @@ class Interface:
 
             list_box.children = [filename_box, datatype_box, checkbox_box]
 
-        header = widgets.HBox(children=[header_label_filename, header_label_datatype, header_label_select], 
-                                layout=main_layout)
+        header = widgets.HBox(
+            children=[
+                header_label_filename,
+                header_label_datatype,
+                header_label_select,
+            ],
+            layout=main_layout,
+        )
 
         filename_box = widgets.VBox(children=filenames)
         datatype_box = widgets.VBox(children=data_types)
@@ -1456,7 +1768,9 @@ class Interface:
 
         selection_button = widgets.FileUpload(description="Select")
         clear_button = widgets.Button(button_style="danger", description="Clear")
-        upload_button = widgets.Button(button_style="primary", description="Upload", disabled=True)
+        upload_button = widgets.Button(
+            button_style="primary", description="Upload", disabled=True
+        )
 
         # TODO - disable the upload button until the user is logged in
         selection_button.observe(update_filelist, names="value")
@@ -1464,8 +1778,13 @@ class Interface:
         clear_button.on_click(clear_checkboxes)
         upload_button.on_click(upload_data)
 
-        button_box = widgets.VBox(children=[selection_button, widgets.HBox(children=[clear_button, upload_button])], 
-                                    layout=main_layout)
+        button_box = widgets.VBox(
+            children=[
+                selection_button,
+                widgets.HBox(children=[clear_button, upload_button]),
+            ],
+            layout=main_layout,
+        )
 
         output = widgets.Output()
         output_box = widgets.VBox(children=[self._spacer, output])
@@ -1493,7 +1812,7 @@ class Interface:
         process = Process(service_url=self._base_url)
 
         datasource_uuids = {}
-        
+
         for filename in data:
             binary_content = data[filename]["content"]
             # Write data to temporary path for the moment
@@ -1501,9 +1820,11 @@ class Interface:
                 filepath = Path(tmpdir).joinpath(filename)
                 with open(filepath, "wb") as f:
                     f.write(binary_content)
-                    
+
                 # Upload the file to
-                uuids = process.process_files(user=self._user, files=filepath, data_type="CRDS")
+                uuids = process.process_files(
+                    user=self._user, files=filepath, data_type="CRDS"
+                )
                 datasource_uuids.update(uuids)
 
         return datasource_uuids
@@ -1518,12 +1839,12 @@ class Interface:
                 FileLink: FileLink for file download
         """
         from IPython.display import FileLink
-        
-        if(self._tmpdir):
+
+        if self._tmpdir:
             self._tmpdir.cleanup()
-            self._tmpdir = tempfile.TemporaryDirectory()  
+            self._tmpdir = tempfile.TemporaryDirectory()
         else:
-            self._tmpdir = tempfile.TemporaryDirectory()     
+            self._tmpdir = tempfile.TemporaryDirectory()
 
         # If we have more than one Dataframe to download we create a bzip
         filepaths = []
@@ -1531,7 +1852,7 @@ class Interface:
             filepath = Path(self._tmpdir.name).joinpath(key).with_suffix(".nc")
             data[key].to_netcdf(filepath)
             filepaths.append(filepath)
-        
+
         # If we have more than one file zip them
         if len(filepaths) > 1:
             archive_name = f"hugs_archive_{datetime.now().strftime('%Y%m%d-%H%M%S')}"
@@ -1588,7 +1909,6 @@ class Interface:
         status_html = widgets.HTML(value=status_text)
         self._widgets["status_bar"].children = [status_html]
 
-
     def add_widgets(self, section, _widgets):
         """ Add widgets to be the children of the key section
             in the widget dictionary
@@ -1644,8 +1964,6 @@ class Interface:
         self.add_widgets(section="upload", _widgets=self.create_fileselector())
         # self.add_widgets(section="status_bar", _widgets=[widgets.HTML(value="Woo")])
 
-
-
     def show_interface(self, new_user=False):
         """ Return the completed interface
 
@@ -1655,7 +1973,9 @@ class Interface:
         # Here we can assign children to the VBox's created in the function above
         if new_user:
             # widget_list.append(self.create_user())
-            self.add_widgets(section="register", _widgets=self.create_registration_box())
+            self.add_widgets(
+                section="register", _widgets=self.create_registration_box()
+            )
 
         self.add_widgets(section="login", _widgets=self.create_login_box())
 
@@ -1665,8 +1985,5 @@ class Interface:
         # This creates a list of of VBoxes to be placed in the main VBox
         boxes = [self._widgets[b] for b in self._module_list]
         box = widgets.VBox(children=boxes)
-        
+
         return box
-
-
-

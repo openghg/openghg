@@ -1,5 +1,6 @@
 __all__ = ["JobRunner"]
 
+
 class JobRunner:
     """ An interface to the the jobrunner service on the HUGS platform.
 
@@ -8,33 +9,43 @@ class JobRunner:
         Args:
             service_url (str): URL of service
     """
+
     def __init__(self, service_url):
         from Acquire.Client import Wallet
 
         wallet = Wallet()
-        
+
         self._service = wallet.get_service(service_url=f"{service_url}/hugs")
         self._service_url = service_url
 
-    def create_job(self, auth_user, requirements, key_password, data_files, hugs_url=None, storage_url=None):
+    def create_job(
+        self,
+        auth_user,
+        requirements,
+        key_password,
+        data_files,
+        hugs_url=None,
+        storage_url=None,
+    ):
         """ Create a job
 
             Args:
                 auth_user (Acquire.User): Authenticated Acquire user
 
                 The following keys are required:
-                    "hostname", "username", "name", "run_command", "partition", "n_nodes", "n_tasks_per_node", 
+                    "hostname", "username", "name", "run_command", "partition", "n_nodes", "n_tasks_per_node",
                     "n_cpus_per_task", "memory_req", "job_duration"
                 where partition must be one of:
                     "cpu_test", "dcv", "gpu", "gpu_veryshort", "hmem", "serial", "test", "veryshort"
 
                 Example:
-                    requirements = {"hostname": hostname, "username": username, "name": "test_job, "n_nodes": 2, 
-                                    "n_tasks_per_node": 2, "n_cpus_per_task": 2, "memory": "128G", ...}
+                    requirements = {"hostname": hostname, "username": username, "name": "test_job,
+                                    "n_nodes": 2,"n_tasks_per_node": 2,
+                                    "n_cpus_per_task": 2, "memory": "128G", ...}
 
                 requirements (dict): Dictionary containing job details and requested resources
                 key_password (str): Password for private key used to access the HPC
-                data_files (dict): Data file(s) to be uploaded to the cloud drive to 
+                data_files (dict): Data file(s) to be uploaded to the cloud drive to
                 run the simulation. Simulation code files should be given in the "app" key and data
                 files in the "data" key
 
@@ -45,9 +56,17 @@ class JobRunner:
                 storage_url (str): URL of storage service
             Returns:
                 dict: Dictionary containing information regarding job running on resource
-                This will contain the PAR for access for data upload and download. 
+                This will contain the PAR for access for data upload and download.
         """
-        from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds, Location, ACLRule
+        from Acquire.Client import (
+            Drive,
+            Service,
+            PAR,
+            Authorisation,
+            StorageCreds,
+            Location,
+            ACLRule,
+        )
         from Acquire.ObjectStore import create_uuid
         import datetime
         import os
@@ -63,7 +82,6 @@ class JobRunner:
 
         if not isinstance(data_files["app"], list):
             data_files["app"] = [data_files["app"]]
-
 
         try:
             if not isinstance(data_files["data"], list):
@@ -81,23 +99,23 @@ class JobRunner:
 
         job_name = requirements["name"]
         job_name = f"{job_name.lower()}_{short_uuid}"
-        
+
         # Create a cloud drive for the input and output data to be written to
         drive = Drive(creds=creds, name=job_name)
 
         # Check the size of the files and if we want to use the chunk uploader
         # Now we want to upload the files to the cloud drive we've created for this job
-        chunk_limit = 50*1024*1024
+        chunk_limit = 50 * 1024 * 1024
 
         # Store the metadata for the uploaded files
-        uploaded_files = {"app" : {}, "data": {}}
+        uploaded_files = {"app": {}, "data": {}}
         # These probably won't be very big so don't check their size
         for f in data_files["app"]:
             file_meta = drive.upload(f, dir="app")
             uploaded_files["app"][f] = file_meta
 
         # We might not have any data files to upload
-        try:    
+        try:
             for f in data_files["data"]:
                 filesize = os.path.getsize(f)
 
@@ -122,13 +140,18 @@ class JobRunner:
         # try:
         #     duration = requirements["duration"]
         #     par_expiry = datetime.datetime
-    
+
         par_lifetime = datetime.datetime.now() + datetime.timedelta(days=1)
 
         # Create an ACL rule for this PAR so we can read and write to it
         aclrule = ACLRule.owner()
-        par = PAR(location=location, user=auth_user, aclrule=aclrule, expires_datetime=par_lifetime)
-       
+        par = PAR(
+            location=location,
+            user=auth_user,
+            aclrule=aclrule,
+            expires_datetime=par_lifetime,
+        )
+
         par_secret = par.secret()
         encryped_par_secret = hugs.encrypt_data(par_secret)
 
@@ -137,7 +160,7 @@ class JobRunner:
         encrypted_password = hugs.encrypt_data(key_password)
 
         par_data = par.to_data()
-    
+
         args = {}
         args["authorisation"] = auth.to_data()
         args["par"] = par_data
@@ -145,7 +168,9 @@ class JobRunner:
         args["requirements"] = requirements
         args["key_password"] = encrypted_password
 
-        function_response = self._service.call_function(function="job_runner", args=args)
+        function_response = self._service.call_function(
+            function="job_runner", args=args
+        )
 
         response = {}
         response["function_response"] = function_response

@@ -1,13 +1,13 @@
-
 __all__ = ["Cranfield"]
+
 
 class Cranfield:
     """ Interface for processnig Template data
 
         Instances of Template should be created using the
         CRDS.create() function
-        
     """
+
     _cranfield_root = "Cranfield"
     _cranfield_uuid = "b3addb14-c182-4449-9d99-f7396c8ea624"
 
@@ -37,7 +37,7 @@ class Cranfield:
         """ This function should be used to create CRDS objects
 
             Returns:
-                CRDS: CRDS object 
+                CRDS: CRDS object
         """
         from Acquire.ObjectStore import get_datetime_now
 
@@ -60,15 +60,17 @@ class Cranfield:
         """
         from HUGS.Processing import assign_data, lookup_gas_datasources
         from HUGS.Util import hash_file
-        import os
         from pathlib import Path
 
         cranfield = Cranfield.load()
-        
+
         file_hash = hash_file(filepath=data_filepath)
         if file_hash in cranfield._file_hashes and not overwrite:
-            raise ValueError(f"This file has been uploaded previously with the filename : {cranfield._file_hashes[file_hash]}")
-        
+            raise ValueError(
+                f"This file has been uploaded previously with the filename \
+                : {cranfield._file_hashes[file_hash]}"
+            )
+
         # Ensure we have a string
         data_filepath = Path(data_filepath)
         gas_data = cranfield.read_data(data_filepath=data_filepath)
@@ -80,8 +82,12 @@ class Cranfield:
         # TODO - currently just using a simple naming system here - update to use
         # an assigned UUID? Seems safer? How to give each gas a UUID?
         # This could be rolled into the assign_data function?
-        lookup_results = lookup_gas_datasources(lookup_dict=cranfield._datasource_names, gas_data=gas_data,
-                                                source_name=source_name, source_id=source_id)
+        lookup_results = lookup_gas_datasources(
+            lookup_dict=cranfield._datasource_names,
+            gas_data=gas_data,
+            source_name=source_name,
+            source_id=source_id,
+        )
 
         # Add in lookup of datasources for current data
         # This function should split the data into a format that
@@ -89,7 +95,9 @@ class Cranfield:
         gas_data = cranfield.read_data(data_filepath=data_filepath)
 
         # Create Datasources, save them to the object store and get their UUIDs
-        datasource_uuids = assign_data(gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite)
+        datasource_uuids = assign_data(
+            gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite
+        )
 
         # Add the Datasources to the list of datasources associated with this object
         cranfield.add_datasources(datasource_uuids)
@@ -99,9 +107,9 @@ class Cranfield:
         return datasource_uuids
 
     def read_data(self, data_filepath, data_type="CRDS"):
-        """ Separates the gases stored in the dataframe in 
+        """ Separates the gases stored in the dataframe in
             separate dataframes and returns a dictionary of gases
-           
+
             Args:
                 data_filepath (pathlib.PosixPath): Path to data file
                 data_type (str, default=CRDS): Type of data to be processed
@@ -113,36 +121,40 @@ class Cranfield:
         if not data_type == "CRDS":
             raise NotImplementedError("Only CRDS can currently be processed")
 
-        data = read_csv(data_filepath, parse_dates=["Date"], index_col = "Date")
+        data = read_csv(data_filepath, parse_dates=["Date"], index_col="Date")
 
-        data = data.rename(columns = {"Methane/ppm": "ch4",
-                                     "Methane stdev/ppm": "ch4 variability",
-                                        "CO2/ppm": "co2",
-                                        "CO2 stdev/ppm": "co2 variability",
-                                        "CO/ppm": "co",
-                                        "CO stdev/ppm": "co variability"})
+        data = data.rename(
+            columns={
+                "Methane/ppm": "ch4",
+                "Methane stdev/ppm": "ch4 variability",
+                "CO2/ppm": "co2",
+                "CO2 stdev/ppm": "co2 variability",
+                "CO/ppm": "co",
+                "CO stdev/ppm": "co variability",
+            }
+        )
         data.index.name = "time"
 
         # Convert CH4 and CO to ppb
-        data["ch4"] = data["ch4"]*1e3
-        data["ch4 variability"] = data["ch4 variability"]*1e3
-        data["co"] = data["co"]*1e3
-        data["co variability"] = data["co variability"]*1e3
-        
+        data["ch4"] = data["ch4"] * 1e3
+        data["ch4 variability"] = data["ch4 variability"] * 1e3
+        data["co"] = data["co"] * 1e3
+        data["co variability"] = data["co variability"] * 1e3
+
         metadata = {}
-        metadata["site"] = "THB" 
+        metadata["site"] = "THB"
         metadata["instrument"] = "CRDS"
         metadata["time_resolution"] = "1_hour"
         metadata["height"] = "10magl"
-        
+
         # TODO - this feels fragile
         species = [col for col in data.columns if " " not in col]
-        
+
         combined_data = {}
         # Number of columns of data for each species
         n_cols = 2
         for n, sp in enumerate(species):
-        # for sp in species:
+            # for sp in species:
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
             species_metadata["species"] = sp
@@ -150,11 +162,11 @@ class Cranfield:
             # Here we don't want to match the co in co2
             # For now we'll just have 2 columns for each species
             # cols = [col for col in data.columns if sp in col]
-            gas_data = data.iloc[:, n*n_cols:(n+1)*n_cols]
-            
+            gas_data = data.iloc[:, n * n_cols : (n + 1) * n_cols]
+
             # Convert from a pandas DataFrame to an xarray Dataset
             gas_data = gas_data.to_xarray()
-            
+
             combined_data[sp] = {"metadata": species_metadata, "data": gas_data}
 
         return combined_data
@@ -174,7 +186,7 @@ class Cranfield:
         data["datasource_uuids"] = self._datasource_uuids
         data["datasource_names"] = self._datasource_names
         data["file_hashes"] = self._file_hashes
-    
+
         return data
 
     @staticmethod
@@ -187,7 +199,7 @@ class Cranfield:
             Returns:
                 CRDS: CRDS object created from data
         """
-        from Acquire.ObjectStore import string_to_datetime 
+        from Acquire.ObjectStore import string_to_datetime
         from HUGS.ObjectStore import get_bucket
 
         if data is None or len(data) == 0:
@@ -195,17 +207,15 @@ class Cranfield:
 
         if bucket is None:
             bucket = get_bucket()
-        
+
         c = Cranfield()
 
         c._creation_datetime = string_to_datetime(data["creation_datetime"])
-        stored = data["stored"]
-
         c._datasource_uuids = data["datasource_uuids"]
         c._datasource_names = data["datasource_names"]
         c._file_hashes = data["file_hashes"]
         c._stored = False
-        
+
         return c
 
     def save(self, bucket=None):
@@ -299,7 +309,7 @@ class Cranfield:
         return self._datasource_names
 
     def remove_datasource(self, uuid):
-        """ Remove the Datasource with the given uuid from the list 
+        """ Remove the Datasource with the given uuid from the list
             of Datasources
 
             Args:

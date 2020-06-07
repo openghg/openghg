@@ -1,19 +1,18 @@
-import pytest
-import pandas as pd
 import os
-from pandas import read_json, Timestamp
 
-from HUGS.Client import Retrieve, Search, ClearDatasources
-from HUGS.Modules import CRDS
-from HUGS.ObjectStore import get_local_bucket, get_object_names
-from Acquire.Client import User, Drive, Service, StorageCreds, PAR, Authorisation
+import pandas as pd
+import pytest
+from Acquire.Client import PAR, Authorisation, Drive, Service, StorageCreds
+
+from HUGS.Client import ClearDatasources, Retrieve, Search
+
 
 @pytest.fixture(scope="session")
 def tempdir(tmpdir_factory):
     d = tmpdir_factory.mktemp("")
     return str(d)
 
-# Seems like a lot to be doing this before each test? Alternative?
+
 @pytest.fixture(autouse=True)
 def crds(authenticated_user):
     clear_ds = ClearDatasources(service_url="hugs")
@@ -21,7 +20,10 @@ def crds(authenticated_user):
 
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
-    filepath = os.path.join(os.path.dirname(__file__), "../../../tests/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat")
+    filepath = os.path.join(
+        os.path.dirname(__file__),
+        "../../../tests/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat",
+    )
     filemeta = drive.upload(filepath)
 
     par = PAR(location=filemeta.location(), user=authenticated_user)
@@ -31,12 +33,15 @@ def crds(authenticated_user):
 
     auth = Authorisation(resource="process", user=authenticated_user)
 
-    args = {"authorisation": auth.to_data(),
-            "par": {"data": par.to_data()},
-            "par_secret": {"data": par_secret},
-            "data_type": "CRDS", "source_name": "bsd.picarro.1minute.248m"}
+    args = {
+        "authorisation": auth.to_data(),
+        "par": {"data": par.to_data()},
+        "par_secret": {"data": par_secret},
+        "data_type": "CRDS",
+        "source_name": "bsd.picarro.1minute.248m",
+    }
 
-    response = hugs.call_function(function="process", args=args)
+    hugs.call_function(function="process", args=args)
 
 
 def test_retrieve(authenticated_user, crds):
@@ -46,7 +51,9 @@ def test_retrieve(authenticated_user, crds):
 
     search_obj = Search(service_url="hugs")
 
-    search_results = search_obj.search(search_terms=search_term, locations=location, data_type=data_type)
+    search_results = search_obj.search(
+        search_terms=search_term, locations=location, data_type=data_type
+    )
 
     key = list(search_results.keys())[0]
     to_download = {"bsd_co": search_results[key]["keys"]}
@@ -59,12 +66,22 @@ def test_retrieve(authenticated_user, crds):
 
     del data.attrs["File created"]
 
-    expected_attributes = {'data_owner': "Simon O'Doherty", 'data_owner_email': 's.odoherty@bristol.ac.uk', 
-                            'inlet_height_magl': '248m',  'comment': 'Cavity ring-down measurements. Output from GCWerks', 
-                            'Conditions of use': 'Ensure that you contact the data owner at the outset of your project.',
-                            'Source': 'In situ measurements of air', 'Conventions': 'CF-1.6', 'Processed by': 'auto@hugs-cloud.com',
-                            'species': 'co', 'Calibration_scale': 'unknown', 'station_longitude': -1.15033, 
-                            'station_latitude': 54.35858, 'station_long_name': 'Bilsdale, UK', 'station_height_masl': 380.0}
+    expected_attributes = {
+        "data_owner": "Simon O'Doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk",
+        "inlet_height_magl": "248m",
+        "comment": "Cavity ring-down measurements. Output from GCWerks",
+        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
+        "Source": "In situ measurements of air",
+        "Conventions": "CF-1.6",
+        "Processed by": "auto@hugs-cloud.com",
+        "species": "co",
+        "Calibration_scale": "unknown",
+        "station_longitude": -1.15033,
+        "station_latitude": 54.35858,
+        "station_long_name": "Bilsdale, UK",
+        "station_height_masl": 380.0,
+    }
 
     assert data["time"][0] == pd.Timestamp("2014-01-30T10:52:30")
     assert data["co"][0] == pytest.approx(204.62)

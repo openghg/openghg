@@ -1,7 +1,8 @@
-from Acquire.Client import Authorisation, PAR, Service
+from Acquire.Client import PAR, Authorisation, Service
 from Acquire.Service import get_this_service
 
 from HUGS.Jobs import run_job
+
 
 def job_runner(args):
     """ Service function that gets called by the Client job_runner

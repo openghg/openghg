@@ -1,4 +1,5 @@
-from HUGS.ObjectStore import get_object_names, get_bucket
+from HUGS.ObjectStore import get_bucket, get_object_names
+
 
 def listobjects(args):
 
@@ -11,4 +12,3 @@ def listobjects(args):
     results = get_object_names(bucket=bucket, prefix=prefix)
 
     return {"results": results}
-

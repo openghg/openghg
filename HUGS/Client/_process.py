@@ -5,24 +5,36 @@ class Process:
     """ Process a datafile at a given PAR
 
     """
+
     def __init__(self, service_url=None):
         """ Process a datafile using the passed user account
 
-            service_url = "https://hugs.acquire-aaai.com/t"        
+            service_url = "https://hugs.acquire-aaai.com/t"
 
             Args:
-                service_url: URL of service 
+                service_url: URL of service
         """
         if service_url:
             from Acquire.Client import Wallet as _Wallet
+
             wallet = _Wallet()
             self._service = wallet.get_service(service_url=f"{service_url}/hugs")
             self._service_url = service_url
         else:
             self._service
 
-    def process_folder(self, user, folder_path, data_type, source_name=None, overwrite=False, extension="dat", 
-                        hugs_url=None, storage_url=None, instrument=None):
+    def process_folder(
+        self,
+        user,
+        folder_path,
+        data_type,
+        source_name=None,
+        overwrite=False,
+        extension="dat",
+        hugs_url=None,
+        storage_url=None,
+        instrument=None,
+    ):
         """ Process the passed directory of data files
 
             Args:
@@ -36,11 +48,10 @@ class Process:
                 This may be removed in the future.
         """
         from pathlib import Path
-        import os
 
         if data_type == "GC":
             filepaths = []
-            # Find all files in 
+            # Find all files in
             for f in Path(folder_path).glob(f"**/*.C"):
                 if "precisions" in f.name:
                     # Remove precisions section and ensure file exists
@@ -48,15 +59,32 @@ class Process:
                     if Path(data_filename).exists():
                         filepaths.append((Path(data_filename), f))
         else:
-            filepaths = [f for f in Path(folder_path).glob(f'**/*.{extension}')]
+            filepaths = [f for f in Path(folder_path).glob(f"**/*.{extension}")]
 
-        return self.process_files(user=user, files=filepaths, data_type=data_type, source_name=source_name, overwrite=overwrite,
-                                    instrument=instrument)
+        return self.process_files(
+            user=user,
+            files=filepaths,
+            data_type=data_type,
+            source_name=source_name,
+            overwrite=overwrite,
+            instrument=instrument,
+        )
 
     # Find a better way to get this storage url in here, currently used for testing
-    def process_files(self, user, files, data_type, source_name=None, overwrite=False, hugs_url=None, 
-                        storage_url=None, datasource=None, site=None, instrument=None):
-        """ Process the passed file(s) 
+    def process_files(
+        self,
+        user,
+        files,
+        data_type,
+        source_name=None,
+        overwrite=False,
+        hugs_url=None,
+        storage_url=None,
+        datasource=None,
+        site=None,
+        instrument=None,
+    ):
+        """ Process the passed file(s)
 
             Args:
                 user (User): Authenticated Acquire User
@@ -87,7 +115,9 @@ class Process:
 
         if data_type.upper() == "GC":
             if not all(isinstance(item, tuple) for item in files):
-                return TypeError("If data type is GC, a list of tuples for data and precision filenames must be passed")
+                return TypeError(
+                    "If data type is GC, a list of tuples for data and precision filenames must be passed"
+                )
 
         if storage_url is None:
             storage_url = self._service_url + "/storage"
@@ -97,7 +127,7 @@ class Process:
 
         # # Take the filename without the file extension
         # source_name = [os.path.splitext((filepath.name).split("/")[-1])[0] for filepath in files]
-        
+
         hugs = Service(service_url=hugs_url)
         creds = StorageCreds(user=user, service_url=storage_url)
         drive = Drive(creds=creds, name="test_drive")
@@ -114,7 +144,7 @@ class Process:
                 # This is only used as a key when returning the Datasource UUIDs
                 filename = file[0].name
                 # This may be removed in the future as is currently only for testing
-                
+
                 if not source_name:
                     source_name = os.path.splitext(filename)[0]
 
@@ -122,7 +152,7 @@ class Process:
                 # dictionary
                 if not site:
                     site = source_name.split(".")[0]
-                
+
                 filemeta = drive.upload(file[0])
                 par = PAR(location=filemeta.location(), user=user)
                 par_secret = hugs.encrypt_data(par.secret())
@@ -131,24 +161,33 @@ class Process:
                 prec_par = PAR(location=prec_meta.location(), user=user)
                 prec_par_secret = hugs.encrypt_data(prec_par.secret())
 
-                args = { "authorisation": auth.to_data(),
-                        "par": {"data": par.to_data(), "precision": prec_par.to_data()},
-                        "par_secret": {"data": par_secret, "precision": prec_par_secret},
-                        "data_type": data_type, "datasource": datasource,
-                        "source_name":source_name, "overwrite": overwrite,
-                        "site":site, "instrument":instrument }
+                args = {
+                    "authorisation": auth.to_data(),
+                    "par": {"data": par.to_data(), "precision": prec_par.to_data()},
+                    "par_secret": {"data": par_secret, "precision": prec_par_secret},
+                    "data_type": data_type,
+                    "datasource": datasource,
+                    "source_name": source_name,
+                    "overwrite": overwrite,
+                    "site": site,
+                    "instrument": instrument,
+                }
             else:
                 filename = file.name
-                
+
                 filemeta = drive.upload(file)
                 par = PAR(location=filemeta.location(), user=user)
                 par_secret = hugs.encrypt_data(par.secret())
 
-                args = { "authorisation": auth.to_data(),
-                        "par": {"data": par.to_data()},
-                        "par_secret": {"data": par_secret},
-                        "data_type": data_type, "datasource": datasource,
-                        "source_name":source_name, "overwrite":overwrite}
+                args = {
+                    "authorisation": auth.to_data(),
+                    "par": {"data": par.to_data()},
+                    "par_secret": {"data": par_secret},
+                    "data_type": data_type,
+                    "datasource": datasource,
+                    "source_name": source_name,
+                    "overwrite": overwrite,
+                }
 
             # If we try to upload many files we don't want it to fail if a single
             # file contains overlapping data
@@ -159,22 +198,3 @@ class Process:
                 datasource_uuids[filename] = err
 
         return datasource_uuids
-
-    # def process_file(self, auth, par, par_secret, data_type):
-    #     """ Pass a PAR for the file to be processed to the processing function
-
-    #         Args:
-    #             par : JSON serialised PAR object
-
-    #     """
-    #     if self._service is None:
-    #         raise PermissionError("Cannot use a null service")
-
-    #     args = {"authorisation": auth.to_data(),
-    #             "par": {"data": par.to_data()},
-    #             "par_secret": {"data": par_secret},
-    #             "data_type": "CRDS"}
-
-    #     response = self._service.call_function(function="process", args=args)
-
-    #     return response["results"]

@@ -1,33 +1,33 @@
 [![Build Status](https://dev.azure.com/wm19361/HUGS/_apis/build/status/hugs-cloud.hugs?branchName=devel)](https://dev.azure.com/wm19361/HUGS/_build/latest?definitionId=1&branchName=devel)
 
-## Install
+HUGS - HUb for greenhouse Gas data Science 
 
-Please clone the HUGS repository to your computer using 
+HUGS is a cloud-based data analysis “hub” for greenhouse gas measurements, modelling and data analysis, funded as a NERC “Constructing a Digital Environment” feasibility study. We aim to streamline the process for greenhouse gas data sharing, analysis and visualisation and add value through automated processes such as atmospheric chemistry transport model runs associated with data.
 
-`git clone https://github.com/chryswoods/hugs.git`
+The HUGS Cloud platform was developed as part of a project to create a platform that would allow researchers in atmospheric chemistry to use the power of the cloud to upload, process and analyse their data.
 
-Change into the `hugs` directory and then install using `pip`
+### Processing
 
-`pip install .`
+HUGS is capable of processing many different types of data including AGAGE/ICOS/NOAA/EUROCOM amongst others. It is built with modularity in mind so it is easy to create new modules to process different types of data. 
 
-HUGS will soon be available on `PyPi` for installation using `pip`.
+### Storage and retrieval
 
-## Post-install
+The processed data is stored within a cloud object store which allows for large amounts of data to be easily stored and retrieved. As cloud storage is utilised datasets can grow as new data is added to them with no limits on the size of a dataset. We are currently using the Oracle object store but we have built the platform using open source software to be cloud agnostic. Data stored on the platform is chunked to allow efficient storage and retrieval. This makes it quick to pull a week's worth of data from a decade of measurements.
 
-bqplot and ipyleaflet must be enabled using the following commands
+### Analyis
 
-```
-jupyter nbextension install --py --symlink --sys-prefix bqplot
-jupyter nbextension enable --py --sys-prefix bqplot
-jupyter nbextension enable --py --sys-prefix ipyleaflet
-```
+Using notebooks hosted on our (JupyterHub)[https://hub.hugs-cloud.com/] it is possible to query the object store and analyse data within the cloud. This allows analysis and processing of large datasets on any computational device as all processing is done on scalable cloud instances.
 
-## Register with HUGS
+![Jupyter notebook analysis](https://hugs-cloud.com/assets/images/HUGS_notebook_interface.jpg)
 
-In the hugs directory under `user/notebooks/account` run `jupyter notebook` and open the `register.ipynb` notebook. This notebook will guide you through the process of creating an account. You will need a 2FA authentication app like andOTP or Google Authenticator.
+### Compliance
 
-Now test your newly created account using the `login.ipynb` notebook.
+We ensure data stored on the platform can be exported as [CF compliant](http://cfconventions.org/) NetCDF files. Here we utilise the (CF Checker)[https://github.com/cedadev/cf-checker] tool to ensure that all datasets hold the correct attributes for all data contained within them.
 
-## Use HUGS
+## Cloud Hosted
 
-A simple graphical interface to the HUGS service is available in the `HUGS_interface.ipynb` notebook within the `user/notebooks/interface` directory. Please scroll down until you see the 'Scroll to here' text and then do Cell -> Run All Above from the toolbar. A simple GUI that allows interaction with functions running on the cloud should appear.
+Currently the HUGS platform can be accessed through a Jupyter Notebook interface available at https://www.hugs-cloud.com/hub. To register for an account on the platform please fill out our (registration form)[https://hugs-cloud.com/registration/]. 
+
+## Open-source technologies
+
+As this is an open source project under the Apache licence, all technologies on which the platform is based are readily available and open source themselves. We harness the power of the (Fn)[https://fnproject.io/] serverless framework for processing and retrieval of data and our JupyterHub based analysis platform is orchestrated using Kubernetes. For more information on our use of these and other open source technologies please see the documentation.

@@ -8,5 +8,3 @@ def status():
     crds = CRDS.load()
 
     return True
-
-

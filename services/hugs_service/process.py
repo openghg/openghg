@@ -1,7 +1,8 @@
-from Acquire.Client import Authorisation, PAR
+from Acquire.Client import PAR, Authorisation
 from Acquire.Service import get_this_service
 
 from HUGS.Processing import process_data
+
 
 def process(args):
     """ Take a PAR from an uploaded file and process the data
