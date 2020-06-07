@@ -1,18 +1,19 @@
-from pathlib import Path
-import pytest
+import logging
 import os
-import tempfile
+from pathlib import Path
+
+from HUGS.Modules import CRDS
+from HUGS.ObjectStore import get_local_bucket
+
+# import tempfile
 
 # from cfchecker import CFChecker
 
-from HUGS.Processing import get_attributes
-from HUGS.Modules import CRDS, EUROCOM
-from HUGS.ObjectStore import get_local_bucket
 
 
-import logging
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
+
 
 def test_crds_attributes():
     _ = get_local_bucket(empty=True)
@@ -50,13 +51,23 @@ def test_crds_attributes():
     del co2_attr["species"]
     del ch4_attr["Calibration_scale"]
     del co2_attr["Calibration_scale"]
+    del ch4_attr["data_owner_email"]
+    del co2_attr["data_owner_email"]
+    del ch4_attr["data_owner"]
+    del co2_attr["data_owner"]
 
-    global_attributes = {'data_owner': "Simon O'Doherty", 'data_owner_email': 's.odoherty@bristol.ac.uk', 'inlet_height_magl': 'test', 
-                        'comment': 'Cavity ring-down measurements. Output from GCWerks', 
-                        'Conditions of use': 'Ensure that you contact the data owner at the outset of your project.', 
-                        'Source': 'In situ measurements of air', 'Conventions': 'CF-1.6', 'Processed by': 'auto@hugs-cloud.com', 
-                        'station_longitude': 1.13872, 'station_latitude': 52.51775, 
-                        'station_long_name': 'Tacolneston Tower, UK', 'station_height_masl': 50.0}
+    global_attributes = {
+        "inlet_height_magl": "test",
+        "comment": "Cavity ring-down measurements. Output from GCWerks",
+        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
+        "Source": "In situ measurements of air",
+        "Conventions": "CF-1.6",
+        "Processed by": "auto@hugs-cloud.com",
+        "station_longitude": 1.13872,
+        "station_latitude": 52.51775,
+        "station_long_name": "Tacolneston Tower, UK",
+        "station_height_masl": 50.0,
+    }
 
     assert ch4_attr == global_attributes
     assert co2_attr == global_attributes
@@ -65,22 +76,42 @@ def test_crds_attributes():
     assert co2_attr_complete["species"] == "co2"
 
     # Check the individual variables attributes
-    
-    time_attributes = {'label': 'left', 'standard_name': 'time',
-                       'comment': 'Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.', 
-                       'sampling_period_seconds': 60}
+
+    time_attributes = {
+        "label": "left",
+        "standard_name": "time",
+        "comment": "Time stamp corresponds to beginning of sampling period. Time since midnight UTC \
+        of reference date. Note that sampling periods are approximate.",
+        "sampling_period_seconds": 60,
+    }
 
     assert ch4_data.time.attrs == time_attributes
     assert co2_data.time.attrs == time_attributes
 
     # Check individual variables
-    assert ch4_data["ch4"].attrs == {'long_name': 'mole_fraction_of_methane_in_air', 'units': '1e-9'}
-    assert ch4_data["ch4_stdev"].attrs == {'long_name': 'mole_fraction_of_methane_in_air_stdev', 'units': '1e-9'}
-    assert ch4_data["ch4_n_meas"].attrs == {'long_name': 'mole_fraction_of_methane_in_air_n_meas'}
+    assert ch4_data["ch4"].attrs == {
+        "long_name": "mole_fraction_of_methane_in_air",
+        "units": "1e-9",
+    }
+    assert ch4_data["ch4_stdev"].attrs == {
+        "long_name": "mole_fraction_of_methane_in_air_stdev",
+        "units": "1e-9",
+    }
+    assert ch4_data["ch4_n_meas"].attrs == {
+        "long_name": "mole_fraction_of_methane_in_air_n_meas"
+    }
 
-    assert co2_data["co2"].attrs == {'long_name': 'mole_fraction_of_carbon_dioxide_in_air', 'units': '1e-6'}
-    assert co2_data["co2_stdev"].attrs == {'long_name': 'mole_fraction_of_carbon_dioxide_in_air_stdev', 'units': '1e-6'}
-    assert co2_data["co2_n_meas"].attrs == {'long_name': 'mole_fraction_of_carbon_dioxide_in_air_n_meas'}
+    assert co2_data["co2"].attrs == {
+        "long_name": "mole_fraction_of_carbon_dioxide_in_air",
+        "units": "1e-6",
+    }
+    assert co2_data["co2_stdev"].attrs == {
+        "long_name": "mole_fraction_of_carbon_dioxide_in_air_stdev",
+        "units": "1e-6",
+    }
+    assert co2_data["co2_n_meas"].attrs == {
+        "long_name": "mole_fraction_of_carbon_dioxide_in_air_n_meas"
+    }
 
     # with tempfile.TemporaryDirectory() as tmpdir:
     #     files = []
@@ -101,14 +132,15 @@ def test_crds_attributes():
     #         assert results["FATAL"] == 0
     #         assert results["ERROR"] == 0
     #         assert results["WARN"] < 3
-            
+
+
 # 2020-03-30 15:03:50
 # TODO - expand these tests
-        
+
 # def test_old_new_attrs():
 #     import sys
 #     sys.path.insert(0, "/home/gar/Documents/Devel/acrg")
-#     # from HUGS.Processing import acrg_attributes 
+#     # from HUGS.Processing import acrg_attributes
 #     from acrg_obs.utils import attributes
 
 #     _ = get_local_bucket(empty=True)
@@ -131,9 +163,11 @@ def test_crds_attributes():
 #     # # Get my attributes
 #     site_attributes = combined["ch4"]["attributes"]
 
-#     ch4_data = get_attributes(ds=ch4_data_orig, species="ch4", site="tac", global_attributes=site_attributes, units="ppm", scale="test_scale")
+#     ch4_data = get_attributes(ds=ch4_data_orig, species="ch4", site="tac",
+#   global_attributes=site_attributes, units="ppm", scale="test_scale")
 
-#     ch4_data_acrg = attributes(ds=ch4_data_orig, species="ch4", global_attributes=site_attributes, site="tac", units="ppm", scale="test_scale")
+#     ch4_data_acrg = attributes(ds=ch4_data_orig, species="ch4", global_attributes=site_attributes,
+#        site="tac", units="ppm", scale="test_scale")
 
 #     # assert False
 
@@ -147,5 +181,3 @@ def test_crds_attributes():
 #     print(ch4_data_acrg.attrs)
 
 #     assert ch4_data.attrs == ch4_data_acrg.attrs
-
-    

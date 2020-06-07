@@ -7,12 +7,13 @@ __all__ = ["search_emissions", "get_emissions_data", "create_search_box", "test_
 # flake8: noqa
 
 from datetime import datetime
-from Acquire.ObjectStore import datetime_to_string
-from HUGS.Client import Search
-from HUGS.Client import Retrieve
-import ipywidgets as widgets
-from pandas import read_json as pd_read_json
 from functools import partial
+
+import ipywidgets as widgets
+from Acquire.ObjectStore import datetime_to_string
+from pandas import read_json as pd_read_json
+
+from HUGS.Client import Retrieve, Search
 
 
 def search_emissions(search_terms):

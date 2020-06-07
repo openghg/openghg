@@ -1,24 +1,26 @@
 """ A class to create the interface for HUGS
 """
-import bqplot as bq
-from Acquire.Client import User
 import collections
-from datetime import datetime
 import functools
-import ipywidgets as widgets
-import ipyleaflet
-from HUGS.Client import Retrieve, Search, Process
-from HUGS.Interface import generate_password
-from HUGS.Util import load_hugs_json
 import json
 import os
-import pandas as pd
-from pathlib import Path
-import matplotlib
 import random
-import tempfile
 import shutil
+import tempfile
+from datetime import datetime
+from pathlib import Path
+
+import bqplot as bq
+import ipyleaflet
 import IPython
+import ipywidgets as widgets
+import matplotlib
+import pandas as pd
+from Acquire.Client import User
+
+from HUGS.Client import Process, Retrieve, Search
+from HUGS.Interface import generate_password
+from HUGS.Util import load_hugs_json
 
 # flake8: noqa
 

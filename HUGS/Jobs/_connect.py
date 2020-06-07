@@ -1,5 +1,6 @@
-import paramiko
 from pathlib import Path
+
+import paramiko
 
 # See this for tests
 # https://pypi.org/project/mock-ssh-server/

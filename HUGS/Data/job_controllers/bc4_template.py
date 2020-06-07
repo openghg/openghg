@@ -1,10 +1,10 @@
 import argparse
 import json
 import subprocess
-
 from pathlib import Path
 
 from Acquire.Client import PAR
+
 
 """ Controls a job running on a local / cloud HPC cluster
 

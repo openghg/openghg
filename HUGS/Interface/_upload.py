@@ -1,9 +1,10 @@
-from HUGS.Client import Process
-from HUGS.Interface import Credentials
+import tempfile
+from pathlib import Path
 
 import ipywidgets as widgets
-from pathlib import Path
-import tempfile
+
+from HUGS.Client import Process
+from HUGS.Interface import Credentials
 
 
 class Upload:

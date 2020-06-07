@@ -1,7 +1,7 @@
-from datetime import datetime
 import json
-from pathlib import Path
 import tempfile
+from datetime import datetime
+from pathlib import Path
 
 from HUGS.Jobs import SSHConnect
 from HUGS.Util import get_datapath
