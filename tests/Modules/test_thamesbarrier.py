@@ -38,7 +38,7 @@ def test_read_file():
 
     filepath = os.path.join(dir_path, test_data, filename)
 
-    tb.read_file(data_filepath=filepath, source_name="TMB")
+    uuids = tb.read_file(data_filepath=filepath, source_name="TMB")
 
     date_key = "2019-07-01-00:39:55+00:00_2019-08-01-00:10:30+00:00"
 

@@ -6,10 +6,9 @@ from HUGS.Modules import CRDS
 from HUGS.ObjectStore import get_local_bucket
 
 # import tempfile
-
 # from cfchecker import CFChecker
 
-
+# flake8: noqa
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -80,8 +79,7 @@ def test_crds_attributes():
     time_attributes = {
         "label": "left",
         "standard_name": "time",
-        "comment": "Time stamp corresponds to beginning of sampling period. Time since midnight UTC \
-        of reference date. Note that sampling periods are approximate.",
+        "comment": "Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.",
         "sampling_period_seconds": 60,
     }
 

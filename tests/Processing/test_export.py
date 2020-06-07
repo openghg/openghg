@@ -1,11 +1,11 @@
 import json
 from pathlib import Path
-
 import pytest
 import yaml
 
 from HUGS.Processing import get_ceda_file
 
+# flake8: noqa : E501
 
 def test_get_ceda_file_raises_no_args():
     with pytest.raises(ValueError):
@@ -82,8 +82,7 @@ def test_get_ceda_file_return_dictionary():
     assert data["project"] == {
         "catalogue_url": "http: //www.metoffice.gov.uk/research/monitoring/atmospheric-trends/sites/bilsdale",
         "title": "Bilsdale Tall Tower",
-        "description": "Bilsdale (BSD) tall tower is in a remote area of the North York Moors National Park \
-        and is the first monitoring site in the northeast region of England.",
+        "description": "Bilsdale (BSD) tall tower is in a remote area of the North York Moors National Park and is the first monitoring site in the northeast region of England.",
         "PI": {"firstname": "HUGS", "lastname": "Cloud"},
         "funder": "NERC",
         "grant_number": "HUGS_Grant",

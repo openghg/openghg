@@ -1,9 +1,9 @@
 import os
-
 import pytest
 
 from HUGS.Modules import CRDS, GC, Footprint
 from HUGS.Processing import search
+from HUGS.ObjectStore import get_local_bucket
 from HUGS.Util import get_datetime
 
 
@@ -37,6 +37,7 @@ def crds_obj():
 
 @pytest.fixture(scope="session")
 def crds_read():
+    get_local_bucket(empty=True)
     test_data = "../data/search_data"
     folder_path = os.path.join(os.path.dirname(__file__), test_data)
     CRDS.read_folder(folder_path=folder_path)

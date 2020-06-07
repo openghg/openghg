@@ -32,7 +32,7 @@ def get_local_bucket(name=None, empty=False):
     # TODO - clean this up
     try:
         return get_service_account_bucket()
-    except ServiceAccountError:
+    except Exception:
         # Get the path of the user's home directory
         home_path = os.path.expanduser("~")
         hugs_test_buckets = "hugs_tmp/test_buckets"
