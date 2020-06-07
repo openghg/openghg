@@ -2,10 +2,22 @@
 
 """
 
-__all__ = ["url_join", "get_daterange_str", "get_datetime_epoch", 
-            "get_datetime_now", "get_datetime", "unanimous", "load_object",
-            "hash_file", "timestamp_tzaware", "get_datapath", "date_overlap",
-            "read_header", "load_hugs_json"]
+__all__ = [
+    "url_join",
+    "get_daterange_str",
+    "get_datetime_epoch",
+    "get_datetime_now",
+    "get_datetime",
+    "unanimous",
+    "load_object",
+    "hash_file",
+    "timestamp_tzaware",
+    "get_datapath",
+    "date_overlap",
+    "read_header",
+    "load_hugs_json",
+]
+
 
 def url_join(*args):
     """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
@@ -17,7 +29,7 @@ def url_join(*args):
         Returns:
             str: A url style key string with arguments separated by forward slashes
     """
-    return "/".join(map(lambda x: str(x).rstrip('/'), args))
+    return "/".join(map(lambda x: str(x).rstrip("/"), args))
 
 
 def get_daterange_str(start, end):
@@ -80,13 +92,15 @@ def get_datetime(year, month, day, hour=None, minute=None, second=None):
     from datetime import datetime as _datetime
     from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
 
-    date = _datetime(year=year, month=month, day=day)#, hour=hour, minute=minute, second=second)
+    date = _datetime(
+        year=year, month=month, day=day
+    )  # , hour=hour, minute=minute, second=second)
 
     return _datetime_to_datetime(date)
 
 
 def unanimous(seq):
-            """ Checks that all values in an iterable object
+    """ Checks that all values in an iterable object
                 are the same
 
                 Args:
@@ -95,13 +109,13 @@ def unanimous(seq):
                     bool: True if all values are the same
 
             """
-            it = iter(seq.values())
-            try:
-                first = next(it)
-            except StopIteration:
-                return True
-            else:
-                return all(i == first for i in it)
+    it = iter(seq.values())
+    try:
+        first = next(it)
+    except StopIteration:
+        return True
+    else:
+        return all(i == first for i in it)
 
 
 def load_object(class_name):
@@ -128,6 +142,7 @@ def load_object(class_name):
 
     return target_class.load()
 
+
 def hash_file(filepath):
     """ Opens the file at filepath and calculates its SHA1 hash
 
@@ -141,10 +156,10 @@ def hash_file(filepath):
     import hashlib
 
     # Lets read stuff in 64kb chunks
-    BUF_SIZE = 65536 
+    BUF_SIZE = 65536
     sha1 = hashlib.sha1()
 
-    with open(filepath, 'rb') as f:
+    with open(filepath, "rb") as f:
         while True:
             data = f.read(BUF_SIZE)
             if not data:
@@ -159,7 +174,7 @@ def timestamp_tzaware(timestamp):
         Timestamp.
 
         Args:
-            timestamp (pandas.Timestamp): Timezone naive 
+            timestamp (pandas.Timestamp): Timezone naive Timestamp
         Returns:
             pandas.Timestamp: Timezone aware
     """
@@ -168,7 +183,7 @@ def timestamp_tzaware(timestamp):
     else:
         return timestamp.tz_convert(tz="UTC")
 
-        
+
 def get_datapath(filename, directory=None):
     """ Returns the correct path to JSON files used for assigning attributes
 
@@ -184,7 +199,12 @@ def get_datapath(filename, directory=None):
     if directory is None:
         return Path(__file__).resolve().parent.parent.joinpath(f"Data/{filename}")
     else:
-        return Path(__file__).resolve().parent.parent.joinpath(f"Data/{directory}/{filename}")
+        return (
+            Path(__file__)
+            .resolve()
+            .parent.parent.joinpath(f"Data/{directory}/{filename}")
+        )
+
 
 def load_hugs_json(filename):
     """ Returns a dictionary created from the HUGS JSON at filename
@@ -197,7 +217,7 @@ def load_hugs_json(filename):
     from json import load
 
     path = get_datapath(filename)
-    
+
     with open(path, "r") as f:
         data = load(f)
 

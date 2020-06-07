@@ -14,10 +14,10 @@
 
 import asyncio
 import os
-import uvloop
 import sys
 
 import lazy_import as _lazy_import
+import uvloop
 
 constants = _lazy_import.lazy_module("fdk.constants")
 log = _lazy_import.lazy_module("fdk.log")

@@ -1,6 +1,7 @@
-from datetime import datetime
-from pathlib import Path
+import os
+
 from Acquire.Client import PAR
+
 
 class JobDrive:
     """" This is used to upload files to the cloud drive for use in a
@@ -10,6 +11,7 @@ class JobDrive:
             par (Acquire.Client.PAR): Pre-authenticated request for access to cloud drive
             par_secret (str): Secret / password to access the PAR
     """
+
     def __init__(self, par, par_secret=None):
         if not isinstance(par, PAR):
             raise TypeError("par argument must be of type Acquire.Client.PAR")
@@ -17,7 +19,7 @@ class JobDrive:
         self._par = par
         self._par_secret = par_secret
         self._drive = par.resolve(secret=par_secret)
-    
+
     def upload(self, files, directory="input"):
         """ Upload files to the cloud drive that's accessed using the Acquire
             PAR
@@ -32,15 +34,15 @@ class JobDrive:
             files = [files]
 
         # 50 MB in bytes
-        chunk_limit = 50*1024*1024
+        chunk_limit = 50 * 1024 * 1024
 
-       # We might not have any data files to upload
+        # We might not have any data files to upload
         for f in files:
             filesize = os.path.getsize(f)
             if filesize < chunk_limit:
-                file_meta = self._drive.upload(filename=f, dir=directory)
+                self._drive.upload(filename=f, dir=directory)
             else:
-                file_meta = self._drive.chunk_upload(filename=f, dir=directory)
+                self._drive.chunk_upload(filename=f, dir=directory)
 
     def list_files(self):
         """ List files in drive
@@ -72,13 +74,3 @@ class JobDrive:
             file_metadata[fname] = self._drive.download(filename=fname, dir=local_dir)
 
         return file_metadata
-            
-
-
-    
-
-
-
-
-
-

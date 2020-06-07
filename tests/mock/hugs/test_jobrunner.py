@@ -3,7 +3,6 @@
 # p_logger.setLevel(logging.WARNING)
 
 
-
 # import datetime
 # import mockssh
 # import pytest
@@ -67,21 +66,22 @@
 #     location = Location(drive_guid=drive_guid)
 
 #     par_lifetime = datetime.datetime.now() + datetime.timedelta(days=1)
-#     par = PAR(location=location, user=authenticated_user, expires_datetime=par_lifetime, aclrule=ACLRule.writer())
+#     par = PAR(location=location, user=authenticated_user,
+#   expires_datetime=par_lifetime, aclrule=ACLRule.writer())
 #     par_secret = hugs.encrypt_data(par.secret())
 
 #     password = os.environ["RUNNER_PWD"]
 #     encrypted_password = hugs.encrypt_data(password)
-    
+
 #     args = {}
 #     args["authorisation"] = auth.to_data()
 #     args["par"] = par.to_data()
 #     args["par_secret"] = par_secret
 #     args["requirements"] = reqs
 #     args["key_password"] = encrypted_password
-    
+
 #     response = hugs.call_function(function="job_runner", args=args)
-    
+
 #     print(response)
-    
+
 #     assert False

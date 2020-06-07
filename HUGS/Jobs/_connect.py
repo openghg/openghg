@@ -1,21 +1,17 @@
-import getpass
-import paramiko
-import os
-import socket
-import sys
-import traceback
 from pathlib import Path
+
+import paramiko
 
 # See this for tests
 # https://pypi.org/project/mock-ssh-server/
 
-# __all__ == ["SSHConnect"]
 
 class SSHConnect:
     """ Use Paramiko to connect to an SSH server
 
         This class can be used as a context manager
     """
+
     def __enter__(self):
         return self
 
@@ -41,15 +37,19 @@ class SSHConnect:
         except AttributeError:
             return
 
-    def connect(self, username, hostname, keypath=None, password=None, known_host=False):
+    def connect(
+        self, username, hostname, keypath=None, password=None, known_host=False
+    ):
         """ Use Paramiko to connect the hostname
 
             Args:
                 user (str): Username for login
                 hostname (str): Hostname of server. This can also be an IP address
                 key_path (Path or str, default=None): Path to private key to use for authentication.
-                By default Paramiko will attempt to use any “id_rsa”, “id_dsa” or “id_ecdsa” key discoverable in ~/.ssh/
-                passsword (str, default=None): Password used for authentication or for unlocking a password protected
+                By default Paramiko will attempt to use any “id_rsa”, “id_dsa” or “id_ecdsa” key
+                discoverable in ~/.ssh/
+                passsword (str, default=None): Password used for authentication or for unlocking a
+                password protected
                 private key
             Returns:
                 None
@@ -57,12 +57,18 @@ class SSHConnect:
         self._client = paramiko.SSHClient()
         self._client.load_system_host_keys()
 
-        # If we haven't connected to the host before the host's fingerprint will not be in the known_hosts file, 
-        # this lets us override the fingerprint checking 
+        # If we haven't connected to the host before the host's fingerprint
+        # will not be in the known_hosts file this lets us override the fingerprint checking
         if not known_host:
             self._client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        
-        self._client.connect(hostname=hostname, port=22, username=username, key_filename=keypath, password=password)
+
+        self._client.connect(
+            hostname=hostname,
+            port=22,
+            username=username,
+            key_filename=keypath,
+            password=password,
+        )
 
     def run_command(self, commands):
         """ Run commands on the remote server
@@ -79,7 +85,7 @@ class SSHConnect:
 
         for c in commands:
             stdin, stdout, stderr = self._client.exec_command(c)
-            
+
             # Get bytes from the objects and convert to str
             stdout = stdout.read().decode("utf-8")
             stderr = stderr.read().decode("utf-8")
@@ -87,7 +93,6 @@ class SSHConnect:
             responses[c] = {"stdout": stdout, "stderr": stderr}
 
         return responses
-
 
     def write_files(self, files, remote_dir=None):
         """ Write the job script to the remote server
@@ -115,7 +120,7 @@ class SSHConnect:
                 # This probably means the directory already exists
                 # TODO - better way of handling this error?
                 pass
-                
+
         for filepath in files:
             # Here we only want the filename
             if remote_dir is not None:
@@ -124,4 +129,4 @@ class SSHConnect:
                 remote_path = filepath.name
 
             # Hopefully paramiko will support Path objects in the near future
-            r = sftp.put(localpath=str(filepath), remotepath=remote_path)
+            sftp.put(localpath=str(filepath), remotepath=remote_path)

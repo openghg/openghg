@@ -10,7 +10,3 @@ def clear_datasources(args):
 
     crds.save()
     gc.save()
-
-    
-
-

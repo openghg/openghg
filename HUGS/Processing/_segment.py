@@ -7,7 +7,7 @@ __all__ = ["get_split_frequency", "create_footprint_datasources", "assign_data"]
 #     """ Create or get an existing Datasource for each gas in the file
 
 #         TODO - currently this function will only take data from a single Datasource
-        
+
 #         Args:
 #             gas_data (list): List of tuples gas name, datasource_id, Pandas.Dataframe
 #         Returns:
@@ -83,7 +83,7 @@ def assign_data(gas_data, lookup_results, overwrite):
         datasource.save()
 
         uuids[name] = datasource.uuid()
-        
+
     return uuids
 
 
@@ -96,6 +96,7 @@ def create_footprint_datasources(footprint_data):
             list: List of UUIDs of used/created Datasources
     """
     raise NotImplementedError()
+
 
 def get_split_frequency(data):
     """ Analyses raw data for size and sets a frequency to split the data
@@ -141,9 +142,8 @@ def get_split_frequency(data):
     elif data_size / (num_years * n_months * n_weeks * n_days) <= segment_size:
         freq = "D"
         return freq
-    elif data_size / (num_years * n_months * n_weeks * n_days * n_hours) <= segment_size:
+    elif (
+        data_size / (num_years * n_months * n_weeks * n_days * n_hours) <= segment_size
+    ):
         freq = "H"
         return freq
-
-
-

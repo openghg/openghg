@@ -1,5 +1,6 @@
 __all___ = ["Datasource"]
 
+
 class Datasource:
     """ A Datasource holds data relating to a single source, such as a specific species
         at a certain height on a specific instrument
@@ -7,6 +8,7 @@ class Datasource:
         Args:
             name (str, default=None): Name of Datasource
     """
+
     _datasource_root = "datasource"
     _datavalues_root = "values"
     _data_root = "data"
@@ -14,7 +16,7 @@ class Datasource:
     def __init__(self, name=None):
         from Acquire.ObjectStore import create_uuid, get_datetime_now
         from collections import defaultdict
-        
+
         self._uuid = create_uuid()
         self._name = name
         self._creation_datetime = get_datetime_now()
@@ -39,7 +41,7 @@ class Datasource:
 
             Returns:
                 datetime: Datetime for start of data
-        """        
+        """
         return self._start_datetime
 
     def end_datetime(self):
@@ -83,7 +85,7 @@ class Datasource:
         #     self.add_metadata(key=k, value=v)
 
         # Ensure metadata values are all lowercase
-        metadata = {k: v.lower() for k,v in metadata.items()}
+        metadata = {k: v.lower() for k, v in metadata.items()}
         self._metadata.update(metadata)
 
         # Add in a type record for timeseries data
@@ -95,7 +97,7 @@ class Datasource:
         # Be easiest to first check the dates covered by the data?
 
         # Check the daterange covered by this data and if we have an overlap
-        # 
+        #
         if self._data:
             # Exisiting data in Datsource
             start_data, end_data = self.daterange()
@@ -104,7 +106,9 @@ class Datasource:
 
             # Check if there's overlap of data
             if start_new >= start_data and end_new <= end_data and overwrite is False:
-                raise ValueError("The provided data overlaps dates covered by existing data")
+                raise ValueError(
+                    "The provided data overlaps dates covered by existing data"
+                )
 
         # Need to check here if we've seen this data before
         freq = get_split_frequency(data)
@@ -112,12 +116,13 @@ class Datasource:
         group = data.groupby(Grouper(freq=freq))
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
-        self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
+        self._data = [
+            (g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0
+        ]
         self.add_metadata(key="data_type", value="timeseries")
         self._data_type = "timeseries"
         # Use daterange() to update the recorded values
         self.update_daterange()
-
 
     def add_data(self, metadata, data, data_type="timeseries", overwrite=False):
         """ Add data to this Datasource and segment the data by size.
@@ -131,19 +136,19 @@ class Datasource:
                 overwrite (bool, default=False): Overwrite existing data
                 None
         """
-        from HUGS.Processing import get_split_frequency
         from HUGS.Util import date_overlap
-        from xarray import Dataset
 
         data_types = ["footprint", "timeseries"]
 
         if data_type not in data_types:
-            raise TypeError(f"Incorrect data type selected. Please select from one of {data_types}")
+            raise TypeError(
+                f"Incorrect data type selected. Please select from one of {data_types}"
+            )
 
         # Ensure metadata values are all lowercase
         if data_type != "footprint":
             metadata = {k: v.lower() for k, v in metadata.items()}
-            
+
         self._metadata.update(metadata)
 
         # For now just create a new version each time data is added
@@ -162,7 +167,7 @@ class Datasource:
             # Group by year then by season
             year_group = list(data.groupby("time.year"))
             year_data = [data for _, data in year_group if data]
-            
+
             # TODO - improve this
             grouped_data = []
             for year in year_data:
@@ -189,7 +194,9 @@ class Datasource:
             to_keep = []
             for current_daterange in self._data:
                 for new_daterange in additional_data:
-                    if not date_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
+                    if not date_overlap(
+                        daterange_a=current_daterange, daterange_b=new_daterange
+                    ):
                         to_keep.append(current_daterange)
 
             updated_data = {}
@@ -210,7 +217,6 @@ class Datasource:
             self.add_metadata(key="data_type", value="footprint")
 
         self.update_daterange()
-
 
     def get_dataframe_daterange(self, dataframe):
         """ Returns the daterange for the passed DataFrame
@@ -246,10 +252,12 @@ class Datasource:
         try:
             start = Timestamp(dataset.time[0].values, tz="UTC")
             end = Timestamp(dataset.time[-1].values, tz="UTC")
-            
+
             return start, end
-        except:
-            raise AttributeError("This dataset does not have a time attribute, unable to read date range")
+        except AttributeError:
+            raise AttributeError(
+                "This dataset does not have a time attribute, unable to read date range"
+            )
 
     def get_dataset_daterange_str(self, dataset):
         start, end = self.get_dataset_daterange(dataset=dataset)
@@ -269,7 +277,7 @@ class Datasource:
             Args:
                 datasource_id (str): ID of datasource created from data
             Returns:
-                bool: True if Datasource exists 
+                bool: True if Datasource exists
         """
         from HUGS.ObjectStore import exists, get_bucket
 
@@ -277,7 +285,7 @@ class Datasource:
             bucket = get_bucket()
 
         key = "%s/uuid/%s" % (Datasource._datasource_root, datasource_id)
-        
+
         return exists(bucket=bucket, key=key)
 
     def to_data(self):
@@ -328,7 +336,7 @@ class Datasource:
         """ Loads a xarray Dataset from the passed key for creation of a Datasource object
 
             Currently this function gets binary data back from the object store, writes it
-            to a temporary file and then gets xarray to read from this file. 
+            to a temporary file and then gets xarray to read from this file.
 
             This is done in a long winded way due to xarray not being able to create a Dataset
             from binary data at the moment.
@@ -357,7 +365,7 @@ class Datasource:
 
             return ds
 
-    # These functions don't work, placeholders for when it's possible to get 
+    # These functions don't work, placeholders for when it's possible to get
     # an in memory NetCDF4 file
     # def dataset_to_netcdf(data):
     #     """ Write the passed dataset to a compressed in-memory NetCDF file
@@ -384,8 +392,6 @@ class Datasource:
     #     store = xarray.backends.NetCDF4DataStore(nc4_ds)
     #     return xarray.open_dataset(store)
 
-
-
     # Modified from
     # https://github.com/pandas-dev/pandas/issues/9246
     @staticmethod
@@ -402,9 +408,15 @@ class Datasource:
         """
         from pandas import HDFStore
 
-        with HDFStore("write.hdf", mode="w", driver="H5FD_CORE", driver_core_backing_store=0,
-                        complevel=6, complib="blosc:blosclz") as out:
-            
+        with HDFStore(
+            "write.hdf",
+            mode="w",
+            driver="H5FD_CORE",
+            driver_core_backing_store=0,
+            complevel=6,
+            complib="blosc:blosclz",
+        ) as out:
+
             out["data"] = data
             return out._handle.get_file_image()
 
@@ -422,8 +434,13 @@ class Datasource:
         """
         from pandas import HDFStore, read_hdf
 
-        with HDFStore("read.hdf", mode="r", driver="H5FD_CORE", driver_core_backing_store=0,
-                        driver_core_image=hdf_data) as data:
+        with HDFStore(
+            "read.hdf",
+            mode="r",
+            driver="H5FD_CORE",
+            driver_core_backing_store=0,
+            driver_core_image=hdf_data,
+        ) as data:
             return read_hdf(data)
 
     @staticmethod
@@ -452,7 +469,7 @@ class Datasource:
         d._data = {}
         d._data_type = data["data_type"]
         d._latest_version = data["latest_version"]
-        
+
         if d._stored and not shallow:
             for date_key in d._data_keys["latest"]["keys"]:
                 data_key = d._data_keys["latest"]["keys"][date_key]
@@ -464,14 +481,17 @@ class Datasource:
 
     def save(self, bucket=None):
         """ Save this Datasource object as JSON to the object store
-    
+
             Args:
                 bucket (dict): Bucket to hold data
             Returns:
                 None
         """
         import tempfile
-        from Acquire.ObjectStore import datetime_to_string, get_datetime_now_to_string, ObjectStore
+        from Acquire.ObjectStore import (
+            get_datetime_now_to_string,
+            ObjectStore,
+        )
         from HUGS.ObjectStore import get_bucket
 
         if not bucket:
@@ -486,7 +506,7 @@ class Datasource:
             version_str = f"v{str(len(self._data_keys))}"
             # Store the keys for the new data
             new_keys = {}
-            
+
             # Iterate over the keys (daterange string) of the data dictionary
             for daterange in self._data:
                 data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
@@ -500,15 +520,15 @@ class Datasource:
                     filepath = f"{tmpdir}/temp.nc"
                     data.to_netcdf(filepath)
                     ObjectStore.set_object_from_file(bucket, data_key, filepath)
-                
+
             # Copy the last version
-            if "latest" in self._data_keys:            
+            if "latest" in self._data_keys:
                 self._data_keys[version_str] = self._data_keys["latest"].copy()
 
             # Save the new keys and create a timestamp
             self._data_keys[version_str]["keys"] = new_keys
             self._data_keys[version_str]["timestamp"] = get_datetime_now_to_string()
-            
+
             # Link latest to the newest version
             self._data_keys["latest"] = self._data_keys[version_str]
             self._latest_version = version_str
@@ -516,7 +536,9 @@ class Datasource:
         self._stored = True
         datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
-        ObjectStore.set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
+        ObjectStore.set_object_from_json(
+            bucket=bucket, key=datasource_key, data=self.to_data()
+        )
 
     @staticmethod
     def load(bucket=None, uuid=None, key=None, shallow=False):
@@ -534,7 +556,6 @@ class Datasource:
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from Acquire.ObjectStore import ObjectStore
         from HUGS.ObjectStore import get_bucket, get_object_json
 
         if not uuid and not key:
@@ -542,7 +563,7 @@ class Datasource:
 
         if not bucket:
             bucket = get_bucket()
-        
+
         if not key:
             key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
 
@@ -584,8 +605,10 @@ class Datasource:
         uuid = ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
 
         if len(uuid) > 1:
-            raise ValueError("There should only be one Datasource associated with this name")
-        
+            raise ValueError(
+                "There should only be one Datasource associated with this name"
+            )
+
         return uuid[0].split("/")[-1]
 
     def version_data(self):
@@ -653,7 +676,7 @@ class Datasource:
 
         return self._start_datetime, self._end_datetime
 
-    def daterange_str(self):    
+    def daterange_str(self):
         """ Get the daterange this Datasource covers as a string in
             the form start_end
 
@@ -680,7 +703,7 @@ class Datasource:
                 return True
 
         return False
-            
+
     def species(self):
         """ Returns the species of this Datasource
 
@@ -702,7 +725,7 @@ class Datasource:
             return self._metadata["site"]
         else:
             return "NA"
-        
+
     def uuid(self):
         """ Return the UUID of this object
 
@@ -738,7 +761,7 @@ class Datasource:
         return self._data_type
 
     def data_keys(self):
-        """ Returns the object store keys where data related 
+        """ Returns the object store keys where data related
             to this Datasource is stored
 
             Returns:
@@ -749,7 +772,7 @@ class Datasource:
     def versions(self):
         """ Return a summary of the versions of data stored for
             this Datasource
-            
+
             WIP
 
             Returns:
@@ -758,11 +781,9 @@ class Datasource:
         return self._data_keys
 
     def latest_version(self):
-        """ Return the string of the latest version 
+        """ Return the string of the latest version
 
             Returns:
                 str: Latest version
         """
         return self._latest_version
-        
-

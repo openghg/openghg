@@ -1,17 +1,18 @@
-import pytest
 import os
-import uuid
+
+import pytest
+from Acquire.Client import PAR, Authorisation, Drive, Service, StorageCreds
 
 from HUGS.Client import Process
+from HUGS.Modules import CRDS, GC
 from HUGS.ObjectStore import get_local_bucket
-from HUGS.Modules import GC, CRDS
-from Acquire.Client import User, Drive, Service, StorageCreds, PAR, Authorisation
 
 
 @pytest.fixture(scope="session")
 def tempdir(tmpdir_factory):
     d = tmpdir_factory.mktemp("tmp_process")
     return str(d)
+
 
 @pytest.fixture(autouse=True)
 def run_before_tests():
@@ -30,17 +31,27 @@ def test_process_CRDS_files(authenticated_user):
     hugs = Service(service_url="hugs")
     _ = hugs.call_function(function="clear_datasources", args={})
 
-    files = ["bsd.picarro.1minute.108m.min.dat", "hfd.picarro.1minute.100m.min.dat", "tac.picarro.1minute.100m.min.dat"]
+    files = [
+        "bsd.picarro.1minute.108m.min.dat",
+        "hfd.picarro.1minute.100m.min.dat",
+        "tac.picarro.1minute.100m.min.dat",
+    ]
     filepaths = [get_test_folder(f) for f in files]
 
-    process = Process(service_url=service_url) 
+    process = Process(service_url=service_url)
 
-    response = process.process_files(user=authenticated_user, files=filepaths, data_type="CRDS", 
-                                        hugs_url="hugs", storage_url="storage")
+    response = process.process_files(
+        user=authenticated_user,
+        files=filepaths,
+        data_type="CRDS",
+        hugs_url="hugs",
+        storage_url="storage",
+    )
 
     assert len(response["bsd.picarro.1minute.108m.min.dat"]) == 3
     assert len(response["hfd.picarro.1minute.100m.min.dat"]) == 3
     assert len(response["tac.picarro.1minute.100m.min.dat"]) == 2
+
 
 # def test_process_GC_files(authenticated_user):
 #     service_url = "hugs"
@@ -48,17 +59,16 @@ def test_process_CRDS_files(authenticated_user):
 #     hugs = Service(service_url="hugs")
 #     _ = hugs.call_function(function="clear_datasources", args={})
 
-#     files = ["bsd.picarro.1minute.108m.min.dat", "hfd.picarro.1minute.100m.min.dat", "tac.picarro.1minute.100m.min.dat"]
+#     files = ["bsd.picarro.1minute.108m.min.dat", "hfd.picarro.1minute.100m.min.dat",
+# "tac.picarro.1minute.100m.min.dat"]
 #     filepaths = [test_folder(f) for f in files]
 
-#     process = Process(service_url=service_url) 
+#     process = Process(service_url=service_url)
 
-#     response = process.process_files(user=authenticated_user, files=filepaths, data_type="CRDS", 
+#     response = process.process_files(user=authenticated_user, files=filepaths, data_type="CRDS",
 #                                         hugs_url="hugs", storage_url="storage")
 
 #     assert False
-
-
 
 
 def test_process_CRDS(authenticated_user, tempdir):
@@ -67,7 +77,10 @@ def test_process_CRDS(authenticated_user, tempdir):
 
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
-    filepath = os.path.join(os.path.dirname(__file__), "../../../tests/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat")
+    filepath = os.path.join(
+        os.path.dirname(__file__),
+        "../../../tests/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat",
+    )
     filemeta = drive.upload(filepath)
 
     par = PAR(location=filemeta.location(), user=authenticated_user)
@@ -77,19 +90,23 @@ def test_process_CRDS(authenticated_user, tempdir):
 
     auth = Authorisation(resource="process", user=authenticated_user)
 
-    args = {"authorisation": auth.to_data(),
-            "par": {"data": par.to_data()},
-            "par_secret": {"data": par_secret},
-            "data_type": "CRDS", "source_name": "bsd.picarro.1minute.248m"}
+    args = {
+        "authorisation": auth.to_data(),
+        "par": {"data": par.to_data()},
+        "par_secret": {"data": par_secret},
+        "data_type": "CRDS",
+        "source_name": "bsd.picarro.1minute.248m",
+    }
 
     response = hugs.call_function(function="process", args=args)
-    
-    expected_keys = ['bsd.picarro.1minute.248m_ch4',
-                    'bsd.picarro.1minute.248m_co',
-                    'bsd.picarro.1minute.248m_co2']
+
+    expected_keys = [
+        "bsd.picarro.1minute.248m_ch4",
+        "bsd.picarro.1minute.248m_co",
+        "bsd.picarro.1minute.248m_co2",
+    ]
 
     assert sorted(response["results"].keys()) == expected_keys
-
 
 
 def test_process_GC(authenticated_user, tempdir):
@@ -98,8 +115,14 @@ def test_process_GC(authenticated_user, tempdir):
 
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
-    data_filepath = os.path.join(os.path.dirname(__file__), "../../../tests/data/proc_test_data/GC/capegrim-medusa.18.C")
-    precision_filepath = os.path.join(os.path.dirname(__file__), "../../../tests/data/proc_test_data/GC/capegrim-medusa.18.precisions.C")
+    data_filepath = os.path.join(
+        os.path.dirname(__file__),
+        "../../../tests/data/proc_test_data/GC/capegrim-medusa.18.C",
+    )
+    precision_filepath = os.path.join(
+        os.path.dirname(__file__),
+        "../../../tests/data/proc_test_data/GC/capegrim-medusa.18.precisions.C",
+    )
 
     data_meta = drive.upload(data_filepath)
     precision_meta = drive.upload(precision_filepath)
@@ -113,24 +136,29 @@ def test_process_GC(authenticated_user, tempdir):
 
     auth = Authorisation(resource="process", user=authenticated_user)
 
-    args = {"authorisation": auth.to_data(),
-            "par": {"data": data_par.to_data(), "precision": precision_par.to_data()},
-            "par_secret": {"data": data_secret, "precision": precision_secret},
-            "data_type": "GC", "source_name": "capegrim-medusa", "site": "CGO",
-            "instrument":"medusa"}
+    args = {
+        "authorisation": auth.to_data(),
+        "par": {"data": data_par.to_data(), "precision": precision_par.to_data()},
+        "par_secret": {"data": data_secret, "precision": precision_secret},
+        "data_type": "GC",
+        "source_name": "capegrim-medusa",
+        "site": "CGO",
+        "instrument": "medusa",
+    }
 
     response = hugs.call_function(function="process", args=args)
 
     result_keys = (sorted(response["results"].keys()))[:8]
 
-    expected_keys =  ['capegrim-medusa_C4F10',
-                        'capegrim-medusa_C6F14',
-                        'capegrim-medusa_CCl4',
-                        'capegrim-medusa_CF4',
-                        'capegrim-medusa_CFC-11',
-                        'capegrim-medusa_CFC-112',
-                        'capegrim-medusa_CFC-113',
-                        'capegrim-medusa_CFC-114']
+    expected_keys = [
+        "capegrim-medusa_C4F10",
+        "capegrim-medusa_C6F14",
+        "capegrim-medusa_CCl4",
+        "capegrim-medusa_CF4",
+        "capegrim-medusa_CFC-11",
+        "capegrim-medusa_CFC-112",
+        "capegrim-medusa_CFC-113",
+        "capegrim-medusa_CFC-114",
+    ]
 
     assert result_keys == expected_keys
-

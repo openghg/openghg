@@ -1,25 +1,31 @@
 import logging
-mpl_logger = logging.getLogger("matplotlib")
-mpl_logger.setLevel(logging.WARNING)
-
-import pytest
 import os
-from pathlib import Path
+
 import pandas as pd
+import pytest
 
 from HUGS.Modules import Datasource, ThamesBarrier
 from HUGS.ObjectStore import get_local_bucket
+
+mpl_logger = logging.getLogger("matplotlib")
+mpl_logger.setLevel(logging.WARNING)
+
+# Disable this for long strings below - Line break occurred before a binary operator (W503)
+# flake8: noqa: W503
+
 
 def test_site_attributes():
     tb = ThamesBarrier()
 
     site_attributes = tb.site_attributes()
 
-    assert site_attributes["data_owner"] == "Valerio Ferracci"
-    assert site_attributes["data_owner_email"] == "V.Ferracci@cranfield.ac.uk"
-    assert site_attributes["Notes"] == "~5m above high tide water level, in tidal region of the Thames"
+    assert (
+        site_attributes["Notes"]
+        == "~5m above high tide water level, in tidal region of the Thames"
+    )
     assert site_attributes["inlet_height_magl"] == "5 m"
     assert site_attributes["instrument"] == "Picarro G2401"
+
 
 def test_read_file():
     _ = get_local_bucket(empty=True)
@@ -68,9 +74,14 @@ def test_read_data():
 
     data = tb.read_data(data_filepath=filepath)
 
-    attributes = {'data_owner': 'Valerio Ferracci', 'data_owner_email': 'V.Ferracci@cranfield.ac.uk', 
-                    'Notes': '~5m above high tide water level, in tidal region of the Thames', 
-                    'inlet_height_magl': '5 m', 'instrument': 'Picarro G2401'}
+    del data["CH4"]["attributes"]["data_owner"]
+    del data["CH4"]["attributes"]["data_owner_email"]
+
+    attributes = {
+        "Notes": "~5m above high tide water level, in tidal region of the Thames",
+        "inlet_height_magl": "5 m",
+        "instrument": "Picarro G2401",
+    }
 
     assert sorted(list(data.keys())) == sorted(["CH4", "CO", "CO2"])
     assert data["CH4"]["attributes"] == attributes
@@ -82,10 +93,3 @@ def test_read_data():
     assert ch4_data.time[-1] == pd.Timestamp("2019-08-01T00:10:30.000000000")
     assert ch4_data["CH4"][0] == pytest.approx(1960.8357162)
     assert ch4_data["CH4"][-1] == pytest.approx(2002.003717)
-
-
-
-
-
-    
-

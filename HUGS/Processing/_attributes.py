@@ -1,11 +1,21 @@
 __all__ = ["get_attributes"]
 
-def get_attributes(ds, species, site, network=None, global_attributes=None, units=None, scale=None, 
-                                                            sampling_period=None, date_range=None):
-    """ 
-    This function writes attributes to an xarray.Dataset so that they conform with 
+
+def get_attributes(
+    ds,
+    species,
+    site,
+    network=None,
+    global_attributes=None,
+    units=None,
+    scale=None,
+    sampling_period=None,
+    date_range=None,
+):
+    """
+    This function writes attributes to an xarray.Dataset so that they conform with
     the CF Convention v1.7
-    
+
     Attributes of the xarray DataSet are modified, and variable names are changed
 
     If the species is a standard mole fraction then either:
@@ -33,17 +43,15 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
             add to the file header (e.g. {"Contact": "Matt Rigby"})
         units (str, default=None): This routine will try to guess the units
             unless this is specified. Options are in units_interpret
-        scale (str, default=None): Calibration scale for species. 
+        scale (str, default=None): Calibration scale for species.
         sampling_period (int, default=None): Number of seconds for which air
             sample is taken. Only for time variable attribute
         date_range (list of two strings, optional): Start and end date for output
             If you only want an end date, just put a very early start date
             (e.g. ["1900-01-01", "2010-01-01"])
     """
-    import datetime
     import json
     from pandas import Timestamp as pd_Timestamp
-    from pathlib import Path
     from HUGS.Util import get_datapath
     from xarray import Dataset as xr_Dataset
 
@@ -62,7 +70,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
         species_attrs = json.load(f)
 
     data_path = get_datapath(filename="attributes.json")
-    
+
     with open(data_path, "r") as f:
         data = json.load(f)
 
@@ -79,28 +87,30 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     # If we don't have any variables to rename, raise an error
     if not matched_keys:
         raise NameError(f"Cannot find species {species} in Dataset variables")
-    
+
     species_rename = {}
     for var in matched_keys:
         if species_upper in species_translator:
             species_label = species_translator[species_upper]["chem"]
         else:
             species_label = species_lower.replace("-", "")
-        
+
         species_rename[var] = var.replace(species_lower, species_label)
 
     ds = ds.rename(species_rename)
 
     # Global attributes
-    global_attributes_default =  {"Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-                                    "Source": "In situ measurements of air",
-                                    "Conventions": "CF-1.6"}
+    global_attributes_default = {
+        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
+        "Source": "In situ measurements of air",
+        "Conventions": "CF-1.6",
+    }
 
     if global_attributes:
         global_attributes.update(global_attributes_default)
     else:
         global_attributes = global_attributes_default
-        
+
     global_attributes["File created"] = str(pd_Timestamp.now(tz="UTC"))
     global_attributes["Processed by"] = "auto@hugs-cloud.com"
     global_attributes["species"] = species_label
@@ -119,7 +129,9 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
 
     # Species-specific attributes
     # Long name
-    if (species_upper.startswith("D") and species_upper != "DESFLURANE") or species_upper == "APD":
+    if (
+        species_upper.startswith("D") and species_upper != "DESFLURANE"
+    ) or species_upper == "APD":
         sp_long = species_translator[species_upper]["name"]
     elif species_upper == "RN":
         sp_long = "radioactivity_concentration_of_222Rn_in_air"
@@ -157,15 +169,17 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
                         ds[key].attrs["units"] = unit_species[species_upper]
                     except KeyError:
                         try:
-                            ds[key].attrs["units"] = species_attrs[species_label.upper()]["units"]
+                            ds[key].attrs["units"] = species_attrs[
+                                species_label.upper()
+                            ]["units"]
                         except KeyError:
                             ds[key].attrs["units"] = "NA"
-                            # raise KeyError(f"Unable to find units for {species_upper} with label {species_label}. \
-                            #                 Please supply them using the 'units' argument.")
 
                 # If units are non-standard, add explanation
                 if species_upper in unit_species_long:
-                    ds[key].attrs["units_description"] = unit_species_long[species_upper]
+                    ds[key].attrs["units_description"] = unit_species_long[
+                        species_upper
+                    ]
 
             # Add to list of ancilliary variables
             if key != species_label:
@@ -188,9 +202,10 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
         except KeyError:
             raise KeyError(key, quality_flags)
 
-        ds[key].attrs = {"flag_meaning":
-                        "0 = unflagged, 1 = flagged",
-                        "long_name": f"{long_name} status_flag"}
+        ds[key].attrs = {
+            "flag_meaning": "0 = unflagged, 1 = flagged",
+            "long_name": f"{long_name} status_flag",
+        }
 
     # Add integration flag attributes
     integration_flags = [key for key in ds.variables if "integration_flag" in key]
@@ -198,9 +213,11 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     for key in integration_flags:
         ds[key] = ds[key].astype(int)
         long_name = ds[species_label].attrs["long_name"]
-        ds[key].attrs = {"flag_meaning": "0 = area, 1 = height",
-                        "standard_name": f"{long_name} integration_flag",
-                        "comment": "GC peak integration method (by height or by area). Does not indicate data quality"}
+        ds[key].attrs = {
+            "flag_meaning": "0 = area, 1 = height",
+            "standard_name": f"{long_name} integration_flag",
+            "comment": "GC peak integration method (by height or by area). Does not indicate data quality",
+        }
 
     # Set time encoding
     # Check if there are duplicate time stamps
@@ -208,7 +225,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     # I feel there should be a more pandas way of doing this
     # but xarray doesn't currently have a duplicates method
     # See this https://github.com/pydata/xarray/issues/2108
-    
+
     # TODO - fix this - just remove duplicates?
     if len(set(ds.time.values)) < len(ds.time.values):
         print("WARNING. Dupliate time stamps")
@@ -220,9 +237,11 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
     time_attributes = {}
     time_attributes["label"] = "left"
     time_attributes["standard_name"] = "time"
-    time_attributes["comment"] = "Time stamp corresponds to beginning of sampling period. " + \
-                                "Time since midnight UTC of reference date. " + \
-                                "Note that sampling periods are approximate."
+    time_attributes["comment"] = (
+        "Time stamp corresponds to beginning of sampling period. "
+        + "Time since midnight UTC of reference date. "
+        + "Note that sampling periods are approximate."
+    )
 
     if sampling_period:
         time_attributes["sampling_period_seconds"] = sampling_period
@@ -231,7 +250,7 @@ def get_attributes(ds, species, site, network=None, global_attributes=None, unit
 
     # If a date range is specified, slice dataset
     if date_range:
-        ds = ds.loc[dict(time = slice(*date_range))]
+        ds = ds.loc[dict(time=slice(*date_range))]
 
     return ds
 
@@ -262,10 +281,12 @@ def _site_info_attributes(site, network=None):
     else:
         network = network.upper()
 
-    attributes_dict = {"longitude": "station_longitude",
-                       "latitude": "station_latitude",
-                       "long_name": "station_long_name",
-                       "height_station_masl": "station_height_masl"}
+    attributes_dict = {
+        "longitude": "station_longitude",
+        "latitude": "station_latitude",
+        "long_name": "station_long_name",
+        "height_station_masl": "station_height_masl",
+    }
 
     attributes = {}
     if site in site_params:
@@ -275,8 +296,8 @@ def _site_info_attributes(site, network=None):
 
                 attributes[attr_key] = site_params[site][network][attr]
     else:
-        raise ValueError("Invalid site passed. Please use a valid site code such as BSD for Bilsdale")
-
+        raise ValueError(
+            "Invalid site passed. Please use a valid site code such as BSD for Bilsdale"
+        )
 
     return attributes
-    

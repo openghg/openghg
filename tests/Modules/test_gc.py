@@ -1,27 +1,17 @@
-# TODO - look into what's causing the logging messages in the first place
-# This does stop them
+import datetime
 import logging
+import uuid
+from pathlib import Path
+
+import pandas as pd
+import pytest
+from Acquire.ObjectStore import datetime_to_datetime, datetime_to_string
+
+from HUGS.Modules import GC
+from HUGS.ObjectStore import get_local_bucket, get_object_names
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
-
-import datetime
-import pytest
-from pathlib import Path
-import pandas as pd
-import os
-import uuid
-
-from Acquire.ObjectStore import (
-    datetime_to_string,
-    string_to_datetime,
-    datetime_to_datetime,
-)
-from HUGS.Modules import GC
-from HUGS.Processing import read_metadata
-from HUGS.ObjectStore import get_local_bucket
-from HUGS.ObjectStore import get_object_names
-from HUGS.Util import get_datetime_epoch
 
 
 @pytest.fixture(scope="session")
@@ -285,7 +275,7 @@ def test_split(data_path, precision_path):
 def test_to_data(gc):
     data = gc.to_data()
 
-    assert data["stored"] == True
+    assert data["stored"] is True
     assert data["creation_datetime"] == datetime_to_string(
         datetime.datetime(1970, 1, 1)
     )
@@ -309,7 +299,7 @@ def test_from_data(gc):
 
     gc_new = GC.from_data(data)
 
-    assert gc_new._stored == False
+    assert gc_new._stored is False
     assert gc_new._creation_datetime == epoch
     assert gc_new._datasource_names == test_datasources
     assert gc_new._datasource_uuids == test_datasources
@@ -331,7 +321,7 @@ def test_load(gc):
     gc.save()
     gc_new = GC.load()
 
-    assert gc_new._stored == False
+    assert gc_new._stored is False
     assert gc_new._creation_datetime == datetime_to_datetime(
         datetime.datetime(1970, 1, 1)
     )
@@ -341,4 +331,4 @@ def test_exists(gc):
     bucket = get_local_bucket()
     gc.save(bucket=bucket)
 
-    assert GC.exists(bucket=bucket) == True
+    assert GC.exists(bucket=bucket) is True

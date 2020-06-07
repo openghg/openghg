@@ -4,20 +4,30 @@ __all__ = ["search_emissions", "get_emissions_data", "create_search_box", "test_
     Searching interface functions
 """
 
+# flake8: noqa
+
 from datetime import datetime
-from Acquire.ObjectStore import datetime_to_string
-from HUGS.Client import Search
-from HUGS.Client import Retrieve
-import ipywidgets as widgets
-from pandas import read_json as pd_read_json
 from functools import partial
+
+import ipywidgets as widgets
+from Acquire.ObjectStore import datetime_to_string
+from pandas import read_json as pd_read_json
+
+from HUGS.Client import Retrieve, Search
 
 
 def search_emissions(search_terms):
-    return ["WAO-20magl_EUROPE_201501", "WAO-20magl_EUROPE_201502", "WAO-20magl_EUROPE_201503", "WAO-20magl_EUROPE_201504"]
+    return [
+        "WAO-20magl_EUROPE_201501",
+        "WAO-20magl_EUROPE_201502",
+        "WAO-20magl_EUROPE_201503",
+        "WAO-20magl_EUROPE_201504",
+    ]
+
 
 def get_emissions_data(search_terms):
     return []
+
 
 def create_search_box():
     """ Create the searching interface
@@ -28,27 +38,40 @@ def create_search_box():
     search_results = None
     date_keys = None
 
-    search_terms = widgets.Text(value="", placeholder="Search", description="Search terms:", disabled=False)
-    locations = widgets.Text(value="", placeholder="BSD, HFD", description="Locations:", disabled=False)
-    data_type = widgets.Dropdown(options=["CRDS", "GC"], value="CRDS", description="Data type", disabled=False)
+    search_terms = widgets.Text(
+        value="", placeholder="Search", description="Search terms:", disabled=False
+    )
+    locations = widgets.Text(
+        value="", placeholder="BSD, HFD", description="Locations:", disabled=False
+    )
+    data_type = widgets.Dropdown(
+        options=["CRDS", "GC"], value="CRDS", description="Data type", disabled=False
+    )
     search_button = widgets.Button(description="Search", button_style="success")
 
-    start_picker = widgets.DatePicker(description='Start date', disabled=False)
-    end_picker = widgets.DatePicker(description='End date', disabled=False)
+    start_picker = widgets.DatePicker(description="Start date", disabled=False)
+    end_picker = widgets.DatePicker(description="End date", disabled=False)
     status_box = widgets.HTML(value="")
 
-    search_children = [search_terms, locations, start_picker, end_picker, data_type,
-                       search_button, status_box]
+    search_children = [
+        search_terms,
+        locations,
+        start_picker,
+        end_picker,
+        data_type,
+        search_button,
+        status_box,
+    ]
 
     search_vbox = widgets.VBox(children=search_children)
 
-    date_keys = {"foo": 1, "bar":2, "spam": 3}
-    
+    date_keys = {"foo": 1, "bar": 2, "spam": 3}
+
     def call_search(x):
         if start_picker.value:
             start = datetime.combine(start_picker.value, datetime.min.time())
         else:
-            start = datetime(2000,1,1)
+            start = datetime(2000, 1, 1)
 
         if end_picker.value:
             end = datetime.combine(end_picker.value, datetime.min.time())
@@ -59,9 +82,14 @@ def create_search_box():
         split_search_terms = search_terms.value.replace(" ", "").split(",")
         split_locations = locations.value.replace(" ", "").split(",")
 
-        #search = Search(service_url=base_url)
-        search_results = search.search(search_terms=split_search_terms, locations=split_locations, 
-                                        data_type=data_type.value, start_datetime=start, end_datetime=end)
+        # search = Search(service_url=base_url)
+        search_results = search.search(
+            search_terms=split_search_terms,
+            locations=split_locations,
+            data_type=data_type.value,
+            start_datetime=start,
+            end_datetime=end,
+        )
 
         if search_results:
             # date_keys = _parse_results(search_results)
@@ -72,12 +100,11 @@ def create_search_box():
             search_vbox.children = search_children + d_box
         else:
             status_box.value = f"<font color='red'>No results</font>"
-    
+
     search_button.on_click(call_search)
 
-
     status_box.value = "Status"
-    # # From here create a 
+    # # From here create a
     # selected_data = []
 
     # # New from here
@@ -116,7 +143,7 @@ def create_search_box():
 
     # # Here could update the status bar and call the download function
     # # download_button.on_click(retrieve_data)
-    
+
     # out = widgets.interactive_output(select_data, arg_dict)
 
     # return download_widgets
@@ -140,14 +167,15 @@ def retrieve_data(arg_dict):
 
     # Update the status bar
     if data:
-    #     update_statusbar("Download complete")
-    #     # Create the plotting box
+        #     update_statusbar("Download complete")
+        #     # Create the plotting box
         create_plotting_box()
     else:
         print("Update statusbar")
     #     update_statusbar("No data downloaded")
 
     selected_data = []
+
     def select_data(**kwargs):
         selected_data.clear()
         for key in kwargs:
@@ -156,10 +184,11 @@ def retrieve_data(arg_dict):
 
     # Here could update the status bar and call the download function
     # download_button.on_click(retrieve_data)
-    
+
     out = widgets.interactive_output(select_data, arg_dict)
 
     # return download_widgets
+
 
 def _parse_results(results):
     """ Split the keys into a list of each key and the date that the data covers
@@ -184,26 +213,27 @@ def _parse_results(results):
 
     return date_keys
 
+
 def test_case():
     from ipywidgets import Button, Checkbox, VBox
-    cb1 = Checkbox(description='1')
-    cb2 = Checkbox(description='2')
-    cb3 = Checkbox(description='3')
+
+    cb1 = Checkbox(description="1")
+    cb2 = Checkbox(description="2")
+    cb3 = Checkbox(description="3")
 
     vb = VBox(children=[cb1, cb2, cb3])
-    top_toggle = Checkbox(description='Remove 3')
+    top_toggle = Checkbox(description="Remove 3")
     # show_results_button = ipywidgets.
 
-
     def remove_3(button):
-        if button['new']:
+        if button["new"]:
             vb.children = [cb1, cb2]
         else:
             vb.children = [cb1, cb2, cb3]
 
     # here instead of having a toggle just have a button
 
-    top_toggle.observe(remove_3, names='value')
+    top_toggle.observe(remove_3, names="value")
     return VBox(children=[top_toggle, vb])
 
 
@@ -215,11 +245,31 @@ def create_download_box(date_keys):
         Returns:
             list: List of download widgets
     """
-    table_style = {'description_width': 'initial'}
-    table_layout = {'width': '100px', 'min_width': '100px', 'height': '28px', 'min_height': '28px'}
-    date_layout = {'width': '275px', 'min_width': '200px', 'height': '28px', 'min_height': '28px'}
-    checkbox_layout = {'width': '100px', 'min_width': '100px', 'height': '28px', 'min_height': '28px'}
-    statusbar_layout = {'width': '250px', 'min_width': '250px', 'height': '28px', 'min_height': '28px'}
+    table_style = {"description_width": "initial"}
+    table_layout = {
+        "width": "100px",
+        "min_width": "100px",
+        "height": "28px",
+        "min_height": "28px",
+    }
+    date_layout = {
+        "width": "275px",
+        "min_width": "200px",
+        "height": "28px",
+        "min_height": "28px",
+    }
+    checkbox_layout = {
+        "width": "100px",
+        "min_width": "100px",
+        "height": "28px",
+        "min_height": "28px",
+    }
+    statusbar_layout = {
+        "width": "250px",
+        "min_width": "250px",
+        "height": "28px",
+        "min_height": "28px",
+    }
 
     header_label_site = widgets.HTML(value=f"<b>Site</b>", layout=table_layout)
     header_label_gas = widgets.HTML(value=f"<b>Gas</b>", layout=table_layout)
@@ -254,18 +304,31 @@ def create_download_box(date_keys):
 
     # arg_dict = {search_keys[i]: checkbox for i, checkbox in enumerate(checkbox_objects)}
 
-    arg_dict_tmp = {chr(i+65): checkbox for i, checkbox in enumerate(checkbox_objects)}
+    arg_dict_tmp = {
+        chr(i + 65): checkbox for i, checkbox in enumerate(checkbox_objects)
+    }
 
-    header_box = widgets.HBox(children=[header_label_site, header_label_gas, header_label_dates, header_label_select])
+    header_box = widgets.HBox(
+        children=[
+            header_label_site,
+            header_label_gas,
+            header_label_dates,
+            header_label_select,
+        ]
+    )
 
     site_vbox = widgets.VBox(children=site_labels)
     gas_vbox = widgets.VBox(children=gas_labels)
     dates_vbox = widgets.VBox(children=date_labels)
     checkbox_vbox = widgets.VBox(children=checkbox_objects)
 
-    dynamic_box = widgets.HBox(children=[site_vbox, gas_vbox, dates_vbox, checkbox_vbox])
+    dynamic_box = widgets.HBox(
+        children=[site_vbox, gas_vbox, dates_vbox, checkbox_vbox]
+    )
 
-    download_button = widgets.Button(description="Download", button_style="success", layout=table_layout)
+    download_button = widgets.Button(
+        description="Download", button_style="success", layout=table_layout
+    )
 
     download_button.on_click(retrieve_data)
     download_button_box = widgets.HBox(children=[download_button])
