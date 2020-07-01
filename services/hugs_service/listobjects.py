@@ -5,7 +5,7 @@ def listobjects(args):
 
     try:
         prefix = args["prefix"]
-    except:
+    except KeyError:
         prefix = None
 
     bucket = get_bucket()

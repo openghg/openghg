@@ -136,8 +136,6 @@ def test_crds_attributes():
 # TODO - expand these tests
 
 # def test_old_new_attrs():
-#     import sys
-#     sys.path.insert(0, "/home/gar/Documents/Devel/acrg")
 #     # from HUGS.Processing import acrg_attributes
 #     from acrg_obs.utils import attributes
 

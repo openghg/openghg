@@ -4,13 +4,11 @@
 ##########
 
 import os
-import sys
 import uuid
 
 import Acquire
 import Acquire.Stubs
 import pytest
-import requests as _original_requests
 
 from access.route import access_functions
 from accounting.route import accounting_functions
@@ -150,8 +148,7 @@ def _login_admin(service_url, username, password, otp):
     """Internal function used to get a valid login to the specified
        service for the passed username, password and otp
     """
-    from Acquire.Client import User, Service
-    from Acquire.Identity import LoginSession
+    from Acquire.Client import User
     from Acquire.Client import Wallet
 
     wallet = Wallet()

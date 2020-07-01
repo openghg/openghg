@@ -5,5 +5,4 @@ from ._process import Process
 from ._removeobjects import RemoveObjects
 from ._retrieve import Retrieve
 from ._search import Search
-from ._status import Status
 from ._upload import Upload

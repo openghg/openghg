@@ -92,8 +92,6 @@ def test_read_data():
 
     combined = crds.read_data(data_filepath=filepath, site="tac")
 
-    ch4_data = combined["ch4"]["data"].to_netcdf("/home/gar/ch4_data.nc")
-
     assert len(combined) == 2
 
     assert list(combined.keys()) == ["ch4", "co2"]
