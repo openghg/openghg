@@ -22,7 +22,9 @@ jobs:
         python.version: '3.6'
       Python37:
         python.version: '3.7'
-    maxParallel: 2
+      Python37:
+        python.version: '3.8'
+    maxParallel: 3
 
   steps:
   - task: UsePythonVersion@0
