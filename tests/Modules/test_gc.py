@@ -169,10 +169,6 @@ def test_split(data_path, precision_path):
     # Use pickle due to error in CI with hdf verion
     df = pd.read_pickle(data_path)
 
-    # df.to_pickle("/home/gar/test.pickle", protocol=4)
-
-    return False
-
     species = [
         "NF3",
         "CF4",

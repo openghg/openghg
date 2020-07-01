@@ -1,13 +1,8 @@
 import os
-import uuid
-
 import pytest
-from Acquire.Client import (PAR, Authorisation, Drive, Service, StorageCreds,
-                            User)
+from Acquire.Client import Service
 
-from HUGS.Client import ListObjects, Process, Search
-from HUGS.Modules import CRDS
-from HUGS.ObjectStore import get_local_bucket
+from HUGS.Client import Process, Search
 
 
 @pytest.fixture(scope="session")
@@ -35,7 +30,7 @@ def load_crds(authenticated_user):
 
     process = Process(service_url="hugs")
 
-    response = process.process_files(
+    process.process_files(
         user=authenticated_user,
         files=filepaths,
         data_type="CRDS",
