@@ -1,4 +1,3 @@
-
 def remove_objects(args):
     from HUGS.ObjectStore import get_bucket as _get_bucket
     from Acquire.ObjectStore import ObjectStore as _ObjectStore

@@ -1,4 +1,3 @@
-
 def clear_datasources(args):
     from HUGS.Modules import CRDS, GC
 

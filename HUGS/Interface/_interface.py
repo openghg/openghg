@@ -19,7 +19,6 @@ import pandas as pd
 from Acquire.Client import User
 
 from HUGS.Client import Process, Retrieve, Search
-from HUGS.Interface import generate_password
 from HUGS.Util import load_hugs_json
 
 # flake8: noqa

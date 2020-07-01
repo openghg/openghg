@@ -1,4 +1,3 @@
-
 def retrieve(args):
     """ Calls the HUGS function to retrieve data stored at the given key
         and combine them into a single Pandas DataFrame for download / visualization
@@ -24,8 +23,10 @@ def retrieve(args):
         return_type = "json"
 
     if not isinstance(key_dict, dict):
-        raise TypeError("Keys must be passed in dictionary format. For example {bsd_co2: [key_list]}")
-    
+        raise TypeError(
+            "Keys must be passed in dictionary format. For example {bsd_co2: [key_list]}"
+        )
+
     combined_data = {}
     for key in key_dict:
         combined = recombine_sections(key_dict[key])
