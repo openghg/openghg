@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/wm19361/HUGS/_apis/build/status/hugs-cloud.hugs?branchName=devel&jobName=Test&configuration=Test%20Python37)](https://dev.azure.com/wm19361/HUGS/_build/latest?definitionId=1&branchName=devel)
+![Build](https://github.com/hugs-cloud/hugs/workflows/Build/badge.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## HUGS - HUb for greenhouse Gas data Science 
