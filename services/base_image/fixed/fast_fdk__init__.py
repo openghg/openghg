@@ -23,6 +23,7 @@ constants = _lazy_import.lazy_module("fdk.constants")
 log = _lazy_import.lazy_module("fdk.log")
 http_stream = _lazy_import.lazy_module("fdk.http_stream")
 
+
 def handle(handle_func):
     log.log("entering handle")
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())

@@ -334,7 +334,7 @@ def aaai_services(tmpdir_factory):
 @pytest.fixture(scope="session")
 def authenticated_user(aaai_services):
     from Acquire.Crypto import PrivateKey, OTP
-    from Acquire.Client import User, Service, Wallet
+    from Acquire.Client import User, Wallet
 
     username = str(uuid.uuid4())
     password = PrivateKey.random_passphrase()
