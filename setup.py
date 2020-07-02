@@ -1,5 +1,3 @@
-import sys
-
 import setuptools
 
 with open("README.md", "r") as fh:
@@ -19,7 +17,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/chryswoods/hugs",
-    # packages=setuptools.find_packages(),    
+    # packages=setuptools.find_packages(),
     packages=setuptools.find_packages(include=["HUGS", "HUGS.*"]),
     package_data={"": ["Data/*"]},
     classifiers=[

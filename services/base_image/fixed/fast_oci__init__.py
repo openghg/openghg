@@ -36,6 +36,6 @@ wait_until = _lazy_import.lazy_function("oci.waiter.wait_until")
 __all__ = [
     "BaseClient", "Request", "Signer", "config", "constants",
     "decorators", "exceptions", "regions", "wait_until", "pagination", "auth", "retry",
-    "audit", "container_engine", "core", "database", "dns", "email", "file_storage", 
+    "audit", "container_engine", "core", "database", "dns", "email", "file_storage",
     "identity", "key_management", "load_balancer", "object_storage", "resource_search"
 ]
