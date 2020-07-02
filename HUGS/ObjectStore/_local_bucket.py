@@ -2,7 +2,6 @@ import datetime
 import os
 
 from Acquire.ObjectStore import ObjectStore, use_testing_object_store_backend
-from Acquire.Service import ServiceAccountError
 
 __all__ = ["bucket_time", "get_local_bucket"]
 

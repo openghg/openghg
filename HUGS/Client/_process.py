@@ -52,7 +52,7 @@ class Process:
         if data_type == "GC":
             filepaths = []
             # Find all files in
-            for f in Path(folder_path).glob(f"**/*.C"):
+            for f in Path(folder_path).glob("**/*.C"):
                 if "precisions" in f.name:
                     # Remove precisions section and ensure file exists
                     data_filename = str(f).replace(".precisions", "")
