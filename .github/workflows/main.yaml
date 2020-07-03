@@ -42,4 +42,4 @@ jobs:
         pytest --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
       run: |
-        cat coverage.xml | curl --data-binary @- https://codecov.io/validate
+        cat codecov.yml | curl --data-binary @- https://codecov.io/validate
