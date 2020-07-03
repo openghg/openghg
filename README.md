@@ -1,7 +1,7 @@
-[![Build Status](https://dev.azure.com/wm19361/HUGS/_apis/build/status/hugs-cloud.hugs?branchName=devel)](https://dev.azure.com/wm19361/HUGS/_build/latest?definitionId=1&branchName=devel)
+![Build](https://github.com/hugs-cloud/hugs/workflows/Build/badge.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-HUGS - HUb for greenhouse Gas data Science 
+## HUGS - HUb for greenhouse Gas data Science 
 
 HUGS is a cloud-based data analysis “hub” for greenhouse gas measurements, modelling and data analysis, funded as a NERC “Constructing a Digital Environment” feasibility study. We aim to streamline the process for greenhouse gas data sharing, analysis and visualisation and add value through automated processes such as atmospheric chemistry transport model runs associated with data.
 
@@ -17,18 +17,18 @@ The processed data is stored within a cloud object store which allows for large 
 
 ### Analyis
 
-Using notebooks hosted on our (JupyterHub)[https://hub.hugs-cloud.com/] it is possible to query the object store and analyse data within the cloud. This allows analysis and processing of large datasets on any computational device as all processing is done on scalable cloud instances.
+Using notebooks hosted on our [JupyterHub](https://hub.hugs-cloud.com) it is possible to query the object store and analyse data within the cloud. This allows analysis and processing of large datasets on any computational device as all processing is done on scalable cloud instances.
 
 ![Jupyter notebook analysis](https://hugs-cloud.com/assets/images/HUGS_notebook_interface.jpg)
 
 ### Compliance
 
-We ensure data stored on the platform can be exported as [CF compliant](http://cfconventions.org/) NetCDF files. Here we utilise the (CF Checker)[https://github.com/cedadev/cf-checker] tool to ensure that all datasets hold the correct attributes for all data contained within them.
+We ensure data stored on the platform can be exported as [CF compliant](http://cfconventions.org/) NetCDF files. Here we utilise the [CF Checker](https://github.com/cedadev/cf-checker) tool to ensure that all datasets hold the correct attributes for all data contained within them.
 
-## Cloud Hosted
+### Cloud Hosted
 
-Currently the HUGS platform can be accessed through a Jupyter Notebook interface available at https://www.hugs-cloud.com/hub. To register for an account on the platform please fill out our (registration form)[https://hugs-cloud.com/registration/]. 
+Currently the HUGS platform can be accessed through our [JupyterHub](https://hub.hugs-cloud.com). To register for an account please fill out our [registration form](https://hugs-cloud.com/registration/). 
 
-## Open-source technologies
+### Open-source technologies
 
-As this is an open source project under the Apache licence, all technologies on which the platform is based are readily available and open source themselves. We harness the power of the (Fn)[https://fnproject.io/] serverless framework for processing and retrieval of data and our JupyterHub based analysis platform is orchestrated using Kubernetes. For more information on our use of these and other open source technologies please see the documentation.
+As this is an open source project under the Apache licence, all technologies on which the platform is based are readily available and open source themselves. We harness the power of the [Fn](https://fnproject.io) serverless framework for processing and retrieval of data and our JupyterHub based analysis platform is orchestrated using Kubernetes. For more information on our use of these and other open source technologies please see the documentation.

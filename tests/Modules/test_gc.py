@@ -307,7 +307,7 @@ def test_save(gc):
 
     gc.save()
 
-    prefix = f""
+    prefix = ""
     objs = get_object_names(bucket, prefix)
 
     assert objs[0].split("/")[-1] == GC._uuid
