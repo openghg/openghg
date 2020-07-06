@@ -102,10 +102,12 @@ class CRDS(BaseModule):
     ):
         """ Creates a CRDS object holding data stored within Datasources
 
-            TODO - currently only works with a single Datasource
-
             Args:
                 filepath (str): Path of file to load
+                source_name (str, default=None): Name of source
+                site (str, default=None): Name of site
+                source_id (str, default=None): Source's unique ID
+                overwrite (bool, default=False): If True overwrite any data currently stored for this date range
             Returns:
                 None
         """
@@ -223,6 +225,9 @@ class CRDS(BaseModule):
         # -1 here as we've already removed the file extension
         # As we're not processing a list of datafiles here we'll only have one inlet
         inlet = source_name.split(".")[-1]
+
+        # instrument = [f.split(".")[1] for f in data_files]
+        # instrument = source_name.split(".")[1]
 
         # Drop any rows with NaNs
         # This is now done before creating metadata

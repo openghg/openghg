@@ -30,7 +30,7 @@ class DataType(_Enum):
     FOOTPRINT = "FOOTPRINT"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"
-    THAMESBARRIER = "THAMESBARRIER"
+    THAMESBARRIER = "ThamesBarrier"
     ICOS = "ICOS"
 
 
@@ -83,7 +83,6 @@ def search(
 
     # TODO - method to load different types in here for search
     # Maybe just an if else for now?
-    data_type = DataType[data_type.upper()].name
     # Get the objects that contain the Datasources
     # object_list = _get_object_names(bucket=bucket, prefix=search_prefix)
     # object_uuid = object_list[0].split("/")[-1]
@@ -93,6 +92,7 @@ def search(
     # if len(object_list) > 1:
     #     raise ValueError("More than one " + data_type.name + " object found.")
 
+    data_type = DataType[data_type.upper()].name
     # Load the CRDS/GC/Footprint etc object we need to read the data
     data_obj = load_object(class_name=data_type)
     # Get the UUIDs of the Datasources associated with the object

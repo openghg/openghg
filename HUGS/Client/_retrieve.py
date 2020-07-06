@@ -1,17 +1,25 @@
-__all__ = ["Retrieve"]
+__all__ = ["Retriever"]
 
 
-class Retrieve:
+class Retriever:
     """
     This class is used to retrieve the data that's found using the search function
     from the object store
     """
 
-    def __init__(self, service_url=None):
+    def __init__(self, results, service_url=None):
         from Acquire.Client import Wallet as _Wallet
 
         wallet = _Wallet()
         self._service = wallet.get_service(service_url="%s/hugs" % service_url)
+        
+    def list(self):
+        """ Return details on the search results
+
+            Returns:
+                list: List of keys of search results
+        """
+        return list(self._results.keys())
 
     def retrieve(self, keys):
         """ Retrieve the data at the keys found by the search function
