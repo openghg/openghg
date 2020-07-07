@@ -7,7 +7,7 @@ class Retrieve:
     from the object store
     """
 
-    def __init__(self, results, service_url=None):
+    def __init__(self, service_url=None):
         from Acquire.Client import Wallet as _Wallet
 
         wallet = _Wallet()
