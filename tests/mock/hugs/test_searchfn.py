@@ -144,3 +144,43 @@ def test_search_multiplesite_multiplespecies(load_crds):
     assert len(results["bsd_co2_108m"]["keys"]) == 23
     assert len(results["hfd_co2_100m"]["keys"]) == 25
     assert len(results["tac_co2_100m"]["keys"]) == 30
+
+
+def test_returns_readable_results():
+    search = Search(service_url="hugs")
+
+    search_term = ["ch4"]
+    location = ["bsd"]
+
+    search.search(search_terms=search_term, locations=location, data_type="CRDS")
+
+    assert search.results() == {'bsd_ch4_108m': 'Daterange : 2014-01-30-13:33:30+00:00 - 2019-07-04-04:23:30+00:00'}
+
+
+def test_search_download():
+    search = Search(service_url="hugs")
+
+    search_term = ["ch4"]
+    location = ["bsd"]
+
+    search.search(search_terms=search_term, locations=location, data_type="CRDS")
+
+    data = search.download("bsd_ch4_108m")
+
+    data_attributes = data["bsd_ch4_108m"].attrs
+    assert data_attributes["data_owner"] == "Simon O'Doherty"
+    assert data_attributes["station_longitude"] == pytest.approx(-1.15033)
+    assert data_attributes["station_latitude"] == pytest.approx(54.35858)
+    assert data_attributes["station_long_name"] == 'Bilsdale, UK'
+    assert data["bsd_ch4_108m"]["ch4"][0] == pytest.approx(1960.25)
+
+
+
+
+
+
+
+
+
+
+    

@@ -1,7 +1,7 @@
-__all__ = ["Retriever"]
+__all__ = ["Retrieve"]
 
 
-class Retriever:
+class Retrieve:
     """
     This class is used to retrieve the data that's found using the search function
     from the object store
