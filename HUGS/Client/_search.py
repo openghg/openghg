@@ -58,7 +58,7 @@ class Search:
         """
         if not isinstance(selected_keys, list):
             selected_keys = [selected_keys]
-        
+
         # Create a Retrieve object to interact with the HUGS Cloud object store
         # Select the keys we want to download
         download_keys = {key: self._results[key]["keys"] for key in selected_keys}

@@ -12,7 +12,7 @@ class Retrieve:
 
         wallet = _Wallet()
         self._service = wallet.get_service(service_url="%s/hugs" % service_url)
-        
+
     def list(self):
         """ Return details on the search results
 

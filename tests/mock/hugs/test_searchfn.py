@@ -173,14 +173,3 @@ def test_search_download():
     assert data_attributes["station_latitude"] == pytest.approx(54.35858)
     assert data_attributes["station_long_name"] == 'Bilsdale, UK'
     assert data["bsd_ch4_108m"]["ch4"][0] == pytest.approx(1960.25)
-
-
-
-
-
-
-
-
-
-
-    
