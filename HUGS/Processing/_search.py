@@ -2,7 +2,7 @@
     the object store
 
 """
-from enum import Enum as _Enum
+from enum import Enum
 
 __all__ = [
     "get_data",
@@ -16,7 +16,7 @@ __all__ = [
 ]
 
 
-class RootPaths(_Enum):
+class RootPaths(Enum):
     DATA = "data"
     DATASOURCE = "datasource"
     INSTRUMENT = "instrument"
@@ -24,13 +24,13 @@ class RootPaths(_Enum):
     NETWORK = "network"
 
 
-class DataType(_Enum):
+class DataType(Enum):
     CRDS = "CRDS"
     GC = "GC"
     FOOTPRINT = "FOOTPRINT"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"
-    THAMESBARRIER = "ThamesBarrier"
+    ThamesBarrier = "THAMESBARRIER"
     ICOS = "ICOS"
 
 
