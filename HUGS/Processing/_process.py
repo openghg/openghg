@@ -4,7 +4,6 @@ __all__ = ["process_data"]
 def process_data(
     data_file,
     source_name,
-    precision_filepath=None,
     data_type="CRDS",
     site=None,
     instrument_name=None,
@@ -14,8 +13,8 @@ def process_data(
         object depending on the data_type argument.
 
         Args:
-            file_data (str): Name of file for processing
-            precision_filepath (str, default=None): Name of precision file for GC data
+            data_file (str, tuple (str, str)): Paths of file(s) for processing
+            source_name (str): Name of source
             data_type (str, default="CRDS"): Type of data to be processed (CRDS, GC etc)
             overwrite (bool, default=False): Should existing and overlapping data be overwritten
         Returns:
@@ -28,14 +27,18 @@ def process_data(
     # Load in the the class used to process the data file/s
     processing_obj = load_object(class_name=data_type)
 
-    # TODO - improve this so the correct module is loaded - maybe don't rely on the above?
     if data_type == "GC":
         if site is None:
             raise ValueError("Site must be specified when reading GC data")
+        
+        try:
+            data, precision = data_file
+        except (TypeError, ValueError) as error:
+            raise TypeError(f"Ensure data and precision files are passed as a tuple\n", error)
 
         datasource_uuids = processing_obj.read_file(
-            data_filepath=data_file,
-            precision_filepath=precision_filepath,
+            data_filepath=data,
+            precision_filepath=precision,
             source_name=source_name,
             instrument_name=instrument_name,
             site=site,

@@ -1,11 +1,27 @@
 import os
-
 import pytest
+from pathlib import Path
+
 from Acquire.Client import PAR, Authorisation, Drive, Service, StorageCreds
 
 from HUGS.Client import Process
 from HUGS.Modules import CRDS, GC
 from HUGS.ObjectStore import get_local_bucket
+
+
+def get_datapath(filename, data_type):
+    """ Get the path of a file in the tests directory 
+
+        Returns:
+            pathlib.Path
+    """
+    return (
+        Path(__file__)
+        .resolve()
+        .parent.parent.parent.joinpath(
+            "data", "proc_test_data", data_type.upper(), filename
+        )
+    )
 
 
 @pytest.fixture(scope="session")
@@ -53,22 +69,35 @@ def test_process_CRDS_files(authenticated_user):
     assert len(response["tac.picarro.1minute.100m.min.dat"]) == 2
 
 
-# def test_process_GC_files(authenticated_user):
-#     service_url = "hugs"
+def test_process_GC_files(authenticated_user):
+    service_url = "hugs"
 
-#     hugs = Service(service_url="hugs")
-#     _ = hugs.call_function(function="clear_datasources", args={})
+    hugs = Service(service_url="hugs")
+    _ = hugs.call_function(function="clear_datasources", args={})
 
-#     files = ["bsd.picarro.1minute.108m.min.dat", "hfd.picarro.1minute.100m.min.dat",
-# "tac.picarro.1minute.100m.min.dat"]
-#     filepaths = [test_folder(f) for f in files]
+    # Get the precisin filepath
+    data = get_datapath("capegrim-medusa.18.C", "GC")
+    precisions = get_datapath("capegrim-medusa.18.precisions.C", "GC")
 
-#     process = Process(service_url=service_url)
+    filepaths = [(data, precisions)]
 
-#     response = process.process_files(user=authenticated_user, files=filepaths, data_type="CRDS",
-#                                         hugs_url="hugs", storage_url="storage")
+    process = Process(service_url=service_url)
 
-#     assert False
+    response = process.process_files(
+        user=authenticated_user,
+        files=filepaths,
+        data_type="GC",
+        hugs_url="hugs",
+        storage_url="storage",
+        instrument="medusa",
+        site="capegrim"
+    )   
+
+    expected_keys = ['capegrim-medusa.18_C4F10', 'capegrim-medusa.18_C6F14', 'capegrim-medusa.18_CCl4', 
+                    'capegrim-medusa.18_CF4', 'capegrim-medusa.18_CFC-11']
+
+    assert len(response["capegrim-medusa.18.C"]) == 56 
+    assert sorted((response["capegrim-medusa.18.C"].keys()))[:5] == expected_keys 
 
 
 def test_process_CRDS(authenticated_user, tempdir):

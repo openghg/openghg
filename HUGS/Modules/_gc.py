@@ -78,16 +78,22 @@ class GC(BaseModule):
                 data_filepath (str, pathlib.Path): Path of data file
                 precision_filepath (str, pathlib.Path): Path of precision file
             Returns:
-                TODO - should this really return anything?
-                GC: GC object
-
+                list: List of UUIDs of Datasources holding this data
         """
         from HUGS.Processing import assign_data, lookup_gas_datasources
         from pathlib import Path
 
+        # TODO - remove this once we know None's won't be passed through
+        if instrument_name is None:
+            raise TypeError("Instrument cannot be None")
+
         gc = GC.load()
 
         data_filepath = Path(data_filepath)
+
+        # We need to have the 3 character site code here
+        if len(site) != 3:
+            site = gc.get_site_code(site)
 
         gas_data = gc.read_data(
             data_filepath=data_filepath,
@@ -284,8 +290,6 @@ class GC(BaseModule):
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
 
-        # site_code = self.get_site_code(site)
-
         # Read inlets from the parameters dictionary
         # expected_inlets = self.get_inlets(site_code=site)
         # Get the inlets in the dataframe
@@ -422,7 +426,12 @@ class GC(BaseModule):
         if not self._gc_params:
             self.load_params()
 
-        return self._gc_params["sampling_period"][instrument]
+        try:
+            sampling_period = self._gc_params["sampling_period"][instrument]
+        except KeyError:
+            raise KeyError(f"Invalid instrument: {instrument}\nPlease select one of {self._gc_params['sampling_period'].keys()}\n")
+
+        return sampling_period
 
     def get_inlets(self, site_code):
         """ Get the inlets used at this site
@@ -489,6 +498,7 @@ class GC(BaseModule):
             self.load_params()
 
         attributes = self._gc_params[site.upper()]["global_attributes"]
+        
         attributes["inlet_height_magl"] = inlet
         try:
             attributes["comment"] = self._gc_params["comment"][instrument]

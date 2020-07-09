@@ -1,5 +1,6 @@
 __all__ = ["Process"]
 
+from Acquire.Client import Wallet
 
 class Process:
     """ Process a datafile at a given PAR
@@ -15,13 +16,12 @@ class Process:
                 service_url: URL of service
         """
         if service_url:
-            from Acquire.Client import Wallet as _Wallet
-
-            wallet = _Wallet()
-            self._service = wallet.get_service(service_url=f"{service_url}/hugs")
             self._service_url = service_url
         else:
-            self._service
+            self._service_url = "https://hugs.acquire-aaai.com/t"
+
+        wallet = Wallet()
+        self._service = wallet.get_service(service_url=f"{self._service_url}/hugs")
 
     def process_folder(
         self,
@@ -111,13 +111,15 @@ class Process:
         if not isinstance(files, list):
             files = [files]
 
-        files = [Path(filepath) for filepath in files]
-
         if data_type.upper() == "GC":
             if not all(isinstance(item, tuple) for item in files):
                 return TypeError(
                     "If data type is GC, a list of tuples for data and precision filenames must be passed"
                 )
+
+            files = [(Path(f), Path(p)) for f, p in files]
+        else:
+            files = [Path(f) for f in files]
 
         if storage_url is None:
             storage_url = self._service_url + "/storage"
