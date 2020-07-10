@@ -498,7 +498,7 @@ class GC(BaseModule):
             self.load_params()
 
         attributes = self._gc_params[site.upper()]["global_attributes"]
-        
+
         attributes["inlet_height_magl"] = inlet
         try:
             attributes["comment"] = self._gc_params["comment"][instrument]

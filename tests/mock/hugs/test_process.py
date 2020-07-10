@@ -90,14 +90,19 @@ def test_process_GC_files(authenticated_user):
         hugs_url="hugs",
         storage_url="storage",
         instrument="medusa",
-        site="capegrim"
-    )   
+        site="capegrim",
+    )
 
-    expected_keys = ['capegrim-medusa.18_C4F10', 'capegrim-medusa.18_C6F14', 'capegrim-medusa.18_CCl4', 
-                    'capegrim-medusa.18_CF4', 'capegrim-medusa.18_CFC-11']
+    expected_keys = [
+        "capegrim-medusa.18_C4F10",
+        "capegrim-medusa.18_C6F14",
+        "capegrim-medusa.18_CCl4",
+        "capegrim-medusa.18_CF4",
+        "capegrim-medusa.18_CFC-11",
+    ]
 
-    assert len(response["capegrim-medusa.18.C"]) == 56 
-    assert sorted((response["capegrim-medusa.18.C"].keys()))[:5] == expected_keys 
+    assert len(response["capegrim-medusa.18.C"]) == 56
+    assert sorted((response["capegrim-medusa.18.C"].keys()))[:5] == expected_keys
 
 
 def test_process_CRDS(authenticated_user, tempdir):

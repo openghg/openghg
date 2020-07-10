@@ -40,7 +40,7 @@ class Upload:
         def do_upload(a):
             if type_widget.value is False:
                 status_text.value = (
-                    f"<font color='red'>Please select a data type</font>"
+                    "<font color='red'>Please select a data type</font>"
                 )
                 return
 
@@ -48,7 +48,7 @@ class Upload:
             data_type = type_widget.value
 
             if not user.is_logged_in():
-                status_text.value = f"<font color='red'>User not logged in</font>"
+                status_text.value = "<font color='red'>User not logged in</font>"
                 return
 
             # Here we get the data as bytes, write it to a tmp directory so we can
@@ -74,17 +74,17 @@ class Upload:
 
                 # Upload the file to HUGS
                 if result:
-                    status_text.value = f"<font color='green'>Upload successful</font>"
+                    status_text.value = "<font color='green'>Upload successful</font>"
                 else:
                     status_text.value = (
-                        f"<font color='red'>Unable to process file</font>"
+                        "<font color='red'>Unable to process file</font>"
                     )
 
         transfer_button.on_click(do_upload)
 
         data_hbox = widgets.HBox(children=[type_widget, upload_widget, transfer_button])
         status_text = widgets.HTML(
-            value=f"<font color='#00BCD4'>Waiting for file</font>"
+            value="<font color='#00BCD4'>Waiting for file</font>"
         )
 
         return widgets.VBox(children=[data_hbox, status_text])

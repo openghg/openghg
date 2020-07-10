@@ -30,11 +30,11 @@ def process_data(
     if data_type == "GC":
         if site is None:
             raise ValueError("Site must be specified when reading GC data")
-        
+
         try:
             data, precision = data_file
         except (TypeError, ValueError) as error:
-            raise TypeError(f"Ensure data and precision files are passed as a tuple\n", error)
+            raise TypeError("Ensure data and precision files are passed as a tuple\n", error)
 
         datasource_uuids = processing_obj.read_file(
             data_filepath=data,

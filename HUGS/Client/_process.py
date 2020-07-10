@@ -2,6 +2,7 @@ __all__ = ["Process"]
 
 from Acquire.Client import Wallet
 
+
 class Process:
     """ Process a datafile at a given PAR
 
