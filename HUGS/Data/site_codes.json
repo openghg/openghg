@@ -2,6 +2,7 @@
     "name_code":
     {
         "bilsdale": "BSD", 
+        "bristol": "BRI",
         "capegrim": "CGO", 
         "capepoint": "CPT", 
         "heathfield": "HFD", 
@@ -23,6 +24,7 @@
     "code_name":
     {
         "BSD": "bilsdale",
+        "BRI": "bristol",
         "CGO": "capegrim",
         "CPT": "capepoint",
         "HFD": "heathfield",

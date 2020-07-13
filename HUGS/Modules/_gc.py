@@ -512,7 +512,7 @@ class GC(BaseModule):
         try:
             site_code = self._site_codes[site.lower()]
         except KeyError:
-            raise KeyError("Site not recognized")
+            raise KeyError(f"Site: {site} not recognized")
 
         return site_code
 
