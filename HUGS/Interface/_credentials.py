@@ -16,7 +16,7 @@ class Credentials:
         username_text = Text(
             value=None, placeholder="username", description="Username: "
         )
-        status_text = HTML(value=f"<font color='black'>Waiting for login</font>")
+        status_text = HTML(value="<font color='black'>Waiting for login</font>")
         login_button = Button(
             description="Login", button_style="success", layout=Layout(width="10%")
         )
@@ -45,7 +45,7 @@ class Credentials:
         username_box = Text(
             value=None, placeholder="username", description="Username: "
         )
-        suggested_password = Label(value=f"Suggested password : ")
+        suggested_password = Label(value="Suggested password : ")
         password_box = Password(description="Password: ", placeholder="")
         conf_password_box = Password(description="Confirm: ", placeholder="")
         register_button = Button(

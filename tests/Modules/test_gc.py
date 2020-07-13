@@ -16,7 +16,6 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def data_path():
-    # This feels messy
     return (
         Path(__file__)
         .resolve()
@@ -30,6 +29,24 @@ def precision_path():
         Path(__file__)
         .resolve()
         .parent.joinpath("../data/proc_test_data/GC/capegrim-medusa.18.precisions.C")
+    )
+
+
+@pytest.fixture(scope="session")
+def data_path_no_instrument():
+    return (
+        Path(__file__)
+        .resolve()
+        .parent.joinpath("../data/proc_test_data/GC/trinidadhead.01.C")
+    )
+
+
+@pytest.fixture(scope="session")
+def precision_path_no_instrument():
+    return (
+        Path(__file__)
+        .resolve()
+        .parent.joinpath("../data/proc_test_data/GC/trinidadhead.01.precisions.C")
     )
 
 
@@ -49,6 +66,7 @@ def test_read_file(data_path, precision_path):
         precision_filepath=precision_path,
         source_name="capegrim_medusa",
         site="CGO",
+        instrument_name="medusa",
     )
 
     assert len(uuids) == 56
@@ -71,13 +89,58 @@ def test_read_file(data_path, precision_path):
     assert first_nine == key_list
 
 
+def test_read_no_instrument_available_raises(
+    data_path_no_instrument, precision_path_no_instrument
+):
+    with pytest.raises(TypeError):
+        GC.read_file(
+            data_filepath=data_path_no_instrument,
+            precision_filepath=precision_path_no_instrument,
+            source_name="capegrim_medusa",
+            site="CGO",
+        )
+
+
+def test_read_invalid_instrument_raises(
+    data_path_no_instrument, precision_path_no_instrument
+):
+    with pytest.raises(KeyError):
+        GC.read_file(
+            data_filepath=data_path_no_instrument,
+            precision_filepath=precision_path_no_instrument,
+            source_name="capegrim_medusa",
+            site="CGO",
+            instrument_name="fish",
+        )
+
+
+def test_read_valid_instrument_passed(
+    data_path_no_instrument, precision_path_no_instrument
+):
+    uuids = GC.read_file(
+        data_filepath=data_path_no_instrument,
+        precision_filepath=precision_path_no_instrument,
+        source_name="capegrim_medusa",
+        site="CGO",
+        instrument_name="medusa",
+    )
+
+    assert list(uuids.keys()) == [
+        "capegrim_medusa_CH4",
+        "capegrim_medusa_CFC-12",
+        "capegrim_medusa_N2O",
+        "capegrim_medusa_CFC-11",
+        "capegrim_medusa_CFC-113",
+        "capegrim_medusa_CHCl3",
+        "capegrim_medusa_CH3CCl3",
+        "capegrim_medusa_CCl4",
+    ]
+
+
 def test_read_data(data_path, precision_path):
     # Capegrim
     site = "CGO"
     instrument = "GCMD"
-
-    data_path = Path(data_path)
-    precision_path = Path(precision_path)
 
     gc = GC()
     data = gc.read_data(

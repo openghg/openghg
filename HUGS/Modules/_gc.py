@@ -8,7 +8,9 @@ class GC(BaseModule):
     _uuid = "8cba4797-510c-gcgc-8af1-e02a5ee57489"
 
     def __init__(self):
+        from json import load
         from Acquire.ObjectStore import get_datetime_now
+        from HUGS.Util import get_datapath
 
         self._creation_datetime = get_datetime_now()
         self._stored = False
@@ -24,6 +26,12 @@ class GC(BaseModule):
         # Site codes for inlet readings
         self._site_codes = {}
         self._sampling_period = 0
+
+        params_file = get_datapath(filename="process_gcwerks_parameters.json")
+
+        with open(params_file, "r") as f:
+            data = load(f)
+            self._gc_params = data["GC"]
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -68,7 +76,7 @@ class GC(BaseModule):
         precision_filepath,
         source_name,
         site,
-        instrument_name="GCMD",
+        instrument_name=None,
         source_id=None,
         overwrite=False,
     ):
@@ -78,7 +86,7 @@ class GC(BaseModule):
                 data_filepath (str, pathlib.Path): Path of data file
                 precision_filepath (str, pathlib.Path): Path of precision file
             Returns:
-                list: List of UUIDs of Datasources holding this data
+                dict: Dictionary of source_name : UUIDs
         """
         from HUGS.Processing import assign_data, lookup_gas_datasources
         from pathlib import Path
@@ -94,6 +102,12 @@ class GC(BaseModule):
         # We need to have the 3 character site code here
         if len(site) != 3:
             site = gc.get_site_code(site)
+
+        # Try and find the instrument name in the filename
+        if instrument_name is None:
+            instrument_name = data_filepath.stem.split("-")[1]
+            if(not gc.is_valid_instrument(instrument_name)):
+                raise KeyError(f"Invalid instrument selected, valid instruments are {gc._gc_params['instruments_suffix'].keys()}")
 
         gas_data = gc.read_data(
             data_filepath=data_filepath,
@@ -413,6 +427,18 @@ class GC(BaseModule):
             )
 
         return data
+
+    def is_valid_instrument(self, instrument):
+        """ Check if the instrument string passed is valid
+
+            Returns:
+                bool: True if valid
+        """
+        valid_instruments = self._gc_params["instruments_suffix"].keys()
+        if(instrument in valid_instruments):
+            return True
+        else:
+            return False
 
     def get_precision(self, instrument):
         """ Get the precision of the instrument in seconds

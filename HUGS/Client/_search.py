@@ -9,9 +9,13 @@ from Acquire.ObjectStore import string_to_datetime, datetime_to_string
 
 class Search:
     def __init__(self, service_url=None):
+        if service_url:
+            self._service_url = service_url
+        else:
+            self._service_url = "https://hugs.acquire-aaai.com/t"
+
         wallet = Wallet()
-        self._service = wallet.get_service(service_url=f"{service_url}/hugs")
-        self._results = {}
+        self._service = wallet.get_service(service_url=f"{self._service_url}/hugs")
 
     def search(
         self, search_terms, locations, data_type, start_datetime=None, end_datetime=None
