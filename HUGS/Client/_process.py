@@ -29,40 +29,34 @@ class Process:
         user,
         folder_path,
         data_type,
-        source_name=None,
         overwrite=False,
         extension="dat",
         hugs_url=None,
         storage_url=None,
-        recursive=False
     ):
         """ Process the passed directory of data files
 
+            Note: this does function does not recursively find files.
+
             Args:
                 user (User): Authenticated Acquire User
-                folder (str, list): Path of files to be processed
+                folder_path (str, pathlib.Path): Path of folder containing files to be processed
                 data_type (str): Type of data to be processed (CRDS, GC etc)
                 hugs_url (str): URL of HUGS service. Currently used for testing
                 datasource (str): Datasource name or UUID
                 This may be removed in the future.
                 storage_url (str): URL of storage service. Currently used for testing
                 This may be removed in the future.
-                resursive (bool, default=False): Should the function search recursively for 
-                files to upload
         """
         from pathlib import Path
-
-        if recursive:
-            glob_string = "**/*.C"
-        else:
-            glob_string = "*.C"
+        data_type = data_type.upper()
 
         if data_type == "GC":
             filepaths = []
             # Find all files in
-            for f in Path(folder_path).glob(glob_string):
+            for f in Path(folder_path).glob("*.C"):
                 if "precisions" in f.name:
-                    # Remove precisions section and ensure file exists
+                    # Remove precisions section and ensure the matching data file exists
                     data_filename = str(f).replace(".precisions", "")
                     if Path(data_filename).exists():
                         filepaths.append((Path(data_filename), f))
@@ -73,7 +67,6 @@ class Process:
             user=user,
             files=filepaths,
             data_type=data_type,
-            source_name=source_name,
             overwrite=overwrite,
         )
 

@@ -89,18 +89,6 @@ def test_read_file(data_path, precision_path):
     assert first_nine == key_list
 
 
-def test_read_no_instrument_available_raises(
-    data_path_no_instrument, precision_path_no_instrument
-):
-    with pytest.raises(TypeError):
-        GC.read_file(
-            data_filepath=data_path_no_instrument,
-            precision_filepath=precision_path_no_instrument,
-            source_name="capegrim_medusa",
-            site="CGO",
-        )
-
-
 def test_read_invalid_instrument_raises(
     data_path_no_instrument, precision_path_no_instrument
 ):
