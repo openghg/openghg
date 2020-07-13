@@ -149,7 +149,7 @@ class Process:
                 # This may be removed in the future as is currently only for testing
 
                 if source_name is None:
-                    source_name = filename.stem
+                    source_name = file[0].stem
 
                 if site is None:
                     site = source_name.split(".")[0]

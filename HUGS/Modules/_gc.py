@@ -391,7 +391,7 @@ class GC(BaseModule):
                     ]
                     spec_data = spec_data.dropna(axis="index", how="any")
 
-                attributes = self.site_attributes(
+                attributes = self.get_site_attributes(
                     site=site, inlet=inlet, instrument=instrument
                 )
 
@@ -416,7 +416,7 @@ class GC(BaseModule):
         from HUGS.Processing import get_attributes
 
         for species in data:
-            site_attributes = data[species]["attributes"]
+            get_site_attributes = data[species]["attributes"]
             units = data[species]["metadata"]["units"]
             scale = data[species]["metadata"]["scale"]
 
@@ -427,7 +427,7 @@ class GC(BaseModule):
                 network=network,
                 units=units,
                 scale=scale,
-                global_attributes=site_attributes,
+                global_attributes=get_site_attributes,
                 sampling_period=self._sampling_period,
             )
 
@@ -516,7 +516,7 @@ class GC(BaseModule):
 
         return site_code
 
-    def site_attributes(self, site, inlet, instrument):
+    def get_site_attributes(self, site, inlet, instrument):
         """ Gets the site specific attributes for writing to Datsets
 
             Args:

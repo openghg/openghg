@@ -3,8 +3,8 @@ name: hugs-root
 version: 0.0.68
 runtime: docker
 type: sync
-memory: 1024
-timeout: 20
+memory: 2048
+timeout: 120
 triggers:
 - name: root
   type: http
