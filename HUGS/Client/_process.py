@@ -34,7 +34,7 @@ class Process:
         extension="dat",
         hugs_url=None,
         storage_url=None,
-        instrument=None,
+        recursive=False
     ):
         """ Process the passed directory of data files
 
@@ -47,13 +47,20 @@ class Process:
                 This may be removed in the future.
                 storage_url (str): URL of storage service. Currently used for testing
                 This may be removed in the future.
+                resursive (bool, default=False): Should the function search recursively for 
+                files to upload
         """
         from pathlib import Path
+
+        if recursive:
+            glob_string = "**/*.C"
+        else:
+            glob_string = "*.C"
 
         if data_type == "GC":
             filepaths = []
             # Find all files in
-            for f in Path(folder_path).glob("**/*.C"):
+            for f in Path(folder_path).glob(glob_string):
                 if "precisions" in f.name:
                     # Remove precisions section and ensure file exists
                     data_filename = str(f).replace(".precisions", "")
@@ -68,7 +75,6 @@ class Process:
             data_type=data_type,
             source_name=source_name,
             overwrite=overwrite,
-            instrument=instrument,
         )
 
     # Find a better way to get this storage url in here, currently used for testing

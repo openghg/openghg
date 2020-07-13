@@ -82,6 +82,8 @@ class GC(BaseModule):
     ):
         """ Reads a GC data file by creating a GC object and associated datasources
 
+            TODO - should this default to GCMD when no instrument is passed?
+
             Args:
                 data_filepath (str, pathlib.Path): Path of data file
                 precision_filepath (str, pathlib.Path): Path of precision file
@@ -90,10 +92,7 @@ class GC(BaseModule):
         """
         from HUGS.Processing import assign_data, lookup_gas_datasources
         from pathlib import Path
-
-        # TODO - remove this once we know None's won't be passed through
-        if instrument_name is None:
-            raise TypeError("Instrument cannot be None")
+        from warnings import warn
 
         gc = GC.load()
 
@@ -105,9 +104,15 @@ class GC(BaseModule):
 
         # Try and find the instrument name in the filename
         if instrument_name is None:
-            instrument_name = data_filepath.stem.split("-")[1]
+            if(len(data_filepath.stem.split("-")) > 1):
+                instrument_name = data_filepath.stem.split("-")[1]
+            else:
+                instrument_name = "NA"
+
             if(not gc.is_valid_instrument(instrument_name)):
-                raise KeyError(f"Invalid instrument selected, valid instruments are {gc._gc_params['instruments_suffix'].keys()}")
+                warn(f"Invalid instrument, defaulting to GCMD. Instruments \
+                        that can be read from filename are {gc._gc_params['suffix_to_instrument'].keys()}")
+                instrument_name = "GCMD"
 
         gas_data = gc.read_data(
             data_filepath=data_filepath,
@@ -434,8 +439,8 @@ class GC(BaseModule):
             Returns:
                 bool: True if valid
         """
-        valid_instruments = self._gc_params["instruments_suffix"].keys()
-        if(instrument in valid_instruments):
+        valid_instruments = self._gc_params["suffix_to_instrument"].keys()
+        if(instrument.lower() in valid_instruments):
             return True
         else:
             return False

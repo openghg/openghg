@@ -10,6 +10,11 @@
             "GCMS": ["", "-gcms"],
             "medusa": ["-medusa"]
         },
+        "suffix_to_instrument": {
+            "md": "GCMD",
+            "gcms": "GCMS",
+            "medusa": "medusa"
+        },
         "instruments_out": {
             "GCMD": {
                 "CH4": "GCFID",
