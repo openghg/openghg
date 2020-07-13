@@ -92,18 +92,19 @@ class Process:
                 data_type (str): Type of data to be processed (CRDS, GC etc)
                 hugs_url (str): URL of HUGS service. Currently used for testing
                 datasource (str): Datasource name or UUID
-
-                TODO - update this
-
                 This may be removed in the future.
                 storage_url (str): URL of storage service. Currently used for testing
                 This may be removed in the future.
+                site (str, default=None): Name of site, three letter code or long name
+                instrument (str, default=None): If no instrument name is passed we will attempt
+                to find it from the filename.
             Returns:
                 dict: UUID of processed files keyed by filename
         """
         from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
-        import os
         from pathlib import Path
+
+        data_type = data_type.upper()
 
         if self._service is None:
             raise PermissionError("Cannot use a null service")
@@ -142,18 +143,18 @@ class Process:
         # cases and this gets a bit clunky
         datasource_uuids = {}
         for file in files:
-            if data_type.upper() == "GC":
+            if data_type == "GC":
                 # This is only used as a key when returning the Datasource UUIDs
                 filename = file[0].name
                 # This may be removed in the future as is currently only for testing
 
-                if not source_name:
-                    source_name = os.path.splitext(filename)[0]
+                if source_name is None:
+                    source_name = filename.stem
 
-                # TODO - update this so we get proper reading of parameters
-                # dictionary
-                if not site:
+                if site is None:
                     site = source_name.split(".")[0]
+                    if "-" in site and data_type == "GC":
+                        site = site.split("-")[0]
 
                 filemeta = drive.upload(file[0])
                 par = PAR(location=filemeta.location(), user=user)
