@@ -7,13 +7,13 @@ class ThamesBarrier(BaseModule):
     """ Interface for processing ThamesBarrier data
 
     """
-
     _root = "ThamesBarrier"
-    # Use uuid.uuid4() to create a unique fixed UUID for this object
     _uuid = "e708ab3f-ade5-402a-a491-979095d8f7ad"
 
     def __init__(self):
+        from json import load
         from Acquire.ObjectStore import get_datetime_now
+        from HUGS.Util import get_datapath
 
         self._creation_datetime = get_datetime_now()
         self._stored = False
@@ -28,6 +28,12 @@ class ThamesBarrier(BaseModule):
         self._tb_params = {}
         # Sampling period of  data in seconds
         self._sampling_period = "NA"
+
+        filepath = get_datapath(filename="attributes.json")
+
+        with open(filepath, "r") as f:
+            data = load(f)
+            self._tb_params = data["TMB"]
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -190,7 +196,7 @@ class ThamesBarrier(BaseModule):
         combined_data = {}
 
         for species in data.columns:
-            processed_data = data.loc[:, [species]].to_xarray()
+            processed_data = data.loc[:, [species]].sort_index().to_xarray()
 
             # Convert methane to ppb
             if species == "CH4":
@@ -219,16 +225,6 @@ class ThamesBarrier(BaseModule):
             Returns:
                 dict: Dictionary of site attributes
         """
-        if not self._tb_params:
-            from json import load
-            from HUGS.Util import get_datapath
-
-            filepath = get_datapath(filename="attributes.json")
-
-            with open(filepath, "r") as f:
-                data = load(f)
-                self._tb_params = data["TMB"]
-
         attributes = self._tb_params["global_attributes"]
         attributes["inlet_height_magl"] = self._tb_params["inlet"]
         attributes["instrument"] = self._tb_params["instrument"]

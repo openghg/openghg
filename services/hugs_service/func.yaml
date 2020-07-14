@@ -5,6 +5,7 @@ runtime: docker
 type: sync
 memory: 2048
 timeout: 120
+idle_timout: 140
 triggers:
 - name: root
   type: http
