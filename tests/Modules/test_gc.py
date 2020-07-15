@@ -89,6 +89,19 @@ def test_read_file(data_path, precision_path):
     assert first_nine == key_list
 
 
+def test_read_file_incorrect_inlet_raises(precision_path):
+    data_path = Path(__file__).resolve().parent.joinpath("../data/proc_test_data/GC/capegrim-incorrect-inlet.18.C")
+
+    with pytest.raises(ValueError):
+        GC.read_file(
+            data_filepath=data_path,
+            precision_filepath=precision_path,
+            source_name="capegrim_medusa",
+            site="CGO",
+            instrument_name="medusa",
+        )
+
+
 def test_read_invalid_instrument_raises(
     data_path_no_instrument, precision_path_no_instrument
 ):
