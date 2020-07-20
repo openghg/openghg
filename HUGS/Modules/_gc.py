@@ -402,7 +402,9 @@ class GC(BaseModule):
         return combined_data
 
     def assign_attributes(self, data, site, network=None):
-        """ Assign attributes to the data we've processed
+        """ Assign attributes to the data we've processed. This ensures that the xarray Datasets produced
+            as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata 
+            to the Datasource allowing more detailed searching of data.
 
             Args:
                 combined_data (dict): Dictionary containing data, metadata and attributes
@@ -412,10 +414,10 @@ class GC(BaseModule):
         from HUGS.Processing import get_attributes
 
         for species in data:
-            get_site_attributes = data[species]["attributes"]
+            site_attributes = data[species]["attributes"]
             units = data[species]["metadata"]["units"]
             scale = data[species]["metadata"]["scale"]
-
+            
             data[species]["data"] = get_attributes(
                 ds=data[species]["data"],
                 species=species,
@@ -423,7 +425,7 @@ class GC(BaseModule):
                 network=network,
                 units=units,
                 scale=scale,
-                global_attributes=get_site_attributes,
+                global_attributes=site_attributes,
                 sampling_period=self._sampling_period,
             )
 

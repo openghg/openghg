@@ -55,15 +55,7 @@ def assign_data(gas_data, lookup_results, overwrite):
 
     uuids = {}
 
-    # Rework this to for the segmentation of data within the Datasource
-    # How to reliably get existing UUIDs to be passed through from an interface or selection?
-    # Rely on site_species for now via name lookup?
-    # Need to allow UUID input here so we can add new data to existing Datasources easily without
-    # relying on the naming method
-
-    # Use the attributes function here
-
-    # TODO - simplify this
+    # Add in copying of attributes, or add attributes to the metadata at an earlier state.
     for species in gas_data:
         metadata = gas_data[species]["metadata"]
         data = gas_data[species]["data"]

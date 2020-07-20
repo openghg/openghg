@@ -6,12 +6,11 @@ class Retrieve:
     This class is used to retrieve the data that's found using the search function
     from the object store
     """
-
     def __init__(self, service_url=None):
-        from Acquire.Client import Wallet as _Wallet
+        from Acquire.Client import Wallet
 
-        wallet = _Wallet()
-        self._service = wallet.get_service(service_url="%s/hugs" % service_url)
+        wallet = Wallet()
+        self._service = wallet.get_service(service_url=f"{service_url}/hugs")
 
     def list(self):
         """ Return details on the search results

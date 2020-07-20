@@ -16,6 +16,7 @@ __all__ = [
     "date_overlap",
     "read_header",
     "load_hugs_json",
+    "valid_site"
 ]
 
 
@@ -89,14 +90,14 @@ def get_datetime(year, month, day, hour=None, minute=None, second=None):
         Returns:
             datetime: Timezone aware datetime object
     """
-    from datetime import datetime as _datetime
-    from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+    from datetime import datetime
+    from Acquire.ObjectStore import datetime_to_datetime
 
-    date = _datetime(
+    date = datetime(
         year=year, month=month, day=day
     )  # , hour=hour, minute=minute, second=second)
 
-    return _datetime_to_datetime(date)
+    return datetime_to_datetime(date)
 
 
 def unanimous(seq):
@@ -271,3 +272,16 @@ def read_header(filepath, comment_char="#"):
                 break
 
     return header
+
+
+def valid_site(site):
+    """ Check if the passed site is a valid one
+
+        Args:
+            site (str): Three letter site code
+        Returns:
+            bool: True if site is valid
+    """
+    site_data = load_hugs_json("acrg_site_info.json")
+
+    return site in site_data
