@@ -1,6 +1,8 @@
 __all__ = ["Process"]
 
 from Acquire.Client import Wallet
+from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
+from pathlib import Path
 
 
 class Process:
@@ -101,9 +103,6 @@ class Process:
             Returns:
                 dict: UUID of processed files keyed by filename
         """
-        from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
-        from pathlib import Path
-
         data_type = data_type.upper()
 
         if self._service is None:

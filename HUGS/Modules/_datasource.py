@@ -35,6 +35,8 @@ class Datasource:
         # Currently unused
         self._latest_version = None
         self._versions = {}
+        # A rank of -1 is unset, 1 is a primary source, 2 secondary
+        self._rank = defaultdict(dict)
 
     def start_datetime(self):
         """ Returns the starting datetime for the data in this Datasource
@@ -732,10 +734,7 @@ class Datasource:
         return self._metadata["inlet"]
 
     def site(self):
-        if "site" in self._metadata:
-            return self._metadata["site"]
-        else:
-            return "NA"
+        return self._metadata.get("site", "NA")
 
     def uuid(self):
         """ Return the UUID of this object
@@ -762,6 +761,33 @@ class Datasource:
                 None
         """
         self._uuid = uid
+
+    def set_rank(self, rank, daterange):
+        """ Set the rank of this Datsource. This allows users to select
+            the best data for a specific species at a site. By default
+            a Datasource is unranked with a value of 0
+
+            Args:   
+                rank (int): Rank number where -1 is no rank and 1 is the highest
+                daterange (str): Daterange in the form of a string
+            Returns:
+                None
+        """
+        self._rank[daterange] = rank
+
+    def get_rank(self, daterange):
+        """ Get the rank of this Datasource for the passed daterange
+
+            Check how much of the data in this Datasource has which rank?
+            Return a dictionary of the ranks and which dateranges these belong to?
+
+            Args:
+                daterange (str): Daterange string of the format
+
+            Returns:
+                int: Rank of data
+        """
+        raise NotImplementedError()
 
     def data_type(self):
         """ Returns the data type held by this Datasource
