@@ -120,7 +120,7 @@ def search(
     # First we find the Datasources from locations we want to narrow down our search
     location_sources = _defaultdict(list)
     # If we have locations to search
-    if locations:
+    if locations is not None:
         for location in locations:
             for datasource in datasources:
                 if datasource.search_metadata(location):

@@ -688,21 +688,32 @@ class Datasource:
         start, end = self.daterange()
         return "".join([datetime_to_string(start), "_", datetime_to_string(end)])
 
-    def search_metadata(self, search_term):
+    def search_metadata(self, search_terms, find_all=False):
         """ Search the values of the metadata of this Datasource for search_term
 
             Args:
-                search_term (str): String to search for in metadata
+                search_term (str, list): String or list of strings to search for in metadata
+                find_all (bool, default=False): If True all search terms must be matched
             Returns:
                 bool: True if found else False
         """
-        search_term = search_term.lower()
+        if not isinstance(search_terms, list):
+            search_terms = [search_terms]
 
-        for v in self._metadata.values():
-            if v == search_term:
-                return True
+        search_terms = [s.lower() for s in search_terms]    
 
-        return False
+        results = []
+        for term in search_terms:
+            for v in self._metadata.values():
+                if v == term:
+                    results.append(True)
+
+        # If we want all the terms to match these should be the same length
+        if find_all:
+            return len(search_terms) == len(results)
+        # Otherwise there should be at least a True in results
+        else:
+            return True in results
 
     def species(self):
         """ Returns the species of this Datasource

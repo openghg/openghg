@@ -1,9 +1,9 @@
-from enum import Enum as _Enum
+from enum import Enum
 
 __all__ = ["RootPaths", "DataTypes"]
 
 
-class RootPaths(_Enum):
+class RootPaths(Enum):
     DATA = "data"
     DATASOURCE = "datasource"
     INSTRUMENT = "instrument"
@@ -12,7 +12,7 @@ class RootPaths(_Enum):
 
 
 # Better name for this enum?
-class DataTypes(_Enum):
+class DataTypes(Enum):
     CRDS = "CRDS"
     GC = "GC"
     EUROCOM = "EUROCOM"

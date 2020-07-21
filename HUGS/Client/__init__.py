@@ -6,4 +6,4 @@ from ._removeobjects import RemoveObjects
 from ._retrieve import Retrieve
 from ._search import Search
 from ._upload import Upload
-from ._set_primary import SetPrimary
+from ._rank_sources import RankSources
