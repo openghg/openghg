@@ -1,27 +1,41 @@
-from pathlib import Path
 import pytest
+import os
 
 from HUGS.Client import RankSources
-from HUGS.Modules import CRDS
-from HUGS.ObjectStore import get_local_bucket
+from Acquire.Client import Service
+
+@pytest.fixture(scope="session")
+def tempdir(tmpdir_factory):
+    d = tmpdir_factory.mktemp("tmp_searchfn")
+    return str(d)
 
 
-@pytest.fixture(autouse=True)
-def crds():
-    get_local_bucket(empty=True)
-    filename = "hfd.picarro.1minute.100m_min.dat"
+@pytest.fixture(scope="session")
+def load_crds(authenticated_user):
+    hugs = Service(service_url="hugs")
+    _ = hugs.call_function(function="clear_datasources", args={})
 
-    filepath = (
-        Path(__file__)
-        .resolve()
-        .parent.joinpath("../../data/proc_test_data/CRDS/")
-        .joinpath(filename)
+    def test_folder(filename):
+        dir_path = os.path.dirname(__file__)
+        test_folder = "../../../tests/data/search_data"
+        return os.path.join(dir_path, test_folder, filename)
+
+    files = [
+        "bsd.picarro.1minute.108m.min.dat",
+        "hfd.picarro.1minute.100m.min.dat",
+        "tac.picarro.1minute.100m.min.dat",
+    ]
+    filepaths = [test_folder(f) for f in files]
+
+    process = Process(service_url="hugs")
+
+    process.process_files(
+        user=authenticated_user,
+        files=filepaths,
+        data_type="CRDS",
+        hugs_url="hugs",
+        storage_url="storage",
     )
-
-    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m", site="hfd")
-    crds = CRDS.load()
-
-    return crds
 
 
 # Need authenticated_user here to allow

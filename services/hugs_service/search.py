@@ -1,13 +1,14 @@
 def search(args):
     from Acquire.ObjectStore import string_to_datetime
+    from HUGS.Processing import search as hugs_search
 
     if "start_datetime" in args:
-        start_datetime = _string_to_datetime(args["start_datetime"])
+        start_datetime = string_to_datetime(args["start_datetime"])
     else:
         start_datetime = None
 
     if "end_datetime" in args:
-        end_datetime = _string_to_datetime(args["end_datetime"])
+        end_datetime = string_to_datetime(args["end_datetime"])
     else:
         end_datetime = None
 
@@ -15,7 +16,7 @@ def search(args):
     locations = args["locations"]
     data_type = args["data_type"]
 
-    results = _hugs_search(
+    results = hugs_search(
         search_terms=search_terms,
         locations=locations,
         data_type=data_type,

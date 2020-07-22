@@ -32,13 +32,15 @@ def get_sources(args):
     # Shallow load the Datasources (only get their JSON metadata)
     datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 
-    matching_sources = [d for d in datasources if d.search_metadata(search_terms=[site, species])]
+    matching_sources = [d for d in datasources if d.search_metadata(search_terms=[site, species], find_all=True)]
 
-    def name_str(d):
-        return "_".join([d.site(), d.species(), d.inlet()])
+    return matching_sources
 
-    # Need to easily rank the datasources for this species and site - how to label them?
-    # We only need to set a rank of 1 for a specific daterange otherwise we'll consider it unranked
-    unranked = {name_str(d): {"rank": -1, "daterange": d.daterange_str(), "uuid": d.uuid()} for d in matching_sources}
+    # def name_str(d):
+    #     return "_".join([d.site(), d.species(), d.inlet()])
 
-    return unranked
+    # # Need to easily rank the datasources for this species and site - how to label them?
+    # # We only need to set a rank of 1 for a specific daterange otherwise we'll consider it unranked
+    # unranked = {name_str(d): {"rank": -1, "daterange": d.daterange_str(), "uuid": d.uuid()} for d in matching_sources}
+
+    # return unranked
