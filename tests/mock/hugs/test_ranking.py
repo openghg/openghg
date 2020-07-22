@@ -14,7 +14,7 @@ def crds():
     filepath = (
         Path(__file__)
         .resolve()
-        .parent.joinpath("../data/proc_test_data/CRDS/")
+        .parent.joinpath("../../data/proc_test_data/CRDS/")
         .joinpath(filename)
     )
 
@@ -24,7 +24,8 @@ def crds():
     return crds
 
 
-def test_get_sources(crds):
-    r = RankSources()
-    sources = r.get_sources(site="hfd", species="co2")
+# Need authenticated_user here to allow
+def test_get_sources(crds, authenticated_user):
+    r = RankSources(service_url="hugs")
+    sources = r.get_sources(site="hfd", species="co2", data_type="CRDS")
     print(sources)

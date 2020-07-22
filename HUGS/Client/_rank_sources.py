@@ -15,12 +15,14 @@ class RankSources:
 
         self._before_ranking = {}
 
-    def get_sources(self, site, species):
+    def get_sources(self, site, species, data_type):
         """ Get the datasources for this site and species to allow a ranking to be set
 
             Args:
                 site (str): Three letter site code
                 species (str): Species name
+                data_type (str): Must be valid datatype i.e. CRDS, GC
+                See all valid datasources in the DataTypes class
             Returns:
                 dict: Dictionary of datasource metadata
         """
@@ -29,12 +31,11 @@ class RankSources:
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
-        # Check the site code here? Raise an error if it's not recognized
         if len(site) != 3 or not valid_site(site):
             # raise InvalidSiteError(f"{site} is not a valid site code")
             raise ValueError(f"{site} is not a valid site code")
 
-        args = {"site": site, "species": species}
+        args = {"site": site, "species": species, "data_type": data_type}
 
         response = self._service.call_function(function="get_sources", args=args)
 

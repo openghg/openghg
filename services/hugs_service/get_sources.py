@@ -23,7 +23,7 @@ def get_sources(args):
         raise KeyError("Species must be specified")
 
     try:
-        data_type = DataTypes(args["data_type"].upper())
+        data_type = DataTypes[args["data_type"].upper()].name
     except KeyError:
         raise KeyError(f"Data type must be specified. Valid options are: {[e.value for e in DataTypes]}")
 

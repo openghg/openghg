@@ -140,6 +140,8 @@ def load_object(class_name):
         class_name = class_name.lower().capitalize()
         module_object = __import__(name=module_path, fromlist=class_name)
         target_class = getattr(module_object, class_name)
+    except ModuleNotFoundError as err:
+        raise ModuleNotFoundError(f"{class_name} is not a valid module {err}")
 
     return target_class.load()
 
@@ -283,5 +285,7 @@ def valid_site(site):
             bool: True if site is valid
     """
     site_data = load_hugs_json("acrg_site_info.json")
+
+    site = site.upper()
 
     return site in site_data
