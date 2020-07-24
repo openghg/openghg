@@ -43,22 +43,25 @@ class RankSources:
 
         return response
 
-    def rank_sources(self, updated_ranking):
-        """ Assign the precendence of sources for each
+    def rank_sources(self, updated_rankings):
+        """ Assign the precendence of sources for each.
+            This function expects a dictionary of the form
+
+            This function expects a dictionary of the form
+
+            {'site_string': {'rank': rank_int, 'daterange': 'start_end', 'uuid': uuid}, 
 
             Args:
                 updated_ranking (dict): Dictionary of ranking
             Returns:
                 None
         """
-        if updated_ranking == self._before_ranking:
+        if updated_rankings == self._before_ranking:
             raise TypeError("Ranking must be updated")
 
-        args = {"ranking": updated_ranking}
+        args = {"ranking": updated_rankings}
 
-        response = self._service.call_function(function="rank_sources", args=args)
-
-        return response
+        self._service.call_function(function="rank_sources", args=args)
 
     def create_daterange(self, start, end):
         """ Create a JSON serialisable daterange string for use in ranking dict

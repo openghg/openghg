@@ -196,9 +196,7 @@ class Datasource:
             to_keep = []
             for current_daterange in self._data:
                 for new_daterange in additional_data:
-                    if not date_overlap(
-                        daterange_a=current_daterange, daterange_b=new_daterange
-                    ):
+                    if not date_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
                         to_keep.append(current_daterange)
 
             updated_data = {}
@@ -283,10 +281,10 @@ class Datasource:
         """
         from HUGS.ObjectStore import exists, get_bucket
 
-        if not bucket:
+        if bucket is None:
             bucket = get_bucket()
 
-        key = "%s/uuid/%s" % (Datasource._datasource_root, datasource_id)
+        key = f"{Datasource._datasource_root}/uuid/{datasource_id}"
 
         return exists(bucket=bucket, key=key)
 
@@ -314,6 +312,9 @@ class Datasource:
         data["data_keys"] = self._data_keys
         data["data_type"] = self._data_type
         data["latest_version"] = self._latest_version
+        data["rank"] = self._rank
+
+        print("Saving to data, rank : ", self._rank)
 
         return data
 
@@ -458,9 +459,6 @@ class Datasource:
         """
         from Acquire.ObjectStore import string_to_datetime
 
-        if not data:
-            return Datasource()
-
         d = Datasource()
         d._uuid = data["UUID"]
         d._name = data["name"]
@@ -471,6 +469,10 @@ class Datasource:
         d._data = {}
         d._data_type = data["data_type"]
         d._latest_version = data["latest_version"]
+        d._rank = data["rank"]
+
+        print("Rank in from_data : ", data["rank"])
+        print("Metadata for this datasource : ", data["metadata"])
 
         if d._stored and not shallow:
             for date_key in d._data_keys["latest"]["keys"]:
@@ -496,7 +498,7 @@ class Datasource:
         )
         from HUGS.ObjectStore import get_bucket
 
-        if not bucket:
+        if bucket is None:
             bucket = get_bucket()
 
         if self._data:
@@ -560,14 +562,14 @@ class Datasource:
         """
         from HUGS.ObjectStore import get_bucket, get_object_json
 
-        if not uuid and not key:
+        if uuid is None and key is None:
             raise ValueError("Both uuid and key cannot be None")
 
-        if not bucket:
+        if bucket is None:
             bucket = get_bucket()
 
-        if not key:
-            key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
+        if key is None:
+            key = f"{Datasource._datasource_root}/uuid/{uuid}"
 
         data = get_object_json(bucket=bucket, key=key)
         return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
@@ -585,7 +587,7 @@ class Datasource:
         """
         from HUGS.ObjectStore import get_dated_object_json
 
-        key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
+        key = f"{Datasource._datasource_root}/uuid/{uuid}"
         data = get_dated_object_json(bucket=bucket, key=key)
 
         return data["name"]
@@ -603,7 +605,7 @@ class Datasource:
         from Acquire.ObjectStore import ObjectStore, string_to_encoded
 
         encoded_name = string_to_encoded(name)
-        prefix = "%s/name/%s" % (Datasource._datasource_root, encoded_name)
+        prefix = f"{Datasource._datasource_root}/name/{encoded_name}"
         uuid = ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
 
         if len(uuid) > 1:
@@ -650,21 +652,21 @@ class Datasource:
     def update_daterange(self):
         """ Update the dates stored by this Datasource
 
-            TODO - cleaner way of doing this?
-
             Returns:
                 None
         """
-        from pandas import Timestamp
-
-        if self._data:
+        # If we've only shallow loaded (without the data) 
+        # this Datasource we use the latest data keys
+        if not self._data:
+            keys = sorted(self._data_keys["latest"]["keys"])
+        else:
             keys = sorted(self._data.keys())
 
-            start = keys[0].split("_")[0]
-            end = keys[-1].split("_")[1]
+        start, _ = self.split_datrange_str(daterange_str=keys[0])
+        _, end = self.split_datrange_str(daterange_str=keys[-1])
 
-            self._start_datetime = Timestamp(start, tz="UTC")
-            self._end_datetime = Timestamp(end, tz="UTC")
+        self._start_datetime = start
+        self._end_datetime = end
 
     def daterange(self):
         """ Get the daterange the data in this Datasource covers as tuple
@@ -673,7 +675,7 @@ class Datasource:
             Returns:
                 tuple (datetime, datetime): Start, end datetimes
         """
-        if not self._start_datetime and self._data:
+        if self._start_datetime is None and self._data is not None:
             self.update_daterange()
 
         return self._start_datetime, self._end_datetime
@@ -762,6 +764,16 @@ class Datasource:
         """
         self._uuid = uid
 
+    def rank(self):
+        """ Return the rank of this Datasource 
+
+            Where a value of -1 means no rank, 1 the highest
+
+            Returns:
+                int: Rank of datasource
+        """
+        return self._rank
+
     def set_rank(self, rank, daterange):
         """ Set the rank of this Datsource. This allows users to select
             the best data for a specific species at a site. By default
@@ -773,7 +785,44 @@ class Datasource:
             Returns:
                 None
         """
-        self._rank[daterange] = rank
+        rank = int(rank)
+
+        if 0 <= rank <= 10:
+            raise TypeError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
+
+        if rank in self._rank:
+            # Check if date is in the
+            # Check for overlap of daterange, if overlap extend otherwise just add?
+            start = daterange.split["_"]
+
+
+        # Check if we have this rank already, 
+        # Need a list of dateranges for each rank?
+        # Then we'll have to check for each rank what dateranges it's first ranked for etc
+        # 
+        # rank =  [daterange,daterange ]
+
+        self._rank[rank] = daterange
+
+    def split_datrange_str(self, daterange_str):
+        """ Split a daterange string to the component start and end
+            Timestamps
+
+            Args:
+                daterange_str (str): Daterange string of the form
+
+                2019-01-01T00:00:00_2019-12-31T00:00:00                
+            Returns:
+                tuple (Timestamp, Timestamp): Tuple of start, end pandas Timestamps
+        """
+        from pandas import Timestamp
+
+        split = daterange_str.split("_")
+
+        start = Timestamp(split[0], tz="UTC")
+        end = Timestamp(split[1], tz="UTC")
+
+        return start, end
 
     def get_rank(self, daterange):
         """ Get the rank of this Datasource for the passed daterange

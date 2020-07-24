@@ -54,7 +54,6 @@ def assign_data(gas_data, lookup_results, overwrite):
     from HUGS.Modules import Datasource
 
     uuids = {}
-
     # Add in copying of attributes, or add attributes to the metadata at an earlier state.
     for species in gas_data:
         metadata = gas_data[species]["metadata"]

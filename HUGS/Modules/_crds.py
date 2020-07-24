@@ -224,7 +224,10 @@ class CRDS(BaseModule):
         source_name = data_filepath.stem
         # -1 here as we've already removed the file extension
         # As we're not processing a list of datafiles here we'll only have one inlet
-        inlet = source_name.split(".")[-1]
+        inlet = source_name.split(".")[3]
+
+        if "m" not in inlet.lower():
+            raise TypeError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
 
         # instrument = [f.split(".")[1] for f in data_files]
         # instrument = source_name.split(".")[1]
@@ -275,6 +278,7 @@ class CRDS(BaseModule):
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
             species_metadata["species"] = species
+            species_metadata["inlet"] = inlet
 
             species_metadata["source_name"] = source_name
 
