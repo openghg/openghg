@@ -36,7 +36,7 @@ class Datasource:
         self._latest_version = None
         self._versions = {}
         # A rank of -1 is unset, 1 is a primary source, 2 secondary
-        self._rank = defaultdict(dict)
+        self._rank = defaultdict(list)
 
     def start_datetime(self):
         """ Returns the starting datetime for the data in this Datasource
@@ -314,8 +314,6 @@ class Datasource:
         data["latest_version"] = self._latest_version
         data["rank"] = self._rank
 
-        print("Saving to data, rank : ", self._rank)
-
         return data
 
     @staticmethod
@@ -470,9 +468,6 @@ class Datasource:
         d._data_type = data["data_type"]
         d._latest_version = data["latest_version"]
         d._rank = data["rank"]
-
-        print("Rank in from_data : ", data["rank"])
-        print("Metadata for this datasource : ", data["metadata"])
 
         if d._stored and not shallow:
             for date_key in d._data_keys["latest"]["keys"]:
@@ -774,6 +769,22 @@ class Datasource:
         """
         return self._rank
 
+    def daterange_from_str(self, daterange_str):
+        """ Get a Pandas DatetimeIndex from a string. The created 
+            DatetimeIndex has minute frequency.
+
+            Args:
+                daterange_str (str): Daterange string
+                of the form 2019-01-01T00:00:00_2019-12-31T00:00:00
+            Returns:
+                pandas.DatetimeIndex: DatetimeIndex with minute frequency
+        """
+        from pandas import date_range
+
+        start, end = self.split_datrange_str(daterange_str)
+
+        return date_range(start=start, end=end, freq="min")
+
     def set_rank(self, rank, daterange):
         """ Set the rank of this Datsource. This allows users to select
             the best data for a specific species at a site. By default
@@ -781,7 +792,7 @@ class Datasource:
 
             Args:   
                 rank (int): Rank number where -1 is no rank and 1 is the highest
-                daterange (str): Daterange in the form of a string
+                daterange (str): Daterange in the form of a string 2019-01-01T00:00:00_2019-12-31T00:00:00
             Returns:
                 None
         """
@@ -790,19 +801,87 @@ class Datasource:
         if 0 <= rank <= 10:
             raise TypeError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
 
+        rank = str(rank)
+
+        self._rank[rank].append(daterange)
+
         if rank in self._rank:
-            # Check if date is in the
-            # Check for overlap of daterange, if overlap extend otherwise just add?
-            start = daterange.split["_"]
+            self._rank[rank] = self.combine_dateranges(self._rank[rank])
 
+    def combine_dateranges(self, dateranges):
+        """ Checks a list of daterange strings for overlapping and combines
+            those that do.
 
-        # Check if we have this rank already, 
-        # Need a list of dateranges for each rank?
-        # Then we'll have to check for each rank what dateranges it's first ranked for etc
-        # 
-        # rank =  [daterange,daterange ]
+            Note : this function expects daterange strings in the form
+            2019-01-01T00:00:00_2019-12-31T00:00:00
 
-        self._rank[rank] = daterange
+            Args:
+                dateranges (list): List of strings
+            Returns:
+                list: List of dateranges with overlapping ranges combined
+        """
+        from itertools import tee
+        from collections import defaultdict
+        # We want to ensure there are no duplciates
+        dateranges = list(set(dateranges))
+        dateranges.sort()
+
+        daterange_objects = [self.daterange_from_str(x) for x in dateranges]
+
+        def pairwise(iterable):
+            a, b = tee(iterable)
+            next(b, None)
+            return zip(a, b)
+
+        # We want lists of dateranges to combine
+        groups = defaultdict(list)
+        # A group_n of dateranges that overlap
+        group_n = 0
+        # Do a pairwise comparison
+        # "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+        for a, b in pairwise(daterange_objects):
+            if len(a.intersection(b)) > 0:
+                groups[group_n].append(a)
+                groups[group_n].append(b)
+            else:
+                # If the first pair don't match we want to keep both but
+                # have them in separate groups
+                if group_n == 0:
+                    groups[group_n].append(a)
+                    group_n += 1
+                    groups[group_n].append(b)
+                    continue
+
+                # Otherwise increment the group number and just keep the second of the pair
+                # The first of the pair was a previous second so will have been saved in the
+                # last iteration
+                group_n += 1
+                groups[group_n].append(b)
+
+        # Now we need to combine each group into a single daterange
+        combined_dateranges = []
+        for group_number, daterange_list in groups.items():
+            combined = daterange_list[0].union_many(daterange_list[1:])
+            combined_dateranges.append(combined)
+
+        # Conver the dateranges backt to strings for storing
+        combined_dateranges = [self.daterange_to_str(x) for x in combined_dateranges]
+
+        return combined_dateranges
+
+    def daterange_to_str(self, daterange):
+        """ Takes a pandas DatetimeIndex created by pandas date_range converts it to a
+            string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00
+
+            Args:
+                daterange (pandas.DatetimeIndex)
+            Returns:
+                str: Daterange in string format
+        """
+        start = str(daterange[0]).replace(" ", "-")
+        end = str(daterange[-1]).replace(" ", "-")
+
+        return "_".join([start, end])
 
     def split_datrange_str(self, daterange_str):
         """ Split a daterange string to the component start and end
