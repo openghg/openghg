@@ -788,25 +788,36 @@ class Datasource:
     def set_rank(self, rank, daterange):
         """ Set the rank of this Datsource. This allows users to select
             the best data for a specific species at a site. By default
-            a Datasource is unranked with a value of 0
+            a Datasource is unranked with a value of 0. The highest rank is 1 and the lowest 10.
+
+            TODO - add a check to ensure multiple ranks aren't set for the same daterange
 
             Args:   
-                rank (int): Rank number where -1 is no rank and 1 is the highest
+                rank (int): Rank number between 0 and 10.
                 daterange (str): Daterange in the form of a string 2019-01-01T00:00:00_2019-12-31T00:00:00
             Returns:
                 None
         """
         rank = int(rank)
 
-        if 0 <= rank <= 10:
+        if not 0 <= rank <= 10:
             raise TypeError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
 
-        rank = str(rank)
-
-        self._rank[rank].append(daterange)
-
         if rank in self._rank:
+            self._rank[rank].append(daterange)
             self._rank[rank] = self.combine_dateranges(self._rank[rank])
+        else:
+            self._rank[rank].append(daterange)
+
+    def date_already_ranked(daterange):
+        """ Check if a rank has already been set for this daterange
+
+            Args:
+                daterange (pandas.DatetimeIndex): Daterange
+            Returns:
+                bool: True if already ranked
+        """
+        raise NotImplementedError()
 
     def combine_dateranges(self, dateranges):
         """ Checks a list of daterange strings for overlapping and combines
@@ -911,11 +922,25 @@ class Datasource:
 
             Args:
                 daterange (str): Daterange string of the format
-
             Returns:
-                int: Rank of data
+                dict: Dictionary of
         """
-        raise NotImplementedError()
+        # Need to search ranks in descending order
+        # If we don't have a rank return 9
+        if not self._rank:
+            return 0
+
+        daterange = self.daterange_from_str(daterange)
+
+        results = {}
+
+        for rank, dateranges in self._rank.items():
+            for d in dateranges:
+                intersection = d.intersection(daterange)
+                if len(d.intersection(daterange)) > 0:
+                    results[rank] = self.daterange_to_str(intersection)
+
+        return results
 
     def data_type(self):
         """ Returns the data type held by this Datasource

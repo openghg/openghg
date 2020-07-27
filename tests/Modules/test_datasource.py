@@ -331,3 +331,35 @@ def test_search_metadata():
 
     assert d.search_metadata("beans") == False
     assert d.search_metadata("flamingo") == False
+
+def test_set_rank():
+    d = Datasource()    
+
+    daterange = "2027-08-01-00:00:00_2027-12-01-00:00:00"
+
+    d.set_rank(rank=1, daterange=daterange)
+
+    assert d._rank[1] == ['2027-08-01-00:00:00_2027-12-01-00:00:00']
+
+def test_set_incorrect_rank_raises():
+    d = Datasource()    
+
+    daterange = "2027-08-01-00:00:00_2027-12-01-00:00:00"
+
+    with pytest.raises(TypeError):
+        d.set_rank(rank=42, daterange=daterange)
+
+def test_setting_overlapping_dateranges():
+    d = Datasource()    
+
+    daterange = "2027-08-01-00:00:00_2027-12-01-00:00:00"
+
+    d.set_rank(rank=1, daterange=daterange)
+    
+    assert d._rank[1] == ['2027-08-01-00:00:00_2027-12-01-00:00:00']
+
+    daterange_two = "2027-11-01-00:00:00_2028-06-01-00:00:00"
+
+    d.set_rank(rank=1, daterange=daterange_two)
+    
+    assert d._rank[1] == ['2027-08-01-00:00:00+00:00_2028-06-01-00:00:00+00:00']
