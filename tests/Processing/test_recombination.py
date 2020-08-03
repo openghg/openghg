@@ -36,7 +36,7 @@ def test_recombination_CRDS():
     crds = CRDS.load()
 
     # filename = "bsd.picarro.1minute.248m.dat"
-    filename = "hfd.picarro.1minute.100m_min.dat"
+    filename = "hfd.picarro.1minute.100m.min.dat"
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
     filepath = os.path.join(dir_path, test_data, filename)

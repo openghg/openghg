@@ -17,16 +17,20 @@ class Search:
         wallet = Wallet()
         self._service = wallet.get_service(service_url=f"{self._service_url}/hugs")
 
-    def search(
-        self, search_terms, locations, data_type, start_datetime=None, end_datetime=None
-    ):
+    def search(self, species, locations, data_type, inlet=None, instrument=None, start_datetime=None, end_datetime=None):
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
         args = {}
-        args["search_terms"] = search_terms
+        args["species"] = species
         args["locations"] = locations
         args["data_type"] = data_type
+
+        if inlet is not None:
+            args["inlet"] = inlet
+
+        if instrument is not None:
+            args["instrument"] = instrument
 
         if start_datetime:
             args["start_datetime"] = datetime_to_string(start_datetime)
@@ -76,7 +80,7 @@ class Search:
             response_data[key] = json.loads(response_data[key])
 
         datasets = {}
-        # TODO - find a better way of doing this, returning binary data would be far better
+        # TODO - find a better way of doing this, returning compressed binary data would be far better
         for key in response_data:
             # We need to convert the datetime string back to datetime objects here
             datetime_data = response_data[key]["coords"]["time"]["data"]

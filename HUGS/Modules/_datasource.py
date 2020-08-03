@@ -569,47 +569,6 @@ class Datasource:
         data = get_object_json(bucket=bucket, key=key)
         return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
 
-    @staticmethod
-    def _get_name_from_uid(bucket, uuid):
-        """ Returns the name of the Datasource associated with
-            the passed UID
-
-            Args:
-                bucket (dict): Bucket holding data
-                name (str): Name to search
-            Returns:
-                str: UUID for the Datasource
-        """
-        from HUGS.ObjectStore import get_dated_object_json
-
-        key = f"{Datasource._datasource_root}/uuid/{uuid}"
-        data = get_dated_object_json(bucket=bucket, key=key)
-
-        return data["name"]
-
-    @staticmethod
-    def _get_uid_from_name(bucket, name):
-        """ Returns the UUID associated with this named Datasource
-
-            Args:
-                bucket (dict): Bucket holding data
-                name (str): Name to search
-            Returns:
-                str: UUID for the Datasource
-        """
-        from Acquire.ObjectStore import ObjectStore, string_to_encoded
-
-        encoded_name = string_to_encoded(name)
-        prefix = f"{Datasource._datasource_root}/name/{encoded_name}"
-        uuid = ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
-
-        if len(uuid) > 1:
-            raise ValueError(
-                "There should only be one Datasource associated with this name"
-            )
-
-        return uuid[0].split("/")[-1]
-
     def version_data(self):
         """ Check the version of the data passed and and check what we want
             to do.
@@ -713,6 +672,34 @@ class Datasource:
         # Otherwise there should be at least a True in results
         else:
             return True in results
+
+    def in_daterange(self, start_date, end_date):
+        """ Return the keys for data within the specified daterange
+
+            Args:
+                daterange (str): Daterange string
+            Return:
+                list: List of keys to data
+        """
+        from Acquire.ObjectStore import string_to_datetime
+
+        data_keys = self._data_keys["latest"]["keys"]
+
+        in_date = []
+        for key in data_keys:
+            end_key = key.split("/")[-1]
+            dates = end_key.split("_")
+
+            if len(dates) > 2:
+                raise ValueError("Invalid date string")
+
+            start_key = string_to_datetime(dates[0])
+            end_key = string_to_datetime(dates[1])
+
+            if start_key >= start_date and end_key <= end_date:
+                in_date.append(key)
+
+        return in_date
 
     def species(self):
         """ Returns the species of this Datasource
@@ -833,7 +820,8 @@ class Datasource:
         """
         from itertools import tee
         from collections import defaultdict
-        # We want to ensure there are no duplciates
+
+        # Ensure there are no duplciates and the dateranges are sorted
         dateranges = list(set(dateranges))
         dateranges.sort()
 

@@ -12,14 +12,19 @@ def search(args):
     else:
         end_datetime = None
 
-    search_terms = args["search_terms"]
+    species = args["species"]
     locations = args["locations"]
     data_type = args["data_type"]
 
+    inlet = args.get("inlet")
+    instrument = args.get("instrument")
+
     results = hugs_search(
-        search_terms=search_terms,
+        species=species,
         locations=locations,
         data_type=data_type,
+        inlet=inlet,
+        instrument=instrument,
         start_datetime=start_datetime,
         end_datetime=end_datetime,
     )

@@ -6,7 +6,7 @@ from HUGS.Processing import read_metadata
 
 
 def test_parse_CRDS():
-    filename = "hfd.picarro.1minute.100m_min.dat"
+    filename = "hfd.picarro.1minute.100m.min.dat"
 
     filepath = (
         Path(__file__)

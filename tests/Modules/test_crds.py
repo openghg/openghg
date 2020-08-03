@@ -29,7 +29,7 @@ mpl_logger.setLevel(logging.WARNING)
 def hfd_filepath():
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
-    filename = "hfd.picarro.1minute.100m_min.dat"
+    filename = "hfd.picarro.1minute.100m.min.dat"
 
     filepath = os.path.join(dir_path, test_data, filename)
 
@@ -41,7 +41,7 @@ def crds():
     get_local_bucket(empty=True)
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
-    filename = "hfd.picarro.1minute.100m_min.dat"
+    filename = "hfd.picarro.1minute.100m.min.dat"
 
     filepath = os.path.join(dir_path, test_data, filename)
     CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m", site="hfd")
@@ -127,7 +127,7 @@ def test_data_persistence(crds):
 def test_seen_before_raises():
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
-    filename = "hfd.picarro.1minute.100m_min.dat"
+    filename = "hfd.picarro.1minute.100m.min.dat"
 
     filepath = os.path.join(dir_path, test_data, filename)
     get_local_bucket(empty=True)
@@ -147,7 +147,7 @@ def test_seen_before_raises():
 def test_seen_before_overwrite():
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/CRDS"
-    filename = "hfd.picarro.1minute.100m_min.dat"
+    filename = "hfd.picarro.1minute.100m.min.dat"
 
     filepath = os.path.join(dir_path, test_data, filename)
     get_local_bucket(empty=True)
@@ -182,7 +182,7 @@ def test_to_data(crds):
 
     assert data["stored"] is False
     assert sorted(data["datasource_names"]) == sorted(datasource_names)
-    assert list(data["file_hashes"].values()) == ["hfd.picarro.1minute.100m_min.dat"]
+    assert list(data["file_hashes"].values()) == ["hfd.picarro.1minute.100m.min.dat"]
 
 
 def test_from_data(crds):
