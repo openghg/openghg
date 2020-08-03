@@ -52,7 +52,7 @@ def test_retrieve(authenticated_user, crds):
     search_obj = Search(service_url="hugs")
 
     search_results = search_obj.search(
-        search_terms=search_term, locations=location, data_type=data_type
+        species=search_term, locations=location, data_type=data_type
     )
 
     key = list(search_results.keys())[0]

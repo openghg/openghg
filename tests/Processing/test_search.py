@@ -65,7 +65,7 @@ def test_search_GC():
     )
 
     results = search(
-        search_terms=["NF3"],
+        species=["NF3"],
         locations=locations,
         data_type=data_type,
         require_all=False,
@@ -91,7 +91,7 @@ def test_search_GC():
 
 
 def test_location_search(crds_read):
-    search_terms = ["co2", "ch4"]
+    species = ["co2", "ch4"]
     locations = ["bsd", "hfd", "tac"]
 
     data_type = "CRDS"
@@ -99,7 +99,7 @@ def test_location_search(crds_read):
     end = None  # get_datetime(year=2017, month=1, day=1)
 
     results = search(
-        search_terms=search_terms,
+        species=species,
         locations=locations,
         data_type=data_type,
         require_all=False,
@@ -132,11 +132,11 @@ def test_location_search(crds_read):
 
 def test_search_no_search_terms(crds_read):
     data_type = "CRDS"
-    search_terms = []
+    species = []
     locations = ["bsd"]
 
     results = search(
-        search_terms=search_terms,
+        species=species,
         locations=locations,
         data_type=data_type,
         require_all=False,
@@ -191,11 +191,11 @@ def test_search_no_search_terms(crds_read):
 
 def test_search_no_locations(crds_read):
     data_type = "CRDS"
-    search_terms = ["ch4"]
+    species = ["ch4"]
     locations = []
 
     results = search(
-        search_terms=search_terms,
+        species=species,
         locations=locations,
         data_type=data_type,
         require_all=False,
@@ -250,14 +250,14 @@ def test_search_no_locations(crds_read):
 
 def test_search_datetimes():
     data_type = "CRDS"
-    search_terms = ["co2"]
+    species = ["co2"]
     locations = ["bsd"]
 
     start = get_datetime(year=2016, month=1, day=1)
     end = get_datetime(year=2017, month=1, day=1)
 
     results = search(
-        search_terms=search_terms,
+        species=species,
         locations=locations,
         data_type=data_type,
         require_all=False,
@@ -300,14 +300,14 @@ def test_search_datetimes():
 
 def test_search_require_all():
     data_type = "CRDS"
-    search_terms = ["co2", "picarro", "108m"]
+    species = ["co2", "picarro", "108m"]
     locations = ["bsd"]
 
     start = get_datetime(year=2016, month=1, day=1)
     end = get_datetime(year=2017, month=1, day=1)
 
     results = search(
-        search_terms=search_terms,
+        species=species,
         locations=locations,
         data_type=data_type,
         require_all=True,
@@ -327,19 +327,19 @@ def test_search_require_all():
 
 def test_search_bad_datatype_raises():
     data_type = "foo"
-    search_terms = ["spam", "eggs", "terry"]
+    species = ["spam", "eggs", "terry"]
     locations = ["tintagel"]
 
     with pytest.raises(KeyError):
-        search(search_terms=search_terms, locations=locations, data_type=data_type)
+        search(species=species, locations=locations, data_type=data_type)
 
 
 def test_search_nonsense_terms():
     data_type = "CRDS"
-    search_terms = ["spam", "eggs", "terry"]
+    species = ["spam", "eggs", "terry"]
     locations = ["tintagel"]
 
-    results = search(search_terms=search_terms, locations=locations, data_type=data_type)
+    results = search(species=species, locations=locations, data_type=data_type)
 
     assert not results
 
@@ -352,7 +352,7 @@ def test_search_footprints():
     Footprint.read_file(filepath=filepath, source_name=source_name)
 
     data_type = "footprint"
-    search_terms = ["WAO"]
+    species = ["WAO"]
     locations = []
 
     expected_metadata = {
@@ -376,7 +376,7 @@ def test_search_footprints():
     }
 
     results = search(
-        search_terms=search_terms,
+        species=species,
         locations=locations,
         data_type=data_type,
         require_all=True,

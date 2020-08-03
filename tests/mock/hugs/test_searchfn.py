@@ -47,7 +47,7 @@ def test_search_bsd(load_crds):
     data_type = "CRDS"
 
     results = search.search(
-        search_terms=search_term, locations=location, data_type=data_type
+        species=search_term, locations=location, data_type=data_type
     )
 
     bsd_res = results["bsd_co_108m"]
@@ -76,7 +76,7 @@ def test_search_multispecies_singlesite(load_crds):
     data_type = "CRDS"
 
     results = search.search(
-        search_terms=search_term, locations=location, data_type=data_type
+        species=search_term, locations=location, data_type=data_type
     )
 
     assert list(results.keys()) == ["bsd_co_108m", "bsd_co2_108m"]
@@ -93,7 +93,7 @@ def test_search_multisite_co(load_crds):
     data_type = "CRDS"
 
     results = search.search(
-        search_terms=search_term, locations=location, data_type=data_type
+        species=search_term, locations=location, data_type=data_type
     )
 
     assert list(results.keys()) == ["bsd_co_108m", "hfd_co_100m"]
@@ -126,7 +126,7 @@ def test_search_multiplesite_multiplespecies(load_crds):
     data_type = "CRDS"
 
     results = search.search(
-        search_terms=search_term, locations=location, data_type=data_type
+        species=search_term, locations=location, data_type=data_type
     )
 
     assert sorted(list(results.keys())) == [
@@ -152,7 +152,7 @@ def test_returns_readable_results():
     search_term = ["ch4"]
     location = ["bsd"]
 
-    search.search(search_terms=search_term, locations=location, data_type="CRDS")
+    search.search(species=search_term, locations=location, data_type="CRDS")
 
     assert search.results() == {'bsd_ch4_108m': 'Daterange : 2014-01-30-13:33:30+00:00 - 2019-07-04-04:23:30+00:00'}
 
@@ -163,7 +163,7 @@ def test_search_download():
     search_term = ["ch4"]
     location = ["bsd"]
 
-    search.search(search_terms=search_term, locations=location, data_type="CRDS")
+    search.search(species=search_term, locations=location, data_type="CRDS")
 
     data = search.download("bsd_ch4_108m")
 
