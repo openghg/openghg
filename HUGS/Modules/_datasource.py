@@ -487,6 +487,8 @@ class Datasource:
                 None
         """
         import tempfile
+        from copy import deepcopy
+
         from Acquire.ObjectStore import (
             get_datetime_now_to_string,
             ObjectStore,
@@ -522,7 +524,7 @@ class Datasource:
 
             # Copy the last version
             if "latest" in self._data_keys:
-                self._data_keys[version_str] = self._data_keys["latest"].copy()
+                self._data_keys[version_str] = deepcopy(self._data_keys["latest"])
 
             # Save the new keys and create a timestamp
             self._data_keys[version_str]["keys"] = new_keys
@@ -687,6 +689,7 @@ class Datasource:
 
         in_date = []
         for key in data_keys:
+            
             end_key = key.split("/")[-1]
             dates = end_key.split("_")
 
@@ -902,33 +905,35 @@ class Datasource:
 
         return start, end
 
-    def get_rank(self, daterange):
+    def get_rank(self, start_date=None, end_date=None):
         """ Get the rank of this Datasource for the passed daterange
 
             Check how much of the data in this Datasource has which rank?
             Return a dictionary of the ranks and which dateranges these belong to?
 
             Args:
-                daterange (str): Daterange string of the format
+                start_date (datetime, default=None)
+                end_date (datetime, default=None)
             Returns:
-                dict: Dictionary of
+                int: Rank number
         """
+        from pandas import date_range
         # Need to search ranks in descending order
         # If we don't have a rank return 9
         if not self._rank:
             return 0
 
-        daterange = self.daterange_from_str(daterange)
+        if start_date is None and end_date is None:
+            return self._rank
 
-        results = {}
+        daterange = date_range(start=start_date, end=end_date)
 
         for rank, dateranges in self._rank.items():
             for d in dateranges:
-                intersection = d.intersection(daterange)
                 if len(d.intersection(daterange)) > 0:
-                    results[rank] = self.daterange_to_str(intersection)
+                    return rank
 
-        return results
+        return 0
 
     def data_type(self):
         """ Returns the data type held by this Datasource

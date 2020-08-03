@@ -46,9 +46,11 @@ def test_search_bsd(load_crds):
     location = "bsd"
     data_type = "CRDS"
 
-    results = search.search(
-        species=search_term, locations=location, data_type=data_type
-    )
+    results = search.search(species=search_term, locations=location, data_type=data_type)
+
+    print(results)
+
+    return False
 
     bsd_res = results["bsd_co_108m"]
 
