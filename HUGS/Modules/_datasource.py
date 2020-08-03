@@ -700,7 +700,7 @@ class Datasource:
             end_key = string_to_datetime(dates[1])
 
             if start_key >= start_date and end_key <= end_date:
-                in_date.append(key)
+                in_date.append(data_keys[key])
 
         return in_date
 
@@ -943,14 +943,21 @@ class Datasource:
         """
         return self._data_type
 
-    def data_keys(self):
+    def data_keys(self, version="latest"):
         """ Returns the object store keys where data related
             to this Datasource is stored
 
+            Args:
+                version (str, default="latest"): Version of keys to get
             Returns:
-                dict: Dictionary keyed as key: daterange covered by key
+                list: List of data keys
         """
-        return self._data_keys
+        try:
+            keys = [v for k, v in self._data_keys[version]["keys"].items()]
+        except KeyError:
+            raise KeyError(f"Invalid version, valid versions {list(self._data_keys.keys())}")
+
+        return keys
 
     def versions(self):
         """ Return a summary of the versions of data stored for
