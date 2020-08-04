@@ -41,7 +41,7 @@ def get_sources(args):
         if d.rank():            
             return d.rank()
         else:
-            return -1
+            return 0
 
     # Need to easily rank the datasources for this species and site - how to label them?
     # We only need to set a rank of 1 for a specific daterange otherwise we'll consider it unranked

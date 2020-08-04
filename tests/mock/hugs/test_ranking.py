@@ -42,13 +42,11 @@ def test_get_sources(authenticated_user, load_crds):
     r = RankSources(service_url="hugs")
     sources = r.get_sources(site="hfd", species="co2", data_type="CRDS")
 
-    # original_sources = copy.deepcopy(sources)
-
     del sources["hfd_co2_100m"]["uuid"]
     del sources["hfd_co2_50m"]["uuid"]
 
-    expected_sources = {'hfd_co2_100m': {'rank': -1, 'daterange': '2013-12-04T14:02:30_2019-05-21T15:46:30'}, 
-                        'hfd_co2_50m': {'rank': -1, 'daterange': '2013-11-23T12:28:30_2020-06-24T09:41:30'}}
+    expected_sources = {'hfd_co2_100m': {'rank': 0, 'daterange': '2013-12-04T14:02:30_2019-05-21T15:46:30'}, 
+                        'hfd_co2_50m': {'rank': 0, 'daterange': '2013-11-23T12:28:30_2020-06-24T09:41:30'}}
 
     assert sources == expected_sources
 
@@ -66,8 +64,8 @@ def test_set_ranking(authenticated_user, load_crds):
     del sources["hfd_ch4_100m"]["uuid"]
     del sources["hfd_ch4_50m"]["uuid"]
 
-    expected_sources = {'hfd_ch4_100m': {'rank': -1, 'daterange': '2013-12-04T14:02:30_2019-05-21T15:46:30'}, 
-                        'hfd_ch4_50m': {'rank': -1, 'daterange': '2013-11-23T12:28:30_2020-06-24T09:41:30'}}
+    expected_sources = {'hfd_ch4_100m': {'rank': 0, 'daterange': '2013-12-04T14:02:30_2019-05-21T15:46:30'}, 
+                        'hfd_ch4_50m': {'rank': 0, 'daterange': '2013-11-23T12:28:30_2020-06-24T09:41:30'}}
 
     assert sources == expected_sources
 
@@ -78,4 +76,10 @@ def test_set_ranking(authenticated_user, load_crds):
 
     sources = r.get_sources(site="hfd", species="ch4", data_type="CRDS")
 
-    assert sources == new_rankings
+    del sources["hfd_ch4_100m"]["uuid"]
+    del sources["hfd_ch4_50m"]["uuid"]
+
+    assert sources == {'hfd_ch4_100m': {'rank': {'1': ['2013-12-04T14:02:30_2019-05-21T15:46:30']}, 
+                        'daterange': '2013-12-04T14:02:30_2019-05-21T15:46:30'}, 
+                        'hfd_ch4_50m': {'rank': {'2': ['2013-11-23T12:28:30_2020-06-24T09:41:30']}, 
+                        'daterange': '2013-11-23T12:28:30_2020-06-24T09:41:30'}}

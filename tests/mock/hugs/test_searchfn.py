@@ -1,8 +1,10 @@
 import os
 import pytest
+from datetime import datetime
+
 from Acquire.Client import Service
 
-from HUGS.Client import Process, Search
+from HUGS.Client import Process, RankSources, Search
 
 
 @pytest.fixture(scope="session")
@@ -38,6 +40,33 @@ def load_crds(authenticated_user):
         storage_url="storage",
     )
 
+@pytest.fixture(scope="session")
+def load_two_crds(authenticated_user):
+    hugs = Service(service_url="hugs")
+    _ = hugs.call_function(function="clear_datasources", args={})
+
+    def test_folder(filename):
+        dir_path = os.path.dirname(__file__)
+        test_folder = "../../../tests/data/search_data"
+        return os.path.join(dir_path, test_folder, filename)
+
+    files = [
+        "bsd.picarro5310.1minute.108m.min.dat",
+        "bsd.picarro5310.1minute.248m.min.dat"
+    ]
+
+    filepaths = [test_folder(f) for f in files]
+
+    process = Process(service_url="hugs")
+
+    process.process_files(
+        user=authenticated_user,
+        files=filepaths,
+        data_type="CRDS",
+        hugs_url="hugs",
+        storage_url="storage",
+    )
+
 
 def test_search_bsd(load_crds):
     search = Search(service_url="hugs")
@@ -48,11 +77,7 @@ def test_search_bsd(load_crds):
 
     results = search.search(species=search_term, locations=location, data_type=data_type)
 
-    print(results)
-
-    return False
-
-    bsd_res = results["bsd_co_108m"]
+    bsd_res = results["co_bsd"]
 
     del bsd_res["metadata"]["source_name"]
 
@@ -60,6 +85,7 @@ def test_search_bsd(load_crds):
         "site": "bsd",
         "instrument": "picarro",
         "time_resolution": "1_minute",
+        "inlet": "108m",
         "height": "108m",
         "port": "9",
         "type": "air",
@@ -68,6 +94,44 @@ def test_search_bsd(load_crds):
     }
 
     assert bsd_res["metadata"] == expected_metadata
+
+
+def test_search_and_rank(load_two_crds):
+    # First we need to rank the data
+    r = RankSources(service_url="hugs")
+    sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
+
+    uuid_108m = sources['bsd_co_108m']["uuid"]
+    uuid_248m = sources['bsd_co_248m']["uuid"]
+    
+    del sources['bsd_co_108m']["uuid"]
+    del sources['bsd_co_248m']["uuid"]
+
+    assert sources == {'bsd_co_108m': {'rank': 0, 'daterange': '2019-03-06T14:03:30_2020-07-04T11:44:30'}, 'bsd_co_248m': {'rank': 0, 'daterange': '2019-03-06T13:23:30_2020-07-05T03:38:30'}}
+
+    daterange_108 = r.create_daterange(start=datetime(2019,3,7), end=datetime(2019,9,15))
+    daterange_248 = r.create_daterange(start=datetime(2019,9,16), end=datetime(2020,7,5))
+
+    new_rankings = {'bsd_co_108m': {'rank': 1, 'daterange': daterange_108 , 'uuid': uuid_108m}, 
+                    'bsd_co_248m': {'rank': 1, 'daterange': daterange_248, 'uuid': uuid_248m}}
+
+    r.rank_sources(updated_rankings=new_rankings)
+
+    updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
+
+    # Now we need to search for the data and ensure we get the correct datasets
+
+    search = Search(service_url="hugs")
+
+    species = "co"
+    location = "bsd"
+    data_type = "CRDS"
+
+    results = search.search(species=species, locations=location, data_type=data_type)
+
+    print(results)
+    
+
 
 
 def test_search_multispecies_singlesite(load_crds):
@@ -81,7 +145,7 @@ def test_search_multispecies_singlesite(load_crds):
         species=search_term, locations=location, data_type=data_type
     )
 
-    assert list(results.keys()) == ["bsd_co_108m", "bsd_co2_108m"]
+    assert list(results.keys()) == ["bsd_co_108m", "bsd_co_108m"]
 
     assert len(results["bsd_co_108m"]["keys"]) == 23
     assert len(results["bsd_co_108m"]["keys"]) == 23
@@ -133,7 +197,7 @@ def test_search_multiplesite_multiplespecies(load_crds):
 
     assert sorted(list(results.keys())) == [
         "bsd_ch4_108m",
-        "bsd_co2_108m",
+        "bsd_co_108m",
         "hfd_ch4_100m",
         "hfd_co2_100m",
         "tac_ch4_100m",
@@ -143,7 +207,7 @@ def test_search_multiplesite_multiplespecies(load_crds):
     assert len(results["bsd_ch4_108m"]["keys"]) == 23
     assert len(results["hfd_ch4_100m"]["keys"]) == 25
     assert len(results["tac_ch4_100m"]["keys"]) == 30
-    assert len(results["bsd_co2_108m"]["keys"]) == 23
+    assert len(results["bsd_co_108m"]["keys"]) == 23
     assert len(results["hfd_co2_100m"]["keys"]) == 25
     assert len(results["tac_co2_100m"]["keys"]) == 30
 

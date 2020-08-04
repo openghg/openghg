@@ -177,13 +177,14 @@ def search(
 
     # Next we search these keys for the search terms we require
     # keys = defaultdict(dict)
-    
+
     if data_type != "FOOTPRINT":
         for location, sources in location_sources.items():
             # Loop over and look for the species
             species_data = defaultdict(list)
             for datasource in sources:
                 for s in species:
+                    # Check the species and the daterange
                     if datasource.search_metadata(search_terms=s):
                         species_data[s].append(datasource)
 
@@ -194,23 +195,43 @@ def search(
                     source = sources[0]
                 # Otherwise find the highest ranked source
                 else:
+                    # Check which sources have the data we want and which has the highest rank
+                    # How to deal with multiple sources being used?
+                    # Find the rank of each source for each daterange
+                    # Get the highest ranked sources and find their overlap
+                    # If we have multiple sources with the same rank at this site we select the dateranges within our searched-for
+                    # daterange and extract that data.
+                    # When we get multipe ones - read the daterange that covers
+                    # get_rank can return the rank: start_end daterange so data can then be read 
+                    # Can use a get_keys data to get only the keys for the daterange we want from the Datasource
+                    #
+                    # 
                     ranked_sources = {}
                     for s in sources:
                         rank = s.get_rank(start_date=start_datetime, end_date=end_datetime)
                         ranked_sources[rank] = s
+                        # Use the uuid
+                        # ranked_sources[s.uuid()] = {"rank": rank, "source": s}
+
+                        
+                        
+                        # So here as they both have a rank of 1 at different dateranges we can't just store them like this
+                        # Need to be able to differentiate between the different sources that are ranked the same over different dateranges
+                        
                     
+                    
+
                     # If they're all unranked we'll only have one zero key
                     # Need to differentiate between the keys by getting their inlet and
                     # adding that to the results key
                     if list(ranked_sources.keys()) == [0]:
-                        # Add the sources - if they're unranked return them all
                         for s in sources:
                             key = f"{sp}_{location}_{s.inlet()}"
                             in_date = source.in_daterange(start_date=start_datetime, end_date=end_datetime)
 
                             results[key]["keys"] = in_date
                             results[key]["metadata"] = source.metadata()
-                        
+
                         # As we've got all the sources here we can skip the rest of this loop
                         continue    
                     else:

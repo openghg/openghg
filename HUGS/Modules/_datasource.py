@@ -456,6 +456,7 @@ class Datasource:
                 Datasource: Datasource created from JSON
         """
         from Acquire.ObjectStore import string_to_datetime
+        from collections import defaultdict
 
         d = Datasource()
         d._uuid = data["UUID"]
@@ -467,7 +468,7 @@ class Datasource:
         d._data = {}
         d._data_type = data["data_type"]
         d._latest_version = data["latest_version"]
-        d._rank = data["rank"]
+        d._rank = defaultdict(list, data["rank"])
 
         if d._stored and not shallow:
             for date_key in d._data_keys["latest"]["keys"]:
@@ -930,6 +931,7 @@ class Datasource:
 
         for rank, dateranges in self._rank.items():
             for d in dateranges:
+                d = self.daterange_from_str(d)
                 if len(d.intersection(daterange)) > 0:
                     return rank
 

@@ -20,7 +20,7 @@ def rank_sources(args):
         daterange = ranking_data[r]["daterange"]
 
         # If a Datasource is left as unranked, ignore it
-        if rank == -1:
+        if rank == 0:
             continue
 
         datasource = Datasource.load(uuid=uuid, shallow=True)
