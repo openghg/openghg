@@ -1,4 +1,5 @@
-from HUGS.Modules import Datasource
+from HUGS.Processing import DataTypes
+from HUGS.Util import load_object
 
 
 def rank_sources(args):
@@ -14,17 +15,21 @@ def rank_sources(args):
     except KeyError:
         raise KeyError("No ranking data passed")
 
+    try:
+        data_type = DataTypes[args["data_type"].upper()].name
+    except KeyError:
+        raise KeyError(f"Data type must be specified. Valid options are: {[e.value for e in DataTypes]}")
+
+    data_obj = load_object(class_name=data_type)
+
     for r in ranking_data:
-        uuid = ranking_data[r]["uuid"]
         rank = ranking_data[r]["rank"]
-        daterange = ranking_data[r]["daterange"]
 
         # If a Datasource is left as unranked, ignore it
         if rank == 0:
             continue
 
-        datasource = Datasource.load(uuid=uuid, shallow=True)
+        uuid = ranking_data[r]["uuid"]
+        daterange = ranking_data[r]["daterange"]
 
-        datasource.set_rank(rank=rank, daterange=daterange)
-
-        datasource.save()
+        data_obj.set_rank(uuid=uuid, rank=rank, daterange=daterange)

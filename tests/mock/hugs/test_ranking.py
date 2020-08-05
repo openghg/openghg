@@ -72,7 +72,7 @@ def test_set_ranking(authenticated_user, load_crds):
     new_rankings = {'hfd_ch4_100m': {'rank': 1, 'daterange': '2013-12-04T14:02:30_2019-05-21T15:46:30', 'uuid': hundred_metre_uuid}, 
                     'hfd_ch4_50m': {'rank': 2, 'daterange': '2013-11-23T12:28:30_2020-06-24T09:41:30', 'uuid': fifty_metre_uuid}}
 
-    r.rank_sources(updated_rankings=new_rankings)
+    r.rank_sources(updated_rankings=new_rankings, data_type="CRDS")
 
     sources = r.get_sources(site="hfd", species="ch4", data_type="CRDS")
 

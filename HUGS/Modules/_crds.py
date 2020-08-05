@@ -14,6 +14,7 @@ class CRDS(BaseModule):
 
     def __init__(self):
         from Acquire.ObjectStore import get_datetime_now
+        from collections import defaultdict
 
         self._creation_datetime = get_datetime_now()
         self._stored = False
@@ -28,6 +29,9 @@ class CRDS(BaseModule):
         self._crds_params = {}
         # Sampling period of CRDS data in seconds
         self._sampling_period = 60
+        # Store the ranking data for all CRDS measurements
+        # Keyed by UUID
+        self._rank_data = defaultdict(dict)
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -44,6 +48,7 @@ class CRDS(BaseModule):
         data["datasource_uuids"] = self._datasource_uuids
         data["datasource_names"] = self._datasource_names
         data["file_hashes"] = self._file_hashes
+        data["rank_data"] = self._rank_data
 
         return data
 
@@ -61,12 +66,10 @@ class CRDS(BaseModule):
         if bucket is None:
             bucket = get_bucket()
 
-        crds_key = "%s/uuid/%s" % (CRDS._root, CRDS._uuid)
+        crds_key = f"{CRDS._root}/uuid/{CRDS._uuid}"
 
         self._stored = True
-        ObjectStore.set_object_from_json(
-            bucket=bucket, key=crds_key, data=self.to_data()
-        )
+        ObjectStore.set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
 
     @staticmethod
     def read_folder(folder_path):
@@ -97,9 +100,7 @@ class CRDS(BaseModule):
         return results
 
     @staticmethod
-    def read_file(
-        data_filepath, source_name=None, site=None, source_id=None, overwrite=False
-    ):
+    def read_file(data_filepath, source_name=None, site=None, source_id=None, overwrite=False):
         """ Creates a CRDS object holding data stored within Datasources
 
             Args:
@@ -154,20 +155,6 @@ class CRDS(BaseModule):
             source_name=source_name,
             source_id=source_id,
         )
-
-        # If we're passed a source name or source id check it against the records of current CRDS data
-        # Update the Datasource records for CRDS and make it a dictionary where
-        # our given source name and the species name are the key
-        # Will have to update the search functionality to take this into account
-
-        # Get the given source name or id
-        # Read in the data and make a key of sourcename_species and check the dict
-        # Have two dicts for each type, one keyed by uuid and the other by name
-        # Update the search to take this into account from the object
-        # Can just load the keys of the UUID keyed dict in instead of the list of UUIDs
-        # when loading Datasources
-
-        # Must add the new dicts name_records and uuid_records to the data, load and save fns
 
         # Create Datasources, save them to the object store and get their UUIDs
         # Change this to assign_data
@@ -314,6 +301,48 @@ class CRDS(BaseModule):
             )
 
         return data
+
+    def set_rank(self, uuid, rank, daterange):
+        """ Set the rank of a Datasource associated with this object.
+
+            This function performs checks to ensure multiple ranks aren't set for
+            overlapping dateranges.
+
+            Passing a daterange and rank to this function will overwrite any current 
+            daterange stored for that rank.
+
+            Args:
+                uuid (str): UUID of Datasource
+                rank (int): Rank of data
+                daterange (str): Daterange
+            Returns:
+                None
+        """
+        from HUGS.Modules import Datasource
+        from HUGS.Util import daterange_from_str
+
+        try:
+            rank_data = self._rank_data[uuid]
+
+            # Check we don't have any overlapping dateranges for other ranks
+            daterange_obj = daterange_from_str(daterange)
+
+            # Check the other dateranges for overlapping dates and raise error
+            for existing_rank, existing_daterange in rank_data.items():
+                existing_daterange = daterange_from_str(daterange_obj)
+                intersection = daterange_obj.intersection(existing_daterange)
+                if len(intersection) > 0 and existing_rank != rank:
+                    raise ValueError(f"This datasource has already got the rank {existing_rank} for dates that overlap the ones given. \
+                                        Overlapping dates are {intersection}")
+        except KeyError:
+            pass
+
+        # Store the rank within the Datasource - is this needed?
+        datasource = Datasource.load(uuid=uuid, shallow=True)
+        datasource.set_rank(rank=rank, daterange=daterange)
+        datasource.save()
+
+        self._rank_data[uuid].update({rank: daterange})
 
     def site_attributes(self, site, inlet):
         """ Gets the site specific attributes for writing to Datsets

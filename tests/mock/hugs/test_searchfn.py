@@ -103,7 +103,7 @@ def test_search_and_rank(load_two_crds):
 
     uuid_108m = sources['bsd_co_108m']["uuid"]
     uuid_248m = sources['bsd_co_248m']["uuid"]
-    
+
     del sources['bsd_co_108m']["uuid"]
     del sources['bsd_co_248m']["uuid"]
 
@@ -115,7 +115,7 @@ def test_search_and_rank(load_two_crds):
     new_rankings = {'bsd_co_108m': {'rank': 1, 'daterange': daterange_108 , 'uuid': uuid_108m}, 
                     'bsd_co_248m': {'rank': 1, 'daterange': daterange_248, 'uuid': uuid_248m}}
 
-    r.rank_sources(updated_rankings=new_rankings)
+    r.rank_sources(updated_rankings=new_rankings, data_type="CRDS")
 
     updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 

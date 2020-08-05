@@ -6,12 +6,11 @@ from enum import Enum
 
 __all__ = [
     "get_data",
-    "in_daterange",
     "daterange_to_string",
     "daterange_to_string",
     "search",
     "lookup_gas_datasources",
-    "lookup_footprintDatasources",
+    "lookup_footprint_datasources",
 ]
 
 
@@ -62,9 +61,7 @@ def search(
     from HUGS.ObjectStore import get_object_names
     from HUGS.ObjectStore import get_bucket
     from HUGS.Modules import Datasource
-    from HUGS.Util import get_datetime_epoch
-    from HUGS.Util import get_datetime_now
-    from HUGS.Util import load_object
+    from HUGS.Util import get_datetime_now, get_datetime_epoch, daterange_from_datetimes, load_object
 
     from collections import defaultdict as defaultdict
 
@@ -140,8 +137,10 @@ def search(
                 raise TypeError("Error - multiple sources found for this inlet and instrument")
 
             match = matching[0]
+
+            daterange_str = daterange_from_datetimes(start=start_datetime, end=end_datetime)
             # Get the data keys for the data in the matching daterange
-            in_date = match.in_daterange(start_datetime, end_datetime)
+            in_date = match.in_daterange(daterane=daterange_str)
 
             key = f"{site}_{species}_{instrument}_{inlet}"
             # Find the keys that match the correct data
@@ -188,63 +187,37 @@ def search(
                     if datasource.search_metadata(search_terms=s):
                         species_data[s].append(datasource)
 
-            # Loop over the species again to check their ranks
+            # For each location we want to find the highest ranking sources for the selected species
             for sp, sources in species_data.items():
-                # If we only have one source for this species use that
-                if len(sources) == 1:
-                    source = sources[0]
-                # Otherwise find the highest ranked source
-                else:
-                    # Check which sources have the data we want and which has the highest rank
-                    # How to deal with multiple sources being used?
-                    # Find the rank of each source for each daterange
-                    # Get the highest ranked sources and find their overlap
-                    # If we have multiple sources with the same rank at this site we select the dateranges within our searched-for
-                    # daterange and extract that data.
-                    # When we get multipe ones - read the daterange that covers
-                    # get_rank can return the rank: start_end daterange so data can then be read 
-                    # Can use a get_keys data to get only the keys for the daterange we want from the Datasource
-                    #
-                    # 
-                    ranked_sources = {}
-                    for s in sources:
-                        rank = s.get_rank(start_date=start_datetime, end_date=end_datetime)
-                        ranked_sources[rank] = s
-                        # Use the uuid
-                        # ranked_sources[s.uuid()] = {"rank": rank, "source": s}
+                ranked_sources = {}
 
-                        
-                        
-                        # So here as they both have a rank of 1 at different dateranges we can't just store them like this
-                        # Need to be able to differentiate between the different sources that are ranked the same over different dateranges
-                        
-                    
+                for s in sources:
+                    rank_data = s.get_rank(start_date=start_datetime, end_date=end_datetime)
+                    # Just get the highest ranked datasources and return them
+                    # Find the highest ranked data from this site
+                    highest_rank = sorted(rank_data.keys())[-1]
+
+                    # Get highest rank, get the daterange that covers and then save it as daterange: datasource ? 
+                    daterange_covered = rank_data[highest_rank]
+
+                    ranked_sources[daterange_covered] = s
+
+                # If it's all zeroes we want to return all sources
+                if set(ranked_sources) == {0}:
+                    ranked_sources = sources
+
+                for daterange, source in ranked_sources.items():
+                    key = f"{sp}_{location}_{source.inlet()}"
+
+                    # Get the object store keys for the data that's within the daterange we're looking for
+                    data_keys = source.in_daterange(daterange=daterange)
+
+                    results[key]["keys"] = data_keys
+                    results[key]["metadata"] = source.metadata()
+
+
                     
 
-                    # If they're all unranked we'll only have one zero key
-                    # Need to differentiate between the keys by getting their inlet and
-                    # adding that to the results key
-                    if list(ranked_sources.keys()) == [0]:
-                        for s in sources:
-                            key = f"{sp}_{location}_{s.inlet()}"
-                            in_date = source.in_daterange(start_date=start_datetime, end_date=end_datetime)
-
-                            results[key]["keys"] = in_date
-                            results[key]["metadata"] = source.metadata()
-
-                        # As we've got all the sources here we can skip the rest of this loop
-                        continue    
-                    else:
-                        highest_rank = sorted(ranked_sources.keys())[-1]
-                        source = ranked_sources[highest_rank]
-
-                # Save the best source to the results dic
-                key = f"{sp}_{location}"
-                # Get the keys here?
-                in_date = source.in_daterange(start_date=start_datetime, end_date=end_datetime)
-
-                results[key]["keys"] = in_date
-                results[key]["metadata"] = source.metadata()
 
         # if species is not None:
         #     for search_term in species:
@@ -413,7 +386,7 @@ def lookup_gas_datasources(lookup_dict, gas_data, source_name, source_id):
     return results
 
 
-def lookup_footprintDatasources(lookup_dict, source_name, source_id=None):
+def lookup_footprint_datasources(lookup_dict, source_name, source_id=None):
     """ Check if we've had data from this Datasource before
 
         TODO - This seems like a waste - combine this with lookup_gasDatasources ?
@@ -447,32 +420,6 @@ def get_data(key_list):
     # Maybe want to do some preprocessing on this data before it comes raw out of the object store?
     # We only want the data in the correct daterange
     return [Datasource.load(key=key)._data for key in key_list]
-
-
-def in_daterange(key, start_search, end_search):
-    """ Does this key contain data in the daterange we want?
-
-        Args:
-            key (str): Key for data
-            daterange (tuple (datetime, datetime)): Daterange as start and end datetime objects
-        Return:
-            bool: True if key within daterange
-    """
-    from Acquire.ObjectStore import string_to_datetime
-
-    key_end = key.split("/")[-1]
-    dates = key_end.split("_")
-
-    if len(dates) > 2:
-        raise ValueError("Invalid date string")
-
-    start = string_to_datetime(dates[0])
-    end = string_to_datetime(dates[1])
-
-    if start >= start_search and end <= end_search:
-        return True
-    else:
-        return False
 
 
 def daterange_to_string(start, end):

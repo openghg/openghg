@@ -676,21 +676,32 @@ class Datasource:
         else:
             return True in results
 
-    def in_daterange(self, start_date, end_date):
+    def in_daterange(self, daterange):
         """ Return the keys for data within the specified daterange
 
             Args:
-                daterange (str): Daterange string
+                daterange (str): Daterange string of the form
+                2019-01-01T00:00:00_2019-12-31T00:00:00
             Return:
                 list: List of keys to data
         """
+        from pandas import Timestamp
         from Acquire.ObjectStore import string_to_datetime
+
+        split_daterange = daterange.split("_")
+
+        if len(split_daterange) > 2:
+            # raise DateError("")
+            raise TypeError("Invalid daterange string passed.")
+
+        start_date = Timestamp(split_daterange[0], tz="UTC").to_pydatetime()
+        end_date = Timestamp(split_daterange[1], tz="UTC").to_pydatetime()
 
         data_keys = self._data_keys["latest"]["keys"]
 
         in_date = []
         for key in data_keys:
-            
+
             end_key = key.split("/")[-1]
             dates = end_key.split("_")
 
@@ -760,22 +771,6 @@ class Datasource:
         """
         return self._rank
 
-    def daterange_from_str(self, daterange_str):
-        """ Get a Pandas DatetimeIndex from a string. The created 
-            DatetimeIndex has minute frequency.
-
-            Args:
-                daterange_str (str): Daterange string
-                of the form 2019-01-01T00:00:00_2019-12-31T00:00:00
-            Returns:
-                pandas.DatetimeIndex: DatetimeIndex with minute frequency
-        """
-        from pandas import date_range
-
-        start, end = self.split_datrange_str(daterange_str)
-
-        return date_range(start=start, end=end, freq="min")
-
     def set_rank(self, rank, daterange):
         """ Set the rank of this Datsource. This allows users to select
             the best data for a specific species at a site. By default
@@ -824,12 +819,13 @@ class Datasource:
         """
         from itertools import tee
         from collections import defaultdict
+        from HUGS.Util import daterange_from_str, daterange_to_str
 
         # Ensure there are no duplciates and the dateranges are sorted
         dateranges = list(set(dateranges))
         dateranges.sort()
 
-        daterange_objects = [self.daterange_from_str(x) for x in dateranges]
+        daterange_objects = [daterange_from_str(x) for x in dateranges]
 
         def pairwise(iterable):
             a, b = tee(iterable)
@@ -868,23 +864,9 @@ class Datasource:
             combined_dateranges.append(combined)
 
         # Conver the dateranges backt to strings for storing
-        combined_dateranges = [self.daterange_to_str(x) for x in combined_dateranges]
+        combined_dateranges = [daterange_to_str(x) for x in combined_dateranges]
 
         return combined_dateranges
-
-    def daterange_to_str(self, daterange):
-        """ Takes a pandas DatetimeIndex created by pandas date_range converts it to a
-            string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00
-
-            Args:
-                daterange (pandas.DatetimeIndex)
-            Returns:
-                str: Daterange in string format
-        """
-        start = str(daterange[0]).replace(" ", "-")
-        end = str(daterange[-1]).replace(" ", "-")
-
-        return "_".join([start, end])
 
     def split_datrange_str(self, daterange_str):
         """ Split a daterange string to the component start and end
@@ -907,35 +889,40 @@ class Datasource:
         return start, end
 
     def get_rank(self, start_date=None, end_date=None):
-        """ Get the rank of this Datasource for the passed daterange
+        """ Get the ranks of data contained within Datasource for the passed daterange.
 
-            Check how much of the data in this Datasource has which rank?
-            Return a dictionary of the ranks and which dateranges these belong to?
+            If no rank has been set zero is returned.
+            If no start or end date is passed all ranking data will be returned.
 
             Args:
                 start_date (datetime, default=None)
                 end_date (datetime, default=None)
             Returns:
-                int: Rank number
+                dict: Dictionary of rank: daterange
         """
         from pandas import date_range
+        from HUGS.Util import daterange_from_str, daterange_to_str
         # Need to search ranks in descending order
         # If we don't have a rank return 9
         if not self._rank:
             return 0
 
-        if start_date is None and end_date is None:
+        if start_date is None or end_date is None:
             return self._rank
 
-        daterange = date_range(start=start_date, end=end_date)
+        search_daterange = date_range(start=start_date, end=end_date)
+
+        results = {}
 
         for rank, dateranges in self._rank.items():
-            for d in dateranges:
-                d = self.daterange_from_str(d)
-                if len(d.intersection(daterange)) > 0:
-                    return rank
+            for daterange_str in dateranges:
+                daterange = daterange_from_str(daterange_str)
 
-        return 0
+                intersection = search_daterange.intersection(daterange)
+                if len(intersection) > 0:
+                    results[rank] = daterange_to_str(intersection)
+
+        return results
 
     def data_type(self):
         """ Returns the data type held by this Datasource

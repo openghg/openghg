@@ -16,7 +16,10 @@ __all__ = [
     "date_overlap",
     "read_header",
     "load_hugs_json",
-    "valid_site"
+    "valid_site",
+    "daterange_from_str",
+    "daterange_to_str",
+    "daterange_from_datetimes"
 ]
 
 
@@ -252,6 +255,59 @@ def date_overlap(daterange_a, daterange_b):
         return True
     else:
         return False
+
+
+def daterange_from_datetimes(start, end):
+    """ Convert the passed datetimes into a daterange string
+        for use in searches and Datasource interactions
+
+        Args:
+            start_datetime (datetime)
+            end_datetime (datetime)
+        Returns:
+            str: Daterange string
+    """
+    from pandas import date_range
+
+    daterange = date_range(start=start, end=end, freq="min")
+
+    return daterange_to_str(daterange)
+
+
+def daterange_from_str(daterange_str):
+    """ Get a Pandas DatetimeIndex from a string. The created 
+        DatetimeIndex has minute frequency.
+
+        Args:
+            daterange_str (str): Daterange string
+            of the form 2019-01-01T00:00:00_2019-12-31T00:00:00
+        Returns:
+            pandas.DatetimeIndex: DatetimeIndex with minute frequency
+    """
+    from pandas import date_range
+    from pandas import Timestamp
+
+    split = daterange_str.split("_")
+
+    start = Timestamp(split[0], tz="UTC")
+    end = Timestamp(split[1], tz="UTC")
+
+    return date_range(start=start, end=end, freq="min")
+
+
+def daterange_to_str(daterange):
+    """ Takes a pandas DatetimeIndex created by pandas date_range converts it to a
+        string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00
+
+        Args:
+            daterange (pandas.DatetimeIndex)
+        Returns:
+            str: Daterange in string format
+    """
+    start = str(daterange[0]).replace(" ", "-")
+    end = str(daterange[-1]).replace(" ", "-")
+
+    return "_".join([start, end])
 
 
 def read_header(filepath, comment_char="#"):

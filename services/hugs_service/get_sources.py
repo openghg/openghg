@@ -38,7 +38,7 @@ def get_sources(args):
         return "_".join([d.site(), d.species(), d.inlet()])
 
     def got_rank(d):
-        if d.rank():            
+        if d.rank():
             return d.rank()
         else:
             return 0

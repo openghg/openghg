@@ -38,6 +38,7 @@ class BaseModule:
         """
         from Acquire.ObjectStore import string_to_datetime
         from HUGS.ObjectStore import get_bucket
+        from collections import defaultdict
 
         if not data:
             raise ValueError("Unable to create object with empty dictionary")
@@ -50,6 +51,12 @@ class BaseModule:
         c._datasource_uuids = data["datasource_uuids"]
         c._datasource_names = data["datasource_names"]
         c._file_hashes = data["file_hashes"]
+
+        try:
+            c._rank = defaultdict(dict, data["rank"])
+        except KeyError:
+            c._rank = defaultdict(dict)
+
         c._stored = False
 
         return c

@@ -43,7 +43,7 @@ class RankSources:
 
         return response
 
-    def rank_sources(self, updated_rankings):
+    def rank_sources(self, updated_rankings, data_type):
         """ Assign the precendence of sources for each.
             This function expects a dictionary of the form
 
@@ -59,7 +59,7 @@ class RankSources:
         if updated_rankings == self._before_ranking:
             raise TypeError("Ranking must be updated")
 
-        args = {"ranking": updated_rankings}
+        args = {"ranking": updated_rankings, "data_type": data_type}
 
         self._service.call_function(function="rank_sources", args=args)
 
