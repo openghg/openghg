@@ -101,16 +101,19 @@ def test_search_and_rank(load_two_crds):
     r = RankSources(service_url="hugs")
     sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
+    print("Sources before ranking : ", sources)
+
     uuid_108m = sources['bsd_co_108m']["uuid"]
     uuid_248m = sources['bsd_co_248m']["uuid"]
 
     del sources['bsd_co_108m']["uuid"]
     del sources['bsd_co_248m']["uuid"]
 
-    assert sources == {'bsd_co_108m': {'rank': 0, 'daterange': '2019-03-06T14:03:30_2020-07-04T11:44:30'}, 'bsd_co_248m': {'rank': 0, 'daterange': '2019-03-06T13:23:30_2020-07-05T03:38:30'}}
+    assert sources == {'bsd_co_108m': {'rank': 0, 'daterange': '2019-03-06T14:03:30_2020-07-04T11:44:30'}, 
+                        'bsd_co_248m': {'rank': 0, 'daterange': '2019-03-06T13:23:30_2020-07-05T03:38:30'}}
 
-    daterange_108 = r.create_daterange(start=datetime(2019,3,7), end=datetime(2019,9,15))
-    daterange_248 = r.create_daterange(start=datetime(2019,9,16), end=datetime(2020,7,5))
+    daterange_108 = r.create_daterange(start=datetime(2019, 3, 7), end=datetime(2019, 9, 15))
+    daterange_248 = r.create_daterange(start=datetime(2019, 9, 16), end=datetime(2020, 7, 5))
 
     new_rankings = {'bsd_co_108m': {'rank': 1, 'daterange': daterange_108 , 'uuid': uuid_108m}, 
                     'bsd_co_248m': {'rank': 1, 'daterange': daterange_248, 'uuid': uuid_248m}}
@@ -127,11 +130,26 @@ def test_search_and_rank(load_two_crds):
     location = "bsd"
     data_type = "CRDS"
 
-    results = search.search(species=species, locations=location, data_type=data_type)
+    results = search.search(species=species, locations=location, data_type=data_type, inlet="108m", instrument="picarro5310")
 
-    print(results)
-    
+    print("Search results: ", results)
 
+
+def test_single_site_search(load_two_crds):
+    search = Search(service_url="hugs")
+
+    species = "co"
+    location = "bsd"
+    data_type = "CRDS"
+    inlet = "108m"
+    instrument = "picarro5310"
+
+    results = search.search(species=species, locations=location, data_type=data_type, inlet=inlet, instrument=instrument)
+
+    assert len(results["bsd_co_picarro5310_108m"]["keys"]) == 7
+    assert results["bsd_co_picarro5310_108m"]["metadata"] == {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 
+                                                                'inlet': '108m', 'port': '2', 'type': 'air', 'species': 'co', 
+                                                                'data_type': 'timeseries'}
 
 
 def test_search_multispecies_singlesite(load_crds):

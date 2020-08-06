@@ -37,7 +37,7 @@ jobs:
         pip install oci retry
     - name: Lint with flake8
       run: |
-        flake8 . --count --statistics
+        flake8 HUGS/ --count --statistics
     - name: Test with pytest
       run: |
         pytest --cov=./ --cov-report=xml

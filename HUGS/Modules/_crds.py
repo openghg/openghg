@@ -237,9 +237,7 @@ class CRDS(BaseModule):
 
         for n in range(n_gases):
             # Slice the columns
-            gas_data = data.iloc[
-                :, skip_cols + n * n_cols : skip_cols + (n + 1) * n_cols
-            ]
+            gas_data = data.iloc[:, skip_cols + n * n_cols : skip_cols + (n + 1) * n_cols]
 
             # Reset the column numbers
             gas_data.columns = RangeIndex(gas_data.columns.size)
@@ -267,7 +265,7 @@ class CRDS(BaseModule):
             species_metadata["species"] = species
             species_metadata["inlet"] = inlet
 
-            species_metadata["source_name"] = source_name
+            # species_metadata["source_name"] = source_name
 
             combined_data[species] = {
                 "metadata": species_metadata,

@@ -119,35 +119,30 @@ def search(
     # If we have locations to search
     for location in locations:
         for datasource in datasources:
-            if datasource.search_metadata(location):
+            if datasource.search_metadata(search_terms=location):
                 location_sources[location].append(datasource)
 
-    
     # This is returned to the caller
     results = defaultdict(dict)
 
     # Rank not required as inlet and instrment specified
     # If we have a specific inlet and instrument set just find that specific data and return it
     if inlet is not None and instrument is not None:
-        for site in location_sources:
-            matching = [d for d in location_sources if d.search_metadata(search_terms=[inlet, instrument, site], find_all=True)]
+        for site, sources in location_sources.items():
+            for sp in species:
+                for datasource in sources:
+                    # Just match the single source here
+                    if datasource.search_metadata(search_terms=[sp, site, inlet, instrument], find_all=True):
+                        daterange_str = daterange_from_datetimes(start=start_datetime, end=end_datetime)
+                        # Get the data keys for the data in the matching daterange
+                        in_date = datasource.in_daterange(daterange=daterange_str)
 
-            # We should only get a single item here
-            if len(matching) > 1:
-                raise TypeError("Error - multiple sources found for this inlet and instrument")
+                        key = f"{site}_{sp}_{instrument}_{inlet}"
+                        # Find the keys that match the correct data
+                        results[key]["keys"] = in_date
+                        results[key]["metadata"] = datasource.metadata()
 
-            match = matching[0]
-
-            daterange_str = daterange_from_datetimes(start=start_datetime, end=end_datetime)
-            # Get the data keys for the data in the matching daterange
-            in_date = match.in_daterange(daterane=daterange_str)
-
-            key = f"{site}_{species}_{instrument}_{inlet}"
-            # Find the keys that match the correct data
-            results[key]["keys"] = in_date
-            results[key]["metadata"] = match.metadata()
-
-        return results
+    return results
 
     # With the results below we need to find the correct rank for the returned data
     # So for CO2 at Bilsdale we only want to return the highest ranked data

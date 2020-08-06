@@ -51,7 +51,7 @@ def _parse_CRDS(filename, data):
     site = split_filename[0]
     instrument = split_filename[1]
     resolution_str = split_filename[2]
-    height = split_filename[3]
+    inlet = split_filename[3]
 
     if resolution_str == "1minute":
         resolution = "1_minute"
@@ -66,7 +66,7 @@ def _parse_CRDS(filename, data):
     metadata["site"] = site
     metadata["instrument"] = instrument
     metadata["time_resolution"] = resolution
-    metadata["height"] = height
+    metadata["inlet"] = inlet
     metadata["port"] = port
     metadata["type"] = type_meas
 
