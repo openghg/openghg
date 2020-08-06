@@ -679,6 +679,8 @@ class Datasource:
     def in_daterange(self, daterange):
         """ Return the keys for data within the specified daterange
 
+            NOTE - this function may be removed in a future release.
+
             Args:
                 daterange (str): Daterange string of the form
                 2019-01-01T00:00:00_2019-12-31T00:00:00
@@ -686,7 +688,6 @@ class Datasource:
                 list: List of keys to data
         """
         from pandas import Timestamp
-        from Acquire.ObjectStore import string_to_datetime
 
         split_daterange = daterange.split("_")
 
@@ -708,13 +709,63 @@ class Datasource:
             if len(dates) > 2:
                 raise ValueError("Invalid date string")
 
-            start_key = string_to_datetime(dates[0])
-            end_key = string_to_datetime(dates[1])
+            start_key = Timestamp(dates[0], tz="UTC")
+            end_key = Timestamp(dates[1], tz="UTC")
 
-            if start_key >= start_date and end_key <= end_date:
+            # For this logic see
+            # https://stackoverflow.com/a/325964
+            if (start_key <= end_date) and (end_key >= start_date):
                 in_date.append(data_keys[key])
 
         return in_date
+
+    # def in_daterange(self, daterange):
+    #     """ Return the keys for data within the specified daterange
+
+    #         Args:
+    #             daterange (str): Daterange string of the form
+    #             2019-01-01T00:00:00_2019-12-31T00:00:00
+    #         Return:
+    #             list: List of keys to data
+    #     """
+    #     from pandas import date_range, Timestamp, Timedelta
+
+    #     split_daterange = daterange.split("_")
+
+    #     start_date = Timestamp(split_daterange[0], tz="UTC")
+
+    #     # TODO - bug ? in pandas results in no intersections being found if start Timestamp has seconds < 30
+    #     # if start_date.second < 30:
+    #     #     start_date += Timedelta("30 seconds")
+
+    #     end_date = Timestamp(split_daterange[1], tz="UTC")
+
+    #     daterange = date_range(start=start_date, end=end_date, freq="min")
+
+    #     in_date = []
+    #     for key in data_keys:
+    #         key_dates = key.split("_")
+
+    #         # We need daterange we're comparing it to to have the same seconds indexes for comparison
+
+
+
+    #         # Need to convert to Timestamp here?
+    #         key_start = Timestamp(key_dates[0], tz="UTC")
+    #         key_end = Timestamp(key_dates[1], tz="UTC")
+
+    #         print(key_start, key_end)
+
+    #         key_daterange = date_range(start=key_start, end=key_end, freq="min")
+
+    #         intersection = daterange.intersection(key_daterange)
+
+    #         print(intersection)
+    #         # if len(intersection) > 0:
+    #         #     in_date.append(key)
+
+    #     print(in_date)
+    #     return in_date
 
     def species(self):
         """ Returns the species of this Datasource
@@ -888,6 +939,42 @@ class Datasource:
 
         return start, end
 
+    def get_rank_intersection(self, start_date=None, end_date=None):
+        """ Get the ranks of data contained within Datasource for the passed daterange.
+
+            If no rank has been set zero is returned.
+            If no start or end date is passed all ranking data will be returned.
+
+            Args:
+                start_date (datetime, default=None)
+                end_date (datetime, default=None)
+            Returns:
+                dict: Dictionary of rank: daterange
+        """
+        from HUGS.Util import daterange_from_str, daterange_to_str, create_daterange
+        # Need to search ranks in descending order
+        # If we don't have a rank return 9
+        if not self._rank:
+            return 0
+
+        if start_date is None or end_date is None:
+            return self._rank
+
+        search_daterange = create_daterange(start=start_date, end=end_date, freq="min")
+
+        results = {}
+
+        for rank, dateranges in self._rank.items():
+            for daterange_str in dateranges:
+                daterange = daterange_from_str(daterange_str)
+
+                print(search_daterange[0], daterange[0])
+                intersection = search_daterange.intersection(daterange)
+                if len(intersection) > 0:
+                    results[rank] = daterange_to_str(intersection)
+
+        return results
+
     def get_rank(self, start_date=None, end_date=None):
         """ Get the ranks of data contained within Datasource for the passed daterange.
 
@@ -900,9 +987,9 @@ class Datasource:
             Returns:
                 dict: Dictionary of rank: daterange
         """
-        from pandas import date_range
-        from HUGS.Util import daterange_from_str, daterange_to_str
+        from HUGS.Util import daterange_from_str, daterange_to_str, create_daterange
         # Need to search ranks in descending order
+
         # If we don't have a rank return 9
         if not self._rank:
             return 0
@@ -910,7 +997,8 @@ class Datasource:
         if start_date is None or end_date is None:
             return self._rank
 
-        search_daterange = date_range(start=start_date, end=end_date)
+        # search_daterange = date_range(start=start_date, end=end_date, freq="min")
+        search_daterange = create_daterange(start=start_date, end=end_date)
 
         results = {}
 

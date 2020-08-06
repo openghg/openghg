@@ -101,8 +101,6 @@ def test_search_and_rank(load_two_crds):
     r = RankSources(service_url="hugs")
     sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
-    print("Sources before ranking : ", sources)
-
     uuid_108m = sources['bsd_co_108m']["uuid"]
     uuid_248m = sources['bsd_co_248m']["uuid"]
 
@@ -122,15 +120,17 @@ def test_search_and_rank(load_two_crds):
 
     updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
-    # Now we need to search for the data and ensure we get the correct datasets
+    assert updated_sources["bsd_co_108m"]["rank"] == {'1': ['2019-03-07T00:00:00_2019-09-15T00:00:00']}
+    assert updated_sources["bsd_co_248m"]["rank"] == {'1': ['2019-09-16T00:00:00_2020-07-05T00:00:00']}
 
+    # Now we need to search for the data and ensure we get the correct datasets
     search = Search(service_url="hugs")
 
     species = "co"
     location = "bsd"
     data_type = "CRDS"
 
-    results = search.search(species=species, locations=location, data_type=data_type, inlet="108m", instrument="picarro5310")
+    results = search.search(species=species, locations=location, data_type=data_type)
 
     print("Search results: ", results)
 

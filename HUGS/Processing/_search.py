@@ -57,13 +57,10 @@ def search(
         Returns:
             dict: List of keys of Datasources matching the search parameters
     """
-    from Acquire.ObjectStore import datetime_to_datetime
-    from HUGS.ObjectStore import get_object_names
-    from HUGS.ObjectStore import get_bucket
+    from collections import defaultdict
     from HUGS.Modules import Datasource
-    from HUGS.Util import get_datetime_now, get_datetime_epoch, daterange_from_datetimes, load_object
-
-    from collections import defaultdict as defaultdict
+    from HUGS.Util import (get_datetime_now, get_datetime_epoch, daterange_from_datetimes, 
+                          load_object, timestamp_tzaware)
 
     if not isinstance(species, list):
         species = [species]
@@ -82,21 +79,8 @@ def search(
     #     end_datetime = max_datetime
 
     # Ensure passed datetimes are timezone aware
-    start_datetime = datetime_to_datetime(start_datetime)
-    end_datetime = datetime_to_datetime(end_datetime)
-
-    bucket = get_bucket()
-
-    # TODO - method to load different types in here for search
-    # Maybe just an if else for now?
-    # Get the objects that contain the Datasources
-    # object_list = get_object_names(bucket=bucket, prefix=search_prefix)
-    # object_uuid = object_list[0].split("/")[-1]
-
-    # if len(object_list) == 0:
-    #     raise ValueError("No " + data_type.name + " object found.")
-    # if len(object_list) > 1:
-    #     raise ValueError("More than one " + data_type.name + " object found.")
+    start_datetime = timestamp_tzaware(start_datetime)
+    end_datetime = timestamp_tzaware(end_datetime)
 
     # Load the required data object and get the datasource UUIDs required for metadata search
     data_type = DataType[data_type.upper()].name
@@ -142,7 +126,7 @@ def search(
                         results[key]["keys"] = in_date
                         results[key]["metadata"] = datasource.metadata()
 
-    return results
+        return results
 
     # With the results below we need to find the correct rank for the returned data
     # So for CO2 at Bilsdale we only want to return the highest ranked data
@@ -188,6 +172,7 @@ def search(
 
                 for s in sources:
                     rank_data = s.get_rank(start_date=start_datetime, end_date=end_datetime)
+
                     # Just get the highest ranked datasources and return them
                     # Find the highest ranked data from this site
                     highest_rank = sorted(rank_data.keys())[-1]
@@ -207,7 +192,7 @@ def search(
                     # Get the object store keys for the data that's within the daterange we're looking for
                     data_keys = source.in_daterange(daterange=daterange)
 
-                    results[key]["keys"] = data_keys
+                    results[key]["keys"] = sorted(data_keys)
                     results[key]["metadata"] = source.metadata()
 
 

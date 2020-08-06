@@ -19,7 +19,9 @@ __all__ = [
     "valid_site",
     "daterange_from_str",
     "daterange_to_str",
-    "daterange_from_datetimes"
+    "daterange_from_datetimes",
+    "create_daterange",
+    "create_aligned_timestamp"
 ]
 
 
@@ -63,9 +65,9 @@ def get_datetime_epoch():
         Returns:
             datetime: Datetime object at epoch
     """
-    import datetime as _datetime
+    from pandas import Timestamp
 
-    return _datetime.datetime(1970, 1, 1, 0, 0, tzinfo=_datetime.timezone.utc)
+    return Timestamp("1970-1-1 00:00:00", tz="UTC")
 
 
 def get_datetime_now():
@@ -75,9 +77,9 @@ def get_datetime_now():
         Returns:
             datetime: Datetime object at epoch
     """
-    import datetime as _datetime
+    from pandas import Timestamp
 
-    return _datetime.datetime.utcnow().replace(tzinfo=_datetime.timezone.utc)
+    return Timestamp.now(tz="UTC")
 
 
 def get_datetime(year, month, day, hour=None, minute=None, second=None):
@@ -231,7 +233,9 @@ def load_hugs_json(filename):
 
 
 def date_overlap(daterange_a, daterange_b):
-    """ Check if daterange_a is within daterange_b
+    """ Check if daterange_a is within daterange_b.
+
+        TODO - could have a better name
 
         Args:
             daterange_a (str): Timezone aware daterange string. Example:
@@ -257,6 +261,65 @@ def date_overlap(daterange_a, daterange_b):
         return False
 
 
+def dates_overlap(range_a, range_b):
+    """ Check if two dateranges overlap
+
+    """
+    # For this logic see
+    # https://stackoverflow.com/a/325964
+    # if (start_key <= end_date) and (end_key >= start_date):
+    raise NotImplementedError
+
+
+def create_aligned_timestamp(time):
+    """ Align the passed datetime / Timestamp object to the minute
+        interval for use in dateranges and overlap checks.
+
+        Args:   
+            time (str, datetime, pandas.Timestamp)
+        Returns:
+            pandas.Timestamp: Timestamp aligned to minute 
+            with UTC timezone
+    """
+    from pandas import Timedelta, Timestamp
+    from datetime import datetime, timezone
+
+    if isinstance(time, datetime):
+        if time.tzinfo is None:
+            t = time.replace(tzinfo=timezone.utc)
+        else:
+            t = time.astimezone(tz=timezone.utc)
+        t = Timestamp(time)
+    elif isinstance(time, Timestamp):
+        if time.tzinfo is None:
+            t = time.tz_localize(tz="UTC")
+        else:
+            t = time.tz_convert(tz="UTC")
+    else:
+        t = Timestamp(time, tz="UTC")
+
+    t -= Timedelta(f"{t.second} s")
+
+    return t
+
+
+def create_daterange(start, end):
+    """ Create a minute aligned daterange
+
+        Args:
+            start (str, datetime, Timestamp)
+            end (str, datetime, Timestamp)
+        Returns:
+            pandas.DatetimeIndex
+    """
+    from pandas import date_range
+
+    start = create_aligned_timestamp(start)
+    end = create_aligned_timestamp(end)
+
+    return date_range(start=start, end=end, freq="min")
+
+
 def daterange_from_datetimes(start, end):
     """ Convert the passed datetimes into a daterange string
         for use in searches and Datasource interactions
@@ -268,6 +331,9 @@ def daterange_from_datetimes(start, end):
             str: Daterange string
     """
     from pandas import date_range
+
+    start = create_aligned_timestamp(start)
+    end = create_aligned_timestamp(end)
 
     daterange = date_range(start=start, end=end, freq="min")
 
@@ -285,12 +351,12 @@ def daterange_from_str(daterange_str):
             pandas.DatetimeIndex: DatetimeIndex with minute frequency
     """
     from pandas import date_range
-    from pandas import Timestamp
 
     split = daterange_str.split("_")
 
-    start = Timestamp(split[0], tz="UTC")
-    end = Timestamp(split[1], tz="UTC")
+    # Align the seconds
+    start = create_aligned_timestamp(split[0])
+    end = create_aligned_timestamp(split[1])
 
     return date_range(start=start, end=end, freq="min")
 
