@@ -3,8 +3,6 @@
 """
 
 __all__ = [
-    "url_join",
-    "get_daterange_str",
     "get_datetime_epoch",
     "get_datetime_now",
     "get_datetime",
@@ -23,39 +21,6 @@ __all__ = [
     "create_daterange",
     "create_aligned_timestamp"
 ]
-
-
-def url_join(*args):
-    """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
-        stripped for each argument.
-
-        Args:
-            *args (str): Strings to concatenate into a key to use
-            in the object store
-        Returns:
-            str: A url style key string with arguments separated by forward slashes
-    """
-    return "/".join(map(lambda x: str(x).rstrip("/"), args))
-
-
-def get_daterange_str(start, end):
-    """ Creates a string from the start and end datetime
-        objects. Used for production of the key
-        to store segmented data in the object store.
-
-        Args:
-            start (datetime): Start datetime
-            end (datetime): End datetime
-        Returns:
-            str: Daterange formatted as start_end
-            YYYYMMDD_YYYYMMDD
-            Example: 20190101_20190201
-    """
-
-    start_fmt = start.strftime("%Y%m%d")
-    end_fmt = end.strftime("%Y%m%d")
-
-    return start_fmt + "_" + end_fmt
 
 
 def get_datetime_epoch():
@@ -239,7 +204,8 @@ def load_hugs_json(filename):
 def date_overlap(daterange_a, daterange_b):
     """ Check if daterange_a is within daterange_b.
 
-        TODO - could have a better name
+        For this logic see
+        https://stackoverflow.com/a/325964
 
         Args:
             daterange_a (str): Timezone aware daterange string. Example:
@@ -259,7 +225,7 @@ def date_overlap(daterange_a, daterange_b):
     start_b = Timestamp(ts_input=daterange_b[0], tz="UTC")
     end_b = Timestamp(ts_input=daterange_b[1], tz="UTC")
 
-    if start_b >= start_a and end_a <= end_b:
+    if start_a <= end_b and end_a >= start_b:
         return True
     else:
         return False
@@ -293,7 +259,6 @@ def create_aligned_timestamp(time):
             t = time.replace(tzinfo=timezone.utc)
         else:
             t = time.astimezone(tz=timezone.utc)
-        t = Timestamp(time)
     elif isinstance(time, Timestamp):
         if time.tzinfo is None:
             t = time.tz_localize(tz="UTC")
@@ -311,12 +276,15 @@ def create_daterange(start, end):
     """ Create a minute aligned daterange
 
         Args:
-            start (str, datetime, Timestamp)
-            end (str, datetime, Timestamp)
+            start (Timestamp)
+            end (Timestamp)
         Returns:
             pandas.DatetimeIndex
     """
     from pandas import date_range
+
+    if start > end:
+        raise ValueError("Start date is after end date")
 
     start = create_aligned_timestamp(start)
     end = create_aligned_timestamp(end)
@@ -329,8 +297,8 @@ def create_daterange_str(start, end):
         for use in searches and Datasource interactions
 
         Args:
-            start_datetime (datetime)
-            end_datetime (datetime)
+            start_datetime (Timestamp)
+            end_datetime (Timestamp)
         Returns:
             str: Daterange string
     """
