@@ -57,7 +57,7 @@ class RankSources:
                 None
         """
         if updated_rankings == self._before_ranking:
-            raise TypeError("Ranking must be updated")
+            return
 
         args = {"ranking": updated_rankings, "data_type": data_type}
 

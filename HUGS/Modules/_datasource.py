@@ -815,11 +815,14 @@ class Datasource:
     def rank(self):
         """ Return the rank of this Datasource 
 
-            Where a value of -1 means no rank, 1 the highest
+            Where a value of 0 means no rank, 1 the highest
 
             Returns:
-                int: Rank of datasource
+                dict: Dictionary of rank: dateranges
         """
+        if not self._rank:
+            return 0
+
         return self._rank
 
     def set_rank(self, rank, daterange):
@@ -831,20 +834,23 @@ class Datasource:
 
             Args:   
                 rank (int): Rank number between 0 and 10.
-                daterange (str): Daterange in the form of a string 2019-01-01T00:00:00_2019-12-31T00:00:00
+                daterange (list): List of daterange strings such as 2019-01-01T00:00:00_2019-12-31T00:00:00
             Returns:
                 None
         """
         rank = int(rank)
 
+        if not isinstance(daterange, list):
+            daterange = [daterange]
+
         if not 0 <= rank <= 10:
             raise TypeError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
 
-        if rank in self._rank:
-            self._rank[rank].append(daterange)
+        try:
+            self._rank[rank].extend(daterange)
             self._rank[rank] = self.combine_dateranges(self._rank[rank])
-        else:
-            self._rank[rank].append(daterange)
+        except KeyError:
+            self._rank[rank] = daterange
 
     def date_already_ranked(daterange):
         """ Check if a rank has already been set for this daterange
@@ -872,6 +878,9 @@ class Datasource:
         from collections import defaultdict
         from HUGS.Util import daterange_from_str, daterange_to_str
 
+        if len(dateranges) < 2:
+            return dateranges
+
         # Ensure there are no duplciates and the dateranges are sorted
         dateranges = list(set(dateranges))
         dateranges.sort()
@@ -885,7 +894,7 @@ class Datasource:
 
         # We want lists of dateranges to combine
         groups = defaultdict(list)
-        # A group_n of dateranges that overlap
+        # Each group contains a number of dateranges that overlap
         group_n = 0
         # Do a pairwise comparison
         # "s -> (s0,s1), (s1,s2), (s2, s3), ..."

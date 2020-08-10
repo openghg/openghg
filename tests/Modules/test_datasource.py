@@ -77,11 +77,10 @@ def test_add_data(data):
     datasource_metadata = d.metadata()
 
     assert datasource_metadata["data_type"] == "timeseries"
-    assert datasource_metadata["height"] == "248m"
+    assert datasource_metadata["inlet"] == "248m"
     assert datasource_metadata["instrument"] == "picarro"
     assert datasource_metadata["port"] == "8"
     assert datasource_metadata["site"] == "bsd"
-    assert datasource_metadata["source_name"] == "bsd.picarro.1minute.248m"
     assert datasource_metadata["species"] == "ch4"
 
 
@@ -226,11 +225,10 @@ def test_to_data(data):
 
     metadata = obj_data["metadata"]
     assert obj_data["name"] == "testing_123"
-    assert metadata["source_name"] == "bsd.picarro.1minute.248m"
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
     assert metadata["time_resolution"] == "1_minute"
-    assert metadata["height"] == "248m"
+    assert metadata["inlet"] == "248m"
     assert obj_data["data_type"] == "timeseries"
     assert len(obj_data["data_keys"]) == 0
 
@@ -251,11 +249,10 @@ def test_from_data(data):
     d_2 = Datasource.from_data(bucket=bucket, data=obj_data, shallow=False)
 
     metadata = d_2.metadata()
-    assert metadata["source_name"] == "bsd.picarro.1minute.248m"
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
     assert metadata["time_resolution"] == "1_minute"
-    assert metadata["height"] == "248m"
+    assert metadata["inlet"] == "248m"
 
     assert d_2.to_data() == d.to_data()
 
@@ -363,3 +360,59 @@ def test_setting_overlapping_dateranges():
     d.set_rank(rank=1, daterange=daterange_two)
     
     assert d._rank[1] == ['2027-08-01-00:00:00+00:00_2028-06-01-00:00:00+00:00']
+
+def test_combining_single_dateranges_returns():
+    d = Datasource()
+
+    daterange = "2027-08-01-00:00:00_2027-12-01-00:00:00"
+
+    combined = d.combine_dateranges(dateranges=[daterange])
+
+    assert combined[0] == daterange
+
+def test_combining_overlapping_dateranges():
+    d = Datasource()
+
+    daterange_1 = "2001-01-01-00:00:00_2001-03-01-00:00:00"
+    daterange_2 = "2001-02-01-00:00:00_2001-06-01-00:00:00"
+
+    dateranges = [daterange_1, daterange_2]
+
+    combined = d.combine_dateranges(dateranges=dateranges)
+
+    assert combined == ['2001-01-01-00:00:00+00:00_2001-06-01-00:00:00+00:00']
+
+    daterange_1 = "2001-01-01-00:00:00_2001-03-01-00:00:00"
+    daterange_2 = "2001-02-01-00:00:00_2001-06-01-00:00:00"
+    daterange_3 = "2001-05-01-00:00:00_2001-08-01-00:00:00"
+    daterange_4 = "2004-05-01-00:00:00_2004-08-01-00:00:00"
+    daterange_5 = "2004-04-01-00:00:00_2004-09-01-00:00:00"
+    daterange_6 = "2007-04-01-00:00:00_2007-09-01-00:00:00"
+
+    dateranges = [daterange_1, daterange_2, daterange_3, daterange_4, daterange_5, daterange_6]
+
+    combined = d.combine_dateranges(dateranges=dateranges)
+
+    assert combined == ['2001-01-01-00:00:00+00:00_2001-08-01-00:00:00+00:00', 
+                        '2004-04-01-00:00:00+00:00_2004-09-01-00:00:00+00:00', 
+                        '2007-04-01-00:00:00+00:00_2007-09-01-00:00:00+00:00']
+
+def test_combining_no_overlap():
+    d = Datasource()
+    daterange_1 = "2001-01-01-00:00:00_2001-03-01-00:00:00"
+    daterange_2 = "2011-02-01-00:00:00_2011-06-01-00:00:00"
+
+    dateranges = [daterange_1, daterange_2]
+
+    combined = d.combine_dateranges(dateranges=dateranges)
+
+    assert combined == ['2001-01-01-00:00:00+00:00_2001-03-01-00:00:00+00:00', '2011-02-01-00:00:00+00:00_2011-06-01-00:00:00+00:00']
+
+
+
+
+
+
+
+
+

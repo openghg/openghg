@@ -37,18 +37,6 @@ def get_sources(args):
     def name_str(d):
         return "_".join([d.site(), d.species(), d.inlet()])
 
-    def got_rank(d):
-        if d.rank():
-            return d.rank()
-        else:
-            return 0
-
-    # Need to easily rank the datasources for this species and site - how to label them?
-    # We only need to set a rank of 1 for a specific daterange otherwise we'll consider it unranked
-
-    # Here we need to check if the datasource already has a rank
-    # Rank is being set here
-
-    unranked = {name_str(d): {"rank": got_rank(d), "daterange": d.daterange_str(), "uuid": d.uuid()} for d in matching_sources}
+    unranked = {name_str(d): {"rank": d.rank(), "daterange": d.daterange_str(), "uuid": d.uuid()} for d in matching_sources}
 
     return unranked

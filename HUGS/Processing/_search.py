@@ -60,7 +60,7 @@ def search(
     from collections import defaultdict
     from HUGS.Modules import Datasource
     from HUGS.Util import (get_datetime_now, get_datetime_epoch, daterange_from_datetimes, 
-                          load_object, timestamp_tzaware)
+                          load_object, create_daterange, timestamp_tzaware)
 
     if not isinstance(species, list):
         species = [species]
@@ -170,34 +170,44 @@ def search(
             for sp, sources in species_data.items():
                 ranked_sources = {}
 
-                for s in sources:
-                    rank_data = s.get_rank(start_date=start_datetime, end_date=end_datetime)
-
+                # How to return all the sources if they're all 0?
+                for source in sources:
+                    rank_data = source.get_rank(start_date=start_datetime, end_date=end_datetime)
                     # Just get the highest ranked datasources and return them
                     # Find the highest ranked data from this site
                     highest_rank = sorted(rank_data.keys())[-1]
 
-                    # Get highest rank, get the daterange that covers and then save it as daterange: datasource ? 
-                    daterange_covered = rank_data[highest_rank]
+                    if highest_rank == 0:
+                        ranked_sources[0] = 0
+                        continue
 
-                    ranked_sources[daterange_covered] = s
+                    ranked_sources[source.uuid()] = {"rank": highest_rank, "dateranges": rank_data[highest_rank], "source": source}
 
                 # If it's all zeroes we want to return all sources
-                if set(ranked_sources) == {0}:
-                    ranked_sources = sources
+                if list(ranked_sources) == [0]:
+                    for source in sources:
+                        key = f"{sp}_{location}_{source.inlet()}"
 
-                for daterange, source in ranked_sources.items():
+                        daterange_str = daterange_from_datetimes(start=start_datetime, end=end_datetime)
+                        data_keys = source.in_daterange(daterange=daterange_str)
+
+                        results[key]["keys"] = {daterange_str: (data_keys)}
+                        results[key]["metadata"] = source.metadata()
+
+                # Otherwise iterate over the sources that are ranked and extract the keys
+                for uid in ranked_sources:
+                    source = ranked_sources[uid]["source"]
+                    source_dateranges = ranked_sources[uid]["dateranges"]
+
                     key = f"{sp}_{location}_{source.inlet()}"
 
-                    # Get the object store keys for the data that's within the daterange we're looking for
-                    data_keys = source.in_daterange(daterange=daterange)
+                    dated_keys = {}
+                    # Get the keys for each daterange
+                    for d in source_dateranges:
+                        dated_keys[d] = source.in_daterange(daterange=d)
 
-                    results[key]["keys"] = sorted(data_keys)
+                    results[key]["keys"] = dated_keys
                     results[key]["metadata"] = source.metadata()
-
-
-                    
-
 
         # if species is not None:
         #     for search_term in species:
@@ -283,12 +293,12 @@ def search(
     # for key in valid_datasources:
         # Find the highest rank
 
-    # Here we can add the daterange key to the search results
-    # TODO - can this just be taken more easily from the Datasource?
-    for key in results:
-        start, end = strip_dates_keys(keys=results[key]["keys"])
-        results[key]["start_date"] = start
-        results[key]["end_date"] = end
+    # # Here we can add the daterange key to the search results
+    # # TODO - can this just be taken more easily from the Datasource?
+    # for key in results:
+    #     start, end = strip_dates_keys(keys=results[key]["keys"])
+    #     results[key]["start_date"] = start
+    #     results[key]["end_date"] = end
 
     return results
 

@@ -33,3 +33,5 @@ def rank_sources(args):
         daterange = ranking_data[r]["daterange"]
 
         data_obj.set_rank(uuid=uuid, rank=rank, daterange=daterange)
+
+        data_obj.save()

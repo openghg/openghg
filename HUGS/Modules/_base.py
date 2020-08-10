@@ -53,9 +53,9 @@ class BaseModule:
         c._file_hashes = data["file_hashes"]
 
         try:
-            c._rank = defaultdict(dict, data["rank"])
+            c._rank_data = defaultdict(dict, data["rank_data"])
         except KeyError:
-            c._rank = defaultdict(dict)
+            c._rank_data = defaultdict(dict)
 
         c._stored = False
 
