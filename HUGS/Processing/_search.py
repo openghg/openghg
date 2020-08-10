@@ -59,7 +59,7 @@ def search(
     """
     from collections import defaultdict
     from HUGS.Modules import Datasource
-    from HUGS.Util import (get_datetime_now, get_datetime_epoch, daterange_from_datetimes, 
+    from HUGS.Util import (get_datetime_now, get_datetime_epoch, create_daterange_str, 
                           load_object, create_daterange, timestamp_tzaware)
 
     if not isinstance(species, list):
@@ -94,9 +94,9 @@ def search(
     # If inlet or instrument aren't passed we want to find the Datasource with the highest rank for
     # the passed daterange
 
-    # If all search terms are required just use a single composite key of all search terms
-    if require_all:
-        single_key = "_".join(sorted(species))
+    # # If all search terms are required just use a single composite key of all search terms
+    # if require_all:
+    #     single_key = "_".join(sorted(species))
 
     # First we find the Datasources from locations we want to narrow down our search
     location_sources = defaultdict(list)
@@ -117,11 +117,11 @@ def search(
                 for datasource in sources:
                     # Just match the single source here
                     if datasource.search_metadata(search_terms=[sp, site, inlet, instrument], find_all=True):
-                        daterange_str = daterange_from_datetimes(start=start_datetime, end=end_datetime)
+                        daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
                         # Get the data keys for the data in the matching daterange
                         in_date = datasource.in_daterange(daterange=daterange_str)
 
-                        key = f"{site}_{sp}_{instrument}_{inlet}"
+                        key = f"{sp}_{site}_{instrument}_{inlet}"
                         # Find the keys that match the correct data
                         results[key]["keys"] = in_date
                         results[key]["metadata"] = datasource.metadata()
@@ -188,7 +188,7 @@ def search(
                     for source in sources:
                         key = f"{sp}_{location}_{source.inlet()}"
 
-                        daterange_str = daterange_from_datetimes(start=start_datetime, end=end_datetime)
+                        daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
                         data_keys = source.in_daterange(daterange=daterange_str)
 
                         results[key]["keys"] = {daterange_str: (data_keys)}
@@ -202,9 +202,12 @@ def search(
                     key = f"{sp}_{location}_{source.inlet()}"
 
                     dated_keys = {}
+
                     # Get the keys for each daterange
                     for d in source_dateranges:
-                        dated_keys[d] = source.in_daterange(daterange=d)
+                        keys_in_date = source.in_daterange(daterange=d)
+                        if keys_in_date:
+                            dated_keys[d] = keys_in_date
 
                     results[key]["keys"] = dated_keys
                     results[key]["metadata"] = source.metadata()

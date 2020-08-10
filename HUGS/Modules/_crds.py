@@ -337,7 +337,7 @@ class CRDS(BaseModule):
                         e = daterange_from_str(e)
 
                         intersection = daterange_obj.intersection(e)
-                        if len(intersection) > 0 and existing_rank != rank:
+                        if len(intersection) > 0 and int(existing_rank) != int(rank):
                             raise ValueError(f"This datasource has already got the rank {existing_rank} for dates that overlap the ones given. \
                                                 Overlapping dates are {intersection}")
         except KeyError:

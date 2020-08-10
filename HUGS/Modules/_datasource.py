@@ -679,8 +679,6 @@ class Datasource:
     def in_daterange(self, daterange):
         """ Return the keys for data within the specified daterange
 
-            NOTE - this function may be removed in a future release.
-
             Args:
                 daterange (str): Daterange string of the form
                 2019-01-01T00:00:00_2019-12-31T00:00:00
@@ -996,6 +994,7 @@ class Datasource:
             Returns:
                 dict: Dictionary of rank: daterange
         """
+        from collections import defaultdict
         from HUGS.Util import daterange_from_str, daterange_to_str, create_daterange
         # Need to search ranks in descending order
 
@@ -1006,10 +1005,9 @@ class Datasource:
         if start_date is None or end_date is None:
             return self._rank
 
-        # search_daterange = date_range(start=start_date, end=end_date, freq="min")
         search_daterange = create_daterange(start=start_date, end=end_date)
 
-        results = {}
+        results = defaultdict(list)
 
         for rank, dateranges in self._rank.items():
             for daterange_str in dateranges:
@@ -1017,7 +1015,7 @@ class Datasource:
 
                 intersection = search_daterange.intersection(daterange)
                 if len(intersection) > 0:
-                    results[rank] = daterange_to_str(intersection)
+                    results[rank].append(daterange_to_str(intersection))
 
         return results
 

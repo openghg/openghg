@@ -19,7 +19,7 @@ __all__ = [
     "valid_site",
     "daterange_from_str",
     "daterange_to_str",
-    "daterange_from_datetimes",
+    "create_daterange_str",
     "create_daterange",
     "create_aligned_timestamp"
 ]
@@ -63,7 +63,7 @@ def get_datetime_epoch():
         1st of January 1970
 
         Returns:
-            datetime: Datetime object at epoch
+            pandas.Timestamp: Timestamp object at epoch
     """
     from pandas import Timestamp
 
@@ -71,11 +71,10 @@ def get_datetime_epoch():
 
 
 def get_datetime_now():
-    """ Returns the UNIX epoch time
-        1st of January 1970
+    """ Returns a Timestamp for the current time
 
         Returns:
-            datetime: Datetime object at epoch
+            Timestamp: Timestamp now
     """
     from pandas import Timestamp
 
@@ -186,6 +185,11 @@ def timestamp_tzaware(timestamp):
         Returns:
             pandas.Timestamp: Timezone aware
     """
+    from pandas import Timestamp
+
+    if not isinstance(timestamp, Timestamp):
+        timestamp = Timestamp(timestamp)
+
     if timestamp.tzinfo is None:
         return timestamp.tz_localize(tz="UTC")
     else:
@@ -320,7 +324,7 @@ def create_daterange(start, end):
     return date_range(start=start, end=end, freq="min")
 
 
-def daterange_from_datetimes(start, end):
+def create_daterange_str(start, end):
     """ Convert the passed datetimes into a daterange string
         for use in searches and Datasource interactions
 

@@ -1,7 +1,7 @@
 import os
 import pytest
 from datetime import datetime
-
+from pandas import Timestamp
 from Acquire.Client import Service
 
 from HUGS.Client import Process, RankSources, Search
@@ -101,42 +101,65 @@ def test_search_and_rank(load_two_crds):
     r = RankSources(service_url="hugs")
     sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
-    uuid_108m = sources['bsd_co_108m']["uuid"]
-    uuid_248m = sources['bsd_co_248m']["uuid"]
+    uuid_108m = sources['co_bsd_108m']["uuid"]
+    uuid_248m = sources['co_bsd_248m']["uuid"]
 
-    del sources['bsd_co_108m']["uuid"]
-    del sources['bsd_co_248m']["uuid"]
+    del sources['co_bsd_108m']["uuid"]
+    del sources['co_bsd_248m']["uuid"]
 
-    assert sources == {'bsd_co_108m': {'rank': 0, 'daterange': '2019-03-06T14:03:30_2020-07-04T11:44:30'}, 
-                        'bsd_co_248m': {'rank': 0, 'daterange': '2019-03-06T13:23:30_2020-07-05T03:38:30'}}
+    assert sources == {'co_bsd_108m': {'rank': 0, 'daterange': '2019-03-06T14:03:30_2020-07-04T11:44:30'}, 
+                        'co_bsd_248m': {'rank': 0, 'daterange': '2019-03-06T13:23:30_2020-07-05T03:38:30'}}
 
     daterange_108 = r.create_daterange(start=datetime(2019, 3, 7), end=datetime(2019, 9, 15))
     daterange_248 = r.create_daterange(start=datetime(2019, 9, 16), end=datetime(2020, 7, 5))
 
-    new_rankings = {'bsd_co_108m': {'rank': 1, 'daterange': daterange_108 , 'uuid': uuid_108m}, 
-                    'bsd_co_248m': {'rank': 1, 'daterange': daterange_248, 'uuid': uuid_248m}}
+    new_rankings = {'co_bsd_108m': {'rank': 1, 'daterange': [daterange_108] , 'uuid': uuid_108m}, 
+                    'co_bsd_248m': {'rank': 1, 'daterange': daterange_248, 'uuid': uuid_248m}}
 
     r.rank_sources(updated_rankings=new_rankings, data_type="CRDS")
 
     updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
-    print("Updated sources : ", updated_sources)
+    updated_sources["co_bsd_108m"]["rank"] == {'1': ['2019-03-07T00:00:00_2019-09-15T00:00:00']}
+    updated_sources["co_bsd_248m"]["rank"] == {'1': ['2019-09-16T00:00:00_2020-07-05T00:00:00']}
 
-    return False
+    daterange_108_1 = r.create_daterange(start=datetime(2019, 3, 7), end=datetime(2019, 9, 15))
+    daterange_108_2 = r.create_daterange(start=datetime(2019, 11, 6), end=datetime(2020, 7, 5))
+    daterange_248 = r.create_daterange(start=datetime(2019, 9, 16), end=datetime(2019, 11, 5))
+    # Change in ranking
+    new_rankings = {'co_bsd_108m': {'rank': 1, 'daterange': [daterange_108_1, daterange_108_2] , 'uuid': uuid_108m}, 
+                    'co_bsd_248m': {'rank': 1, 'daterange': daterange_248, 'uuid': uuid_248m}}
 
-    assert updated_sources["bsd_co_108m"]["rank"] == {'1': ['2019-03-07T00:00:00_2019-06-14T00:00:00', '2019-09-16T00:00:00_2020-09-15T00:00:00']}
-    assert updated_sources["bsd_co_248m"]["rank"] == {'1': ['2019-06-15T00:00:00_2019-09-15T23:59:59']}
+    r.rank_sources(updated_rankings=new_rankings, data_type="CRDS")
 
-    # Now we need to search for the data and ensure we get the correct datasets
+    updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
+
+    assert updated_sources["co_bsd_108m"]["rank"] == {'1': ['2019-03-07-00:00:00+00:00_2019-09-15-00:00:00+00:00', '2019-11-06-00:00:00+00:00_2020-07-05-00:00:00+00:00']}
+    assert updated_sources["co_bsd_248m"]["rank"] == {'1': ['2019-09-16T00:00:00_2019-11-05T00:00:00']}
+
+    # Now we need to search for the data and ensure we get the correct data keys returned
     search = Search(service_url="hugs")
 
     species = "co"
     location = "bsd"
     data_type = "CRDS"
 
-    results = search.search(species=species, locations=location, data_type=data_type)
+    start_search = Timestamp(2019, 3, 7)
+    end_search = Timestamp(2020, 10, 30)
 
-    print("Search results: ", results)
+    results = search.search(species=species, locations=location, data_type=data_type, start_datetime=start_search, end_datetime=end_search)
+
+    print(results)
+    assert results["co_bsd_108m"]["metadata"] == {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 
+                                                'inlet': '108m', 'port': '2', 'type': 'air', 'species': 'co', 'data_type': 'timeseries'}
+
+    assert len(results["co_bsd_108m"]["keys"]["2019-03-07-00:00:00+00:00_2019-09-15-00:00:00+00:00"]) == 3
+    assert len(results["co_bsd_108m"]["keys"]["2019-11-06-00:00:00+00:00_2020-07-05-00:00:00+00:00"]) == 5
+
+    assert len(results["co_bsd_248m"]["keys"]["2019-09-16-00:00:00+00:00_2019-11-05-00:00:00+00:00"]) == 1
+
+    assert results["co_bsd_248m"]["metadata"] == {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 
+                                                'inlet': '248m', 'port': '1', 'type': 'air', 'species': 'co', 'data_type': 'timeseries'}
 
 
 def test_single_site_search(load_two_crds):
@@ -150,8 +173,8 @@ def test_single_site_search(load_two_crds):
 
     results = search.search(species=species, locations=location, data_type=data_type, inlet=inlet, instrument=instrument)
 
-    assert len(results["bsd_co_picarro5310_108m"]["keys"]) == 7
-    assert results["bsd_co_picarro5310_108m"]["metadata"] == {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 
+    assert len(results["co_bsd_picarro5310_108m"]["keys"]) == 7
+    assert results["co_bsd_picarro5310_108m"]["metadata"] == {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 
                                                                 'inlet': '108m', 'port': '2', 'type': 'air', 'species': 'co', 
                                                                 'data_type': 'timeseries'}
 
@@ -167,10 +190,10 @@ def test_search_multispecies_singlesite(load_crds):
         species=search_term, locations=location, data_type=data_type
     )
 
-    assert list(results.keys()) == ["bsd_co_108m", "bsd_co_108m"]
+    assert list(results.keys()) == ["co_bsd_108m", "co2_bsd_108m"]
 
-    assert len(results["bsd_co_108m"]["keys"]) == 23
-    assert len(results["bsd_co_108m"]["keys"]) == 23
+    assert len(results["co_bsd_108m"]["keys"]) == 23
+    assert len(results["co2_bsd_108m"]["keys"]) == 23
 
 
 def test_search_multisite_co(load_crds):
@@ -184,9 +207,9 @@ def test_search_multisite_co(load_crds):
         species=search_term, locations=location, data_type=data_type
     )
 
-    assert list(results.keys()) == ["bsd_co_108m", "hfd_co_100m"]
+    assert list(results.keys()) == ["co_bsd_108m", "co_hfd_100m"]
 
-    key_dates = sorted(results["hfd_co_100m"]["keys"])[:10]
+    key_dates = sorted(results["co_hfd_100m"]["keys"])[:10]
 
     key_dates = [v.split("/")[-1] for v in key_dates]
 
@@ -218,20 +241,20 @@ def test_search_multiplesite_multiplespecies(load_crds):
     )
 
     assert sorted(list(results.keys())) == [
-        "bsd_ch4_108m",
-        "bsd_co_108m",
-        "hfd_ch4_100m",
-        "hfd_co2_100m",
-        "tac_ch4_100m",
-        "tac_co2_100m",
+        "ch4_bsd_108m",
+        "co_bsd_108m",
+        "ch4_bsd_100m",
+        "co2_hfd_100m",
+        "ch4_tac_100m",
+        "co2_tac_100m",
     ]
 
-    assert len(results["bsd_ch4_108m"]["keys"]) == 23
-    assert len(results["hfd_ch4_100m"]["keys"]) == 25
-    assert len(results["tac_ch4_100m"]["keys"]) == 30
-    assert len(results["bsd_co_108m"]["keys"]) == 23
-    assert len(results["hfd_co2_100m"]["keys"]) == 25
-    assert len(results["tac_co2_100m"]["keys"]) == 30
+    assert len(results["ch4_bsd_108m"]["keys"]) == 23
+    assert len(results["ch4_bsd_100m"]["keys"]) == 25
+    assert len(results["ch4_tac_100m"]["keys"]) == 30
+    assert len(results["co_bsd_108m"]["keys"]) == 23
+    assert len(results["co2_hfd_100m"]["keys"]) == 25
+    assert len(results["co2_tac_100m"]["keys"]) == 30
 
 
 def test_returns_readable_results():
@@ -242,7 +265,7 @@ def test_returns_readable_results():
 
     search.search(species=search_term, locations=location, data_type="CRDS")
 
-    assert search.results() == {'bsd_ch4_108m': 'Daterange : 2014-01-30-13:33:30+00:00 - 2019-07-04-04:23:30+00:00'}
+    assert search.results() == {'ch4_bsd_108m': 'Daterange : 2014-01-30-13:33:30+00:00 - 2019-07-04-04:23:30+00:00'}
 
 
 def test_search_download():
@@ -253,11 +276,11 @@ def test_search_download():
 
     search.search(species=search_term, locations=location, data_type="CRDS")
 
-    data = search.download("bsd_ch4_108m")
+    data = search.download("ch4_bsd_108m")
 
-    data_attributes = data["bsd_ch4_108m"].attrs
+    data_attributes = data["ch4_bsd_108m"].attrs
     assert data_attributes["data_owner"] == "Simon O'Doherty"
     assert data_attributes["station_longitude"] == pytest.approx(-1.15033)
     assert data_attributes["station_latitude"] == pytest.approx(54.35858)
     assert data_attributes["station_long_name"] == 'Bilsdale, UK'
-    assert data["bsd_ch4_108m"]["ch4"][0] == pytest.approx(1960.25)
+    assert data["ch4_bsd_108m"]["ch4"][0] == pytest.approx(1960.25)

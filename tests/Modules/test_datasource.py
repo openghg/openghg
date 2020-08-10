@@ -408,8 +408,10 @@ def test_combining_no_overlap():
 
     assert combined == ['2001-01-01-00:00:00+00:00_2001-03-01-00:00:00+00:00', '2011-02-01-00:00:00+00:00_2011-06-01-00:00:00+00:00']
 
+def test_in_dateange():
+    d = Datasource()
 
-
+    assert False
 
 
 

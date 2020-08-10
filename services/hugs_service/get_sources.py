@@ -35,7 +35,7 @@ def get_sources(args):
     matching_sources = [d for d in datasources if d.search_metadata(search_terms=[site, species], find_all=True)]
 
     def name_str(d):
-        return "_".join([d.site(), d.species(), d.inlet()])
+        return "_".join([d.species(), d.site(), d.inlet()])
 
     unranked = {name_str(d): {"rank": d.rank(), "daterange": d.daterange_str(), "uuid": d.uuid()} for d in matching_sources}
 
