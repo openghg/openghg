@@ -11,6 +11,7 @@ from Acquire.ObjectStore import ObjectStore
 
 from HUGS.Modules import CRDS, Datasource
 from HUGS.ObjectStore import get_local_bucket
+from HUGS.Util import create_daterange_str
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
@@ -67,8 +68,6 @@ def test_add_data(data):
     d.add_data(metadata=metadata, data=ch4_data)
 
     date_key = "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
-
-    return False
 
     assert d._data[date_key]["ch4"].equals(ch4_data["ch4"])
     assert d._data[date_key]["ch4 stdev"].equals(ch4_data["ch4 stdev"])
@@ -329,6 +328,19 @@ def test_search_metadata():
     assert d.search_metadata("beans") == False
     assert d.search_metadata("flamingo") == False
 
+def test_search_metadata_require_all():
+    d = Datasource(name="test_search")
+
+    d._metadata = {"inlet": "100m", "instrument": "violin", "car": "toyota"}
+
+    result = d.search_metadata(search_terms=["100m", "violin", "toyota"], find_all=True)
+
+    assert result is True
+
+    result = d.search_metadata(search_terms=["100m", "violin", "toyota", "swallow"], find_all=True)
+
+    assert result is False
+
 def test_set_rank():
     d = Datasource()    
 
@@ -408,10 +420,43 @@ def test_combining_no_overlap():
 
     assert combined == ['2001-01-01-00:00:00+00:00_2001-03-01-00:00:00+00:00', '2011-02-01-00:00:00+00:00_2011-06-01-00:00:00+00:00']
 
-def test_in_dateange():
+def test_split_daterange_str():
     d = Datasource()
 
-    assert False
+    start_true = pd.Timestamp("2001-01-01-00:00:00", tz="UTC")
+    end_true = pd.Timestamp("2001-03-01-00:00:00", tz="UTC")
+
+    daterange_1 = "2001-01-01-00:00:00_2001-03-01-00:00:00"
+
+
+    start, end = d.split_datrange_str(daterange_str=daterange_1)
+
+    assert start_true == start
+    assert end_true == end
+
+
+def test_in_daterange(data):
+    metadata = data["ch4"]["metadata"]
+    data = data["ch4"]["data"]
+
+    d = Datasource()
+    d.add_data(metadata=metadata, data=data)
+    d.save()
+
+    start = pd.Timestamp("2014-1-1")
+    end = pd.Timestamp("2014-2-1")
+
+    daterange = create_daterange_str(start=start, end=end)
+
+    d._data_keys["latest"]["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"] = ['data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00']
+    d._data_keys["latest"]["2015-01-30-10:52:30+00:00_2016-01-30-14:20:30+00:00"] = ['data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2015-01-30-10:52:30+00:00_2016-01-30-14:20:30+00:00']
+    d._data_keys["latest"]["2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00"] = ['data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00']
+
+    keys = d.in_daterange(daterange=daterange)
+
+    assert keys[0].split("/")[-1] == '2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00'
+
+
 
 
 

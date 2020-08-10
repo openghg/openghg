@@ -339,6 +339,9 @@ def create_daterange_str(start, end):
     start = create_aligned_timestamp(start)
     end = create_aligned_timestamp(end)
 
+    if start > end:
+        raise ValueError("Start date is after end date")
+
     daterange = date_range(start=start, end=end, freq="min")
 
     return daterange_to_str(daterange)

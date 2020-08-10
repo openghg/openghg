@@ -572,17 +572,6 @@ class Datasource:
         data = get_object_json(bucket=bucket, key=key)
         return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
 
-    def version_data(self):
-        """ Check the version of the data passed and and check what we want
-            to do.
-
-            1. Update current data
-            2. Create a new "current" record and push the current back to v(n) where n is the number
-            of times data has been added to this Datasource
-            3. Clear data - this seems a bit dangerous to add, could just delete the whole datasource instead?
-        """
-        raise NotImplementedError()
-
     def data(self):
         """ Get the data stored in this Datasource
 
@@ -590,21 +579,6 @@ class Datasource:
                 list: List of tuples of Pandas.DataFrame and start, end datetime tuple
         """
         return self._data
-
-    def sort_data(self):
-        """ Sorts the data in the data list
-
-            TODO - Remove ? this should be redundant now
-
-            Returns:
-                None
-        """
-        raise NotImplementedError()
-        # from operator import itemgetter
-        # # Data list elements contain a tuple of
-        # # (data,(start_datetime, end_datetime))
-        # # Could also check to make sure we don't have overlapping dateranges?
-        # self._data = sorted(self._data, key=itemgetter(1,0))
 
     def update_daterange(self):
         """ Update the dates stored by this Datasource
@@ -717,54 +691,6 @@ class Datasource:
 
         return in_date
 
-    # def in_daterange(self, daterange):
-    #     """ Return the keys for data within the specified daterange
-
-    #         Args:
-    #             daterange (str): Daterange string of the form
-    #             2019-01-01T00:00:00_2019-12-31T00:00:00
-    #         Return:
-    #             list: List of keys to data
-    #     """
-    #     from pandas import date_range, Timestamp, Timedelta
-
-    #     split_daterange = daterange.split("_")
-
-    #     start_date = Timestamp(split_daterange[0], tz="UTC")
-
-    #     # TODO - bug ? in pandas results in no intersections being found if start Timestamp has seconds < 30
-    #     # if start_date.second < 30:
-    #     #     start_date += Timedelta("30 seconds")
-
-    #     end_date = Timestamp(split_daterange[1], tz="UTC")
-
-    #     daterange = date_range(start=start_date, end=end_date, freq="min")
-
-    #     in_date = []
-    #     for key in data_keys:
-    #         key_dates = key.split("_")
-
-    #         # We need daterange we're comparing it to to have the same seconds indexes for comparison
-
-
-
-    #         # Need to convert to Timestamp here?
-    #         key_start = Timestamp(key_dates[0], tz="UTC")
-    #         key_end = Timestamp(key_dates[1], tz="UTC")
-
-    #         print(key_start, key_end)
-
-    #         key_daterange = date_range(start=key_start, end=key_end, freq="min")
-
-    #         intersection = daterange.intersection(key_daterange)
-
-    #         print(intersection)
-    #         # if len(intersection) > 0:
-    #         #     in_date.append(key)
-
-    #     print(in_date)
-    #     return in_date
-
     def species(self):
         """ Returns the species of this Datasource
 
@@ -849,16 +775,6 @@ class Datasource:
             self._rank[rank] = self.combine_dateranges(self._rank[rank])
         except KeyError:
             self._rank[rank] = daterange
-
-    def date_already_ranked(daterange):
-        """ Check if a rank has already been set for this daterange
-
-            Args:
-                daterange (pandas.DatetimeIndex): Daterange
-            Returns:
-                bool: True if already ranked
-        """
-        raise NotImplementedError()
 
     def combine_dateranges(self, dateranges):
         """ Checks a list of daterange strings for overlapping and combines
@@ -946,42 +862,6 @@ class Datasource:
 
         return start, end
 
-    def get_rank_intersection(self, start_date=None, end_date=None):
-        """ Get the ranks of data contained within Datasource for the passed daterange.
-
-            If no rank has been set zero is returned.
-            If no start or end date is passed all ranking data will be returned.
-
-            Args:
-                start_date (datetime, default=None)
-                end_date (datetime, default=None)
-            Returns:
-                dict: Dictionary of rank: daterange
-        """
-        from HUGS.Util import daterange_from_str, daterange_to_str, create_daterange
-        # Need to search ranks in descending order
-        # If we don't have a rank return 9
-        if not self._rank:
-            return 0
-
-        if start_date is None or end_date is None:
-            return self._rank
-
-        search_daterange = create_daterange(start=start_date, end=end_date, freq="min")
-
-        results = {}
-
-        for rank, dateranges in self._rank.items():
-            for daterange_str in dateranges:
-                daterange = daterange_from_str(daterange_str)
-
-                print(search_daterange[0], daterange[0])
-                intersection = search_daterange.intersection(daterange)
-                if len(intersection) > 0:
-                    results[rank] = daterange_to_str(intersection)
-
-        return results
-
     def get_rank(self, start_date=None, end_date=None):
         """ Get the ranks of data contained within Datasource for the passed daterange.
 
@@ -1046,8 +926,6 @@ class Datasource:
     def versions(self):
         """ Return a summary of the versions of data stored for
             this Datasource
-
-            WIP
 
             Returns:
                 dict: Dictionary of versions
