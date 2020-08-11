@@ -880,7 +880,7 @@ class Datasource:
 
         # If we don't have a rank return 9
         if not self._rank:
-            return 0
+            return {}
 
         if start_date is None or end_date is None:
             return self._rank

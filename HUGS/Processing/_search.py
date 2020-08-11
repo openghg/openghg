@@ -173,6 +173,12 @@ def search(
                 # How to return all the sources if they're all 0?
                 for source in sources:
                     rank_data = source.get_rank(start_date=start_datetime, end_date=end_datetime)
+
+                    # With no rank set we get an empty dictionary
+                    if not rank_data:
+                        ranked_sources[0] = 0
+                        continue
+
                     # Just get the highest ranked datasources and return them
                     # Find the highest ranked data from this site
                     highest_rank = sorted(rank_data.keys())[-1]
@@ -193,6 +199,8 @@ def search(
 
                         results[key]["keys"] = {daterange_str: (data_keys)}
                         results[key]["metadata"] = source.metadata()
+
+                    continue
 
                 # Otherwise iterate over the sources that are ranked and extract the keys
                 for uid in ranked_sources:

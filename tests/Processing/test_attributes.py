@@ -56,7 +56,7 @@ def test_crds_attributes():
     del co2_attr["data_owner"]
 
     global_attributes = {
-        "inlet_height_magl": "test",
+        "inlet_height_magl": "100m",
         "comment": "Cavity ring-down measurements. Output from GCWerks",
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",

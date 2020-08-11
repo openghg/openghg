@@ -101,7 +101,7 @@ def test_read_data():
     assert ch4_metadata["site"] == "tac"
     assert ch4_metadata["instrument"] == "picarro"
     assert ch4_metadata["time_resolution"] == "1_minute"
-    assert ch4_metadata["height"] == "100m"
+    assert ch4_metadata["inlet"] == "100m"
     assert ch4_metadata["port"] == "9"
     assert ch4_metadata["type"] == "air"
     assert ch4_metadata["species"] == "ch4"

@@ -55,7 +55,9 @@ def test_recombination_CRDS():
 
     keys = search(species=gas_name, locations=location, data_type=data_type)
 
-    to_download = keys["hfd_ch4_100m_min"]["keys"]
+    to_download = keys["ch4_hfd_100m"]["keys"]
+
+    print(to_download)
 
     ch4_data_recombined = recombine_sections(data_keys=to_download)
 
