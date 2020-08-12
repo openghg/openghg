@@ -57,8 +57,6 @@ def test_recombination_CRDS():
 
     to_download = keys["ch4_hfd_100m"]["keys"]
 
-    print(to_download)
-
     ch4_data_recombined = recombine_sections(data_keys=to_download)
 
     ch4_data_recombined.attrs = {}

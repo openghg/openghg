@@ -60,8 +60,6 @@ def _parse_CRDS(filename, data):
     else:
         resolution = "Not read"
 
-    # Parse the dataframe to find the gases - this might be excessive
-    # gases, _ = find_gases(data=data)
     metadata = {}
     metadata["site"] = site
     metadata["instrument"] = instrument

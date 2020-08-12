@@ -197,7 +197,7 @@ def search(
                         daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
                         data_keys = source.in_daterange(daterange=daterange_str)
 
-                        results[key]["keys"] = {daterange_str: (data_keys)}
+                        results[key]["keys"] = data_keys
                         results[key]["metadata"] = source.metadata()
 
                     continue

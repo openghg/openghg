@@ -44,11 +44,6 @@ def crds_read():
 
 
 def test_search_GC():
-    locations = []
-    data_type = "GC"
-    start = None
-    end = None
-
     data_file = "capegrim-medusa.18.C"
     prec_file = "capegrim-medusa.18.precisions.C"
     dir_path = os.path.dirname(__file__)
@@ -66,12 +61,12 @@ def test_search_GC():
 
     results = search(
         species=["NF3"],
-        locations=locations,
-        data_type=data_type,
+        locations="CGO",
+        data_type="GC",
         require_all=False,
-        start_datetime=start,
-        end_datetime=end,
     )
+
+    print(results)
 
     nf3_results = results["capegrim_NF3_75m_4"]
 
@@ -84,6 +79,7 @@ def test_search_GC():
         "inlet": "75m_4",
         "data_type": "timeseries",
     }
+
 
     assert nf3_results["metadata"] == metadata
     assert nf3_results["start_date"] == "2018-01-01-02:24:00+00:00"

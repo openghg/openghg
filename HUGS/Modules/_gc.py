@@ -65,7 +65,7 @@ class GC(BaseModule):
         if bucket is None:
             bucket = get_bucket()
 
-        gc_key = "%s/uuid/%s" % (GC._root, GC._uuid)
+        gc_key = f"{GC._root}/uuid/{GC._uuid}"
 
         self._stored = True
         ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
@@ -75,7 +75,7 @@ class GC(BaseModule):
         data_filepath,
         precision_filepath,
         source_name,
-        site,
+        site=None,
         instrument_name=None,
         source_id=None,
         overwrite=False,
@@ -92,27 +92,30 @@ class GC(BaseModule):
         """
         from HUGS.Processing import assign_data, lookup_gas_datasources
         from pathlib import Path
-        from warnings import warn
 
         gc = GC.load()
 
         data_filepath = Path(data_filepath)
 
+        if site is None:
+            # Read from the filename
+            site_name = data_filepath.stem.split("-")
+            site = gc.get_site_code(site_name[0])
+
         # We need to have the 3 character site code here
         if len(site) != 3:
             site = gc.get_site_code(site)
+
+        print("Site : ", site)
 
         # Try and find the instrument name in the filename
         if instrument_name is None:
             if(len(data_filepath.stem.split("-")) > 1):
                 instrument_name = data_filepath.stem.split("-")[1]
-            else:
-                instrument_name = "NA"
 
             if(not gc.is_valid_instrument(instrument_name)):
-                warn(f"Invalid instrument, defaulting to GCMD. Instruments \
+                raise ValueError(f"Invalid instrument, defaulting to GCMD. Instruments \
                         that can be read from filename are {gc._gc_params['suffix_to_instrument'].keys()}")
-                instrument_name = "GCMD"
 
         gas_data = gc.read_data(
             data_filepath=data_filepath,
@@ -152,14 +155,11 @@ class GC(BaseModule):
                 site (str): Name of site
                 instrument (str): Identifying data for instrument
             Returns:
-                list: List of tuples (str, dict, str, Pandas.Dataframe)
-
-                Tuple contains species name, species metadata, datasource_uuid and dataframe
+                dict: Dictionary of gas data keyed by species
         """
         from datetime import datetime
         from pandas import read_csv
         from pandas import Timedelta as pd_Timedelta
-        from HUGS.Processing import read_metadata
 
         # Read header
         header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
@@ -180,7 +180,8 @@ class GC(BaseModule):
         )
         data.index.name = "Datetime"
 
-        metadata = read_metadata(filepath=data_filepath, data=data, data_type="GC")
+        # This metadata will be added to when species are split and attributes are written
+        metadata = {"instrument": instrument, "site": site}
 
         units = {}
         scale = {}
@@ -438,10 +439,8 @@ class GC(BaseModule):
                 bool: True if valid
         """
         valid_instruments = self._gc_params["suffix_to_instrument"].keys()
-        if(instrument.lower() in valid_instruments):
-            return True
-        else:
-            return False
+
+        return instrument.lower() in valid_instruments
 
     def get_precision(self, instrument):
         """ Get the precision of the instrument in seconds
