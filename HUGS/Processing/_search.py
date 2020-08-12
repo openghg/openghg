@@ -187,9 +187,9 @@ def search(
                         
                         # Get a key that covers the daterange of the actual data and not from epoch to now
                         # if no start/end datetimes are passed
-                        start, end = strip_dates_keys(data_keys)
+                        data_date_str = strip_dates_keys(data_keys)
 
-                        results[key]["keys"] = {daterange_str: data_keys}
+                        results[key]["keys"] = {data_date_str: data_keys}
                         results[key]["metadata"] = source.metadata()
 
                     continue
@@ -212,19 +212,18 @@ def search(
                     # Get the keys for each daterange
                     for d in source_dateranges:
                         keys_in_date = source.in_daterange(daterange=d)
+                        d = d.replace("+00:00", "")
                         if keys_in_date:
                             data_keys[d] = keys_in_date
 
                     if not data_keys:
                         continue
-
+                    
                     results[key]["keys"] = data_keys
                     results[key]["metadata"] = source.metadata()
     else:
         raise NotImplementedError("Footprint search not implemented.")
     
-    print(results)
-
     return results
 
 
@@ -241,12 +240,12 @@ def strip_dates_keys(keys):
     if not isinstance(keys, list):
         keys = [keys]
 
-    keys = sorted(keys)
+    keys.sort()
     start_key = keys[0]
     end_key = keys[-1]
     # Get the first and last dates from the keys in the search results
-    start_date = start_key.split("/")[-1].split("_")[0].rstrip("+00:00")
-    end_date = end_key.split("/")[-1].split("_")[-1].rstrip("+00:00")
+    start_date = start_key.split("/")[-1].split("_")[0].replace("+00:00", "")
+    end_date = end_key.split("/")[-1].split("_")[-1].replace("+00:00", "")
 
     return "_".join([start_date, end_date])
 
