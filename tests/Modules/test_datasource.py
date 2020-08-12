@@ -328,7 +328,7 @@ def test_search_metadata():
     assert d.search_metadata("beans") == False
     assert d.search_metadata("flamingo") == False
 
-def test_search_metadata_require_all():
+def test_search_metadata_find_all():
     d = Datasource(name="test_search")
 
     d._metadata = {"inlet": "100m", "instrument": "violin", "car": "toyota"}

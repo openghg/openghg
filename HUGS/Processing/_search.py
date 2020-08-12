@@ -38,7 +38,7 @@ def search(
     data_type,
     inlet=None,
     instrument=None,
-    require_all=False,
+    find_all=False,
     start_datetime=None,
     end_datetime=None,
 ):
@@ -49,7 +49,7 @@ def search(
             locations (str or list): Where to search for the terms in species
             inlet (str, default=None): Inlet height such as 100m
             instrument (str, default=None): Instrument name such as picarro
-            require_all (bool, default=False): Require all search terms to be satisfied
+            find_all (bool, default=False): Require all search terms to be satisfied
             start_datetime (datetime, default=None): Start datetime for search
             If None a start datetime of UNIX epoch (1970-01-01) is set
             end_datetime (datetime, default=None): End datetime for search
@@ -108,16 +108,8 @@ def search(
     data_obj = load_object(class_name=data_type)
     datasource_uuids = data_obj.datasources()
 
-    # TODO - implement lookup tables?
     # Shallow load the Datasources
     datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
-
-    # If inlet or instrument aren't passed we want to find the Datasource with the highest rank for
-    # the passed daterange
-
-    # # If all search terms are required just use a single composite key of all search terms
-    # if require_all:
-    #     single_key = "_".join(sorted(species))
 
     # First we find the Datasources from locations we want to narrow down our search
     location_sources = defaultdict(list)
@@ -149,34 +141,6 @@ def search(
 
         return results
 
-    # With the results below we need to find the correct rank for the returned data
-    # So for CO2 at Bilsdale we only want to return the highest ranked data
-    # If no rank is found in any of the datasources we want to return everything
-
-    # Get rank - get the highest ranked data for the daterange passed
-
-    # elif data_type == "FOOTPRINT":
-    #     footprints = []
-    #     search_fn = datasource.search_metadata
-    #     footprints = []
-    #     for datasource in datasources:
-    #         if datasource.search_metadata(data_type.lower()):
-    # Return the metadata for each datasource with the results?
-    # Display the additional metadata with each item
-    # How to then differentiate between the
-    # Take the values of the metadata keys and add them to the returned key to allow differentiation
-    # between returned keys? This feels clunky but should be OK for now
-    # Will get too long with lots of metadata
-
-    # Instead of adding the values to the key retur the metadata dict?
-    # Then we can parse that in the UI
-    # OR just update the UI for selcetion of the type of data before searching and then
-    # it creates a dictionary of search terms that can be parsed more easily by this function?
-    # For now we can differentiate between inlets at least
-
-    # Next we search these keys for the search terms we require
-    # keys = defaultdict(dict)
-
     if data_type != "FOOTPRINT":
         for location, sources in location_sources.items():
             # Loop over and look for the species
@@ -184,7 +148,7 @@ def search(
             for datasource in sources:
                 for s in species:
                     # Check the species and the daterange
-                    if datasource.search_metadata(search_terms=s):
+                    if datasource.search_metadata(search_terms=s, find_all=find_all):
                         species_data[s].append(datasource)
 
             # For each location we want to find the highest ranking sources for the selected species
@@ -218,10 +182,24 @@ def search(
                         daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
                         data_keys = source.in_daterange(daterange=daterange_str)
 
-                        results[key]["keys"] = data_keys
+                        if not data_keys:
+                            continue
+                        
+                        # Get a key that covers the daterange of the actual data and not from epoch to now
+                        # if no start/end datetimes are passed
+                        start, end = strip_dates_keys(data_keys)
+
+                        results[key]["keys"] = {daterange_str: data_keys}
                         results[key]["metadata"] = source.metadata()
 
                     continue
+                else:
+                    # TODO - find a cleaner way of doing this
+                    # We might have a zero rank, delete it as we have higher ranked data
+                    try:
+                        del ranked_sources[0]
+                    except KeyError:
+                        pass
 
                 # Otherwise iterate over the sources that are ranked and extract the keys
                 for uid in ranked_sources:
@@ -230,107 +208,22 @@ def search(
 
                     key = f"{sp}_{location}_{source.inlet()}"
 
-                    dated_keys = {}
-
+                    data_keys = {}
                     # Get the keys for each daterange
                     for d in source_dateranges:
                         keys_in_date = source.in_daterange(daterange=d)
                         if keys_in_date:
-                            dated_keys[d] = keys_in_date
+                            data_keys[d] = keys_in_date
 
-                    results[key]["keys"] = dated_keys
+                    if not data_keys:
+                        continue
+
+                    results[key]["keys"] = data_keys
                     results[key]["metadata"] = source.metadata()
-
-        # if species is not None:
-        #     for search_term in species:
-        #         for location in location_sources:
-        #             for datasource in location_sources[location]:
-        #                 if datasource.search_metadata(search_term) and datasource.in_daterange(start_datetime, end_datetime):
-        #                     # Currently just add the inlet to the search key
-        #                     # TODO - come up with a cleaner way of creating this key
-        #                     key_addition = datasource.metadata().get("inlet", "")
-
-        #                     if require_all:
-        #                         remaining_terms = [datasource.search_metadata(term) for term in species if term != search_term]
-
-        #                         if all(remaining_terms):
-        #                             search_key = f"{location}_{single_key}_{key_addition}"
-        #                             valid_datasources[search_key].append(datasource)
-        #                     else:
-        #                         search_key = f"{location}_{search_term}_{key_addition}"
-        #                         valid_datasources[search_key].append(datasource)
-
-        #                     # in_date = datasource.in_daterange(start_date=start_datetime, end_date=end_datetime)
-
-        #                     # Add the values of the metadata dictionary to the key for differentiation
-
-        #                     # if require_all:
-        #                     #     search_key = f"{location}_{single_key}_{key_addition}"
-        #                     #     remaining_terms = [
-        #                     #         datasource.search_metadata(term)
-        #                     #         for term in species
-        #                     #         if term != search_term
-        #                     #     ]
-
-        #                     #     if all(remaining_terms):
-        #                     #         results = append_keys(
-        #                     #             results=results,
-        #                     #             search_key=search_key,
-        #                     #             keys=in_date,
-        #                     #         )
-        #                     #         # Add the metadata from the Datasource to the results
-        #                     #         results[search_key]["metadata"] = datasource.metadata()
-        #                     #         # results[search_key].extend(in_date)
-        #                     # else:
-        #                     #     search_key = f"{location}_{search_term}_{key_addition}"
-        #                     #     results = append_keys(
-        #                     #         results=results, search_key=search_key, keys=in_date
-        #                     #     )
-        #                     #     results[search_key]["metadata"] = datasource.metadata()
-        #                         # results[search_key].extend(in_date)
-        # # If we don't have any search terms, return everything that's in the correct daterange
-        # else:
-        #     for location in location_sources:
-        #         for datasource in location_sources[location]:
-        #             in_date = datasource.in_daterange(start_date=start_datetime, end_date=end_datetime)
-
-        #             key_addition = datasource.metadata().get("inlet", "")
-
-        #             search_key = f"{location}_{datasource.species()}_{key_addition}"
-
-        #             valid_datasources[search_key].append(datasource)
-
-        #             # results = append_keys(
-        #             #     results=results, search_key=search_key, keys=in_date
-        #             # )
-        #             # results[search_key]["metadata"] = datasource.metadata()
-        #             # results[search_key].extend(in_date)
     else:
         raise NotImplementedError("Footprint search not implemented.")
-    #     # For now get all footprints
-    #     for datasource in datasources:
-    #         if datasource.data_type() == "footprint":
-    #             search_key = single_key
-    #             prefix = f"data/uuid/{datasource.uuid()}" 
-    #             data_list = get_object_names(bucket=bucket, prefix=prefix)
-    #             results = append_keys(
-    #                 results=results, search_key=search_key, keys=data_list
-    #             )
-    #             results[search_key]["metadata"] = datasource.metadata()
-    # results["footprints"].extend(data_list)
-    # else:
-    #     raise NotImplementedError("Only time series and footprint data can be searched for currently")
-
-    # Now we find the highest ranking data for each key
-    # for key in valid_datasources:
-        # Find the highest rank
-
-    # # Here we can add the daterange key to the search results
-    # # TODO - can this just be taken more easily from the Datasource?
-    # for key in results:
-    #     start, end = strip_dates_keys(keys=results[key]["keys"])
-    #     results[key]["start_date"] = start
-    #     results[key]["end_date"] = end
+    
+    print(results)
 
     return results
 
@@ -339,13 +232,11 @@ def strip_dates_keys(keys):
     """ Strips the date from a key, could this data just be read from JSON instead?
         Read dates covered from the Datasource?
 
-        TODO - check if this is necessary - Datasource instead?
-
         Args:
             keys (list): List of keys containing data
-            data/uuid/<uuid>/2014-01-30T10:52:30_2014-01-30T14:20:30'
+            data/uuid/<uuid>/<version>/2019-03-01-04:14:30+00:00_2019-05-31-20:44:30+00:00
         Returns:
-            tuple (str,str): Start, end dates
+            str: Daterange string
     """
     if not isinstance(keys, list):
         keys = [keys]
@@ -354,10 +245,10 @@ def strip_dates_keys(keys):
     start_key = keys[0]
     end_key = keys[-1]
     # Get the first and last dates from the keys in the search results
-    start_date = start_key.split("/")[-1].split("_")[0].replace("T", " ")
-    end_date = end_key.split("/")[-1].split("_")[-1].replace("T", " ")
+    start_date = start_key.split("/")[-1].split("_")[0].rstrip("+00:00")
+    end_date = end_key.split("/")[-1].split("_")[-1].rstrip("+00:00")
 
-    return start_date, end_date
+    return "_".join([start_date, end_date])
 
 
 def append_keys(results, search_key, keys):

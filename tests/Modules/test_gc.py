@@ -105,7 +105,7 @@ def test_read_file_incorrect_inlet_raises(precision_path):
 def test_read_invalid_instrument_raises(
     data_path_no_instrument, precision_path_no_instrument
 ):
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         GC.read_file(
             data_filepath=data_path_no_instrument,
             precision_filepath=precision_path_no_instrument,
@@ -141,24 +141,13 @@ def test_read_valid_instrument_passed(
 def test_read_unsure_instrument_type(
     data_path_no_instrument, precision_path_no_instrument
 ):
-    with pytest.warns(UserWarning):
-        uuids = GC.read_file(
+    with pytest.raises(ValueError):
+        GC.read_file(
             data_filepath=data_path_no_instrument,
             precision_filepath=precision_path_no_instrument,
             source_name="capegrim_medusa",
             site="CGO",
         )
-
-    assert list(uuids.keys()) == [
-        "capegrim_medusa_CH4",
-        "capegrim_medusa_CFC-12",
-        "capegrim_medusa_N2O",
-        "capegrim_medusa_CFC-11",
-        "capegrim_medusa_CFC-113",
-        "capegrim_medusa_CHCl3",
-        "capegrim_medusa_CH3CCl3",
-        "capegrim_medusa_CCl4",
-    ]
 
 
 def test_read_data(data_path, precision_path):

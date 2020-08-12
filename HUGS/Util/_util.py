@@ -246,26 +246,20 @@ def create_aligned_timestamp(time):
         interval for use in dateranges and overlap checks.
 
         Args:   
-            time (str, datetime, pandas.Timestamp)
+            time (str, pandas.Timestamp)
         Returns:
             pandas.Timestamp: Timestamp aligned to minute 
             with UTC timezone
     """
     from pandas import Timedelta, Timestamp
-    from datetime import datetime, timezone
 
-    if isinstance(time, datetime):
-        if time.tzinfo is None:
-            t = time.replace(tzinfo=timezone.utc)
-        else:
-            t = time.astimezone(tz=timezone.utc)
-    elif isinstance(time, Timestamp):
-        if time.tzinfo is None:
-            t = time.tz_localize(tz="UTC")
-        else:
-            t = time.tz_convert(tz="UTC")
+    if not isinstance(time, Timestamp):
+        time = Timestamp(ts_input=time)
+
+    if time.tzinfo is None:
+        t = time.tz_localize(tz="UTC")
     else:
-        t = Timestamp(time, tz="UTC")
+        t = time.tz_convert(tz="UTC")
 
     t -= Timedelta(f"{t.second} s")
 
@@ -302,15 +296,7 @@ def create_daterange_str(start, end):
         Returns:
             str: Daterange string
     """
-    from pandas import date_range
-
-    start = create_aligned_timestamp(start)
-    end = create_aligned_timestamp(end)
-
-    if start > end:
-        raise ValueError("Start date is after end date")
-
-    daterange = date_range(start=start, end=end, freq="min")
+    daterange = create_daterange(start=start, end=end)
 
     return daterange_to_str(daterange)
 

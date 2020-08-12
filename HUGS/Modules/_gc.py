@@ -106,16 +106,14 @@ class GC(BaseModule):
         if len(site) != 3:
             site = gc.get_site_code(site)
 
-        print("Site : ", site)
-
         # Try and find the instrument name in the filename
         if instrument_name is None:
             if(len(data_filepath.stem.split("-")) > 1):
                 instrument_name = data_filepath.stem.split("-")[1]
 
-            if(not gc.is_valid_instrument(instrument_name)):
-                raise ValueError(f"Invalid instrument, defaulting to GCMD. Instruments \
-                        that can be read from filename are {gc._gc_params['suffix_to_instrument'].keys()}")
+                if(not gc.is_valid_instrument(instrument_name)):
+                    raise ValueError(f"Invalid instrument, defaulting to GCMD. Instruments \
+                            that can be read from filename are {gc._gc_params['suffix_to_instrument'].keys()}")
 
         gas_data = gc.read_data(
             data_filepath=data_filepath,
@@ -418,7 +416,7 @@ class GC(BaseModule):
             site_attributes = data[species]["attributes"]
             units = data[species]["metadata"]["units"]
             scale = data[species]["metadata"]["scale"]
-            
+
             data[species]["data"] = get_attributes(
                 ds=data[species]["data"],
                 species=species,
@@ -457,7 +455,7 @@ class GC(BaseModule):
         try:
             sampling_period = self._gc_params["sampling_period"][instrument]
         except KeyError:
-            raise KeyError(f"Invalid instrument: {instrument}\nPlease select one of {self._gc_params['sampling_period'].keys()}\n")
+            raise ValueError(f"Invalid instrument: {instrument}\nPlease select one of {self._gc_params['sampling_period'].keys()}\n")
 
         return sampling_period
 
