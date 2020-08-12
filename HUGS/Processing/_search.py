@@ -58,15 +58,36 @@ def search(
             dict: List of keys of Datasources matching the search parameters
     """
     from collections import defaultdict
+    from json import load
     from HUGS.Modules import Datasource
     from HUGS.Util import (get_datetime_now, get_datetime_epoch, create_daterange_str, 
-                          load_object, create_daterange, timestamp_tzaware)
+                            load_object, timestamp_tzaware, get_datapath)
 
     if not isinstance(species, list):
         species = [species]
 
     if not isinstance(locations, list):
         locations = [locations]
+
+    # Allow passing of location names instead of codes
+    site_codes_json = get_datapath(filename="site_codes.json")
+    with open(site_codes_json, "r") as f:
+        d = load(f)
+        site_codes = d["name_code"]
+
+    updated_locations = []
+    # Check locations, if they're longer than three letters do a lookup
+    for l in locations:
+        if len(l) > 3:
+            try:
+                site_code = site_codes[l.lower()]
+                updated_locations.append(site_code)
+            except KeyError:
+                raise ValueError(f"Invalid site {l} passed")
+        else:
+            updated_locations.append(l)
+
+    locations = updated_locations
 
     if start_datetime is None:
         start_datetime = get_datetime_epoch()
@@ -131,7 +152,7 @@ def search(
     # With the results below we need to find the correct rank for the returned data
     # So for CO2 at Bilsdale we only want to return the highest ranked data
     # If no rank is found in any of the datasources we want to return everything
-    
+
     # Get rank - get the highest ranked data for the daterange passed
 
     # elif data_type == "FOOTPRINT":
@@ -278,7 +299,7 @@ def search(
         #             search_key = f"{location}_{datasource.species()}_{key_addition}"
 
         #             valid_datasources[search_key].append(datasource)
-                    
+
         #             # results = append_keys(
         #             #     results=results, search_key=search_key, keys=in_date
         #             # )
@@ -296,7 +317,7 @@ def search(
     #                 results=results, search_key=search_key, keys=data_list
     #             )
     #             results[search_key]["metadata"] = datasource.metadata()
-                # results["footprints"].extend(data_list)
+    # results["footprints"].extend(data_list)
     # else:
     #     raise NotImplementedError("Only time series and footprint data can be searched for currently")
 

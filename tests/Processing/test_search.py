@@ -61,17 +61,15 @@ def test_search_GC():
 
     results = search(
         species=["NF3"],
-        locations="CGO",
+        locations="capegrim",
         data_type="GC",
         require_all=False,
     )
 
-    print(results)
-
-    nf3_results = results["capegrim_NF3_75m_4"]
+    nf3_results = results["NF3_CGO_75m_4"]
 
     metadata = {
-        "site": "capegrim",
+        "site": "cgo",
         "instrument": "medusa",
         "species": "nf3",
         "units": "ppt",
@@ -80,10 +78,8 @@ def test_search_GC():
         "data_type": "timeseries",
     }
 
-
+    assert nf3_results["keys"][0].split("/")[-1] == "2018-01-01-02:24:00+00:00_2018-01-31-23:33:00+00:00"
     assert nf3_results["metadata"] == metadata
-    assert nf3_results["start_date"] == "2018-01-01-02:24:00+00:00"
-    assert nf3_results["end_date"] == "2018-01-31-23:33:00+00:00"
 
 
 def test_location_search(crds_read):
