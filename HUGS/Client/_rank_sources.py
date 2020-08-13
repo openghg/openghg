@@ -9,8 +9,10 @@ class RankSources:
     This class is used to select the primary datasources for species from different sites
     """
     def __init__(self, service_url=None):
-
         wallet = Wallet()
+        if service_url is None:
+            service_url = "https://hugs.acquire-aaai.com/t"
+
         self._service = wallet.get_service(service_url=f"{service_url}/hugs")
 
         self._before_ranking = {}
