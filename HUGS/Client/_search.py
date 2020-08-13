@@ -1,5 +1,6 @@
 __all__ = ["Search"]
 
+from collections import defaultdict
 import json
 import warnings
 import xarray
@@ -55,14 +56,13 @@ class Search:
         }
 
     def download(self, selected_keys):
-        """ Download the selected keys
-
-            TODO should this just return a single concatenated Dataset?
+        """ Downloads the selected keys and returns a dictionary of
+            xarray Datasets
 
             Args:
                 keys (str, list): Key(s) from search results to download
             Returns:
-                dict: Dictionary of Datasets for 
+                defaultdict(dict): Dictionary of Datasets
         """
         if not isinstance(selected_keys, list):
             selected_keys = [selected_keys]
@@ -73,27 +73,24 @@ class Search:
 
         args = {"keys": download_keys, "return_type": "json"}
         response = self._service.call_function(function="retrieve", args=args)
-        response_data = response["results"]
+        result_data = response["results"]
 
-        # Convert the string passed to dict
-        for key in response_data:
-            response_data[key] = json.loads(response_data[key])
-
-        datasets = {}
+        datasets = defaultdict(dict)
         # TODO - find a better way of doing this, returning compressed binary data would be far better
-        for key in response_data:
-            # We need to convert the datetime string back to datetime objects here
-            datetime_data = response_data[key]["coords"]["time"]["data"]
+        for key, dateranges in result_data.items():
+            for daterange in dateranges:
+                serialised_data = json.loads(result_data[key][daterange])
 
-            for i, _ in enumerate(datetime_data):
-                datetime_data[i] = string_to_datetime(datetime_data[i])
+                # We need to convert the datetime string back to datetime objects here
+                datetime_data = serialised_data["coords"]["time"]["data"]
+                for i, _ in enumerate(datetime_data):
+                    datetime_data[i] = string_to_datetime(datetime_data[i])
 
-            # TODO - catch FutureWarnings here that may affect run when used within voila
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
+                # TODO - catch FutureWarnings here that may affect run when used within voila
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
 
-                json_data = response_data[key]
-                datasets[key] = xarray.Dataset.from_dict(json_data)
+                    datasets[key][daterange] = xarray.Dataset.from_dict(serialised_data)
 
         return datasets
 

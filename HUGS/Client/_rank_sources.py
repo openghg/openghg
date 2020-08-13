@@ -75,5 +75,10 @@ class RankSources:
                 str: Serialisable daterange string
         """
         from Acquire.ObjectStore import datetime_to_string
+        from pandas import Timestamp
+
+        if isinstance(start, str) and isinstance(end, str):
+            start = Timestamp(start).to_pydatetime()
+            end = Timestamp(end).to_pydatetime()
 
         return "".join([datetime_to_string(start), "_", datetime_to_string(end)])

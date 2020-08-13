@@ -37,6 +37,6 @@ def get_sources(args):
     def name_str(d):
         return "_".join([d.species(), d.site(), d.inlet()])
 
-    unranked = {name_str(d): {"rank": d.rank(), "daterange": d.daterange_str(), "uuid": d.uuid()} for d in matching_sources}
+    unranked = {name_str(d): {"rank": d.rank(), "data_range": d.daterange_str(), "uuid": d.uuid()} for d in matching_sources}
 
     return unranked
