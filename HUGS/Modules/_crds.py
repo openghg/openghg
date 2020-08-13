@@ -319,6 +319,8 @@ class CRDS(BaseModule):
         from HUGS.Modules import Datasource
         from HUGS.Util import daterange_from_str
 
+        rank = int(rank)
+        
         if not 0 <= rank <= 10:
             raise TypeError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
 

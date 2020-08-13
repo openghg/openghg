@@ -22,16 +22,13 @@ def rank_sources(args):
 
     data_obj = load_object(class_name=data_type)
 
-    for r in ranking_data:
-        rank = ranking_data[r]["rank"]
+    for key in ranking_data:
+        uuid = ranking_data[key]["uuid"]
+        for rank, daterange in ranking_data[key]["rank"].items():
+            if rank == 0:
+                continue
 
-        # If a Datasource is left as unranked, ignore it
-        if rank == 0:
-            continue
+            for d in daterange:
+                data_obj.set_rank(uuid=uuid, rank=rank, daterange=daterange)
 
-        uuid = ranking_data[r]["uuid"]
-        daterange = ranking_data[r]["daterange"]
-
-        data_obj.set_rank(uuid=uuid, rank=rank, daterange=daterange)
-
-        data_obj.save()
+    data_obj.save()

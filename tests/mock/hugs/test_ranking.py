@@ -38,25 +38,10 @@ def load_crds(authenticated_user):
     )
 
 
-def test_get_sources(authenticated_user, load_crds):
-    r = RankSources(service_url="hugs")
-    sources = r.get_sources(site="hfd", species="co2", data_type="CRDS")
-
-    del sources["co2_hfd_100m"]["uuid"]
-    del sources["co2_hfd_50m"]["uuid"]
-
-    expected_sources = {'co2_hfd_100m': {'rank': 0, 'daterange': '2013-12-04T14:02:30_2019-05-21T15:46:30'}, 
-                        'co2_hfd_50m': {'rank': 0, 'daterange': '2013-11-23T12:28:30_2020-06-24T09:41:30'}}
-
-    assert sources == expected_sources
-
-
 def test_set_ranking(authenticated_user, load_crds):
     r = RankSources(service_url="hugs")
 
     sources = r.get_sources(site="hfd", species="ch4", data_type="CRDS")
-
-    # original_sources = copy.deepcopy(sources)
 
     fifty_metre_uuid = sources["ch4_hfd_50m"]["uuid"]
     hundred_metre_uuid = sources["ch4_hfd_100m"]["uuid"]
@@ -64,13 +49,13 @@ def test_set_ranking(authenticated_user, load_crds):
     del sources["ch4_hfd_100m"]["uuid"]
     del sources["ch4_hfd_50m"]["uuid"]
 
-    expected_sources = {'ch4_hfd_100m': {'rank': 0, 'daterange': '2013-12-04T14:02:30_2019-05-21T15:46:30'}, 
-                        'ch4_hfd_50m': {'rank': 0, 'daterange': '2013-11-23T12:28:30_2020-06-24T09:41:30'}}
+    expected_sources = {'ch4_hfd_100m': {'rank': 0, 'data_range': '2013-12-04T14:02:30_2019-05-21T15:46:30'}, 
+                        'ch4_hfd_50m': {'rank': 0, 'data_range': '2013-11-23T12:28:30_2020-06-24T09:41:30'}}
 
     assert sources == expected_sources
 
-    new_rankings = {'ch4_hfd_100m': {'rank': 1, 'daterange': '2013-12-04T14:02:30_2019-05-21T15:46:30', 'uuid': hundred_metre_uuid}, 
-                    'ch4_hfd_50m': {'rank': 2, 'daterange': '2013-11-23T12:28:30_2020-06-24T09:41:30', 'uuid': fifty_metre_uuid}}
+    new_rankings = {'ch4_hfd_100m': {'rank': {1: ["2013-12-04T14:02:30_2019-05-21T15:46:30"]}, 'uuid': hundred_metre_uuid}, 
+                    'ch4_hfd_50m': {'rank': {2: ['2013-11-23T12:28:30_2020-06-24T09:41:30']}, 'uuid': fifty_metre_uuid}}
 
     r.rank_sources(updated_rankings=new_rankings, data_type="CRDS")
 
@@ -79,7 +64,9 @@ def test_set_ranking(authenticated_user, load_crds):
     del sources["ch4_hfd_100m"]["uuid"]
     del sources["ch4_hfd_50m"]["uuid"]
 
-    assert sources == {'ch4_hfd_100m': {'rank': {'1': ['2013-12-04T14:02:30_2019-05-21T15:46:30']}, 
-                        'daterange': '2013-12-04T14:02:30_2019-05-21T15:46:30'}, 
-                        'ch4_hfd_50m': {'rank': {'2': ['2013-11-23T12:28:30_2020-06-24T09:41:30']}, 
-                        'daterange': '2013-11-23T12:28:30_2020-06-24T09:41:30'}}
+    expected = {'ch4_hfd_100m': {'rank': {'1': ['2013-12-04T14:02:30_2019-05-21T15:46:30']}, 
+                'data_range': '2013-12-04T14:02:30_2019-05-21T15:46:30'}, 
+                'ch4_hfd_50m': {'rank': {'2': ['2013-11-23T12:28:30_2020-06-24T09:41:30']}, 
+                'data_range': '2013-11-23T12:28:30_2020-06-24T09:41:30'}}
+
+    assert sources == expected
