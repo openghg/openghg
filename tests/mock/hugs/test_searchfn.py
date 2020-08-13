@@ -13,8 +13,36 @@ def tempdir(tmpdir_factory):
     return str(d)
 
 
+# @pytest.fixture(scope="session")
+# def load_two_crds(authenticated_user):
+#     hugs = Service(service_url="hugs")
+#     _ = hugs.call_function(function="clear_datasources", args={})
+
+#     def test_folder(filename):
+#         dir_path = os.path.dirname(__file__)
+#         test_folder = "../../../tests/data/search_data"
+#         return os.path.join(dir_path, test_folder, filename)
+
+#     files = [
+#         "bsd.picarro.1minute.108m.min.dat",
+#         "hfd.picarro.1minute.100m.min.dat",
+#         "tac.picarro.1minute.100m.min.dat",
+#     ]
+#     filepaths = [test_folder(f) for f in files]
+
+#     process = Process(service_url="hugs")
+
+#     process.process_files(
+#         user=authenticated_user,
+#         files=filepaths,
+#         data_type="CRDS",
+#         hugs_url="hugs",
+#         storage_url="storage",
+#     )
+
+
 @pytest.fixture(scope="session")
-def load_crds(authenticated_user):
+def load_two_crds(authenticated_user):
     hugs = Service(service_url="hugs")
     _ = hugs.call_function(function="clear_datasources", args={})
 
@@ -24,35 +52,9 @@ def load_crds(authenticated_user):
         return os.path.join(dir_path, test_folder, filename)
 
     files = [
-        "bsd.picarro.1minute.108m.min.dat",
-        "hfd.picarro.1minute.100m.min.dat",
-        "tac.picarro.1minute.100m.min.dat",
-    ]
-    filepaths = [test_folder(f) for f in files]
-
-    process = Process(service_url="hugs")
-
-    process.process_files(
-        user=authenticated_user,
-        files=filepaths,
-        data_type="CRDS",
-        hugs_url="hugs",
-        storage_url="storage",
-    )
-
-@pytest.fixture(scope="session")
-def load_two_crds(authenticated_user):
-    # hugs = Service(service_url="hugs")
-    # _ = hugs.call_function(function="clear_datasources", args={})
-
-    def test_folder(filename):
-        dir_path = os.path.dirname(__file__)
-        test_folder = "../../../tests/data/search_data"
-        return os.path.join(dir_path, test_folder, filename)
-
-    files = [
         "bsd.picarro5310.1minute.108m.min.dat",
-        "bsd.picarro5310.1minute.248m.min.dat"
+        "bsd.picarro5310.1minute.248m.min.dat",
+        "hfd.picarro.1minute.100m.min.dat",
     ]
 
     filepaths = [test_folder(f) for f in files]
@@ -68,31 +70,33 @@ def load_two_crds(authenticated_user):
     )
 
 
-def test_search_bsd(load_crds):
+def test_search_hfd(load_two_crds):
     search = Search(service_url="hugs")
 
     search_term = "co"
-    location = "bsd"
+    location = "hfd"
     data_type = "CRDS"
 
-    results = search.search(species=search_term, locations=location, data_type=data_type)
+    results = search.search(
+        species=search_term, locations=location, data_type=data_type
+    )
 
-    bsd_res = results["co_bsd_108m"]
+    hfd_res = results["co_hfd_100m"]
 
-    assert len(bsd_res["keys"]["2014-01-30-13:33:30_2019-07-04-04:23:30"]) == 23
+    assert len(hfd_res["keys"]["2013-11-20-20:02:30_2019-07-04-21:29:30"]) == 25
 
     expected_metadata = {
-        "site": "bsd",
+        "site": "hfd",
         "instrument": "picarro",
         "time_resolution": "1_minute",
-        "inlet": "108m",
-        "port": "9",
+        "inlet": "100m",
+        "port": "10",
         "type": "air",
         "species": "co",
         "data_type": "timeseries",
     }
 
-    assert bsd_res["metadata"] == expected_metadata
+    assert hfd_res["metadata"] == expected_metadata
 
 
 def test_search_and_rank(load_two_crds):
@@ -100,42 +104,78 @@ def test_search_and_rank(load_two_crds):
     r = RankSources(service_url="hugs")
     sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
-    uuid_108m = sources['co_bsd_108m']["uuid"]
-    uuid_248m = sources['co_bsd_248m']["uuid"]
+    uuid_108m = sources["co_bsd_108m"]["uuid"]
+    uuid_248m = sources["co_bsd_248m"]["uuid"]
 
-    del sources['co_bsd_108m']["uuid"]
-    del sources['co_bsd_248m']["uuid"]
+    del sources["co_bsd_108m"]["uuid"]
+    del sources["co_bsd_248m"]["uuid"]
 
-    assert sources == {'co_bsd_108m': {'rank': 0, 'daterange': '2019-03-06T14:03:30_2020-07-04T11:44:30'}, 
-                        'co_bsd_248m': {'rank': 0, 'daterange': '2019-03-06T13:23:30_2020-07-05T03:38:30'}}
+    assert sources == {
+        "co_bsd_108m": {
+            "rank": 0,
+            "daterange": "2019-03-06T14:03:30_2020-07-04T11:44:30",
+        },
+        "co_bsd_248m": {
+            "rank": 0,
+            "daterange": "2019-03-06T13:23:30_2020-07-05T03:38:30",
+        },
+    }
 
-    daterange_108 = r.create_daterange(start=datetime(2019, 3, 7), end=datetime(2019, 9, 15))
-    daterange_248 = r.create_daterange(start=datetime(2019, 9, 16), end=datetime(2020, 7, 5))
+    daterange_108 = r.create_daterange(
+        start=datetime(2019, 3, 7), end=datetime(2019, 9, 15)
+    )
+    daterange_248 = r.create_daterange(
+        start=datetime(2019, 9, 16), end=datetime(2020, 7, 5)
+    )
 
-    new_rankings = {'co_bsd_108m': {'rank': 1, 'daterange': [daterange_108] , 'uuid': uuid_108m}, 
-                    'co_bsd_248m': {'rank': 1, 'daterange': daterange_248, 'uuid': uuid_248m}}
+    new_rankings = {
+        "co_bsd_108m": {"rank": 1, "daterange": [daterange_108], "uuid": uuid_108m},
+        "co_bsd_248m": {"rank": 1, "daterange": daterange_248, "uuid": uuid_248m},
+    }
 
     r.rank_sources(updated_rankings=new_rankings, data_type="CRDS")
 
     updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
-    updated_sources["co_bsd_108m"]["rank"] == {'1': ['2019-03-07T00:00:00_2019-09-15T00:00:00']}
-    updated_sources["co_bsd_248m"]["rank"] == {'1': ['2019-09-16T00:00:00_2020-07-05T00:00:00']}
+    updated_sources["co_bsd_108m"]["rank"] == {
+        "1": ["2019-03-07T00:00:00_2019-09-15T00:00:00"]
+    }
+    updated_sources["co_bsd_248m"]["rank"] == {
+        "1": ["2019-09-16T00:00:00_2020-07-05T00:00:00"]
+    }
 
-    daterange_108_1 = r.create_daterange(start=datetime(2019, 3, 7), end=datetime(2019, 9, 15))
-    daterange_108_2 = r.create_daterange(start=datetime(2019, 11, 6), end=datetime(2020, 7, 5))
-    daterange_248 = r.create_daterange(start=datetime(2019, 9, 16), end=datetime(2019, 11, 5))
+    daterange_108_1 = r.create_daterange(
+        start=datetime(2019, 3, 7), end=datetime(2019, 9, 15)
+    )
+    daterange_108_2 = r.create_daterange(
+        start=datetime(2019, 11, 6), end=datetime(2020, 7, 5)
+    )
+    daterange_248 = r.create_daterange(
+        start=datetime(2019, 9, 16), end=datetime(2019, 11, 5)
+    )
     # Change in ranking
-    new_rankings = {'co_bsd_108m': {'rank': 1, 'daterange': [daterange_108_1, daterange_108_2] , 'uuid': uuid_108m}, 
-                    'co_bsd_248m': {'rank': 1, 'daterange': daterange_248, 'uuid': uuid_248m}}
+    new_rankings = {
+        "co_bsd_108m": {
+            "rank": 1,
+            "daterange": [daterange_108_1, daterange_108_2],
+            "uuid": uuid_108m,
+        },
+        "co_bsd_248m": {"rank": 1, "daterange": daterange_248, "uuid": uuid_248m},
+    }
 
     r.rank_sources(updated_rankings=new_rankings, data_type="CRDS")
 
     updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
-    assert updated_sources["co_bsd_108m"]["rank"] == {'1': ['2019-03-07-00:00:00+00:00_2019-09-15-00:00:00+00:00', 
-                                                            '2019-11-06-00:00:00+00:00_2020-07-05-00:00:00+00:00']}
-    assert updated_sources["co_bsd_248m"]["rank"] == {'1': ['2019-09-16T00:00:00_2019-11-05T00:00:00']}
+    assert updated_sources["co_bsd_108m"]["rank"] == {
+        "1": [
+            "2019-03-07-00:00:00+00:00_2019-09-15-00:00:00+00:00",
+            "2019-11-06-00:00:00+00:00_2020-07-05-00:00:00+00:00",
+        ]
+    }
+    assert updated_sources["co_bsd_248m"]["rank"] == {
+        "1": ["2019-09-16T00:00:00_2019-11-05T00:00:00"]
+    }
 
     # Now we need to search for the data and ensure we get the correct data keys returned
     search = Search(service_url="hugs")
@@ -147,99 +187,133 @@ def test_search_and_rank(load_two_crds):
     start_search = Timestamp(2019, 3, 7)
     end_search = Timestamp(2020, 10, 30)
 
-    results = search.search(species=species, locations=location, data_type=data_type, start_datetime=start_search, end_datetime=end_search)
+    results = search.search(
+        species=species,
+        locations=location,
+        data_type=data_type,
+        start_datetime=start_search,
+        end_datetime=end_search,
+    )
 
-    assert results["co_bsd_108m"]["metadata"] == {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 
-                                                'inlet': '108m', 'port': '2', 'type': 'air', 'species': 'co', 'data_type': 'timeseries'}
+    assert results["co_bsd_108m"]["metadata"] == {
+        "site": "bsd",
+        "instrument": "picarro5310",
+        "time_resolution": "1_minute",
+        "inlet": "108m",
+        "port": "2",
+        "type": "air",
+        "species": "co",
+        "data_type": "timeseries",
+    }
 
     assert len(results["co_bsd_108m"]["keys"]["2019-03-07-00:00:00_2019-09-15-00:00:00"]) == 3
     assert len(results["co_bsd_108m"]["keys"]["2019-11-06-00:00:00_2020-07-05-00:00:00"]) == 5
-
     assert len(results["co_bsd_248m"]["keys"]["2019-09-16-00:00:00_2019-11-05-00:00:00"]) == 1
 
-    assert results["co_bsd_248m"]["metadata"] == {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 
-                                                'inlet': '248m', 'port': '1', 'type': 'air', 'species': 'co', 'data_type': 'timeseries'}
+    assert results["co_bsd_248m"]["metadata"] == {
+        "site": "bsd",
+        "instrument": "picarro5310",
+        "time_resolution": "1_minute",
+        "inlet": "248m",
+        "port": "1",
+        "type": "air",
+        "species": "co",
+        "data_type": "timeseries",
+    }
 
 
 def test_single_site_search(load_two_crds):
     search = Search(service_url="hugs")
 
     species = "co"
-    location = "bsd"
+    location = "hfd"
     data_type = "CRDS"
-    inlet = "108m"
-    instrument = "picarro5310"
-
-    results = search.search(species=species, locations=location, data_type=data_type, inlet=inlet, instrument=instrument)
-
-    assert len(results["co_bsd_picarro5310_108m"]["keys"]) == 7
-    assert results["co_bsd_picarro5310_108m"]["metadata"] == {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 
-                                                                'inlet': '108m', 'port': '2', 'type': 'air', 'species': 'co', 
-                                                                'data_type': 'timeseries'}
-
-
-def test_search_multispecies_singlesite(load_crds):
-    search = Search(service_url="hugs")
-
-    search_term = ["co", "co2"]
-    location = "bsd"
-    data_type = "CRDS"
-
-    results = search.search(species=search_term, locations=location, data_type=data_type)
-
-    assert sorted(list(results.keys())) == sorted(["co_bsd_108m", "co2_bsd_108m", "co_bsd_248m"])
-    
-    print(results)
-
-    # assert len(results["co_bsd_108m"]["keys"]["2014-01-30-13:33:30_2019-07-04-04:23:30"]) == 23
-    # assert len(results["co_bsd_108m"]["keys"]["2019-03-07-00:00:00+00:00_2019-09-15-00:00:00+00:00"]
-    # assert len(results["co2_bsd_108m"]["keys"]) == 23
-    # assert len(results["co_bsd_248m"]["keys"]) == 2
-
-
-def test_search_multisite_co(load_crds):
-    search = Search(service_url="hugs")
-
-    search_term = "co"
-    location = ["bsd", "hfd", "tac"]
-    data_type = "CRDS"
+    inlet = "100m"
+    instrument = "picarro"
 
     results = search.search(
-        species=search_term, locations=location, data_type=data_type
+        species=species,
+        locations=location,
+        data_type=data_type,
+        inlet=inlet,
+        instrument=instrument,
     )
 
-    assert sorted(list(results.keys())) == sorted(["co_bsd_108m", "co_hfd_100m", "co_bsd_248m"])
+    assert len(results["co_hfd_picarro_100m"]["keys"]["2013-11-20-20:02:30_2019-07-04-21:29:30"]) == 25
 
-    assert "2013-11-20-20:02:30_2019-07-04-21:29:30" in results["co_hfd_100m"]["keys"]
+    assert results["co_hfd_picarro_100m"]["metadata"] == {'site': 'hfd', 'instrument': 'picarro', 'time_resolution': '1_minute', 
+                                                            'inlet': '100m', 'port': '10', 'type': 'air', 'species': 'co', 
+                                                            'data_type': 'timeseries'}
 
 
-def test_search_multiplesite_multiplespecies(load_crds):
-    search = Search(service_url="hugs")
+# def test_search_multispecies_singlesite(load_two_crds):
+#     search = Search(service_url="hugs")
 
-    search_term = ["ch4", "co2"]
-    location = ["bsd", "hfd", "tac"]
-    data_type = "CRDS"
+#     search_term = ["co", "co2"]
+#     location = "bsd"
+#     data_type = "CRDS"
 
-    results = search.search(
-        species=search_term, locations=location, data_type=data_type
-    )
+#     results = search.search(species=search_term, locations=location, data_type=data_type)
 
-    expected_keys = ['ch4_bsd_108m', 'co2_bsd_108m', 'ch4_hfd_100m', 'co2_hfd_100m', 'ch4_tac_100m', 'co2_tac_100m']
+#     assert sorted(list(results.keys())) == sorted(["co_bsd_108m", "co_bsd_248m"])
+#     assert "2019-03-07-00:00:00_2019-09-15-00:00:00" in results["co_bsd_108m"]["keys"]
+#     assert "2019-09-16-00:00:00_2019-11-05-00:00:00" in results["co_bsd_248m"]["keys"]
 
-    assert sorted(list(results.keys())) == sorted(expected_keys)
 
-    expected_keys = ['2014-01-30-13:33:30_2019-07-04-04:23:30',
-                    '2014-01-30-13:33:30_2019-07-04-04:23:30',
-                    '2013-11-20-20:02:30_2019-07-04-21:29:30',
-                    '2013-11-20-20:02:30_2019-07-04-21:29:30',
-                    '2012-07-26-12:01:30_2019-07-04-09:58:30',
-                    '2012-07-26-12:01:30_2019-07-04-09:58:30']
+# def test_search_multisite_co(load_two_crds):
+#     search = Search(service_url="hugs")
 
-    keys = []
-    for key in results:
-        keys.append(list(results[key]["keys"].keys())[0])
+#     search_term = "co"
+#     location = ["bsd", "hfd", "tac"]
+#     data_type = "CRDS"
 
-    assert sorted(keys) == sorted(expected_keys)
+#     results = search.search(
+#         species=search_term, locations=location, data_type=data_type
+#     )
+
+#     assert sorted(list(results.keys())) == sorted(
+#         ["co_bsd_108m", "co_hfd_100m", "co_bsd_248m"]
+#     )
+
+#     assert "2013-11-20-20:02:30_2019-07-04-21:29:30" in results["co_hfd_100m"]["keys"]
+
+
+# def test_search_multiplesite_multiplespecies(load_two_crds):
+#     search = Search(service_url="hugs")
+
+#     search_term = ["ch4", "co2"]
+#     location = ["bsd", "hfd", "tac"]
+#     data_type = "CRDS"
+
+#     results = search.search(
+#         species=search_term, locations=location, data_type=data_type
+#     )
+
+#     expected_keys = [
+#         "ch4_bsd_108m",
+#         "co2_bsd_108m",
+#         "ch4_hfd_100m",
+#         "co2_hfd_100m",
+#         "ch4_tac_100m",
+#         "co2_tac_100m",
+#     ]
+
+#     assert sorted(list(results.keys())) == sorted(expected_keys)
+
+#     expected_keys = [
+#         "2014-01-30-13:33:30_2019-07-04-04:23:30",
+#         "2014-01-30-13:33:30_2019-07-04-04:23:30",
+#         "2013-11-20-20:02:30_2019-07-04-21:29:30",
+#         "2013-11-20-20:02:30_2019-07-04-21:29:30",
+#         "2012-07-26-12:01:30_2019-07-04-09:58:30",
+#         "2012-07-26-12:01:30_2019-07-04-09:58:30",
+#     ]
+
+#     keys = []
+#     for key in results:
+#         keys.append(list(results[key]["keys"].keys())[0])
+
+#     assert sorted(keys) == sorted(expected_keys)
 
 
 # def test_returns_readable_results():
@@ -253,7 +327,7 @@ def test_search_multiplesite_multiplespecies(load_crds):
 #     assert search.results() == {'ch4_bsd_108m': 'Daterange : 2014-01-30-13:33:30+00:00 - 2019-07-04-04:23:30+00:00'}
 
 
-# def test_search_download():
+# def test_search_download(load_two_crds):
 #     search = Search(service_url="hugs")
 
 #     search_term = ["ch4"]
@@ -267,5 +341,5 @@ def test_search_multiplesite_multiplespecies(load_crds):
 #     assert data_attributes["data_owner"] == "Simon O'Doherty"
 #     assert data_attributes["station_longitude"] == pytest.approx(-1.15033)
 #     assert data_attributes["station_latitude"] == pytest.approx(54.35858)
-#     assert data_attributes["station_long_name"] == 'Bilsdale, UK'
+#     assert data_attributes["station_long_name"] == "Bilsdale, UK"
 #     assert data["ch4_bsd_108m"]["ch4"][0] == pytest.approx(1960.25)

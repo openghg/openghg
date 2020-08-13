@@ -44,6 +44,8 @@ def search(
 ):
     """ Search for gas data (optionally within a daterange)
 
+        TODO - review this function - feel like it can be tidied and simplified
+
         Args:
             species (str or list): Terms to search for in Datasources
             locations (str or list): Where to search for the terms in species
@@ -77,15 +79,15 @@ def search(
 
     updated_locations = []
     # Check locations, if they're longer than three letters do a lookup
-    for l in locations:
-        if len(l) > 3:
+    for loc in locations:
+        if len(loc) > 3:
             try:
-                site_code = site_codes[l.lower()]
+                site_code = site_codes[loc.lower()]
                 updated_locations.append(site_code)
             except KeyError:
-                raise ValueError(f"Invalid site {l} passed")
+                raise ValueError(f"Invalid site {loc} passed")
         else:
-            updated_locations.append(l)
+            updated_locations.append(loc)
 
     locations = updated_locations
 
@@ -134,9 +136,11 @@ def search(
                         # Get the data keys for the data in the matching daterange
                         in_date = datasource.in_daterange(daterange=daterange_str)
 
+                        data_date_str = strip_dates_keys(in_date)
+
                         key = f"{sp}_{site}_{instrument}_{inlet}"
                         # Find the keys that match the correct data
-                        results[key]["keys"] = in_date
+                        results[key]["keys"] = {data_date_str: in_date}
                         results[key]["metadata"] = datasource.metadata()
 
         return results
@@ -184,7 +188,7 @@ def search(
 
                         if not data_keys:
                             continue
-                        
+
                         # Get a key that covers the daterange of the actual data and not from epoch to now
                         # if no start/end datetimes are passed
                         data_date_str = strip_dates_keys(data_keys)
@@ -218,12 +222,12 @@ def search(
 
                     if not data_keys:
                         continue
-                    
+
                     results[key]["keys"] = data_keys
                     results[key]["metadata"] = source.metadata()
     else:
         raise NotImplementedError("Footprint search not implemented.")
-    
+
     return results
 
 
