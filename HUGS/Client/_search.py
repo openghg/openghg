@@ -75,7 +75,8 @@ class Search:
         response = self._service.call_function(function="retrieve", args=args)
         result_data = response["results"]
 
-        datasets = defaultdict(dict)
+        # datasets = defaultdict(dict)
+        datasets = []
         # TODO - find a better way of doing this, returning compressed binary data would be far better
         for key, dateranges in result_data.items():
             for daterange in dateranges:
@@ -89,8 +90,8 @@ class Search:
                 # TODO - catch FutureWarnings here that may affect run when used within voila
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
-
-                    datasets[key][daterange] = xarray.Dataset.from_dict(serialised_data)
+                    # datasets[key][daterange] = xarray.Dataset.from_dict(serialised_data)
+                    datasets.append(xarray.Dataset.from_dict(serialised_data))
 
         return datasets
 

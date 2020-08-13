@@ -3,8 +3,7 @@ import os
 import pandas as pd
 import pytest
 from Acquire.Client import PAR, Authorisation, Drive, Service, StorageCreds
-
-from HUGS.Client import ClearDatasources, Retrieve, Search
+from HUGS.Client import ClearDatasources, Search
 
 
 @pytest.fixture(scope="session")
