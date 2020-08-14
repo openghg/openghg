@@ -55,11 +55,9 @@ def test_retrieve(authenticated_user, crds):
     )
 
     key = list(search_results.keys())[0]
-    
-    result = search_obj.download(selected_keys=key)
 
-    data_key = list(result.keys())[0]
-    data = result[data_key]["2014-01-30-10:52:30_2014-01-30-14:20:30"]
+    result = search_obj.download(selected_keys=key)
+    data = result[0]
 
     del data.attrs["File created"]
 

@@ -24,6 +24,7 @@ def rank_sources(args):
 
     for key in ranking_data:
         uuid = ranking_data[key]["uuid"]
+
         for rank, daterange in ranking_data[key]["rank"].items():
             if rank == 0:
                 continue

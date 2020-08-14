@@ -166,20 +166,8 @@ def test_search_and_rank(load_two_crds):
 
     updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
-    print(updated_sources)
-
-    return False
-
-
-    assert updated_sources["co_bsd_108m"]["rank"] == {
-        "1": [
-            "2019-03-07-00:00:00+00:00_2019-09-15-00:00:00+00:00",
-            "2019-11-06-00:00:00+00:00_2020-07-05-00:00:00+00:00",
-        ]
-    }
-    assert updated_sources["co_bsd_248m"]["rank"] == {
-        "1": ["2019-09-16T00:00:00_2019-11-05T00:00:00"]
-    }
+    assert updated_sources["co_bsd_108m"]["rank"] == {'1': ['2019-03-07-00:00:00+00:00_2019-09-15-00:00:00+00:00', '2019-11-06-00:00:00+00:00_2020-07-05-00:00:00+00:00']}
+    assert updated_sources["co_bsd_248m"]["rank"] == {'1': ['2019-09-16-00:00:00+00:00_2020-07-05-00:00:00+00:00']}
 
     # Now we need to search for the data and ensure we get the correct data keys returned
     search = Search(service_url="hugs")
@@ -219,8 +207,8 @@ def test_search_and_rank(load_two_crds):
         == 5
     )
     assert (
-        len(results["co_bsd_248m"]["keys"]["2019-09-16-00:00:00_2019-11-05-00:00:00"])
-        == 1
+        len(results["co_bsd_248m"]["keys"]["2019-09-16-00:00:00_2020-07-05-00:00:00"])
+        == 5
     )
 
     assert results["co_bsd_248m"]["metadata"] == {

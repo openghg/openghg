@@ -768,7 +768,6 @@ class Datasource:
         if not isinstance(daterange, list):
             daterange = [daterange]
 
-        print(f"Adding {daterange} to datasource")
         try:
             self._rank[rank].extend(daterange)
             self._rank[rank] = self.combine_dateranges(self._rank[rank])
@@ -791,11 +790,12 @@ class Datasource:
         from collections import defaultdict
         from HUGS.Util import daterange_from_str, daterange_to_str
 
+        # Ensure there are no duplciates
+        dateranges = list(set(dateranges))
+        # We can't combine a single daterange
         if len(dateranges) < 2:
             return dateranges
 
-        # Ensure there are no duplciates and the dateranges are sorted
-        dateranges = list(set(dateranges))
         dateranges.sort()
 
         daterange_objects = [daterange_from_str(x) for x in dateranges]

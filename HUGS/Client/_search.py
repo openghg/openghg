@@ -1,6 +1,5 @@
 __all__ = ["Search"]
 
-from collections import defaultdict
 import json
 import warnings
 import xarray
