@@ -300,6 +300,17 @@ class CRDS(BaseModule):
 
         return data
 
+    def get_rank(self, uuid, daterange):
+        """ Get the rank of the Datasource with the passed uuid for the given daterange
+
+            Args:
+                uuid (str)
+                daterange (str)
+            Returns:
+                dict: Dictionary of rank data
+        """
+        pass
+
     def set_rank(self, uuid, rank, daterange):
         """ Set the rank of a Datasource associated with this object.
 
@@ -319,9 +330,7 @@ class CRDS(BaseModule):
         from HUGS.Modules import Datasource
         from HUGS.Util import daterange_from_str
 
-        rank = int(rank)
-        
-        if not 0 <= rank <= 10:
+        if not 0 <= int(rank) <= 10:
             raise TypeError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
 
         if not isinstance(daterange, list):

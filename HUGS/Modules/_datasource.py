@@ -762,14 +762,13 @@ class Datasource:
             Returns:
                 None
         """
-        rank = int(rank)
+        if not 0 <= int(rank) <= 10:
+            raise TypeError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
 
         if not isinstance(daterange, list):
             daterange = [daterange]
 
-        if not 0 <= rank <= 10:
-            raise TypeError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
-
+        print(f"Adding {daterange} to datasource")
         try:
             self._rank[rank].extend(daterange)
             self._rank[rank] = self.combine_dateranges(self._rank[rank])

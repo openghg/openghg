@@ -29,6 +29,6 @@ def rank_sources(args):
                 continue
 
             for d in daterange:
-                data_obj.set_rank(uuid=uuid, rank=rank, daterange=daterange)
+                data_obj.set_rank(uuid=uuid, rank=rank, daterange=d)
 
     data_obj.save()
