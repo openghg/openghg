@@ -10,6 +10,7 @@ class RankSources:
     """
     def __init__(self, service_url=None):
         wallet = Wallet()
+
         if service_url is None:
             service_url = "https://hugs.acquire-aaai.com/t"
 
@@ -43,7 +44,22 @@ class RankSources:
 
         self._before_ranking = copy.deepcopy(response)
 
+        self._key_uuids = {key: response[key]["uuid"] for key in response}
+
         return response
+
+    def rank_simply(self, key, start_date, end_date, data_type):
+        """ Simply y
+
+            Args:
+                key (str): Key such as co_bsd_248m
+                start_date (str): Start date
+                end_date ()
+            Returns:
+                None
+        """
+        pass
+
 
     def rank_sources(self, updated_rankings, data_type):
         """ Assign the precendence of sources for each.

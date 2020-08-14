@@ -700,15 +700,23 @@ class Datasource:
         return self._metadata["species"]
 
     def inlet(self):
-        """ Returns the inlet of this Datasource
+        """ Returns the inlet height of this Datasource
 
             Returns:
-                str: Inlet of this Datasource
+                str: Inlet height of this Datasource
         """
         return self._metadata["inlet"]
 
     def site(self):
+        """ Return the instrument 
+
+            Returns:
+                str: Instrument name
+        """
         return self._metadata.get("site", "NA")
+
+    def instrument(self):
+        return self._metadata.get("instrument", "NA")
 
     def uuid(self):
         """ Return the UUID of this object
