@@ -104,18 +104,18 @@ def test_search_and_rank(load_two_crds):
     r = RankSources(service_url="hugs")
     sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
-    uuid_108m = sources["co_bsd_108m"]["uuid"]
-    uuid_248m = sources["co_bsd_248m"]["uuid"]
+    uuid_108m = sources["co_bsd_108m_picarro5310"]["uuid"]
+    uuid_248m = sources["co_bsd_248m_picarro5310"]["uuid"]
 
-    del sources["co_bsd_108m"]["uuid"]
-    del sources["co_bsd_248m"]["uuid"]
+    del sources["co_bsd_108m_picarro5310"]["uuid"]
+    del sources["co_bsd_248m_picarro5310"]["uuid"]
 
     assert sources == {
-        "co_bsd_108m": {
+        "co_bsd_108m_picarro5310": {
             "rank": 0,
             "data_range": "2019-03-06T14:03:30_2020-07-04T11:44:30",
         },
-        "co_bsd_248m": {
+        "co_bsd_248m_picarro5310": {
             "rank": 0,
             "data_range": "2019-03-06T13:23:30_2020-07-05T03:38:30",
         },
@@ -129,18 +129,18 @@ def test_search_and_rank(load_two_crds):
     )
 
     new_rankings = {
-        "co_bsd_108m": {"rank": {1: [daterange_108]}, "uuid": uuid_108m},
-        "co_bsd_248m": {"rank": {1: [daterange_248]}, "uuid": uuid_248m},
+        "co_bsd_108m_picarro5310": {"rank": {1: [daterange_108]}, "uuid": uuid_108m},
+        "co_bsd_248m_picarro5310": {"rank": {1: [daterange_248]}, "uuid": uuid_248m},
     }
 
     r.rank_sources(updated_rankings=new_rankings, data_type="CRDS")
 
     updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
-    assert updated_sources["co_bsd_108m"]["rank"] == {
+    assert updated_sources["co_bsd_108m_picarro5310"]["rank"] == {
         "1": ["2019-03-07T00:00:00_2019-09-15T00:00:00"]
     }
-    assert updated_sources["co_bsd_248m"]["rank"] == {
+    assert updated_sources["co_bsd_248m_picarro5310"]["rank"] == {
         "1": ["2019-09-16T00:00:00_2020-07-05T00:00:00"]
     }
 
@@ -155,19 +155,19 @@ def test_search_and_rank(load_two_crds):
     )
     # Change in ranking
     new_rankings = {
-        "co_bsd_108m": {
+        "co_bsd_108m_picarro5310": {
             "rank": {1 : [daterange_108_1, daterange_108_2]},
             "uuid": uuid_108m,
         },
-        "co_bsd_248m": {"rank": {1: [daterange_248]}, "uuid": uuid_248m},
+        "co_bsd_248m_picarro5310": {"rank": {1: [daterange_248]}, "uuid": uuid_248m},
     }
 
     r.rank_sources(updated_rankings=new_rankings, data_type="CRDS")
 
     updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
-    assert updated_sources["co_bsd_108m"]["rank"] == {'1': ['2019-03-07-00:00:00+00:00_2019-09-15-00:00:00+00:00', '2019-11-06-00:00:00+00:00_2020-07-05-00:00:00+00:00']}
-    assert updated_sources["co_bsd_248m"]["rank"] == {'1': ['2019-09-16-00:00:00+00:00_2020-07-05-00:00:00+00:00']}
+    assert updated_sources["co_bsd_108m_picarro5310"]["rank"] == {'1': ['2019-03-07-00:00:00+00:00_2019-09-15-00:00:00+00:00', '2019-11-06-00:00:00+00:00_2020-07-05-00:00:00+00:00']}
+    assert updated_sources["co_bsd_248m_picarro5310"]["rank"] == {'1': ['2019-09-16-00:00:00+00:00_2020-07-05-00:00:00+00:00']}
 
     # Now we need to search for the data and ensure we get the correct data keys returned
     search = Search(service_url="hugs")
