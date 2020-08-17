@@ -60,7 +60,6 @@ class RankSources:
         """
         pass
 
-
     def rank_sources(self, updated_rankings, data_type):
         """ Assign the precendence of sources for each.
             This function expects a dictionary of the form
