@@ -3,17 +3,7 @@ import os
 
 from Acquire.ObjectStore import ObjectStore, use_testing_object_store_backend
 
-__all__ = ["bucket_time", "get_local_bucket"]
-
-
-def bucket_time():
-    """ Returns a prettified (maybe) string of the current
-        time and date
-
-        Returns:
-            str: A formatted version of datetime.now()
-    """
-    return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+__all__ = ["get_local_bucket"]
 
 
 def get_local_bucket(name=None, empty=False):
