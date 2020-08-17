@@ -14,6 +14,7 @@ __all__ = [
     "get_dated_object",
     "get_object",
     "get_dated_object_json",
+    "get_local_bucket",
     "exists",
     "get_object_json",
     "get_abs_filepaths",
@@ -222,47 +223,42 @@ def get_bucket(empty=False):
         Args:
             empty (bool, default=False): Get an empty bucket
         Returns:
-            dict: Bucket
+            str: Bucket path as string
     """
     from Acquire.Service import get_service_account_bucket
 
-    return get_service_account_bucket()
+    try:
+        bucket = get_service_account_bucket()
+    except:
+        bucket = get_local_bucket(empty=empty)
+
+    return bucket
 
 
-def get_local_bucket(name=None, empty=False):
-    """ Creates and returns a local bucket
-        that's created in the user's home directory
+def get_local_bucket(empty=False):
+    """ Creates and returns a local bucket that's created in the
+        /tmp/hugs_test directory
 
         Args:
-            name (str, default=None): Extra string to add to bucket name
             empty (bool, default=False): If True return an empty bucket
         Returns:
-            dict: Local bucket
+            str: Path to local bucket
     """
-    from Acquire.ObjectStore import ObjectStore, use_testing_object_store_backend
-    from Acquire.Service import get_service_account_bucket
+    from pathlib import Path
     import shutil
+    from Acquire.ObjectStore import ObjectStore, use_testing_object_store_backend
 
-    # Get the path of the user's home directory
-    home_path = os.path.expanduser("~")
-    hugs_test_buckets = "hugs_tmp/test_buckets"
+    local_buckets_dir = Path("/tmp/hugs_test")
 
-    local_buckets_dir = os.path.join(home_path, hugs_test_buckets)
-
-    if name is not None:
-        hugs_test_buckets += "/%s" % name
-
-    if empty is not None:
-        # Remove the directory and recreate
-        if os.path.isdir(local_buckets_dir):
+    if local_buckets_dir.exists():
+        if empty is True:
             shutil.rmtree(local_buckets_dir)
-            os.makedirs(local_buckets_dir)
-        else:
-            os.makedirs(local_buckets_dir)
+            local_buckets_dir.mkdir(parents=True)
+    else:
+        local_buckets_dir.mkdir(parents=True)
 
     root_bucket = use_testing_object_store_backend(local_buckets_dir)
 
     bucket = ObjectStore.create_bucket(bucket=root_bucket, bucket_name="hugs_test")
 
     return bucket
-
