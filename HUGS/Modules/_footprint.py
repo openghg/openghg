@@ -111,18 +111,17 @@ class Footprint:
             Returns:
                 None
         """
+        from HUGS.ObjectStore import get_bucket, set_object_from_json
+
         if self.is_null():
             return
-
-        from Acquire.ObjectStore import ObjectStore
-        from HUGS.ObjectStore import get_bucket
 
         if bucket is None:
             bucket = get_bucket()
 
         self._stored = True
-        key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_uuid)
-        ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
+        key = f"{Footprint._footprint_root}/uuid/{Footprint._footprint_uuid}"
+        set_object_from_json(bucket=bucket, key=key, data=self.to_data())
 
     @staticmethod
     def load(bucket=None):
@@ -133,8 +132,7 @@ class Footprint:
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from Acquire.ObjectStore import ObjectStore
-        from HUGS.ObjectStore import get_bucket
+        from HUGS.ObjectStore import get_bucket, get_object_from_json
 
         if not Footprint.exists():
             return Footprint.create()
@@ -142,8 +140,8 @@ class Footprint:
         if bucket is None:
             bucket = get_bucket()
 
-        key = "%s/uuid/%s" % (Footprint._footprint_root, Footprint._footprint_uuid)
-        data = ObjectStore.get_object_from_json(bucket=bucket, key=key)
+        key = f"{Footprint._footprint_root}/uuid/{Footprint._footprint_uuid}"
+        data = get_object_from_json(bucket=bucket, key=key)
 
         return Footprint.from_data(data=data, bucket=bucket)
 

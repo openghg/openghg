@@ -55,12 +55,11 @@ class GC(BaseModule):
         """ Save this GC object in the object store
 
             Args:
-                bucket (dict, default=None): Bucket for data storage
+                bucket (str, default=None): Bucket for data storage
             Returns:
                 None
         """
-        from Acquire.ObjectStore import ObjectStore
-        from HUGS.ObjectStore import get_bucket
+        from HUGS.ObjectStore import get_bucket, set_object_from_json
 
         if bucket is None:
             bucket = get_bucket()
@@ -68,7 +67,7 @@ class GC(BaseModule):
         gc_key = f"{GC._root}/uuid/{GC._uuid}"
 
         self._stored = True
-        ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
+        set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
 
     @staticmethod
     def read_file(

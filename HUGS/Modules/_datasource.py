@@ -326,9 +326,9 @@ class Datasource:
             Returns:
                 Pandas.Dataframe: Dataframe from stored HDF file
         """
-        from HUGS.ObjectStore import get_dated_object
+        from HUGS.ObjectStore import get_object
 
-        data = get_dated_object(bucket, key)
+        data = get_object(bucket, key)
 
         return Datasource.hdf_to_dataframe(data)
 
@@ -348,12 +348,12 @@ class Datasource:
             Returns:
                 xarray.Dataset: Dataset from NetCDF file
         """
-        from Acquire.ObjectStore import ObjectStore
+        from HUGS.ObjectStore import get_object
         from xarray import load_dataset
         import tempfile
         from pathlib import Path
 
-        data = ObjectStore.get_object(bucket, key)
+        data = get_object(bucket, key)
 
         # TODO - is there a cleaner way of doing this?
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -483,18 +483,15 @@ class Datasource:
         """ Save this Datasource object as JSON to the object store
 
             Args:
-                bucket (dict): Bucket to hold data
+                bucket (str, default=None): Bucket to hold data
             Returns:
                 None
         """
         import tempfile
         from copy import deepcopy
 
-        from Acquire.ObjectStore import (
-            get_datetime_now_to_string,
-            ObjectStore,
-        )
-        from HUGS.ObjectStore import get_bucket
+        from Acquire.ObjectStore import get_datetime_now_to_string
+        from HUGS.ObjectStore import get_bucket, set_object_from_file, set_object_from_json
 
         if bucket is None:
             bucket = get_bucket()
@@ -521,7 +518,7 @@ class Datasource:
                 with tempfile.TemporaryDirectory() as tmpdir:
                     filepath = f"{tmpdir}/temp.nc"
                     data.to_netcdf(filepath)
-                    ObjectStore.set_object_from_file(bucket, data_key, filepath)
+                    set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
 
             # Copy the last version
             if "latest" in self._data_keys:
@@ -538,9 +535,7 @@ class Datasource:
         self._stored = True
         datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
-        ObjectStore.set_object_from_json(
-            bucket=bucket, key=datasource_key, data=self.to_data()
-        )
+        set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
 
     @staticmethod
     def load(bucket=None, uuid=None, key=None, shallow=False):

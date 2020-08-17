@@ -1,6 +1,7 @@
 """ Query the object store for data uploaded by a certain user etc
 
 """
+from Acquire.ObjectStore import ObjectStore
 import sys
 
 if sys.version_info.major < 3:
@@ -10,11 +11,14 @@ if sys.version_info.minor < 6:
     raise ImportError("HUGS requires Python 3.6 minimum")
 
 __all__ = [
+    "delete_object",
     "get_object_names",
-    "get_dated_object",
+    "get_all_object_names",
     "get_object",
-    "get_dated_object_json",
+    "get_object_from_json",
     "get_local_bucket",
+    "set_object_from_json",
+    "set_object_from_file",
     "exists",
     "get_object_json",
     "get_abs_filepaths",
@@ -23,6 +27,33 @@ __all__ = [
     "hash_files",
     "get_bucket",
 ]
+
+
+def get_all_object_names(bucket, prefix=None, without_prefix=False):
+    """ Returns the names of all objects in the passed bucket
+
+        Args:
+            bucket (str): Bucket containing data
+            prefix (str, default=None): String for key prefix
+            without_prefix (bool, default=False)
+        Returns:
+            list: List of object names
+    """
+    from Acquire.ObjectStore import ObjectStore
+
+    return ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix, without_prefix=without_prefix)
+
+
+def delete_object(bucket, key):
+    """ Delete the object at key in bucket
+
+        Args:
+            bucket (str): Bucket containing data
+            key (str): Key for data in bucket
+        Returns:
+            None
+    """
+    return ObjectStore.delete_object(bucket=bucket, key=key)
 
 
 def get_object_names(bucket, prefix=None):
@@ -35,32 +66,7 @@ def get_object_names(bucket, prefix=None):
         Returns:
             list: List of keys in object store
     """
-    from Acquire.ObjectStore import ObjectStore
-
     return ObjectStore.get_all_object_names(bucket, prefix)
-
-
-def get_dated_object(bucket, key):
-    """ Removes the daterange from the passed key and uses the reduced
-        key to get an object from the object store.
-
-        Wraps the Acquire get_object function
-
-        Args:
-            bucket (dict): Bucket containing data
-            key (str): Key for data in bucket
-        Returns:
-            Object: Object from store
-    """
-    from Acquire.ObjectStore import ObjectStore as _ObjectStore
-
-    # Get the object and use the key as a prefix
-    name = _ObjectStore.get_all_object_names(bucket, prefix=key)
-
-    if len(name) > 1:
-        raise ValueError("There should only be one object")
-
-    return _ObjectStore.get_object(bucket, name[0])
 
 
 def get_object(bucket, key):
@@ -74,12 +80,10 @@ def get_object(bucket, key):
         Returns:
             Object: Object from store
     """
-    from Acquire.ObjectStore import ObjectStore as _ObjectStore
-
-    return _ObjectStore.get_object(bucket, key)
+    return ObjectStore.get_object(bucket, key)
 
 
-def get_dated_object_json(bucket, key):
+def get_object_from_json(bucket, key):
     """ Removes the daterange from the passed key and uses the reduced
         key to get an object from the object store.
 
@@ -91,15 +95,13 @@ def get_dated_object_json(bucket, key):
         Returns:
             Object: Object from store
     """
-    from Acquire.ObjectStore import ObjectStore as _ObjectStore
-
     # Get the object and use the key as a prefix
-    name = _ObjectStore.get_all_object_names(bucket, prefix=key)
+    name = ObjectStore.get_all_object_names(bucket, prefix=key)
 
     if len(name) > 1:
-        raise ValueError("There should only be one object")
+        raise ValueError("There should only be one object with this key")
 
-    return _ObjectStore.get_object_from_json(bucket, name[0])
+    return ObjectStore.get_object_from_json(bucket, name[0])
 
 
 def exists(bucket, key):
@@ -111,10 +113,8 @@ def exists(bucket, key):
         Returns:
             bool: True if exists in store
     """
-    from Acquire.ObjectStore import ObjectStore as _ObjectStore
-
     # Get the object and use the key as a prefix
-    name = _ObjectStore.get_all_object_names(bucket, prefix=key)
+    name = ObjectStore.get_all_object_names(bucket, prefix=key)
 
     return len(name) > 0
 
@@ -125,16 +125,39 @@ def get_object_json(bucket, key):
         Wraps the Acquire get_object_from_json function
 
         Args:
-            bucket(dict): Bucket containing data
-            key(str): Key for data in bucket
+            bucket (str): Bucket containing data
+            key (str): Key for data in bucket
         Returns:
             Object: Object from store
     """
-    from Acquire.ObjectStore import ObjectStore as _ObjectStore
+    return ObjectStore.get_object_from_json(bucket, key)
 
-    return _ObjectStore.get_object_from_json(bucket, key)
 
-    _ObjectStore.get_obj
+def set_object_from_json(bucket, key, data):
+    """ Wraps the Acquire set_object_from_json function
+
+        Args:
+            bucket (str): Bucket for data storage
+            key (str): Key for data in bucket
+            data: Data
+        Returns:
+            None
+    """
+    return ObjectStore.set_object_from_json(bucket=bucket, key=key, data=data)
+
+
+def set_object_from_file(bucket, key, filename):
+    """ Set an object in the object store from the file
+        at filename
+
+        Args:
+            bucket (str): Bucket to contain data
+            key (str): Key for data in bucket
+            filename (str, pathlib.Path): Filename/path
+        Returns:
+            None
+    """
+    return ObjectStore.set_object_from_file(bucket=bucket, key=key, filename=filename)
 
 
 def get_abs_filepaths(directory):
@@ -166,11 +189,11 @@ def get_md5(filename):
             str: MD5 hash of file
 
     """
-    import hashlib as _hashlib
+    import hashlib
 
     # Size of buffer in bytes
     BUF_SIZE = 65536
-    md5 = _hashlib.md5()
+    md5 = hashlib.md5()
 
     # Read the file in 64 kB blocks
     with open(filename, "rb") as f:
@@ -192,9 +215,9 @@ def get_md5_bytes(data):
             str: MD5 hash of data
 
     """
-    import hashlib as _hashlib
+    import hashlib
 
-    return _hashlib.md5(data).hexdigest()
+    return hashlib.md5(data).hexdigest()
 
 
 def hash_files(file_list):
@@ -246,7 +269,7 @@ def get_local_bucket(empty=False):
     """
     from pathlib import Path
     import shutil
-    from Acquire.ObjectStore import ObjectStore, use_testing_object_store_backend
+    from Acquire.ObjectStore import use_testing_object_store_backend
 
     local_buckets_dir = Path("/tmp/hugs_test")
 

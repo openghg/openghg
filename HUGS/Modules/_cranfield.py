@@ -226,16 +226,15 @@ class Cranfield:
             Returns:
                 None
         """
-        from Acquire.ObjectStore import ObjectStore
-        from HUGS.ObjectStore import get_bucket
+        from HUGS.ObjectStore import get_bucket, set_object_from_json
 
         if bucket is None:
             bucket = get_bucket()
 
-        key = "%s/uuid/%s" % (Cranfield._cranfield_root, Cranfield._cranfield_uuid)
+        key = f"{Cranfield._cranfield_root}/uuid/{Cranfield._cranfield_uuid}"
 
         self._stored = True
-        ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
+        set_object_from_json(bucket=bucket, key=key, data=self.to_data())
 
     @staticmethod
     def load(bucket=None):
@@ -249,14 +248,13 @@ class Cranfield:
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from Acquire.ObjectStore import ObjectStore
-        from HUGS.ObjectStore import get_bucket
+        from HUGS.ObjectStore import get_bucket, get_object_from_json
 
         if bucket is None:
             bucket = get_bucket()
 
-        key = "%s/uuid/%s" % (Cranfield._cranfield_root, Cranfield._cranfield_uuid)
-        data = ObjectStore.get_object_from_json(bucket=bucket, key=key)
+        key = f"{Cranfield._cranfield_root}/uuid/{Cranfield._cranfield_uuid}"
+        data = get_object_from_json(bucket=bucket, key=key)
 
         return Cranfield.from_data(data=data, bucket=bucket)
 

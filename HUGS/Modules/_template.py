@@ -62,8 +62,7 @@ class TEMPLATE(BaseModule):
             Returns:
                 None
         """
-        from Acquire.ObjectStore import ObjectStore
-        from HUGS.ObjectStore import get_bucket
+        from HUGS.ObjectStore import get_bucket, set_object_from_json
 
         if bucket is None:
             bucket = get_bucket()
@@ -71,7 +70,7 @@ class TEMPLATE(BaseModule):
         key = f"{TEMPLATE._root}/uuid/{TEMPLATE._uuid}"
 
         self._stored = True
-        ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
+        set_object_from_json(bucket=bucket, key=key, data=self.to_data())
 
     @staticmethod
     def read_folder(folder_path, extension=".dat", recursive=True):

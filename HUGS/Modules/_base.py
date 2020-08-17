@@ -72,8 +72,7 @@ class BaseModule:
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from Acquire.ObjectStore import ObjectStore
-        from HUGS.ObjectStore import get_bucket
+        from HUGS.ObjectStore import get_bucket, get_object_from_json
 
         if not cls.exists():
             return cls()
@@ -82,7 +81,7 @@ class BaseModule:
             bucket = get_bucket()
 
         key = f"{cls._root}/uuid/{cls._uuid}"
-        data = ObjectStore.get_object_from_json(bucket=bucket, key=key)
+        data = get_object_from_json(bucket=bucket, key=key)
 
         return cls.from_data(data=data, bucket=bucket)
 
