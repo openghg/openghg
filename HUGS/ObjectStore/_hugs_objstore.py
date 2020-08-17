@@ -13,35 +13,18 @@ if sys.version_info.minor < 6:
 __all__ = [
     "delete_object",
     "get_object_names",
-    "get_all_object_names",
     "get_object",
     "get_object_from_json",
     "get_local_bucket",
     "set_object_from_json",
     "set_object_from_file",
     "exists",
-    "get_object_json",
     "get_abs_filepaths",
     "get_md5",
     "get_md5_bytes",
     "hash_files",
     "get_bucket",
 ]
-
-
-def get_all_object_names(bucket, prefix=None, without_prefix=False):
-    """ Returns the names of all objects in the passed bucket
-
-        Args:
-            bucket (str): Bucket containing data
-            prefix (str, default=None): String for key prefix
-            without_prefix (bool, default=False)
-        Returns:
-            list: List of object names
-    """
-    from Acquire.ObjectStore import ObjectStore
-
-    return ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix, without_prefix=without_prefix)
 
 
 def delete_object(bucket, key):
@@ -66,7 +49,7 @@ def get_object_names(bucket, prefix=None):
         Returns:
             list: List of keys in object store
     """
-    return ObjectStore.get_all_object_names(bucket, prefix)
+    return ObjectStore.get_all_object_names(bukcet=bucket, prefix=prefix)
 
 
 def get_object(bucket, key):
@@ -117,20 +100,6 @@ def exists(bucket, key):
     name = ObjectStore.get_all_object_names(bucket, prefix=key)
 
     return len(name) > 0
-
-
-def get_object_json(bucket, key):
-    """ Gets the object at key in the passed bucket
-
-        Wraps the Acquire get_object_from_json function
-
-        Args:
-            bucket (str): Bucket containing data
-            key (str): Key for data in bucket
-        Returns:
-            Object: Object from store
-    """
-    return ObjectStore.get_object_from_json(bucket, key)
 
 
 def set_object_from_json(bucket, key, data):

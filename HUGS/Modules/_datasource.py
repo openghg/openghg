@@ -553,7 +553,7 @@ class Datasource:
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from HUGS.ObjectStore import get_bucket, get_object_json
+        from HUGS.ObjectStore import get_bucket, get_object_from_json
 
         if uuid is None and key is None:
             raise ValueError("Both uuid and key cannot be None")
@@ -564,7 +564,8 @@ class Datasource:
         if key is None:
             key = f"{Datasource._datasource_root}/uuid/{uuid}"
 
-        data = get_object_json(bucket=bucket, key=key)
+        data = get_object_from_json(bucket=bucket, key=key)
+        
         return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
 
     def data(self):

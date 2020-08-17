@@ -9,7 +9,7 @@ import pytest
 import xarray
 
 from HUGS.Modules import CRDS, Datasource
-from HUGS.ObjectStore import get_local_bucket, get_all_object_names
+from HUGS.ObjectStore import get_local_bucket, get_object_names
 from HUGS.Util import create_daterange_str
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
@@ -155,7 +155,7 @@ def test_save(mock_uuid2):
 
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
 
-    objs = get_all_object_names(bucket, prefix)
+    objs = get_object_names(bucket, prefix)
 
     assert objs[0].split("/")[-1] == mocked_uuid2
 
@@ -177,7 +177,7 @@ def test_save_footprint():
     datasource.save()
 
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
-    objs = get_all_object_names(bucket, prefix)
+    objs = get_object_names(bucket, prefix)
 
     datasource_2 = Datasource.load(bucket=bucket, key=objs[0])
 
