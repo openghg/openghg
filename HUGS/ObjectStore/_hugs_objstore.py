@@ -225,11 +225,11 @@ def get_bucket(empty=False):
         Returns:
             str: Bucket path as string
     """
-    from Acquire.Service import get_service_account_bucket
+    from Acquire.Service import get_service_account_bucket, ServiceError
 
     try:
         bucket = get_service_account_bucket()
-    except:
+    except ServiceError:
         bucket = get_local_bucket(empty=empty)
 
     return bucket
