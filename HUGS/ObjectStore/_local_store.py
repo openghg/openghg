@@ -36,7 +36,7 @@ def get_all_object_names(bucket, prefix=None, without_prefix=False):
     root = bucket
 
     if prefix is not None:
-        root = "%s/%s" % (bucket, prefix)
+        root = f"{bucket}/{prefix}"
 
     root_len = len(bucket) + 1
 

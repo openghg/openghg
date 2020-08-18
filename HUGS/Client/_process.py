@@ -45,7 +45,6 @@ class Process:
                 folder_path (str, pathlib.Path): Path of folder containing files to be processed
                 data_type (str): Type of data to be processed (CRDS, GC etc)
                 hugs_url (str): URL of HUGS service. Currently used for testing
-                datasource (str): Datasource name or UUID
                 This may be removed in the future.
                 storage_url (str): URL of storage service. Currently used for testing
                 This may be removed in the future.
@@ -101,7 +100,7 @@ class Process:
                 instrument (str, default=None): If no instrument name is passed we will attempt
                 to find it from the filename.
             Returns:
-                dict: UUID of processed files keyed by filename
+                dict: UUIDs of Datasources storing data of processed files keyed by filename
         """
         data_type = data_type.upper()
 
