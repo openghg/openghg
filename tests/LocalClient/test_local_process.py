@@ -24,10 +24,10 @@ def test_process_folder():
 
     results = process_folder(folder_path=folder_path, data_type="CRDS")
 
-    expected_keys = ['tac.picarro.1minute.100m.test_ch4', 'tac.picarro.1minute.100m.test_co2', 'hfd.picarro.1minute.50m.min_ch4', 
+    expected_keys = sorted(['tac.picarro.1minute.100m.test_ch4', 'tac.picarro.1minute.100m.test_co2', 'hfd.picarro.1minute.50m.min_ch4', 
                     'hfd.picarro.1minute.50m.min_co2', 'hfd.picarro.1minute.50m.min_co', 'hfd.picarro.1minute.100m.min_ch4', 
                     'hfd.picarro.1minute.100m.min_co2', 'hfd.picarro.1minute.100m.min_co', 'tac.picarro.1minute.100m.min_ch4', 
                     'tac.picarro.1minute.100m.min_co2', 'bsd.picarro.1minute.248m_ch4', 'bsd.picarro.1minute.248m_co2', 
-                    'bsd.picarro.1minute.248m_co']
+                    'bsd.picarro.1minute.248m_co'])
 
-    assert list(results.keys()) == expected_keys
+    assert list(results.keys()) == sorted(expected_keys)
