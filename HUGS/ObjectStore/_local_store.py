@@ -14,6 +14,12 @@ def get_hugs_local_path():
         Returns:
             pathlib.Path
     """
+    # env_path = os.getenv("HUGS_PATH")
+
+    # if env_path:
+    #     return Path(env_path)
+    # else:
+    #     raise ValueError("No environment variable HUGS_PATH found, please set to use the local object store")
     return Path("/tmp/hugs_local")
 
 
