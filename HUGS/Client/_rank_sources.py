@@ -66,7 +66,7 @@ class RankSources:
 
             This function expects a dictionary of the form
 
-            {'site_string': {'rank': rank_int, 'daterange': 'start_end', 'uuid': uuid}, 
+            {'site_string': {'rank': [daterange_str, ...], 'daterange': 'start_end', 'uuid': uuid}, 
 
             Args:
                 updated_ranking (dict): Dictionary of ranking
