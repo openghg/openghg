@@ -1,21 +1,21 @@
-# import os
-# import sys
+import os
+import sys
 
-# # load all of the common fixtures used by the mocked tests
-# pytest_plugins = ["mock.fixtures.mocked_services"]
+# load all of the common fixtures used by the mocked tests
+pytest_plugins = ["mock.fixtures.mocked_services"]
 
-# # Added for import of services modules in tests
-# sys.path.insert(0, os.path.abspath("services"))
+# Added for import of services modules in tests
+sys.path.insert(0, os.path.abspath("services"))
 
-# # Added for import of hugs from testing directory
-# sys.path.insert(0, os.path.abspath("."))
-
-
-# def pytest_configure(config):
-#     config.addinivalue_line("markers", "slow: slow")
+# Added for import of hugs from testing directory
+sys.path.insert(0, os.path.abspath("."))
 
 
-# acquire_dir = "../acquire"
+def pytest_configure(config):
+    config.addinivalue_line("markers", "slow: slow")
 
-# # sys.path.insert(0, os.path.abspath(acquire_dir))
-# sys.path.insert(0, os.path.abspath(f"{acquire_dir}/services"))
+
+acquire_dir = "../acquire"
+
+# sys.path.insert(0, os.path.abspath(acquire_dir))
+sys.path.insert(0, os.path.abspath(f"{acquire_dir}/services"))
