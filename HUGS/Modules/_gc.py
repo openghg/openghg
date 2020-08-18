@@ -73,7 +73,7 @@ class GC(BaseModule):
     def read_file(
         data_filepath,
         precision_filepath,
-        source_name,
+        source_name=None,
         site=None,
         instrument_name=None,
         source_id=None,
@@ -113,6 +113,9 @@ class GC(BaseModule):
                 if(not gc.is_valid_instrument(instrument_name)):
                     raise ValueError(f"Invalid instrument, defaulting to GCMD. Instruments \
                             that can be read from filename are {gc._gc_params['suffix_to_instrument'].keys()}")
+
+        if source_name is None:
+            source_name = data_filepath.stem
 
         gas_data = gc.read_data(
             data_filepath=data_filepath,

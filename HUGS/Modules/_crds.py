@@ -208,6 +208,7 @@ class CRDS(BaseModule):
 
         # At the moment we're using the filename as the source name
         source_name = data_filepath.stem
+        
         # -1 here as we've already removed the file extension
         # As we're not processing a list of datafiles here we'll only have one inlet
         inlet = source_name.split(".")[3]
