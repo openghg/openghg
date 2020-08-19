@@ -76,4 +76,3 @@ def process_files(files, data_type, site=None, instrument=None, network=None, ov
             results.update(r)
 
     return results
-

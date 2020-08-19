@@ -30,4 +30,4 @@ def test_process_folder():
                     'tac.picarro.1minute.100m.min_co2', 'bsd.picarro.1minute.248m_ch4', 'bsd.picarro.1minute.248m_co2', 
                     'bsd.picarro.1minute.248m_co'])
 
-    assert list(results.keys()) == sorted(expected_keys)
+    assert sorted(list(results.keys())) == expected_keys
