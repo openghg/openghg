@@ -13,8 +13,27 @@ def tempdir(tmpdir_factory):
     return str(d)
 
 
+def get_test_path_services(filename, data_type):
+    """ Gets the path of the filename for a given data type
+
+        Args:
+            filename (str): Name of file, not path
+            data_type (str): Data type, CRDS, GC, ICOS etc
+        Returns:
+            pathlib.Path: Absolute path to object
+
+    """
+    from pathlib import Path
+
+    data_path = Path(__file__).resolve().parent.parent.parent.joinpath(f"data/proc_test_data/{data_type}/{filename}")
+
+    return data_path
+
+
+
+
 # @pytest.fixture(scope="session")
-# def load_two_crds(authenticated_user):
+# def load_two_data(authenticated_user):
 #     hugs = Service(service_url="hugs")
 #     _ = hugs.call_function(function="clear_datasources", args={})
 
@@ -40,9 +59,8 @@ def tempdir(tmpdir_factory):
 #         storage_url="storage",
 #     )
 
-
 @pytest.fixture(scope="session")
-def load_two_crds(authenticated_user):
+def load_two_data(authenticated_user):
     hugs = Service(service_url="hugs")
     _ = hugs.call_function(function="clear_datasources", args={})
 
@@ -51,13 +69,13 @@ def load_two_crds(authenticated_user):
         test_folder = "../../../tests/data/search_data"
         return os.path.join(dir_path, test_folder, filename)
 
-    files = [
+    crds_files = [
         "bsd.picarro5310.1minute.108m.min.dat",
         "bsd.picarro5310.1minute.248m.min.dat",
         "hfd.picarro.1minute.100m.min.dat",
     ]
 
-    filepaths = [test_folder(f) for f in files]
+    filepaths = [test_folder(filename=f) for f in crds_files]
 
     process = Process(service_url="hugs")
 
@@ -69,8 +87,24 @@ def load_two_crds(authenticated_user):
         storage_url="storage",
     )
 
+    dir_path = os.path.dirname(__file__)
+    test_data = "../../../tests/data/proc_test_data/GC"
+    data = os.path.join(dir_path, test_data, "capegrim-medusa.18.C")
+    precision = os.path.join(dir_path, test_data, "capegrim-medusa.18.precisions.C")
 
-def test_search_hfd(load_two_crds):
+    gc_files = [data, precision]
+    # gc_files = [test_folder(f) for f in gc_files]
+
+    process.process_files(
+        user=authenticated_user,
+        files=gc_files,
+        data_type="CRDS",
+        hugs_url="hugs",
+        storage_url="storage",
+    )
+
+
+def test_search_hfd(load_two_data):
     search = Search(service_url="hugs")
 
     search_term = "co"
@@ -99,7 +133,28 @@ def test_search_hfd(load_two_crds):
     assert hfd_res["metadata"] == expected_metadata
 
 
-def test_search_and_rank(load_two_crds):
+def test_search_and_rank_gc(load_two_data):
+    r = RankSources(service_url="hugs")
+    sources = r.get_sources(site="capegrim", species="NF3", data_type="GC")
+
+    print(sources)
+
+    search = Search(service_url="hugs")
+
+    species = "SIO12"
+    location = "CGO"
+    data_type = "GC"
+
+    results = search.search(
+        species=species,
+        locations=location,
+        data_type=data_type,
+        )
+
+    print(results)
+
+
+def test_search_and_rank(load_two_data):
     # First we need to rank the data
     r = RankSources(service_url="hugs")
     sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
@@ -166,7 +221,8 @@ def test_search_and_rank(load_two_crds):
 
     updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
 
-    assert updated_sources["co_bsd_108m_picarro5310"]["rank"] == {'1': ['2019-03-07-00:00:00+00:00_2019-09-15-00:00:00+00:00', '2019-11-06-00:00:00+00:00_2020-07-05-00:00:00+00:00']}
+    assert updated_sources["co_bsd_108m_picarro5310"]["rank"] == {'1': ['2019-03-07-00:00:00+00:00_2019-09-15-00:00:00+00:00', 
+                                                                        '2019-11-06-00:00:00+00:00_2020-07-05-00:00:00+00:00']}
     assert updated_sources["co_bsd_248m_picarro5310"]["rank"] == {'1': ['2019-09-16-00:00:00+00:00_2020-07-05-00:00:00+00:00']}
 
     # Now we need to search for the data and ensure we get the correct data keys returned
@@ -187,7 +243,7 @@ def test_search_and_rank(load_two_crds):
         end_datetime=end_search,
     )
 
-    assert results["co_bsd_108m"]["metadata"] == {
+    assert results["co_bsd_108m_picarro5310"]["metadata"] == {
         "site": "bsd",
         "instrument": "picarro5310",
         "time_resolution": "1_minute",
@@ -199,19 +255,19 @@ def test_search_and_rank(load_two_crds):
     }
 
     assert (
-        len(results["co_bsd_108m"]["keys"]["2019-03-07-00:00:00_2019-09-15-00:00:00"])
+        len(results["co_bsd_108m_picarro5310"]["keys"]["2019-03-07-00:00:00_2019-09-15-00:00:00"])
         == 3
     )
     assert (
-        len(results["co_bsd_108m"]["keys"]["2019-11-06-00:00:00_2020-07-05-00:00:00"])
+        len(results["co_bsd_108m_picarro5310"]["keys"]["2019-11-06-00:00:00_2020-07-05-00:00:00"])
         == 5
     )
     assert (
-        len(results["co_bsd_248m"]["keys"]["2019-09-16-00:00:00_2020-07-05-00:00:00"])
+        len(results["co_bsd_248m_picarro5310"]["keys"]["2019-09-16-00:00:00_2020-07-05-00:00:00"])
         == 5
     )
 
-    assert results["co_bsd_248m"]["metadata"] == {
+    assert results["co_bsd_248m_picarro5310"]["metadata"] == {
         "site": "bsd",
         "instrument": "picarro5310",
         "time_resolution": "1_minute",
@@ -223,7 +279,7 @@ def test_search_and_rank(load_two_crds):
     }
 
 
-def test_single_site_search(load_two_crds):
+def test_single_site_search(load_two_data):
     search = Search(service_url="hugs")
 
     species = "co"
@@ -261,7 +317,7 @@ def test_single_site_search(load_two_crds):
     }
 
 
-# def test_search_multispecies_singlesite(load_two_crds):
+# def test_search_multispecies_singlesite(load_two_data):
 #     search = Search(service_url="hugs")
 
 #     search_term = ["co", "co2"]
@@ -275,7 +331,7 @@ def test_single_site_search(load_two_crds):
 #     assert "2019-09-16-00:00:00_2019-11-05-00:00:00" in results["co_bsd_248m"]["keys"]
 
 
-# def test_search_multisite_co(load_two_crds):
+# def test_search_multisite_co(load_two_data):
 #     search = Search(service_url="hugs")
 
 #     search_term = "co"
@@ -293,7 +349,7 @@ def test_single_site_search(load_two_crds):
 #     assert "2013-11-20-20:02:30_2019-07-04-21:29:30" in results["co_hfd_100m"]["keys"]
 
 
-# def test_search_multiplesite_multiplespecies(load_two_crds):
+# def test_search_multiplesite_multiplespecies(load_two_data):
 #     search = Search(service_url="hugs")
 
 #     search_term = ["ch4", "co2"]
@@ -342,7 +398,7 @@ def test_single_site_search(load_two_crds):
 #     assert search.results() == {'ch4_bsd_108m': 'Daterange : 2014-01-30-13:33:30+00:00 - 2019-07-04-04:23:30+00:00'}
 
 
-# def test_search_download(load_two_crds):
+# def test_search_download(load_two_data):
 #     search = Search(service_url="hugs")
 
 #     search_term = ["ch4"]

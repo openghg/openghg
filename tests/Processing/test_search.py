@@ -1,10 +1,11 @@
 import os
 import pytest
 
+from HUGS.Client import RankSources
 from HUGS.Modules import CRDS, GC
 from HUGS.Processing import search
 from HUGS.ObjectStore import get_local_bucket
-# from HUGS.Util import get_datetime
+from HUGS.Util import get_datetime
 
 
 @pytest.fixture(scope="session")
@@ -113,93 +114,88 @@ def test_location_search(crds_read):
 
     assert results_list == expected
 
-    # assert len(results["co2_bsd_108m"]["keys"]) == 23
-    # assert len(results["co2_hfd_100m"]["keys"]) == 25
-    # assert len(results["co2_tac_100m"]["keys"]) == 30
-    # assert len(results["ch4_bsd_108m"]["keys"]) == 23
-    # assert len(results["ch4_hfd_100m"]["keys"]) == 25
-    # assert len(results["ch4_tac_100m"]["keys"]) == 30
+    assert len(results["co2_bsd_108m"]["keys"]['2014-01-30-13:33:30_2019-07-04-04:23:30']) == 23
+    assert len(results["co2_hfd_100m"]["keys"]['2013-11-20-20:02:30_2019-07-04-21:29:30']) == 25
+    assert len(results["co2_tac_100m"]["keys"]['2012-07-26-12:01:30_2019-07-04-09:58:30']) == 30
+    assert len(results["ch4_bsd_108m"]["keys"]['2014-01-30-13:33:30_2019-07-04-04:23:30']) == 23
+    assert len(results["ch4_hfd_100m"]["keys"]['2013-11-20-20:02:30_2019-07-04-21:29:30']) == 25
+    assert len(results["ch4_tac_100m"]["keys"]['2012-07-26-12:01:30_2019-07-04-09:58:30']) == 30
 
 
-# def test_search_datetimes():
-#     data_type = "CRDS"
-#     species = ["co2"]
-#     locations = ["bsd"]
+def test_search_datetimes():
+    data_type = "CRDS"
+    species = ["co2"]
+    locations = ["bsd"]
 
-#     start = get_datetime(year=2016, month=1, day=1)
-#     end = get_datetime(year=2017, month=1, day=1)
+    start = get_datetime(year=2016, month=1, day=1)
+    end = get_datetime(year=2017, month=1, day=1)
 
-#     results = search(
-#         species=species,
-#         locations=locations,
-#         data_type=data_type,
-#         find_all=False,
-#         start_datetime=start,
-#         end_datetime=end,
-#     )
+    results = search(
+        species=species,
+        locations=locations,
+        data_type=data_type,
+        find_all=False,
+        start_datetime=start,
+        end_datetime=end,
+    )
 
-#     result_keys = results["co2_bsd_108m"]["keys"]
+    result_keys = results["co2_bsd_108m"]["keys"]
 
-#     expected_date_strings = [
-#         "2016-01-19-17:17:30+00:00_2016-12-31-23:52:30+00:00",
-#         "2016-03-01-02:22:30+00:00_2016-05-31-22:15:30+00:00",
-#         "2016-06-01-00:23:30+00:00_2016-08-31-23:58:30+00:00",
-#         "2016-09-01-02:48:30+00:00_2016-11-30-22:57:30+00:00",
-#     ]
+    date_strings = [v.split("/")[-1] for v in result_keys]
 
-#     date_strings = sorted([v.split("/")[-1] for v in result_keys])
+    assert date_strings == ['2016-01-19-17:17:30_2016-11-30-22:57:30']
 
-#     assert date_strings == expected_date_strings
+    metadata = results["co2_bsd_108m"]["metadata"]
 
-#     metadata = results["co2_bsd_108m"]["metadata"]
+    expected_metadata = {
+        "site": "bsd",
+        "instrument": "picarro",
+        "time_resolution": "1_minute",
+        "inlet": "108m",
+        "port": "9",
+        "type": "air",
+        "species": "co2",
+        "data_type": "timeseries",
+    }
 
-#     expected_metadata = {
-#         "site": "bsd",
-#         "instrument": "picarro",
-#         "time_resolution": "1_minute",
-#         "inlet": "108m",
-#         "port": "9",
-#         "type": "air",
-#         "species": "co2",
-#         "data_type": "timeseries",
-#     }
-
-#     assert metadata == expected_metadata
+    assert metadata == expected_metadata
 
 
-# def test_search_find_all():
-#     data_type = "CRDS"
-#     species = ["co2"]
-#     locations = ["bsd"]
-#     inlet = "108m"
-#     instrument = "picarro"
+def test_search_find_all():
+    data_type = "CRDS"
+    species = ["co2"]
+    locations = ["bsd"]
+    inlet = "108m"
+    instrument = "picarro"
 
-#     start = get_datetime(year=2016, month=1, day=1)
-#     end = get_datetime(year=2017, month=1, day=1)
+    start = get_datetime(year=2016, month=1, day=1)
+    end = get_datetime(year=2017, month=1, day=1)
 
-#     results = search(
-#         species=species,
-#         locations=locations,
-#         data_type=data_type,
-#         find_all=True,
-#         start_datetime=start,
-#         end_datetime=end,
-#         inlet=inlet,
-#         instrument=instrument
-#     )
+    results = search(
+        species=species,
+        locations=locations,
+        data_type=data_type,
+        find_all=True,
+        start_datetime=start,
+        end_datetime=end,
+        inlet=inlet,
+        instrument=instrument
+    )
 
-#     bsd_results = results["co2_bsd_picarro_108m"]
+    bsd_results = results["co2_bsd_picarro_108m"]
 
-#     assert bsd_results["metadata"]["site"] == "bsd"
-#     assert bsd_results["metadata"]["species"] == "co2"
-#     assert bsd_results["metadata"]["time_resolution"] == "1_minute"
+    assert bsd_results["metadata"]["site"] == "bsd"
+    assert bsd_results["metadata"]["species"] == "co2"
+    assert bsd_results["metadata"]["time_resolution"] == "1_minute"
 
-#     key_dates = sorted([daterange.split("/")[-1] for daterange in bsd_results["keys"]])
+    key_dates = [daterange.split("/")[-1] for daterange in bsd_results["keys"]]
 
-#     assert key_dates == sorted(["2016-01-19-17:17:30+00:00_2016-12-31-23:52:30+00:00",
-#                                 "2016-06-01-00:23:30+00:00_2016-08-31-23:58:30+00:00",
-#                                 "2016-03-01-02:22:30+00:00_2016-05-31-22:15:30+00:00",
-#                                 "2016-09-01-02:48:30+00:00_2016-11-30-22:57:30+00:00"])
+    assert key_dates == ['2016-01-19-17:17:30_2016-11-30-22:57:30']
+
+    # assert key_dates == sorted(["2016-01-19-17:17:30+00:00_2016-12-31-23:52:30+00:00",
+    #                             "2016-06-01-00:23:30+00:00_2016-08-31-23:58:30+00:00",
+    #                             "2016-03-01-02:22:30+00:00_2016-05-31-22:15:30+00:00",
+    #                             "2016-09-01-02:48:30+00:00_2016-11-30-22:57:30+00:00"])
 
 
 def test_search_bad_datatype_raises():

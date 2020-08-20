@@ -371,4 +371,9 @@ def valid_site(site):
 
     site = site.upper()
 
-    return site in site_data
+    if site not in site_data:
+        site = site.lower()
+        site_name_code = load_hugs_json("site_codes.json")
+        return site in site_name_code["name_code"]
+
+    return True

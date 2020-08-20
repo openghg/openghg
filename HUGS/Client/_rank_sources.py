@@ -34,7 +34,7 @@ class RankSources:
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
-        if len(site) != 3 or not valid_site(site):
+        if not valid_site(site):
             # raise InvalidSiteError(f"{site} is not a valid site code")
             raise ValueError(f"{site} is not a valid site code")
 

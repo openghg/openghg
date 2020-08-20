@@ -124,8 +124,7 @@ def search(
     # This is returned to the caller
     results = defaultdict(dict)
 
-    # Rank not required as inlet and instrment specified
-    # If we have a specific inlet and instrument set just find that specific data and return it
+    # With both inlet and instrument specified we bypass the ranking system
     if inlet is not None and instrument is not None:
         for site, sources in location_sources.items():
             for sp in species:
@@ -210,7 +209,7 @@ def search(
                     source = ranked_sources[uid]["source"]
                     source_dateranges = ranked_sources[uid]["dateranges"]
 
-                    key = f"{sp}_{location}_{source.inlet()}"
+                    key = f"{sp}_{location}_{source.inlet()}_{source.instrument()}"
 
                     data_keys = {}
                     # Get the keys for each daterange
