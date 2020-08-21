@@ -17,7 +17,7 @@ class Search:
         wallet = Wallet()
         self._service = wallet.get_service(service_url=f"{self._service_url}/hugs")
 
-    def search(self, species, locations, data_type, inlet=None, instrument=None, start_datetime=None, end_datetime=None):
+    def search(self, data_type, locations, species=None, inlet=None, instrument=None, start_datetime=None, end_datetime=None):
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 

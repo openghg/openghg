@@ -92,6 +92,8 @@ class GC(BaseModule):
         from HUGS.Processing import assign_data, lookup_gas_datasources
         from pathlib import Path
 
+        print("Reading in GC data wooo")
+
         gc = GC.load()
 
         data_filepath = Path(data_filepath)
@@ -220,6 +222,8 @@ class GC(BaseModule):
 
         # Rename columns to include the gas this flag represents
         data = data.rename(columns=columns_renamed, inplace=False)
+
+        print(data)
 
         # Read and parse precisions file
         precision, precision_species = self.read_precision(precision_filepath)

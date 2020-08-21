@@ -33,9 +33,9 @@ class DataType(Enum):
 
 
 def search(
-    species,
-    locations,
     data_type,
+    locations,
+    species=None,
     inlet=None,
     instrument=None,
     find_all=False,
@@ -65,7 +65,7 @@ def search(
     from HUGS.Util import (get_datetime_now, get_datetime_epoch, create_daterange_str, 
                             load_object, timestamp_tzaware, get_datapath)
 
-    if not isinstance(species, list):
+    if species is not None and not isinstance(species, list):
         species = [species]
 
     if not isinstance(locations, list):
@@ -123,6 +123,27 @@ def search(
 
     # This is returned to the caller
     results = defaultdict(dict)
+
+    print(location_sources)
+
+    if not species:
+        for site, sources in location_sources.items():
+            for datasource in sources:
+                print(datasource.metadata())
+                # Just match the single source here
+                if datasource.search_metadata(search_terms=[site], find_all=False):
+                    daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
+                    # Get the data keys for the data in the matching daterange
+                    in_date = datasource.in_daterange(daterange=daterange_str)
+
+                    data_date_str = strip_dates_keys(in_date)
+
+                    key = f"{datasource.species()}_{site}_{datasource.instrument()}_{datasource.inlet()}"
+                    # Find the keys that match the correct data
+                    results[key]["keys"] = {data_date_str: in_date}
+                    results[key]["metadata"] = datasource.metadata()
+
+        return results
 
     # With both inlet and instrument specified we bypass the ranking system
     if inlet is not None and instrument is not None:

@@ -98,7 +98,7 @@ def load_two_data(authenticated_user):
     process.process_files(
         user=authenticated_user,
         files=gc_files,
-        data_type="CRDS",
+        data_type="GC",
         hugs_url="hugs",
         storage_url="storage",
     )
@@ -141,15 +141,10 @@ def test_search_and_rank_gc(load_two_data):
 
     search = Search(service_url="hugs")
 
-    species = "SIO12"
-    location = "CGO"
+    location = "capegrim"
     data_type = "GC"
 
-    results = search.search(
-        species=species,
-        locations=location,
-        data_type=data_type,
-        )
+    results = search.search(locations=location, data_type=data_type)
 
     print(results)
 

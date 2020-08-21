@@ -1,103 +1,18 @@
 # from _paths import RootPaths
 __all__ = ["CRDS"]
 
-from HUGS.Modules import BaseModule
 
-
-class CRDS(BaseModule):
+class CRDS():
     """
         Interface for processing CRDS data
     """
-
-    _root = "CRDS"
-    _uuid = "c2b2126a-29d9-crds-b66e-543bd5a188c2"
-
     def __init__(self):
-        from Acquire.ObjectStore import get_datetime_now
-        from collections import defaultdict
-
-        self._creation_datetime = get_datetime_now()
-        self._stored = False
-        # self._datasources = []
-        # Keyed by name - allows retrieval of UUID from name
-        self._datasource_names = {}
-        # Keyed by UUID - allows retrieval of name by UUID
-        self._datasource_uuids = {}
-        # Hashes of previously uploaded files
-        self._file_hashes = {}
         # Holds parameters used for writing attributes to Datasets
         self._crds_params = {}
         # Sampling period of CRDS data in seconds
         self._sampling_period = 60
-        # Store the ranking data for all CRDS measurements
-        # Keyed by UUID
-        self._rank_data = defaultdict(dict)
 
-    def to_data(self):
-        """ Return a JSON-serialisable dictionary of object
-            for storage in object store
-
-            Returns:
-                dict: Dictionary version of object
-        """
-        from Acquire.ObjectStore import datetime_to_string
-
-        data = {}
-        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_uuids"] = self._datasource_uuids
-        data["datasource_names"] = self._datasource_names
-        data["file_hashes"] = self._file_hashes
-        data["rank_data"] = self._rank_data
-
-        return data
-
-    def save(self, bucket=None):
-        """ Save the object to the object store
-
-            Args:
-                bucket (dict, default=None): Bucket for data
-            Returns:
-                None
-        """
-        from HUGS.ObjectStore import get_bucket, set_object_from_json
-
-        if bucket is None:
-            bucket = get_bucket()
-
-        crds_key = f"{CRDS._root}/uuid/{CRDS._uuid}"
-
-        self._stored = True
-        set_object_from_json(bucket=bucket, key=crds_key, data=self.to_data())
-
-    @staticmethod
-    def read_folder(folder_path):
-        """ Read all data matching filter in folder
-
-            Args:
-                folder_path (str): Path of folder
-            Returns:
-                dict: Dictionary of the Datasources created for each file
-        """
-        from pathlib import Path
-
-        filepaths = [f for f in Path(folder_path).glob("**/*.dat")]
-
-        if not filepaths:
-            raise FileNotFoundError("No data files found")
-
-        results = {}
-        for fp in filepaths:
-            filename = fp.name
-            # Strip the file suffix
-            filename = ".".join(filename.split(".")[:-1])
-            datasources = CRDS.read_file(data_filepath=fp.resolve(), source_name=filename)
-            results.update(datasources)
-
-        return results
-
-    @staticmethod
-    def read_file(data_filepath, source_name=None, site=None, source_id=None, overwrite=False):
+    def read_file(self, data_filepath, source_name=None, site=None):
         """ Creates a CRDS object holding data stored within Datasources
 
             Args:
@@ -109,27 +24,10 @@ class CRDS(BaseModule):
             Returns:
                 None
         """
-        from HUGS.Processing import assign_data, lookup_gas_datasources
-        from HUGS.Util import hash_file
         from pathlib import Path
 
-        data_filepath = Path(data_filepath)
-
-        crds = CRDS.load()
-        # here we check the source id from the interface or the source_name
-        # Check that against the lookup table and then we can decide if we want to
-        # either create a new Datasource or add the data to an existing source
-
-        # Take hash of file and save it's hash so we know we've read it already
-        # TODO - this should be expanded to check dates for the uploaded data
-        # That would have to be done during processing
-        file_hash = hash_file(filepath=data_filepath)
-        if file_hash in crds._file_hashes and not overwrite:
-            raise ValueError(
-                f"This file has been uploaded previously with the filename : {crds._file_hashes[file_hash]}."
-            )
-
-        filename = data_filepath.name
+        if not isinstance(data_filepath, Path):
+            data_filepath = Path(data_filepath)
 
         if not source_name:
             source_name = data_filepath.stem
@@ -137,38 +35,12 @@ class CRDS(BaseModule):
         if not site:
             site = source_name.split(".")[0]
 
-        gas_data = crds.read_data(data_filepath=data_filepath, site=site)
+        # Process the data into separate Datasets
+        gas_data = self.read_data(data_filepath=data_filepath, site=site)
+        # Ensure the data is CF compliant
+        gas_data = self.assign_attributes(data=gas_data, site=site)
 
-        # Assign attributes to data here makes it a lot easier to test
-        gas_data = crds.assign_attributes(data=gas_data, site=site)
-
-        # Check to see if we've had data from these Datasources before
-        # TODO - currently just using a simple naming system here - update to use
-        # an assigned UUID? Seems safer? How to give each gas a UUID?
-        # This could be rolled into the assign_data function?
-        lookup_results = lookup_gas_datasources(
-            lookup_dict=crds._datasource_names,
-            gas_data=gas_data,
-            source_name=source_name,
-            source_id=source_id,
-        )
-
-        # Create Datasources, save them to the object store and get their UUIDs
-        # Change this to assign_data
-        datasource_uuids = assign_data(
-            gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite
-        )
-
-        # Add the Datasources to the list of datasources associated with this object
-        crds.add_datasources(datasource_uuids)
-
-        # Store the hash as the key for easy searching, store the filename as well for
-        # ease of checking by user
-        crds._file_hashes[file_hash] = filename
-
-        crds.save()
-
-        return datasource_uuids
+        return gas_data
 
     def read_data(self, data_filepath, site):
         """ Separates the gases stored in the dataframe in
@@ -183,7 +55,6 @@ class CRDS(BaseModule):
         """
         from datetime import datetime
         from pandas import RangeIndex, read_csv, NaT
-        from HUGS.Processing import read_metadata
 
         # Function to parse the datetime format found in the datafile
         def parse_date(date):
@@ -206,7 +77,7 @@ class CRDS(BaseModule):
 
         # At the moment we're using the filename as the source name
         source_name = data_filepath.stem
-        
+
         # -1 here as we've already removed the file extension
         # As we're not processing a list of datafiles here we'll only have one inlet
         inlet = source_name.split(".")[3]
@@ -214,22 +85,19 @@ class CRDS(BaseModule):
         if "m" not in inlet.lower():
             raise TypeError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
 
-        # instrument = [f.split(".")[1] for f in data_files]
-        # instrument = source_name.split(".")[1]
-
         # Drop any rows with NaNs
         # This is now done before creating metadata
         data = data.dropna(axis="rows", how="any")
 
         # Get the number of gases in dataframe and number of columns of data present for each gas
-        n_gases, n_cols = self._gas_info(data=data)
+        n_gases, n_cols = self.gas_info(data=data)
 
         header = data.head(2)
         skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
         header_rows = 2
         # Create metadata here
-        metadata = read_metadata(filepath=data_filepath, data=data, data_type="CRDS")
+        metadata = self.read_metadata(filepath=data_filepath, data=data, data_type="CRDS")
         # This dictionary is used to store the gas data and its associated metadata
         combined_data = {}
 
@@ -273,6 +141,50 @@ class CRDS(BaseModule):
 
         return combined_data
 
+    def read_metadata(filename, data):
+        """ Parse CRDS files and create a metadata dict
+
+            Args:
+                filename (str): Name of data file
+                data (Pandas.DataFrame): Raw data
+            Returns:
+                dict: Dictionary containing metadata
+        """
+        # Find gas measured and port used
+        type_meas = data[2][2]
+        port = data[3][2]
+
+        # Split the filename to get the site and resolution
+        split_filename = filename.split(".")
+
+        if len(split_filename) < 4:
+            raise ValueError(
+                "Error reading metadata from filename. The expected format is \
+                {site}.{instrument}.{time resolution}.{height}.dat"
+            )
+
+        site = split_filename[0]
+        instrument = split_filename[1]
+        resolution_str = split_filename[2]
+        inlet = split_filename[3]
+
+        if resolution_str == "1minute":
+            resolution = "1_minute"
+        elif resolution_str == "hourly":
+            resolution = "1_hour"
+        else:
+            raise ValueError("Unable to read time resolution from filename.")
+
+        metadata = {}
+        metadata["site"] = site
+        metadata["instrument"] = instrument
+        metadata["time_resolution"] = resolution
+        metadata["inlet"] = inlet
+        metadata["port"] = port
+        metadata["type"] = type_meas
+
+        return metadata
+
     def assign_attributes(self, data, site, network=None):
         """ Assign attributes to the data we've processed
 
@@ -307,15 +219,9 @@ class CRDS(BaseModule):
             Returns:
                 dict: Dictionary of attributes
         """
+        from HUGS.Util import load_hugs_json
         if not self._crds_params:
-            from json import load
-            from HUGS.Util import get_datapath
-
-            filepath = get_datapath(filename="process_gcwerks_parameters.json")
-
-            with open(filepath, "r") as f:
-                data = load(f)
-                self._crds_params = data["CRDS"]
+            self._crds_params = load_hugs_json(filename="process_gcwerks_parameters.json")
 
         attributes = self._crds_params[site.upper()]["global_attributes"]
         attributes["inlet_height_magl"] = inlet.split("_")[0]
@@ -323,7 +229,7 @@ class CRDS(BaseModule):
 
         return attributes
 
-    def _gas_info(self, data):
+    def gas_info(self, data):
         """ Returns the number of columns of data for each gas
                 that is present in the dataframe
 
