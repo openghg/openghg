@@ -1,13 +1,13 @@
 from HUGS.Modules import BaseModule
 
-__all__ = ["ThamesBarrier"]
+__all__ = ["THAMESBARRIER"]
 
 
-class ThamesBarrier(BaseModule):
-    """ Interface for processing ThamesBarrier data
+class THAMESBARRIER(BaseModule):
+    """ Interface for processing THAMESBARRIER data
 
     """
-    _root = "ThamesBarrier"
+    _root = "THAMESBARRIER"
     _uuid = "e708ab3f-ade5-402a-a491-979095d8f7ad"
 
     def __init__(self):
@@ -66,7 +66,7 @@ class ThamesBarrier(BaseModule):
         if bucket is None:
             bucket = get_bucket()
 
-        key = f"{ThamesBarrier._root}/uuid/{ThamesBarrier._uuid}"
+        key = f"{THAMESBARRIER._root}/uuid/{THAMESBARRIER._uuid}"
 
         self._stored = True
         set_object_from_json(bucket=bucket, key=key, data=self.to_data())
@@ -97,13 +97,13 @@ class ThamesBarrier(BaseModule):
             raise FileNotFoundError("No data files found")
 
         for fp in filepaths:
-            datasource_uuids[fp] = ThamesBarrier.read_file(data_filepath=fp)
+            datasource_uuids[fp] = THAMESBARRIER.read_file(data_filepath=fp)
 
         return datasource_uuids
 
     @staticmethod
     def read_file(data_filepath, source_name, source_id=None, overwrite=False):
-        """ Reads ThamesBarrier data files and returns the UUIDS of the Datasources
+        """ Reads THAMESBARRIER data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
             Args:
@@ -115,7 +115,7 @@ class ThamesBarrier(BaseModule):
         from HUGS.Util import hash_file
         from pathlib import Path
 
-        tb = ThamesBarrier.load()
+        tb = THAMESBARRIER.load()
 
         # Check if the file has been uploaded already
         file_hash = hash_file(filepath=data_filepath)

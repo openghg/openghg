@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import pytest
 
-from HUGS.Modules import Datasource, ThamesBarrier
+from HUGS.Modules import Datasource, THAMESBARRIER
 from HUGS.ObjectStore import get_local_bucket
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -15,7 +15,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 
 def test_site_attributes():
-    tb = ThamesBarrier()
+    tb = THAMESBARRIER()
 
     site_attributes = tb.site_attributes()
 
@@ -30,10 +30,10 @@ def test_site_attributes():
 def test_read_file():
     _ = get_local_bucket(empty=True)
 
-    tb = ThamesBarrier()
+    tb = THAMESBARRIER()
 
     dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/ThamesBarrier"
+    test_data = "../data/proc_test_data/THAMESBARRIER"
     filename = "thames_test_20190707.csv"
 
     filepath = os.path.join(dir_path, test_data, filename)
@@ -64,10 +64,10 @@ def test_read_file():
 
 
 def test_read_data():
-    tb = ThamesBarrier()
+    tb = THAMESBARRIER()
 
     dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/ThamesBarrier"
+    test_data = "../data/proc_test_data/THAMESBARRIER"
     filename = "thames_test_20190707.csv"
 
     filepath = os.path.join(dir_path, test_data, filename)

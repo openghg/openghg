@@ -28,6 +28,7 @@ class CRDS():
                 None
         """
         from pathlib import Path
+        from HUGS.Processing import assign_attributes
 
         if not isinstance(data_filepath, Path):
             data_filepath = Path(data_filepath)
@@ -41,7 +42,7 @@ class CRDS():
         # Process the data into separate Datasets
         gas_data = self.read_data(data_filepath=data_filepath, site=site)
         # Ensure the data is CF compliant
-        gas_data = self.assign_attributes(data=gas_data, site=site)
+        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=self._sampling_period)
 
         return gas_data
 

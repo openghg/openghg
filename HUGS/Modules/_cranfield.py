@@ -1,8 +1,8 @@
-__all__ = ["Cranfield"]
+__all__ = ["CRANFIELD"]
 
 
-class Cranfield:
-    """ Interface for processing Cranfield data """
+class CRANFIELD:
+    """ Interface for processing CRANFIELD data """
 
     def read_file(self, data_filepath, source_name=None, source_id=None, overwrite=False):
         """ Creates a CRDS object holding data stored within Datasources
@@ -13,7 +13,7 @@ class Cranfield:
                 source_name (str): Name of data source
                 overwrite (bool, default=False): Should data be overwritten
             Returns:
-                Cranfield: Crandfield object
+                CRANFIELD: Crandfield object
         """
         from pathlib import Path
         from pandas import read_csv
@@ -68,5 +68,7 @@ class Cranfield:
             gas_data = gas_data.to_xarray()
 
             combined_data[sp] = {"metadata": species_metadata, "data": gas_data}
+
+        # Assign data
 
         return combined_data

@@ -38,6 +38,7 @@ class GC(BaseModule):
                 dict: Dictionary of source_name : UUIDs
         """
         from pathlib import Path
+        from HUGS.Processing import assign_attributes
 
         data_filepath = Path(data_filepath)
 
@@ -72,7 +73,7 @@ class GC(BaseModule):
         )
 
         # Assign attributes to the data for CF compliant NetCDFs
-        gas_data = self.assign_attributes(data=gas_data, site=site)
+        gas_data = assign_attributes(data=gas_data, site=site)
 
         return gas_data
 
@@ -325,36 +326,6 @@ class GC(BaseModule):
                 combined_data[spec]["attributes"] = attributes
 
         return combined_data
-
-    def assign_attributes(self, data, site, network=None):
-        """ Assign attributes to the data we've processed. This ensures that the xarray Datasets produced
-            as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata 
-            to the Datasource allowing more detailed searching of data.
-
-            Args:
-                combined_data (dict): Dictionary containing data, metadata and attributes
-            Returns:
-                dict: Dictionary of combined data with correct attributes assigned to Datasets
-        """
-        from HUGS.Processing import get_attributes
-
-        for species in data:
-            site_attributes = data[species]["attributes"]
-            units = data[species]["metadata"]["units"]
-            scale = data[species]["metadata"]["scale"]
-
-            data[species]["data"] = get_attributes(
-                ds=data[species]["data"],
-                species=species,
-                site=site,
-                network=network,
-                units=units,
-                scale=scale,
-                global_attributes=site_attributes,
-                sampling_period=self._sampling_period,
-            )
-
-        return data
 
     def is_valid_instrument(self, instrument):
         """ Check if the instrument string passed is valid

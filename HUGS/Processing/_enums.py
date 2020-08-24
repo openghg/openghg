@@ -9,5 +9,6 @@ class DataTypes(Enum):
     FOOTPRINT = "FOOTPRINT"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"
-    ThamesBarrier = "THAMESBARRIER"
+    THAMESBARRIER = "THAMESBARRIER"
     ICOS = "ICOS"
+    CRANFIELD = "CRANFIELD"

@@ -1,4 +1,34 @@
-__all__ = ["get_attributes"]
+__all__ = ["assign_attributes", "get_attributes"]
+
+
+def assign_attributes(data, site, sampling_period=None, network=None):
+    """ Assign attributes to the data we've processed. This ensures that the xarray Datasets produced
+        as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata 
+        to the Datasource allowing more detailed searching of data.
+
+        Args:
+            combined_data (dict): Dictionary containing data, metadata and attributes
+        Returns:
+            dict: Dictionary of combined data with correct attributes assigned to Datasets
+    """
+    for species in data:
+        site_attributes = data[species]["attributes"]
+
+        units = data[species].get("metadata", {}).get("units")
+        scale = data[species].get("metadata", {}).get("scale")
+
+        data[species]["data"] = get_attributes(
+            ds=data[species]["data"],
+            species=species,
+            site=site,
+            network=network,
+            units=units,
+            scale=scale,
+            global_attributes=site_attributes,
+            sampling_period=sampling_period,
+        )
+
+    return data
 
 
 def get_attributes(

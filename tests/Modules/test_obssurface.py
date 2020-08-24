@@ -156,6 +156,25 @@ def test_read_GC():
 
     assert sorted(obs._datasource_names.keys()) == expected_keys
 
+    del hfc152a_data.attrs["File created"]
+
+    assert hfc152a_data.attrs == {
+        "data_owner": "Paul Krummel",
+        "data_owner_email": "paul.krummel@csiro.au",
+        "inlet_height_magl": "75m_4",
+        "comment": "Medusa measurements. Output from GCWerks. See Miller et al. (2008).",
+        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
+        "Source": "In situ measurements of air",
+        "Conventions": "CF-1.6",
+        "Processed by": "auto@hugs-cloud.com",
+        "species": "hfc152a",
+        "Calibration_scale": "SIO-05",
+        "station_longitude": 144.689,
+        "station_latitude": -40.683,
+        "station_long_name": "Cape Grim, Tasmania",
+        "station_height_masl": 94.0,
+    }
+
 
 def test_read_cranfield():
     get_local_bucket(empty=True)
@@ -164,7 +183,7 @@ def test_read_cranfield():
         filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS"
     )
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="Cranfield")
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="CRANFIELD")
 
     expected_keys = sorted(
         [
@@ -209,17 +228,19 @@ def test_read_icos():
 
     data = Datasource.load(uuid=uuid, shallow=False).data()
 
-    assert sorted(list(data.keys())) == sorted([
-        "2011-12-07-01:38:00+00:00_2011-12-31-19:57:00+00:00",
-        "2011-06-01-05:54:00+00:00_2011-08-31-17:58:00+00:00",
-        "2011-03-30-08:52:00+00:00_2011-05-31-20:59:00+00:00",
-        "2011-09-01-11:20:00+00:00_2011-11-30-03:39:00+00:00",
-        "2012-12-01-04:03:00+00:00_2012-12-31-15:41:00+00:00",
-        "2012-06-01-11:15:00+00:00_2012-08-07-19:16:00+00:00",
-        "2012-04-07-06:20:00+00:00_2012-05-31-18:00:00+00:00",
-        "2012-09-05-02:15:00+00:00_2012-11-30-19:08:00+00:00",
-        "2013-01-01-00:01:00+00:00_2013-01-17-18:06:00+00:00",
-    ])
+    assert sorted(list(data.keys())) == sorted(
+        [
+            "2011-12-07-01:38:00+00:00_2011-12-31-19:57:00+00:00",
+            "2011-06-01-05:54:00+00:00_2011-08-31-17:58:00+00:00",
+            "2011-03-30-08:52:00+00:00_2011-05-31-20:59:00+00:00",
+            "2011-09-01-11:20:00+00:00_2011-11-30-03:39:00+00:00",
+            "2012-12-01-04:03:00+00:00_2012-12-31-15:41:00+00:00",
+            "2012-06-01-11:15:00+00:00_2012-08-07-19:16:00+00:00",
+            "2012-04-07-06:20:00+00:00_2012-05-31-18:00:00+00:00",
+            "2012-09-05-02:15:00+00:00_2012-11-30-19:08:00+00:00",
+            "2013-01-01-00:01:00+00:00_2013-01-17-18:06:00+00:00",
+        ]
+    )
 
     co2_data = data["2012-12-01-04:03:00+00:00_2012-12-31-15:41:00+00:00"]
 
@@ -234,4 +255,19 @@ def test_read_icos():
 
     assert co2_data["co2_number_of_observations"][0] == 12
     assert co2_data["co2_number_of_observations"][-1] == 13
+
+    del co2_data.attrs["File created"]
+
+    assert co2_data.attrs == {
+        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
+        "Source": "In situ measurements of air",
+        "Conventions": "CF-1.6",
+        "Processed by": "auto@hugs-cloud.com",
+        "species": "co2",
+        "Calibration_scale": "unknown",
+        "station_longitude": -2.98598,
+        "station_latitude": 56.55511,
+        "station_long_name": "Angus Tower, UK",
+        "station_height_masl": 300.0,
+    }
 

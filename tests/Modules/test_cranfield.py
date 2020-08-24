@@ -5,7 +5,7 @@ import uuid
 import pytest
 from Acquire.ObjectStore import datetime_to_datetime, datetime_to_string
 
-from HUGS.Modules import Cranfield, Datasource
+from HUGS.Modules import CRANFIELD, Datasource
 from HUGS.ObjectStore import get_local_bucket
 
 
@@ -21,14 +21,14 @@ def cranfield_obj():
     get_local_bucket(empty=True)
 
     # Create a cranfield object as we won't have one with an empty bucket
-    cranfield = Cranfield.create()
+    cranfield = CRANFIELD.create()
     cranfield.save()
 
     # Read in the data file and create datasources
-    Cranfield.read_file(data_filepath=filepath)
+    CRANFIELD.read_file(data_filepath=filepath)
 
     # We want the updated object from the object store
-    cranfield = Cranfield.load()
+    cranfield = CRANFIELD.load()
 
     return cranfield
 
@@ -76,7 +76,7 @@ def test_read_data():
 
     filepath = os.path.join(dir_path, test_data, filename)
 
-    cranfield = Cranfield.load()
+    cranfield = CRANFIELD.load()
 
     combined_data = cranfield.read_data(data_filepath=filepath)
 
@@ -137,7 +137,7 @@ def test_from_data(cranfield_obj):
 
     data["file_hashes"] = {"test1": random_data1, "test2": random_data2}
 
-    c = Cranfield.from_data(data)
+    c = CRANFIELD.from_data(data)
 
     assert c._creation_datetime == epoch
     assert sorted(c._datasource_names) == sorted(
@@ -154,7 +154,7 @@ def test_from_data(cranfield_obj):
 def test_exists(cranfield_obj):
     cranfield_obj.save()
 
-    assert Cranfield.exists() is True
+    assert CRANFIELD.exists() is True
 
 
 def test_clear_datasources(cranfield_obj):

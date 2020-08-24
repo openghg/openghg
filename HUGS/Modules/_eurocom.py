@@ -21,7 +21,7 @@ class EUROCOM(BaseModule):
         data = load_hugs_json(filename="attributes.json")
         self._eurocom_params = data["EUROCOM"]
 
-    def read_file(self, data_filepath, source_name, site=None, source_id=None, overwrite=False):
+    def read_file(self, data_filepath, source_name, site=None, overwrite=False):
         """ Reads EUROCOM data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
@@ -31,6 +31,7 @@ class EUROCOM(BaseModule):
                 list: UUIDs of Datasources data has been assigned to
         """
         from pathlib import Path
+        from HUGS.Processing import assign_attributes
 
         data_filepath = Path(data_filepath)
 
@@ -42,6 +43,9 @@ class EUROCOM(BaseModule):
 
         # This should return xarray Datasets
         gas_data = self.read_data(data_filepath=data_filepath, site=site)
+
+        # Assign attributes to the xarray Datasets here data here makes it a lot easier to test
+        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=self._sampling_period)
 
         return gas_data
 

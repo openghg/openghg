@@ -21,6 +21,7 @@ class ICOS(BaseModule):
                 list: UUIDs of Datasources data has been assigned to
         """
         from pathlib import Path
+        from HUGS.Processing import assign_attributes
 
         data_filepath = Path(data_filepath)
 
@@ -35,7 +36,7 @@ class ICOS(BaseModule):
         # This should return xarray Datasets
         gas_data = self.read_data(data_filepath=data_filepath, species=species, site=site)
         # Assign attributes to the xarray Datasets here data here makes it a lot easier to test
-        gas_data = self.assign_attributes(data=gas_data, site=site, network=network)
+        gas_data = assign_attributes(data=gas_data, site=site, network=network, sampling_period=self._sampling_period)
 
         return gas_data
 
@@ -45,7 +46,7 @@ class ICOS(BaseModule):
             with an assigned UUID as gas:UUID and a list of the processed
             dataframes
 
-            # TODO - update this to process multiple species here?
+            TODO - update this to process multiple species here?
 
             Args:
                 data_filepath (pathlib.Path): Path of datafile
@@ -136,27 +137,3 @@ class ICOS(BaseModule):
 
         return combined_data
 
-    def assign_attributes(self, data, site, network=None):
-        """ Assign attributes to the data we've processed
-
-            Args:
-                combined_data (dict): Dictionary containing data, metadata and attributes
-            Returns:
-                dict: Dictionary of combined data with correct attributes assigned to Datasets
-        """
-        from HUGS.Processing import get_attributes
-
-        for species in data:
-            site_attributes = data[species]["attributes"]
-
-            # TODO - save Dataset attributes to metadata for storage within Datasource
-            data[species]["data"] = get_attributes(
-                ds=data[species]["data"],
-                species=species,
-                site=site,
-                network=network,
-                global_attributes=site_attributes,
-                sampling_period=self._sampling_period,
-            )
-
-        return data
