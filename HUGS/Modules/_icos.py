@@ -7,97 +7,11 @@ class ICOS(BaseModule):
     """ Interface for processing ICOS data
 
     """
-
-    _root = "ICOS"
-    _uuid = "3b8e169b-ea1a-4744-9b63-12a8eedd2281"
-
     def __init__(self):
-        from Acquire.ObjectStore import get_datetime_now
-
-        self._creation_datetime = get_datetime_now()
-        self._stored = False
-        # self._datasources = []
-        # Keyed by name - allows retrieval of UUID from name
-        self._datasource_names = {}
-        # Keyed by UUID - allows retrieval of name by UUID
-        self._datasource_uuids = {}
-        # Hashes of previously uploaded files
-        self._file_hashes = {}
-        # Holds parameters used for writing attributes to Datasets
-        self._template_params = {}
         # Sampling period of ICOS data in seconds
         self._sampling_period = "NA"
 
-    def to_data(self):
-        """ Return a JSON-serialisable dictionary of object
-            for storage in object store
-
-            Returns:
-                dict: Dictionary version of object
-        """
-        from Acquire.ObjectStore import datetime_to_string
-
-        data = {}
-        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_uuids"] = self._datasource_uuids
-        data["datasource_names"] = self._datasource_names
-        data["file_hashes"] = self._file_hashes
-
-        return data
-
-    def save(self, bucket=None):
-        """ Save the object to the object store
-
-            Args:
-                bucket (dict, default=None): Bucket for data
-            Returns:
-                None
-        """
-        from HUGS.ObjectStore import get_bucket, set_object_from_json
-
-        if bucket is None:
-            bucket = get_bucket()
-
-        key = f"{ICOS._root}/uuid/{ICOS._uuid}"
-
-        self._stored = True
-        set_object_from_json(bucket=bucket, key=key, data=self.to_data())
-
-    @staticmethod
-    def read_folder(folder_path, extension=".dat", recursive=True):
-        """ Read all data matching filter in folder
-
-            Args:
-                folder_path (str): Path of folder
-                extension (str, default=".dat"): File extension for data files in folder
-                recursive (bool, default=True)
-            Returns:
-                None
-        """
-        from glob import glob
-        from os import path
-
-        datasource_uuids = {}
-
-        # This finds data files in sub-folders
-        folder_path = path.join(folder_path, f"./*.{extension}")
-        # This finds files in the current folder, get recursive
-        # folder_path = _path.join(folder_path, "*.dat")
-        filepaths = glob(folder_path, recursive=recursive)
-
-        if not filepaths:
-            raise FileNotFoundError("No data files found")
-
-        for fp in filepaths:
-            datasource_uuids[fp] = ICOS.read_file(data_filepath=fp)
-
-        return datasource_uuids
-
-    @staticmethod
-    def read_file(
-        data_filepath, source_name, site=None, source_id=None, overwrite=False
-    ):
+    def read_file(self, data_filepath, source_name=None, site=None, network=None, overwrite=False):
         """ Reads ICOS data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
@@ -106,57 +20,24 @@ class ICOS(BaseModule):
             Returns:
                 list: UUIDs of Datasources data has been assigned to
         """
-        from HUGS.Processing import assign_data, lookup_gas_datasources
-        from HUGS.Util import hash_file
         from pathlib import Path
 
-        icos = ICOS.load()
-
-        # Check if the file has been uploaded already
-        file_hash = hash_file(filepath=data_filepath)
-        if file_hash in icos._file_hashes and not overwrite:
-            raise ValueError(
-                f"This file has been uploaded previously with the filename : {icos._file_hashes[file_hash]}"
-            )
-
         data_filepath = Path(data_filepath)
-        filename = data_filepath.name
 
-        if not source_name:
-            source_name = filename.stem
+        if source_name is None:
+            source_name = data_filepath.stem
 
-        if not site:
+        if site is None:
             site = source_name.split(".")[0]
 
+        species = source_name.split(".")[1]
+
         # This should return xarray Datasets
-        gas_data = icos.read_data(data_filepath=data_filepath, site=site)
-
+        gas_data = self.read_data(data_filepath=data_filepath, species=species, site=site)
         # Assign attributes to the xarray Datasets here data here makes it a lot easier to test
-        gas_data = icos.assign_attributes(data=gas_data, site=site)
+        gas_data = self.assign_attributes(data=gas_data, site=site, network=network)
 
-        # Check if we've got data from these sources before
-        lookup_results = lookup_gas_datasources(
-            lookup_dict=icos._datasource_names,
-            gas_data=gas_data,
-            source_name=source_name,
-            source_id=source_id,
-        )
-
-        # Assign the data to the correct datasources
-        datasource_uuids = assign_data(
-            gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite
-        )
-
-        # Add the Datasources to the list of datasources associated with this object
-        icos.add_datasources(datasource_uuids)
-
-        # Store the hash as the key for easy searching, store the filename as well for
-        # ease of checking by user
-        icos._file_hashes[file_hash] = filename
-
-        icos.save()
-
-        return datasource_uuids
+        return gas_data
 
     def read_data(self, data_filepath, species, site=None):
         """ Separates the gases stored in the dataframe in
@@ -254,3 +135,28 @@ class ICOS(BaseModule):
         }
 
         return combined_data
+
+    def assign_attributes(self, data, site, network=None):
+        """ Assign attributes to the data we've processed
+
+            Args:
+                combined_data (dict): Dictionary containing data, metadata and attributes
+            Returns:
+                dict: Dictionary of combined data with correct attributes assigned to Datasets
+        """
+        from HUGS.Processing import get_attributes
+
+        for species in data:
+            site_attributes = data[species]["attributes"]
+
+            # TODO - save Dataset attributes to metadata for storage within Datasource
+            data[species]["data"] = get_attributes(
+                ds=data[species]["data"],
+                species=species,
+                site=site,
+                network=network,
+                global_attributes=site_attributes,
+                sampling_period=self._sampling_period,
+            )
+
+        return data

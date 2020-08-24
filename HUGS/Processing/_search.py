@@ -14,24 +14,6 @@ __all__ = [
 ]
 
 
-class RootPaths(Enum):
-    DATA = "data"
-    DATASOURCE = "datasource"
-    INSTRUMENT = "instrument"
-    SITE = "site"
-    NETWORK = "network"
-
-
-class DataType(Enum):
-    CRDS = "CRDS"
-    GC = "GC"
-    FOOTPRINT = "FOOTPRINT"
-    NOAA = "NOAA"
-    EUROCOM = "EUROCOM"
-    ThamesBarrier = "THAMESBARRIER"
-    ICOS = "ICOS"
-
-
 def search(
     data_type,
     locations,
@@ -64,6 +46,7 @@ def search(
     from HUGS.Modules import Datasource
     from HUGS.Util import (get_datetime_now, get_datetime_epoch, create_daterange_str, 
                             load_object, timestamp_tzaware, get_datapath)
+    from HUGS.Processing import DataTypes
 
     if species is not None and not isinstance(species, list):
         species = [species]
@@ -106,7 +89,7 @@ def search(
     end_datetime = timestamp_tzaware(end_datetime)
 
     # Load the required data object and get the datasource UUIDs required for metadata search
-    data_type = DataType[data_type.upper()].name
+    data_type = DataTypes[data_type.upper()].name
     data_obj = load_object(class_name=data_type)
     datasource_uuids = data_obj.datasources()
 

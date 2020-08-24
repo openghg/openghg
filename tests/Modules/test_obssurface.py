@@ -58,9 +58,13 @@ def test_read_GC():
     get_local_bucket(empty=True)
 
     data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
-    precision_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
+    precision_filepath = get_datapath(
+        filename="capegrim-medusa.18.precisions.C", data_type="GC"
+    )
 
-    results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GC")
+    results = ObsSurface.read_file(
+        filepath=(data_filepath, precision_filepath), data_type="GC"
+    )
 
     expected_keys = sorted(
         [
@@ -156,11 +160,19 @@ def test_read_GC():
 def test_read_cranfield():
     get_local_bucket(empty=True)
 
-    data_filepath = get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")
+    data_filepath = get_datapath(
+        filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS"
+    )
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="Cranfield")
 
-    expected_keys = sorted(['THB_hourly_means_test_ch4', 'THB_hourly_means_test_co2', 'THB_hourly_means_test_co'])
+    expected_keys = sorted(
+        [
+            "THB_hourly_means_test_ch4",
+            "THB_hourly_means_test_co2",
+            "THB_hourly_means_test_co",
+        ]
+    )
 
     assert sorted(results["THB_hourly_means_test.csv"].keys()) == expected_keys
 
@@ -178,4 +190,48 @@ def test_read_cranfield():
     assert ch4_data["ch4 variability"][0] == pytest.approx(75.50218)
     assert ch4_data["ch4 variability"][-1] == pytest.approx(6.48413)
 
+
+def test_read_icos():
+    get_local_bucket(empty=True)
+
+    data_filepath = get_datapath(
+        filename="tta.co2.1minute.222m.min.dat", data_type="ICOS"
+    )
+
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS")
+
+    assert (
+        list(results["tta.co2.1minute.222m.min.dat"].keys())[0]
+        == "tta.co2.1minute.222m.min_co2"
+    )
+
+    uuid = results["tta.co2.1minute.222m.min.dat"]["tta.co2.1minute.222m.min_co2"]
+
+    data = Datasource.load(uuid=uuid, shallow=False).data()
+
+    assert sorted(list(data.keys())) == sorted([
+        "2011-12-07-01:38:00+00:00_2011-12-31-19:57:00+00:00",
+        "2011-06-01-05:54:00+00:00_2011-08-31-17:58:00+00:00",
+        "2011-03-30-08:52:00+00:00_2011-05-31-20:59:00+00:00",
+        "2011-09-01-11:20:00+00:00_2011-11-30-03:39:00+00:00",
+        "2012-12-01-04:03:00+00:00_2012-12-31-15:41:00+00:00",
+        "2012-06-01-11:15:00+00:00_2012-08-07-19:16:00+00:00",
+        "2012-04-07-06:20:00+00:00_2012-05-31-18:00:00+00:00",
+        "2012-09-05-02:15:00+00:00_2012-11-30-19:08:00+00:00",
+        "2013-01-01-00:01:00+00:00_2013-01-17-18:06:00+00:00",
+    ])
+
+    co2_data = data["2012-12-01-04:03:00+00:00_2012-12-31-15:41:00+00:00"]
+
+    assert co2_data.time[0] == Timestamp("2012-12-01T04:03:00")
+    assert co2_data.time[-1] == Timestamp("2012-12-31T15:41:00")
+
+    assert co2_data["co2"][0] == 397.765
+    assert co2_data["co2"][-1] == 398.374
+
+    assert co2_data["co2_variability"][0] == 0.057
+    assert co2_data["co2_variability"][-1] == 0.063
+
+    assert co2_data["co2_number_of_observations"][0] == 12
+    assert co2_data["co2_number_of_observations"][-1] == 13
 
