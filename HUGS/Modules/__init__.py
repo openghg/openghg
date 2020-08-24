@@ -12,3 +12,4 @@ from ._gc import GC
 from ._icos import ICOS
 from ._noaa import NOAA
 from ._thamesbarrier import ThamesBarrier
+from ._obs_surface import ObsSurface

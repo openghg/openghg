@@ -97,7 +97,8 @@ class CRDS():
 
         header_rows = 2
         # Create metadata here
-        metadata = self.read_metadata(filepath=data_filepath, data=data, data_type="CRDS")
+        metadata = self.read_metadata(filepath=data_filepath, data=data)
+
         # This dictionary is used to store the gas data and its associated metadata
         combined_data = {}
 
@@ -124,7 +125,7 @@ class CRDS():
             # Here we can convert the Dataframe to a Dataset and then write the attributes
             gas_data = gas_data.to_xarray()
 
-            site_attributes = self.site_attributes(site=site, inlet=inlet)
+            site_attributes = self.get_site_attributes(site=site, inlet=inlet)
 
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
@@ -141,7 +142,7 @@ class CRDS():
 
         return combined_data
 
-    def read_metadata(filename, data):
+    def read_metadata(self, filepath, data):
         """ Parse CRDS files and create a metadata dict
 
             Args:
@@ -155,7 +156,7 @@ class CRDS():
         port = data[3][2]
 
         # Split the filename to get the site and resolution
-        split_filename = filename.split(".")
+        split_filename = str(filepath.name).split(".")
 
         if len(split_filename) < 4:
             raise ValueError(
@@ -210,7 +211,7 @@ class CRDS():
 
         return data
 
-    def site_attributes(self, site, inlet):
+    def get_site_attributes(self, site, inlet):
         """ Gets the site specific attributes for writing to Datsets
 
             Args:
@@ -220,8 +221,10 @@ class CRDS():
                 dict: Dictionary of attributes
         """
         from HUGS.Util import load_hugs_json
+
         if not self._crds_params:
-            self._crds_params = load_hugs_json(filename="process_gcwerks_parameters.json")
+            data = load_hugs_json(filename="process_gcwerks_parameters.json")
+            self._crds_params = data["CRDS"]
 
         attributes = self._crds_params[site.upper()]["global_attributes"]
         attributes["inlet_height_magl"] = inlet.split("_")[0]

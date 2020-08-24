@@ -112,7 +112,7 @@ def load_object(class_name):
     except ModuleNotFoundError as err:
         raise ModuleNotFoundError(f"{class_name} is not a valid module {err}")
 
-    return target_class.load()
+    return target_class()
 
 
 def hash_file(filepath):

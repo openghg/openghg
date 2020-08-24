@@ -87,9 +87,10 @@ class ObsSurface(BaseModule):
         obs = ObsSurface.load()
 
         results = {}
+
         for fp in filepath:
             # TODO - need a new way of creating the source name
-            source_name = filepath.stem
+            source_name = fp.stem
 
             # Hash the file and if we've seen this file before raise an error
             file_hash = hash_file(filepath=fp)
@@ -108,7 +109,7 @@ class ObsSurface(BaseModule):
             # Create Datasources, save them to the object store and get their UUIDs
             datasource_uuids = assign_data(gas_data=data, lookup_results=datasource_table, overwrite=overwrite)
 
-            results[fp] = datasource_uuids
+            results[fp.name] = datasource_uuids
 
             # Record the Datasources we've created / appended to
             obs.add_datasources(datasource_uuids)
@@ -116,6 +117,9 @@ class ObsSurface(BaseModule):
             # Store the hash as the key for easy searching, store the filename as well for
             # ease of checking by user
             obs._file_hashes[file_hash] = fp.name
+
+        # Save this object back to the object store
+        obs.save()
 
         return results
 
@@ -138,9 +142,4 @@ class ObsSurface(BaseModule):
         results = ObsSurface.read_file(filepath=filepaths)
 
         return results
-
-
-
-
-        
 
