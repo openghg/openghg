@@ -1,6 +1,6 @@
 # from _paths import RootPaths
 __all__ = ["CRDS"]
-
+from HUGS.Util import load_hugs_json
 
 class CRDS():
     """
@@ -11,6 +11,9 @@ class CRDS():
         self._crds_params = {}
         # Sampling period of CRDS data in seconds
         self._sampling_period = 60
+
+        data = load_hugs_json(filename="process_gcwerks_parameters.json")
+        self._crds_params = data["CRDS"]
 
     def read_file(self, data_filepath, source_name=None, site=None):
         """ Creates a CRDS object holding data stored within Datasources
