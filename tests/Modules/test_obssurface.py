@@ -15,7 +15,7 @@ def get_datapath(filename, data_type):
     return (
         Path(__file__)
         .resolve()
-        .parent.parent.joinpath("data", "proc_test_data", data_type.upper(), filename)
+        .parent.parent.joinpath("data", "proc_test_data", data_type, filename)
     )
 
 
@@ -58,13 +58,9 @@ def test_read_GC():
     get_local_bucket(empty=True)
 
     data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
-    precision_filepath = get_datapath(
-        filename="capegrim-medusa.18.precisions.C", data_type="GC"
-    )
+    precision_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    results = ObsSurface.read_file(
-        filepath=(data_filepath, precision_filepath), data_type="GC"
-    )
+    results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GC")
 
     expected_keys = sorted(
         [
@@ -155,3 +151,31 @@ def test_read_GC():
     obs = ObsSurface.load()
 
     assert sorted(obs._datasource_names.keys()) == expected_keys
+
+
+def test_read_cranfield():
+    get_local_bucket(empty=True)
+
+    data_filepath = get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")
+
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="Cranfield")
+
+    expected_keys = sorted(['THB_hourly_means_test_ch4', 'THB_hourly_means_test_co2', 'THB_hourly_means_test_co'])
+
+    assert sorted(results["THB_hourly_means_test.csv"].keys()) == expected_keys
+
+    uuid = results["THB_hourly_means_test.csv"]["THB_hourly_means_test_ch4"]
+
+    ch4_data = Datasource.load(uuid=uuid, shallow=False).data()
+    ch4_data = ch4_data["2018-05-05-00:00:00+00:00_2018-05-13-16:00:00+00:00"]
+
+    assert ch4_data.time[0] == Timestamp("2018-05-05")
+    assert ch4_data.time[-1] == Timestamp("2018-05-13T16:00:00")
+
+    assert ch4_data["ch4"][0] == pytest.approx(2585.651)
+    assert ch4_data["ch4"][-1] == pytest.approx(1999.018)
+
+    assert ch4_data["ch4 variability"][0] == pytest.approx(75.50218)
+    assert ch4_data["ch4 variability"][-1] == pytest.approx(6.48413)
+
+

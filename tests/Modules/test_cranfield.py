@@ -13,7 +13,7 @@ from HUGS.ObjectStore import get_local_bucket
 def cranfield_obj():
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/Cranfield_CRDS"
-    filename = "thames_barrier_cumulative_calibrated_hourly_means_TEST.csv"
+    filename = "THB_hourly_means_test.csv"
 
     filepath = os.path.join(dir_path, test_data, filename)
 
@@ -72,7 +72,7 @@ def test_read_file(cranfield_obj):
 def test_read_data():
     dir_path = os.path.dirname(__file__)
     test_data = "../data/proc_test_data/Cranfield_CRDS"
-    filename = "thames_barrier_cumulative_calibrated_hourly_means_TEST.csv"
+    filename = "THB_hourly_means_test.csv"
 
     filepath = os.path.join(dir_path, test_data, filename)
 
