@@ -317,3 +317,24 @@ def test_read_thames_barrier():
     data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER")
+
+    expected_keys = sorted(['thames_test_20190707_CH4', 'thames_test_20190707_CO2', 'thames_test_20190707_CO'])
+
+    assert sorted(list(results["thames_test_20190707.csv"].keys())) == expected_keys
+
+    uuid = results["thames_test_20190707.csv"]["thames_test_20190707_CO2"]
+
+    data = Datasource.load(uuid=uuid, shallow=False).data()
+    data = data["2019-07-01-00:39:55+00:00_2019-08-01-00:10:30+00:00"]
+
+    assert data.time[0] == Timestamp("2019-07-01T00:39:55")
+    assert data.time[-1] == Timestamp("2019-08-01T00:10:30")
+    assert data["co2"][0] == pytest.approx(417.97344761)
+    assert data["co2"][-1] == pytest.approx(417.80000653)
+    assert data["co2_variability"][0] == 0
+    assert data["co2_variability"][-1] == 0
+
+    obs = ObsSurface.load()
+
+    assert sorted(obs._datasource_names.keys()) == expected_keys
+

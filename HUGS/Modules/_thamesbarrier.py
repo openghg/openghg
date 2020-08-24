@@ -80,7 +80,9 @@ class THAMESBARRIER(BaseModule):
                 processed_data[species] * 0.0
             )
 
-            site_attributes = self.site_attributes()
+            site_attributes = self._tb_params["global_attributes"]
+            site_attributes["inlet_height_magl"] = self._tb_params["inlet"]
+            site_attributes["instrument"] = self._tb_params["instrument"]
 
             # TODO - add in metadata reading
             combined_data[species] = {
