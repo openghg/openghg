@@ -209,6 +209,12 @@ def test_read_cranfield():
     assert ch4_data["ch4 variability"][0] == pytest.approx(75.50218)
     assert ch4_data["ch4 variability"][-1] == pytest.approx(6.48413)
 
+    # Check obs has stored the keys correctly
+    obs = ObsSurface.load()
+
+    assert sorted(list(obs._datasource_names.keys())) == sorted(['THB_hourly_means_test_ch4', 
+                                                                'THB_hourly_means_test_co2', 
+                                                                'THB_hourly_means_test_co'])
 
 def test_read_icos():
     get_local_bucket(empty=True)
@@ -219,10 +225,7 @@ def test_read_icos():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS")
 
-    assert (
-        list(results["tta.co2.1minute.222m.min.dat"].keys())[0]
-        == "tta.co2.1minute.222m.min_co2"
-    )
+    assert list(results["tta.co2.1minute.222m.min.dat"].keys())[0] == "tta.co2.1minute.222m.min_co2"
 
     uuid = results["tta.co2.1minute.222m.min.dat"]["tta.co2.1minute.222m.min_co2"]
 
@@ -271,3 +274,46 @@ def test_read_icos():
         "station_height_masl": 300.0,
     }
 
+    obs = ObsSurface.load()
+
+    assert list(obs._datasource_names.keys())[0] == "tta.co2.1minute.222m.min_co2"
+
+
+def test_read_noaa():
+    get_local_bucket(empty=True)
+
+    data_filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
+
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="NOAA")
+
+    uuid = results["co_pocn25_surface-flask_1_ccgg_event.txt"]["co_pocn25_surface-flask_1_ccgg_event_CO"]
+
+    co_data = Datasource.load(uuid=uuid, shallow=False).data()
+
+    assert len(co_data.keys()) == 95
+
+    old_data = co_data["1990-12-02-12:23:00+00:00_1990-12-02-12:23:00+00:00"]
+
+    assert old_data.time[0] == Timestamp("1990-12-02T12:23:00")
+    assert old_data.time[-1] == Timestamp("1990-12-02T12:23:00")
+
+    assert old_data["co"][0] == 141.61
+    assert old_data["co"][-1] == 141.61
+
+    assert old_data["co_repeatability"][0] == -999.99
+    assert old_data["co_repeatability"][-1] == -999.99
+
+    assert old_data["co_selection_flag"][0] == 0
+    assert old_data["co_selection_flag"][-1] == 0
+
+    obs = ObsSurface.load()
+
+    assert list(obs._datasource_names.keys())[0] == "co_pocn25_surface-flask_1_ccgg_event_CO"
+
+
+def test_read_thames_barrier():
+    get_local_bucket(empty=True)
+
+    data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
+
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER")

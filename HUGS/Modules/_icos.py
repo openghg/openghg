@@ -11,12 +11,12 @@ class ICOS(BaseModule):
         # Sampling period of ICOS data in seconds
         self._sampling_period = "NA"
 
-    def read_file(self, data_filepath, source_name=None, site=None, network=None, overwrite=False):
+    def read_file(self, data_filepath, source_name=None, site=None, network=None):
         """ Reads ICOS data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
             Args:
-                filepath (str or Path): Path of file to load
+                data_filepath (str or Path): Path of file to load
             Returns:
                 list: UUIDs of Datasources data has been assigned to
         """

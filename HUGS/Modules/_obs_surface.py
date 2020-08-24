@@ -152,4 +152,3 @@ class ObsSurface(BaseModule):
         results = ObsSurface.read_file(filepath=filepaths)
 
         return results
-

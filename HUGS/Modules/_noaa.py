@@ -156,7 +156,9 @@ class NOAA(BaseModule):
 
         data = data.to_xarray()
 
-        site_attributes = self.site_attributes()
+        site_attributes = self._noaa_params["global_attributes"]
+        site_attributes["inlet_height_magl"] = "NA"
+        site_attributes["instrument"] = self._noaa_params["instrument"][species]
 
         metadata = {}
         metadata["species"] = species
@@ -170,15 +172,3 @@ class NOAA(BaseModule):
         }
 
         return combined_data
-
-    def site_attributes(self):
-        """ Gets the site specific attributes for writing to Datsets
-
-            Returns:
-                dict: Dictionary of site attributes
-        """
-        attributes = self._noaa_params["global_attributes"]
-        attributes["inlet_height_magl"] = "NA"
-        attributes["instrument"] = self._noaa_params["instrument"]
-
-        return attributes
