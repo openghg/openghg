@@ -14,7 +14,6 @@ class Search:
         self,
         species,
         locations,
-        data_type,
         inlet=None,
         instrument=None,
         start_datetime=None,
@@ -38,7 +37,6 @@ class Search:
         results = search_fn(
             species=species,
             locations=locations,
-            data_type=data_type,
             inlet=inlet,
             instrument=instrument,
             start_datetime=start_datetime,

@@ -56,7 +56,11 @@ class GC(BaseModule):
             # Get the first part of the filename
             # Example filename: capegrim-medusa.18.C
             site_instrument = str(data_filepath.name).split(".")
-            instrument_name = site_instrument[0].split("-")[1]
+            try:
+                instrument_name = site_instrument[0].split("-")[1]
+            except IndexError:
+                raise ValueError(f"Unable to read instrument from filename {data_filepath.name}. \
+                                    Please pass the instrument name or amend the filename.")
 
             if(not self.is_valid_instrument(instrument_name)):
                 raise ValueError(f"Invalid instrument, defaulting to GCMD. Instruments \

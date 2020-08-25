@@ -57,8 +57,7 @@ class RankSources:
         if updated_rankings == self._before_ranking:
             return
 
-        data_type = DataTypes[data_type.upper()].name
-        data_obj = load_object(class_name=data_type)
+        obs = ObsSurface.load()
 
         for key in updated_rankings:
             uuid = updated_rankings[key]["uuid"]
@@ -68,9 +67,9 @@ class RankSources:
                     continue
 
                 for d in daterange:
-                    data_obj.set_rank(uuid=uuid, rank=rank, daterange=d)
+                    obs.set_rank(uuid=uuid, rank=rank, daterange=d)
 
-        data_obj.save()
+        obs.save()
 
     def create_daterange(self, start, end):
         """ Create a JSON serialisable daterange string for use in ranking dict
