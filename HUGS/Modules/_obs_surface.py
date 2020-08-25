@@ -62,7 +62,7 @@ class ObsSurface(BaseModule):
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
     @staticmethod
-    def read_file(filepath, data_type, site=None, network=None, overwrite=False):
+    def read_file(filepath, data_type, site=None, network=None, instrument=None, overwrite=False):
         """ Read file(s) with the processing module given by data_type
 
             Args:

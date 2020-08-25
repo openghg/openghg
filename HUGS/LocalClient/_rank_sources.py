@@ -1,5 +1,5 @@
 import copy
-from HUGS.Modules import Datasource
+from HUGS.Modules import Datasource, ObsSurface
 from HUGS.Processing import DataTypes
 from HUGS.Util import load_object, valid_site
 
@@ -22,11 +22,9 @@ class RankSources:
             # raise InvalidSiteError(f"{site} is not a valid site code")
             raise ValueError(f"{site} is not a valid site code")
 
-        data_type = DataTypes[data_type.upper()].name
+        obs = ObsSurface.load()
+        datasource_uuids = obs.datasources()
 
-        data_obj = load_object(class_name=data_type)
-
-        datasource_uuids = data_obj.datasources()
         # Shallow load the Datasources (only get their JSON metadata)
         datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 

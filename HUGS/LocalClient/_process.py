@@ -1,6 +1,7 @@
 # The local version of the Process object
 from pathlib import Path
 
+from HUGS.Modules import ObsSurface
 from HUGS.Processing import DataTypes
 from HUGS.Util import load_object
 
@@ -36,14 +37,15 @@ def process_folder(folder_path, data_type, overwrite=False, extension="dat"):
     return process_files(files=filepaths, data_type=data_type)
 
 
-def process_files(files, data_type, site=None, instrument=None, network=None, overwrite=False):
+def process_files(files, data_type, site=None, network=None, instrument=None, overwrite=False):
     """ Process the passed file(s)
 
         Args:
             files (str, list): Path of files to be processed
-            site (str): Site code or name
-            instrument (str): Instrument name
             data_type (str): Type of data to be processed (CRDS, GC etc)
+            site (str, default=None): Site code or name
+            network (str, default=None): Network name
+            instrument (str, default=None): Instrument name
             overwrite (bool, default=False): Should this data overwrite data
             stored for these datasources for existing dateranges
         Returns:
@@ -54,25 +56,18 @@ def process_files(files, data_type, site=None, instrument=None, network=None, ov
     if not isinstance(files, list):
         files = [files]
 
-    # Load in the the class used to process the data file/s
-    processing_obj = load_object(class_name=data_type)
+    obs = ObsSurface.load()
 
     results = {}
     # Ensure we have Paths
     if data_type == "GC":
         if not all(isinstance(item, tuple) for item in files):
             return TypeError("If data type is GC, a list of tuples for data and precision filenames must be passed")
-
         files = [(Path(f), Path(p)) for f, p in files]
-
-        for data, precision in files:
-            r = processing_obj.read_file(data_filepath=data, precision_filepath=precision)
-            results.update(r)
     else:
         files = [Path(f) for f in files]
 
-        for data in files:
-            r = processing_obj.read_file(data_filepath=data)
-            results.update(r)
+    r = obs.read_file(filepath=files, data_type=data_type, site=site, network=network, instrument=instrument)
+    results.update(r)
 
     return results

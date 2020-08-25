@@ -1,7 +1,7 @@
 import os
 import pytest
 from HUGS.LocalClient import RankSources
-from HUGS.Modules import CRDS
+from HUGS.Modules import ObsSurface
 from HUGS.ObjectStore import get_local_bucket
 
 
@@ -14,7 +14,7 @@ def crds():
     filename = "hfd.picarro.1minute.100m.min.dat"
     filepath = os.path.join(dir_path, test_data, filename)
 
-    CRDS.read_file(data_filepath=filepath, source_name="hfd_picarro_100m", site="hfd")
+    ObsSurface.read_file(filepath=filepath, data_type="CRDS")
 
 
 def test_ranking(crds):

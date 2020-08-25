@@ -12,6 +12,8 @@ def test_process_files():
 
     results = process_files(files=filepath, site="hfd", instrument="picarro", network="DECC", data_type="CRDS")
 
+    results = results["hfd.picarro.1minute.100m.min.dat"]
+
     assert "hfd.picarro.1minute.100m.min_ch4" in results
     assert "hfd.picarro.1minute.100m.min_co2" in results
 
@@ -24,10 +26,25 @@ def test_process_folder():
 
     results = process_folder(folder_path=folder_path, data_type="CRDS")
 
-    expected_keys = sorted(['tac.picarro.1minute.100m.test_ch4', 'tac.picarro.1minute.100m.test_co2', 'hfd.picarro.1minute.50m.min_ch4', 
-                    'hfd.picarro.1minute.50m.min_co2', 'hfd.picarro.1minute.50m.min_co', 'hfd.picarro.1minute.100m.min_ch4', 
-                    'hfd.picarro.1minute.100m.min_co2', 'hfd.picarro.1minute.100m.min_co', 'tac.picarro.1minute.100m.min_ch4', 
-                    'tac.picarro.1minute.100m.min_co2', 'bsd.picarro.1minute.248m_ch4', 'bsd.picarro.1minute.248m_co2', 
-                    'bsd.picarro.1minute.248m_co'])
+    expected_keys = sorted(['tac.picarro.1minute.100m.test.dat', 'hfd.picarro.1minute.50m.min.dat', 
+                    'hfd.picarro.1minute.100m.min.dat', 'tac.picarro.1minute.100m.min.dat', 
+                    'bsd.picarro.1minute.248m.dat'])
 
     assert sorted(list(results.keys())) == expected_keys
+
+    subkeys = []
+    for key, subdict in results.items():
+        for subkey in subdict:
+            subkeys.append(subkey)
+
+    subkeys.sort()
+
+    expected_subkeys = sorted(['tac.picarro.1minute.100m.test_ch4', 'tac.picarro.1minute.100m.test_co2', 
+                        'hfd.picarro.1minute.50m.min_ch4', 'hfd.picarro.1minute.50m.min_co2', 
+                        'hfd.picarro.1minute.50m.min_co', 'hfd.picarro.1minute.100m.min_ch4', 
+                        'hfd.picarro.1minute.100m.min_co2', 'hfd.picarro.1minute.100m.min_co', 
+                        'tac.picarro.1minute.100m.min_ch4', 'tac.picarro.1minute.100m.min_co2', 
+                        'bsd.picarro.1minute.248m_ch4', 'bsd.picarro.1minute.248m_co2', 
+                        'bsd.picarro.1minute.248m_co'])
+
+    assert subkeys == expected_subkeys
