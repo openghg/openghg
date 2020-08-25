@@ -75,6 +75,7 @@ class ObsSurface(BaseModule):
                 None
         """
         from collections import defaultdict
+        from pathlib import Path
         from HUGS.Util import load_object, hash_file
         from HUGS.Processing import assign_data, DataTypes
 
@@ -92,13 +93,13 @@ class ObsSurface(BaseModule):
             if data_type == "GC":
                 if not isinstance(fp, tuple):
                     raise TypeError("To process GC data a data filepath and a precision filepath must be suppled as a tuple")
-                
-                data_filepath = fp[0]
-                precision_filepath = fp[1]
+
+                data_filepath = Path(fp[0])
+                precision_filepath = Path(fp[1])
 
                 data = data_obj.read_file(data_filepath=data_filepath, precision_filepath=precision_filepath)
             else:
-                data_filepath = fp
+                data_filepath = Path(fp)
                 data = data_obj.read_file(data_filepath=data_filepath)
 
             # TODO - need a new way of creating the source name
@@ -134,21 +135,24 @@ class ObsSurface(BaseModule):
         return results
 
     @staticmethod
-    def read_folder(folder_path):
-        """ Read all data matching filter in folder
+    def read_folder(folder_path, data_type, extension="dat"):
+        """ Find files with the given extension (by default dat) in the passed folder
 
             Args:
                 folder_path (str): Path of folder
+                data_type (str): Data type
+                extension (str, default="dat"): File extension
             Returns:
                 dict: Dictionary of the Datasources created for each file
         """
         from pathlib import Path
 
-        filepaths = [f.resolve() for f in Path(folder_path).glob("**/*.dat")]
+        if extension.startswith("."):
+            extension = extension.strip(".")
+
+        filepaths = [f.resolve() for f in Path(folder_path).glob(f"**/*.{extension}")]
 
         if not filepaths:
             raise FileNotFoundError("No data files found")
 
-        results = ObsSurface.read_file(filepath=filepaths)
-
-        return results
+        return ObsSurface.read_file(filepath=filepaths, data_type=data_type)

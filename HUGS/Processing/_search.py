@@ -2,8 +2,6 @@
     the object store
 
 """
-from enum import Enum
-
 __all__ = [
     "get_data",
     "daterange_to_string",
@@ -15,12 +13,11 @@ __all__ = [
 
 
 def search(
-    data_type,
     locations,
     species=None,
     inlet=None,
     instrument=None,
-    find_all=False,
+    find_all=True,
     start_datetime=None,
     end_datetime=None,
 ):
@@ -33,7 +30,7 @@ def search(
             locations (str or list): Where to search for the terms in species
             inlet (str, default=None): Inlet height such as 100m
             instrument (str, default=None): Instrument name such as picarro
-            find_all (bool, default=False): Require all search terms to be satisfied
+            find_all (bool, default=True): Require all search terms to be satisfied
             start_datetime (datetime, default=None): Start datetime for search
             If None a start datetime of UNIX epoch (1970-01-01) is set
             end_datetime (datetime, default=None): End datetime for search
@@ -43,9 +40,9 @@ def search(
     """
     from collections import defaultdict
     from json import load
-    from HUGS.Modules import Datasource
+    from HUGS.Modules import Datasource, ObsSurface
     from HUGS.Util import (get_datetime_now, get_datetime_epoch, create_daterange_str, 
-                            load_object, timestamp_tzaware, get_datapath)
+                            timestamp_tzaware, get_datapath)
     from HUGS.Processing import DataTypes
 
     if species is not None and not isinstance(species, list):
@@ -88,12 +85,11 @@ def search(
     start_datetime = timestamp_tzaware(start_datetime)
     end_datetime = timestamp_tzaware(end_datetime)
 
-    # Load the required data object and get the datasource UUIDs required for metadata search
-    data_type = DataTypes[data_type.upper()].name
-    data_obj = load_object(class_name=data_type)
-    datasource_uuids = data_obj.datasources()
+    # Here we want to load in the ObsSurface module for now
+    obs = ObsSurface.load()
+    datasource_uuids = obs.datasources()
 
-    # Shallow load the Datasources
+    # Shallow load the Datasources so we can search their metadata
     datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 
     # First we find the Datasources from locations we want to narrow down our search
@@ -107,12 +103,10 @@ def search(
     # This is returned to the caller
     results = defaultdict(dict)
 
-    print(location_sources)
-
+    # So we can search for all species at a site, this should be rolled into the other search functions
     if not species:
         for site, sources in location_sources.items():
             for datasource in sources:
-                print(datasource.metadata())
                 # Just match the single source here
                 if datasource.search_metadata(search_terms=[site], find_all=False):
                     daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
@@ -121,7 +115,8 @@ def search(
 
                     data_date_str = strip_dates_keys(in_date)
 
-                    key = f"{datasource.species()}_{site}_{datasource.instrument()}_{datasource.inlet()}"
+                    key = f"{datasource.species()}_{site}_{datasource.instrument()}_{datasource.inlet()}".lower()
+                    
                     # Find the keys that match the correct data
                     results[key]["keys"] = {data_date_str: in_date}
                     results[key]["metadata"] = datasource.metadata()
@@ -141,95 +136,94 @@ def search(
 
                         data_date_str = strip_dates_keys(in_date)
 
-                        key = f"{sp}_{site}_{instrument}_{inlet}"
+                        key = f"{sp}_{site}_{instrument}_{inlet}".lower()
+                        
                         # Find the keys that match the correct data
                         results[key]["keys"] = {data_date_str: in_date}
                         results[key]["metadata"] = datasource.metadata()
 
         return results
 
-    if data_type != "FOOTPRINT":
-        for location, sources in location_sources.items():
-            # Loop over and look for the species
-            species_data = defaultdict(list)
-            for datasource in sources:
-                for s in species:
-                    # Check the species and the daterange
-                    if datasource.search_metadata(search_terms=s, find_all=find_all):
-                        species_data[s].append(datasource)
+    for location, sources in location_sources.items():
+        # Loop over and look for the species
+        species_data = defaultdict(list)
+        for datasource in sources:
+            for s in species:
+                search_terms = [x for x in (s, inlet, instrument) if x is not None]
+                # Check the species and the daterange
+                if datasource.search_metadata(search_terms=search_terms, find_all=find_all):
+                    species_data[s].append(datasource)
 
-            # For each location we want to find the highest ranking sources for the selected species
-            for sp, sources in species_data.items():
-                ranked_sources = {}
+        # For each location we want to find the highest ranking sources for the selected species
+        for sp, sources in species_data.items():
+            ranked_sources = {}
 
-                # How to return all the sources if they're all 0?
-                for source in sources:
-                    rank_data = source.get_rank(start_date=start_datetime, end_date=end_datetime)
+            # How to return all the sources if they're all 0?
+            for source in sources:
+                rank_data = source.get_rank(start_date=start_datetime, end_date=end_datetime)
 
-                    # With no rank set we get an empty dictionary
-                    if not rank_data:
-                        ranked_sources[0] = 0
-                        continue
-
-                    # Just get the highest ranked datasources and return them
-                    # Find the highest ranked data from this site
-                    highest_rank = sorted(rank_data.keys())[-1]
-
-                    if highest_rank == 0:
-                        ranked_sources[0] = 0
-                        continue
-
-                    ranked_sources[source.uuid()] = {"rank": highest_rank, "dateranges": rank_data[highest_rank], "source": source}
-
-                # If it's all zeroes we want to return all sources
-                if list(ranked_sources) == [0]:
-                    for source in sources:
-                        key = f"{sp}_{location}_{source.inlet()}"
-
-                        daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
-                        data_keys = source.in_daterange(daterange=daterange_str)
-
-                        if not data_keys:
-                            continue
-
-                        # Get a key that covers the daterange of the actual data and not from epoch to now
-                        # if no start/end datetimes are passed
-                        data_date_str = strip_dates_keys(data_keys)
-
-                        results[key]["keys"] = {data_date_str: data_keys}
-                        results[key]["metadata"] = source.metadata()
-
+                # With no rank set we get an empty dictionary
+                if not rank_data:
+                    ranked_sources[0] = 0
                     continue
-                else:
-                    # TODO - find a cleaner way of doing this
-                    # We might have a zero rank, delete it as we have higher ranked data
-                    try:
-                        del ranked_sources[0]
-                    except KeyError:
-                        pass
 
-                # Otherwise iterate over the sources that are ranked and extract the keys
-                for uid in ranked_sources:
-                    source = ranked_sources[uid]["source"]
-                    source_dateranges = ranked_sources[uid]["dateranges"]
+                # Just get the highest ranked datasources and return them
+                # Find the highest ranked data from this site
+                highest_rank = sorted(rank_data.keys())[-1]
 
-                    key = f"{sp}_{location}_{source.inlet()}_{source.instrument()}"
+                if highest_rank == 0:
+                    ranked_sources[0] = 0
+                    continue
 
-                    data_keys = {}
-                    # Get the keys for each daterange
-                    for d in source_dateranges:
-                        keys_in_date = source.in_daterange(daterange=d)
-                        d = d.replace("+00:00", "")
-                        if keys_in_date:
-                            data_keys[d] = keys_in_date
+                ranked_sources[source.uuid()] = {"rank": highest_rank, "dateranges": rank_data[highest_rank], "source": source}
+
+            # If it's all zeroes we want to return all sources
+            if list(ranked_sources) == [0]:
+                for source in sources:
+                    key = f"{sp}_{location}_{source.inlet()}".lower()
+
+                    daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
+                    data_keys = source.in_daterange(daterange=daterange_str)
 
                     if not data_keys:
                         continue
 
-                    results[key]["keys"] = data_keys
+                    # Get a key that covers the daterange of the actual data and not from epoch to now
+                    # if no start/end datetimes are passed
+                    data_date_str = strip_dates_keys(data_keys)
+
+                    results[key]["keys"] = {data_date_str: data_keys}
                     results[key]["metadata"] = source.metadata()
-    else:
-        raise NotImplementedError("Footprint search not implemented.")
+
+                continue
+            else:
+                # TODO - find a cleaner way of doing this
+                # We might have a zero rank, delete it as we have higher ranked data
+                try:
+                    del ranked_sources[0]
+                except KeyError:
+                    pass
+
+            # Otherwise iterate over the sources that are ranked and extract the keys
+            for uid in ranked_sources:
+                source = ranked_sources[uid]["source"]
+                source_dateranges = ranked_sources[uid]["dateranges"]
+
+                key = f"{sp}_{location}_{source.inlet()}_{source.instrument()}".lower()
+
+                data_keys = {}
+                # Get the keys for each daterange
+                for d in source_dateranges:
+                    keys_in_date = source.in_daterange(daterange=d)
+                    d = d.replace("+00:00", "")
+                    if keys_in_date:
+                        data_keys[d] = keys_in_date
+
+                if not data_keys:
+                    continue
+
+                results[key]["keys"] = data_keys
+                results[key]["metadata"] = source.metadata()
 
     return results
 

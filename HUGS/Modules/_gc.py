@@ -55,7 +55,7 @@ class GC(BaseModule):
         if instrument_name is None:
             # Get the first part of the filename
             # Example filename: capegrim-medusa.18.C
-            site_instrument = str(data_filepath).split(".")
+            site_instrument = str(data_filepath.name).split(".")
             instrument_name = site_instrument[0].split("-")[1]
 
             if(not self.is_valid_instrument(instrument_name)):
