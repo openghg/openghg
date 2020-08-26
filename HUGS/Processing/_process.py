@@ -20,36 +20,16 @@ def process_data(
         Returns:
             list: List of Datasources
     """
-    from HUGS.Processing import DataTypes
-    from HUGS.Util import load_object
+    from HUGS.Modules import ObsSurface
 
-    data_type = DataTypes[data_type.upper()].name
-    # Load in the the class used to process the data file/s
-    processing_obj = load_object(class_name=data_type)
+    processing_obj = ObsSurface.load()
 
     if data_type == "GC":
-        if site is None:
-            raise ValueError("Site must be specified when reading GC data")
-
         try:
             data, precision = data_file
         except (TypeError, ValueError) as error:
             raise TypeError("Ensure data and precision files are passed as a tuple\n", error)
 
-        datasource_uuids = processing_obj.read_file(
-            data_filepath=data,
-            precision_filepath=precision,
-            source_name=source_name,
-            instrument_name=instrument_name,
-            site=site,
-            overwrite=overwrite,
-        )
-    else:
-        datasource_uuids = processing_obj.read_file(
-            data_filepath=data_file,
-            site=site,
-            source_name=source_name,
-            overwrite=overwrite,
-        )
+    result = processing_obj.read_file(filepath=data_file, data_type=data_type, site=site, instrument=instrument_name)
 
-    return datasource_uuids
+    return result

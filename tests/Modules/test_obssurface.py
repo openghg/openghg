@@ -286,7 +286,7 @@ def test_read_noaa():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="NOAA")
 
-    uuid = results["co_pocn25_surface-flask_1_ccgg_event.txt"]["co_pocn25_surface-flask_1_ccgg_event_CO"]
+    uuid = results["co_pocn25_surface-flask_1_ccgg_event.txt"]["co_pocn25_surface-flask_1_ccgg_event_co"]
 
     co_data = Datasource.load(uuid=uuid, shallow=False).data()
 
@@ -308,7 +308,7 @@ def test_read_noaa():
 
     obs = ObsSurface.load()
 
-    assert list(obs._datasource_names.keys())[0] == "co_pocn25_surface-flask_1_ccgg_event_CO"
+    assert list(obs._datasource_names.keys())[0] == "co_pocn25_surface-flask_1_ccgg_event_co"
 
 
 def test_read_thames_barrier():
@@ -340,8 +340,6 @@ def test_read_thames_barrier():
 
 
 def test_upload_same_file_twice_raises():
-    get_local_bucket(empty=True)
-
     get_local_bucket(empty=True)
 
     data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")

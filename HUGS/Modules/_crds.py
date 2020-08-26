@@ -2,6 +2,7 @@ from HUGS.Util import load_hugs_json
 
 __all__ = ["CRDS"]
 
+
 class CRDS():
     """
         Interface for processing CRDS data
@@ -60,6 +61,15 @@ class CRDS():
         from datetime import datetime
         from pandas import RangeIndex, read_csv, NaT
 
+        # At the moment we're using the filename as the source name
+        source_name = data_filepath.stem
+        # -1 here as we've already removed the file extension
+        # As we're not processing a list of datafiles here we'll only have one inlet
+        inlet = source_name.split(".")[3]
+
+        if "m" not in inlet.lower():
+            raise ValueError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
+
         # Function to parse the datetime format found in the datafile
         def parse_date(date):
             try:
@@ -78,16 +88,6 @@ class CRDS():
         )
 
         data.index.name = "time"
-
-        # At the moment we're using the filename as the source name
-        source_name = data_filepath.stem
-
-        # -1 here as we've already removed the file extension
-        # As we're not processing a list of datafiles here we'll only have one inlet
-        inlet = source_name.split(".")[3]
-
-        if "m" not in inlet.lower():
-            raise ValueError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
 
         # Drop any rows with NaNs
         # This is now done before creating metadata

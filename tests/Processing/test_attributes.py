@@ -4,7 +4,7 @@ from pathlib import Path
 
 from HUGS.Modules import CRDS
 from HUGS.ObjectStore import get_local_bucket
-
+from HUGS.Processing import assign_attributes
 # import tempfile
 # from cfchecker import CFChecker
 
@@ -13,23 +13,19 @@ from HUGS.ObjectStore import get_local_bucket
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
+def get_datapath(filename, data_type):
+    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 def test_crds_attributes():
     _ = get_local_bucket(empty=True)
 
-    crds = CRDS.load()
+    crds = CRDS()
 
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/CRDS"
-    filename = "tac.picarro.1minute.100m.test.dat"
-
-    filepath = os.path.join(dir_path, test_data, filename)
-
-    filepath = Path(filepath)
+    filepath = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
 
     combined = crds.read_data(data_filepath=filepath, site="tac")
 
-    combined_attributes = crds.assign_attributes(data=combined, site="tac")
+    combined_attributes = assign_attributes(data=combined, site="tac")
 
     # for key in combined_attributes:
     #     ds = combined_attributes[key]["data"]
@@ -80,7 +76,6 @@ def test_crds_attributes():
         "label": "left",
         "standard_name": "time",
         "comment": "Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.",
-        "sampling_period_seconds": 60,
     }
 
     assert ch4_data.time.attrs == time_attributes

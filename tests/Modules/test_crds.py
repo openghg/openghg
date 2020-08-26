@@ -88,11 +88,10 @@ def test_read_data():
 
 def test_read_data_no_inlet_raises():
     crds = CRDS()
-
-    tac_filepath = get_datapath(filename="tac.picarro.1minute.no_inlet.dat", data_type="CRDS")
+    filepath = Path("tac.picarro.1minute.no_inlet.dat")
 
     with pytest.raises(ValueError):
-        crds.read_data(data_filepath=tac_filepath, site="tac")
+        crds.read_data(data_filepath=filepath, site="tac")
 
 
 def test_gas_info(hfd_filepath):
@@ -107,7 +106,7 @@ def test_gas_info(hfd_filepath):
         parse_dates=[[0, 1]],
     )
 
-    n_gases, n_cols = crds._gas_info(data=data)
+    n_gases, n_cols = crds.gas_info(data=data)
 
     assert n_gases == 3
     assert n_cols == 3

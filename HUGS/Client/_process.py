@@ -139,7 +139,7 @@ class Process:
         # for use in processing.
         # We can maybe reconsider the way this is done if there ends up being a lot of test
         # cases and this gets a bit clunky
-        datasource_uuids = {}
+        results = {}
         for file in files:
             if data_type == "GC":
                 # This is only used as a key when returning the Datasource UUIDs
@@ -194,8 +194,8 @@ class Process:
             # file contains overlapping data
             try:
                 response = self._service.call_function(function="process", args=args)
-                datasource_uuids[filename] = response["results"]
+                results[filename] = response["results"]
             except ValueError as err:
-                datasource_uuids[filename] = err
+                results[filename] = err
 
-        return datasource_uuids
+        return results

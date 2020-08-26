@@ -18,16 +18,16 @@ mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
 # Disable this for long strings below - Line break occurred before a binary operator (W503)
 # flake8: noqa: W503
 
+def get_datapath(filename, data_type):
+    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+
 @pytest.fixture(scope="session")
 def data():
+    crds = CRDS()
+
     filename = "bsd.picarro.1minute.248m.dat"
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/CRDS"
-    filepath = os.path.join(dir_path, test_data, filename)
+    filepath = get_datapath(filename=filename, data_type="CRDS")
 
-    filepath = Path(filepath)
-
-    crds = CRDS.load()
     combined_data = crds.read_data(data_filepath=filepath, site="bsd")
 
     return combined_data

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from HUGS.Modules import CRDS
+from HUGS.Modules import CRDS, GC, ObsSurface
 from HUGS.ObjectStore import get_local_bucket
 from HUGS.Processing import recombine_sections, search
 
@@ -29,21 +29,19 @@ def precision_path():
         + "../data/proc_test_data/GC/capegrim-medusa.18.precisions.C"
     )
 
+def get_datapath(filename, data_type):
+    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+
 
 def test_recombination_CRDS():
-    _ = get_local_bucket(empty=True)
+    get_local_bucket(empty=True)
 
-    crds = CRDS.load()
-
-    # filename = "bsd.picarro.1minute.248m.dat"
     filename = "hfd.picarro.1minute.100m.min.dat"
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/CRDS"
-    filepath = os.path.join(dir_path, test_data, filename)
+    filepath = get_datapath(filename=filename, data_type="CRDS")
 
-    filepath = Path(filepath)
+    crds = CRDS()
 
-    CRDS.read_file(filepath)
+    ObsSurface.read_file(filepath, data_type="CRDS")
 
     gas_data = crds.read_data(data_filepath=filepath, site="HFD")
 
@@ -51,9 +49,8 @@ def test_recombination_CRDS():
 
     gas_name = "ch4"
     location = "hfd"
-    data_type = "CRDS"
 
-    keys = search(species=gas_name, locations=location, data_type=data_type)
+    keys = search(species=gas_name, locations=location)
 
     to_download = keys["ch4_hfd_100m"]["keys"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]
 
@@ -63,3 +60,36 @@ def test_recombination_CRDS():
 
     assert ch4_data_read.time.equals(ch4_data_recombined.time)
     assert ch4_data_read["ch4"].equals(ch4_data_recombined["ch4"])
+
+
+def test_recombination_GC():
+    get_local_bucket(empty=True)
+
+    gc = GC()
+
+    data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
+    precision = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
+
+    ObsSurface.read_file((data, precision), data_type="GC")
+
+    data = gc.read_data(data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa")
+
+    toluene_data = data["toluene"]["data"]
+
+    gas_name = "toluene"
+    location = "CGO"
+
+    keys = search(species=gas_name, locations=location)
+
+    to_download = keys["toluene_cgo_75m_4"]["keys"]["2018-01-01-02:24:00_2018-01-31-23:33:00"]
+
+    toluene_data_recombined = recombine_sections(data_keys=to_download)
+
+    toluene_data.attrs = {}
+    toluene_data_recombined.attrs = {}
+
+    assert toluene_data.time.equals(toluene_data_recombined.time)
+    assert toluene_data["toluene"].equals(toluene_data_recombined["c6h5ch3"])
+    assert toluene_data["toluene repeatability"].equals(toluene_data_recombined["c6h5ch3_repeatability"])
+    assert toluene_data["toluene status_flag"].equals(toluene_data_recombined["c6h5ch3_status_flag"])
+    assert toluene_data["toluene integration_flag"].equals(toluene_data_recombined["c6h5ch3_integration_flag"])

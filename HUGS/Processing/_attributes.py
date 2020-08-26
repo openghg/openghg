@@ -159,9 +159,7 @@ def get_attributes(
 
     # Species-specific attributes
     # Long name
-    if (
-        species_upper.startswith("D") and species_upper != "DESFLURANE"
-    ) or species_upper == "APD":
+    if species_upper.startswith("D") and species_upper != "DESFLURANE" or species_upper == "APD":
         sp_long = species_translator[species_upper]["name"]
     elif species_upper == "RN":
         sp_long = "radioactivity_concentration_of_222Rn_in_air"
@@ -273,7 +271,7 @@ def get_attributes(
         + "Note that sampling periods are approximate."
     )
 
-    if sampling_period:
+    if sampling_period is not None:
         time_attributes["sampling_period_seconds"] = sampling_period
 
     ds.time.attrs.update(time_attributes)

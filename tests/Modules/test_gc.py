@@ -271,7 +271,7 @@ def test_split(data_path, precision_path):
 
     metadata = {"foo": "bar"}
 
-    gc = GC.load()
+    gc = GC()
 
     units = {}
     scale = {}
