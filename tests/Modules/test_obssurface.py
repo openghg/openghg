@@ -338,3 +338,15 @@ def test_read_thames_barrier():
 
     assert sorted(obs._datasource_names.keys()) == expected_keys
 
+
+def test_upload_same_file_twice_raises():
+    get_local_bucket(empty=True)
+
+    get_local_bucket(empty=True)
+
+    data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
+
+    ObsSurface.read_file(filepath=data_filepath, data_type="ICOS")
+
+    with pytest.raises(ValueError):
+        ObsSurface.read_file(filepath=data_filepath, data_type="ICOS")
