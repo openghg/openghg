@@ -3,7 +3,7 @@ from HUGS.Modules import BaseModule
 __all__ = ["EUROCOM"]
 
 
-class EUROCOM(BaseModule):
+class EUROCOM():
     """ Interface for processing EUROCOM data
 
         This is only a temporary module to processing the ICOS EUROCOM study data

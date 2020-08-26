@@ -1,14 +1,10 @@
 import datetime
 import logging
-import uuid
 from pathlib import Path
-
 import pandas as pd
 import pytest
-from Acquire.ObjectStore import datetime_to_datetime, datetime_to_string
 
 from HUGS.Modules import GC
-from HUGS.ObjectStore import get_local_bucket, get_object_names
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -309,65 +305,3 @@ def test_split(data_path, precision_path):
     assert len(data) == 56
 
     assert sorted(list(data.keys()))[:10] == sorted_species
-
-
-def test_to_data(gc):
-    data = gc.to_data()
-
-    assert data["stored"] is True
-    assert data["creation_datetime"] == datetime_to_string(
-        datetime.datetime(1970, 1, 1)
-    )
-
-
-def test_from_data(gc):
-    data = gc.to_data()
-
-    epoch = datetime_to_datetime(datetime.datetime(1970, 1, 1, 1, 1))
-    data["creation_datetime"] = datetime_to_string(epoch)
-
-    random_data1 = uuid.uuid4()
-    random_data2 = uuid.uuid4()
-
-    test_hashes = {"test1": random_data1, "test2": random_data2}
-    test_datasources = {"datasource1": random_data1, "datasource2": random_data2}
-
-    data["file_hashes"] = test_hashes
-    data["datasource_names"] = test_datasources
-    data["datasource_uuids"] = test_datasources
-
-    gc_new = GC.from_data(data)
-
-    assert gc_new._stored is False
-    assert gc_new._creation_datetime == epoch
-    assert gc_new._datasource_names == test_datasources
-    assert gc_new._datasource_uuids == test_datasources
-    assert gc_new._file_hashes == test_hashes
-
-
-def test_save(gc):
-    bucket = get_local_bucket(empty=True)
-
-    gc.save()
-
-    prefix = ""
-    objs = get_object_names(bucket, prefix)
-
-    assert objs[0].split("/")[-1] == GC._uuid
-
-
-def test_load(gc):
-    gc.save()
-    gc_new = GC.load()
-
-    assert gc_new._stored is False
-    assert gc_new._creation_datetime == datetime_to_datetime(
-        datetime.datetime(1970, 1, 1)
-    )
-
-
-def test_exists(gc):
-    bucket = get_local_bucket()
-    gc.save(bucket=bucket)
-
-    assert GC.exists(bucket=bucket) is True

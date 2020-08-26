@@ -3,10 +3,7 @@ from HUGS.Modules import BaseModule
 __all__ = ["GC"]
 
 
-class GC(BaseModule):
-    _root = "GC"
-    _uuid = "8cba4797-510c-gcgc-8af1-e02a5ee57489"
-
+class GC():
     def __init__(self):
         from HUGS.Util import load_hugs_json
 

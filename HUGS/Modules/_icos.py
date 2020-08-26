@@ -3,7 +3,7 @@ from HUGS.Modules import BaseModule
 __all__ = ["ICOS"]
 
 
-class ICOS(BaseModule):
+class ICOS():
     """ Interface for processing ICOS data
 
     """
@@ -11,7 +11,7 @@ class ICOS(BaseModule):
         # Sampling period of ICOS data in seconds
         self._sampling_period = "NA"
 
-    def read_file(self, data_filepath, source_name=None, site=None, network=None):
+    def read_file(self, data_filepath, site=None, network=None):
         """ Reads ICOS data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
@@ -25,8 +25,7 @@ class ICOS(BaseModule):
 
         data_filepath = Path(data_filepath)
 
-        if source_name is None:
-            source_name = data_filepath.stem
+        source_name = data_filepath.stem
 
         if site is None:
             site = source_name.split(".")[0]
@@ -126,8 +125,17 @@ class ICOS(BaseModule):
 
         site_attributes = {}
 
-        metadata = {}
-        metadata["species"] = species
+        # Read some metadata from the filename
+        split_filename = data_filepath.name.split(".")
+
+        try:
+            site = split_filename[0]
+            time_resolution = split_filename[2]
+            inlet_height = split_filename[3]
+        except KeyError:
+            raise ValueError("Unable to read metadata from filename. We expect a filename such as tta.co2.1minute.222m.dat")
+
+        metadata = {"site": site, "species": species, "inlet": inlet_height, "time_resolution": time_resolution}
 
         combined_data[species] = {
             "metadata": metadata,

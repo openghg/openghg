@@ -87,7 +87,7 @@ class CRDS():
         inlet = source_name.split(".")[3]
 
         if "m" not in inlet.lower():
-            raise TypeError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
+            raise ValueError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
 
         # Drop any rows with NaNs
         # This is now done before creating metadata
@@ -190,31 +190,6 @@ class CRDS():
 
         return metadata
 
-    def assign_attributes(self, data, site, network=None):
-        """ Assign attributes to the data we've processed
-
-            Args:
-                combined_data (dict): Dictionary containing data, metadata and attributes
-            Returns:
-                dict: Dictionary of combined data with correct attributes assigned to Datasets
-        """
-        from HUGS.Processing import get_attributes
-
-        for species in data:
-            site_attributes = data[species]["attributes"]
-
-            # TODO - save Dataset attributes to metadata for storage within Datasource
-            data[species]["data"] = get_attributes(
-                ds=data[species]["data"],
-                species=species,
-                site=site,
-                network=network,
-                global_attributes=site_attributes,
-                sampling_period=self._sampling_period,
-            )
-
-        return data
-
     def get_site_attributes(self, site, inlet):
         """ Gets the site specific attributes for writing to Datsets
 
@@ -230,7 +205,11 @@ class CRDS():
             data = load_hugs_json(filename="process_gcwerks_parameters.json")
             self._crds_params = data["CRDS"]
 
-        attributes = self._crds_params[site.upper()]["global_attributes"]
+        try:
+            attributes = self._crds_params[site.upper()]["global_attributes"]
+        except KeyError:
+            raise ValueError(f"Unable to read attributes for site: {site}")
+
         attributes["inlet_height_magl"] = inlet.split("_")[0]
         attributes["comment"] = self._crds_params["comment"]
 

@@ -2,18 +2,17 @@ __all__ = ["CRANFIELD"]
 
 
 class CRANFIELD:
-    """ Interface for processing CRANFIELD data """
+    """ Interface for processing Cranfield data """
 
-    def read_file(self, data_filepath, source_name=None, source_id=None, overwrite=False):
+    def read_file(self, data_filepath, overwrite=False):
         """ Creates a CRDS object holding data stored within Datasources
 
             Args:
                 filepath (str): Path of file to load
                 data_filepath (str): Filepath of data to be read
-                source_name (str): Name of data source
                 overwrite (bool, default=False): Should data be overwritten
             Returns:
-                CRANFIELD: Crandfield object
+                dict: Dictionary of gas data
         """
         from pathlib import Path
         from pandas import read_csv

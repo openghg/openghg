@@ -36,7 +36,7 @@ class NOAA(BaseModule):
         filename = data_filepath.name
 
         if species is None:
-            species = filename.split("_")[0].upper()
+            species = filename.split("_")[0].lower()
 
         source_name = data_filepath.stem
         source_name = source_name.split("-")[0]
@@ -44,7 +44,7 @@ class NOAA(BaseModule):
         gas_data = self.read_data(data_filepath=data_filepath, species=species)
 
         if site is None:
-            site = gas_data[species]["metadata"]["site"]
+            site = gas_data[species.lower()]["metadata"]["site"]
 
         gas_data = assign_attributes(data=gas_data, site=site)
 
@@ -158,14 +158,14 @@ class NOAA(BaseModule):
 
         site_attributes = self._noaa_params["global_attributes"]
         site_attributes["inlet_height_magl"] = "NA"
-        site_attributes["instrument"] = self._noaa_params["instrument"][species]
+        site_attributes["instrument"] = self._noaa_params["instrument"][species.upper()]
 
         metadata = {}
-        metadata["species"] = species
+        metadata["species"] = species.lower()
         metadata["site"] = site
         metadata["measurement_type"] = measurement_type
 
-        combined_data[species] = {
+        combined_data[species.lower()] = {
             "metadata": metadata,
             "data": data,
             "attributes": site_attributes,
