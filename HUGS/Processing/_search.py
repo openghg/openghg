@@ -44,7 +44,8 @@ def search(
     from HUGS.Util import (get_datetime_now, get_datetime_epoch, create_daterange_str, 
                             timestamp_tzaware, get_datapath)
 
-    if species is not None and not isinstance(species, list):
+    # if species is not None and not isinstance(species, list):
+    if not isinstance(species, list):
         species = [species]
 
     if not isinstance(locations, list):
@@ -75,11 +76,6 @@ def search(
     if end_datetime is None:
         end_datetime = get_datetime_now()
 
-    # TODO - for now the latest dates people can access is the end of 2017
-    # max_datetime = datetime_to_datetime(datetime(2017, 12, 31))
-    # if end_datetime > max_datetime:
-    #     end_datetime = max_datetime
-
     # Ensure passed datetimes are timezone aware
     start_datetime = timestamp_tzaware(start_datetime)
     end_datetime = timestamp_tzaware(end_datetime)
@@ -102,26 +98,6 @@ def search(
     # This is returned to the caller
     results = defaultdict(dict)
 
-    # So we can search for all species at a site, this should be rolled into the other search functions
-    if not species:
-        for site, sources in location_sources.items():
-            for datasource in sources:
-                # Just match the single source here
-                if datasource.search_metadata(search_terms=[site], find_all=False):
-                    daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
-                    # Get the data keys for the data in the matching daterange
-                    in_date = datasource.in_daterange(daterange=daterange_str)
-
-                    data_date_str = strip_dates_keys(in_date)
-
-                    key = f"{datasource.species()}_{site}_{datasource.instrument()}_{datasource.inlet()}".lower()
-
-                    # Find the keys that match the correct data
-                    results[key]["keys"] = {data_date_str: in_date}
-                    results[key]["metadata"] = datasource.metadata()
-
-        return results
-
     # With both inlet and instrument specified we bypass the ranking system
     if inlet is not None and instrument is not None:
         for site, sources in location_sources.items():
@@ -135,7 +111,7 @@ def search(
 
                         data_date_str = strip_dates_keys(in_date)
 
-                        key = f"{sp}_{site}_{instrument}_{inlet}".lower()
+                        key = f"{sp}_{site}_{inlet}_{instrument}".lower()
 
                         # Find the keys that match the correct data
                         results[key]["keys"] = {data_date_str: in_date}
@@ -148,9 +124,9 @@ def search(
         species_data = defaultdict(list)
         for datasource in sources:
             for s in species:
-                search_terms = [x for x in (s, inlet, instrument) if x is not None]
+                search_terms = [x for x in (s, location, inlet, instrument) if x is not None]
                 # Check the species and the daterange
-                if datasource.search_metadata(search_terms=search_terms, find_all=find_all):
+                if datasource.search_metadata(search_terms=search_terms, find_all=True):
                     species_data[s].append(datasource)
 
         # For each location we want to find the highest ranking sources for the selected species
@@ -179,7 +155,7 @@ def search(
             # If it's all zeroes we want to return all sources
             if list(ranked_sources) == [0]:
                 for source in sources:
-                    key = f"{sp}_{location}_{source.inlet()}".lower()
+                    key = f"{source.species()}_{source.site()}_{source.inlet()}_{source.instrument()}".lower()
 
                     daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
                     data_keys = source.in_daterange(daterange=daterange_str)
@@ -208,7 +184,7 @@ def search(
                 source = ranked_sources[uid]["source"]
                 source_dateranges = ranked_sources[uid]["dateranges"]
 
-                key = f"{sp}_{location}_{source.inlet()}_{source.instrument()}".lower()
+                key = f"{source.species()}_{source.site()}_{source.inlet()}_{source.instrument()}".lower()
 
                 data_keys = {}
                 # Get the keys for each daterange

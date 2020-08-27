@@ -82,7 +82,7 @@ def test_search_hfd(load_two_data):
 
     results = search.search(species=search_term, locations=location)
 
-    hfd_res = results["co_hfd_100m"]
+    hfd_res = results["co_hfd_100m_picarro"]
 
     assert len(hfd_res["keys"]["2013-11-20-20:02:30_2019-07-04-21:29:30"]) == 25
 
@@ -256,14 +256,14 @@ def test_single_site_search(load_two_data):
 
     assert (
         len(
-            results["co_hfd_picarro_100m"]["keys"][
+            results["co_hfd_100m_picarro"]["keys"][
                 "2013-11-20-20:02:30_2019-07-04-21:29:30"
             ]
         )
         == 25
     )
 
-    assert results["co_hfd_picarro_100m"]["metadata"] == {
+    assert results["co_hfd_100m_picarro"]["metadata"] == {
         "site": "hfd",
         "instrument": "picarro",
         "time_resolution": "1_minute",

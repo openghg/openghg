@@ -29,6 +29,7 @@ def precision_path():
         + "../data/proc_test_data/GC/capegrim-medusa.18.precisions.C"
     )
 
+
 def get_datapath(filename, data_type):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
@@ -52,7 +53,7 @@ def test_recombination_CRDS():
 
     keys = search(species=gas_name, locations=location)
 
-    to_download = keys["ch4_hfd_100m"]["keys"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]
+    to_download = keys["ch4_hfd_100m_picarro"]["keys"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]
 
     ch4_data_recombined = recombine_sections(data_keys=to_download)
 
@@ -81,7 +82,7 @@ def test_recombination_GC():
 
     keys = search(species=gas_name, locations=location)
 
-    to_download = keys["toluene_cgo_75m_4"]["keys"]["2018-01-01-02:24:00_2018-01-31-23:33:00"]
+    to_download = keys["toluene_cgo_75m_4_medusa"]["keys"]["2018-01-01-02:24:00_2018-01-31-23:33:00"]
 
     toluene_data_recombined = recombine_sections(data_keys=to_download)
 

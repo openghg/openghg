@@ -22,19 +22,17 @@ def test_search_and_download(crds):
 
     results = s.search(species="co2", locations="hfd")
 
-    assert len(results["co2_hfd_100m"]["keys"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]) == 23
+    assert len(results["co2_hfd_100m_picarro"]["keys"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]) == 23
 
     expected_metadata = {'site': 'hfd', 'instrument': 'picarro', 'time_resolution': '1_minute', 
                         'inlet': '100m', 'port': '10', 'type': 'air', 'species': 'co2', 
                         'data_type': 'timeseries'}
 
-    assert results["co2_hfd_100m"]["metadata"] == expected_metadata
+    assert results["co2_hfd_100m_picarro"]["metadata"] == expected_metadata
 
-    data = s.retrieve(selected_keys="co2_hfd_100m")
+    data = s.retrieve(selected_keys="co2_hfd_100m_picarro")
 
-    assert data["co2_hfd_100m"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]["co2"][0] == pytest.approx(414.21)
+    assert data["co2_hfd_100m_picarro"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]["co2"][0] == pytest.approx(414.21)
 
-    assert data["co2_hfd_100m"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]["co2_stdev"][-1] == pytest.approx(0.247)
-    assert data["co2_hfd_100m"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]["co2_n_meas"][10] == 19.0
-
-
+    assert data["co2_hfd_100m_picarro"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]["co2_stdev"][-1] == pytest.approx(0.247)
+    assert data["co2_hfd_100m_picarro"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]["co2_n_meas"][10] == 19.0
