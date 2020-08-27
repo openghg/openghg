@@ -910,15 +910,19 @@ class Datasource:
         """
         return self._data_type
 
-    def data_keys(self, version="latest"):
+    def data_keys(self, version="latest", return_all=False):
         """ Returns the object store keys where data related
             to this Datasource is stored
 
             Args:
                 version (str, default="latest"): Version of keys to get
+                return_all (bool, default=False): Return all data keys
             Returns:
                 list: List of data keys
         """
+        if return_all:
+            return self._data_keys
+
         try:
             keys = [v for k, v in self._data_keys[version]["keys"].items()]
         except KeyError:

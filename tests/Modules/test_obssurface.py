@@ -3,7 +3,7 @@ from pandas import Timestamp
 from pathlib import Path
 
 from HUGS.Modules import Datasource, ObsSurface
-from HUGS.ObjectStore import get_local_bucket
+from HUGS.ObjectStore import get_local_bucket, exists
 
 
 def get_datapath(filename, data_type):
@@ -348,3 +348,36 @@ def test_upload_same_file_twice_raises():
 
     with pytest.raises(ValueError):
         ObsSurface.read_file(filepath=data_filepath, data_type="ICOS")
+
+
+def test_delete_Datasource():
+    bucket = get_local_bucket(empty=True)
+
+    data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
+
+    ObsSurface.read_file(filepath=data_filepath, data_type="ICOS")
+
+    obs = ObsSurface.load()
+
+    datasources = obs.datasources()
+
+    uuid = datasources[0]
+
+    datasource = Datasource.load(uuid=uuid)
+
+    data = datasource.data()["2011-12-07-01:38:00+00:00_2011-12-31-19:57:00+00:00"]
+
+    assert data["co2"][0] == pytest.approx(397.334)
+    assert data.time[0] == Timestamp("2011-12-07T01:38:00")
+
+    data_keys = datasource.data_keys()
+
+    key = data_keys[0]
+
+    assert exists(bucket=bucket, key=key)
+
+    obs.delete(uuid=uuid)
+
+    assert uuid not in obs.datasources()
+
+    assert not exists(bucket=bucket, key=key)

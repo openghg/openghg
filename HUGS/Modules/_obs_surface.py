@@ -156,3 +156,40 @@ class ObsSurface(BaseModule):
             raise FileNotFoundError("No data files found")
 
         return ObsSurface.read_file(filepath=filepaths, data_type=data_type)
+
+    def delete(self, uuid):
+        """ Delete a Datasource with the given UUID
+
+            This function deletes both the record of the object store in he
+
+            Args:
+                uuid (str): UUID of Datasource
+            Returns:
+                None
+        """
+        from HUGS.ObjectStore import delete_object, get_bucket
+        from HUGS.Modules import Datasource
+
+        bucket = get_bucket()
+        # Load the Datasource and get all its keys
+        # iterate over these keys and delete them
+        datasource = Datasource.load(uuid=uuid)
+
+        data_keys = datasource.data_keys(return_all=True)
+
+        for version in data_keys:
+            key_data = data_keys[version]["keys"]
+
+            for daterange in key_data:
+                key = key_data[daterange]
+                delete_object(bucket=bucket, key=key)
+
+        # Then delete the Datasource itself
+        key = f"{Datasource._datasource_root}/uuid/{uuid}"
+        delete_object(bucket=bucket, key=key)
+
+        # First remove from our dictionary of Datasources
+        name = self._datasource_uuids[uuid]
+
+        del self._datasource_names[name]
+        del self._datasource_uuids[uuid]

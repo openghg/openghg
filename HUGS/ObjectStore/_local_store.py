@@ -96,8 +96,9 @@ def delete_object(bucket, key):
         Returns:
             None
     """
+    key = f"{bucket}/{key}._data"
     try:
-        os.remove(f"{bucket}/{key}._data")
+        os.remove(key)
     except FileNotFoundError:
         pass
 
