@@ -1,4 +1,4 @@
-from HUGS.Modules import Datasource
+from HUGS.Modules import Datasource, ObsSurface
 from HUGS.Processing import DataTypes
 from HUGS.Util import load_object
 
@@ -22,13 +22,9 @@ def get_sources(args):
     except KeyError:
         raise KeyError("Species must be specified")
 
-    try:
-        data_type = DataTypes[args["data_type"].upper()].name
-    except KeyError:
-        raise KeyError(f"Data type must be specified. Valid options are: {[e.value for e in DataTypes]}")
-
-    data_obj = load_object(class_name=data_type)
-    datasource_uuids = data_obj.datasources()
+    obs = ObsSurface.load()
+   
+    datasource_uuids = obs.datasources()
     # Shallow load the Datasources (only get their JSON metadata)
     datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 

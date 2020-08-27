@@ -14,13 +14,11 @@ def search(args):
 
     species = args.get("species")
     locations = args["locations"]
-    data_type = args["data_type"]
 
     inlet = args.get("inlet")
     instrument = args.get("instrument")
 
     results = hugs_search(
-        data_type=data_type,
         locations=locations,
         species=species,
         inlet=inlet,

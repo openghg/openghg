@@ -7,6 +7,19 @@ from Acquire.ObjectStore import ObjectStoreError
 
 rlock = threading.RLock()
 
+__all__ = ["delete_object", 
+            "get_hugs_local_path", 
+            "get_all_object_names", 
+            "get_object_names", 
+            "get_bucket", 
+            "get_local_bucket", 
+            "get_object", 
+            "set_object", 
+            "set_object_from_json", 
+            "set_object_from_file", 
+            "get_object_from_json", 
+            "exists"]
+
 
 def get_hugs_local_path():
     """ Returns the path to the local HUGS object store bucket

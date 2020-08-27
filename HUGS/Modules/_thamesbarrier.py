@@ -92,4 +92,3 @@ class THAMESBARRIER(BaseModule):
             }
 
         return combined_data
-

@@ -43,7 +43,6 @@ def search(
     from HUGS.Modules import Datasource, ObsSurface
     from HUGS.Util import (get_datetime_now, get_datetime_epoch, create_daterange_str, 
                             timestamp_tzaware, get_datapath)
-    from HUGS.Processing import DataTypes
 
     if species is not None and not isinstance(species, list):
         species = [species]
@@ -116,7 +115,7 @@ def search(
                     data_date_str = strip_dates_keys(in_date)
 
                     key = f"{datasource.species()}_{site}_{datasource.instrument()}_{datasource.inlet()}".lower()
-                    
+
                     # Find the keys that match the correct data
                     results[key]["keys"] = {data_date_str: in_date}
                     results[key]["metadata"] = datasource.metadata()
@@ -137,7 +136,7 @@ def search(
                         data_date_str = strip_dates_keys(in_date)
 
                         key = f"{sp}_{site}_{instrument}_{inlet}".lower()
-                        
+
                         # Find the keys that match the correct data
                         results[key]["keys"] = {data_date_str: in_date}
                         results[key]["metadata"] = datasource.metadata()

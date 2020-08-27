@@ -18,14 +18,12 @@ class RankSources:
 
         self._before_ranking = {}
 
-    def get_sources(self, site, species, data_type):
+    def get_sources(self, site, species):
         """ Get the datasources for this site and species to allow a ranking to be set
 
             Args:
                 site (str): Three letter site code
                 species (str): Species name
-                data_type (str): Must be valid datatype i.e. CRDS, GC
-                See all valid datasources in the DataTypes class
             Returns:
                 dict: Dictionary of datasource metadata
         """
@@ -38,7 +36,7 @@ class RankSources:
             # raise InvalidSiteError(f"{site} is not a valid site code")
             raise ValueError(f"{site} is not a valid site code")
 
-        args = {"site": site, "species": species, "data_type": data_type}
+        args = {"site": site, "species": species}
 
         response = self._service.call_function(function="get_sources", args=args)
 
@@ -60,7 +58,7 @@ class RankSources:
         """
         pass
 
-    def rank_sources(self, updated_rankings, data_type):
+    def rank_sources(self, updated_rankings):
         """ Assign the precendence of sources for each.
             This function expects a dictionary of the form
 
@@ -76,7 +74,7 @@ class RankSources:
         if updated_rankings == self._before_ranking:
             return
 
-        args = {"ranking": updated_rankings, "data_type": data_type}
+        args = {"ranking": updated_rankings}
 
         self._service.call_function(function="rank_sources", args=args)
 

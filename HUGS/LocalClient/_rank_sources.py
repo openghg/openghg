@@ -1,7 +1,6 @@
 import copy
 from HUGS.Modules import Datasource, ObsSurface
-from HUGS.Processing import DataTypes
-from HUGS.Util import load_object, valid_site
+from HUGS.Util import valid_site
 
 __all__ = ["RankSources"]
 

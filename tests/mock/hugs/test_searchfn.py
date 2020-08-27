@@ -2,9 +2,9 @@ import os
 import pytest
 from datetime import datetime
 from pandas import Timestamp
-from Acquire.Client import Service
 
 from HUGS.Client import Process, RankSources, Search
+from HUGS.ObjectStore import get_local_bucket
 
 
 @pytest.fixture(scope="session")
@@ -30,39 +30,9 @@ def get_test_path_services(filename, data_type):
     return data_path
 
 
-
-
-# @pytest.fixture(scope="session")
-# def load_two_data(authenticated_user):
-#     hugs = Service(service_url="hugs")
-#     _ = hugs.call_function(function="clear_datasources", args={})
-
-#     def test_folder(filename):
-#         dir_path = os.path.dirname(__file__)
-#         test_folder = "../../../tests/data/search_data"
-#         return os.path.join(dir_path, test_folder, filename)
-
-#     files = [
-#         "bsd.picarro.1minute.108m.min.dat",
-#         "hfd.picarro.1minute.100m.min.dat",
-#         "tac.picarro.1minute.100m.min.dat",
-#     ]
-#     filepaths = [test_folder(f) for f in files]
-
-#     process = Process(service_url="hugs")
-
-#     process.process_files(
-#         user=authenticated_user,
-#         files=filepaths,
-#         data_type="CRDS",
-#         hugs_url="hugs",
-#         storage_url="storage",
-#     )
-
 @pytest.fixture(scope="session")
 def load_two_data(authenticated_user):
-    hugs = Service(service_url="hugs")
-    _ = hugs.call_function(function="clear_datasources", args={})
+    get_local_bucket(empty=True)
 
     def test_folder(filename):
         dir_path = os.path.dirname(__file__)
@@ -109,11 +79,8 @@ def test_search_hfd(load_two_data):
 
     search_term = "co"
     location = "hfd"
-    data_type = "CRDS"
 
-    results = search.search(
-        species=search_term, locations=location, data_type=data_type
-    )
+    results = search.search(species=search_term, locations=location)
 
     hfd_res = results["co_hfd_100m"]
 
@@ -133,26 +100,26 @@ def test_search_hfd(load_two_data):
     assert hfd_res["metadata"] == expected_metadata
 
 
-def test_search_and_rank_gc(load_two_data):
-    r = RankSources(service_url="hugs")
-    sources = r.get_sources(site="capegrim", species="NF3", data_type="GC")
+# def test_search_and_rank_gc(load_two_data):
+#     r = RankSources(service_url="hugs")
+#     sources = r.get_sources(site="capegrim", species="NF3")
 
-    print(sources)
+#     print(sources)
 
-    search = Search(service_url="hugs")
+#     search = Search(service_url="hugs")
 
-    location = "capegrim"
-    data_type = "GC"
+#     location = "capegrim"
+#     data_type = "GC"
 
-    results = search.search(locations=location, data_type=data_type)
+#     results = search.search(locations=location, data_type=data_type)
 
-    print(results)
+#     print(results)
 
 
 def test_search_and_rank(load_two_data):
     # First we need to rank the data
     r = RankSources(service_url="hugs")
-    sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
+    sources = r.get_sources(site="bsd", species="co")
 
     uuid_108m = sources["co_bsd_108m_picarro5310"]["uuid"]
     uuid_248m = sources["co_bsd_248m_picarro5310"]["uuid"]
@@ -183,9 +150,9 @@ def test_search_and_rank(load_two_data):
         "co_bsd_248m_picarro5310": {"rank": {1: [daterange_248]}, "uuid": uuid_248m},
     }
 
-    r.rank_sources(updated_rankings=new_rankings, data_type="CRDS")
+    r.rank_sources(updated_rankings=new_rankings)
 
-    updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
+    updated_sources = r.get_sources(site="bsd", species="co")
 
     assert updated_sources["co_bsd_108m_picarro5310"]["rank"] == {
         "1": ["2019-03-07T00:00:00_2019-09-15T00:00:00"]
@@ -212,9 +179,9 @@ def test_search_and_rank(load_two_data):
         "co_bsd_248m_picarro5310": {"rank": {1: [daterange_248]}, "uuid": uuid_248m},
     }
 
-    r.rank_sources(updated_rankings=new_rankings, data_type="CRDS")
+    r.rank_sources(updated_rankings=new_rankings)
 
-    updated_sources = r.get_sources(site="bsd", species="co", data_type="CRDS")
+    updated_sources = r.get_sources(site="bsd", species="co")
 
     assert updated_sources["co_bsd_108m_picarro5310"]["rank"] == {'1': ['2019-03-07-00:00:00+00:00_2019-09-15-00:00:00+00:00', 
                                                                         '2019-11-06-00:00:00+00:00_2020-07-05-00:00:00+00:00']}
@@ -225,7 +192,6 @@ def test_search_and_rank(load_two_data):
 
     species = "co"
     location = "bsd"
-    data_type = "CRDS"
 
     start_search = Timestamp(2019, 3, 7)
     end_search = Timestamp(2020, 10, 30)
@@ -233,7 +199,6 @@ def test_search_and_rank(load_two_data):
     results = search.search(
         species=species,
         locations=location,
-        data_type=data_type,
         start_datetime=start_search,
         end_datetime=end_search,
     )
@@ -279,14 +244,12 @@ def test_single_site_search(load_two_data):
 
     species = "co"
     location = "hfd"
-    data_type = "CRDS"
     inlet = "100m"
     instrument = "picarro"
 
     results = search.search(
         species=species,
         locations=location,
-        data_type=data_type,
         inlet=inlet,
         instrument=instrument,
     )

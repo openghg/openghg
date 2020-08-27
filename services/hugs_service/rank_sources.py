@@ -1,5 +1,4 @@
-from HUGS.Processing import DataTypes
-from HUGS.Util import load_object
+from HUGS.Modules import ObsSurface
 
 
 def rank_sources(args):
@@ -15,12 +14,7 @@ def rank_sources(args):
     except KeyError:
         raise KeyError("No ranking data passed")
 
-    try:
-        data_type = DataTypes[args["data_type"].upper()].name
-    except KeyError:
-        raise KeyError(f"Data type must be specified. Valid options are: {[e.value for e in DataTypes]}")
-
-    data_obj = load_object(class_name=data_type)
+    obs = ObsSurface.load()
 
     for key in ranking_data:
         uuid = ranking_data[key]["uuid"]
@@ -30,6 +24,6 @@ def rank_sources(args):
                 continue
 
             for d in daterange:
-                data_obj.set_rank(uuid=uuid, rank=rank, daterange=d)
+                obs.set_rank(uuid=uuid, rank=rank, daterange=d)
 
-    data_obj.save()
+    obs.save()

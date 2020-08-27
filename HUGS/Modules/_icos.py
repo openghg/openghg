@@ -1,5 +1,3 @@
-from HUGS.Modules import BaseModule
-
 __all__ = ["ICOS"]
 
 
@@ -144,4 +142,3 @@ class ICOS():
         }
 
         return combined_data
-

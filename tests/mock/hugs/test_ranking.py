@@ -2,8 +2,7 @@ import pytest
 import os
 
 from HUGS.Client import RankSources, Process
-from Acquire.Client import Service
-
+from HUGS.ObjectStore import get_local_bucket
 
 @pytest.fixture(scope="session")
 def tempdir(tmpdir_factory):
@@ -13,8 +12,7 @@ def tempdir(tmpdir_factory):
 
 @pytest.fixture(scope="session")
 def load_crds(authenticated_user):
-    hugs = Service(service_url="hugs")
-    _ = hugs.call_function(function="clear_datasources", args={})
+    get_local_bucket(empty=True)
 
     def test_folder(filename):
         dir_path = os.path.dirname(__file__)
@@ -41,7 +39,7 @@ def load_crds(authenticated_user):
 def test_set_ranking(authenticated_user, load_crds):
     r = RankSources(service_url="hugs")
 
-    sources = r.get_sources(site="hfd", species="ch4", data_type="CRDS")
+    sources = r.get_sources(site="hfd", species="ch4")
 
     fifty_metre_uuid = sources["ch4_hfd_50m_picarro"]["uuid"]
     hundred_metre_uuid = sources["ch4_hfd_100m_picarro"]["uuid"]
@@ -57,9 +55,9 @@ def test_set_ranking(authenticated_user, load_crds):
     new_rankings = {'ch4_hfd_100m_picarro': {'rank': {1: ["2013-12-04T14:02:30_2019-05-21T15:46:30"]}, 'uuid': hundred_metre_uuid}, 
                     'ch4_hfd_50m_picarro': {'rank': {2: ['2013-11-23T12:28:30_2020-06-24T09:41:30']}, 'uuid': fifty_metre_uuid}}
 
-    r.rank_sources(updated_rankings=new_rankings, data_type="CRDS")
+    r.rank_sources(updated_rankings=new_rankings)
 
-    sources = r.get_sources(site="hfd", species="ch4", data_type="CRDS")
+    sources = r.get_sources(site="hfd", species="ch4")
 
     del sources["ch4_hfd_100m_picarro"]["uuid"]
     del sources["ch4_hfd_50m_picarro"]["uuid"]

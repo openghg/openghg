@@ -1,5 +1,3 @@
-from HUGS.Modules import BaseModule
-
 __all__ = ["GC"]
 
 

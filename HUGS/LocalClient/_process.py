@@ -3,7 +3,6 @@ from pathlib import Path
 
 from HUGS.Modules import ObsSurface
 from HUGS.Processing import DataTypes
-from HUGS.Util import load_object
 
 __all__ = ["process_folder", "process_files"]
 

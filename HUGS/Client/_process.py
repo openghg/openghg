@@ -142,10 +142,6 @@ class Process:
         results = {}
         for file in files:
             if data_type == "GC":
-                # This is only used as a key when returning the Datasource UUIDs
-                filename = file[0].name
-                # This may be removed in the future as is currently only for testing
-
                 if source_name is None:
                     source_name = file[0].stem
 
@@ -174,8 +170,6 @@ class Process:
                     "instrument": instrument,
                 }
             else:
-                filename = file.name
-
                 filemeta = drive.upload(file)
                 par = PAR(location=filemeta.location(), user=user)
                 par_secret = hugs.encrypt_data(par.secret())
@@ -194,8 +188,8 @@ class Process:
             # file contains overlapping data
             try:
                 response = self._service.call_function(function="process", args=args)
-                results[filename] = response["results"]
+                results.update(response["results"])
             except ValueError as err:
-                results[filename] = err
+                results[file.name] = err
 
         return results

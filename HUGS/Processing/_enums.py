@@ -18,4 +18,3 @@ class ObsTypes(Enum):
     SURFACE = "ObsSurface"
     SATELLITE = "ObsSatellite"
     FLASK = "ObsFlask"
-    

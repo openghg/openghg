@@ -51,6 +51,10 @@ def test_process_CRDS_files(authenticated_user):
     ]
     filepaths = [get_test_folder(f) for f in files]
 
+    # Make sure don't have the temporary files
+    for f in files:
+        Path(f"/tmp/{f}").unlink(missing_ok=True)
+
     process = Process(service_url=service_url)
 
     response = process.process_files(
@@ -99,8 +103,8 @@ def test_process_GC_files(authenticated_user):
         "capegrim-medusa.18_CFC-11",
     ] 
 
-    assert len(response["capegrim-medusa.18.C"]["capegrim-medusa.18.C"].keys()) == 56
-    assert sorted((response["capegrim-medusa.18.C"]["capegrim-medusa.18.C"].keys()))[:5] == expected_keys
+    assert len(response["capegrim-medusa.18.C"].keys()) == 56
+    assert sorted(response["capegrim-medusa.18.C"].keys())[:5] == expected_keys
 
 
 def test_process_CRDS(authenticated_user, tempdir):
@@ -145,9 +149,6 @@ def test_process_CRDS(authenticated_user, tempdir):
 
 
 def test_process_GC(authenticated_user, tempdir):
-    gc = GC.load()
-    gc.save()
-
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
     data_filepath = os.path.join(
@@ -189,14 +190,14 @@ def test_process_GC(authenticated_user, tempdir):
     result_keys = (sorted(response["results"]["capegrim-medusa.18.C"].keys()))[:8]
 
     expected_keys = [
-        "capegrim-medusa_C4F10",
-        "capegrim-medusa_C6F14",
-        "capegrim-medusa_CCl4",
-        "capegrim-medusa_CF4",
-        "capegrim-medusa_CFC-11",
-        "capegrim-medusa_CFC-112",
-        "capegrim-medusa_CFC-113",
-        "capegrim-medusa_CFC-114",
+        "capegrim-medusa.18_C4F10",
+        "capegrim-medusa.18_C6F14",
+        "capegrim-medusa.18_CCl4",
+        "capegrim-medusa.18_CF4",
+        "capegrim-medusa.18_CFC-11",
+        "capegrim-medusa.18_CFC-112",
+        "capegrim-medusa.18_CFC-113",
+        "capegrim-medusa.18_CFC-114",
     ]
 
     assert result_keys == expected_keys
