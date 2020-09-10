@@ -103,6 +103,9 @@ class CRDS():
         # Create metadata here
         metadata = self.read_metadata(filepath=data_filepath, data=data)
 
+        # Read the scale from JSON
+        crds_data = load_hugs_json(filename="process_gcwerks_parameters.json")
+
         # This dictionary is used to store the gas data and its associated metadata
         combined_data = {}
 
@@ -132,11 +135,12 @@ class CRDS():
             site_attributes = self.get_site_attributes(site=site, inlet=inlet)
 
             # Create a copy of the metadata dict
+            scale = crds_data["CRDS"]["default_scales"].get(species.upper())
+
             species_metadata = metadata.copy()
             species_metadata["species"] = species
             species_metadata["inlet"] = inlet
-
-            # species_metadata["source_name"] = source_name
+            species_metadata["scale"] = scale
 
             combined_data[species] = {
                 "metadata": species_metadata,
@@ -155,6 +159,8 @@ class CRDS():
             Returns:
                 dict: Dictionary containing metadata
         """
+        from HUGS.Util import load_hugs_json
+
         # Find gas measured and port used
         type_meas = data[2][2]
         port = data[3][2]
@@ -179,6 +185,7 @@ class CRDS():
             resolution = "1_hour"
         else:
             raise ValueError("Unable to read time resolution from filename.")
+
 
         metadata = {}
         metadata["site"] = site

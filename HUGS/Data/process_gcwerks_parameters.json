@@ -215,6 +215,12 @@
         "directory" : "/dagage2/agage/%site-picarro/results-gcwerks/",
         "directory_output" : "/data/shared/obs_2018",
         "comment": "Cavity ring-down measurements. Output from GCWerks",
+        "default_scales": {
+            "N2O": "WMO-X2006A",
+            "CH4": "WMO-X2004A",
+            "CO2": "WMO-X2007",
+            "CO": "WMO-X2014A"
+        },
         "BSD" : {
             "gcwerks_site_name": "bilsdale",
             "global_attributes": {

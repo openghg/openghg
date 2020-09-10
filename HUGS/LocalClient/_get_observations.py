@@ -4,6 +4,7 @@ from xarray import Dataset
 from typing import Optional, Union
 from pandas import Timestamp
 
+
 def get_obs(
     sites,
     species,
@@ -200,6 +201,16 @@ def get_single_site(
 
             obs_files.append(data)
 
+    # Now check if the units match for each of the observation Datasets
+    units = set([f.mf.attrs["units"] for f in obs_files])
+    if len(units) > 1:
+        raise ValueError(f"Units do not match for these observation Datasets {[(f.mf.attrs['units'],f.attrs['filename']) for f in obs_files]}")
+
+    scales = set([f.attrs["scale"] for f in obs_files])
+    if len(scales) > 1:
+        print(f"Scales do not match for these observation Datasets {[(f.attrs['scale'],f.attrs['filename']) for f in obs_files]}")
+        print("Suggestion: set calibration_scale to convert scales")
+
     return obs_files
 
 
@@ -229,9 +240,7 @@ def synonyms(species: str) -> str:
     if not matched_strings:
         for key in species_data:
             # Iterate over the alternative labels and check for a match
-            matched_strings = [
-                s for s in species_data[key][alt_label] if s.upper() == species.upper()
-            ]
+            matched_strings = [s for s in species_data[key][alt_label] if s.upper() == species.upper()]
 
             if matched_strings:
                 matched_strings = [key]

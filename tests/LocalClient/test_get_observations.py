@@ -20,9 +20,8 @@ def crds():
     ObsSurface.read_file(filepath=filepath, data_type="CRDS")
 
 
-def test_get_single_site():
-
-    data = get_single_site(site="hfd", species="co2", average="2h")
+def test_get_single_site_few_args():
+    data = get_single_site(site="hfd", species="co2")
 
     print(data)
 
