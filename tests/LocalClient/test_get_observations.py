@@ -23,5 +23,11 @@ def crds():
 def test_get_single_site_few_args():
     data = get_single_site(site="hfd", species="co2")
 
-    print(data)
+    print(data.time[0])
+    print(data["mf"][0])
+    print(data["co2_stdev"][0])
+    print(data["co2_n_meas"][0])
+
+    print(data.attrs)
+
 
