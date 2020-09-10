@@ -92,6 +92,12 @@ def get_single_site(
     if site not in site_info:
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
+    # Ensure we have the Timestamps we expect
+    if start_date is not None and not isinstance(start_date, Timestamp):
+        start_date = Timestamp(start_date)
+    if end_date is not None and not isinstance(end_date, Timestamp):
+        end_date = Timestamp(end_date)
+
     # Find the correct synonym for the passed species
     species = synonyms(species)
 

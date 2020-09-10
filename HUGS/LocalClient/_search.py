@@ -42,6 +42,7 @@ class Search:
             start_datetime=start_datetime,
             end_datetime=end_datetime,
         )
+
         self._results = results
 
         return results
