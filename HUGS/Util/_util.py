@@ -19,7 +19,8 @@ __all__ = [
     "daterange_to_str",
     "create_daterange_str",
     "create_daterange",
-    "create_aligned_timestamp"
+    "create_aligned_timestamp",
+    "is_number"
 ]
 
 
@@ -377,3 +378,16 @@ def valid_site(site):
         return site in site_name_code["name_code"]
 
     return True
+
+
+def is_number(s):
+    ''' Is it a number?
+        
+        Args:
+            s (str): String which may be a number
+    '''
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False

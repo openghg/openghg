@@ -30,6 +30,7 @@ def process_files(files, data_type, site=None, network=None, instrument=None, ov
 
     results = {}
     # Ensure we have Paths
+    # TODO: Delete this, as we already have the same warning in read_file?
     if data_type == "GCWERKS":
         if not all(isinstance(item, tuple) for item in files):
             return TypeError("If data type is GC, a list of tuples for data and precision filenames must be passed")

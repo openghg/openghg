@@ -34,12 +34,14 @@ class GCWERKS():
         """
         from pathlib import Path
         from HUGS.Processing import assign_attributes
-
+        from HUGS.Util import is_number
+        import re
+        
         data_filepath = Path(data_filepath)
 
         if site is None:
             # Read from the filename
-            site_name = data_filepath.stem.split("-")[0]
+            site_name = re.findall(r"[\w']+", data_filepath.stem)[0]
             site = self.get_site_code(site_name)
 
         # We need to have the 3 character site code here
@@ -50,16 +52,15 @@ class GCWERKS():
         if instrument_name is None:
             # Get the first part of the filename
             # Example filename: capegrim-medusa.18.C
-            site_instrument = str(data_filepath.name).split(".")
-            try:
-                instrument_name = site_instrument[0].split("-")[1]
-            except IndexError:
-                raise ValueError(f"Unable to read instrument from filename {data_filepath.name}. \
-                                    Please pass the instrument name or amend the filename.")
+            instrument_name = re.findall(r"[\w']+", str(data_filepath.name))[1]
 
-            if(not self.is_valid_instrument(instrument_name)):
-                raise ValueError(f"Invalid instrument, defaulting to GCMD. Instruments \
-                        that can be read from filename are {self._gc_params['suffix_to_instrument'].keys()}")
+            if is_number(instrument_name):
+                # has picked out the year, rather than the instrument. Default to GCMD
+                instrument_name = "GCMD"
+            
+#            if(not self.is_valid_instrument(instrument_name)):
+#                raise ValueError(f"Invalid instrument, defaulting to GCMD. Instruments \
+#                        that can be read from filename are {self._gc_params['suffix_to_instrument'].keys()}")
 
         if source_name is None:
             source_name = data_filepath.stem

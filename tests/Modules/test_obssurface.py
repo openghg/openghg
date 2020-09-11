@@ -63,7 +63,7 @@ def test_read_GC():
     )
 
     results = ObsSurface.read_file(
-        filepath=(data_filepath, precision_filepath), data_type="GC"
+        filepath=(data_filepath, precision_filepath), data_type="GCWERKS"
     )
 
     expected_keys = sorted(

@@ -5,7 +5,7 @@ from pathlib import Path
 from Acquire.Client import PAR, Authorisation, Drive, Service, StorageCreds
 
 from HUGS.Client import Process
-from HUGS.Modules import CRDS, GC
+from HUGS.Modules import CRDS, GCWERKS
 from HUGS.ObjectStore import get_local_bucket
 
 
@@ -88,7 +88,7 @@ def test_process_GC_files(authenticated_user):
     response = process.process_files(
         user=authenticated_user,
         files=filepaths,
-        data_type="GC",
+        data_type="GCWERKS",
         hugs_url="hugs",
         storage_url="storage",
         instrument="medusa",
@@ -179,7 +179,7 @@ def test_process_GC(authenticated_user, tempdir):
         "authorisation": auth.to_data(),
         "par": {"data": data_par.to_data(), "precision": precision_par.to_data()},
         "par_secret": {"data": data_secret, "precision": precision_secret},
-        "data_type": "GC",
+        "data_type": "GCWERKS",
         "source_name": "capegrim-medusa",
         "site": "CGO",
         "instrument": "medusa",

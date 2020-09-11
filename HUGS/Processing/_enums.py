@@ -5,7 +5,7 @@ __all__ = ["DataTypes", "ObsTypes"]
 
 class DataTypes(Enum):
     CRDS = "CRDS"
-    GC = "GC"
+    GCWERKS = "GCWERKS"
     FOOTPRINT = "FOOTPRINT"
     NOAA = "NOAA"
     EUROCOM = "EUROCOM"
