@@ -90,7 +90,7 @@ class ObsSurface(BaseModule):
         results = {}
 
         for fp in filepath:
-            if data_type == "GC":
+            if data_type == "GCWERKS":
                 if not isinstance(fp, tuple):
                     raise TypeError("To process GC data a data filepath and a precision filepath must be suppled as a tuple")
 

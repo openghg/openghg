@@ -63,7 +63,7 @@ class BaseModule:
 
     @classmethod
     def load(cls, bucket=None):
-        """ Load a CRDS object from the datastore using the passed
+        """ Load an object from the datastore using the passed
             bucket and UUID
 
             Args:

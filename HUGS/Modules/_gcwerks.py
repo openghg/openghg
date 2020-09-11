@@ -1,14 +1,14 @@
-__all__ = ["GC"]
+__all__ = ["GCWERKS"]
 
 
-class GC():
+class GCWERKS():
     def __init__(self):
         from HUGS.Util import load_hugs_json
 
         self._sampling_period = 0
         # Load site data 
         data = load_hugs_json(filename="process_gcwerks_parameters.json")
-        self._gc_params = data["GC"]
+        self._gc_params = data["GCWERKS"]
         # Site codes for inlet readings
         self._site_codes = load_hugs_json(filename="site_codes.json")
 
