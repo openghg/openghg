@@ -55,13 +55,9 @@ class GCWERKS():
             instrument_name = re.findall(r"[\w']+", str(data_filepath.name))[1]
 
             if is_number(instrument_name):
-                # has picked out the year, rather than the instrument. Default to GCMD
+                # has picked out the year, rather than the instrument. Default to GCMD for this type of file
                 instrument_name = "GCMD"
             
-#            if(not self.is_valid_instrument(instrument_name)):
-#                raise ValueError(f"Invalid instrument, defaulting to GCMD. Instruments \
-#                        that can be read from filename are {self._gc_params['suffix_to_instrument'].keys()}")
-
         if source_name is None:
             source_name = data_filepath.stem
 
