@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from HUGS.Modules import CRDS, GC, ObsSurface
+from HUGS.Modules import CRDS, GCWERKS, ObsSurface
 from HUGS.ObjectStore import get_local_bucket
 from HUGS.Processing import recombine_sections, search
 
@@ -65,12 +65,12 @@ def test_recombination_CRDS():
 def test_recombination_GC():
     get_local_bucket(empty=True)
 
-    gc = GC()
+    gc = GCWERKS()
 
     data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     precision = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    ObsSurface.read_file((data, precision), data_type="GC")
+    ObsSurface.read_file((data, precision), data_type="GCWERKS")
 
     data = gc.read_data(data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa")
 

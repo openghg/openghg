@@ -17,7 +17,7 @@ def gc_read():
     data_filepath = os.path.join(dir_path, test_data, data_file)
     prec_filepath = os.path.join(dir_path, test_data, prec_file)
 
-    ObsSurface.read_file(filepath=(data_filepath, prec_filepath), data_type="GC")
+    ObsSurface.read_file(filepath=(data_filepath, prec_filepath), data_type="GCWERKS")
 
 
 @pytest.fixture(scope="session")
