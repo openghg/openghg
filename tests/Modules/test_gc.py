@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from HUGS.Modules import GC
+from HUGS.Modules import GCWERKS as GC
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -97,20 +97,6 @@ def test_read_valid_instrument_passed(
     )
 
     assert sorted(list(data.keys())) == sorted(['CH4', 'CFC-12', 'N2O', 'CFC-11', 'CFC-113', 'CHCl3', 'CH3CCl3', 'CCl4'])
-
-
-def test_read_unsure_instrument_type(
-    data_path_no_instrument, precision_path_no_instrument
-):
-    gc = GC()
-
-    with pytest.raises(ValueError):
-        gc.read_file(
-            data_filepath=data_path_no_instrument,
-            precision_filepath=precision_path_no_instrument,
-            source_name="capegrim_medusa",
-            site="CGO",
-        )
 
 
 def test_read_data(data_path, precision_path):
