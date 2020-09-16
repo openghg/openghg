@@ -26,7 +26,7 @@ def test_search_and_download(crds):
 
     expected_metadata = {'site': 'hfd', 'instrument': 'picarro', 'time_resolution': '1_minute', 
                         'inlet': '100m', 'port': '10', 'type': 'air', 'species': 'co2', 
-                        'data_type': 'timeseries'}
+                        'data_type': 'timeseries', 'scale': 'wmo-x2007'}
 
     assert results["co2_hfd_100m_picarro"]["metadata"] == expected_metadata
 

@@ -111,6 +111,7 @@ def test_search_datetimes():
         "type": "air",
         "species": "co2",
         "data_type": "timeseries",
+        'scale': 'wmo-x2007'
     }
 
     assert metadata == expected_metadata
@@ -170,7 +171,7 @@ def test_search_with_inlet_instrument(crds_read):
 
     assert len(results["ch4_hfd_100m_picarro"]["keys"]["2013-11-20-20:02:30_2019-07-04-21:29:30"]) == 25
 
-    expected_metadata = {'site': 'hfd', 'instrument': 'picarro', 'time_resolution': '1_minute', 
+    expected_metadata = {'site': 'hfd', 'instrument': 'picarro', 'time_resolution': '1_minute', 'scale': 'wmo-x2004a',
                         'inlet': '100m', 'port': '10', 'type': 'air', 'species': 'ch4', 'data_type': 'timeseries'}
 
     assert results["ch4_hfd_100m_picarro"]["metadata"] == expected_metadata
@@ -190,7 +191,7 @@ def test_search_inlet_no_instrument(crds_read):
     assert len(results["ch4_hfd_100m_picarro"]["keys"]["2013-11-20-20:02:30_2019-07-04-21:29:30"]) == 25
 
     expected_metadata = {'site': 'hfd', 'instrument': 'picarro', 'time_resolution': '1_minute', 'inlet': '100m', 
-                        'port': '10', 'type': 'air', 'species': 'ch4', 'data_type': 'timeseries'}
+                        'port': '10', 'type': 'air', 'species': 'ch4', 'data_type': 'timeseries', 'scale': 'wmo-x2004a'}
 
     assert results["ch4_hfd_100m_picarro"]["metadata"] == expected_metadata
 
@@ -210,10 +211,10 @@ def test_search_instrument_no_inlet(crds_read):
     assert len(results["n2o_bsd_248m_picarro5310"]["keys"]["2019-03-06-13:23:30_2020-07-05-03:38:30"]) == 7
 
     metadata_108m = {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 
-                    'inlet': '108m', 'port': '2', 'type': 'air', 'species': 'n2o', 'data_type': 'timeseries'}
+                    'inlet': '108m', 'port': '2', 'type': 'air', 'species': 'n2o', 'data_type': 'timeseries', 'scale': 'wmo-x2006a'}
 
     metadata_248m = {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 
-                    'inlet': '248m', 'port': '1', 'type': 'air', 'species': 'n2o', 'data_type': 'timeseries'}
+                    'inlet': '248m', 'port': '1', 'type': 'air', 'species': 'n2o', 'data_type': 'timeseries', 'scale': 'wmo-x2006a'}
 
     assert results["n2o_bsd_108m_picarro5310"]["metadata"] == metadata_108m
     assert results["n2o_bsd_248m_picarro5310"]["metadata"] == metadata_248m

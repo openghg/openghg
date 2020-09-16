@@ -255,9 +255,6 @@ def synonyms(species: str) -> str:
     if matched_strings:
         updated_species = matched_strings[0]
 
-        if updated_species != species:
-            print(f"Updating species from {species} to {updated_species}")
-
         return updated_species
     else:
         raise ValueError(f"Unable to find synonym for species {species}")
@@ -274,6 +271,7 @@ def scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
             xarray.Dataset: Dataset with mole fraction data scaled
     """    
     from pandas import read_csv
+    from numexpr import evaluate
     from HUGS.Util import get_datapath
 
     # If scale is already correct, return
@@ -302,7 +300,7 @@ def scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
 
     # scale_convert file has variable X in equations, so let's create it
     X = 1.0
-    scale_factor = eval(converter[direction])
+    scale_factor = evaluate(converter[direction])
     data["mf"].values *= scale_factor
 
     data.attrs["scale"] = to_scale
