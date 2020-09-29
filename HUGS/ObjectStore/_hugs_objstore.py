@@ -2,13 +2,7 @@
 
 """
 from Acquire.ObjectStore import ObjectStore
-import sys
 
-if sys.version_info.major < 3:
-    raise ImportError("HUGS requires Python 3.6  minimum")
-
-if sys.version_info.minor < 6:
-    raise ImportError("HUGS requires Python 3.6 minimum")
 
 __all__ = [
     "delete_object",
@@ -242,10 +236,9 @@ def get_local_bucket(empty=False):
 
     local_buckets_dir = Path("/tmp/hugs_test")
 
-    if local_buckets_dir.exists():
-        if empty is True:
-            shutil.rmtree(local_buckets_dir)
-            local_buckets_dir.mkdir(parents=True)
+    if local_buckets_dir.exists() and empty is True:
+        shutil.rmtree(local_buckets_dir)
+        local_buckets_dir.mkdir(parents=True)
     else:
         local_buckets_dir.mkdir(parents=True)
 

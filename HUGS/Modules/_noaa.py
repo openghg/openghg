@@ -164,6 +164,7 @@ class NOAA(BaseModule):
         metadata["species"] = species.lower()
         metadata["site"] = site
         metadata["measurement_type"] = measurement_type
+        metadata["network"] = "NOAA"
 
         combined_data[species.lower()] = {
             "metadata": metadata,
