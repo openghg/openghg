@@ -28,7 +28,7 @@ def data():
     filename = "bsd.picarro.1minute.248m.dat"
     filepath = get_datapath(filename=filename, data_type="CRDS")
 
-    combined_data = crds.read_data(data_filepath=filepath, site="bsd")
+    combined_data = crds.read_data(data_filepath=filepath, site="bsd", network="DECC")
 
     return combined_data
 

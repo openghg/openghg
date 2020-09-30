@@ -74,6 +74,7 @@ def load_two_data(authenticated_user):
     )
 
 
+@pytest.mark.skip(reason="Need to fix dependence on Acquire")
 def test_search_hfd(load_two_data):
     search = Search(service_url="hugs")
 
@@ -116,6 +117,7 @@ def test_search_hfd(load_two_data):
 #     print(results)
 
 
+@pytest.mark.skip(reason="Need to fix dependence on Acquire")
 def test_search_and_rank(load_two_data):
     # First we need to rank the data
     r = RankSources(service_url="hugs")
@@ -238,7 +240,7 @@ def test_search_and_rank(load_two_data):
         "data_type": "timeseries",
     }
 
-
+@pytest.mark.skip(reason="Need to fix dependence on Acquire")
 def test_single_site_search(load_two_data):
     search = Search(service_url="hugs")
 

@@ -20,10 +20,10 @@ def populate_store():
     filepath = hfd_filepath()
     ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="hfd")
 
-
-def test_query_store(populate_store):
-    data = query_store()
+# @pytest.mark.skip(reason="Unfinished")
+# def test_query_store(populate_store):
+#     data = query_store()
     
-    print(data)
+    # print(data)
 
 

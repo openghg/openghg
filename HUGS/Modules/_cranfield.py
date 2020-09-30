@@ -4,13 +4,14 @@ __all__ = ["CRANFIELD"]
 class CRANFIELD:
     """ Interface for processing Cranfield data """
 
-    def read_file(self, data_filepath, overwrite=False):
+    def read_file(self, data_filepath, site=None, network=None):
         """ Creates a CRDS object holding data stored within Datasources
 
             Args:
                 filepath (str): Path of file to load
                 data_filepath (str): Filepath of data to be read
-                overwrite (bool, default=False): Should data be overwritten
+                site (str, default=None): Name of site
+                network (str, default=None): Name of network
             Returns:
                 dict: Dictionary of gas data
         """

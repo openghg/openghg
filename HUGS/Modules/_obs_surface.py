@@ -138,7 +138,7 @@ class ObsSurface(BaseModule):
         return results
 
     @staticmethod
-    def read_folder(folder_path, data_type, extension="dat"):
+    def read_folder(folder_path, data_type, network, extension="dat"):
         """ Find files with the given extension (by default dat) in the passed folder
 
             Args:
@@ -158,7 +158,7 @@ class ObsSurface(BaseModule):
         if not filepaths:
             raise FileNotFoundError("No data files found")
 
-        return ObsSurface.read_file(filepath=filepaths, data_type=data_type)
+        return ObsSurface.read_file(filepath=filepaths, data_type=data_type, network=network)
 
     def delete(self, uuid):
         """ Delete a Datasource with the given UUID

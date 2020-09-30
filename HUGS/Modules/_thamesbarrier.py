@@ -18,12 +18,14 @@ class THAMESBARRIER(BaseModule):
         data = load_hugs_json(filename="attributes.json")
         self._tb_params = data["TMB"]
 
-    def read_file(self, data_filepath):
+    def read_file(self, data_filepath, site=None, network=None):
         """ Reads THAMESBARRIER data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
             Args:
                 data_filepath (str or Path): Path of file to load
+                site (str, default=None): Site name
+                network (str, default=None): Network name
             Returns:
                 list: UUIDs of Datasources data has been assigned to
         """
