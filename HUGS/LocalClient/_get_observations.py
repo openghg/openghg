@@ -298,6 +298,7 @@ def scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
     else:
         direction = "1to2"
 
+    # flake8: noqa: F841
     # scale_convert file has variable X in equations, so let's create it
     X = 1.0
     scale_factor = evaluate(converter[direction])

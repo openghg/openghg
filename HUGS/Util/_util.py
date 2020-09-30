@@ -382,7 +382,7 @@ def valid_site(site):
 
 def is_number(s):
     ''' Is it a number?
-        
+
         Args:
             s (str): String which may be a number
     '''
