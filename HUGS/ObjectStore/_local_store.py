@@ -1,7 +1,6 @@
 import glob
 import json
 import os
-import sys
 from pathlib import Path
 import threading
 from Acquire.ObjectStore import ObjectStoreError
@@ -275,9 +274,3 @@ def query_store():
         data[d.uuid()] = result
 
     return data
-
-        
-# def visualise_store():
-#     """ Visualise the output of the 
-
-#     """

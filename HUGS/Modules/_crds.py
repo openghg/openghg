@@ -160,8 +160,6 @@ class CRDS():
             Returns:
                 dict: Dictionary containing metadata
         """
-        from HUGS.Util import load_hugs_json
-
         # Find gas measured and port used
         type_meas = data[2][2]
         port = data[3][2]
@@ -186,7 +184,6 @@ class CRDS():
             resolution = "1_hour"
         else:
             raise ValueError("Unable to read time resolution from filename.")
-
 
         metadata = {}
         metadata["site"] = site

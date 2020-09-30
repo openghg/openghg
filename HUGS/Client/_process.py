@@ -3,7 +3,6 @@ __all__ = ["Process"]
 from Acquire.Client import Wallet
 from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
 from pathlib import Path
-from warnings import warn
 
 
 class Process:
