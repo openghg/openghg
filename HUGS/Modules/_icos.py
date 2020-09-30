@@ -1,10 +1,11 @@
 __all__ = ["ICOS"]
 
 
-class ICOS():
+class ICOS:
     """ Interface for processing ICOS data
 
     """
+
     def __init__(self):
         # Sampling period of ICOS data in seconds
         self._sampling_period = "NA"
@@ -33,7 +34,7 @@ class ICOS():
         # This should return xarray Datasets
         gas_data = self.read_data(data_filepath=data_filepath, species=species, site=site)
         # Assign attributes to the xarray Datasets here data here makes it a lot easier to test
-        gas_data = assign_attributes(data=gas_data, site=site, network=network, sampling_period=self._sampling_period)
+        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=self._sampling_period)
 
         return gas_data
 
@@ -133,7 +134,13 @@ class ICOS():
         except KeyError:
             raise ValueError("Unable to read metadata from filename. We expect a filename such as tta.co2.1minute.222m.dat")
 
-        metadata = {"site": site, "species": species, "inlet": inlet_height, "time_resolution": time_resolution}
+        metadata = {
+            "site": site,
+            "species": species,
+            "inlet": inlet_height,
+            "time_resolution": time_resolution,
+            "network": "ICOS",
+        }
 
         combined_data[species] = {
             "metadata": metadata,

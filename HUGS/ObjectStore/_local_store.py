@@ -1,6 +1,7 @@
 import glob
 import json
 import os
+import sys
 from pathlib import Path
 import threading
 from Acquire.ObjectStore import ObjectStoreError
@@ -248,3 +249,35 @@ def get_local_bucket(empty=False):
         local_buckets_dir.mkdir(parents=True)
 
     return str(local_buckets_dir)
+
+
+def query_store():
+    """ Create a dictionary that can be used to visualise the object store 
+
+        Returns:
+            dict: Dictionary of data ? 
+
+    """
+    from collections import defaultdict
+    from HUGS.Modules import Datasource, ObsSurface
+
+    obs = ObsSurface.load()
+
+    datasource_uuids = obs.datasources()
+    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+
+    data = defaultdict(dict)
+
+    for d in datasources:
+        metadata = d.metadata()
+        result = {"site": metadata["site"], "species": metadata["species"], 
+                    "instrument": metadata.get("instrument", "Unknown"), "network": metadata.get("network")}
+        data[d.uuid()] = result
+
+    return data
+
+        
+# def visualise_store():
+#     """ Visualise the output of the 
+
+#     """

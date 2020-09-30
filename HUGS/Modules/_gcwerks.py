@@ -16,11 +16,9 @@ class GCWERKS():
         self,
         data_filepath,
         precision_filepath,
-        source_name=None,
         site=None,
-        instrument_name=None,
-        source_id=None,
-        overwrite=False,
+        instrument=None,
+        network=None
     ):
         """ Reads a GC data file by creating a GC object and associated datasources
 
@@ -29,6 +27,9 @@ class GCWERKS():
             Args:
                 data_filepath (str, pathlib.Path): Path of data file
                 precision_filepath (str, pathlib.Path): Path of precision file
+                site (str, default=None): Three letter code or name for site
+                instrument (str, default=None): Instrument name
+                network (str, default=None): Network name
             Returns:
                 dict: Dictionary of source_name : UUIDs
         """
@@ -36,7 +37,7 @@ class GCWERKS():
         from HUGS.Processing import assign_attributes
         from HUGS.Util import is_number
         import re
-        
+
         data_filepath = Path(data_filepath)
 
         if site is None:
@@ -49,23 +50,21 @@ class GCWERKS():
             site = self.get_site_code(site)
 
         # Try and find the instrument name in the filename
-        if instrument_name is None:
+        if instrument is None:
             # Get the first part of the filename
             # Example filename: capegrim-medusa.18.C
-            instrument_name = re.findall(r"[\w']+", str(data_filepath.name))[1]
+            instrument = re.findall(r"[\w']+", str(data_filepath.name))[1]
 
-            if is_number(instrument_name):
+            if is_number(instrument):
                 # has picked out the year, rather than the instrument. Default to GCMD for this type of file
-                instrument_name = "GCMD"
+                instrument = "GCMD"
             
-        if source_name is None:
-            source_name = data_filepath.stem
-
         gas_data = self.read_data(
             data_filepath=data_filepath,
             precision_filepath=precision_filepath,
             site=site,
-            instrument=instrument_name,
+            instrument=instrument,
+            network=network
         )
 
         # Assign attributes to the data for CF compliant NetCDFs
@@ -73,14 +72,15 @@ class GCWERKS():
 
         return gas_data
 
-    def read_data(self, data_filepath, precision_filepath, site, instrument):
+    def read_data(self, data_filepath, precision_filepath, site, instrument, network):
         """ Read data from the data and precision files
 
             Args:
                 data_filepath (pathlib.Path): Path of data file
                 precision_filepath (pathlib.Path): Path of precision file
                 site (str): Name of site
-                instrument (str): Identifying data for instrument
+                instrument (str): Instrument name
+                network (str): Network name
             Returns:
                 dict: Dictionary of gas data keyed by species
         """
@@ -108,7 +108,7 @@ class GCWERKS():
         data.index.name = "Datetime"
 
         # This metadata will be added to when species are split and attributes are written
-        metadata = {"instrument": instrument, "site": site}
+        metadata = {"instrument": instrument, "site": site, "network": network}
 
         units = {}
         scale = {}

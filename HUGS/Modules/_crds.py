@@ -16,7 +16,7 @@ class CRDS():
         data = load_hugs_json(filename="process_gcwerks_parameters.json")
         self._crds_params = data["CRDS"]
 
-    def read_file(self, data_filepath, source_name=None, site=None):
+    def read_file(self, data_filepath, source_name=None, site=None, network=None):
         """ Creates a CRDS object holding data stored within Datasources
 
             Args:
@@ -41,13 +41,13 @@ class CRDS():
             site = source_name.split(".")[0]
 
         # Process the data into separate Datasets
-        gas_data = self.read_data(data_filepath=data_filepath, site=site)
+        gas_data = self.read_data(data_filepath=data_filepath, site=site, network=network)
         # Ensure the data is CF compliant
         gas_data = assign_attributes(data=gas_data, site=site, sampling_period=self._sampling_period)
 
         return gas_data
 
-    def read_data(self, data_filepath, site):
+    def read_data(self, data_filepath, site, network):
         """ Separates the gases stored in the dataframe in
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
@@ -99,9 +99,10 @@ class CRDS():
         header = data.head(2)
         skip_cols = sum([header[column][0] == "-" for column in header.columns])
 
-        header_rows = 2
-        # Create metadata here
         metadata = self.read_metadata(filepath=data_filepath, data=data)
+
+        if network is not None:
+            metadata["network"] = network
 
         # Read the scale from JSON
         crds_data = load_hugs_json(filename="process_gcwerks_parameters.json")
@@ -122,10 +123,10 @@ class CRDS():
 
             # Name columns
             gas_data = gas_data.set_axis(column_labels, axis="columns", inplace=False)
+
+            header_rows = 2
             # Drop the first two rows now we have the name
-            gas_data = gas_data.drop(
-                index=gas_data.head(header_rows).index, inplace=False
-            )
+            gas_data = gas_data.drop(index=gas_data.head(header_rows).index, inplace=False)
             # Cast data to float64 / double
             gas_data = gas_data.astype("float64")
 

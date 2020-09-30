@@ -97,10 +97,13 @@ class ObsSurface(BaseModule):
                 data_filepath = Path(fp[0])
                 precision_filepath = Path(fp[1])
 
-                data = data_obj.read_file(data_filepath=data_filepath, precision_filepath=precision_filepath)
+                data = data_obj.read_file(data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, network=network)
             else:
+                if isinstance(fp, tuple):
+                    raise TypeError("Only a single data file may be passed for this data type. Please check you have the correct type selected.")
+
                 data_filepath = Path(fp)
-                data = data_obj.read_file(data_filepath=data_filepath)
+                data = data_obj.read_file(data_filepath=data_filepath, site=site, network=network)
 
             # TODO - need a new way of creating the source name
             source_name = data_filepath.stem

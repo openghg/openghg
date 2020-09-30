@@ -108,14 +108,22 @@ class BaseModule:
         self._datasource_uuids.update(uuid_keyed)
 
     def datasources(self):
-        """ Return the list of Datasources for this object
+        """ Return the list of Datasources UUIDs associated with this object
 
             Returns:
-                list: List of Datasources
+                list: List of Datasource UUIDs
         """
         return list(self._datasource_uuids.keys())
 
     def datasource_names(self):
+        """ Return the names of the datasources
+
+
+
+        """
+        import warnings
+        warnings.warn("This may be removed in a future release", category=DeprecationWarning)
+
         return self._datasource_names
 
     def remove_datasource(self, uuid):

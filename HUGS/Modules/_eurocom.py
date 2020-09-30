@@ -19,7 +19,7 @@ class EUROCOM():
         data = load_hugs_json(filename="attributes.json")
         self._eurocom_params = data["EUROCOM"]
 
-    def read_file(self, data_filepath, source_name, site=None, overwrite=False):
+    def read_file(self, data_filepath, site=None, overwrite=False):
         """ Reads EUROCOM data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
@@ -33,11 +33,8 @@ class EUROCOM():
 
         data_filepath = Path(data_filepath)
 
-        if not source_name:
-            source_name = data_filepath.stem
-
-        if not site:
-            site = source_name.split("_")[0]
+        if site is None:
+            site = data_filepath.stem.split("_")[0]
 
         # This should return xarray Datasets
         gas_data = self.read_data(data_filepath=data_filepath, site=site)
@@ -147,6 +144,7 @@ class EUROCOM():
         metadata["species"] = species
         metadata["inlet_height"] = site_attributes["inlet_height_m"]
         metadata["calibration_scale"] = calibration_scale
+        metadata["network"] = "EUROCOM"
 
         combined_data[species] = {
             "metadata": metadata,
