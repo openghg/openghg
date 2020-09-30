@@ -3,8 +3,8 @@ import os
 import pandas as pd
 import pytest
 from Acquire.Client import PAR, Authorisation, Drive, Service, StorageCreds
-
-from HUGS.Client import ClearDatasources, Retrieve, Search
+from HUGS.Client import Search
+from HUGS.ObjectStore import get_local_bucket
 
 
 @pytest.fixture(scope="session")
@@ -15,9 +15,7 @@ def tempdir(tmpdir_factory):
 
 @pytest.fixture(autouse=True)
 def crds(authenticated_user):
-    clear_ds = ClearDatasources(service_url="hugs")
-    clear_ds.clear_datasources()
-
+    get_local_bucket(empty=True)
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
     filepath = os.path.join(
@@ -47,22 +45,15 @@ def crds(authenticated_user):
 def test_retrieve(authenticated_user, crds):
     search_term = "co"
     location = "bsd"
-    data_type = "CRDS"
 
     search_obj = Search(service_url="hugs")
 
-    search_results = search_obj.search(
-        search_terms=search_term, locations=location, data_type=data_type
-    )
+    search_results = search_obj.search(species=search_term, locations=location)
 
     key = list(search_results.keys())[0]
-    to_download = {"bsd_co": search_results[key]["keys"]}
 
-    retrieve_obj = Retrieve(service_url="hugs")
-
-    response = retrieve_obj.retrieve(keys=to_download)
-
-    data = response["bsd_co"]
+    result = search_obj.download(selected_keys=key)
+    data = result[0]
 
     del data.attrs["File created"]
 

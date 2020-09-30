@@ -1,5 +1,9 @@
 __all__ = ["Process"]
 
+from Acquire.Client import Wallet
+from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
+from pathlib import Path
+
 
 class Process:
     """ Process a datafile at a given PAR
@@ -15,46 +19,45 @@ class Process:
                 service_url: URL of service
         """
         if service_url:
-            from Acquire.Client import Wallet as _Wallet
-
-            wallet = _Wallet()
-            self._service = wallet.get_service(service_url=f"{service_url}/hugs")
             self._service_url = service_url
         else:
-            self._service
+            self._service_url = "https://hugs.acquire-aaai.com/t"
+
+        wallet = Wallet()
+        self._service = wallet.get_service(service_url=f"{self._service_url}/hugs")
 
     def process_folder(
         self,
         user,
         folder_path,
         data_type,
-        source_name=None,
         overwrite=False,
         extension="dat",
         hugs_url=None,
         storage_url=None,
-        instrument=None,
     ):
         """ Process the passed directory of data files
 
+            Note: this does function does not recursively find files.
+
             Args:
                 user (User): Authenticated Acquire User
-                folder (str, list): Path of files to be processed
+                folder_path (str, pathlib.Path): Path of folder containing files to be processed
                 data_type (str): Type of data to be processed (CRDS, GC etc)
                 hugs_url (str): URL of HUGS service. Currently used for testing
-                datasource (str): Datasource name or UUID
                 This may be removed in the future.
                 storage_url (str): URL of storage service. Currently used for testing
                 This may be removed in the future.
         """
         from pathlib import Path
+        data_type = data_type.upper()
 
         if data_type == "GC":
             filepaths = []
             # Find all files in
-            for f in Path(folder_path).glob("**/*.C"):
+            for f in Path(folder_path).glob("*.C"):
                 if "precisions" in f.name:
-                    # Remove precisions section and ensure file exists
+                    # Remove precisions section and ensure the matching data file exists
                     data_filename = str(f).replace(".precisions", "")
                     if Path(data_filename).exists():
                         filepaths.append((Path(data_filename), f))
@@ -65,9 +68,7 @@ class Process:
             user=user,
             files=filepaths,
             data_type=data_type,
-            source_name=source_name,
             overwrite=overwrite,
-            instrument=instrument,
         )
 
     # Find a better way to get this storage url in here, currently used for testing
@@ -92,18 +93,16 @@ class Process:
                 data_type (str): Type of data to be processed (CRDS, GC etc)
                 hugs_url (str): URL of HUGS service. Currently used for testing
                 datasource (str): Datasource name or UUID
-
-                TODO - update this
-
                 This may be removed in the future.
                 storage_url (str): URL of storage service. Currently used for testing
                 This may be removed in the future.
+                site (str, default=None): Name of site, three letter code or long name
+                instrument (str, default=None): If no instrument name is passed we will attempt
+                to find it from the filename.
             Returns:
-                dict: UUID of processed files keyed by filename
+                dict: UUIDs of Datasources storing data of processed files keyed by filename
         """
-        from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
-        import os
-        from pathlib import Path
+        data_type = data_type.upper()
 
         if self._service is None:
             raise PermissionError("Cannot use a null service")
@@ -111,13 +110,15 @@ class Process:
         if not isinstance(files, list):
             files = [files]
 
-        files = [Path(filepath) for filepath in files]
-
         if data_type.upper() == "GC":
             if not all(isinstance(item, tuple) for item in files):
                 return TypeError(
                     "If data type is GC, a list of tuples for data and precision filenames must be passed"
                 )
+
+            files = [(Path(f), Path(p)) for f, p in files]
+        else:
+            files = [Path(f) for f in files]
 
         if storage_url is None:
             storage_url = self._service_url + "/storage"
@@ -138,20 +139,16 @@ class Process:
         # for use in processing.
         # We can maybe reconsider the way this is done if there ends up being a lot of test
         # cases and this gets a bit clunky
-        datasource_uuids = {}
+        results = {}
         for file in files:
-            if data_type.upper() == "GC":
-                # This is only used as a key when returning the Datasource UUIDs
-                filename = file[0].name
-                # This may be removed in the future as is currently only for testing
+            if data_type == "GC":
+                if source_name is None:
+                    source_name = file[0].stem
 
-                if not source_name:
-                    source_name = os.path.splitext(filename)[0]
-
-                # TODO - update this so we get proper reading of parameters
-                # dictionary
-                if not site:
+                if site is None:
                     site = source_name.split(".")[0]
+                    if "-" in site and data_type == "GC":
+                        site = site.split("-")[0]
 
                 filemeta = drive.upload(file[0])
                 par = PAR(location=filemeta.location(), user=user)
@@ -173,8 +170,6 @@ class Process:
                     "instrument": instrument,
                 }
             else:
-                filename = file.name
-
                 filemeta = drive.upload(file)
                 par = PAR(location=filemeta.location(), user=user)
                 par_secret = hugs.encrypt_data(par.secret())
@@ -193,8 +188,8 @@ class Process:
             # file contains overlapping data
             try:
                 response = self._service.call_function(function="process", args=args)
-                datasource_uuids[filename] = response["results"]
+                results.update(response["results"])
             except ValueError as err:
-                datasource_uuids[filename] = err
+                results[file.name] = err
 
-        return datasource_uuids
+        return results

@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.operating-system }}
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       max-parallel: 4
       fail-fast: false
@@ -36,7 +37,10 @@ jobs:
         pip install oci retry
     - name: Lint with flake8
       run: |
-        flake8 . --count --statistics
+        flake8 HUGS/ --count --statistics
     - name: Test with pytest
       run: |
         pytest --cov=./ --cov-report=xml
+    - name: Upload coverage to Codecov
+      run: |
+        bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"

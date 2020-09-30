@@ -1,140 +1,92 @@
-from HUGS.Modules import BaseModule
-
-__all__ = ["GC"]
+__all__ = ["GCWERKS"]
 
 
-class GC(BaseModule):
-    _root = "GC"
-    _uuid = "8cba4797-510c-gcgc-8af1-e02a5ee57489"
-
+class GCWERKS():
     def __init__(self):
-        from Acquire.ObjectStore import get_datetime_now
+        from HUGS.Util import load_hugs_json
 
-        self._creation_datetime = get_datetime_now()
-        self._stored = False
-        self._datasources = []
-        # Keyed by name - allows retrieval of UUID from name
-        self._datasource_names = {}
-        # Keyed by UUID - allows retrieval of name by UUID
-        self._datasource_uuids = {}
-        # Hashes of previously uploaded files
-        self._file_hashes = {}
-        # Holds parameters used for writing attributes to Datasets
-        self._gc_params = {}
-        # Site codes for inlet readings
-        self._site_codes = {}
         self._sampling_period = 0
+        # Load site data 
+        data = load_hugs_json(filename="process_gcwerks_parameters.json")
+        self._gc_params = data["GCWERKS"]
+        # Site codes for inlet readings
+        self._site_codes = load_hugs_json(filename="site_codes.json")
 
-    def to_data(self):
-        """ Return a JSON-serialisable dictionary of object
-            for storage in object store
-
-            Returns:
-                dict: Dictionary version of object
-        """
-        from Acquire.ObjectStore import datetime_to_string as _datetime_to_string
-
-        data = {}
-        data["creation_datetime"] = _datetime_to_string(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_uuids"] = self._datasource_uuids
-        data["datasource_names"] = self._datasource_names
-        data["file_hashes"] = self._file_hashes
-
-        return data
-
-    def save(self, bucket=None):
-        """ Save this GC object in the object store
-
-            Args:
-                bucket (dict, default=None): Bucket for data storage
-            Returns:
-                None
-        """
-        from Acquire.ObjectStore import ObjectStore
-        from HUGS.ObjectStore import get_bucket
-
-        if bucket is None:
-            bucket = get_bucket()
-
-        gc_key = "%s/uuid/%s" % (GC._root, GC._uuid)
-
-        self._stored = True
-        ObjectStore.set_object_from_json(bucket=bucket, key=gc_key, data=self.to_data())
-
-    @staticmethod
     def read_file(
+        self,
         data_filepath,
         precision_filepath,
-        source_name,
-        site,
-        instrument_name="GCMD",
-        source_id=None,
-        overwrite=False,
+        site=None,
+        instrument=None,
+        network=None
     ):
         """ Reads a GC data file by creating a GC object and associated datasources
+
+            TODO - should this default to GCMD when no instrument is passed?
 
             Args:
                 data_filepath (str, pathlib.Path): Path of data file
                 precision_filepath (str, pathlib.Path): Path of precision file
+                site (str, default=None): Three letter code or name for site
+                instrument (str, default=None): Instrument name
+                network (str, default=None): Network name
             Returns:
-                TODO - should this really return anything?
-                GC: GC object
-
+                dict: Dictionary of source_name : UUIDs
         """
-        from HUGS.Processing import assign_data, lookup_gas_datasources
         from pathlib import Path
-
-        gc = GC.load()
+        from HUGS.Processing import assign_attributes
+        from HUGS.Util import is_number
+        import re
 
         data_filepath = Path(data_filepath)
 
-        gas_data = gc.read_data(
+        if site is None:
+            # Read from the filename
+            site_name = re.findall(r"[\w']+", data_filepath.stem)[0]
+            site = self.get_site_code(site_name)
+
+        # We need to have the 3 character site code here
+        if len(site) != 3:
+            site = self.get_site_code(site)
+
+        # Try and find the instrument name in the filename
+        if instrument is None:
+            # Get the first part of the filename
+            # Example filename: capegrim-medusa.18.C
+            instrument = re.findall(r"[\w']+", str(data_filepath.name))[1]
+
+            if is_number(instrument):
+                # has picked out the year, rather than the instrument. Default to GCMD for this type of file
+                instrument = "GCMD"
+            
+        gas_data = self.read_data(
             data_filepath=data_filepath,
             precision_filepath=precision_filepath,
             site=site,
-            instrument=instrument_name,
+            instrument=instrument,
+            network=network
         )
 
         # Assign attributes to the data for CF compliant NetCDFs
-        gas_data = gc.assign_attributes(data=gas_data, site=site)
+        gas_data = assign_attributes(data=gas_data, site=site)
 
-        lookup_results = lookup_gas_datasources(
-            lookup_dict=gc._datasource_names,
-            gas_data=gas_data,
-            source_name=source_name,
-            source_id=source_id,
-        )
+        return gas_data
 
-        # Create Datasources, save them to the object store and get their UUIDs
-        datasource_uuids = assign_data(
-            gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite
-        )
-        # Add the Datasources to the list of datasources associated with this object
-        gc.add_datasources(datasource_uuids)
-        # Save object to object store
-        gc.save()
-
-        # Return the UUIDs of the datasources in which the data was stored
-        return datasource_uuids
-
-    def read_data(self, data_filepath, precision_filepath, site, instrument):
+    def read_data(self, data_filepath, precision_filepath, site, instrument, network):
         """ Read data from the data and precision files
 
             Args:
                 data_filepath (pathlib.Path): Path of data file
                 precision_filepath (pathlib.Path): Path of precision file
                 site (str): Name of site
-                instrument (str): Identifying data for instrument
+                instrument (str): Instrument name
+                network (str): Network name
             Returns:
-                list: List of tuples (str, dict, str, Pandas.Dataframe)
-
-                Tuple contains species name, species metadata, datasource_uuid and dataframe
+                dict: Dictionary of gas data keyed by species
         """
         from datetime import datetime
         from pandas import read_csv
         from pandas import Timedelta as pd_Timedelta
-        from HUGS.Processing import read_metadata
 
         # Read header
         header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
@@ -155,7 +107,8 @@ class GC(BaseModule):
         )
         data.index.name = "Datetime"
 
-        metadata = read_metadata(filepath=data_filepath, data=data, data_type="GC")
+        # This metadata will be added to when species are split and attributes are written
+        metadata = {"instrument": instrument, "site": site, "network": network}
 
         units = {}
         scale = {}
@@ -171,12 +124,8 @@ class GC(BaseModule):
                 # Add it to the dictionary for renaming later
                 columns_renamed[column] = gas_name + "_flag"
                 # Create 2 new columns based on the flag columns
-                data[gas_name + " status_flag"] = (data[column].str[0] != "-").astype(
-                    int
-                )
-                data[gas_name + " integration_flag"] = (
-                    data[column].str[1] != "-"
-                ).astype(int)
+                data[gas_name + " status_flag"] = (data[column].str[0] != "-").astype(int)
+                data[gas_name + " integration_flag"] = (data[column].str[1] != "-").astype(int)
 
                 col_shift = 4
                 units[gas_name] = header.iloc[1, col_loc + col_shift]
@@ -245,9 +194,7 @@ class GC(BaseModule):
             return datetime.strptime(date, "%y%m%d")
 
         # Read precision species
-        precision_header = read_csv(
-            filepath, skiprows=3, nrows=1, header=None, sep=r"\s+"
-        )
+        precision_header = read_csv(filepath, skiprows=3, nrows=1, header=None, sep=r"\s+")
 
         precision_species = precision_header.values[0][1:].tolist()
 
@@ -281,36 +228,30 @@ class GC(BaseModule):
             Returns:
                 dict: Dataframe of gas data and metadata
         """
+        from fnmatch import fnmatch
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
 
-        # site_code = self.get_site_code(site)
-
         # Read inlets from the parameters dictionary
-        # expected_inlets = self.get_inlets(site_code=site)
+        expected_inlets = self.get_inlets(site_code=site)
         # Get the inlets in the dataframe
         try:
-            data_inlets = data["Inlet"].unique()
+            data_inlets = data["Inlet"].unique().tolist()
         except KeyError:
             raise KeyError(
                 "Unable to read inlets from data, please ensure this data is of the GC \
                                     type expected by this processing module"
             )
         # TODO - ask Matt/Rachel about inlets
-        matching_inlets = data_inlets
 
-        # # For now just add air to the expected inlets
-        # expected_inlets.append("air")
-        # # Check that each inlet in data_inlet matches one that's given by parameters file
-        # for data_inlet in data_inlets:
-        #     match = [fnmatch(data_inlet, inlet) for inlet in expected_inlets]
-        #     if True in match:
-        #         # Filter the expected inlets by the ones we've found in data
-        #         # If none of them match processing below will not proceed
-        #         matching_inlets = list(compress(data_inlets, match))
-        #     else:
-        #         raise ValueError("Inlet mismatch - please ensure correct site is selected. \
-        #                           Mismatch between inlet in data and inlet in parameters file.")
+        # For now just add air to the expected inlets
+        expected_inlets.append("air")
+
+        matching_inlets = [data_inlet for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)]
+
+        if not matching_inlets:
+            raise ValueError("Inlet mismatch - please ensure correct site is selected. \
+                                  Mismatch between inlet in data and inlet in parameters file.")
 
         combined_data = {}
 
@@ -368,7 +309,7 @@ class GC(BaseModule):
                     ]
                     spec_data = spec_data.dropna(axis="index", how="any")
 
-                attributes = self.site_attributes(
+                attributes = self.get_site_attributes(
                     site=site, inlet=inlet, instrument=instrument
                 )
 
@@ -382,33 +323,15 @@ class GC(BaseModule):
 
         return combined_data
 
-    def assign_attributes(self, data, site, network=None):
-        """ Assign attributes to the data we've processed
+    def is_valid_instrument(self, instrument):
+        """ Check if the instrument string passed is valid
 
-            Args:
-                combined_data (dict): Dictionary containing data, metadata and attributes
             Returns:
-                dict: Dictionary of combined data with correct attributes assigned to Datasets
+                bool: True if valid
         """
-        from HUGS.Processing import get_attributes
+        valid_instruments = self._gc_params["suffix_to_instrument"].keys()
 
-        for species in data:
-            site_attributes = data[species]["attributes"]
-            units = data[species]["metadata"]["units"]
-            scale = data[species]["metadata"]["scale"]
-
-            data[species]["data"] = get_attributes(
-                ds=data[species]["data"],
-                species=species,
-                site=site,
-                network=network,
-                units=units,
-                scale=scale,
-                global_attributes=site_attributes,
-                sampling_period=self._sampling_period,
-            )
-
-        return data
+        return instrument.lower() in valid_instruments
 
     def get_precision(self, instrument):
         """ Get the precision of the instrument in seconds
@@ -419,10 +342,12 @@ class GC(BaseModule):
                 int: Precision of instrument in seconds
 
         """
-        if not self._gc_params:
-            self.load_params()
+        try:
+            sampling_period = self._gc_params["sampling_period"][instrument]
+        except KeyError:
+            raise ValueError(f"Invalid instrument: {instrument}\nPlease select one of {self._gc_params['sampling_period'].keys()}\n")
 
-        return self._gc_params["sampling_period"][instrument]
+        return sampling_period
 
     def get_inlets(self, site_code):
         """ Get the inlets used at this site
@@ -432,25 +357,7 @@ class GC(BaseModule):
             Returns:
                 list: List of inlets
         """
-        if not self._gc_params:
-            self.load_params()
-
         return self._gc_params[site_code]["inlets"]
-
-    def load_params(self):
-        """ Load the parameters from file
-
-            Returns:
-                None
-        """
-        from json import load
-        from HUGS.Util import get_datapath
-
-        params_file = get_datapath(filename="process_gcwerks_parameters.json")
-
-        with open(params_file, "r") as f:
-            data = load(f)
-            self._gc_params = data["GC"]
 
     def get_site_code(self, site):
         """ Get the site code
@@ -460,23 +367,14 @@ class GC(BaseModule):
             Returns:
                 str: Site code
         """
-        from json import load
-        from HUGS.Util import get_datapath
-
-        if not self._site_codes:
-            site_codes_json = get_datapath(filename="site_codes.json")
-            with open(site_codes_json, "r") as f:
-                d = load(f)
-                self._site_codes = d["name_code"]
-
         try:
-            site_code = self._site_codes[site.lower()]
+            site_code = self._site_codes["name_code"][site.lower()]
         except KeyError:
-            raise KeyError("Site not recognized")
+            raise KeyError(f"Site: {site} not recognized")
 
         return site_code
 
-    def site_attributes(self, site, inlet, instrument):
+    def get_site_attributes(self, site, inlet, instrument):
         """ Gets the site specific attributes for writing to Datsets
 
             Args:
@@ -485,17 +383,13 @@ class GC(BaseModule):
             Returns:
                 dict: Dictionary of attributes
         """
-        if not self._gc_params:
-            self.load_params()
-
         attributes = self._gc_params[site.upper()]["global_attributes"]
+
         attributes["inlet_height_magl"] = inlet
         try:
             attributes["comment"] = self._gc_params["comment"][instrument]
         except KeyError:
             valid_instruments = list(self._gc_params["comment"].keys())
-            raise KeyError(
-                f"Invalid instrument passed, valid instruments : {valid_instruments}"
-            )
+            raise KeyError(f"Invalid instrument passed, valid instruments : {valid_instruments}")
 
         return attributes

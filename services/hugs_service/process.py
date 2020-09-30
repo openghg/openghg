@@ -40,8 +40,9 @@ def process(args):
         precision_file = precision_filename.download(dir="/tmp")
         site = args["site"]
         instrument = args["instrument"]
+
+        data_file = data_file, precision_file
     else:
-        precision_file = None
         site = None
         instrument = None
 
@@ -55,7 +56,6 @@ def process(args):
     results = process_data(
         data_file=data_file,
         source_name=source_name,
-        precision_filepath=precision_file,
         data_type=data_type,
         site=site,
         instrument_name=instrument,

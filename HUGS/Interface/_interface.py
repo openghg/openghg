@@ -15,6 +15,7 @@ import ipyleaflet
 import IPython
 import ipywidgets as widgets
 import matplotlib
+import matplotlib.cm as mplcmap
 import pandas as pd
 from Acquire.Client import User
 
@@ -124,9 +125,6 @@ class Interface:
             # Keyed code: name
             self._site_names = data["code_name"]
 
-        # self._tableau20 = list(matplotlib.cm.tab20.colors)
-        # self._colour_blind = list(data["colour_blind"].values())
-
         self._tableau10 = [
             "#4E79A7",
             "#F28E2B",
@@ -134,9 +132,7 @@ class Interface:
             "#76B7B2",
             "#59A14F",
         ]  # ,'#EDC948','#B07AA1','#FF9DA7','#9C755F','#BAB0AC']
-        self._tableau20 = [
-            matplotlib.colors.rgb2hex(colour) for colour in matplotlib.cm.tab20.colors
-        ]
+        self._tableau20 = [matplotlib.colors.rgb2hex(colour) for colour in matplotlib.cm.get_cmap("tab20").colors]
         self._colour_blind = self._tableau20
 
     def get_user(self):

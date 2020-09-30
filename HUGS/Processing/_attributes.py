@@ -1,4 +1,34 @@
-__all__ = ["get_attributes"]
+__all__ = ["assign_attributes", "get_attributes"]
+
+
+def assign_attributes(data, site, sampling_period=None, network=None):
+    """ Assign attributes to the data we've processed. This ensures that the xarray Datasets produced
+        as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata 
+        to the Datasource allowing more detailed searching of data.
+
+        Args:
+            combined_data (dict): Dictionary containing data, metadata and attributes
+        Returns:
+            dict: Dictionary of combined data with correct attributes assigned to Datasets
+    """
+    for species in data:
+        site_attributes = data[species]["attributes"]
+
+        units = data[species].get("metadata", {}).get("units")
+        scale = data[species].get("metadata", {}).get("scale")
+
+        data[species]["data"] = get_attributes(
+            ds=data[species]["data"],
+            species=species,
+            site=site,
+            network=network,
+            units=units,
+            scale=scale,
+            global_attributes=site_attributes,
+            sampling_period=sampling_period,
+        )
+
+    return data
 
 
 def get_attributes(
@@ -129,9 +159,7 @@ def get_attributes(
 
     # Species-specific attributes
     # Long name
-    if (
-        species_upper.startswith("D") and species_upper != "DESFLURANE"
-    ) or species_upper == "APD":
+    if species_upper.startswith("D") and species_upper != "DESFLURANE" or species_upper == "APD":
         sp_long = species_translator[species_upper]["name"]
     elif species_upper == "RN":
         sp_long = "radioactivity_concentration_of_222Rn_in_air"
@@ -243,7 +271,7 @@ def get_attributes(
         + "Note that sampling periods are approximate."
     )
 
-    if sampling_period:
+    if sampling_period is not None:
         time_attributes["sampling_period_seconds"] = sampling_period
 
     ds.time.attrs.update(time_attributes)

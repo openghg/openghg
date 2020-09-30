@@ -17,16 +17,10 @@ from HUGS.Client import Retrieve, Search
 
 
 def search_emissions(search_terms):
-    return [
-        "WAO-20magl_EUROPE_201501",
-        "WAO-20magl_EUROPE_201502",
-        "WAO-20magl_EUROPE_201503",
-        "WAO-20magl_EUROPE_201504",
-    ]
-
+    raise NotImplementedError()
 
 def get_emissions_data(search_terms):
-    return []
+    raise NotImplementedError()
 
 
 def create_search_box():

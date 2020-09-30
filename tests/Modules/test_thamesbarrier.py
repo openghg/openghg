@@ -1,10 +1,10 @@
 import logging
 import os
-
+from pathlib import Path
 import pandas as pd
 import pytest
 
-from HUGS.Modules import Datasource, ThamesBarrier
+from HUGS.Modules import Datasource, THAMESBARRIER
 from HUGS.ObjectStore import get_local_bucket
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -13,42 +13,24 @@ mpl_logger.setLevel(logging.WARNING)
 # Disable this for long strings below - Line break occurred before a binary operator (W503)
 # flake8: noqa: W503
 
-
-def test_site_attributes():
-    tb = ThamesBarrier()
-
-    site_attributes = tb.site_attributes()
-
-    assert (
-        site_attributes["Notes"]
-        == "~5m above high tide water level, in tidal region of the Thames"
+def get_datapath(filename, data_type):
+    return (
+        Path(__file__)
+        .resolve(strict=True)
+        .parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
     )
-    assert site_attributes["inlet_height_magl"] == "5 m"
-    assert site_attributes["instrument"] == "Picarro G2401"
 
 
 def test_read_file():
-    _ = get_local_bucket(empty=True)
+    tb = THAMESBARRIER()
 
-    tb = ThamesBarrier()
+    filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/ThamesBarrier"
-    filename = "thames_test_20190707.csv"
+    data = tb.read_file(data_filepath=filepath)
 
-    filepath = os.path.join(dir_path, test_data, filename)
-
-    uuids = tb.read_file(data_filepath=filepath, source_name="TMB")
-
-    date_key = "2019-07-01-00:39:55+00:00_2019-08-01-00:10:30+00:00"
-
-    ch4_ds = Datasource.load(uuid=uuids["TMB_CH4"])
-    co2_ds = Datasource.load(uuid=uuids["TMB_CO2"])
-    co_ds = Datasource.load(uuid=uuids["TMB_CO"])
-
-    ch4_data = ch4_ds._data[date_key]
-    co2_data = co2_ds._data[date_key]
-    co_data = co_ds._data[date_key]
+    ch4_data = data["CH4"]["data"]
+    co2_data = data["CO2"]["data"]
+    co_data = data["CO"]["data"]
 
     assert ch4_data.time[0] == pd.Timestamp("2019-07-01T00:39:55.000000000")
     assert ch4_data["ch4"][0] == pytest.approx(1960.835716)
@@ -62,15 +44,25 @@ def test_read_file():
     assert co_data["co"][0] == pytest.approx(0.08788712)
     assert co_data["co_variability"][0] == 0
 
+    expected_attrs = {'data_owner': 'Valerio Ferracci', 'data_owner_email': 'V.Ferracci@cranfield.ac.uk', 
+                    'Notes': '~5m above high tide water level, in tidal region of the Thames', 
+                    'inlet_height_magl': '5 m', 'instrument': 'Picarro G2401', 
+                    'Conditions of use': 'Ensure that you contact the data owner at the outset of your project.', 
+                    'Source': 'In situ measurements of air', 'Conventions': 'CF-1.6', 
+                    'Processed by': 'auto@hugs-cloud.com', 'species': 'co', 
+                    'Calibration_scale': 'unknown', 'station_longitude': 0.036995, 'station_latitude': 51.496769, 
+                    'station_long_name': 'Thames Barrier, London, UK', 'station_height_masl': 5.0}
+
+    del co_data.attrs["File created"]
+    
+    assert co_data.attrs == expected_attrs
+
+
 
 def test_read_data():
-    tb = ThamesBarrier()
+    tb = THAMESBARRIER()
 
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/ThamesBarrier"
-    filename = "thames_test_20190707.csv"
-
-    filepath = os.path.join(dir_path, test_data, filename)
+    filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
     data = tb.read_data(data_filepath=filepath)
 

@@ -1,83 +1,108 @@
 import datetime
 import logging
-import uuid
 from pathlib import Path
-
 import pandas as pd
 import pytest
-from Acquire.ObjectStore import datetime_to_datetime, datetime_to_string
 
-from HUGS.Modules import GC
-from HUGS.ObjectStore import get_local_bucket, get_object_names
+from HUGS.Modules import GCWERKS as GC
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
 
+def get_datapath(filename):
+    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/GC/{filename}")
+
+
 @pytest.fixture(scope="session")
 def data_path():
-    # This feels messy
-    return (
-        Path(__file__)
-        .resolve()
-        .parent.joinpath("../data/proc_test_data/GC/capegrim-medusa.18.C")
-    )
+    return get_datapath(filename="capegrim-medusa.18.C")
 
 
 @pytest.fixture(scope="session")
 def precision_path():
-    return (
-        Path(__file__)
-        .resolve()
-        .parent.joinpath("../data/proc_test_data/GC/capegrim-medusa.18.precisions.C")
-    )
+    return get_datapath(filename="capegrim-medusa.18.precisions.C")
 
 
-@pytest.fixture
-def gc():
-    gc = GC()
-    gc._uuid = "123"
-    gc._creation_datetime = datetime_to_datetime(datetime.datetime(1970, 1, 1))
-    gc.save()
+@pytest.fixture(scope="session")
+def data_path_no_instrument():
+    return get_datapath(filename="trinidadhead.01.C")
 
-    return gc
+
+@pytest.fixture(scope="session")
+def precision_path_no_instrument():
+    return get_datapath(filename="trinidadhead.01.precisions.C")
 
 
 def test_read_file(data_path, precision_path):
-    uuids = GC.read_file(
+    gc = GC()
+
+    gas_data = gc.read_file(
         data_filepath=data_path,
         precision_filepath=precision_path,
         source_name="capegrim_medusa",
         site="CGO",
+        instrument_name="medusa",
     )
 
-    assert len(uuids) == 56
+    expected_eight = ['C4F10', 'C6F14', 'CCl4', 'CF4', 'CFC-11', 'CFC-112', 'CFC-113', 'CFC-114']
 
-    first_nine = [
-        "capegrim_medusa_C4F10",
-        "capegrim_medusa_C6F14",
-        "capegrim_medusa_CCl4",
-        "capegrim_medusa_CF4",
-        "capegrim_medusa_CFC-11",
-        "capegrim_medusa_CFC-112",
-        "capegrim_medusa_CFC-113",
-        "capegrim_medusa_CFC-114",
-        "capegrim_medusa_CFC-115",
-        "capegrim_medusa_CFC-12",
-    ]
+    sorted_keys = sorted(list(gas_data.keys()))
 
-    key_list = sorted(list(uuids.keys()))[:10]
+    assert sorted_keys[:8] == expected_eight
 
-    assert first_nine == key_list
+    assert len(sorted_keys) == 56
+
+
+def test_read_file_incorrect_inlet_raises(precision_path):
+    data_path = Path(__file__).resolve().parent.joinpath("../data/proc_test_data/GC/capegrim-incorrect-inlet.18.C")
+
+    gc = GC()
+
+    with pytest.raises(ValueError):
+        gc.read_file(
+            data_filepath=data_path,
+            precision_filepath=precision_path,
+            source_name="capegrim_medusa",
+            site="CGO",
+            instrument_name="medusa",
+        )
+
+
+def test_read_invalid_instrument_raises(
+    data_path_no_instrument, precision_path_no_instrument
+):
+    gc = GC()
+
+    with pytest.raises(ValueError):
+        gc.read_file(
+            data_filepath=data_path_no_instrument,
+            precision_filepath=precision_path_no_instrument,
+            source_name="capegrim_medusa",
+            site="CGO",
+            instrument_name="fish",
+        )
+
+
+def test_read_valid_instrument_passed(
+    data_path_no_instrument, precision_path_no_instrument
+):
+    gc = GC()
+    data = gc.read_file(
+        data_filepath=data_path_no_instrument,
+        precision_filepath=precision_path_no_instrument,
+        source_name="capegrim_medusa",
+        site="CGO",
+        instrument_name="medusa",
+    )
+
+    assert sorted(list(data.keys())) == sorted(['CH4', 'CFC-12', 'N2O', 'CFC-11', 'CFC-113', 'CHCl3', 'CH3CCl3', 'CCl4'])
 
 
 def test_read_data(data_path, precision_path):
     # Capegrim
     site = "CGO"
     instrument = "GCMD"
-
-    data_path = Path(data_path)
-    precision_path = Path(precision_path)
 
     gc = GC()
     data = gc.read_data(
@@ -232,7 +257,7 @@ def test_split(data_path, precision_path):
 
     metadata = {"foo": "bar"}
 
-    gc = GC.load()
+    gc = GC()
 
     units = {}
     scale = {}
@@ -266,65 +291,3 @@ def test_split(data_path, precision_path):
     assert len(data) == 56
 
     assert sorted(list(data.keys()))[:10] == sorted_species
-
-
-def test_to_data(gc):
-    data = gc.to_data()
-
-    assert data["stored"] is True
-    assert data["creation_datetime"] == datetime_to_string(
-        datetime.datetime(1970, 1, 1)
-    )
-
-
-def test_from_data(gc):
-    data = gc.to_data()
-
-    epoch = datetime_to_datetime(datetime.datetime(1970, 1, 1, 1, 1))
-    data["creation_datetime"] = datetime_to_string(epoch)
-
-    random_data1 = uuid.uuid4()
-    random_data2 = uuid.uuid4()
-
-    test_hashes = {"test1": random_data1, "test2": random_data2}
-    test_datasources = {"datasource1": random_data1, "datasource2": random_data2}
-
-    data["file_hashes"] = test_hashes
-    data["datasource_names"] = test_datasources
-    data["datasource_uuids"] = test_datasources
-
-    gc_new = GC.from_data(data)
-
-    assert gc_new._stored is False
-    assert gc_new._creation_datetime == epoch
-    assert gc_new._datasource_names == test_datasources
-    assert gc_new._datasource_uuids == test_datasources
-    assert gc_new._file_hashes == test_hashes
-
-
-def test_save(gc):
-    bucket = get_local_bucket(empty=True)
-
-    gc.save()
-
-    prefix = ""
-    objs = get_object_names(bucket, prefix)
-
-    assert objs[0].split("/")[-1] == GC._uuid
-
-
-def test_load(gc):
-    gc.save()
-    gc_new = GC.load()
-
-    assert gc_new._stored is False
-    assert gc_new._creation_datetime == datetime_to_datetime(
-        datetime.datetime(1970, 1, 1)
-    )
-
-
-def test_exists(gc):
-    bucket = get_local_bucket()
-    gc.save(bucket=bucket)
-
-    assert GC.exists(bucket=bucket) is True

@@ -7,14 +7,6 @@ def hugs_functions(function, args):
         Returns:
             dict: Dictionary of results
     """
-    if function == "hello":
-        from hugs_service.hello import hello
-
-        return hello(args)
-    if function == "goodbye":
-        from hugs_service.goodbye import goodbye
-
-        return goodbye(args)
     if function == "listobjects":
         from hugs_service.listobjects import listobjects
 
@@ -47,6 +39,14 @@ def hugs_functions(function, args):
         from hugs_service.jobrunner import job_runner
 
         return job_runner(args)
+    if function == "rank_sources":
+        from hugs_service.rank_sources import rank_sources
+
+        return rank_sources(args)
+    if function == "get_sources":
+        from hugs_service.get_sources import get_sources
+
+        return get_sources(args)
     else:
         from admin.handler import MissingFunctionError
 

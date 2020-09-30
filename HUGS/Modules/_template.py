@@ -35,6 +35,9 @@ class TEMPLATE(BaseModule):
         self._template_params = {}
         # Sampling period of TEMPLATE data in seconds
         self._sampling_period = 60
+        # Store the ranking data for all CRDS measurements
+        # Keyed by UUID
+        self._rank_data = defaultdict(dict)
 
     def to_data(self):
         """ Return a JSON-serialisable dictionary of object
@@ -51,6 +54,7 @@ class TEMPLATE(BaseModule):
         data["datasource_uuids"] = self._datasource_uuids
         data["datasource_names"] = self._datasource_names
         data["file_hashes"] = self._file_hashes
+        data["rank_data"] = self._rank_data
 
         return data
 
@@ -62,8 +66,7 @@ class TEMPLATE(BaseModule):
             Returns:
                 None
         """
-        from Acquire.ObjectStore import ObjectStore
-        from HUGS.ObjectStore import get_bucket
+        from HUGS.ObjectStore import get_bucket, set_object_from_json
 
         if bucket is None:
             bucket = get_bucket()
@@ -71,7 +74,7 @@ class TEMPLATE(BaseModule):
         key = f"{TEMPLATE._root}/uuid/{TEMPLATE._uuid}"
 
         self._stored = True
-        ObjectStore.set_object_from_json(bucket=bucket, key=key, data=self.to_data())
+        set_object_from_json(bucket=bucket, key=key, data=self.to_data())
 
     @staticmethod
     def read_folder(folder_path, extension=".dat", recursive=True):
@@ -207,3 +210,30 @@ class TEMPLATE(BaseModule):
             }
 
         return combined_data
+
+    def assign_attributes(self, data, site, network=None):
+        """ Assign attributes to the data we've processed
+
+            Args:
+                combined_data (dict): Dictionary containing data, metadata and attributes
+            Returns:
+                dict: Dictionary of combined data with correct attributes assigned to Datasets
+        """
+        from HUGS.Processing import get_attributes
+
+        for species in data:
+            site_attributes = data[species]["attributes"]
+
+            # TODO - save Dataset attributes to metadata for storage within Datasource
+            data[species]["data"] = get_attributes(
+                ds=data[species]["data"],
+                species=species,
+                site=site,
+                network=network,
+                global_attributes=site_attributes,
+                sampling_period=self._sampling_period,
+            )
+
+        return data
+
+    

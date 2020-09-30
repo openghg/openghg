@@ -2,12 +2,8 @@
     the object store
 
 """
-from enum import Enum as _Enum
-
 __all__ = [
     "get_data",
-    "in_daterange",
-    "key_to_daterange",
     "daterange_to_string",
     "daterange_to_string",
     "search",
@@ -16,38 +12,25 @@ __all__ = [
 ]
 
 
-class RootPaths(_Enum):
-    DATA = "data"
-    DATASOURCE = "datasource"
-    INSTRUMENT = "instrument"
-    SITE = "site"
-    NETWORK = "network"
-
-
-class DataType(_Enum):
-    CRDS = "CRDS"
-    GC = "GC"
-    FOOTPRINT = "FOOTPRINT"
-    NOAA = "NOAA"
-    EUROCOM = "EUROCOM"
-    THAMESBARRIER = "THAMESBARRIER"
-    ICOS = "ICOS"
-
-
 def search(
-    search_terms,
     locations,
-    data_type,
-    require_all=False,
+    species=None,
+    inlet=None,
+    instrument=None,
+    find_all=True,
     start_datetime=None,
     end_datetime=None,
 ):
     """ Search for gas data (optionally within a daterange)
 
+        TODO - review this function - feel like it can be tidied and simplified
+
         Args:
-            search_terms (string or list): Terms to search for in Datasources
-            locations (string or list): Where to search for the terms in search_terms
-            require_all (bool, default=False): Require all search terms to be satisfied
+            species (str or list): Terms to search for in Datasources
+            locations (str or list): Where to search for the terms in species
+            inlet (str, default=None): Inlet height such as 100m
+            instrument (str, default=None): Instrument name such as picarro
+            find_all (bool, default=True): Require all search terms to be satisfied
             start_datetime (datetime, default=None): Start datetime for search
             If None a start datetime of UNIX epoch (1970-01-01) is set
             end_datetime (datetime, default=None): End datetime for search
@@ -55,217 +38,167 @@ def search(
         Returns:
             dict: List of keys of Datasources matching the search parameters
     """
-    from HUGS.ObjectStore import get_object_names as _get_object_names
-    from HUGS.ObjectStore import get_bucket as _get_bucket
-    from HUGS.Modules import Datasource as _Datasource
-    from HUGS.Util import get_datetime_epoch as _get_datetime_epoch
-    from HUGS.Util import get_datetime_now as _get_datetime_now
-    from HUGS.Util import load_object
-    from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+    from collections import defaultdict
+    from json import load
+    from HUGS.Modules import Datasource, ObsSurface
+    from HUGS.Util import (get_datetime_now, get_datetime_epoch, create_daterange_str, 
+                            timestamp_tzaware, get_datapath)
 
-    from collections import defaultdict as _defaultdict
-
-    if start_datetime is None:
-        start_datetime = _get_datetime_epoch()
-    if end_datetime is None:
-        end_datetime = _get_datetime_now()
-
-    # TODO - for now the latest dates people can access is the end of 2017
-    # max_datetime = _datetime_to_datetime(datetime(2017, 12, 31))
-    # if end_datetime > max_datetime:
-    #     end_datetime = max_datetime
-
-    # Ensure passed datetimes are timezone aware
-    start_datetime = _datetime_to_datetime(start_datetime)
-    end_datetime = _datetime_to_datetime(end_datetime)
-
-    bucket = _get_bucket()
-
-    # TODO - method to load different types in here for search
-    # Maybe just an if else for now?
-    data_type = DataType[data_type.upper()].name
-    # Get the objects that contain the Datasources
-    # object_list = _get_object_names(bucket=bucket, prefix=search_prefix)
-    # object_uuid = object_list[0].split("/")[-1]
-
-    # if len(object_list) == 0:
-    #     raise ValueError("No " + data_type.name + " object found.")
-    # if len(object_list) > 1:
-    #     raise ValueError("More than one " + data_type.name + " object found.")
-
-    # Load the CRDS/GC/Footprint etc object we need to read the data
-    data_obj = load_object(class_name=data_type)
-    # Get the UUIDs of the Datasources associated with the object
-    datasource_uuids = data_obj.datasources()
-
-    # First check if the uuids we have are in the list of known and valid Datasources
-    # This could be an object has a quick lookup data structure so we don't need to load
-    # in the datasources and search their keys
-    # TODO - implement lookup tables?
-    datasources = [
-        _Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids
-    ]
-
-    if not isinstance(search_terms, list):
-        search_terms = [search_terms]
+    # if species is not None and not isinstance(species, list):
+    if not isinstance(species, list):
+        species = [species]
 
     if not isinstance(locations, list):
         locations = [locations]
 
-    # If all search terms are required just use a single composite key of all search terms
-    if require_all:
-        single_key = "_".join(sorted(search_terms))
+    # Allow passing of location names instead of codes
+    site_codes_json = get_datapath(filename="site_codes.json")
+    with open(site_codes_json, "r") as f:
+        d = load(f)
+        site_codes = d["name_code"]
 
-    # if data_type == "GC" or data_type == "CRDS":
-    # First we find the Datasources from locations we want to narrow down our search
-    location_sources = _defaultdict(list)
-    # If we have locations to search
-    if locations:
-        for location in locations:
-            for datasource in datasources:
-                if datasource.search_metadata(location):
-                    location_sources[location].append(datasource)
-    # If we have an empty list of locations, search everywhere
-    # TODO - this feels clunky
-    else:
-        for datasource in datasources:
-            location_sources[datasource.site()].append(datasource)
-
-    # elif data_type == "FOOTPRINT":
-    #     footprints = []
-    #     search_fn = datasource.search_metadata
-    #     footprints = []
-    #     for datasource in datasources:
-    #         if datasource.search_metadata(data_type.lower()):
-    # Return the metadata for each datasource with the results?
-    # Display the additional metadata with each item
-    # How to then differentiate between the
-    # Take the values of the metadata keys and add them to the returned key to allow differentiation
-    # between returned keys? This feels clunky but should be OK for now
-    # Will get too long with lots of metadata
-
-    # Instead of adding the values to the key retur the metadata dict?
-    # Then we can parse that in the UI
-    # OR just update the UI for selcetion of the type of data before searching and then
-    # it creates a dictionary of search terms that can be parsed more easily by this function?
-    # For now we can differentiate between inlets at least
-
-    # Next we search these keys for the search terms we require
-    # keys = _defaultdict(dict)
-    results = _defaultdict(list)
-    # TODO - is there a way of tidying this up?
-    # If we have search terms
-    # Here we could create a dictionary keyed by inlet, location, height etc and the height we require
-
-    # Return the metadata for each datasource as an extension to the key?
-    if data_type != "FOOTPRINT":
-        if search_terms:
-            for search_term in search_terms:
-                for location in location_sources:
-                    for datasource in location_sources[location]:
-                        if datasource.search_metadata(search_term):
-                            # Get the latest version string from the Datasource
-                            version_str = datasource.latest_version()
-                            uuid = datasource.uuid()
-
-                            prefix = f"data/uuid/{uuid}/{version_str}"
-                            data_list = _get_object_names(bucket=bucket, prefix=prefix)
-
-                            # Get the Dataframes that are within the required date range
-                            in_date = [
-                                d
-                                for d in data_list
-                                if in_daterange(d, start_datetime, end_datetime)
-                            ]
-
-                            # Could use a readablekey_shortuuid keying in the dict to make sure there isn't
-                            # any overwriting of results
-
-                            # Add the values of the metadata dictionary to the key for differentiation
-                            key_addition = "_".join(
-                                [
-                                    v
-                                    for k, v in datasource.metadata().items()
-                                    if k == "inlet" or k == "height"
-                                ]
-                            )
-
-                            if require_all:
-                                search_key = f"{location}_{single_key}_{key_addition}"
-                                remaining_terms = [
-                                    datasource.search_metadata(term)
-                                    for term in search_terms
-                                    if term != search_term
-                                ]
-
-                                # TODO - check the behaviour of this
-                                if all(remaining_terms):
-                                    results = append_keys(
-                                        results=results,
-                                        search_key=search_key,
-                                        keys=in_date,
-                                    )
-                                    # Add the metadata from the Datasource to the results
-                                    results[search_key][
-                                        "metadata"
-                                    ] = datasource.metadata()
-                                    # results[search_key].extend(in_date)
-                            else:
-                                search_key = f"{location}_{search_term}_{key_addition}"
-                                results = append_keys(
-                                    results=results, search_key=search_key, keys=in_date
-                                )
-                                results[search_key]["metadata"] = datasource.metadata()
-                                # results[search_key].extend(in_date)
-        # If we don't have any search terms, return everything that's in the correct daterange
+    updated_locations = []
+    # Check locations, if they're longer than three letters do a lookup
+    for loc in locations:
+        if len(loc) > 3:
+            try:
+                site_code = site_codes[loc.lower()]
+                updated_locations.append(site_code)
+            except KeyError:
+                raise ValueError(f"Invalid site {loc} passed")
         else:
-            for location in location_sources:
-                for datasource in location_sources[location]:
-                    prefix = "data/uuid/%s" % datasource.uuid()
-                    data_list = _get_object_names(bucket=bucket, prefix=prefix)
-                    in_date = [
-                        d
-                        for d in data_list
-                        if in_daterange(d, start_datetime, end_datetime)
-                    ]
+            updated_locations.append(loc)
 
-                    key_addition = "_".join(
-                        [
-                            v
-                            for k, v in datasource.metadata().items()
-                            if k == "inlet" or k == "height"
-                        ]
-                    )
+    locations = updated_locations
 
-                    # TODO - currently adding in the species here, is this OK?
-                    # key_addition = "_".join(datasource.metadata().values())
-                    search_key = f"{location}_{datasource.species()}_{key_addition}"
-                    results = append_keys(
-                        results=results, search_key=search_key, keys=in_date
-                    )
-                    results[search_key]["metadata"] = datasource.metadata()
-                    # results[search_key].extend(in_date)
-    else:
-        # For now get all footprints
+    if start_datetime is None:
+        start_datetime = get_datetime_epoch()
+    if end_datetime is None:
+        end_datetime = get_datetime_now()
+
+    # Ensure passed datetimes are timezone aware
+    start_datetime = timestamp_tzaware(start_datetime)
+    end_datetime = timestamp_tzaware(end_datetime)
+
+    # Here we want to load in the ObsSurface module for now
+    obs = ObsSurface.load()
+    datasource_uuids = obs.datasources()
+
+    # Shallow load the Datasources so we can search their metadata
+    datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
+
+    # First we find the Datasources from locations we want to narrow down our search
+    location_sources = defaultdict(list)
+    # If we have locations to search
+    for location in locations:
         for datasource in datasources:
-            if datasource.data_type() == "footprint":
-                search_key = single_key
-                prefix = "data/uuid/%s" % datasource.uuid()
-                data_list = _get_object_names(bucket=bucket, prefix=prefix)
-                results = append_keys(
-                    results=results, search_key=search_key, keys=data_list
-                )
-                results[search_key]["metadata"] = datasource.metadata()
-                # results["footprints"].extend(data_list)
-    # else:
-    #     raise NotImplementedError("Only time series and footprint data can be searched for currently")
+            if datasource.search_metadata(search_terms=location):
+                location_sources[location].append(datasource)
 
-    # Here we can add the daterange key to the search results
-    # TODO - can this just be taken more easily from the Datasource?
-    for key in results:
-        start, end = strip_dates_keys(keys=results[key]["keys"])
-        results[key]["start_date"] = start
-        results[key]["end_date"] = end
+    # This is returned to the caller
+    results = defaultdict(dict)
+
+    # With both inlet and instrument specified we bypass the ranking system
+    if inlet is not None and instrument is not None:
+        for site, sources in location_sources.items():
+            for sp in species:
+                for datasource in sources:
+                    # Just match the single source here
+                    if datasource.search_metadata(search_terms=[sp, site, inlet, instrument], find_all=True):
+                        daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
+                        # Get the data keys for the data in the matching daterange
+                        in_date = datasource.in_daterange(daterange=daterange_str)
+
+                        data_date_str = strip_dates_keys(in_date)
+
+                        key = f"{sp}_{site}_{inlet}_{instrument}".lower()
+
+                        # Find the keys that match the correct data
+                        results[key]["keys"] = {data_date_str: in_date}
+                        results[key]["metadata"] = datasource.metadata()
+
+        return results
+
+    for location, sources in location_sources.items():
+        # Loop over and look for the species
+        species_data = defaultdict(list)
+        for datasource in sources:
+            for s in species:
+                search_terms = [x for x in (s, location, inlet, instrument) if x is not None]
+                # Check the species and the daterange
+                if datasource.search_metadata(search_terms=search_terms, find_all=True):
+                    species_data[s].append(datasource)
+
+        # For each location we want to find the highest ranking sources for the selected species
+        for sp, sources in species_data.items():
+            ranked_sources = {}
+
+            # How to return all the sources if they're all 0?
+            for source in sources:
+                rank_data = source.get_rank(start_date=start_datetime, end_date=end_datetime)
+
+                # With no rank set we get an empty dictionary
+                if not rank_data:
+                    ranked_sources[0] = 0
+                    continue
+
+                # Just get the highest ranked datasources and return them
+                # Find the highest ranked data from this site
+                highest_rank = sorted(rank_data.keys())[-1]
+
+                if highest_rank == 0:
+                    ranked_sources[0] = 0
+                    continue
+
+                ranked_sources[source.uuid()] = {"rank": highest_rank, "dateranges": rank_data[highest_rank], "source": source}
+
+            # If it's all zeroes we want to return all sources
+            if list(ranked_sources) == [0]:
+                for source in sources:
+                    key = f"{source.species()}_{source.site()}_{source.inlet()}_{source.instrument()}".lower()
+
+                    daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
+                    data_keys = source.in_daterange(daterange=daterange_str)
+
+                    if not data_keys:
+                        continue
+
+                    # Get a key that covers the daterange of the actual data and not from epoch to now
+                    # if no start/end datetimes are passed
+                    data_date_str = strip_dates_keys(data_keys)
+
+                    results[key]["keys"] = {data_date_str: data_keys}
+                    results[key]["metadata"] = source.metadata()
+
+                continue
+            else:
+                # TODO - find a cleaner way of doing this
+                # We might have a zero rank, delete it as we have higher ranked data
+                try:
+                    del ranked_sources[0]
+                except KeyError:
+                    pass
+
+            # Otherwise iterate over the sources that are ranked and extract the keys
+            for uid in ranked_sources:
+                source = ranked_sources[uid]["source"]
+                source_dateranges = ranked_sources[uid]["dateranges"]
+
+                key = f"{source.species()}_{source.site()}_{source.inlet()}_{source.instrument()}".lower()
+
+                data_keys = {}
+                # Get the keys for each daterange
+                for d in source_dateranges:
+                    keys_in_date = source.in_daterange(daterange=d)
+                    d = d.replace("+00:00", "")
+                    if keys_in_date:
+                        data_keys[d] = keys_in_date
+
+                if not data_keys:
+                    continue
+
+                results[key]["keys"] = data_keys
+                results[key]["metadata"] = source.metadata()
 
     return results
 
@@ -274,25 +207,23 @@ def strip_dates_keys(keys):
     """ Strips the date from a key, could this data just be read from JSON instead?
         Read dates covered from the Datasource?
 
-        TODO - check if this is necessary - Datasource instead?
-
         Args:
             keys (list): List of keys containing data
-            data/uuid/<uuid>/2014-01-30T10:52:30_2014-01-30T14:20:30'
+            data/uuid/<uuid>/<version>/2019-03-01-04:14:30+00:00_2019-05-31-20:44:30+00:00
         Returns:
-            tuple (str,str): Start, end dates
+            str: Daterange string
     """
     if not isinstance(keys, list):
         keys = [keys]
 
-    keys = sorted(keys)
+    keys.sort()
     start_key = keys[0]
     end_key = keys[-1]
     # Get the first and last dates from the keys in the search results
-    start_date = start_key.split("/")[-1].split("_")[0].replace("T", " ")
-    end_date = end_key.split("/")[-1].split("_")[-1].replace("T", " ")
+    start_date = start_key.split("/")[-1].split("_")[0].replace("+00:00", "")
+    end_date = end_key.split("/")[-1].split("_")[-1].replace("+00:00", "")
 
-    return start_date, end_date
+    return "_".join([start_date, end_date])
 
 
 def append_keys(results, search_key, keys):
@@ -346,7 +277,7 @@ def lookup_gas_datasources(lookup_dict, gas_data, source_name, source_id):
 def lookup_footprint_datasources(lookup_dict, source_name, source_id=None):
     """ Check if we've had data from this Datasource before
 
-        TODO - This seems like a waste - combine this with lookup_gas_datasources ?
+        TODO - This seems like a waste - combine this with lookup_gasDatasources ?
 
         Args:
             lookup_dict (dict): Dictionary to search for exisiting Datasources
@@ -370,54 +301,13 @@ def get_data(key_list):
         Bypass loading the Datasource? Get both then we have metadata?
 
     """
-    from HUGS.Modules import Datasource as _Datasource
+    from HUGS.Modules import Datasource
 
     # Get the data
     # This will return a list of lists of data
     # Maybe want to do some preprocessing on this data before it comes raw out of the object store?
     # We only want the data in the correct daterange
-    return [_Datasource.load(key=key)._data for key in key_list]
-
-
-def in_daterange(key, start_search, end_search):
-    """ Does this key contain data in the daterange we want?
-
-        Args:
-            key (str): Key for data
-            daterange (tuple (datetime, datetime)): Daterange as start and end datetime objects
-        Return:
-            bool: True if key within daterange
-    """
-    start_key, end_key = key_to_daterange(key)
-
-    if start_key >= start_search and end_key <= end_search:
-        return True
-    else:
-        return False
-
-
-def key_to_daterange(key):
-    """ Takes a dated key and returns two datetimes for the start and
-        end datetimes for the data
-
-        Args:
-            key (str): Key for data in the object store
-        Returns:
-            tuple (datetime, datetime): Datetimes for start and end of data
-
-    """
-    from Acquire.ObjectStore import string_to_datetime as _string_to_datetime
-
-    end_key = key.split("/")[-1]
-    dates = end_key.split("_")
-
-    if len(dates) > 2:
-        raise ValueError("Invalid date string")
-
-    start = _string_to_datetime(dates[0])
-    end = _string_to_datetime(dates[1])
-
-    return start, end
+    return [Datasource.load(key=key)._data for key in key_list]
 
 
 def daterange_to_string(start, end):
@@ -455,12 +345,12 @@ def daterange_to_string(start, end):
 
 #     """
 #     from Acquire.ObjectStore import ObjectStore as _ObjectStore
-#     from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+#     from Acquire.ObjectStore import datetime_to_datetime as datetime_to_datetime
 #     from objectstore._hugs_objstore import get_dataframe as _get_dataframe
 #     from pandas import date_range as _pd_daterange
 
-#     datetime_begin = _datetime_to_datetime(datetime_begin)
-#     datetime_end = _datetime_to_datetime(datetime_end)
+#     datetime_begin = datetime_to_datetime(datetime_begin)
+#     datetime_end = datetime_to_datetime(datetime_end)
 
 #     daterange = _pd_daterange(datetime_begin, datetime_end)
 

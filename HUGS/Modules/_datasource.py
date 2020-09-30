@@ -35,6 +35,8 @@ class Datasource:
         # Currently unused
         self._latest_version = None
         self._versions = {}
+        # A rank of -1 is unset, 1 is a primary source, 2 secondary
+        self._rank = defaultdict(list)
 
     def start_datetime(self):
         """ Returns the starting datetime for the data in this Datasource
@@ -194,9 +196,7 @@ class Datasource:
             to_keep = []
             for current_daterange in self._data:
                 for new_daterange in additional_data:
-                    if not date_overlap(
-                        daterange_a=current_daterange, daterange_b=new_daterange
-                    ):
+                    if not date_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
                         to_keep.append(current_daterange)
 
             updated_data = {}
@@ -281,10 +281,10 @@ class Datasource:
         """
         from HUGS.ObjectStore import exists, get_bucket
 
-        if not bucket:
+        if bucket is None:
             bucket = get_bucket()
 
-        key = "%s/uuid/%s" % (Datasource._datasource_root, datasource_id)
+        key = f"{Datasource._datasource_root}/uuid/{datasource_id}"
 
         return exists(bucket=bucket, key=key)
 
@@ -312,6 +312,7 @@ class Datasource:
         data["data_keys"] = self._data_keys
         data["data_type"] = self._data_type
         data["latest_version"] = self._latest_version
+        data["rank"] = self._rank
 
         return data
 
@@ -325,9 +326,9 @@ class Datasource:
             Returns:
                 Pandas.Dataframe: Dataframe from stored HDF file
         """
-        from HUGS.ObjectStore import get_dated_object
+        from HUGS.ObjectStore import get_object
 
-        data = get_dated_object(bucket, key)
+        data = get_object(bucket, key)
 
         return Datasource.hdf_to_dataframe(data)
 
@@ -347,12 +348,12 @@ class Datasource:
             Returns:
                 xarray.Dataset: Dataset from NetCDF file
         """
-        from Acquire.ObjectStore import ObjectStore
+        from HUGS.ObjectStore import get_object
         from xarray import load_dataset
         import tempfile
         from pathlib import Path
 
-        data = ObjectStore.get_object(bucket, key)
+        data = get_object(bucket, key)
 
         # TODO - is there a cleaner way of doing this?
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -455,9 +456,7 @@ class Datasource:
                 Datasource: Datasource created from JSON
         """
         from Acquire.ObjectStore import string_to_datetime
-
-        if not data:
-            return Datasource()
+        from collections import defaultdict
 
         d = Datasource()
         d._uuid = data["UUID"]
@@ -469,6 +468,7 @@ class Datasource:
         d._data = {}
         d._data_type = data["data_type"]
         d._latest_version = data["latest_version"]
+        d._rank = defaultdict(list, data["rank"])
 
         if d._stored and not shallow:
             for date_key in d._data_keys["latest"]["keys"]:
@@ -483,18 +483,17 @@ class Datasource:
         """ Save this Datasource object as JSON to the object store
 
             Args:
-                bucket (dict): Bucket to hold data
+                bucket (str, default=None): Bucket to hold data
             Returns:
                 None
         """
         import tempfile
-        from Acquire.ObjectStore import (
-            get_datetime_now_to_string,
-            ObjectStore,
-        )
-        from HUGS.ObjectStore import get_bucket
+        from copy import deepcopy
 
-        if not bucket:
+        from Acquire.ObjectStore import get_datetime_now_to_string
+        from HUGS.ObjectStore import get_bucket, set_object_from_file, set_object_from_json
+
+        if bucket is None:
             bucket = get_bucket()
 
         if self._data:
@@ -519,11 +518,11 @@ class Datasource:
                 with tempfile.TemporaryDirectory() as tmpdir:
                     filepath = f"{tmpdir}/temp.nc"
                     data.to_netcdf(filepath)
-                    ObjectStore.set_object_from_file(bucket, data_key, filepath)
+                    set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
 
             # Copy the last version
             if "latest" in self._data_keys:
-                self._data_keys[version_str] = self._data_keys["latest"].copy()
+                self._data_keys[version_str] = deepcopy(self._data_keys["latest"])
 
             # Save the new keys and create a timestamp
             self._data_keys[version_str]["keys"] = new_keys
@@ -536,9 +535,7 @@ class Datasource:
         self._stored = True
         datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
-        ObjectStore.set_object_from_json(
-            bucket=bucket, key=datasource_key, data=self.to_data()
-        )
+        set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
 
     @staticmethod
     def load(bucket=None, uuid=None, key=None, shallow=False):
@@ -556,71 +553,20 @@ class Datasource:
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from HUGS.ObjectStore import get_bucket, get_object_json
+        from HUGS.ObjectStore import get_bucket, get_object_from_json
 
-        if not uuid and not key:
+        if uuid is None and key is None:
             raise ValueError("Both uuid and key cannot be None")
 
-        if not bucket:
+        if bucket is None:
             bucket = get_bucket()
 
-        if not key:
-            key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
+        if key is None:
+            key = f"{Datasource._datasource_root}/uuid/{uuid}"
 
-        data = get_object_json(bucket=bucket, key=key)
+        data = get_object_from_json(bucket=bucket, key=key)
+
         return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
-
-    @staticmethod
-    def _get_name_from_uid(bucket, uuid):
-        """ Returns the name of the Datasource associated with
-            the passed UID
-
-            Args:
-                bucket (dict): Bucket holding data
-                name (str): Name to search
-            Returns:
-                str: UUID for the Datasource
-        """
-        from HUGS.ObjectStore import get_dated_object_json
-
-        key = "%s/uuid/%s" % (Datasource._datasource_root, uuid)
-        data = get_dated_object_json(bucket=bucket, key=key)
-
-        return data["name"]
-
-    @staticmethod
-    def _get_uid_from_name(bucket, name):
-        """ Returns the UUID associated with this named Datasource
-
-            Args:
-                bucket (dict): Bucket holding data
-                name (str): Name to search
-            Returns:
-                str: UUID for the Datasource
-        """
-        from Acquire.ObjectStore import ObjectStore, string_to_encoded
-
-        encoded_name = string_to_encoded(name)
-        prefix = "%s/name/%s" % (Datasource._datasource_root, encoded_name)
-        uuid = ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
-
-        if len(uuid) > 1:
-            raise ValueError(
-                "There should only be one Datasource associated with this name"
-            )
-
-        return uuid[0].split("/")[-1]
-
-    def version_data(self):
-        """ Check the version of the data passed and and check what we want
-            to do.
-
-            1. Update current data
-            2. Create a new "current" record and push the current back to v(n) where n is the number
-            of times data has been added to this Datasource
-            3. Clear data - this seems a bit dangerous to add, could just delete the whole datasource instead?
-        """
-        raise NotImplementedError()
 
     def data(self):
         """ Get the data stored in this Datasource
@@ -630,39 +576,24 @@ class Datasource:
         """
         return self._data
 
-    def sort_data(self):
-        """ Sorts the data in the data list
-
-            TODO - Remove ? this should be redundant now
-
-            Returns:
-                None
-        """
-        raise NotImplementedError()
-        # from operator import itemgetter
-        # # Data list elements contain a tuple of
-        # # (data,(start_datetime, end_datetime))
-        # # Could also check to make sure we don't have overlapping dateranges?
-        # self._data = sorted(self._data, key=itemgetter(1,0))
-
     def update_daterange(self):
         """ Update the dates stored by this Datasource
 
-            TODO - cleaner way of doing this?
-
             Returns:
                 None
         """
-        from pandas import Timestamp
-
-        if self._data:
+        # If we've only shallow loaded (without the data) 
+        # this Datasource we use the latest data keys
+        if not self._data:
+            keys = sorted(self._data_keys["latest"]["keys"])
+        else:
             keys = sorted(self._data.keys())
 
-            start = keys[0].split("_")[0]
-            end = keys[-1].split("_")[1]
+        start, _ = self.split_datrange_str(daterange_str=keys[0])
+        _, end = self.split_datrange_str(daterange_str=keys[-1])
 
-            self._start_datetime = Timestamp(start, tz="UTC")
-            self._end_datetime = Timestamp(end, tz="UTC")
+        self._start_datetime = start
+        self._end_datetime = end
 
     def daterange(self):
         """ Get the daterange the data in this Datasource covers as tuple
@@ -671,7 +602,7 @@ class Datasource:
             Returns:
                 tuple (datetime, datetime): Start, end datetimes
         """
-        if not self._start_datetime and self._data:
+        if self._start_datetime is None and self._data is not None:
             self.update_daterange()
 
         return self._start_datetime, self._end_datetime
@@ -688,21 +619,73 @@ class Datasource:
         start, end = self.daterange()
         return "".join([datetime_to_string(start), "_", datetime_to_string(end)])
 
-    def search_metadata(self, search_term):
+    def search_metadata(self, search_terms, find_all=False):
         """ Search the values of the metadata of this Datasource for search_term
 
             Args:
-                search_term (str): String to search for in metadata
+                search_term (str, list): String or list of strings to search for in metadata
+                find_all (bool, default=False): If True all search terms must be matched
             Returns:
                 bool: True if found else False
         """
-        search_term = search_term.lower()
+        if not isinstance(search_terms, list):
+            search_terms = [search_terms]
 
-        for v in self._metadata.values():
-            if v == search_term:
-                return True
+        search_terms = [s.lower() for s in search_terms]    
 
-        return False
+        results = []
+        for term in search_terms:
+            for v in self._metadata.values():
+                if v == term:
+                    results.append(True)
+
+        # If we want all the terms to match these should be the same length
+        if find_all:
+            return len(search_terms) == len(results)
+        # Otherwise there should be at least a True in results
+        else:
+            return True in results
+
+    def in_daterange(self, daterange):
+        """ Return the keys for data within the specified daterange
+
+            Args:
+                daterange (str): Daterange string of the form
+                2019-01-01T00:00:00_2019-12-31T00:00:00
+            Return:
+                list: List of keys to data
+        """
+        from pandas import Timestamp
+
+        split_daterange = daterange.split("_")
+
+        if len(split_daterange) > 2:
+            # raise DateError("")
+            raise TypeError("Invalid daterange string passed.")
+
+        start_date = Timestamp(split_daterange[0], tz="UTC").to_pydatetime()
+        end_date = Timestamp(split_daterange[1], tz="UTC").to_pydatetime()
+
+        data_keys = self._data_keys["latest"]["keys"]
+
+        in_date = []
+        for key in data_keys:
+
+            end_key = key.split("/")[-1]
+            dates = end_key.split("_")
+
+            if len(dates) > 2:
+                raise ValueError("Invalid date string")
+
+            start_key = Timestamp(dates[0], tz="UTC")
+            end_key = Timestamp(dates[1], tz="UTC")
+
+            # For this logic see
+            # https://stackoverflow.com/a/325964
+            if (start_key <= end_date) and (end_key >= start_date):
+                in_date.append(data_keys[key])
+
+        return in_date
 
     def species(self):
         """ Returns the species of this Datasource
@@ -713,18 +696,23 @@ class Datasource:
         return self._metadata["species"]
 
     def inlet(self):
-        """ Returns the inlet of this Datasource
+        """ Returns the inlet height of this Datasource
 
             Returns:
-                str: Inlet of this Datasource
+                str: Inlet height of this Datasource
         """
         return self._metadata["inlet"]
 
     def site(self):
-        if "site" in self._metadata:
-            return self._metadata["site"]
-        else:
-            return "NA"
+        """ Return the instrument 
+
+            Returns:
+                str: Instrument name
+        """
+        return self._metadata.get("site", "NA")
+
+    def instrument(self):
+        return self._metadata.get("instrument", "NA")
 
     def uuid(self):
         """ Return the UUID of this object
@@ -752,6 +740,168 @@ class Datasource:
         """
         self._uuid = uid
 
+    def rank(self):
+        """ Return the rank of this Datasource 
+
+            Where a value of 0 means no rank, 1 the highest
+
+            Returns:
+                dict: Dictionary of rank: dateranges
+        """
+        if not self._rank:
+            return 0
+
+        return self._rank
+
+    def set_rank(self, rank, daterange):
+        """ Set the rank of this Datsource. This allows users to select
+            the best data for a specific species at a site. By default
+            a Datasource is unranked with a value of 0. The highest rank is 1 and the lowest 10.
+
+            TODO - add a check to ensure multiple ranks aren't set for the same daterange
+
+            Args:   
+                rank (int): Rank number between 0 and 10.
+                daterange (list): List of daterange strings such as 2019-01-01T00:00:00_2019-12-31T00:00:00
+            Returns:
+                None
+        """
+        if not 0 <= int(rank) <= 10:
+            raise TypeError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
+
+        if not isinstance(daterange, list):
+            daterange = [daterange]
+
+        try:
+            self._rank[rank].extend(daterange)
+            self._rank[rank] = self.combine_dateranges(self._rank[rank])
+        except KeyError:
+            self._rank[rank] = daterange
+
+    def combine_dateranges(self, dateranges):
+        """ Checks a list of daterange strings for overlapping and combines
+            those that do.
+
+            Note : this function expects daterange strings in the form
+            2019-01-01T00:00:00_2019-12-31T00:00:00
+
+            Args:
+                dateranges (list): List of strings
+            Returns:
+                list: List of dateranges with overlapping ranges combined
+        """
+        from itertools import tee
+        from collections import defaultdict
+        from HUGS.Util import daterange_from_str, daterange_to_str
+
+        # Ensure there are no duplciates
+        dateranges = list(set(dateranges))
+        # We can't combine a single daterange
+        if len(dateranges) < 2:
+            return dateranges
+
+        dateranges.sort()
+
+        daterange_objects = [daterange_from_str(x) for x in dateranges]
+
+        def pairwise(iterable):
+            a, b = tee(iterable)
+            next(b, None)
+            return zip(a, b)
+
+        # We want lists of dateranges to combine
+        groups = defaultdict(list)
+        # Each group contains a number of dateranges that overlap
+        group_n = 0
+        # Do a pairwise comparison
+        # "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+        for a, b in pairwise(daterange_objects):
+            if len(a.intersection(b)) > 0:
+                groups[group_n].append(a)
+                groups[group_n].append(b)
+            else:
+                # If the first pair don't match we want to keep both but
+                # have them in separate groups
+                if group_n == 0:
+                    groups[group_n].append(a)
+                    group_n += 1
+                    groups[group_n].append(b)
+                    continue
+
+                # Otherwise increment the group number and just keep the second of the pair
+                # The first of the pair was a previous second so will have been saved in the
+                # last iteration
+                group_n += 1
+                groups[group_n].append(b)
+
+        # Now we need to combine each group into a single daterange
+        combined_dateranges = []
+        for group_number, daterange_list in groups.items():
+            combined = daterange_list[0].union_many(daterange_list[1:])
+            combined_dateranges.append(combined)
+
+        # Conver the dateranges backt to strings for storing
+        combined_dateranges = [daterange_to_str(x) for x in combined_dateranges]
+
+        return combined_dateranges
+
+    def split_datrange_str(self, daterange_str):
+        """ Split a daterange string to the component start and end
+            Timestamps
+
+            Args:
+                daterange_str (str): Daterange string of the form
+
+                2019-01-01T00:00:00_2019-12-31T00:00:00                
+            Returns:
+                tuple (Timestamp, Timestamp): Tuple of start, end pandas Timestamps
+        """
+        from pandas import Timestamp
+
+        split = daterange_str.split("_")
+
+        start = Timestamp(split[0], tz="UTC")
+        end = Timestamp(split[1], tz="UTC")
+
+        return start, end
+
+    def get_rank(self, start_date=None, end_date=None):
+        """ Get the ranks of data contained within Datasource for the passed daterange.
+
+            If no rank has been set zero is returned.
+            If no start or end date is passed all ranking data will be returned.
+
+            Args:
+                start_date (datetime, default=None)
+                end_date (datetime, default=None)
+            Returns:
+                dict: Dictionary of rank: daterange
+        """
+        from collections import defaultdict
+        from HUGS.Util import daterange_from_str, daterange_to_str, create_daterange
+        # Need to search ranks in descending order
+
+        # If we don't have a rank return 9
+        if not self._rank:
+            return {}
+
+        if start_date is None or end_date is None:
+            return self._rank
+
+        search_daterange = create_daterange(start=start_date, end=end_date)
+
+        results = defaultdict(list)
+
+        for rank, dateranges in self._rank.items():
+            for daterange_str in dateranges:
+                daterange = daterange_from_str(daterange_str)
+
+                intersection = search_daterange.intersection(daterange)
+                if len(intersection) > 0:
+                    results[rank].append(daterange_to_str(intersection))
+
+        return results
+
     def data_type(self):
         """ Returns the data type held by this Datasource
 
@@ -760,20 +910,29 @@ class Datasource:
         """
         return self._data_type
 
-    def data_keys(self):
+    def data_keys(self, version="latest", return_all=False):
         """ Returns the object store keys where data related
             to this Datasource is stored
 
+            Args:
+                version (str, default="latest"): Version of keys to get
+                return_all (bool, default=False): Return all data keys
             Returns:
-                dict: Dictionary keyed as key: daterange covered by key
+                list: List of data keys
         """
-        return self._data_keys
+        if return_all:
+            return self._data_keys
+
+        try:
+            keys = [v for k, v in self._data_keys[version]["keys"].items()]
+        except KeyError:
+            raise KeyError(f"Invalid version, valid versions {list(self._data_keys.keys())}")
+
+        return keys
 
     def versions(self):
         """ Return a summary of the versions of data stored for
             this Datasource
-
-            WIP
 
             Returns:
                 dict: Dictionary of versions

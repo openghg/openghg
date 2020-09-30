@@ -3,8 +3,6 @@
 """
 
 __all__ = [
-    "url_join",
-    "get_daterange_str",
     "get_datetime_epoch",
     "get_datetime_now",
     "get_datetime",
@@ -16,40 +14,14 @@ __all__ = [
     "date_overlap",
     "read_header",
     "load_hugs_json",
+    "valid_site",
+    "daterange_from_str",
+    "daterange_to_str",
+    "create_daterange_str",
+    "create_daterange",
+    "create_aligned_timestamp",
+    "is_number"
 ]
-
-
-def url_join(*args):
-    """ Joins given arguments into an filepath style key. Trailing but not leading slashes are
-        stripped for each argument.
-
-        Args:
-            *args (str): Strings to concatenate into a key to use
-            in the object store
-        Returns:
-            str: A url style key string with arguments separated by forward slashes
-    """
-    return "/".join(map(lambda x: str(x).rstrip("/"), args))
-
-
-def get_daterange_str(start, end):
-    """ Creates a string from the start and end datetime
-        objects. Used for production of the key
-        to store segmented data in the object store.
-
-        Args:
-            start (datetime): Start datetime
-            end (datetime): End datetime
-        Returns:
-            str: Daterange formatted as start_end
-            YYYYMMDD_YYYYMMDD
-            Example: 20190101_20190201
-    """
-
-    start_fmt = start.strftime("%Y%m%d")
-    end_fmt = end.strftime("%Y%m%d")
-
-    return start_fmt + "_" + end_fmt
 
 
 def get_datetime_epoch():
@@ -57,23 +29,22 @@ def get_datetime_epoch():
         1st of January 1970
 
         Returns:
-            datetime: Datetime object at epoch
+            pandas.Timestamp: Timestamp object at epoch
     """
-    import datetime as _datetime
+    from pandas import Timestamp
 
-    return _datetime.datetime(1970, 1, 1, 0, 0, tzinfo=_datetime.timezone.utc)
+    return Timestamp("1970-1-1 00:00:00", tz="UTC")
 
 
 def get_datetime_now():
-    """ Returns the UNIX epoch time
-        1st of January 1970
+    """ Returns a Timestamp for the current time
 
         Returns:
-            datetime: Datetime object at epoch
+            Timestamp: Timestamp now
     """
-    import datetime as _datetime
+    from pandas import Timestamp
 
-    return _datetime.datetime.utcnow().replace(tzinfo=_datetime.timezone.utc)
+    return Timestamp.now(tz="UTC")
 
 
 def get_datetime(year, month, day, hour=None, minute=None, second=None):
@@ -89,14 +60,14 @@ def get_datetime(year, month, day, hour=None, minute=None, second=None):
         Returns:
             datetime: Timezone aware datetime object
     """
-    from datetime import datetime as _datetime
-    from Acquire.ObjectStore import datetime_to_datetime as _datetime_to_datetime
+    from datetime import datetime
+    from Acquire.ObjectStore import datetime_to_datetime
 
-    date = _datetime(
+    date = datetime(
         year=year, month=month, day=day
     )  # , hour=hour, minute=minute, second=second)
 
-    return _datetime_to_datetime(date)
+    return datetime_to_datetime(date)
 
 
 def unanimous(seq):
@@ -139,8 +110,10 @@ def load_object(class_name):
         class_name = class_name.lower().capitalize()
         module_object = __import__(name=module_path, fromlist=class_name)
         target_class = getattr(module_object, class_name)
+    except ModuleNotFoundError as err:
+        raise ModuleNotFoundError(f"{class_name} is not a valid module {err}")
 
-    return target_class.load()
+    return target_class()
 
 
 def hash_file(filepath):
@@ -178,6 +151,11 @@ def timestamp_tzaware(timestamp):
         Returns:
             pandas.Timestamp: Timezone aware
     """
+    from pandas import Timestamp
+
+    if not isinstance(timestamp, Timestamp):
+        timestamp = Timestamp(timestamp)
+
     if timestamp.tzinfo is None:
         return timestamp.tz_localize(tz="UTC")
     else:
@@ -225,7 +203,10 @@ def load_hugs_json(filename):
 
 
 def date_overlap(daterange_a, daterange_b):
-    """ Check if daterange_a is within daterange_b
+    """ Check if daterange_a is within daterange_b.
+
+        For this logic see
+        https://stackoverflow.com/a/325964
 
         Args:
             daterange_a (str): Timezone aware daterange string. Example:
@@ -245,10 +226,116 @@ def date_overlap(daterange_a, daterange_b):
     start_b = Timestamp(ts_input=daterange_b[0], tz="UTC")
     end_b = Timestamp(ts_input=daterange_b[1], tz="UTC")
 
-    if start_b >= start_a and end_a <= end_b:
+    if start_a <= end_b and end_a >= start_b:
         return True
     else:
         return False
+
+
+def dates_overlap(range_a, range_b):
+    """ Check if two dateranges overlap
+
+    """
+    # For this logic see
+    # https://stackoverflow.com/a/325964
+    # if (start_key <= end_date) and (end_key >= start_date):
+    raise NotImplementedError
+
+
+def create_aligned_timestamp(time):
+    """ Align the passed datetime / Timestamp object to the minute
+        interval for use in dateranges and overlap checks.
+
+        Args:   
+            time (str, pandas.Timestamp)
+        Returns:
+            pandas.Timestamp: Timestamp aligned to minute 
+            with UTC timezone
+    """
+    from pandas import Timedelta, Timestamp
+
+    if not isinstance(time, Timestamp):
+        time = Timestamp(ts_input=time)
+
+    if time.tzinfo is None:
+        t = time.tz_localize(tz="UTC")
+    else:
+        t = time.tz_convert(tz="UTC")
+
+    t -= Timedelta(f"{t.second} s")
+
+    return t
+
+
+def create_daterange(start, end):
+    """ Create a minute aligned daterange
+
+        Args:
+            start (Timestamp)
+            end (Timestamp)
+        Returns:
+            pandas.DatetimeIndex
+    """
+    from pandas import date_range
+
+    if start > end:
+        raise ValueError("Start date is after end date")
+
+    start = create_aligned_timestamp(start)
+    end = create_aligned_timestamp(end)
+
+    return date_range(start=start, end=end, freq="min")
+
+
+def create_daterange_str(start, end):
+    """ Convert the passed datetimes into a daterange string
+        for use in searches and Datasource interactions
+
+        Args:
+            start_datetime (Timestamp)
+            end_datetime (Timestamp)
+        Returns:
+            str: Daterange string
+    """
+    daterange = create_daterange(start=start, end=end)
+
+    return daterange_to_str(daterange)
+
+
+def daterange_from_str(daterange_str):
+    """ Get a Pandas DatetimeIndex from a string. The created 
+        DatetimeIndex has minute frequency.
+
+        Args:
+            daterange_str (str): Daterange string
+            of the form 2019-01-01T00:00:00_2019-12-31T00:00:00
+        Returns:
+            pandas.DatetimeIndex: DatetimeIndex with minute frequency
+    """
+    from pandas import date_range
+
+    split = daterange_str.split("_")
+
+    # Align the seconds
+    start = create_aligned_timestamp(split[0])
+    end = create_aligned_timestamp(split[1])
+
+    return date_range(start=start, end=end, freq="min")
+
+
+def daterange_to_str(daterange):
+    """ Takes a pandas DatetimeIndex created by pandas date_range converts it to a
+        string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00
+
+        Args:
+            daterange (pandas.DatetimeIndex)
+        Returns:
+            str: Daterange in string format
+    """
+    start = str(daterange[0]).replace(" ", "-")
+    end = str(daterange[-1]).replace(" ", "-")
+
+    return "_".join([start, end])
 
 
 def read_header(filepath, comment_char="#"):
@@ -271,3 +358,36 @@ def read_header(filepath, comment_char="#"):
                 break
 
     return header
+
+
+def valid_site(site):
+    """ Check if the passed site is a valid one
+
+        Args:
+            site (str): Three letter site code
+        Returns:
+            bool: True if site is valid
+    """
+    site_data = load_hugs_json("acrg_site_info.json")
+
+    site = site.upper()
+
+    if site not in site_data:
+        site = site.lower()
+        site_name_code = load_hugs_json("site_codes.json")
+        return site in site_name_code["name_code"]
+
+    return True
+
+
+def is_number(s):
+    ''' Is it a number?
+        
+        Args:
+            s (str): String which may be a number
+    '''
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False

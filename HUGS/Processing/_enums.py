@@ -1,21 +1,20 @@
-from enum import Enum as _Enum
+from enum import Enum
 
-__all__ = ["RootPaths", "DataTypes"]
-
-
-class RootPaths(_Enum):
-    DATA = "data"
-    DATASOURCE = "datasource"
-    INSTRUMENT = "instrument"
-    SITE = "site"
-    NETWORK = "network"
+__all__ = ["DataTypes", "ObsTypes"]
 
 
-# Better name for this enum?
-class DataTypes(_Enum):
+class DataTypes(Enum):
     CRDS = "CRDS"
-    GC = "GC"
-    EUROCOM = "EUROCOM"
+    GCWERKS = "GCWERKS"
+    FOOTPRINT = "FOOTPRINT"
     NOAA = "NOAA"
+    EUROCOM = "EUROCOM"
     THAMESBARRIER = "THAMESBARRIER"
+    ICOS = "ICOS"
     CRANFIELD = "CRANFIELD"
+
+
+class ObsTypes(Enum):
+    SURFACE = "ObsSurface"
+    SATELLITE = "ObsSatellite"
+    FLASK = "ObsFlask"
