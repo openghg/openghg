@@ -3,6 +3,7 @@ __all__ = ["Process"]
 from Acquire.Client import Wallet
 from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
 from pathlib import Path
+from warnings import warn
 
 
 class Process:
@@ -49,27 +50,7 @@ class Process:
                 storage_url (str): URL of storage service. Currently used for testing
                 This may be removed in the future.
         """
-        from pathlib import Path
-        data_type = data_type.upper()
-
-        if data_type == "GC":
-            filepaths = []
-            # Find all files in
-            for f in Path(folder_path).glob("*.C"):
-                if "precisions" in f.name:
-                    # Remove precisions section and ensure the matching data file exists
-                    data_filename = str(f).replace(".precisions", "")
-                    if Path(data_filename).exists():
-                        filepaths.append((Path(data_filename), f))
-        else:
-            filepaths = [f for f in Path(folder_path).glob(f"**/*.{extension}")]
-
-        return self.process_files(
-            user=user,
-            files=filepaths,
-            data_type=data_type,
-            overwrite=overwrite,
-        )
+        raise NotImplementedError("This function has been removed, please use process_files.")
 
     # Find a better way to get this storage url in here, currently used for testing
     def process_files(
