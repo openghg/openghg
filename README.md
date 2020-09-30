@@ -1,7 +1,7 @@
 ![Build](https://github.com/hugs-cloud/hugs/workflows/Build/badge.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-### Please note continued development of this codebase will continue in our new repository at [www.github.com/openghg/openghg](https://github.com/openghg/openghg)
+### Please note development of this codebase will continue in our new repository at [www.github.com/openghg/openghg](https://github.com/openghg/openghg)
 
 ## HUGS - HUb for greenhouse Gas data Science 
 
