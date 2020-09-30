@@ -39,6 +39,8 @@ jobs:
       run: |
         flake8 HUGS/ --count --statistics
     - name: Test with pytest
+      env:
+        HUGS_PATH: /tmp/hugs_store
       run: |
         pytest --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
