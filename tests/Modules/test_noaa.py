@@ -36,6 +36,7 @@ def test_read_file():
         "species": "co",
         "site": "POC",
         "measurement_type": "flask",
+        "network": "NOAA"
     }
 
     co_data = data["co"]["data"]
@@ -85,7 +86,7 @@ def test_read_data():
     metadata = data["co"]["metadata"]
     attributes = data["co"]["attributes"]
 
-    expected_metadata = {"species": "co", "site": "POC", "measurement_type": "flask"}
+    expected_metadata = {"species": "co", "site": "POC", "measurement_type": "flask", "network": "NOAA"}
 
     expected_attrs = {'data_owner': 'Ed Dlugokencky, Gabrielle Petron (CO)', 
                     'data_owner_email': 'ed.dlugokencky@noaa.gov, gabrielle.petron@noaa.gov', 

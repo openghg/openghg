@@ -41,6 +41,7 @@ def get_test_folder(filename):
     return os.path.join(dir_path, test_folder, filename)
 
 
+@pytest.mark.skip(reason="Need to fix dependence on Acquire")
 def test_process_CRDS_files(authenticated_user):
     service_url = "hugs"
 
@@ -70,6 +71,7 @@ def test_process_CRDS_files(authenticated_user):
     assert len(response["tac.picarro.1minute.100m.min.dat"]) == 2
 
 
+@pytest.mark.skip(reason="Need to fix dependence on Acquire")
 def test_process_GC_files(authenticated_user):
     service_url = "hugs"
 
@@ -107,6 +109,7 @@ def test_process_GC_files(authenticated_user):
     assert sorted(response["capegrim-medusa.18.C"].keys())[:5] == expected_keys
 
 
+@pytest.mark.skip(reason="Need to fix dependence on Acquire")
 def test_process_CRDS(authenticated_user, tempdir):
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
@@ -148,6 +151,7 @@ def test_process_CRDS(authenticated_user, tempdir):
     assert sorted(results.keys()) == expected_keys
 
 
+@pytest.mark.skip(reason="Need to fix dependence on Acquire")
 def test_process_GC(authenticated_user, tempdir):
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")

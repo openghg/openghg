@@ -17,7 +17,7 @@ def gc_read():
     data_filepath = os.path.join(dir_path, test_data, data_file)
     prec_filepath = os.path.join(dir_path, test_data, prec_file)
 
-    ObsSurface.read_file(filepath=(data_filepath, prec_filepath), data_type="GCWERKS")
+    ObsSurface.read_file(filepath=(data_filepath, prec_filepath), data_type="GCWERKS", network="AGAGE")
 
 
 @pytest.fixture(scope="session")
@@ -25,7 +25,7 @@ def crds_read():
     get_local_bucket(empty=True)
     test_data = "../data/search_data"
     folder_path = os.path.join(os.path.dirname(__file__), test_data)
-    ObsSurface.read_folder(folder_path=folder_path, data_type="CRDS", extension="dat")
+    ObsSurface.read_folder(folder_path=folder_path, data_type="CRDS", network="DECC", extension="dat")
 
 
 def test_search_gc(gc_read):
@@ -41,6 +41,7 @@ def test_search_gc(gc_read):
         "scale": "sio-12",
         "inlet": "75m_4",
         "data_type": "timeseries",
+        "network": "agage"
     }
 
     assert "2018-01-01-02:24:00_2018-01-31-23:33:00" in nf3_results["keys"]
@@ -79,7 +80,7 @@ def test_location_search(crds_read):
     assert len(results["ch4_tac_100m_picarro"]["keys"]['2012-07-26-12:01:30_2019-07-04-09:58:30']) == 30
 
 
-def test_search_datetimes():
+def test_search_datetimes(crds_read):
     species = ["co2"]
     locations = ["bsd"]
 
@@ -111,7 +112,8 @@ def test_search_datetimes():
         "type": "air",
         "species": "co2",
         "data_type": "timeseries",
-        'scale': 'wmo-x2007'
+        'scale': 'wmo-x2007',
+        'network': 'decc'
     }
 
     assert metadata == expected_metadata
@@ -172,7 +174,7 @@ def test_search_with_inlet_instrument(crds_read):
     assert len(results["ch4_hfd_100m_picarro"]["keys"]["2013-11-20-20:02:30_2019-07-04-21:29:30"]) == 25
 
     expected_metadata = {'site': 'hfd', 'instrument': 'picarro', 'time_resolution': '1_minute', 'scale': 'wmo-x2004a',
-                        'inlet': '100m', 'port': '10', 'type': 'air', 'species': 'ch4', 'data_type': 'timeseries'}
+                        'inlet': '100m', 'port': '10', 'type': 'air', 'species': 'ch4', 'data_type': 'timeseries', 'network': 'decc'}
 
     assert results["ch4_hfd_100m_picarro"]["metadata"] == expected_metadata
 
@@ -191,7 +193,7 @@ def test_search_inlet_no_instrument(crds_read):
     assert len(results["ch4_hfd_100m_picarro"]["keys"]["2013-11-20-20:02:30_2019-07-04-21:29:30"]) == 25
 
     expected_metadata = {'site': 'hfd', 'instrument': 'picarro', 'time_resolution': '1_minute', 'inlet': '100m', 
-                        'port': '10', 'type': 'air', 'species': 'ch4', 'data_type': 'timeseries', 'scale': 'wmo-x2004a'}
+                        'port': '10', 'type': 'air', 'species': 'ch4', 'data_type': 'timeseries', 'scale': 'wmo-x2004a', 'network': 'decc'}
 
     assert results["ch4_hfd_100m_picarro"]["metadata"] == expected_metadata
 
@@ -210,10 +212,10 @@ def test_search_instrument_no_inlet(crds_read):
     assert len(results["n2o_bsd_108m_picarro5310"]["keys"]["2019-03-06-14:03:30_2020-07-04-11:44:30"]) == 7
     assert len(results["n2o_bsd_248m_picarro5310"]["keys"]["2019-03-06-13:23:30_2020-07-05-03:38:30"]) == 7
 
-    metadata_108m = {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 
+    metadata_108m = {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 'network': 'decc',
                     'inlet': '108m', 'port': '2', 'type': 'air', 'species': 'n2o', 'data_type': 'timeseries', 'scale': 'wmo-x2006a'}
 
-    metadata_248m = {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 
+    metadata_248m = {'site': 'bsd', 'instrument': 'picarro5310', 'time_resolution': '1_minute', 'network': 'decc',
                     'inlet': '248m', 'port': '1', 'type': 'air', 'species': 'n2o', 'data_type': 'timeseries', 'scale': 'wmo-x2006a'}
 
     assert results["n2o_bsd_108m_picarro5310"]["metadata"] == metadata_108m

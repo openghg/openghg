@@ -17,13 +17,13 @@ def get_datapath(filename, data_type):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 def test_crds_attributes():
-    _ = get_local_bucket(empty=True)
+    get_local_bucket(empty=True)
 
     crds = CRDS()
 
     filepath = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
 
-    combined = crds.read_data(data_filepath=filepath, site="tac")
+    combined = crds.read_data(data_filepath=filepath, site="tac", network="DECC")
 
     combined_attributes = assign_attributes(data=combined, site="tac")
 

@@ -19,13 +19,16 @@ class NOAA(BaseModule):
         data_filepath,
         species=None,
         site=None,
-        overwrite=False,
+        network="NOAA"
     ):
         """ Reads NOAA data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
             Args:
-                filepath (str or Path): Path of file to load
+                data_filepath (str or Path): Path of file to load
+                species (str, default=None): Species name
+                site (str, default=None): Site name
+                network (str, default="NOAA"): Network name
             Returns:
                 list: UUIDs of Datasources data has been assigned to
         """

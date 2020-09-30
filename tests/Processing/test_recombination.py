@@ -44,7 +44,7 @@ def test_recombination_CRDS():
 
     ObsSurface.read_file(filepath, data_type="CRDS")
 
-    gas_data = crds.read_data(data_filepath=filepath, site="HFD")
+    gas_data = crds.read_data(data_filepath=filepath, site="HFD", network="AGAGE")
 
     ch4_data_read = gas_data["ch4"]["data"]
 
@@ -73,7 +73,7 @@ def test_recombination_GC():
 
     ObsSurface.read_file((data, precision), data_type="GCWERKS")
 
-    data = gc.read_data(data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa")
+    data = gc.read_data(data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa", network="AGAGE")
 
     toluene_data = data["toluene"]["data"]
 

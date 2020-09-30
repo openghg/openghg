@@ -1,15 +1,10 @@
-import datetime
 import logging
-import os
-import uuid
 from pathlib import Path
 
 import pandas as pd
 import pytest
-from Acquire.ObjectStore import datetime_to_datetime, datetime_to_string
 
-from HUGS.Modules import CRDS, Datasource
-from HUGS.ObjectStore import get_local_bucket
+from HUGS.Modules import CRDS
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -62,7 +57,7 @@ def test_read_data():
 
     tac_filepath = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
 
-    combined = crds.read_data(data_filepath=tac_filepath, site="tac")
+    combined = crds.read_data(data_filepath=tac_filepath, site="tac", network="DECC")
 
     assert len(combined) == 2
 
@@ -77,6 +72,7 @@ def test_read_data():
     assert ch4_metadata["port"] == "9"
     assert ch4_metadata["type"] == "air"
     assert ch4_metadata["species"] == "ch4"
+    assert ch4_metadata["network"] == "DECC"
 
     ch4_data = combined["ch4"]["data"]
 
@@ -91,7 +87,7 @@ def test_read_data_no_inlet_raises():
     filepath = Path("tac.picarro.1minute.no_inlet.dat")
 
     with pytest.raises(ValueError):
-        crds.read_data(data_filepath=filepath, site="tac")
+        crds.read_data(data_filepath=filepath, site="tac", network="DECC")
 
 
 def test_gas_info(hfd_filepath):

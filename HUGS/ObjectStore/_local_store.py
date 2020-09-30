@@ -271,7 +271,7 @@ def query_store():
     for d in datasources:
         metadata = d.metadata()
         result = {"site": metadata["site"], "species": metadata["species"], 
-                    "instrument": metadata.get("instrument", "Unknown"), "network": metadata.get("network")}
+                    "instrument": metadata.get("instrument", "Unknown"), "network": metadata.get("network", "Unkown")}
         data[d.uuid()] = result
 
     return data

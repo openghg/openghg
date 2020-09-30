@@ -43,4 +43,5 @@ def test_read_data():
     assert co2_data["co2 variability"][0].values == pytest.approx(0.087)
     assert co2_data["co2 number_of_observations"][0].values == 13
 
-    assert data["co2"]["metadata"] == {'site': 'tta', 'species': 'co2', 'inlet': '222m', 'time_resolution': '1minute'}
+    assert data["co2"]["metadata"] == {'site': 'tta', 'species': 'co2', 'inlet': '222m', 
+                                        'time_resolution': '1minute', 'network': 'ICOS'}

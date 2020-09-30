@@ -22,8 +22,6 @@ class GCWERKS():
     ):
         """ Reads a GC data file by creating a GC object and associated datasources
 
-            TODO - should this default to GCMD when no instrument is passed?
-
             Args:
                 data_filepath (str, pathlib.Path): Path of data file
                 precision_filepath (str, pathlib.Path): Path of precision file
@@ -58,7 +56,10 @@ class GCWERKS():
             if is_number(instrument):
                 # has picked out the year, rather than the instrument. Default to GCMD for this type of file
                 instrument = "GCMD"
-            
+
+        if network is None:
+            network = "NA"
+
         gas_data = self.read_data(
             data_filepath=data_filepath,
             precision_filepath=precision_filepath,
