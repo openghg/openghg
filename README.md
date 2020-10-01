@@ -18,7 +18,7 @@ HUGS is capable of processing many different types of data including AGAGE/ICOS/
 
 The processed data is stored within a cloud object store which allows for large amounts of data to be easily stored and retrieved. As cloud storage is utilised datasets can grow as new data is added to them with no limits on the size of a dataset. We are currently using the Oracle object store but we have built the platform using open source software to be cloud agnostic. Data stored on the platform is chunked to allow efficient storage and retrieval. This makes it quick to pull a week's worth of data from a decade of measurements.
 
-### Analyis
+### Analysis
 
 Using notebooks hosted on our [JupyterHub](https://hub.hugs-cloud.com) it is possible to query the object store and analyse data within the cloud. This allows analysis and processing of large datasets on any computational device as all processing is done on scalable cloud instances.
 
