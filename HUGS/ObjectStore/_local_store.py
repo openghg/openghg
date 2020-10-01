@@ -254,8 +254,7 @@ def query_store():
     """ Create a dictionary that can be used to visualise the object store 
 
         Returns:
-            dict: Dictionary of data ? 
-
+            dict: Dictionary for data to be shown in force graph 
     """
     from collections import defaultdict
     from HUGS.Modules import Datasource, ObsSurface

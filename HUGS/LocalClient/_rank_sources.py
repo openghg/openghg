@@ -1,19 +1,18 @@
 import copy
 from HUGS.Modules import Datasource, ObsSurface
 from HUGS.Util import valid_site
+from pyvis.network import Network
 
 __all__ = ["RankSources"]
 
 
 class RankSources:
-    def get_sources(self, site, species, data_type):
+    def get_sources(self, site, species=None):
         """ Get the datasources for this site and species to allow a ranking to be set
 
             Args:
                 site (str): Three letter site code
                 species (str): Species name
-                data_type (str): Must be valid datatype i.e. CRDS, GC
-                See all valid datasources in the DataTypes class
             Returns:
                 dict: Dictionary of datasource metadata
         """
@@ -27,33 +26,112 @@ class RankSources:
         # Shallow load the Datasources (only get their JSON metadata)
         datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
 
-        matching_sources = [d for d in datasources if d.search_metadata(search_terms=[site, species], find_all=True)]
+        search_terms = [site]
+        if species is not None:
+            search_terms.append(species)
+
+        matching_sources = [d for d in datasources if d.search_metadata(search_terms=search_terms, find_all=True)]
 
         def name_str(d):
             return "_".join([d.species(), d.site(), d.inlet(), d.instrument()])
 
-        rank_info = {name_str(d): {"rank": d.rank(), "data_range": d.daterange_str(), "uuid": d.uuid()} for d in matching_sources}
+        rank_info = {
+            name_str(d): {"rank": d.rank(), "data_range": d.daterange_str(), "uuid": d.uuid(), "metadata": d.metadata()}
+            for d in matching_sources
+        }
 
-        self._before_ranking = copy.deepcopy(rank_info)
-        self._key_uuids = {key: rank_info[key]["uuid"] for key in rank_info}
+        self._rank_data = copy.deepcopy(rank_info)
+        # self._key_uuids = {key: rank_info[key]["uuid"] for key in rank_info}
 
         return rank_info
 
-    def rank_sources(self, updated_rankings, data_type):
-        """ Assign the precendence of sources for each.
-            This function expects a dictionary of the form
+    def set_rank(self, rank_key: str, rank_data: dict):
+        """ Set the rank data for the 
 
+            Args:
+                rank_data: Dictionary of ranking data for example
+                co2_hfd_50m_picarro: {1: [daterange_1], 2: [daterange_2]}
+            Returns:
+                None
+        """
+        # First find the UUID
+        uuid = self._rank_data[rank_key]["uuid"]
+
+        obs = ObsSurface.load()
+
+        for rank, dateranges in rank_data.items():
+            if int(rank) == 0:
+                continue
+
+            for daterange in dateranges:
+                obs.set_rank(uuid=uuid, rank=rank, daterange=daterange)
+
+        # Update local version of data
+        self._rank_data[rank_key]["rank"] = rank_data
+
+        obs.save()
+
+    def show_rank_network(self) -> Network:
+        """ Creates a small network graph of ranked data with each rank given a colour
+
+            Note that this function should only be run from a Jupyter Notebook
+
+            Args:
+                rank_data (dict): Dictionary of the form given by RankSources.get_sources()
+            Returns:
+                pyvis.network.Network: Network graph
+        """
+        net = Network("800px", "100%", notebook=True, heading="OpenGHG Object Store")
+        # Set the physics layout of the network
+        net.force_atlas_2based()
+
+        rank_data = self._rank_data
+
+        a_key = list(rank_data.keys())[0]
+        site = rank_data[a_key]["metadata"]["site"].upper()
+
+        net.add_node(site, label=site, color="brown", value=5000)
+
+        # Add in the Datasources associated with this site, colourmap for rankings? 
+        # Create a dictionary for this or just use  amatplotlib colourmap
+        colours = {"0": "red", "1": "green", "2": "blue"}
+
+        for key, data in rank_data.items():
+            rank = data["rank"]
+
+            site_name = data["metadata"]["site"]
+            data_range = data["data_range"]
+
+            title = "</br>".join([f"Rank : {str(rank)}", f"Site: {site_name}", f"Data range: {data_range}"])
+
+            if rank == 0:
+                colour = colours[str(rank)]
+            else:
+                # For now just use the highest rank for the color
+                highest_rank = sorted(list(rank.keys()))[-1]
+                colour = colours[str(highest_rank)]
+
+            net.add_node(key, label=key, title=title, color=colour, value=2000)
+            net.add_edge(source=site, to=key)
+
+        return net.show("openghg_rankings.html")
+
+    def rank_sources(self, updated_rankings):
+        """ Assign the precendence of sources for each.
             This function expects a dictionary of the form
 
             {'site_string': {'rank': [daterange_str, ...], 'daterange': 'start_end', 'uuid': uuid}, 
 
             Args:
                 updated_ranking (dict): Dictionary of ranking
-                data_type (str): Data type e.g. CRDS, GC
             Returns:
                 None
         """
-        if updated_rankings == self._before_ranking:
+        from warnings import warn
+
+        warn(message="This function will soon be removed, please use set_rank instead", category=DeprecationWarning)
+
+        if updated_rankings == self._rank_data:
             return
 
         obs = ObsSurface.load()
@@ -87,3 +165,8 @@ class RankSources:
             end = Timestamp(end).to_pydatetime()
 
         return "".join([datetime_to_string(start), "_", datetime_to_string(end)])
+
+    # def visualise_ranks():
+    #     """ Return a dic
+
+    #     """
