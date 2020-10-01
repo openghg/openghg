@@ -2,7 +2,7 @@ import pytest
 from pandas import Timestamp
 from pathlib import Path
 
-from HUGS.LocalClient import get_single_site
+from HUGS.LocalClient import get_single_site, scale_convert
 from HUGS.Modules import ObsSurface
 from HUGS.ObjectStore import get_local_bucket
 
@@ -92,6 +92,40 @@ def test_get_single_site_datetime_selection():
     assert data["mf"][-1] == pytest.approx(407.55)
 
 
+def test_scale_convert():
+    results = get_single_site(site="hfd", species="co", start_date="2001-01-01", end_date="2015-01-01")
 
+    data = results[0]
 
+    assert data["mf"][0] == pytest.approx(214.28)
+    assert data["co_stdev"][0] == pytest.approx(4.081)
+    assert data["co_n_meas"][0] == 19.0
 
+    # # Fix the scale for test purposes
+    data.attrs["scale"] = "WMO-X2014A"
+
+    new_scale = "CSIRO94"
+
+    data = scale_convert(data=data, species="co", to_scale=new_scale)
+
+    assert data["mf"][0] == pytest.approx(902.755)
+    assert data["co_stdev"][0] == pytest.approx(4.081)
+    assert data["co_n_meas"][0] == 19.0
+
+    assert data.attrs["scale"] == new_scale
+
+    results = get_single_site(site="hfd", species="ch4", start_date="2001-01-01", end_date="2015-01-01")
+
+    data = results[0]
+
+    assert data["mf"][0] == pytest.approx(1993.83)
+    assert data["ch4_stdev"][0] == pytest.approx(1.555)
+    assert data["ch4_n_meas"][0] == 19.0
+
+    data.attrs["scale"] = "WMO-X2014A"
+
+    data = scale_convert(data=data, species="co", to_scale=new_scale)
+
+    assert data["mf"][0] == pytest.approx(8399.95)
+    assert data["ch4_stdev"][0] == pytest.approx(1.555)
+    assert data["ch4_n_meas"][0] == 19.0

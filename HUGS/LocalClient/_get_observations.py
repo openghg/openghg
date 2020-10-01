@@ -1,4 +1,4 @@
-__all__ = ["get_single_site"]
+__all__ = ["get_single_site", "scale_convert"]
 
 from xarray import Dataset
 from typing import Optional, Union

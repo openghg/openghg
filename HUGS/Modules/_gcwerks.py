@@ -1,25 +1,18 @@
 __all__ = ["GCWERKS"]
 
 
-class GCWERKS():
+class GCWERKS:
     def __init__(self):
         from HUGS.Util import load_hugs_json
 
         self._sampling_period = 0
-        # Load site data 
+        # Load site data
         data = load_hugs_json(filename="process_gcwerks_parameters.json")
         self._gc_params = data["GCWERKS"]
         # Site codes for inlet readings
         self._site_codes = load_hugs_json(filename="site_codes.json")
 
-    def read_file(
-        self,
-        data_filepath,
-        precision_filepath,
-        site=None,
-        instrument=None,
-        network=None
-    ):
+    def read_file(self, data_filepath, precision_filepath, site=None, instrument=None, network=None):
         """ Reads a GC data file by creating a GC object and associated datasources
 
             Args:
@@ -61,11 +54,7 @@ class GCWERKS():
             network = "NA"
 
         gas_data = self.read_data(
-            data_filepath=data_filepath,
-            precision_filepath=precision_filepath,
-            site=site,
-            instrument=instrument,
-            network=network
+            data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, instrument=instrument, network=network
         )
 
         # Assign attributes to the data for CF compliant NetCDFs
@@ -150,30 +139,18 @@ class GCWERKS():
 
         for sp in species:
             precision_index = precision_species.index(sp) * 2 + 1
-            data[sp + " repeatability"] = (
-                precision[precision_index]
-                .astype(float)
-                .reindex_like(data, method="pad")
-            )
+            data[sp + " repeatability"] = precision[precision_index].astype(float).reindex_like(data, method="pad")
 
         # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
         self._sampling_period = self.get_precision(instrument)
 
-        data["new_time"] = data.index - pd_Timedelta(
-            seconds=self._sampling_period / 2.0
-        )
+        data["new_time"] = data.index - pd_Timedelta(seconds=self._sampling_period / 2.0)
 
         data = data.set_index("new_time", inplace=False, drop=True)
         data.index.name = "time"
 
         gas_data = self.split_species(
-            data=data,
-            site=site,
-            species=species,
-            instrument=instrument,
-            metadata=metadata,
-            units=units,
-            scale=scale,
+            data=data, site=site, species=species, instrument=instrument, metadata=metadata, units=units, scale=scale,
         )
 
         return gas_data
@@ -199,15 +176,7 @@ class GCWERKS():
 
         precision_species = precision_header.values[0][1:].tolist()
 
-        precision = read_csv(
-            filepath,
-            skiprows=5,
-            header=None,
-            sep=r"\s+",
-            index_col=0,
-            parse_dates=[0],
-            date_parser=parser,
-        )
+        precision = read_csv(filepath, skiprows=5, header=None, sep=r"\s+", index_col=0, parse_dates=[0], date_parser=parser,)
 
         precision.index.name = "Datetime"
         # Drop any duplicates from the index
@@ -230,8 +199,6 @@ class GCWERKS():
                 dict: Dataframe of gas data and metadata
         """
         from fnmatch import fnmatch
-        # Create a list tuples of the split dataframe and the daterange it covers
-        # As some (years, months, weeks) may be empty we don't want those dataframes
 
         # Read inlets from the parameters dictionary
         expected_inlets = self.get_inlets(site_code=site)
@@ -239,11 +206,8 @@ class GCWERKS():
         try:
             data_inlets = data["Inlet"].unique().tolist()
         except KeyError:
-            raise KeyError(
-                "Unable to read inlets from data, please ensure this data is of the GC \
-                                    type expected by this processing module"
-            )
-        # TODO - ask Matt/Rachel about inlets
+            raise KeyError("Unable to read inlets from data, please ensure this data is of the GC \
+                                    type expected by this processing module")
 
         # For now just add air to the expected inlets
         expected_inlets.append("air")
@@ -252,7 +216,7 @@ class GCWERKS():
 
         if not matching_inlets:
             raise ValueError("Inlet mismatch - please ensure correct site is selected. \
-                                  Mismatch between inlet in data and inlet in parameters file.")
+                                Mismatch between inlet in data and inlet in parameters file.")
 
         combined_data = {}
 
@@ -272,47 +236,25 @@ class GCWERKS():
                 spec_metadata["inlet"] = inlet
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
-                    spec_data = data[
-                        [
-                            spec,
-                            spec + " repeatability",
-                            spec + " status_flag",
-                            spec + " integration_flag",
-                            "Inlet",
-                        ]
-                    ]
+                    spec_data = data[[spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]]
                     spec_data = spec_data.dropna(axis="index", how="any")
                 elif "date" in inlet:
                     dates = inlet.split("_")[1:]
                     slice_dict = {"time": slice(dates[0], dates[1])}
                     data_sliced = data.loc(slice_dict)
                     spec_data = data_sliced[
-                        [
-                            spec,
-                            spec + " repeatability",
-                            spec + " status_flag",
-                            spec + " integration_flag",
-                            "Inlet",
-                        ]
+                        [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
                     ]
                     spec_data = spec_data.dropna(axis="index", how="any")
                 else:
                     # Take only data for this inlet from the dataframe
                     inlet_data = data.loc[data["Inlet"] == inlet]
                     spec_data = inlet_data[
-                        [
-                            spec,
-                            spec + " repeatability",
-                            spec + " status_flag",
-                            spec + " integration_flag",
-                            "Inlet",
-                        ]
+                        [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
                     ]
                     spec_data = spec_data.dropna(axis="index", how="any")
 
-                attributes = self.get_site_attributes(
-                    site=site, inlet=inlet, instrument=instrument
-                )
+                attributes = self.get_site_attributes(site=site, inlet=inlet, instrument=instrument)
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
@@ -346,7 +288,9 @@ class GCWERKS():
         try:
             sampling_period = self._gc_params["sampling_period"][instrument]
         except KeyError:
-            raise ValueError(f"Invalid instrument: {instrument}\nPlease select one of {self._gc_params['sampling_period'].keys()}\n")
+            raise ValueError(
+                f"Invalid instrument: {instrument}\nPlease select one of {self._gc_params['sampling_period'].keys()}\n"
+            )
 
         return sampling_period
 
