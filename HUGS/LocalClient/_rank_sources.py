@@ -2,6 +2,8 @@ import copy
 from HUGS.Modules import Datasource, ObsSurface
 from HUGS.Util import valid_site
 from pyvis.network import Network
+import matplotlib.cm as cm
+import matplotlib
 
 __all__ = ["RankSources"]
 
@@ -81,7 +83,8 @@ class RankSources:
             Returns:
                 pyvis.network.Network: Network graph
         """
-        net = Network("800px", "100%", notebook=True, heading="OpenGHG Object Store")
+        header_text = "OpenGHG ranked data"
+        net = Network("800px", "100%", notebook=True, heading=header_text)
         # Set the physics layout of the network
         net.force_atlas_2based()
 
@@ -90,28 +93,32 @@ class RankSources:
         a_key = list(rank_data.keys())[0]
         site = rank_data[a_key]["metadata"]["site"].upper()
 
-        net.add_node(site, label=site, color="brown", value=5000)
+        norm = matplotlib.colors.Normalize(vmin=0, vmax=10, clip=True)
+        mapper = cm.ScalarMappable(norm=norm, cmap=cm.tab10)
 
-        # Add in the Datasources associated with this site, colourmap for rankings? 
-        # Create a dictionary for this or just use  amatplotlib colourmap
-        colours = {"0": "red", "1": "green", "2": "blue"}
+        def colour_mapper(x):
+            return matplotlib.colors.to_hex(mapper.to_rgba(x))
+
+        net.add_node(site, label=site, color="brown", value=5000)
 
         for key, data in rank_data.items():
             rank = data["rank"]
-
-            site_name = data["metadata"]["site"]
+            site_name = data["metadata"]["site"].upper()
             data_range = data["data_range"]
 
-            title = "</br>".join([f"Rank : {str(rank)}", f"Site: {site_name}", f"Data range: {data_range}"])
+            title = "</br>".join([f"<b>Rank:</b> {str(rank)}", f"<b>Site:</b> {site_name}", f"<b>Data range:</b> {data_range}"])
 
             if rank == 0:
-                colour = colours[str(rank)]
+                colour = colour_mapper(rank)
             else:
                 # For now just use the highest rank for the color
                 highest_rank = sorted(list(rank.keys()))[-1]
-                colour = colours[str(highest_rank)]
+                colour = colour_mapper(int(highest_rank))
 
-            net.add_node(key, label=key, title=title, color=colour, value=2000)
+            split_key = key.split("_")
+            label = " ".join((split_key[0].upper(), split_key[1].upper(), split_key[2], split_key[3]))
+
+            net.add_node(key, label=label, title=title, color=colour, value=2000)
             net.add_edge(source=site, to=key)
 
         return net.show("openghg_rankings.html")
