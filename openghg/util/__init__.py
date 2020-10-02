@@ -1,5 +1,5 @@
 """
-    Utility functions for HUGS
+    Utility functions for OpenGHG
 """
 
 from ._util import (date_overlap, get_datapath, get_datetime, get_datetime_epoch, get_datetime_now,

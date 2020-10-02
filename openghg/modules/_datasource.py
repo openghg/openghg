@@ -80,7 +80,7 @@ class Datasource:
                 None
         """
         from pandas import Grouper
-        from HUGS.Processing import get_split_frequency
+        from openghg.processing import get_split_frequency
 
         # Store the metadata as labels
         # for k, v in metadata.items():
@@ -138,7 +138,7 @@ class Datasource:
                 overwrite (bool, default=False): Overwrite existing data
                 None
         """
-        from HUGS.Util import date_overlap
+        from openghg.util import date_overlap
 
         data_types = ["footprint", "timeseries"]
 
@@ -227,7 +227,7 @@ class Datasource:
                 tuple (datetime, datetime): Start and end datetimes for DataSet
         """
         from pandas import DatetimeIndex
-        from HUGS.Util import timestamp_tzaware
+        from openghg.util import timestamp_tzaware
 
         if not isinstance(dataframe.index, DatetimeIndex):
             raise TypeError("Only DataFrames with a DatetimeIndex must be passed")
@@ -279,7 +279,7 @@ class Datasource:
             Returns:
                 bool: True if Datasource exists
         """
-        from HUGS.ObjectStore import exists, get_bucket
+        from openghg.objectstore import exists, get_bucket
 
         if bucket is None:
             bucket = get_bucket()
@@ -326,7 +326,7 @@ class Datasource:
             Returns:
                 Pandas.Dataframe: Dataframe from stored HDF file
         """
-        from HUGS.ObjectStore import get_object
+        from openghg.objectstore import get_object
 
         data = get_object(bucket, key)
 
@@ -348,7 +348,7 @@ class Datasource:
             Returns:
                 xarray.Dataset: Dataset from NetCDF file
         """
-        from HUGS.ObjectStore import get_object
+        from openghg.objectstore import get_object
         from xarray import load_dataset
         import tempfile
         from pathlib import Path
@@ -491,7 +491,7 @@ class Datasource:
         from copy import deepcopy
 
         from Acquire.ObjectStore import get_datetime_now_to_string
-        from HUGS.ObjectStore import get_bucket, set_object_from_file, set_object_from_json
+        from openghg.objectstore import get_bucket, set_object_from_file, set_object_from_json
 
         if bucket is None:
             bucket = get_bucket()
@@ -553,7 +553,7 @@ class Datasource:
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from HUGS.ObjectStore import get_bucket, get_object_from_json
+        from openghg.objectstore import get_bucket, get_object_from_json
 
         if uuid is None and key is None:
             raise ValueError("Both uuid and key cannot be None")
@@ -792,7 +792,7 @@ class Datasource:
         """
         from itertools import tee
         from collections import defaultdict
-        from HUGS.Util import daterange_from_str, daterange_to_str
+        from openghg.util import daterange_from_str, daterange_to_str
 
         # Ensure there are no duplciates
         dateranges = list(set(dateranges))
@@ -878,7 +878,7 @@ class Datasource:
                 dict: Dictionary of rank: daterange
         """
         from collections import defaultdict
-        from HUGS.Util import daterange_from_str, daterange_to_str, create_daterange
+        from openghg.util import daterange_from_str, daterange_to_str, create_daterange
         # Need to search ranks in descending order
 
         # If we don't have a rank return 9

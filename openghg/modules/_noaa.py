@@ -1,4 +1,4 @@
-from HUGS.Modules import BaseModule
+from openghg.modules import BaseModule
 
 __all__ = ["NOAA"]
 
@@ -8,7 +8,7 @@ class NOAA(BaseModule):
 
     """
     def __init__(self):
-        from HUGS.Util import load_hugs_json
+        from openghg.util import load_hugs_json
 
         # Holds parameters used for writing attributes to Datasets
         data = load_hugs_json("attributes.json")
@@ -32,7 +32,7 @@ class NOAA(BaseModule):
             Returns:
                 list: UUIDs of Datasources data has been assigned to
         """
-        from HUGS.Processing import assign_attributes
+        from openghg.processing import assign_attributes
         from pathlib import Path
 
         data_filepath = Path(data_filepath)
@@ -65,7 +65,7 @@ class NOAA(BaseModule):
             Returns:
                 dict: Dictionary containing attributes, data and metadata keys
         """
-        from HUGS.Util import read_header
+        from openghg.util import read_header
         from pandas import read_csv, Timestamp
         import numpy as np
 

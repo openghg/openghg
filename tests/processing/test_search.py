@@ -1,10 +1,10 @@
 import os
 import pytest
 
-from HUGS.Modules import ObsSurface
-from HUGS.Processing import search
-from HUGS.ObjectStore import get_local_bucket
-from HUGS.Util import get_datetime
+from openghg.modules import ObsSurface
+from openghg.processing import search
+from openghg.objectstore import get_local_bucket
+from openghg.util import get_datetime
 
 
 @pytest.fixture(scope="session")

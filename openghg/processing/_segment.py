@@ -13,7 +13,7 @@ __all__ = ["get_split_frequency", "create_footprint_datasources", "assign_data"]
 #         Returns:
 #             list: List of UUIDs
 #     """
-#     from HUGS.Modules import Datasource
+#     from openghg.modules import Datasource
 
 #     uuids = []
 
@@ -51,7 +51,7 @@ def assign_data(gas_data, lookup_results, overwrite):
         Returns:
             dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
     """
-    from HUGS.Modules import Datasource
+    from openghg.modules import Datasource
 
     uuids = {}
     # Add in copying of attributes, or add attributes to the metadata at an earlier state.

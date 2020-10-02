@@ -2,9 +2,9 @@ import pytest
 from pandas import Timestamp
 from pathlib import Path
 
-from HUGS.LocalClient import get_single_site, scale_convert
-from HUGS.Modules import ObsSurface
-from HUGS.ObjectStore import get_local_bucket
+from openghg.localclient import get_single_site, scale_convert
+from openghg.modules import ObsSurface
+from openghg.objectstore import get_local_bucket
 
 
 def get_datapath(filename, data_type):

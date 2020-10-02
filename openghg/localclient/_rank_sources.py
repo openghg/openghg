@@ -1,6 +1,6 @@
 import copy
-from HUGS.Modules import Datasource, ObsSurface
-from HUGS.Util import valid_site
+from openghg.modules import Datasource, ObsSurface
+from openghg.util import valid_site
 from pyvis.network import Network
 import matplotlib.cm as cm
 import matplotlib

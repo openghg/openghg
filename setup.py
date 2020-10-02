@@ -4,7 +4,7 @@ import versioneer
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-files = ["HUGS/*"]
+files = ["openghg/*"]
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()

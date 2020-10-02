@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 
-from HUGS.Modules import CRANFIELD
+from openghg.modules import CRANFIELD
 
 
 def get_datapath(filename, data_type):

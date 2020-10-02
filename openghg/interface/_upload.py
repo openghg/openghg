@@ -3,8 +3,8 @@ from pathlib import Path
 
 import ipywidgets as widgets
 
-from HUGS.Client import Process
-from HUGS.Interface import Credentials
+from openghg.client import Process
+from openghg.Interface import Credentials
 
 
 class Upload:
@@ -28,7 +28,7 @@ class Upload:
             disabled=False,
         )
 
-        base_url = "https://hugs.acquire-aaai.com/t"
+        base_url = "https://openghg.acquire-aaai.com/t"
 
         upload_widget = widgets.FileUpload(multiple=False, label="Select")
         transfer_button = widgets.Button(
@@ -52,8 +52,8 @@ class Upload:
                 return
 
             # Here we get the data as bytes, write it to a tmp directory so we can
-            # process it using HUGS
-            # TODO - better processing method? Allow HUGS to accept bytes?
+            # process it
+            # TODO - better processing method? Accept bytes?
             with tempfile.TemporaryDirectory() as tmpdir:
                 file_content = upload_widget.value
                 filename = list(file_content.keys())[0]
@@ -72,7 +72,6 @@ class Upload:
 
                 self._results = result
 
-                # Upload the file to HUGS
                 if result:
                     status_text.value = "<font color='green'>Upload successful</font>"
                 else:

@@ -2,7 +2,7 @@ __all__ = ["JobRunner"]
 
 
 class JobRunner:
-    """ An interface to the the jobrunner service on the HUGS platform.
+    """ An interface to the the jobrunner service on the OpenGHG platform.
 
         This class is used to run jobs on both local and cloud based HPC clusters
 
@@ -52,7 +52,7 @@ class JobRunner:
                 TODO - having to pass in a password and get it through to Paramiko seems
                 long winded, is there a better way to do this?
 
-                hugs_url (str): URL of HUGS service
+                hugs_url (str): URL of OpenGHG service
                 storage_url (str): URL of storage service
             Returns:
                 dict: Dictionary containing information regarding job running on resource
@@ -153,11 +153,11 @@ class JobRunner:
         )
 
         par_secret = par.secret()
-        encryped_par_secret = hugs.encrypt_data(par_secret)
+        encryped_par_secret = openghg.encrypt_data(par_secret)
 
         # Encrypt the password we use to decrypt the private key used to access the HPC cluster
         # TODO - is this a sensible way of doing this?
-        encrypted_password = hugs.encrypt_data(key_password)
+        encrypted_password = openghg.encrypt_data(key_password)
 
         par_data = par.to_data()
 

@@ -1,5 +1,5 @@
 def remove_objects(args):
-    from HUGS.ObjectStore import get_bucket, delete_object
+    from openghg.objectstore import get_bucket, delete_object
 
     if "keys" in args:
         keys = args["keys"]

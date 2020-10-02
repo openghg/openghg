@@ -21,7 +21,7 @@ class Credentials:
             description="Login", button_style="success", layout=Layout(width="10%")
         )
         login_link_box = Output()
-        base_url = "https://hugs.acquire-aaai.com/t"
+        base_url = "https://openghg.acquire-aaai.com/t"
 
         def do_login(a):
             user = User(
@@ -55,7 +55,7 @@ class Credentials:
         status_text = HTML(value="<font color='blue'>Enter credentials</font>")
         output_box = Output()
 
-        base_url = "https://hugs.acquire-aaai.com/t"
+        base_url = "https://openghg.acquire-aaai.com/t"
 
         def register_user(a):
             if password_box.value != conf_password_box.value:

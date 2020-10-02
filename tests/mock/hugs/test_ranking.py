@@ -1,8 +1,8 @@
 import pytest
 import os
 
-from HUGS.Client import RankSources, Process
-from HUGS.ObjectStore import get_local_bucket
+from openghg.client import RankSources, Process
+from openghg.objectstore import get_local_bucket
 
 @pytest.fixture(scope="session")
 def tempdir(tmpdir_factory):

@@ -1,5 +1,5 @@
 def retrieve(args):
-    """ Calls the HUGS function to retrieve data stored at the given key
+    """ Calls the OpenGHG function to retrieve data stored at the given key
         and combine them into a single Pandas DataFrame for download / visualization
 
         Args:
@@ -8,7 +8,7 @@ def retrieve(args):
             dict: Dictionary of results
 
     """
-    from HUGS.Processing import recombine_sections
+    from openghg.processing import recombine_sections
     from Acquire.ObjectStore import datetime_to_string
     from json import dumps as json_dumps
     from collections import defaultdict

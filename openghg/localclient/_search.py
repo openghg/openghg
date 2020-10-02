@@ -1,8 +1,8 @@
-from HUGS.Processing import search as search_fn
+from openghg.processing import search as search_fn
 
 __all__ = ["Search"]
 
-from HUGS.Processing import recombine_sections
+from openghg.processing import recombine_sections
 from collections import defaultdict
 
 

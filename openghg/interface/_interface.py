@@ -1,4 +1,4 @@
-""" A class to create the interface for HUGS
+""" A class to create the interface for OpenGHG notebooks
 """
 import collections
 import functools
@@ -19,8 +19,8 @@ import matplotlib.cm as mplcmap
 import pandas as pd
 from Acquire.Client import User
 
-from HUGS.Client import Process, Retrieve, Search
-from HUGS.Util import load_hugs_json
+from openghg.client import Process, Retrieve, Search
+from openghg.util import load_hugs_json
 
 # flake8: noqa
 
@@ -29,7 +29,7 @@ __all__ = ["Interface"]
 
 class Interface:
     """
-        Handles the creation of an interface for the HUGS platform
+        Handles the creation of an interface for the OpenGHG platform
 
         # TODO - this needs a lot of tidying and code removal, kept for possible future reuse.
 
@@ -45,7 +45,7 @@ class Interface:
     """
 
     def __init__(self):
-        self._base_url = "https://hugs.acquire-aaai.com/t"
+        self._base_url = "https://openghg.acquire-aaai.com/t"
         self._search_results = None
         # This is the order in which they'll be shown (if created)
         self._module_list = [
@@ -229,7 +229,7 @@ class Interface:
             disabled=False,
         )
 
-        base_url = "https://hugs.acquire-aaai.com/t"
+        base_url = "https://openghg.acquire-aaai.com/t"
 
         upload_widget = widgets.FileUpload(multiple=False, label="Select")
         transfer_button = widgets.Button(
@@ -253,8 +253,8 @@ class Interface:
                 return
 
             # Here we get the data as bytes, write it to a tmp directory so we can
-            # process it using HUGS
-            # TODO - better processing method? Allow HUGS to accept bytes?
+            # process it
+            # TODO - better processing method? Accept bytes?
             with tempfile.TemporaryDirectory() as tmpdir:
                 file_content = upload_widget.value
                 filename = list(file_content.keys())[0]
@@ -273,7 +273,6 @@ class Interface:
 
                 self._results = result
 
-                # Upload the file to HUGS
                 if result:
                     status_text.value = f"<font color='green'>Upload successful</font>"
                 else:
@@ -1790,7 +1789,7 @@ class Interface:
 
     def process_data(self, data):
         """ Process the data passed by the FileUpload widget and 
-            pass to the HUGS processing functions
+            pass to the OpenGHG processing functions
 
             Args:
                 user (Acquire User): Authorised User object
@@ -1803,7 +1802,6 @@ class Interface:
             # Raise or return a warning message here?
             raise ValueError("User must be logged in to upload data")
 
-        # Create a process object to interact with HUGS
         process = Process(service_url=self._base_url)
 
         datasource_uuids = {}
@@ -1875,7 +1873,7 @@ class Interface:
             Returns:
                 dict: Dictionary of data
         """
-        # Create a Retrieve object to interact with the HUGS Cloud object store
+        # Create a Retrieve object to interact with the cloud object store
         retrieve = Retrieve(service_url=self._base_url)
         # Select the keys we want to download
         download_keys = {key: selected_results[key]["keys"] for key in selected_results}

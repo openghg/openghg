@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from HUGS.Processing import get_ceda_file
+from openghg.processing import get_ceda_file
 
 # flake8: noqa : E501
 
@@ -30,7 +30,7 @@ def test_get_upload_file_json_file_output(tmpdir):
 
     assert data["title"] == "Bilsdale Tall Tower"
     assert data["authors"] == [
-        {"firstname": "HUGS", "surname": "Cloud"},
+        {"firstname": "OpenGHG", "surname": "Cloud"},
         {"firstname": "", "surname": ""},
         {"firstname": "", "surname": ""},
     ]
@@ -68,7 +68,7 @@ def test_get_ceda_file_return_dictionary():
 
     assert data["title"] == "Bilsdale Tall Tower"
     assert data["authors"] == [
-        {"firstname": "HUGS", "surname": "Cloud"},
+        {"firstname": "OpenGHG", "surname": "Cloud"},
         {"firstname": "", "surname": ""},
         {"firstname": "", "surname": ""},
     ]
@@ -83,9 +83,9 @@ def test_get_ceda_file_return_dictionary():
         "catalogue_url": "http: //www.metoffice.gov.uk/research/monitoring/atmospheric-trends/sites/bilsdale",
         "title": "Bilsdale Tall Tower",
         "description": "Bilsdale (BSD) tall tower is in a remote area of the North York Moors National Park and is the first monitoring site in the northeast region of England.",
-        "PI": {"firstname": "HUGS", "lastname": "Cloud"},
+        "PI": {"firstname": "OpenGHG", "lastname": "Cloud"},
         "funder": "NERC",
-        "grant_number": "HUGS_Grant",
+        "grant_number": "OpenGHG_Grant",
     }
 
 

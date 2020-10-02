@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from HUGS.Modules import CRDS, GCWERKS, ObsSurface
-from HUGS.ObjectStore import get_local_bucket
-from HUGS.Processing import recombine_sections, search
+from openghg.modules import CRDS, GCWERKS, ObsSurface
+from openghg.objectstore import get_local_bucket
+from openghg.processing import recombine_sections, search
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)

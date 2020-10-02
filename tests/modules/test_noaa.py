@@ -5,8 +5,8 @@ from pathlib import Path
 from pandas import Timestamp
 import pytest
 
-from HUGS.Modules import NOAA, Datasource
-from HUGS.ObjectStore import get_local_bucket
+from openghg.modules import NOAA, Datasource
+from openghg.objectstore import get_local_bucket
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)

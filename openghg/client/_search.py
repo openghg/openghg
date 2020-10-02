@@ -12,7 +12,7 @@ class Search:
         if service_url:
             self._service_url = service_url
         else:
-            self._service_url = "https://hugs.acquire-aaai.com/t"
+            self._service_url = "https://openghg.acquire-aaai.com/t"
 
         wallet = Wallet()
         self._service = wallet.get_service(service_url=f"{self._service_url}/hugs")
@@ -65,7 +65,7 @@ class Search:
         if not isinstance(selected_keys, list):
             selected_keys = [selected_keys]
 
-        # Create a Retrieve object to interact with the HUGS Cloud object store
+        # Create a Retrieve object to interact with the object store
         # Select the keys we want to download
         download_keys = {key: self._results[key]["keys"] for key in selected_keys}
 

@@ -32,7 +32,7 @@ def get_ceda_file(
     import json
     import yaml
     from pathlib import Path
-    from HUGS.Util import get_datapath
+    from openghg.util import get_datapath
 
     if filepath:
         filepath = Path(filepath)
@@ -67,7 +67,7 @@ def get_ceda_file(
     # Similarly load from YAML?yaml
     # Where site_authors is a dict containing authors
     data["authors"] = [
-        {"firstname": "HUGS", "surname": "Cloud"},
+        {"firstname": "OpenGHG", "surname": "Cloud"},
         {"firstname": "", "surname": ""},
         {"firstname": "", "surname": ""},
     ]
@@ -92,9 +92,9 @@ def get_ceda_file(
         "catalogue_url": ceda_comp[site]["catalogue_url"],
         "title": site_title,
         "description": site_description,
-        "PI": {"firstname": "HUGS", "lastname": "Cloud"},
+        "PI": {"firstname": "OpenGHG", "lastname": "Cloud"},
         "funder": "NERC",
-        "grant_number": "HUGS_Grant",
+        "grant_number": "OpenGHG_Grant",
     }
 
     data["instrument"] = {

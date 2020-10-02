@@ -17,7 +17,7 @@ class BaseModule:
             Returns:
                 bool: True if object exists
         """
-        from HUGS.ObjectStore import exists, get_bucket
+        from openghg.objectstore import exists, get_bucket
 
         if bucket is None:
             bucket = get_bucket()
@@ -37,7 +37,7 @@ class BaseModule:
                 cls: Class object of cls type
         """
         from Acquire.ObjectStore import string_to_datetime
-        from HUGS.ObjectStore import get_bucket
+        from openghg.objectstore import get_bucket
         from collections import defaultdict
 
         if not data:
@@ -72,7 +72,7 @@ class BaseModule:
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from HUGS.ObjectStore import get_bucket, get_object_from_json
+        from openghg.objectstore import get_bucket, get_object_from_json
 
         if not cls.exists():
             return cls()
@@ -151,8 +151,8 @@ class BaseModule:
             Returns:
                 None
         """
-        from HUGS.Modules import Datasource
-        from HUGS.Util import daterange_from_str
+        from openghg.modules import Datasource
+        from openghg.util import daterange_from_str
 
         if not 0 <= int(rank) <= 10:
             raise TypeError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")

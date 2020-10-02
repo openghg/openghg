@@ -20,7 +20,7 @@ class ICOS:
                 list: UUIDs of Datasources data has been assigned to
         """
         from pathlib import Path
-        from HUGS.Processing import assign_attributes
+        from openghg.processing import assign_attributes
 
         data_filepath = Path(data_filepath)
 
@@ -54,7 +54,7 @@ class ICOS:
         """
         from pandas import read_csv, Timestamp
         import numpy as np
-        from HUGS.Util import read_header
+        from openghg.util import read_header
 
         # metadata = read_metadata(filepath=data_filepath, data=data, data_type="ICOS")
         header = read_header(filepath=data_filepath)

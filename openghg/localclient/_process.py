@@ -1,8 +1,8 @@
 # The local version of the Process object
 from pathlib import Path
 
-from HUGS.Modules import ObsSurface
-from HUGS.Processing import DataTypes
+from openghg.modules import ObsSurface
+from openghg.processing import DataTypes
 
 __all__ = ["process_files"]
 

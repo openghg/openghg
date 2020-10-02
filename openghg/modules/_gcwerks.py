@@ -3,7 +3,7 @@ __all__ = ["GCWERKS"]
 
 class GCWERKS:
     def __init__(self):
-        from HUGS.Util import load_hugs_json
+        from openghg.util import load_hugs_json
 
         self._sampling_period = 0
         # Load site data
@@ -25,8 +25,8 @@ class GCWERKS:
                 dict: Dictionary of source_name : UUIDs
         """
         from pathlib import Path
-        from HUGS.Processing import assign_attributes
-        from HUGS.Util import is_number
+        from openghg.processing import assign_attributes
+        from openghg.util import is_number
         import re
 
         data_filepath = Path(data_filepath)

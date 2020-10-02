@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 import pytest
 
-from HUGS.Modules import ICOS
+from openghg.modules import ICOS
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)

@@ -204,7 +204,7 @@ def hash_files(file_list):
 
 
 def get_bucket(empty=False):
-    """ Returns the HUGS bucket
+    """ Returns the the object store bucket
 
         Args:
             empty (bool, default=False): Get an empty bucket

@@ -13,7 +13,7 @@ class Process:
     def __init__(self, service_url=None):
         """ Process a datafile using the passed user account
 
-            service_url = "https://hugs.acquire-aaai.com/t"
+            service_url = "https://openghg.acquire-aaai.com/t"
 
             Args:
                 service_url: URL of service
@@ -21,7 +21,7 @@ class Process:
         if service_url:
             self._service_url = service_url
         else:
-            self._service_url = "https://hugs.acquire-aaai.com/t"
+            self._service_url = "https://openghg.acquire-aaai.com/t"
 
         wallet = Wallet()
         self._service = wallet.get_service(service_url=f"{self._service_url}/hugs")
@@ -44,7 +44,7 @@ class Process:
                 user (User): Authenticated Acquire User
                 folder_path (str, pathlib.Path): Path of folder containing files to be processed
                 data_type (str): Type of data to be processed (CRDS, GC etc)
-                hugs_url (str): URL of HUGS service. Currently used for testing
+                hugs_url (str): URL of OpenGHG service. Currently used for testing
                 This may be removed in the future.
                 storage_url (str): URL of storage service. Currently used for testing
                 This may be removed in the future.
@@ -71,7 +71,7 @@ class Process:
                 user (User): Authenticated Acquire User
                 files (str, list): Path of files to be processed
                 data_type (str): Type of data to be processed (CRDS, GC etc)
-                hugs_url (str): URL of HUGS service. Currently used for testing
+                hugs_url (str): URL of OpenGHG service. Currently used for testing
                 datasource (str): Datasource name or UUID
                 This may be removed in the future.
                 storage_url (str): URL of storage service. Currently used for testing
@@ -132,11 +132,11 @@ class Process:
 
                 filemeta = drive.upload(file[0])
                 par = PAR(location=filemeta.location(), user=user)
-                par_secret = hugs.encrypt_data(par.secret())
+                par_secret = openghg.encrypt_data(par.secret())
 
                 prec_meta = drive.upload(file[1])
                 prec_par = PAR(location=prec_meta.location(), user=user)
-                prec_par_secret = hugs.encrypt_data(prec_par.secret())
+                prec_par_secret = openghg.encrypt_data(prec_par.secret())
 
                 args = {
                     "authorisation": auth.to_data(),
@@ -152,7 +152,7 @@ class Process:
             else:
                 filemeta = drive.upload(file)
                 par = PAR(location=filemeta.location(), user=user)
-                par_secret = hugs.encrypt_data(par.secret())
+                par_secret = openghg.encrypt_data(par.secret())
 
                 args = {
                     "authorisation": auth.to_data(),

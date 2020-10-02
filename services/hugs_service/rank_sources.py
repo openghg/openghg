@@ -1,4 +1,4 @@
-from HUGS.Modules import ObsSurface
+from openghg.modules import ObsSurface
 
 
 def rank_sources(args):

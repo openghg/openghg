@@ -1,4 +1,4 @@
-from HUGS.Modules import BaseModule
+from openghg.modules import BaseModule
 
 __all__ = ["THAMESBARRIER"]
 
@@ -8,7 +8,7 @@ class THAMESBARRIER(BaseModule):
 
     """
     def __init__(self):
-        from HUGS.Util import load_hugs_json
+        from openghg.util import load_hugs_json
 
         # Holds parameters used for writing attributes to Datasets
         self._tb_params = {}
@@ -30,7 +30,7 @@ class THAMESBARRIER(BaseModule):
                 list: UUIDs of Datasources data has been assigned to
         """
         from pathlib import Path
-        from HUGS.Processing import assign_attributes
+        from openghg.processing import assign_attributes
 
         data_filepath = Path(data_filepath)
 

@@ -22,7 +22,7 @@ __all__ = ["delete_object",
 
 
 def get_hugs_local_path():
-    """ Returns the path to the local HUGS object store bucket
+    """ Returns the path to the local OpenGHG object store bucket
 
         Returns:
             pathlib.Path
@@ -257,7 +257,7 @@ def query_store():
             dict: Dictionary for data to be shown in force graph 
     """
     from collections import defaultdict
-    from HUGS.Modules import Datasource, ObsSurface
+    from openghg.modules import Datasource, ObsSurface
 
     obs = ObsSurface.load()
 

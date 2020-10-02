@@ -2,8 +2,8 @@ import pytest
 from pandas import Timestamp
 from pathlib import Path
 
-from HUGS.Modules import Datasource, ObsSurface
-from HUGS.ObjectStore import get_local_bucket, exists
+from openghg.modules import Datasource, ObsSurface
+from openghg.objectstore import get_local_bucket, exists
 
 
 def get_datapath(filename, data_type):

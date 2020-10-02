@@ -1,4 +1,4 @@
-from HUGS.Modules import BaseModule
+from openghg.modules import BaseModule
 
 # flake8: noqa
 
@@ -66,7 +66,7 @@ class TEMPLATE(BaseModule):
             Returns:
                 None
         """
-        from HUGS.ObjectStore import get_bucket, set_object_from_json
+        from openghg.objectstore import get_bucket, set_object_from_json
 
         if bucket is None:
             bucket = get_bucket()
@@ -118,8 +118,8 @@ class TEMPLATE(BaseModule):
             Returns:
                 list: UUIDs of Datasources data has been assigned to
         """
-        from HUGS.Processing import assign_data, lookup_gas_datasources
-        from HUGS.Util import hash_file
+        from openghg.processing import assign_data, lookup_gas_datasources
+        from openghg.util import hash_file
         from pathlib import Path
 
         template = TEMPLATE.load()
@@ -183,7 +183,7 @@ class TEMPLATE(BaseModule):
                 dict: Dictionary containing attributes, data and metadata keys
         """
         from pandas import RangeIndex, concat, read_csv, datetime, NaT
-        from HUGS.Processing import get_attributes, read_metadata
+        from openghg.processing import get_attributes, read_metadata
 
         metadata = read_metadata(
             filepath=data_filepath, data=data, data_type="TEMPLATE"
@@ -219,7 +219,7 @@ class TEMPLATE(BaseModule):
             Returns:
                 dict: Dictionary of combined data with correct attributes assigned to Datasets
         """
-        from HUGS.Processing import get_attributes
+        from openghg.processing import get_attributes
 
         for species in data:
             site_attributes = data[species]["attributes"]

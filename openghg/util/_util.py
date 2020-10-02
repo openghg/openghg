@@ -97,7 +97,7 @@ def load_object(class_name):
         Returns:
             class_name: class_name object
     """
-    module_path = "HUGS.Modules"
+    module_path = "openghg.modules"
     class_name = str(class_name).upper()
 
     # Here we try upper and lowercase for the module
@@ -175,17 +175,17 @@ def get_datapath(filename, directory=None):
     filename = str(filename)
 
     if directory is None:
-        return Path(__file__).resolve().parent.parent.joinpath(f"Data/{filename}")
+        return Path(__file__).resolve().parent.parent.joinpath(f"data/{filename}")
     else:
         return (
             Path(__file__)
             .resolve()
-            .parent.parent.joinpath(f"Data/{directory}/{filename}")
+            .parent.parent.joinpath(f"data/{directory}/{filename}")
         )
 
 
 def load_hugs_json(filename):
-    """ Returns a dictionary created from the HUGS JSON at filename
+    """ Returns a dictionary created from the OpenGHG JSON at filename
 
         Args:
             filename (str): Name of JSON file

@@ -17,8 +17,8 @@ def recombine_sections(data_keys):
     """
     # from pandas import concat as _concat
     from xarray import concat as xr_concat
-    from HUGS.ObjectStore import get_bucket
-    from HUGS.Modules import Datasource
+    from openghg.objectstore import get_bucket
+    from openghg.modules import Datasource
 
     bucket = get_bucket()
 

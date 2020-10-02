@@ -1,6 +1,6 @@
-from HUGS.Modules import Datasource, ObsSurface
-from HUGS.Processing import DataTypes
-from HUGS.Util import load_object
+from openghg.modules import Datasource, ObsSurface
+from openghg.processing import DataTypes
+from openghg.util import load_object
 
 
 def get_sources(args):

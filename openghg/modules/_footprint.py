@@ -37,7 +37,7 @@ class Footprint:
             Returns:
                 bool: True if object exists
         """
-        from HUGS.ObjectStore import exists, get_bucket
+        from openghg.objectstore import exists, get_bucket
 
         if bucket is None:
             bucket = get_bucket()
@@ -111,7 +111,7 @@ class Footprint:
             Returns:
                 None
         """
-        from HUGS.ObjectStore import get_bucket, set_object_from_json
+        from openghg.objectstore import get_bucket, set_object_from_json
 
         if self.is_null():
             return
@@ -132,7 +132,7 @@ class Footprint:
             Returns:
                 Datasource: Datasource object created from JSON
         """
-        from HUGS.ObjectStore import get_bucket, get_object_from_json
+        from openghg.objectstore import get_bucket, get_object_from_json
 
         if not Footprint.exists():
             return Footprint.create()
@@ -157,7 +157,7 @@ class Footprint:
                 None
         """
         import xarray as xr
-        from HUGS.Processing import lookup_footprint_datasources
+        from openghg.processing import lookup_footprint_datasources
 
         footprint = Footprint.load()
 
@@ -199,7 +199,7 @@ class Footprint:
             Returns:
                 list: List of Datasource UUIDs
         """
-        from HUGS.Modules import Datasource
+        from openghg.modules import Datasource
 
         uuids = {}
         for key in lookup_results:

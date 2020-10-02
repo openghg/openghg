@@ -4,9 +4,9 @@ from pathlib import Path
 
 from Acquire.Client import PAR, Authorisation, Drive, Service, StorageCreds
 
-from HUGS.Client import Process
-from HUGS.Modules import CRDS, GCWERKS
-from HUGS.ObjectStore import get_local_bucket
+from openghg.client import Process
+from openghg.modules import CRDS, GCWERKS
+from openghg.objectstore import get_local_bucket
 
 
 def get_datapath(filename, data_type):
@@ -124,7 +124,7 @@ def test_process_CRDS(authenticated_user, tempdir):
     par = PAR(location=filemeta.location(), user=authenticated_user)
 
     hugs = Service(service_url="hugs")
-    par_secret = hugs.encrypt_data(par.secret())
+    par_secret = openghg.encrypt_data(par.secret())
 
     auth = Authorisation(resource="process", user=authenticated_user)
 
@@ -136,7 +136,7 @@ def test_process_CRDS(authenticated_user, tempdir):
         "source_name": "bsd.picarro.1minute.248m",
     }
 
-    response = hugs.call_function(function="process", args=args)
+    response = openghg.call_function(function="process", args=args)
 
     expected_keys = [
         "bsd.picarro.1minute.248m_ch4",
@@ -174,8 +174,8 @@ def test_process_GC(authenticated_user, tempdir):
     precision_par = PAR(location=precision_meta.location(), user=authenticated_user)
 
     hugs = Service(service_url="hugs")
-    data_secret = hugs.encrypt_data(data_par.secret())
-    precision_secret = hugs.encrypt_data(precision_par.secret())
+    data_secret = openghg.encrypt_data(data_par.secret())
+    precision_secret = openghg.encrypt_data(precision_par.secret())
 
     auth = Authorisation(resource="process", user=authenticated_user)
 
@@ -189,7 +189,7 @@ def test_process_GC(authenticated_user, tempdir):
         "instrument": "medusa",
     }
 
-    response = hugs.call_function(function="process", args=args)
+    response = openghg.call_function(function="process", args=args)
 
     result_keys = (sorted(response["results"]["capegrim-medusa.18.C"].keys()))[:8]
 

@@ -3,8 +3,8 @@ import pytest
 from datetime import datetime
 from pandas import Timestamp
 
-from HUGS.Client import Process, RankSources, Search
-from HUGS.ObjectStore import get_local_bucket
+from openghg.client import Process, RankSources, Search
+from openghg.objectstore import get_local_bucket
 
 
 @pytest.fixture(scope="session")

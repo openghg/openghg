@@ -83,8 +83,8 @@ def get_single_site(
     from pandas import Timestamp, Timedelta
     import numpy as np
     from xarray import concat as xr_concat
-    from HUGS.LocalClient import Search
-    from HUGS.Util import load_hugs_json
+    from openghg.localclient import Search
+    from openghg.util import load_hugs_json
 
     site_info = load_hugs_json(filename="acrg_site_info.json")
     site = site.upper()
@@ -231,7 +231,7 @@ def synonyms(species: str) -> str:
     Returns:
         str: Matched species string
     """
-    from HUGS.Util import load_hugs_json
+    from openghg.util import load_hugs_json
 
     # Load in the species data
     species_data = load_hugs_json(filename="acrg_species_info.json")
@@ -272,7 +272,7 @@ def scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
     """    
     from pandas import read_csv
     from numexpr import evaluate
-    from HUGS.Util import get_datapath
+    from openghg.util import get_datapath
 
     # If scale is already correct, return
     ds_scale = data.attrs["scale"]

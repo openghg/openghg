@@ -4,8 +4,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from HUGS.Modules import Datasource, THAMESBARRIER
-from HUGS.ObjectStore import get_local_bucket
+from openghg.modules import Datasource, THAMESBARRIER
+from openghg.objectstore import get_local_bucket
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)

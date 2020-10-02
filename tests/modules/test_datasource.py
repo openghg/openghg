@@ -8,9 +8,9 @@ import pandas as pd
 import pytest
 import xarray
 
-from HUGS.Modules import CRDS, Datasource
-from HUGS.ObjectStore import get_local_bucket, get_object_names
-from HUGS.Util import create_daterange_str
+from openghg.modules import CRDS, Datasource
+from openghg.objectstore import get_local_bucket, get_object_names
+from openghg.util import create_daterange_str
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 mocked_uuid2 = "10000000-0000-0000-00000-000000000001"

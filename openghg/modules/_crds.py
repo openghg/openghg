@@ -1,4 +1,4 @@
-from HUGS.Util import load_hugs_json
+from openghg.util import load_hugs_json
 
 __all__ = ["CRDS"]
 
@@ -29,7 +29,7 @@ class CRDS():
                 None
         """
         from pathlib import Path
-        from HUGS.Processing import assign_attributes
+        from openghg.processing import assign_attributes
 
         if not isinstance(data_filepath, Path):
             data_filepath = Path(data_filepath)
@@ -204,7 +204,7 @@ class CRDS():
             Returns:
                 dict: Dictionary of attributes
         """
-        from HUGS.Util import load_hugs_json
+        from openghg.util import load_hugs_json
 
         if not self._crds_params:
             data = load_hugs_json(filename="process_gcwerks_parameters.json")
@@ -230,7 +230,7 @@ class CRDS():
                     tuple (int, int): Number of gases, number of
                     columns of data for each gas
             """
-        from HUGS.Util import unanimous
+        from openghg.util import unanimous
 
         # Slice the dataframe
         head_row = data.head(1)

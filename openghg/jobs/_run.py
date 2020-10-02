@@ -3,8 +3,8 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-from HUGS.Jobs import SSHConnect
-from HUGS.Util import get_datapath
+from openghg.jobs import SSHConnect
+from openghg.util import get_datapath
 
 
 def run_job(username, hostname, password, job_data, known_host=False):

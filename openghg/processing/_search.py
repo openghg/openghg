@@ -40,8 +40,8 @@ def search(
     """
     from collections import defaultdict
     from json import load
-    from HUGS.Modules import Datasource, ObsSurface
-    from HUGS.Util import (get_datetime_now, get_datetime_epoch, create_daterange_str, 
+    from openghg.modules import Datasource, ObsSurface
+    from openghg.util import (get_datetime_now, get_datetime_epoch, create_daterange_str, 
                             timestamp_tzaware, get_datapath)
 
     # if species is not None and not isinstance(species, list):
@@ -301,7 +301,7 @@ def get_data(key_list):
         Bypass loading the Datasource? Get both then we have metadata?
 
     """
-    from HUGS.Modules import Datasource
+    from openghg.modules import Datasource
 
     # Get the data
     # This will return a list of lists of data

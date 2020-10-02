@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from HUGS.Processing import get_split_frequency
+from openghg.processing import get_split_frequency
 
 mocked_uuid = "00000000-0000-1111-00000-000000000000"
 

@@ -1,4 +1,4 @@
-from HUGS.Modules import BaseModule
+from openghg.modules import BaseModule
 
 
 class ObsSurface(BaseModule):
@@ -51,7 +51,7 @@ class ObsSurface(BaseModule):
             Returns:
                 None
         """
-        from HUGS.ObjectStore import get_bucket, set_object_from_json
+        from openghg.objectstore import get_bucket, set_object_from_json
 
         if bucket is None:
             bucket = get_bucket()
@@ -76,8 +76,8 @@ class ObsSurface(BaseModule):
         """
         from collections import defaultdict
         from pathlib import Path
-        from HUGS.Util import load_object, hash_file
-        from HUGS.Processing import assign_data, DataTypes
+        from openghg.util import load_object, hash_file
+        from openghg.processing import assign_data, DataTypes
 
         if not isinstance(filepath, list):
             filepath = [filepath]
@@ -170,8 +170,8 @@ class ObsSurface(BaseModule):
             Returns:
                 None
         """
-        from HUGS.ObjectStore import delete_object, get_bucket
-        from HUGS.Modules import Datasource
+        from openghg.objectstore import delete_object, get_bucket
+        from openghg.modules import Datasource
 
         bucket = get_bucket()
         # Load the Datasource and get all its keys

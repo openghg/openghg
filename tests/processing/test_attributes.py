@@ -2,9 +2,9 @@ import logging
 import os
 from pathlib import Path
 
-from HUGS.Modules import CRDS
-from HUGS.ObjectStore import get_local_bucket
-from HUGS.Processing import assign_attributes
+from openghg.modules import CRDS
+from openghg.objectstore import get_local_bucket
+from openghg.processing import assign_attributes
 # import tempfile
 # from cfchecker import CFChecker
 
@@ -131,7 +131,7 @@ def test_crds_attributes():
 # TODO - expand these tests
 
 # def test_old_new_attrs():
-#     # from HUGS.Processing import acrg_attributes
+#     # from openghg.processing import acrg_attributes
 #     from acrg_obs.utils import attributes
 
 #     _ = get_local_bucket(empty=True)

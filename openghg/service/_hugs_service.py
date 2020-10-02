@@ -13,7 +13,7 @@ class HugsService(_Service):
             self.__dict__ = _copy(other.__dict__)
 
             if self.service_type() != "hugs":
-                from hugs.Service import HugsServiceError
+                from openghg.service import HugsServiceError
 
                 raise HugsServiceError(
                     "Cannot construct a HugsService from a service which is not a hugs service!"

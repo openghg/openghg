@@ -10,7 +10,7 @@ class EUROCOM():
 
     """
     def __init__(self):
-        from HUGS.Util import load_hugs_json
+        from openghg.util import load_hugs_json
 
         self._eurocom_params = {}
         # Sampling period of EUROCOM data in seconds
@@ -29,7 +29,7 @@ class EUROCOM():
                 list: UUIDs of Datasources data has been assigned to
         """
         from pathlib import Path
-        from HUGS.Processing import assign_attributes
+        from openghg.processing import assign_attributes
 
         data_filepath = Path(data_filepath)
 
@@ -57,8 +57,8 @@ class EUROCOM():
         """
         from pandas import read_csv, Timestamp
         import numpy as np
-        from HUGS.Processing import get_attributes
-        from HUGS.Util import read_header
+        from openghg.processing import get_attributes
+        from openghg.util import read_header
         from pathlib import Path
 
         data_filepath = Path(data_filepath)

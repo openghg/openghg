@@ -1,9 +1,9 @@
 import os
 import pytest
 
-from HUGS.Modules import ObsSurface
-from HUGS.ObjectStore import get_local_bucket
-from HUGS.LocalClient import Search
+from openghg.modules import ObsSurface
+from openghg.objectstore import get_local_bucket
+from openghg.localclient import Search
 
 # Ensure we have something to find
 @pytest.fixture(scope="session", autouse=True)

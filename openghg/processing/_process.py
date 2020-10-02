@@ -20,7 +20,7 @@ def process_data(
         Returns:
             list: List of Datasources
     """
-    from HUGS.Modules import ObsSurface
+    from openghg.modules import ObsSurface
 
     processing_obj = ObsSurface.load()
 

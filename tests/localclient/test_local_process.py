@@ -1,6 +1,6 @@
 import os
-from HUGS.LocalClient import process_files
-from HUGS.ObjectStore import get_local_bucket
+from openghg.localclient import process_files
+from openghg.objectstore import get_local_bucket
 
 
 def test_process_files():

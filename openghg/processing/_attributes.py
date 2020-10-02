@@ -82,7 +82,7 @@ def get_attributes(
     """
     import json
     from pandas import Timestamp as pd_Timestamp
-    from HUGS.Util import get_datapath
+    from openghg.util import get_datapath
     from xarray import Dataset as xr_Dataset
 
     if not isinstance(ds, xr_Dataset):
@@ -292,7 +292,7 @@ def _site_info_attributes(site, network=None):
         Returns:
             dict: Dictionary of site attributes
     """
-    from HUGS.Util import get_datapath
+    from openghg.util import get_datapath
     from json import load as json_load
 
     site = site.upper()

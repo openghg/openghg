@@ -12,7 +12,7 @@ class RankSources:
         wallet = Wallet()
 
         if service_url is None:
-            service_url = "https://hugs.acquire-aaai.com/t"
+            service_url = "https://openghg.acquire-aaai.com/t"
 
         self._service = wallet.get_service(service_url=f"{service_url}/hugs")
 
@@ -27,7 +27,7 @@ class RankSources:
             Returns:
                 dict: Dictionary of datasource metadata
         """
-        from HUGS.Util import valid_site
+        from openghg.util import valid_site
 
         if self._service is None:
             raise PermissionError("Cannot use a null service")

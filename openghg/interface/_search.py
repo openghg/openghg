@@ -13,7 +13,7 @@ import ipywidgets as widgets
 from Acquire.ObjectStore import datetime_to_string
 from pandas import read_json as pd_read_json
 
-from HUGS.Client import Retrieve, Search
+from openghg.client import Retrieve, Search
 
 
 def search_emissions(search_terms):
