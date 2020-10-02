@@ -97,7 +97,7 @@ class RankSources:
         mapper = cm.ScalarMappable(norm=norm, cmap=cm.tab10)
 
         def colour_mapper(x):
-            return matplotlib.colors.to_hex(mapper.to_rgba(x))
+            return matplotlib.colors.to_hex(mapper.to_rgba(int(x)))
 
         net.add_node(site, label=site, color="brown", value=5000)
 
@@ -106,6 +106,7 @@ class RankSources:
             site_name = data["metadata"]["site"].upper()
             data_range = data["data_range"]
 
+            # HTML to show when the mouse is hovered over a node
             title = "</br>".join([f"<b>Rank:</b> {str(rank)}", f"<b>Site:</b> {site_name}", f"<b>Data range:</b> {data_range}"])
 
             if rank == 0:
@@ -113,7 +114,7 @@ class RankSources:
             else:
                 # For now just use the highest rank for the color
                 highest_rank = sorted(list(rank.keys()))[-1]
-                colour = colour_mapper(int(highest_rank))
+                colour = colour_mapper(highest_rank)
 
             split_key = key.split("_")
             label = " ".join((split_key[0].upper(), split_key[1].upper(), split_key[2], split_key[3]))
