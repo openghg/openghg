@@ -5,6 +5,8 @@
 from . import client, jobs, localclient, modules, objectstore, processing, service, util
 from ._version import get_versions
 
+__all__ = ["client", "jobs", "localclient", "modules", "objectstore", "processing", "service", "util"]
+
 v = get_versions()
 
 __version__ = v['version']

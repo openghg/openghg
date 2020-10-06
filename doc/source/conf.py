@@ -14,10 +14,24 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import sys
+from pathlib import Path
+
+script_dir = Path(__file__).resolve(strict=True)
+# OpenGHG directory for import
+openghg_dir = script_dir.parent.parent.parent
+# Add to sys path for import
+sys.path.insert(0, str(openghg_dir))
+
+# script_dir = os.path.dirname(__file__)
+# openghg_dir = os.path.join(script_dir, "..", "..")
+
+# build_dir = script_dir.parent.parent.joinpath("build")
+
 
 # -- Project information -----------------------------------------------------
 
-project = 'HUGS'
+project = 'OpenGHG'
 copyright = '2020, Gareth Jones'
 author = 'Gareth Jones'
 
@@ -27,9 +41,8 @@ author = 'Gareth Jones'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['autoapi.extension']
-
-autoapi_dirs = ['../../HUGS']
+extensions = [
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -39,6 +52,16 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+extensions = [
+    "autoapi.extension",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.mathjax",
+    "sphinxcontrib.programoutput",
+    "sphinx_issues",
+]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -51,3 +74,11 @@ html_theme = 'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# General information about the project.
+project = "OpenGHG"
+copyright = "2020 OpenGHG"
+
+autoapi_type = "python"
+autoapi_dirs = ["../../openghg"]
+autoapi_ignore = ["*interface/*", "*data/*"]
