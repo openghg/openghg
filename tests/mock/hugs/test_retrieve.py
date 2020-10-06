@@ -3,8 +3,8 @@ import os
 import pandas as pd
 import pytest
 from Acquire.Client import PAR, Authorisation, Drive, Service, StorageCreds
-
-from HUGS.Client import ClearDatasources, Retrieve, Search
+from openghg.client import Search
+from openghg.objectstore import get_local_bucket
 
 
 @pytest.fixture(scope="session")
@@ -15,9 +15,7 @@ def tempdir(tmpdir_factory):
 
 @pytest.fixture(autouse=True)
 def crds(authenticated_user):
-    clear_ds = ClearDatasources(service_url="hugs")
-    clear_ds.clear_datasources()
-
+    get_local_bucket(empty=True)
     creds = StorageCreds(user=authenticated_user, service_url="storage")
     drive = Drive(creds=creds, name="test_drive")
     filepath = os.path.join(
@@ -29,7 +27,7 @@ def crds(authenticated_user):
     par = PAR(location=filemeta.location(), user=authenticated_user)
 
     hugs = Service(service_url="hugs")
-    par_secret = hugs.encrypt_data(par.secret())
+    par_secret = openghg.encrypt_data(par.secret())
 
     auth = Authorisation(resource="process", user=authenticated_user)
 
@@ -41,28 +39,22 @@ def crds(authenticated_user):
         "source_name": "bsd.picarro.1minute.248m",
     }
 
-    hugs.call_function(function="process", args=args)
+    openghg.call_function(function="process", args=args)
 
 
+@pytest.mark.skip(reason="Need to fix dependence on Acquire")
 def test_retrieve(authenticated_user, crds):
     search_term = "co"
     location = "bsd"
-    data_type = "CRDS"
 
     search_obj = Search(service_url="hugs")
 
-    search_results = search_obj.search(
-        search_terms=search_term, locations=location, data_type=data_type
-    )
+    search_results = search_obj.search(species=search_term, locations=location)
 
     key = list(search_results.keys())[0]
-    to_download = {"bsd_co": search_results[key]["keys"]}
 
-    retrieve_obj = Retrieve(service_url="hugs")
-
-    response = retrieve_obj.retrieve(keys=to_download)
-
-    data = response["bsd_co"]
+    result = search_obj.download(selected_keys=key)
+    data = result[0]
 
     del data.attrs["File created"]
 

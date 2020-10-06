@@ -3,7 +3,7 @@
 
 # from Acquire.Client import Drive, StorageCreds
 
-# from HUGS.Client import ListObjects
+# from openghg.client import ListObjects
 
 # @pytest.fixture(scope="session")
 # def tempdir(tmpdir_factory):

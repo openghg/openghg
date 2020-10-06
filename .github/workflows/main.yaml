@@ -1,4 +1,4 @@
-name: HUGS tests
+name: OpenGHG tests
 
 on:
   push:
@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.operating-system }}
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       max-parallel: 4
       fail-fast: false
@@ -28,7 +29,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest pytest-cov flake8
         pip install -r requirements.txt
-        pip install -r test-requirements.txt
+        pip install -r requirements-dev.txt
     - name: 'Clone Acquire for services folder required for tests'
       run: |
         git clone -b testStore https://github.com/gareth-j/acquire.git ../acquire
@@ -36,8 +37,10 @@ jobs:
         pip install oci retry
     - name: Lint with flake8
       run: |
-        flake8 . --count --statistics
+        flake8 HUGS/ --count --statistics
     - name: Test with pytest
+      env:
+        HUGS_PATH: /tmp/openghg_store
       run: |
         pytest --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov

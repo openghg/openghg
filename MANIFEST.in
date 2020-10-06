@@ -8,4 +8,5 @@ graft HUGS
 global-exclude *.pickle
 global-exclude *.pyc
 global-exclude *.pyd
-global-exclude .git*
+global-exclude .git*include versioneer.py
+include openghg/_version.py

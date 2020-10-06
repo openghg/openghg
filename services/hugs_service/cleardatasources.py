@@ -1,5 +1,5 @@
 def clear_datasources(args):
-    from HUGS.Modules import CRDS, GC
+    from openghg.modules import CRDS, GC
 
     gc = GC.load()
     crds = CRDS.load()

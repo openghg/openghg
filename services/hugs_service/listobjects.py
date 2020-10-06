@@ -1,4 +1,4 @@
-from HUGS.ObjectStore import get_bucket, get_object_names
+from openghg.objectstore import get_bucket, get_object_names
 
 
 def listobjects(args):

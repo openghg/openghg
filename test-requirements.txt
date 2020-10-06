@@ -1,4 +1,0 @@
-coverage
-fdk==0.0.35
-flake8
-pytest
