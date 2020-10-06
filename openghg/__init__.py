@@ -7,8 +7,6 @@ from ._version import get_versions
 
 v = get_versions()
 
-print(v)
-
 __version__ = v['version']
 __branch__ = v['branch']
 __repository__ = v['repository']
