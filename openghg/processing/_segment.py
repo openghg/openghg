@@ -44,10 +44,13 @@ __all__ = ["get_split_frequency", "create_footprint_datasources", "assign_data"]
 
 
 def assign_data(gas_data, lookup_results, overwrite):
-    """ Create or get an existing Datasource for each gas in the file
+    """ Assign data to a Datasource. This will either create a new Datasource 
+    Create or get an existing Datasource for each gas in the file
 
         Args:
             gas_data (dict): Dictionary containing data and metadata for species
+            lookup_results (dict): Dictionary of lookup results]
+            overwrite (bool): If True overwrite current data stored
         Returns:
             dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
     """

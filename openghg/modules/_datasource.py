@@ -108,9 +108,7 @@ class Datasource:
 
             # Check if there's overlap of data
             if start_new >= start_data and end_new <= end_data and overwrite is False:
-                raise ValueError(
-                    "The provided data overlaps dates covered by existing data"
-                )
+                raise ValueError("The provided data overlaps dates covered by existing data")
 
         # Need to check here if we've seen this data before
         freq = get_split_frequency(data)
@@ -118,9 +116,7 @@ class Datasource:
         group = data.groupby(Grouper(freq=freq))
         # Create a list tuples of the split dataframe and the daterange it covers
         # As some (years, months, weeks) may be empty we don't want those dataframes
-        self._data = [
-            (g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0
-        ]
+        self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
         self.add_metadata(key="data_type", value="timeseries")
         self._data_type = "timeseries"
         # Use daterange() to update the recorded values
@@ -143,9 +139,7 @@ class Datasource:
         data_types = ["footprint", "timeseries"]
 
         if data_type not in data_types:
-            raise TypeError(
-                f"Incorrect data type selected. Please select from one of {data_types}"
-            )
+            raise TypeError(f"Incorrect data type selected. Please select from one of {data_types}")
 
         # Ensure metadata values are all lowercase
         if data_type != "footprint":
@@ -255,9 +249,7 @@ class Datasource:
 
             return start, end
         except AttributeError:
-            raise AttributeError(
-                "This dataset does not have a time attribute, unable to read date range"
-            )
+            raise AttributeError("This dataset does not have a time attribute, unable to read date range")
 
     def get_dataset_daterange_str(self, dataset):
         start, end = self.get_dataset_daterange(dataset=dataset)
@@ -410,12 +402,7 @@ class Datasource:
         from pandas import HDFStore
 
         with HDFStore(
-            "write.hdf",
-            mode="w",
-            driver="H5FD_CORE",
-            driver_core_backing_store=0,
-            complevel=6,
-            complib="blosc:blosclz",
+            "write.hdf", mode="w", driver="H5FD_CORE", driver_core_backing_store=0, complevel=6, complib="blosc:blosclz",
         ) as out:
 
             out["data"] = data
@@ -435,13 +422,7 @@ class Datasource:
         """
         from pandas import HDFStore, read_hdf
 
-        with HDFStore(
-            "read.hdf",
-            mode="r",
-            driver="H5FD_CORE",
-            driver_core_backing_store=0,
-            driver_core_image=hdf_data,
-        ) as data:
+        with HDFStore("read.hdf", mode="r", driver="H5FD_CORE", driver_core_backing_store=0, driver_core_image=hdf_data,) as data:
             return read_hdf(data)
 
     @staticmethod
@@ -582,7 +563,7 @@ class Datasource:
             Returns:
                 None
         """
-        # If we've only shallow loaded (without the data) 
+        # If we've only shallow loaded (without the data)
         # this Datasource we use the latest data keys
         if not self._data:
             keys = sorted(self._data_keys["latest"]["keys"])
@@ -631,7 +612,7 @@ class Datasource:
         if not isinstance(search_terms, list):
             search_terms = [search_terms]
 
-        search_terms = [s.lower() for s in search_terms]    
+        search_terms = [s.lower() for s in search_terms]
 
         results = []
         for term in search_terms:
@@ -879,6 +860,7 @@ class Datasource:
         """
         from collections import defaultdict
         from openghg.util import daterange_from_str, daterange_to_str, create_daterange
+
         # Need to search ranks in descending order
 
         # If we don't have a rank return 9

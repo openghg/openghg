@@ -11,8 +11,9 @@ to create a cloud agnostic platform for simulation and analysis of large dataset
 Background
 ==========
 
-OpenGHG will primarily be based in the cloud but can also be used locally to handle the processing and 
-storage of data within a local object store. See the :doc:`local use section <localuse>`.
+OpenGHG is based on the work of the `HUGS project <https://hugs-cloud.com>`_ to develop a cloud based platform for
+analysis of greenhouse gas measurement data. 
+
 
 Features
 ========
@@ -38,3 +39,11 @@ API Reference
    :maxdepth: 2
 
    api/index
+
+Devloper API Reference
+======================
+
+.. toctree::
+   :maxdepth: 2
+
+   api/index_devapi

@@ -1,5 +1,5 @@
 ==========================
-Modules API Detail
+modules API Detail
 ==========================
 
 ObsSurface

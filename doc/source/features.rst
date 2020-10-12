@@ -4,7 +4,6 @@ Features
 
 OpenGHG Features
 
-
 Data processing
 ===============
 

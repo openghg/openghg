@@ -3,9 +3,6 @@
 
 """
 __all__ = [
-    "get_data",
-    "daterange_to_string",
-    "daterange_to_string",
     "search",
     "lookup_gas_datasources",
     "lookup_footprint_datasources",
@@ -109,7 +106,7 @@ def search(
                         # Get the data keys for the data in the matching daterange
                         in_date = datasource.in_daterange(daterange=daterange_str)
 
-                        data_date_str = strip_dates_keys(in_date)
+                        data_date_str = _strip_dates_keys(in_date)
 
                         key = f"{sp}_{site}_{inlet}_{instrument}".lower()
 
@@ -165,7 +162,7 @@ def search(
 
                     # Get a key that covers the daterange of the actual data and not from epoch to now
                     # if no start/end datetimes are passed
-                    data_date_str = strip_dates_keys(data_keys)
+                    data_date_str = _strip_dates_keys(data_keys)
 
                     results[key]["keys"] = {data_date_str: data_keys}
                     results[key]["metadata"] = source.metadata()
@@ -203,7 +200,7 @@ def search(
     return results
 
 
-def strip_dates_keys(keys):
+def _strip_dates_keys(keys):
     """ Strips the date from a key, could this data just be read from JSON instead?
         Read dates covered from the Datasource?
 
@@ -226,29 +223,7 @@ def strip_dates_keys(keys):
     return "_".join([start_date, end_date])
 
 
-def append_keys(results, search_key, keys):
-    """ defaultdict(list) behaviour for keys record
-
-        If search_key exists in results the keys list is appended
-        to the list stored at that key. Otherwise a new list containing
-        the keys is created and stored at that key.
-
-        Args:
-            results (dict): Results dictionary
-            search_key (str): Key to use to access results
-            keys (list): List of object store keys to access
-        Returns:
-            dict: Results dictionary
-    """
-    if search_key in results:
-        results[search_key]["keys"].extend(keys)
-    else:
-        results[search_key] = {"keys": keys}
-
-    return results
-
-
-def lookup_gas_datasources(lookup_dict, gas_data, source_name, source_id):
+def lookup_gas_datasources(lookup_dict, gas_data, source_name):
     """ Check if the passed data exists in the lookup dict
 
         Args:
@@ -259,10 +234,10 @@ def lookup_gas_datasources(lookup_dict, gas_data, source_name, source_id):
         Returns:
             dict: source_name: Datasource UUID (key: value)
     """
+    import warnings
     # If we already have data from these datasources then return that UUID
     # otherwise return False
-    if source_id is not None:
-        raise NotImplementedError()
+    warnings.warn("This function will be removed in a future release", category=DeprecationWarning)
 
     results = {}
     for species in gas_data:
@@ -274,7 +249,7 @@ def lookup_gas_datasources(lookup_dict, gas_data, source_name, source_id):
     return results
 
 
-def lookup_footprint_datasources(lookup_dict, source_name, source_id=None):
+def lookup_footprint_datasources(lookup_dict, source_name):
     """ Check if we've had data from this Datasource before
 
         TODO - This seems like a waste - combine this with lookup_gasDatasources ?
@@ -286,114 +261,7 @@ def lookup_footprint_datasources(lookup_dict, source_name, source_id=None):
         Returns:
             dict: source_name: Datasource UUID (key: value)
     """
-    if source_id is not None:
-        raise NotImplementedError()
-
     results = {source_name: {}}
     results[source_name]["uuid"] = lookup_dict.get(source_name, False)
 
     return results
-
-
-def get_data(key_list):
-    """ Gets data from the Datasources found by the search function
-
-        Bypass loading the Datasource? Get both then we have metadata?
-
-    """
-    from openghg.modules import Datasource
-
-    # Get the data
-    # This will return a list of lists of data
-    # Maybe want to do some preprocessing on this data before it comes raw out of the object store?
-    # We only want the data in the correct daterange
-    return [Datasource.load(key=key)._data for key in key_list]
-
-
-def daterange_to_string(start, end):
-    """ Creates a string from the start and end datetime
-    objects. Used for production of the key
-    to store segmented data in the object store.
-
-    Args:
-        start (datetime): Start datetime
-        end (datetime): End datetime
-    Returns:
-        str: Daterange formatted as start_end
-        YYYYMMDD_YYYYMMDD
-        Example: 20190101_20190201
-    """
-
-    start_fmt = start.strftime("%Y%m%d")
-    end_fmt = end.strftime("%Y%m%d")
-
-    return start_fmt + "_" + end_fmt
-
-
-# def get_objects(bucket, root_path, datetime_begin, datetime_end):
-#     """ Get all values stored in the object store
-
-#         Args:
-#             bucket (dict): Bucket holding data
-#             root_path (str): Select from the enum RootPaths
-#             For DataSources: datasource
-#             For Instruments: instrument etc
-#             datetime_begin (datetime): Start of datetime range
-#             datetime_end (datetime): End of datetime range
-#         Returns:
-#             list: A list of Pandas.Dataframes
-
-#     """
-#     from Acquire.ObjectStore import ObjectStore as _ObjectStore
-#     from Acquire.ObjectStore import datetime_to_datetime as datetime_to_datetime
-#     from objectstore._hugs_objstore import get_dataframe as _get_dataframe
-#     from pandas import date_range as _pd_daterange
-
-#     datetime_begin = datetime_to_datetime(datetime_begin)
-#     datetime_end = datetime_to_datetime(datetime_end)
-
-#     daterange = _pd_daterange(datetime_begin, datetime_end)
-
-#     freq = "YS"
-#     resolution = "%Y"
-#     if start_datetime.month != 0 and end_datetime.month != 0:
-#         resolution += "%m"
-#         freq = "MS"
-#     if start_datetime.day != 0 and end_datetime.day != 0:
-#         resolution += "%d"
-#         freq = "D"
-#     if start_datetime.hour != 0 and end_datetime.hour != 0:
-#         resolution += "%h"
-#         freq = "H"
-
-#     keys = []
-
-#     path = RootPaths[root_path.upper()]
-
-#     for date in daterange:
-#         date_string = date.strftime(resolution)
-#         prefix = "%s/%s/%s" % (path, uuid, date_string)
-
-#         # datakeys =
-
-
-#     # Find the keys that are valid
-#     for year in range(year_begin, year_end+1):
-#         prefix = "%s/%s/%s" % (path, self._uuid, year)
-
-#         datakeys = _ObjectStore.get_all_object_names(bucket=bucket, prefix=prefix)
-
-#         # Check the end date of the data
-#         for datakey in datakeys:
-#             _, end = string_to_daterange(datakey.split("_")[-1])
-
-#             if end.year < year_end:
-#                 keys.append(datakey)
-
-#     # List to store dataframes
-#     values = []
-
-#     for key in keys:
-#         values.append(_get_dataframe(bucket=bucket, key=key))
-
-#     return values

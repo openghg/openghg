@@ -1,5 +1,5 @@
 =========================
-Client API Detail
+client API Detail
 =========================
 
 Process
