@@ -143,7 +143,7 @@ class Datasource:
 
         # Ensure metadata values are all lowercase
         if data_type != "footprint":
-            metadata = {k: v.lower() for k, v in metadata.items()}
+            metadata = {k: v.lower() for k, v in metadata.items() if v is not None}
 
         self._metadata.update(metadata)
 
