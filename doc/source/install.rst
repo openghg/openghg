@@ -45,6 +45,14 @@ the library is by cloning the repository and installing manually using pip.
    cd openghg
    pip install . 
 
+Upgrade
+=======
+
+To upgrade a currently installed version
+
+.. code-block:: bash
+    pip install --upgrade openghg
+
 
 For developers
 ==============

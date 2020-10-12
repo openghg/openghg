@@ -1,12 +1,13 @@
 .. OpenGHG documentation master file
 
-============
+========
 OpenGHG
-============
+========
 
 OpenGHG is a project to create a platform for collaboration for researchers, stakeholders and the public
 within the realm of greenhouse gases. The platform is built on open source technologies :doc:`technologies <technologies>`
-to create a cloud agnostic platform for simulation and analysis of large datasets.
+to create a cloud agnostic platform for simulation and analysis of large datasets. 
+
 
 Background
 ==========
@@ -30,6 +31,14 @@ Installation
    :maxdepth: 2
 
    install
+
+Tutorials
+=========
+
+.. toctree::
+   :maxdepth: 2
+
+   tutorials/index
 
 
 API Reference

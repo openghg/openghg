@@ -1,0 +1,30 @@
+===================
+Beginner workflow
+===================
+
+This tutorial assumes that you have installed ``openghg``. To ensure install has been successful you can open an ``ipython``
+console and import openghg
+
+.. code-block:: bash
+    ipython
+
+    import openghg
+    print(openghg.__version__)
+
+If you get an ``ImportError`` please go back to the :doc:`install section <../../install>`.
+
+This tutorial is written for ``openghg`` version |version| or higher. If you are using an older
+version then please upgrade (see :ref:`Installation instructions:Upgrade`).
+
+Notebooks
+=========
+
+In this tutorial we'll make use of a Jupyter notebook file ``start.ipynb`` that can be found in the ``users/tutorials/beginning_workflow`` 
+directory in the root directory of the OpenGHG repository.
+
+
+.. note:: For anyone new to notebooks see `this introduction <https://realpython.com/jupyter-notebook-introduction/>`_.
+
+
+1. Uploading data
+=================

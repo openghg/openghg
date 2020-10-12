@@ -3,8 +3,9 @@ Developer API documentation
 ===========================
 
 The functions and methods documented in this section are the internal workings of the OpenGHG library. They are subject to change
-without warning due to the early stages of development of the project. Normal users should not use any of the function shown here directly
-as their functionality may change. 
+without warning due to the early stages of development of the project.
+
+.. warning:: Normal users should not use any of the functions shown here directly as they may be removed or their functionality may change.
 
 modules
 =======
