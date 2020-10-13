@@ -4,6 +4,7 @@ flake8
 pytest
 pytest-tornasync
 pytest-cov
+nbsphinx
 sphinx
 sphinx_issues
 sphinx_rtd_theme

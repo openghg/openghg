@@ -4,6 +4,9 @@ import os
 from pathlib import Path
 import threading
 from Acquire.ObjectStore import ObjectStoreError
+import pyvis
+from collections import defaultdict
+from uuid import uuid4
 
 rlock = threading.RLock()
 
@@ -18,7 +21,8 @@ __all__ = ["delete_object",
             "set_object_from_json", 
             "set_object_from_file", 
             "get_object_from_json", 
-            "exists"]
+            "exists", 
+            "visualise_store"]
 
 
 def get_hugs_local_path():
@@ -27,12 +31,12 @@ def get_hugs_local_path():
         Returns:
             pathlib.Path
     """
-    env_path = os.getenv("HUGS_PATH")
+    env_path = os.getenv("OPENGHG_PATH")
 
     if env_path:
         return Path(env_path)
     else:
-        raise ValueError("No environment variable HUGS_PATH found, please set to use the local object store")
+        raise ValueError("No environment variable OPENGHG_PATH found, please set to use the local object store")
     # return Path("/tmp/hugs_local")
 
 
@@ -269,7 +273,61 @@ def query_store():
     for d in datasources:
         metadata = d.metadata()
         result = {"site": metadata["site"], "species": metadata["species"], 
-                    "instrument": metadata.get("instrument", "Unknown"), "network": metadata.get("network", "Unkown")}
+                    "instrument": metadata.get("instrument", "Unknown"), "network": metadata.get("network", "Unknown")}
         data[d.uuid()] = result
 
     return data
+
+
+def visualise_store() -> pyvis.network.Network:
+    """ View the object store using a pyvis force graph.
+
+        This function should only be called from within a notebook
+
+        Returns:
+            pyvis.network.Network
+    """
+    data = query_store()
+
+    net = pyvis.network.Network("800px", "100%", notebook=True, heading="OpenGHG Object Store")
+    net.force_atlas_2based()
+
+    # Create the ObsSurface node
+    net.add_node(0, label="ObsSurface", color="#4e79a7", value=5000)
+
+    # We want to created a nested dictionary
+    def nested_dict():
+        return defaultdict(nested_dict)
+
+    network_split = nested_dict()
+
+    for key, value in data.items():
+        # Iterate over Datasources to select the networks
+        network = value["network"]
+        site = value["site"]
+        network_split[network][site][key] = value
+
+    for network, sites in network_split.items():
+        network_name = network.upper()
+        net.add_node(network, label=network_name, color="#59a14f", value=2500)
+        net.add_edge(source=0, to=network)
+
+    # Then we want a subnode for each site  
+    for site, data in sites.items():
+        # Don't want to use a site here as a site might be in multiple networks
+        site_name = site.upper()
+        site_id = str(uuid4())
+        net.add_node(site_id, label=site_name, color="#e15759", value=1000)
+        net.add_edge(source=network, to=site_id)
+
+        # Now for each site create the datasource nodes
+        for uid, datasource in data.items():
+            species = datasource["species"]
+            instrument = datasource["instrument"].upper()
+
+            label = f"{site.upper()} {species.upper()} {instrument}"
+            title = f"\n".join([f"Site: {site.upper()}", f"Species : {species.upper()}", f"Instrument: {instrument}"])
+            net.add_node(uid, label=label, title=title, color="#f28e2b", value=100)
+            net.add_edge(source=site_id, to=uid)
+
+    return net.show("openghg_objstore.html")

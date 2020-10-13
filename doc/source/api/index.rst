@@ -49,7 +49,7 @@ localclient
 
 For use with a local version of the object store. These functions make it easy to take advantage of the processing and export capabilities
 of OpenGHG on your local filesystem. Use of this module results in the creation of a local object store in a location controlled by the
-``HUGS_PATH`` environment variable.
+``OPENGHG_PATH`` environment variable.
 
 
 :func:`~openghg.localclient.get_single_site`

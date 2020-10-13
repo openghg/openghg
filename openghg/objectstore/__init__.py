@@ -13,14 +13,11 @@ from ._local_store import (
     set_object_from_file,
     get_object_from_json,
     exists,
-    query_store
+    query_store, 
+    visualise_store
 )
 
-if sys.version_info.major < 3:
-    raise ImportError("openghg requires Python 3.6 minimum")
 
-if sys.version_info.minor < 6:
-    raise ImportError("openghg requires Python 3.6 minimum")
 
 
 # from ._hugs_objstore import (delete_object, exists, get_abs_filepaths, get_bucket,

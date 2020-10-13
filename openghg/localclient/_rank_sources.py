@@ -51,6 +51,8 @@ class RankSources:
         """ Set the rank data for the 
 
             Args:
+                rank_key: Key of ranking data from the original dict
+                return by get_sources.
                 rank_data: Dictionary of ranking data for example
                 co2_hfd_50m_picarro: {1: [daterange_1], 2: [daterange_2]}
             Returns:
@@ -61,7 +63,7 @@ class RankSources:
 
         obs = ObsSurface.load()
 
-        for rank, dateranges in rank_data.items():
+        for rank, dateranges in rank_data[rank_key].items():
             if int(rank) == 0:
                 continue
 

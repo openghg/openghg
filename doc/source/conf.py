@@ -54,6 +54,8 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 extensions = [
+    'nbsphinx',
+    'sphinx.ext.mathjax',
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.autosummary",

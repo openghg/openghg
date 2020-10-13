@@ -56,3 +56,11 @@ Devloper API Reference
    :maxdepth: 2
 
    api/index_devapi
+
+Tutorials
+=========
+
+.. toctree::
+   :maxdepth: 1
+
+   tutorials/index
