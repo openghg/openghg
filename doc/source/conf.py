@@ -64,6 +64,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinxcontrib.programoutput",
     "sphinx_issues",
+    "IPython.sphinxext.ipython_console_highlighting",
 ]
 
 # -- Options for HTML output -------------------------------------------------

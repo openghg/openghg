@@ -104,12 +104,7 @@ def get_single_site(
     search = Search()
 
     results = search.search(
-        species=species,
-        locations=site,
-        inlet=inlet,
-        instrument=instrument,
-        start_datetime=start_date,
-        end_datetime=end_date,
+        species=species, locations=site, inlet=inlet, instrument=instrument, start_datetime=start_date, end_datetime=end_date,
     )
 
     # Retrieve all the data found
@@ -165,11 +160,13 @@ def get_single_site(
                 # For some variables, need a different type of resampling
                 for var in data.variables:
                     if "repeatability" in var:
-                        ds_resampled[var] = (np.sqrt((data[var] ** 2).resample(time=average).sum()) / data[var].resample(time=average).count())
+                        ds_resampled[var] = (
+                            np.sqrt((data[var] ** 2).resample(time=average).sum()) / data[var].resample(time=average).count()
+                        )
 
                     elif "variability" in var:
                         # Calculate std of 1 min mf obs in av period as new vmf
-                        ds_resampled[var] = (data[var].resample(time=average, keep_attrs=True).std(skipna=False))
+                        ds_resampled[var] = data[var].resample(time=average, keep_attrs=True).std(skipna=False)
 
                     # Copy over some attributes
                     if "long_name" in data[var].attrs:
@@ -210,7 +207,9 @@ def get_single_site(
     # Now check if the units match for each of the observation Datasets
     units = set([f.mf.attrs["units"] for f in obs_files])
     if len(units) > 1:
-        raise ValueError(f"Units do not match for these observation Datasets {[(f.mf.attrs['units'],f.attrs['filename']) for f in obs_files]}")
+        raise ValueError(
+            f"Units do not match for these observation Datasets {[(f.mf.attrs['units'],f.attrs['filename']) for f in obs_files]}"
+        )
 
     scales = set([f.attrs["scale"] for f in obs_files])
     if len(scales) > 1:
@@ -269,7 +268,7 @@ def scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
             to_scale: Calibration scale to convert to
         Returns:
             xarray.Dataset: Dataset with mole fraction data scaled
-    """    
+    """
     from pandas import read_csv
     from numexpr import evaluate
     from openghg.util import get_datapath
@@ -282,10 +281,14 @@ def scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
     scale_convert_filepath = get_datapath("acrg_obs_scale_convert.csv")
 
     scale_converter = read_csv(scale_convert_filepath)
-    scale_converter_scales = scale_converter[scale_converter.isin([species.upper(), ds_scale, to_scale])][["species", "scale1", "scale2"]].dropna(axis=0, how = "any")
+    scale_converter_scales = scale_converter[scale_converter.isin([species.upper(), ds_scale, to_scale])][
+        ["species", "scale1", "scale2"]
+    ].dropna(axis=0, how="any")
 
     if len(scale_converter_scales) == 0:
-        raise ValueError(f"Scales {ds_scale} and {to_scale} are not both in any one row in acrg_obs_scale_convert.csv for species {species}")
+        raise ValueError(
+            f"Scales {ds_scale} and {to_scale} are not both in any one row in acrg_obs_scale_convert.csv for species {species}"
+        )
     elif len(scale_converter_scales) > 1:
         raise ValueError(f"Duplicate rows in acrg_obs_scale_convert.csv?")
     else:

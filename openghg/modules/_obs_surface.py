@@ -78,9 +78,9 @@ class ObsSurface(BaseModule):
         from pathlib import Path
         from openghg.util import load_object, hash_file
         from openghg.processing import assign_data, DataTypes
+        import logging
 
-        # import warnings
-        # warnings.filterwarnings('error')
+        logging.getLogger("numexpr").setLevel(logging.WARNING)
 
         if not isinstance(filepath, list):
             filepath = [filepath]

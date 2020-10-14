@@ -75,7 +75,7 @@ class RankSources:
 
         obs.save()
 
-    def show_rank_network(self) -> Network:
+    def visualise_rankings(self) -> Network:
         """ Creates a small network graph of ranked data with each rank given a colour
 
             Note that this function should only be run from a Jupyter Notebook

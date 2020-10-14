@@ -14,6 +14,10 @@ body {
 .wy-nav-side {
     background-color: #808080;
 }
+
+.wy-nav-content {
+ max-width: 55%;
+}
 /* 
 .wy-side-scroll {
     background-color: #5188b4;
