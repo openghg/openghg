@@ -15,6 +15,7 @@ pandas
 paramiko
 pyotp
 pytz
+pyviz
 PyYAML
 qrcode[pil]
 requests
