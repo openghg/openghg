@@ -1,4 +1,4 @@
-import sys
+import sys as _sys
 
 from ._local_store import (
     delete_object,
@@ -17,6 +17,12 @@ from ._local_store import (
     visualise_store
 )
 
+
+if _sys.version_info.major < 3:
+    raise ImportError("openghg requires Python 3.6 minimum")
+
+if _sys.version_info.minor < 6:
+    raise ImportError("openghg requires Python 3.6 minimum")
 
 
 
