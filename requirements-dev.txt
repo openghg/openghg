@@ -6,6 +6,6 @@ pytest-tornasync
 pytest-cov
 nbsphinx
 sphinx
-sphinx_issues
+sphinx-issues
 sphinx_rtd_theme
 sphinxcontrib-programoutput
