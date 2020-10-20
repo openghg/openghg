@@ -2,11 +2,13 @@ from openghg.util import load_hugs_json
 
 __all__ = ["CRDS"]
 
+from pandas import DataFrame
 
-class CRDS():
+class CRDS:
     """
-        Interface for processing CRDS data
+    Interface for processing CRDS data
     """
+
     def __init__(self):
         # Holds parameters used for writing attributes to Datasets
         self._crds_params = {}
@@ -16,17 +18,20 @@ class CRDS():
         data = load_hugs_json(filename="process_gcwerks_parameters.json")
         self._crds_params = data["CRDS"]
 
-    def read_file(self, data_filepath, source_name=None, site=None, network=None):
-        """ Creates a CRDS object holding data stored within Datasources
+    def read_file(
+        self, 
+        data_filepath: Union[str, pathlib.Path, list], 
+        site: Optional[str] = None, 
+        network: Optional[str] = None
+    ) -> dict:
+        """Creates a CRDS object holding data stored within Datasources
 
-            Args:
-                filepath (str): Path of file to load
-                source_name (str, default=None): Name of source
-                site (str, default=None): Name of site
-                source_id (str, default=None): Source's unique ID
-                overwrite (bool, default=False): If True overwrite any data currently stored for this date range
-            Returns:
-                None
+        Args:
+            filepath: Path of file to load
+            site: Name of site
+            source_id: Source's unique ID
+        Returns:
+            dict: Dictionary of gas data
         """
         from pathlib import Path
         from openghg.processing import assign_attributes
@@ -47,16 +52,16 @@ class CRDS():
 
         return gas_data
 
-    def read_data(self, data_filepath, site, network):
-        """ Separates the gases stored in the dataframe in
-            separate dataframes and returns a dictionary of gases
-            with an assigned UUID as gas:UUID and a list of the processed
-            dataframes
+    def read_data(self, data_filepath: pathlib.Path, site: str, network: str) -> dict:
+        """Separates the gases stored in the dataframe in
+        separate dataframes and returns a dictionary of gases
+        with an assigned UUID as gas:UUID and a list of the processed
+        dataframes
 
-            Args:
-                data_filepath (pathlib.Path): Path of datafile
-            Returns:
-                dict: Dictionary containing metadata, data and attributes keys
+        Args:
+            data_filepath (pathlib.Path): Path of datafile
+        Returns:
+            dict: Dictionary containing metadata, data and attributes keys
         """
         from datetime import datetime
         from pandas import RangeIndex, read_csv, NaT
@@ -151,14 +156,14 @@ class CRDS():
 
         return combined_data
 
-    def read_metadata(self, filepath, data):
+    def read_metadata(self, filepath: pathlib.Path, data: DataFrame) -> dict:
         """ Parse CRDS files and create a metadata dict
 
-            Args:
-                filename (str): Name of data file
-                data (Pandas.DataFrame): Raw data
-            Returns:
-                dict: Dictionary containing metadata
+        Args:
+            filepath: Data filepath
+            data: Raw pandas DataFrame
+        Returns:
+            dict: Dictionary containing metadata
         """
         # Find gas measured and port used
         type_meas = data[2][2]
@@ -195,14 +200,14 @@ class CRDS():
 
         return metadata
 
-    def get_site_attributes(self, site, inlet):
-        """ Gets the site specific attributes for writing to Datsets
+    def get_site_attributes(self, site: str, inlet: str) -> dict:
+        """Gets the site specific attributes for writing to Datsets
 
-            Args:
-                site (str): Site name
-                inlet (str): Inlet (example: 108m)
-            Returns:
-                dict: Dictionary of attributes
+        Args:
+            site: Site name
+            inlet: Inlet height, example: 108m
+        Returns:
+            dict: Dictionary of attributes
         """
         from openghg.util import load_hugs_json
 
@@ -220,16 +225,16 @@ class CRDS():
 
         return attributes
 
-    def gas_info(self, data):
-        """ Returns the number of columns of data for each gas
-                that is present in the dataframe
+    def gas_info(self, data: DataFrame) -> tuple[int, int]:
+        """Returns the number of columns of data for each gas
+        that is present in the dataframe
 
-                Args:
-                    data (Pandas.DataFrame): Measurement data
-                Returns:
-                    tuple (int, int): Number of gases, number of
-                    columns of data for each gas
-            """
+        Args:
+            data: Measurement data
+        Returns:
+            tuple (int, int): Number of gases, number of
+            columns of data for each gas
+        """
         from openghg.util import unanimous
 
         # Slice the dataframe

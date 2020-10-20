@@ -2,9 +2,8 @@ from openghg.modules import BaseModule
 
 
 class ObsSurface(BaseModule):
-    """ This class is used to process surface observation data
+    """This class is used to process surface observation data"""
 
-    """
     _root = "ObsSurface"
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
 
@@ -20,16 +19,15 @@ class ObsSurface(BaseModule):
         self._datasource_uuids = {}
         # Hashes of previously uploaded files
         self._file_hashes = {}
-        # Store the ranking data for all CRDS measurements
         # Keyed by UUID
         self._rank_data = defaultdict(dict)
 
     def to_data(self):
-        """ Return a JSON-serialisable dictionary of object
-            for storage in object store
+        """Return a JSON-serialisable dictionary of object
+        for storage in object store
 
-            Returns:
-                dict: Dictionary version of object
+        Returns:
+            dict: Dictionary version of object
         """
         from Acquire.ObjectStore import datetime_to_string
 
@@ -43,13 +41,13 @@ class ObsSurface(BaseModule):
 
         return data
 
-    def save(self, bucket=None):
-        """ Save the object to the object store
+    def save(self, bucket: Optional[dict] = None):
+        """Save the object to the object store
 
-            Args:
-                bucket (dict, default=None): Bucket for data
-            Returns:
-                None
+        Args:
+            bucket: Bucket for data
+        Returns:
+            None
         """
         from openghg.objectstore import get_bucket, set_object_from_json
 
@@ -62,17 +60,26 @@ class ObsSurface(BaseModule):
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
     @staticmethod
-    def read_file(filepath, data_type, site=None, network=None, instrument=None, overwrite=False):
-        """ Read file(s) with the processing module given by data_type
+    def read_file(
+        filepath: Union[str, pathlib.Path, list],
+        data_type: str,
+        site: Optional[str] = None,
+        network: Optional[str] = None,
+        instrument: Optional[str] = None,
+        overwrite: Optional[bool] = False,
+    ) -> dict:
+        """Process files and store in the object store. This function
+            utilises the process functions of the other classes in this submodule
+            to handle each data type.
 
-            Args:
-                filepath (str, pathlib.Path, list): Filepath(s)
-                data_type (str): Data type
-                site (str, default=None): Site code/name
-                network (str, default=None): Network name
-                overwrite (bool, default=False): Should we overwrite previously seend data
-            Returns:
-                None
+        Args:
+            filepath: Filepath(s)
+            data_type: Data type
+            site: Site code/name
+            network: Network name
+            overwrite: Overwrite previously uploaded data
+        Returns:
+            dict: Dictionary of Datasource UUIDs
         """
         from collections import defaultdict
         from pathlib import Path
@@ -95,15 +102,21 @@ class ObsSurface(BaseModule):
         for fp in filepath:
             if data_type == "GCWERKS":
                 if not isinstance(fp, tuple):
-                    raise TypeError("To process GCWERKS data a data filepath and a precision filepath must be suppled as a tuple")
+                    raise TypeError(
+                        "To process GCWERKS data a data filepath and a precision filepath must be suppled as a tuple"
+                    )
 
                 data_filepath = Path(fp[0])
                 precision_filepath = Path(fp[1])
 
-                data = data_obj.read_file(data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, network=network)
+                data = data_obj.read_file(
+                    data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, network=network
+                )
             else:
                 if isinstance(fp, tuple):
-                    raise TypeError("Only a single data file may be passed for this data type. Please check you have the correct type selected.")
+                    raise TypeError(
+                        "Only a single data file may be passed for this data type. Please check you have the correct type selected."
+                    )
 
                 data_filepath = Path(fp)
                 data = data_obj.read_file(data_filepath=data_filepath, site=site, network=network)
@@ -114,7 +127,9 @@ class ObsSurface(BaseModule):
             # Hash the file and if we've seen this file before raise an error
             file_hash = hash_file(filepath=data_filepath)
             if file_hash in obs._file_hashes and not overwrite:
-                raise ValueError(f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}.")
+                raise ValueError(
+                    f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
+                )
 
             datasource_table = defaultdict(dict)
             # For each species check if we have a Datasource
@@ -141,15 +156,17 @@ class ObsSurface(BaseModule):
         return results
 
     @staticmethod
-    def read_folder(folder_path, data_type, network, extension="dat"):
-        """ Find files with the given extension (by default dat) in the passed folder
+    def read_folder(
+        folder_path: Union[str, pathlib.Path], data_type: str, network: str, extension: Optional[str] = "dat"
+    ) -> dict:
+        """Find files with the given extension (by default dat) in the passed folder
 
-            Args:
-                folder_path (str): Path of folder
-                data_type (str): Data type
-                extension (str, default="dat"): File extension
-            Returns:
-                dict: Dictionary of the Datasources created for each file
+        Args:
+            folder_path: Path of folder
+            data_type: Data type
+            extension: File extension
+        Returns:
+            dict: Dictionary of the Datasources created for each file
         """
         from pathlib import Path
 
@@ -163,15 +180,15 @@ class ObsSurface(BaseModule):
 
         return ObsSurface.read_file(filepath=filepaths, data_type=data_type, network=network)
 
-    def delete(self, uuid):
-        """ Delete a Datasource with the given UUID
+    def delete(self, uuid: str) -> None:
+        """Delete a Datasource with the given UUID
 
-            This function deletes both the record of the object store in he
+        This function deletes both the record of the object store in he
 
-            Args:
-                uuid (str): UUID of Datasource
-            Returns:
-                None
+        Args:
+            uuid (str): UUID of Datasource
+        Returns:
+            None
         """
         from openghg.objectstore import delete_object, get_bucket
         from openghg.modules import Datasource

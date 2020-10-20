@@ -19,7 +19,7 @@
         "mol_mass": "188.0196", 
         "print_string": "C$_3$F$_8$", 
         "units": "ppt"
-    }, 
+    },
     "C4F8": {"alt": ["PFC-318", "PFC318", "c-C4F8"],
         "group": "PFCs", 
         "long_name": "C$_4$F$_8$", 

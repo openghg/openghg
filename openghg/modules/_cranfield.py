@@ -4,16 +4,21 @@ __all__ = ["CRANFIELD"]
 class CRANFIELD:
     """ Interface for processing Cranfield data """
 
-    def read_file(self, data_filepath, site=None, network=None):
-        """ Creates a CRDS object holding data stored within Datasources
+    def read_file(
+        self, 
+        data_filepath: Union[str, pathlib.Path, list], 
+        site: Optional[str] = None, 
+        network: Optional[str] = None
+    ) -> dict:
+        """Creates a CRDS object holding data stored within Datasources
 
-            Args:
-                filepath (str): Path of file to load
-                data_filepath (str): Filepath of data to be read
-                site (str, default=None): Name of site
-                network (str, default=None): Name of network
-            Returns:
-                dict: Dictionary of gas data
+        Args:
+            filepath: Path of file to load
+            data_filepath : Filepath of data to be read
+            site: Name of site
+            network: Name of network
+        Returns:
+            dict: Dictionary of gas data
         """
         from pathlib import Path
         from pandas import read_csv

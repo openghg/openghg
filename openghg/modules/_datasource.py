@@ -1,19 +1,22 @@
 __all___ = ["Datasource"]
 
+from pandas import DataFrame, Timestamp
+from xarray import Dataset
+
 
 class Datasource:
-    """ A Datasource holds data relating to a single source, such as a specific species
-        at a certain height on a specific instrument
+    """A Datasource holds data relating to a single source, such as a specific species
+    at a certain height on a specific instrument
 
-        Args:
-            name (str, default=None): Name of Datasource
+    Args:
+        name (str, default=None): Name of Datasource
     """
 
     _datasource_root = "datasource"
     _datavalues_root = "values"
     _data_root = "data"
 
-    def __init__(self, name=None):
+    def __init__(self, name: Optional[str] = None):
         from Acquire.ObjectStore import create_uuid, get_datetime_now
         from collections import defaultdict
 
@@ -38,46 +41,48 @@ class Datasource:
         # A rank of -1 is unset, 1 is a primary source, 2 secondary
         self._rank = defaultdict(list)
 
-    def start_datetime(self):
-        """ Returns the starting datetime for the data in this Datasource
+    def start_datetime(self) -> Timestamp:
+        """Returns the starting datetime for the data in this Datasource
 
-            Returns:
-                datetime: Datetime for start of data
+        Returns:
+            Timestamp: Timestamp for start of data
         """
         return self._start_datetime
 
-    def end_datetime(self):
-        """ Returns the end datetime for the data in this Datasource
+    def end_datetime(self) -> Timestamp:
+        """Returns the end datetime for the data in this Datasource
 
-            Returns:
-                datetime: Datetime for end of data
+        Returns:
+            Timestamp: Timestamp for end of data
         """
         return self._end_datetime
 
-    def add_metadata(self, key, value):
-        """ Add a label to the metadata dictionary with the key value pair
-            This will overwrite any previous entry stored at that key.
+    def add_metadata(self, key: str, value: str) -> None:
+        """Add a label to the metadata dictionary with the key value pair
+        This will overwrite any previous entry stored at that key.
 
-            Args:
-                key (str): Key for dictionary
-                value (str): Value for dictionary
-            Returns:
-                None
+        Args:
+            key: Key for dictionary
+            value: Value for dictionary
+        Returns:
+            None
         """
         value = str(value)
         self._metadata[key.lower()] = value.lower()
 
-    def add_data_dataframe(self, metadata, data, data_type=None, overwrite=False):
-        """ Add data to this Datasource and segment the data by size.
-            The data is stored as a tuple of the data and the daterange it covers.
+    def add_data_dataframe(
+        self, metadata: dict, data: DataFrame, data_type: Optional[str] = None, overwrite: Optional[bool] = False
+    ) -> None:
+        """Add data to this Datasource and segment the data by size.
+        The data is stored as a tuple of the data and the daterange it covers.
 
-            Args:
-                metadata (dict): Metadata on the data for this Datasource
-                data (Pandas.DataFrame): Data
-                data_type (str, default=None): Placeholder for combination of this fn
-                with add_footprint_data in the future
-                overwrite (bool, default=False): Overwrite existing data
-                None
+        Args:
+            metadata: Metadata on the data for this Datasource
+            data: Measurement data
+            data_type: Placeholder for combination of this fn
+            with add_footprint_data in the future
+            overwrite: Overwrite existing data
+            None
         """
         from pandas import Grouper
         from openghg.processing import get_split_frequency
@@ -122,17 +127,20 @@ class Datasource:
         # Use daterange() to update the recorded values
         self.update_daterange()
 
-    def add_data(self, metadata, data, data_type="timeseries", overwrite=False):
-        """ Add data to this Datasource and segment the data by size.
-            The data is stored as a tuple of the data and the daterange it covers.
+    def add_data(
+        self, metadata: dict, data: Dataset, data_type: Optional[str] = "timeseries", overwrite: Optional[bool] = False
+    ) -> None:
+        """Add data to this Datasource and segment the data by size.
+        The data is stored as a tuple of the data and the daterange it covers.
 
-            Args:
-                metadata (dict): Metadata on the data for this Datasource
-                data (Pandas.DataFrame): Data
-                data_type (str, default=None): Placeholder for combination of this fn
-                with add_footprint_data in the future
-                overwrite (bool, default=False): Overwrite existing data
-                None
+        Args:
+            metadata (dict): Metadata on the data for this Datasource
+            data (Pandas.DataFrame): Data
+            data_type (str, default=None): Placeholder for combination of this fn
+            with add_footprint_data in the future
+            overwrite (bool, default=False): Overwrite existing data
+        Returns:
+            None
         """
         from openghg.util import date_overlap
 
@@ -146,15 +154,6 @@ class Datasource:
             metadata = {k: v.lower() for k, v in metadata.items() if v is not None}
 
         self._metadata.update(metadata)
-
-        # For now just create a new version each time data is added
-        # Need to check what daterange the new data covers
-        # If it covers a greater period of time than the current data
-        # Just use the new data
-        # If it covers a different period / take the other data as well
-        # and keep it in the new version so "latest" has all available data
-        # Maybe this can be overridden so we just add the new data in and ignore
-        # the old
 
         # We expect a tuple below but won't group footprint data at the moment, so create one here
         if data_type == "footprint":
@@ -212,13 +211,13 @@ class Datasource:
 
         self.update_daterange()
 
-    def get_dataframe_daterange(self, dataframe):
-        """ Returns the daterange for the passed DataFrame
+    def get_dataframe_daterange(self, dataframe: DataFrame) -> tuple[Timestamp, Timestamp]:
+        """Returns the daterange for the passed DataFrame
 
-            Args:
-                dataframe (Pandas.DataFrame): DataFrame to parse
-            Returns:
-                tuple (datetime, datetime): Start and end datetimes for DataSet
+        Args:
+            dataframe: DataFrame to parse
+        Returns:
+            tuple (Timestamp, Timestamp): Start and end Timestamps for data
         """
         from pandas import DatetimeIndex
         from openghg.util import timestamp_tzaware
@@ -233,12 +232,12 @@ class Datasource:
         return start, end
 
     def get_dataset_daterange(self, dataset):
-        """ Get the daterange for the passed Dataset
+        """Get the daterange for the passed Dataset
 
-            Args:
-                dataset (xarray.DataSet): Dataset to parse
-            Returns:
-                tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
+        Args:
+            dataset (xarray.DataSet): Dataset to parse
+        Returns:
+            tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
 
         """
         from pandas import Timestamp
@@ -264,12 +263,12 @@ class Datasource:
 
     @staticmethod
     def exists(datasource_id, bucket=None):
-        """ Check if a datasource with this ID is already stored in the object store
+        """Check if a datasource with this ID is already stored in the object store
 
-            Args:
-                datasource_id (str): ID of datasource created from data
-            Returns:
-                bool: True if Datasource exists
+        Args:
+            datasource_id (str): ID of datasource created from data
+        Returns:
+            bool: True if Datasource exists
         """
         from openghg.objectstore import exists, get_bucket
 
@@ -281,17 +280,17 @@ class Datasource:
         return exists(bucket=bucket, key=key)
 
     def to_data(self):
-        """ Return a JSON-serialisable dictionary of object
-            for storage in object store
+        """Return a JSON-serialisable dictionary of object
+        for storage in object store
 
-            Storing of the data within the Datasource is done in
-            the save function
+        Storing of the data within the Datasource is done in
+        the save function
 
-            Args:
-                store (bool, default=False): True if we are storing this
-                in the object store
-            Returns:
-                dict: Dictionary version of object
+        Args:
+            store (bool, default=False): True if we are storing this
+            in the object store
+        Returns:
+            dict: Dictionary version of object
         """
         from Acquire.ObjectStore import datetime_to_string
 
@@ -310,13 +309,13 @@ class Datasource:
 
     @staticmethod
     def load_dataframe(bucket, key):
-        """ Loads data from the object store for creation of a Datasource object
+        """Loads data from the object store for creation of a Datasource object
 
-            Args:
-                bucket (dict): Bucket containing data
-                key (str): Key for data
-            Returns:
-                Pandas.Dataframe: Dataframe from stored HDF file
+        Args:
+            bucket (dict): Bucket containing data
+            key (str): Key for data
+        Returns:
+            Pandas.Dataframe: Dataframe from stored HDF file
         """
         from openghg.objectstore import get_object
 
@@ -326,19 +325,19 @@ class Datasource:
 
     @staticmethod
     def load_dataset(bucket, key):
-        """ Loads a xarray Dataset from the passed key for creation of a Datasource object
+        """Loads a xarray Dataset from the passed key for creation of a Datasource object
 
-            Currently this function gets binary data back from the object store, writes it
-            to a temporary file and then gets xarray to read from this file.
+        Currently this function gets binary data back from the object store, writes it
+        to a temporary file and then gets xarray to read from this file.
 
-            This is done in a long winded way due to xarray not being able to create a Dataset
-            from binary data at the moment.
+        This is done in a long winded way due to xarray not being able to create a Dataset
+        from binary data at the moment.
 
-            Args:
-                bucket (dict): Bucket containing data
-                key (str): Key for data
-            Returns:
-                xarray.Dataset: Dataset from NetCDF file
+        Args:
+            bucket (dict): Bucket containing data
+            key (str): Key for data
+        Returns:
+            xarray.Dataset: Dataset from NetCDF file
         """
         from openghg.objectstore import get_object
         from xarray import load_dataset
@@ -389,20 +388,25 @@ class Datasource:
     # https://github.com/pandas-dev/pandas/issues/9246
     @staticmethod
     def dataframe_to_hdf(data):
-        """ Writes this Datasource's data to a compressed in-memory HDF5 file
+        """Writes this Datasource's data to a compressed in-memory HDF5 file
 
-            This function is partnered with hdf_to_dataframe()
-            which reads a datframe from the in-memory HDF5 bytes object
+        This function is partnered with hdf_to_dataframe()
+        which reads a datframe from the in-memory HDF5 bytes object
 
-            Args:
-                dataframe (Pandas.Dataframe): Dataframe containing raw data
-            Returns:
-                bytes: HDF5 file as bytes object
+        Args:
+            dataframe (Pandas.Dataframe): Dataframe containing raw data
+        Returns:
+            bytes: HDF5 file as bytes object
         """
         from pandas import HDFStore
 
         with HDFStore(
-            "write.hdf", mode="w", driver="H5FD_CORE", driver_core_backing_store=0, complevel=6, complib="blosc:blosclz",
+            "write.hdf",
+            mode="w",
+            driver="H5FD_CORE",
+            driver_core_backing_store=0,
+            complevel=6,
+            complib="blosc:blosclz",
         ) as out:
 
             out["data"] = data
@@ -410,31 +414,37 @@ class Datasource:
 
     @staticmethod
     def hdf_to_dataframe(hdf_data):
-        """ Reads a dataframe from the passed HDF5 bytes object buffer
+        """Reads a dataframe from the passed HDF5 bytes object buffer
 
-            This function is partnered with dataframe_to_hdf()
-            which writes a dataframe to an in-memory HDF5 file
+        This function is partnered with dataframe_to_hdf()
+        which writes a dataframe to an in-memory HDF5 file
 
-            Args:
-                data (bytes): Bytes object containing HDF5 file
-            Returns:
-                Pandas.Dataframe: Dataframe read from HDF5 file buffer
+        Args:
+            data (bytes): Bytes object containing HDF5 file
+        Returns:
+            Pandas.Dataframe: Dataframe read from HDF5 file buffer
         """
         from pandas import HDFStore, read_hdf
 
-        with HDFStore("read.hdf", mode="r", driver="H5FD_CORE", driver_core_backing_store=0, driver_core_image=hdf_data,) as data:
+        with HDFStore(
+            "read.hdf",
+            mode="r",
+            driver="H5FD_CORE",
+            driver_core_backing_store=0,
+            driver_core_image=hdf_data,
+        ) as data:
             return read_hdf(data)
 
     @staticmethod
     def from_data(bucket, data, shallow):
-        """ Construct from a JSON-deserialised dictionary
+        """Construct from a JSON-deserialised dictionary
 
-            Args:
-                bucket (dict): Bucket containing data
-                data (dict): JSON data
-                shallow (bool): Load only the JSON data, do not retrieve data from the object store
-            Returns:
-                Datasource: Datasource created from JSON
+        Args:
+            bucket (dict): Bucket containing data
+            data (dict): JSON data
+            shallow (bool): Load only the JSON data, do not retrieve data from the object store
+        Returns:
+            Datasource: Datasource created from JSON
         """
         from Acquire.ObjectStore import string_to_datetime
         from collections import defaultdict
@@ -461,12 +471,12 @@ class Datasource:
         return d
 
     def save(self, bucket=None):
-        """ Save this Datasource object as JSON to the object store
+        """Save this Datasource object as JSON to the object store
 
-            Args:
-                bucket (str, default=None): Bucket to hold data
-            Returns:
-                None
+        Args:
+            bucket (str, default=None): Bucket to hold data
+        Returns:
+            None
         """
         import tempfile
         from copy import deepcopy
@@ -520,19 +530,19 @@ class Datasource:
 
     @staticmethod
     def load(bucket=None, uuid=None, key=None, shallow=False):
-        """ Load a Datasource from the object store either by name or UUID
+        """Load a Datasource from the object store either by name or UUID
 
-            uuid or name must be passed to the function
+        uuid or name must be passed to the function
 
-            Args:
-                bucket (dict, default=None): Bucket to store object
-                uuid (str, default=None): UID of Datasource
-                name (str, default=None): Name of Datasource
-                shallow (bool, default=False): Only load JSON data, do not
-                read Datasets from object store. This will speed up creation
-                of the Datasource object.
-            Returns:
-                Datasource: Datasource object created from JSON
+        Args:
+            bucket (dict, default=None): Bucket to store object
+            uuid (str, default=None): UID of Datasource
+            name (str, default=None): Name of Datasource
+            shallow (bool, default=False): Only load JSON data, do not
+            read Datasets from object store. This will speed up creation
+            of the Datasource object.
+        Returns:
+            Datasource: Datasource object created from JSON
         """
         from openghg.objectstore import get_bucket, get_object_from_json
 
@@ -550,18 +560,18 @@ class Datasource:
         return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
 
     def data(self):
-        """ Get the data stored in this Datasource
+        """Get the data stored in this Datasource
 
-            Returns:
-                list: List of tuples of Pandas.DataFrame and start, end datetime tuple
+        Returns:
+            list: List of tuples of Pandas.DataFrame and start, end datetime tuple
         """
         return self._data
 
     def update_daterange(self):
-        """ Update the dates stored by this Datasource
+        """Update the dates stored by this Datasource
 
-            Returns:
-                None
+        Returns:
+            None
         """
         # If we've only shallow loaded (without the data)
         # this Datasource we use the latest data keys
@@ -577,11 +587,11 @@ class Datasource:
         self._end_datetime = end
 
     def daterange(self):
-        """ Get the daterange the data in this Datasource covers as tuple
-            of start, end datetime objects
+        """Get the daterange the data in this Datasource covers as tuple
+        of start, end datetime objects
 
-            Returns:
-                tuple (datetime, datetime): Start, end datetimes
+        Returns:
+            tuple (datetime, datetime): Start, end datetimes
         """
         if self._start_datetime is None and self._data is not None:
             self.update_daterange()
@@ -589,11 +599,11 @@ class Datasource:
         return self._start_datetime, self._end_datetime
 
     def daterange_str(self):
-        """ Get the daterange this Datasource covers as a string in
-            the form start_end
+        """Get the daterange this Datasource covers as a string in
+        the form start_end
 
-            Returns:
-                str: Daterange covered by this Datasource
+        Returns:
+            str: Daterange covered by this Datasource
         """
         from Acquire.ObjectStore import datetime_to_string
 
@@ -601,13 +611,13 @@ class Datasource:
         return "".join([datetime_to_string(start), "_", datetime_to_string(end)])
 
     def search_metadata(self, search_terms, find_all=False):
-        """ Search the values of the metadata of this Datasource for search_term
+        """Search the values of the metadata of this Datasource for search_term
 
-            Args:
-                search_term (str, list): String or list of strings to search for in metadata
-                find_all (bool, default=False): If True all search terms must be matched
-            Returns:
-                bool: True if found else False
+        Args:
+            search_term (str, list): String or list of strings to search for in metadata
+            find_all (bool, default=False): If True all search terms must be matched
+        Returns:
+            bool: True if found else False
         """
         if not isinstance(search_terms, list):
             search_terms = [search_terms]
@@ -628,13 +638,13 @@ class Datasource:
             return True in results
 
     def in_daterange(self, daterange):
-        """ Return the keys for data within the specified daterange
+        """Return the keys for data within the specified daterange
 
-            Args:
-                daterange (str): Daterange string of the form
-                2019-01-01T00:00:00_2019-12-31T00:00:00
-            Return:
-                list: List of keys to data
+        Args:
+            daterange (str): Daterange string of the form
+            2019-01-01T00:00:00_2019-12-31T00:00:00
+        Return:
+            list: List of keys to data
         """
         from pandas import Timestamp
 
@@ -669,26 +679,26 @@ class Datasource:
         return in_date
 
     def species(self):
-        """ Returns the species of this Datasource
+        """Returns the species of this Datasource
 
-            Returns:
-                str: Species of this Datasource
+        Returns:
+            str: Species of this Datasource
         """
         return self._metadata["species"]
 
     def inlet(self):
-        """ Returns the inlet height of this Datasource
+        """Returns the inlet height of this Datasource
 
-            Returns:
-                str: Inlet height of this Datasource
+        Returns:
+            str: Inlet height of this Datasource
         """
         return self._metadata["inlet"]
 
     def site(self):
-        """ Return the instrument 
+        """Return the instrument
 
-            Returns:
-                str: Instrument name
+        Returns:
+            str: Instrument name
         """
         return self._metadata.get("site", "NA")
 
@@ -696,38 +706,38 @@ class Datasource:
         return self._metadata.get("instrument", "NA")
 
     def uuid(self):
-        """ Return the UUID of this object
+        """Return the UUID of this object
 
-            Returns:
-                str: UUID
+        Returns:
+            str: UUID
         """
         return self._uuid
 
     def metadata(self):
-        """ Retur the metadata of this Datasource
+        """Retur the metadata of this Datasource
 
-            Returns:
-                dict: Metadata of Datasource
+        Returns:
+            dict: Metadata of Datasource
         """
         return self._metadata
 
     def set_id(self, uid):
-        """ Set the UUID for this Datasource
+        """Set the UUID for this Datasource
 
-            Args:
-                id (str): UUID
-            Returns:
-                None
+        Args:
+            id (str): UUID
+        Returns:
+            None
         """
         self._uuid = uid
 
     def rank(self):
-        """ Return the rank of this Datasource 
+        """Return the rank of this Datasource
 
-            Where a value of 0 means no rank, 1 the highest
+        Where a value of 0 means no rank, 1 the highest
 
-            Returns:
-                dict: Dictionary of rank: dateranges
+        Returns:
+            dict: Dictionary of rank: dateranges
         """
         if not self._rank:
             return 0
@@ -735,17 +745,17 @@ class Datasource:
         return self._rank
 
     def set_rank(self, rank, daterange):
-        """ Set the rank of this Datsource. This allows users to select
-            the best data for a specific species at a site. By default
-            a Datasource is unranked with a value of 0. The highest rank is 1 and the lowest 10.
+        """Set the rank of this Datsource. This allows users to select
+        the best data for a specific species at a site. By default
+        a Datasource is unranked with a value of 0. The highest rank is 1 and the lowest 10.
 
-            TODO - add a check to ensure multiple ranks aren't set for the same daterange
+        TODO - add a check to ensure multiple ranks aren't set for the same daterange
 
-            Args:   
-                rank (int): Rank number between 0 and 10.
-                daterange (list): List of daterange strings such as 2019-01-01T00:00:00_2019-12-31T00:00:00
-            Returns:
-                None
+        Args:
+            rank (int): Rank number between 0 and 10.
+            daterange (list): List of daterange strings such as 2019-01-01T00:00:00_2019-12-31T00:00:00
+        Returns:
+            None
         """
         if not 0 <= int(rank) <= 10:
             raise TypeError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
@@ -760,16 +770,16 @@ class Datasource:
             self._rank[rank] = daterange
 
     def combine_dateranges(self, dateranges):
-        """ Checks a list of daterange strings for overlapping and combines
-            those that do.
+        """Checks a list of daterange strings for overlapping and combines
+        those that do.
 
-            Note : this function expects daterange strings in the form
-            2019-01-01T00:00:00_2019-12-31T00:00:00
+        Note : this function expects daterange strings in the form
+        2019-01-01T00:00:00_2019-12-31T00:00:00
 
-            Args:
-                dateranges (list): List of strings
-            Returns:
-                list: List of dateranges with overlapping ranges combined
+        Args:
+            dateranges (list): List of strings
+        Returns:
+            list: List of dateranges with overlapping ranges combined
         """
         from itertools import tee
         from collections import defaultdict
@@ -827,15 +837,15 @@ class Datasource:
         return combined_dateranges
 
     def split_datrange_str(self, daterange_str):
-        """ Split a daterange string to the component start and end
-            Timestamps
+        """Split a daterange string to the component start and end
+        Timestamps
 
-            Args:
-                daterange_str (str): Daterange string of the form
+        Args:
+            daterange_str (str): Daterange string of the form
 
-                2019-01-01T00:00:00_2019-12-31T00:00:00                
-            Returns:
-                tuple (Timestamp, Timestamp): Tuple of start, end pandas Timestamps
+            2019-01-01T00:00:00_2019-12-31T00:00:00
+        Returns:
+            tuple (Timestamp, Timestamp): Tuple of start, end pandas Timestamps
         """
         from pandas import Timestamp
 
@@ -847,16 +857,16 @@ class Datasource:
         return start, end
 
     def get_rank(self, start_date=None, end_date=None):
-        """ Get the ranks of data contained within Datasource for the passed daterange.
+        """Get the ranks of data contained within Datasource for the passed daterange.
 
-            If no rank has been set zero is returned.
-            If no start or end date is passed all ranking data will be returned.
+        If no rank has been set zero is returned.
+        If no start or end date is passed all ranking data will be returned.
 
-            Args:
-                start_date (datetime, default=None)
-                end_date (datetime, default=None)
-            Returns:
-                dict: Dictionary of rank: daterange
+        Args:
+            start_date (datetime, default=None)
+            end_date (datetime, default=None)
+        Returns:
+            dict: Dictionary of rank: daterange
         """
         from collections import defaultdict
         from openghg.util import daterange_from_str, daterange_to_str, create_daterange
@@ -885,22 +895,22 @@ class Datasource:
         return results
 
     def data_type(self):
-        """ Returns the data type held by this Datasource
+        """Returns the data type held by this Datasource
 
-            Returns:
-                str: Data type held by Datasource
+        Returns:
+            str: Data type held by Datasource
         """
         return self._data_type
 
     def data_keys(self, version="latest", return_all=False):
-        """ Returns the object store keys where data related
-            to this Datasource is stored
+        """Returns the object store keys where data related
+        to this Datasource is stored
 
-            Args:
-                version (str, default="latest"): Version of keys to get
-                return_all (bool, default=False): Return all data keys
-            Returns:
-                list: List of data keys
+        Args:
+            version (str, default="latest"): Version of keys to get
+            return_all (bool, default=False): Return all data keys
+        Returns:
+            list: List of data keys
         """
         if return_all:
             return self._data_keys
@@ -913,18 +923,18 @@ class Datasource:
         return keys
 
     def versions(self):
-        """ Return a summary of the versions of data stored for
-            this Datasource
+        """Return a summary of the versions of data stored for
+        this Datasource
 
-            Returns:
-                dict: Dictionary of versions
+        Returns:
+            dict: Dictionary of versions
         """
         return self._data_keys
 
     def latest_version(self):
-        """ Return the string of the latest version
+        """Return the string of the latest version
 
-            Returns:
-                str: Latest version
+        Returns:
+            str: Latest version
         """
         return self._latest_version
