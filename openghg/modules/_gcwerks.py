@@ -125,8 +125,8 @@ class GCWERKS:
                 # Have this in case the column shift between the header and data changes
                 if units[gas_name] == "--" or scale[gas_name] == "--":
                     raise ValueError(
-                        "Error reading units and scale, ensure columns are correct \
-                        between header and dataframe"
+                        f"Error reading units and scale, ensure columns are correct \
+                        between header and dataframe. File: {data_filepath}, species: {gas_name}"
                     )
 
                 species.append(gas_name)
