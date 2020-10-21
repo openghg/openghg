@@ -1,7 +1,7 @@
 __all___ = ["Datasource"]
 
 from pandas import DataFrame, Timestamp
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 from xarray import Dataset
 
 

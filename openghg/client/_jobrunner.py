@@ -90,7 +90,7 @@ class JobRunner:
             pass
 
         # Get an authorisaton to pass to the service
-        hugs = Service(service_url=hugs_url)
+        openghg = Service(service_url=hugs_url)
         # Credentials to create the cloud storage drive
         creds = StorageCreds(user=auth_user, service_url=storage_url)
 

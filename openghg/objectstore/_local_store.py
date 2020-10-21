@@ -326,7 +326,7 @@ def visualise_store() -> pyvis.network.Network:
             instrument = datasource["instrument"].upper()
 
             label = f"{site.upper()} {species.upper()} {instrument}"
-            title = f"\n".join([f"Site: {site.upper()}", f"Species : {species.upper()}", f"Instrument: {instrument}"])
+            title = "\n".join([f"Site: {site.upper()}", f"Species : {species.upper()}", f"Instrument: {instrument}"])
             net.add_node(uid, label=label, title=title, color="#f28e2b", value=100)
             net.add_edge(source=site_id, to=uid)
 
