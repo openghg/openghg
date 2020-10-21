@@ -354,7 +354,7 @@ def test_set_incorrect_rank_raises():
 
     daterange = "2027-08-01-00:00:00_2027-12-01-00:00:00"
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         d.set_rank(rank=42, daterange=daterange)
 
 def test_setting_overlapping_dateranges():
