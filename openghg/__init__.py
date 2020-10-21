@@ -5,9 +5,9 @@ __all__ = ["client", "jobs", "localclient", "modules", "objectstore", "processin
 
 v = get_versions()
 
-__version__ = v['version']
-__branch__ = v['branch']
-__repository__ = v['repository']
-__revisionid__ = v['full-revisionid']
+__version__ = v.get('version')
+__branch__ = v.get('branch')
+__repository__ = v.get('repository')
+__revisionid__ = v.get('full-revisionid')
 
 del v, get_versions
