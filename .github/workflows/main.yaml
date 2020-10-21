@@ -32,9 +32,7 @@ jobs:
         python -m pip install --upgrade pip wheel
         pip install -r requirements-dev.txt
         pip install .
-    - name: Install pandoc for building of documentation
-      run: |
-        sudo apt-get install -yq pandoc
+   
     - name: 'Clone Acquire for services folder required for tests'
       run: |
         git clone -b testStore https://github.com/gareth-j/acquire.git ../acquire
@@ -51,11 +49,12 @@ jobs:
     - name: Upload coverage to Codecov
       run: |
         bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
-    - name: Build the documentation
+    - name: Install pandoc and build the documentation
       run: |
+        sudo apt-get install -yq pandoc
         cd doc
         make
-      if: matrix.python-version == 3.7 && matrix.config.os == 'ubuntu-latest' && github.event_name == 'push'
+      if: matrix.python-version == 3.7 && matrix.config.os == 'ubuntu-latest'
     - name: Deploy to GitHub pages
       uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
@@ -63,7 +62,7 @@ jobs:
         BRANCH: gh-pages 
         FOLDER: doc/build/html
         CLEAN: true 
-      if: matrix.python-version == 3.7 && matrix.config.os == 'ubuntu-latest' && github.event_name == 'push'
+      if: matrix.python-version == 3.7 && matrix.config.os == 'ubuntu-latest'
       
         
 
