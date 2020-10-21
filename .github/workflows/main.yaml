@@ -60,7 +60,7 @@ jobs:
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages 
-        FOLDER: doc/build/html
+        FOLDER: "doc/build/html"
         CLEAN: true 
       if: matrix.python-version == 3.7 && matrix.operating-system == 'ubuntu-latest'
       
