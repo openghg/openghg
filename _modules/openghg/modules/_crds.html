@@ -1,0 +1,467 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>openghg.modules._crds &mdash; OpenGHG 0+untagged.1.ga03f122 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script src="../../../_static/custom.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../features.html">Features</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Developer’s guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index_devapi.html">Developer API documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenGHG</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>openghg.modules._crds</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for openghg.modules._crds</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_hugs_json</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CRDS&quot;</span><span class="p">]</span>
+
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+
+<div class="viewcode-block" id="CRDS"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS">[docs]</a><span class="k">class</span> <span class="nc">CRDS</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interface for processing CRDS data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="CRDS.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Holds parameters used for writing attributes to Datasets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Sampling period of CRDS data in seconds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_period</span> <span class="o">=</span> <span class="mi">60</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;CRDS&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="CRDS.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span> 
+        <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+        <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Creates a CRDS object holding data stored within Datasources</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath: Path of file to load</span>
+<span class="sd">            site: Name of site</span>
+<span class="sd">            source_id: Source&#39;s unique ID</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of gas data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+        <span class="kn">from</span> <span class="nn">openghg.processing</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+            <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">site</span><span class="p">:</span>
+            <span class="n">site</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Process the data into separate Datasets</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>
+        <span class="c1"># Ensure the data is CF compliant</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampling_period</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">gas_data</span></div>
+
+<div class="viewcode-block" id="CRDS.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Separates the gases stored in the dataframe in</span>
+<span class="sd">        separate dataframes and returns a dictionary of gases</span>
+<span class="sd">        with an assigned UUID as gas:UUID and a list of the processed</span>
+<span class="sd">        dataframes</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_filepath (pathlib.Path): Path of datafile</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary containing metadata, data and attributes keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+        <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">RangeIndex</span><span class="p">,</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">NaT</span>
+
+        <span class="c1"># At the moment we&#39;re using the filename as the source name</span>
+        <span class="n">source_name</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span>
+        <span class="c1"># -1 here as we&#39;ve already removed the file extension</span>
+        <span class="c1"># As we&#39;re not processing a list of datafiles here we&#39;ll only have one inlet</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">source_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;m&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inlet</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Function to parse the datetime format found in the datafile</span>
+        <span class="k">def</span> <span class="nf">parse_date</span><span class="p">(</span><span class="n">date</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="s2">&quot;%y%m</span><span class="si">%d</span><span class="s2"> %H%M%S&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">NaT</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span>
+            <span class="n">data_filepath</span><span class="p">,</span>
+            <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;0_1&quot;</span><span class="p">],</span>
+            <span class="n">parse_dates</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+            <span class="n">date_parser</span><span class="o">=</span><span class="n">parse_date</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span>
+
+        <span class="c1"># Drop any rows with NaNs</span>
+        <span class="c1"># This is now done before creating metadata</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;rows&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Get the number of gases in dataframe and number of columns of data present for each gas</span>
+        <span class="n">n_gases</span><span class="p">,</span> <span class="n">n_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas_info</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="n">header</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">skip_cols</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">header</span><span class="p">[</span><span class="n">column</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">header</span><span class="o">.</span><span class="n">columns</span><span class="p">])</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_metadata</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
+
+        <span class="c1"># Read the scale from JSON</span>
+        <span class="n">crds_data</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">)</span>
+
+        <span class="c1"># This dictionary is used to store the gas data and its associated metadata</span>
+        <span class="n">combined_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_gases</span><span class="p">):</span>
+            <span class="c1"># Slice the columns</span>
+            <span class="n">gas_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">skip_cols</span> <span class="o">+</span> <span class="n">n</span> <span class="o">*</span> <span class="n">n_cols</span> <span class="p">:</span> <span class="n">skip_cols</span> <span class="o">+</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">n_cols</span><span class="p">]</span>
+
+            <span class="c1"># Reset the column numbers</span>
+            <span class="n">gas_data</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">RangeIndex</span><span class="p">(</span><span class="n">gas_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">species</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">species</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+            <span class="n">column_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">species</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> stdev&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> n_meas&quot;</span><span class="p">]</span>
+
+            <span class="c1"># Name columns</span>
+            <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">set_axis</span><span class="p">(</span><span class="n">column_labels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;columns&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="n">header_rows</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="c1"># Drop the first two rows now we have the name</span>
+            <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">gas_data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">header_rows</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="c1"># Cast data to float64 / double</span>
+            <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Here we can convert the Dataframe to a Dataset and then write the attributes</span>
+            <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
+
+            <span class="n">site_attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_site_attributes</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span>
+
+            <span class="c1"># Create a copy of the metadata dict</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="n">crds_data</span><span class="p">[</span><span class="s2">&quot;CRDS&quot;</span><span class="p">][</span><span class="s2">&quot;default_scales&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+
+            <span class="n">species_metadata</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">species_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
+            <span class="n">species_metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
+            <span class="n">species_metadata</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale</span>
+
+            <span class="n">combined_data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">species_metadata</span><span class="p">,</span>
+                <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">gas_data</span><span class="p">,</span>
+                <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">site_attributes</span><span class="p">,</span>
+            <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">combined_data</span></div>
+
+<div class="viewcode-block" id="CRDS.read_metadata"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.read_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">read_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Parse CRDS files and create a metadata dict</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath: Data filepath</span>
+<span class="sd">            data: Raw pandas DataFrame</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary containing metadata</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Find gas measured and port used</span>
+        <span class="n">type_meas</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># Split the filename to get the site and resolution</span>
+        <span class="n">split_filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filepath</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split_filename</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Error reading metadata from filename. The expected format is </span><span class="se">\</span>
+<span class="s2">                </span><span class="si">{site}</span><span class="s2">.</span><span class="si">{instrument}</span><span class="s2">.{time resolution}.</span><span class="si">{height}</span><span class="s2">.dat&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">site</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">instrument</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">resolution_str</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">resolution_str</span> <span class="o">==</span> <span class="s2">&quot;1minute&quot;</span><span class="p">:</span>
+            <span class="n">resolution</span> <span class="o">=</span> <span class="s2">&quot;1_minute&quot;</span>
+        <span class="k">elif</span> <span class="n">resolution_str</span> <span class="o">==</span> <span class="s2">&quot;hourly&quot;</span><span class="p">:</span>
+            <span class="n">resolution</span> <span class="o">=</span> <span class="s2">&quot;1_hour&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to read time resolution from filename.&quot;</span><span class="p">)</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolution</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;port&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">port</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">type_meas</span>
+
+        <span class="k">return</span> <span class="n">metadata</span></div>
+
+<div class="viewcode-block" id="CRDS.get_site_attributes"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.get_site_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Gets the site specific attributes for writing to Datsets</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            site: Site name</span>
+<span class="sd">            inlet: Inlet height, example: 108m</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of attributes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_hugs_json</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;CRDS&quot;</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()][</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to read attributes for site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">attributes</span></div>
+
+<div class="viewcode-block" id="CRDS.gas_info"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.gas_info">[docs]</a>    <span class="k">def</span> <span class="nf">gas_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the number of columns of data for each gas</span>
+<span class="sd">        that is present in the dataframe</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Measurement data</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple (int, int): Number of gases, number of</span>
+<span class="sd">            columns of data for each gas</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">unanimous</span>
+
+        <span class="c1"># Slice the dataframe</span>
+        <span class="n">head_row</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">gases</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Loop over the gases and find each unique value</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">head_row</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">head_row</span><span class="p">[</span><span class="n">column</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+                <span class="n">gases</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">gases</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># Check that we have the same number of columns for each gas</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">unanimous</span><span class="p">(</span><span class="n">gases</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Each gas does not have the same number of columns. Please ensure data&quot;</span>
+                <span class="s2">&quot;is of the CRDS type expected by this module&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">gases</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">gases</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 OpenGHG development team
+      <span class="lastupdated">
+        Last updated on Oct 21, 2020.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

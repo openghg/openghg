@@ -1,0 +1,401 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>jobs API Detail &mdash; OpenGHG 0+untagged.1.ga03f122 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/custom.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Developer’s guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index_devapi.html">Developer API documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenGHG</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>jobs API Detail</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="jobs-api-detail">
+<h1>jobs API Detail<a class="headerlink" href="#jobs-api-detail" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="sshconnect">
+<h2>SSHConnect<a class="headerlink" href="#sshconnect" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="openghg.jobs.SSHConnect">
+<em class="property">class </em><code class="sig-prename descclassname">openghg.jobs.</code><code class="sig-name descname">SSHConnect</code><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.jobs.SSHConnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use Paramiko to connect to an SSH server</p>
+<p>This class can be used as a context manager</p>
+<dl class="py method">
+<dt id="openghg.jobs.SSHConnect.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="openghg.jobs.SSHConnect.close">
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls close on the paramiko SSHClient instance used
+the SSH connection</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="openghg.jobs.SSHConnect.connect">
+<code class="sig-name descname">connect</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em>, <em class="sig-param"><span class="n">hostname</span></em>, <em class="sig-param"><span class="n">keypath</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">password</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">known_host</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use Paramiko to connect the hostname</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user</strong> (<em>str</em>) – Username for login</p></li>
+<li><p><strong>hostname</strong> (<em>str</em>) – Hostname of server. This can also be an IP address</p></li>
+<li><p><strong>key_path</strong> (<em>Path</em><em> or </em><em>str</em><em>, </em><em>default=None</em>) – Path to private key to use for authentication.</p></li>
+<li><p><strong>default Paramiko will attempt to use any “id_rsa”</strong> (<em>By</em>) – </p></li>
+<li><p><strong>or “id_ecdsa” key</strong> (<em>“id_dsa”</em>) – </p></li>
+<li><p><strong>in ~/.ssh/</strong> (<em>discoverable</em>) – </p></li>
+<li><p><strong>passsword</strong> (<em>str</em><em>, </em><em>default=None</em>) – Password used for authentication or for unlocking a</p></li>
+<li><p><strong>protected</strong> (<em>password</em>) – </p></li>
+<li><p><strong>key</strong> (<em>private</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="openghg.jobs.SSHConnect.run_command">
+<code class="sig-name descname">run_command</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">commands</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.run_command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.run_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run commands on the remote server</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>commands</strong> (<em>str</em><em>, </em><em>list</em>) – Command(s) to be run on the remote server</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of tuples of stdin, stdout and stderr for each command</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="openghg.jobs.SSHConnect.write_files">
+<code class="sig-name descname">write_files</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span></em>, <em class="sig-param"><span class="n">remote_dir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.write_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.write_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the job script to the remote server</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of paths of files to transfer</p></li>
+<li><p><strong>path</strong> (<em>str</em><em>, </em><em>default=None</em>) – Path to write script, if not passed the script</p></li>
+<li><p><strong>be written to the user's home directory</strong> (<em>will</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="jobdrive">
+<h2>JobDrive<a class="headerlink" href="#jobdrive" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="openghg.jobs.JobDrive">
+<em class="property">class </em><code class="sig-prename descclassname">openghg.jobs.</code><code class="sig-name descname">JobDrive</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">par</span></em>, <em class="sig-param"><span class="n">par_secret</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.jobs.JobDrive" title="Permalink to this definition">¶</a></dt>
+<dd><p>” This is used to upload files to the cloud drive for use in a
+HPC job</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>par</strong> (<em>Acquire.Client.PAR</em>) – Pre-authenticated request for access to cloud drive</p></li>
+<li><p><strong>par_secret</strong> (<em>str</em>) – Secret / password to access the PAR</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="openghg.jobs.JobDrive.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">par</span></em>, <em class="sig-param"><span class="n">par_secret</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.jobs.JobDrive.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="openghg.jobs.JobDrive.download">
+<code class="sig-name descname">download</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span></em>, <em class="sig-param"><span class="n">local_dir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.jobs.JobDrive.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download the files in the given list to a local directory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – File(s) on drive</p></li>
+<li><p><strong>local_dir</strong> (<em>Path</em><em>, </em><em>str</em>) – Path of folder to download files to</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary keyed by filename containing file metadata</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="openghg.jobs.JobDrive.list_files">
+<code class="sig-name descname">list_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.list_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.jobs.JobDrive.list_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>List files in drive</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of files</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="openghg.jobs.JobDrive.upload">
+<code class="sig-name descname">upload</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span></em>, <em class="sig-param"><span class="n">directory</span><span class="o">=</span><span class="default_value">'input'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.upload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.jobs.JobDrive.upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload files to the cloud drive that’s accessed using the Acquire
+PAR</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>str</em><em>, </em><em>Path</em><em>, </em><em>list</em>) – File(s) to be uploaded</p></li>
+<li><p><strong>directory</strong> (<em>str</em><em>, </em><em>default=&quot;input&quot;</em>) – Name of directory in which to place files</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 OpenGHG development team
+      <span class="lastupdated">
+        Last updated on Oct 21, 2020.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

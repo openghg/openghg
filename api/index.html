@@ -1,0 +1,343 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Documentation &mdash; OpenGHG 0+untagged.1.ga03f122 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/custom.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Developer API documentation" href="index_devapi.html" />
+    <link rel="prev" title="Developer’s guide" href="../development.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Developer’s guide</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#modules">modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#client">client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jobs">jobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#localclient">localclient</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#objectstore">objectstore</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#processing">processing</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index_devapi.html">Developer API documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenGHG</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="index_devapi.html" class="btn btn-neutral float-right" title="Developer API documentation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../development.html" class="btn btn-neutral float-left" title="Developer’s guide" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<p>This section of the documentation gives an overview of the public facing functions used in the Jupyter notebooks available at the
+OpenGHG hub. For developers documentation of the internal workings of the library are available in the developer API section.</p>
+<div class="section" id="modules">
+<h2>modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h2>
+<p>These modules are used to process observation data. Classes in this module should not be used directly as they
+are used by functions in the <code class="docutils literal notranslate"><span class="pre">Client</span></code> or <code class="docutils literal notranslate"><span class="pre">LocalClient</span></code> modules when either uploading data to the OpenGHG cloud platform
+or processing data for storage in a local object store.</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_modules.html#openghg.modules.ObsSurface" title="openghg.modules.ObsSurface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsSurface</span></code></a></dt><dd><p>Process surface observation data</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="client">
+<h2>client<a class="headerlink" href="#client" title="Permalink to this headline">¶</a></h2>
+<p>Classes within the client module are used to interact with the cloud based OpenGHG system.</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_client.html#openghg.client.Process" title="openghg.client.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></a></dt><dd><p>Upload and process observation data files</p>
+</dd>
+<dt><a class="reference internal" href="api_client.html#openghg.client.Search" title="openghg.client.Search"><code class="xref py py-class docutils literal notranslate"><span class="pre">Search</span></code></a></dt><dd><p>Search for data in the object store</p>
+</dd>
+<dt><a class="reference internal" href="api_client.html#openghg.client.RankSources" title="openghg.client.RankSources"><code class="xref py py-class docutils literal notranslate"><span class="pre">RankSources</span></code></a></dt><dd><p>Rank data sources by date range</p>
+</dd>
+<dt><a class="reference internal" href="api_client.html#openghg.client.JobRunner" title="openghg.client.JobRunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobRunner</span></code></a></dt><dd><p>Run jobs on a local or cloud HPC cluster</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="jobs">
+<h2>jobs<a class="headerlink" href="#jobs" title="Permalink to this headline">¶</a></h2>
+<p>Classes within this module are used for running simulation jobs on high performace computing (HPC) clusters either locally
+or within the cloud based on a cluster as a service (CaaS) offering (see CitC).</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_jobs.html#openghg.jobs.SSHConnect" title="openghg.jobs.SSHConnect"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSHConnect</span></code></a></dt><dd><p>Connect via SSH to a HPC cluster</p>
+</dd>
+<dt><a class="reference internal" href="api_jobs.html#openghg.jobs.JobDrive" title="openghg.jobs.JobDrive"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobDrive</span></code></a></dt><dd><p>Create a cloud storage drive for use by the HPC job</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="localclient">
+<h2>localclient<a class="headerlink" href="#localclient" title="Permalink to this headline">¶</a></h2>
+<p>For use with a local version of the object store. These functions make it easy to take advantage of the processing and export capabilities
+of OpenGHG on your local filesystem. Use of this module results in the creation of a local object store in a location controlled by the
+<code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code> environment variable.</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_localclient.html#openghg.localclient.get_single_site" title="openghg.localclient.get_single_site"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_single_site()</span></code></a></dt><dd><p>Search for observations in the object store using a site, species and date range.</p>
+</dd>
+<dt><a class="reference internal" href="api_localclient.html#openghg.localclient.process_files" title="openghg.localclient.process_files"><code class="xref py py-func docutils literal notranslate"><span class="pre">process_files()</span></code></a></dt><dd><p>Process files for storage in the object store</p>
+</dd>
+<dt><a class="reference internal" href="api_localclient.html#openghg.localclient.RankSources" title="openghg.localclient.RankSources"><code class="xref py py-class docutils literal notranslate"><span class="pre">RankSources</span></code></a></dt><dd><p>Rank data sources by date range</p>
+</dd>
+<dt><a class="reference internal" href="api_localclient.html#openghg.localclient.Search" title="openghg.localclient.Search"><code class="xref py py-class docutils literal notranslate"><span class="pre">Search</span></code></a></dt><dd><p>Search for data within the object store (soon to be deprecated in favour of <code class="docutils literal notranslate"><span class="pre">get_obs</span></code></p>
+</dd>
+</dl>
+</div>
+<div class="section" id="objectstore">
+<h2>objectstore<a class="headerlink" href="#objectstore" title="Permalink to this headline">¶</a></h2>
+<p>Many of the functions in this submodule are only for internal use and will be renamed.</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_objectstore.html#openghg.objectstore.get_bucket" title="openghg.objectstore.get_bucket"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_bucket()</span></code></a></dt><dd><p>Get a bucket (data container) for storing of data within the object store</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="processing">
+<h2>processing<a class="headerlink" href="#processing" title="Permalink to this headline">¶</a></h2>
+<p>This submodule contains functions that are widely used in the processing functions found in <code class="docutils literal notranslate"><span class="pre">modules</span></code>.</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_processing.html#openghg.processing.assign_attributes" title="openghg.processing.assign_attributes"><code class="xref py py-func docutils literal notranslate"><span class="pre">assign_attributes()</span></code></a></dt><dd><p>Assign attributes to a dictionary of observation data in NetCDF format using <code class="docutils literal notranslate"><span class="pre">get_attributes</span></code></p>
+</dd>
+<dt><a class="reference internal" href="api_processing.html#openghg.processing.get_attributes" title="openghg.processing.get_attributes"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_attributes()</span></code></a></dt><dd><p>Write attributes to an in-memory NetCDF file to ensure it is <a class="reference external" href="https://cfconventions.org/">CF-compliant</a></p>
+</dd>
+<dt><a class="reference internal" href="api_processing.html#openghg.processing.get_ceda_file" title="openghg.processing.get_ceda_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_ceda_file()</span></code></a></dt><dd><p>Create a file that contains the correct attributes for uploading to the <a class="reference external" href="http://archive.ceda.ac.uk/">CEDA archive</a></p>
+</dd>
+<dt><a class="reference internal" href="api_processing.html#openghg.processing.recombine_sections" title="openghg.processing.recombine_sections"><code class="xref py py-func docutils literal notranslate"><span class="pre">recombine_sections()</span></code></a></dt><dd><p>Recombine separate NetCDF files into a single file sorted by date</p>
+</dd>
+<dt><a class="reference internal" href="api_processing.html#openghg.processing.search" title="openghg.processing.search"><code class="xref py py-func docutils literal notranslate"><span class="pre">search()</span></code></a></dt><dd><p>The function that is used by <code class="docutils literal notranslate"><span class="pre">openghg.client.Search</span></code> and <code class="docutils literal notranslate"><span class="pre">openghg.localclient.Search</span></code> to search the object store</p>
+</dd>
+<dt><a class="reference internal" href="api_processing.html#openghg.processing.assign_data" title="openghg.processing.assign_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">assign_data()</span></code></a></dt><dd><p>Assings data to exisiting Datasources or creates new Datasources</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="index_devapi.html" class="btn btn-neutral float-right" title="Developer API documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../development.html" class="btn btn-neutral float-left" title="Developer’s guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 OpenGHG development team
+      <span class="lastupdated">
+        Last updated on Oct 21, 2020.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

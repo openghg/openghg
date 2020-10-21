@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>openghg.processing._segment &mdash; OpenGHG 0+untagged.1.ga03f122 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script src="../../../_static/custom.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../features.html">Features</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Developer’s guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index_devapi.html">Developer API documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenGHG</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>openghg.processing._segment</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for openghg.processing._segment</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Segment the data into Datasources</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_split_frequency&quot;</span><span class="p">,</span> <span class="s2">&quot;create_footprint_datasources&quot;</span><span class="p">,</span> <span class="s2">&quot;assign_data&quot;</span><span class="p">]</span>
+
+<span class="c1"># def create_datasources(gas_data):</span>
+<span class="c1">#     &quot;&quot;&quot; Create or get an existing Datasource for each gas in the file</span>
+
+<span class="c1">#         TODO - currently this function will only take data from a single Datasource</span>
+
+<span class="c1">#         Args:</span>
+<span class="c1">#             gas_data (list): List of tuples gas name, datasource_id, Pandas.Dataframe</span>
+<span class="c1">#         Returns:</span>
+<span class="c1">#             list: List of UUIDs</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from openghg.modules import Datasource</span>
+
+<span class="c1">#     uuids = []</span>
+
+<span class="c1">#     # Rework this to for the segmentation of data within the Datasource</span>
+<span class="c1">#     # How to reliably get existing UUIDs to be passed through from an interface or selection?</span>
+<span class="c1">#     # Rely on site_species for now via name lookup?</span>
+<span class="c1">#     # Need to allow UUID input here so we can add new data to existing Datasources easily without</span>
+<span class="c1">#     # relying on the naming method</span>
+<span class="c1">#     for species, metadata, data in gas_data:</span>
+<span class="c1">#         # Lookup Datasource uuid, if exists</span>
+<span class="c1">#         if Datasource.exists(datasource_id=datasource_id):</span>
+<span class="c1">#             datasource = Datasource.load(uuid=datasource_id)</span>
+<span class="c1">#             # TODO - add metadata in here - append to existing?</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             datasource = Datasource.create(name=species)</span>
+
+<span class="c1">#         # Store the name and datasource_id</span>
+<span class="c1">#         # self._species[gas_name] = datasource_id</span>
+<span class="c1">#         # Add the dataframe to the datasource</span>
+<span class="c1">#         datasource.add_data(metadata, data)</span>
+<span class="c1">#         # Save Datasource to object store</span>
+<span class="c1">#         datasource.save()</span>
+
+<span class="c1">#         # Add the Datasource to the list</span>
+<span class="c1">#         uuids.append(datasource.uuid())</span>
+
+<span class="c1">#     return uuids</span>
+
+
+<div class="viewcode-block" id="assign_data"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.assign_data">[docs]</a><span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">lookup_results</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Assign data to a Datasource. This will either create a new Datasource </span>
+<span class="sd">    Create or get an existing Datasource for each gas in the file</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            gas_data (dict): Dictionary containing data and metadata for species</span>
+<span class="sd">            lookup_results (dict): Dictionary of lookup results]</span>
+<span class="sd">            overwrite (bool): If True overwrite current data stored</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span>
+
+    <span class="n">uuids</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># Add in copying of attributes, or add attributes to the metadata at an earlier state.</span>
+    <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">gas_data</span><span class="p">:</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">lookup_results</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="n">lookup_results</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span>
+
+        <span class="c1"># If we have a UUID for this Datasource load the existing object</span>
+        <span class="c1"># from the object store</span>
+        <span class="k">if</span> <span class="n">uuid</span><span class="p">:</span>
+            <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># Add the dataframe to the datasource</span>
+        <span class="n">datasource</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">)</span>
+        <span class="c1"># Save Datasource to object store</span>
+        <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">uuids</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">uuids</span></div>
+
+
+<span class="k">def</span> <span class="nf">create_footprint_datasources</span><span class="p">(</span><span class="n">footprint_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Create Datasources for the passed footprint data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            footprint_data (list): List of tupes of footprint name, datasource_id, xarray.Dataset</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of UUIDs of used/created Datasources</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">get_split_frequency</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Analyses raw data for size and sets a frequency to split the data</span>
+<span class="sd">        depending on how big the resulting dataframe will be</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (Pandas.Dataframe): Raw data in dataframe</span>
+<span class="sd">            Note: DataFrame must have a Datetime index</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: String selecting frequency for data splitting by Groupby</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data_size</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="c1"># If the data is larger than this it will be split into</span>
+    <span class="c1"># separate parts</span>
+    <span class="c1"># For now use 5 MB chunks</span>
+    <span class="n">segment_size</span> <span class="o">=</span> <span class="mi">5_242_880</span>  <span class="c1"># bytes</span>
+
+    <span class="c1"># Get time delta for the first and last date</span>
+    <span class="n">start_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">first_valid_index</span><span class="p">()</span>
+    <span class="n">end_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">last_valid_index</span><span class="p">()</span>
+
+    <span class="n">num_years</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">end_data</span> <span class="o">-</span> <span class="n">start_data</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> <span class="o">/</span> <span class="mf">365.25</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">num_years</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">num_years</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">n_months</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">n_weeks</span> <span class="o">=</span> <span class="mi">52</span>
+    <span class="n">n_days</span> <span class="o">=</span> <span class="mi">365</span>
+    <span class="n">n_hours</span> <span class="o">=</span> <span class="mi">24</span>
+
+    <span class="n">freq</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+    <span class="c1"># Try splitting into years</span>
+    <span class="k">if</span> <span class="n">data_size</span> <span class="o">/</span> <span class="n">num_years</span> <span class="o">&lt;=</span> <span class="n">segment_size</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">freq</span>
+    <span class="c1"># Months</span>
+    <span class="k">elif</span> <span class="n">data_size</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_years</span> <span class="o">*</span> <span class="n">n_months</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">segment_size</span><span class="p">:</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="s2">&quot;M&quot;</span>
+        <span class="k">return</span> <span class="n">freq</span>
+    <span class="c1"># Weeks</span>
+    <span class="k">elif</span> <span class="n">data_size</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_years</span> <span class="o">*</span> <span class="n">n_months</span> <span class="o">*</span> <span class="n">n_weeks</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">segment_size</span><span class="p">:</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="s2">&quot;W&quot;</span>
+        <span class="k">return</span> <span class="n">freq</span>
+    <span class="k">elif</span> <span class="n">data_size</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_years</span> <span class="o">*</span> <span class="n">n_months</span> <span class="o">*</span> <span class="n">n_weeks</span> <span class="o">*</span> <span class="n">n_days</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">segment_size</span><span class="p">:</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="s2">&quot;D&quot;</span>
+        <span class="k">return</span> <span class="n">freq</span>
+    <span class="k">elif</span> <span class="p">(</span>
+        <span class="n">data_size</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_years</span> <span class="o">*</span> <span class="n">n_months</span> <span class="o">*</span> <span class="n">n_weeks</span> <span class="o">*</span> <span class="n">n_days</span> <span class="o">*</span> <span class="n">n_hours</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">segment_size</span>
+    <span class="p">):</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="s2">&quot;H&quot;</span>
+        <span class="k">return</span> <span class="n">freq</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 OpenGHG development team
+      <span class="lastupdated">
+        Last updated on Oct 21, 2020.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

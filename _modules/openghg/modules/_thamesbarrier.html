@@ -1,0 +1,306 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>openghg.modules._thamesbarrier &mdash; OpenGHG 0+untagged.1.ga03f122 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script src="../../../_static/custom.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../features.html">Features</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Developer’s guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index_devapi.html">Developer API documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenGHG</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>openghg.modules._thamesbarrier</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for openghg.modules._thamesbarrier</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">BaseModule</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;THAMESBARRIER&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="THAMESBARRIER"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.THAMESBARRIER">[docs]</a><span class="k">class</span> <span class="nc">THAMESBARRIER</span><span class="p">(</span><span class="n">BaseModule</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Interface for processing THAMESBARRIER data</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="THAMESBARRIER.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.THAMESBARRIER.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_hugs_json</span>
+
+        <span class="c1"># Holds parameters used for writing attributes to Datasets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tb_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Sampling period of  data in seconds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_period</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tb_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;TMB&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="THAMESBARRIER.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.THAMESBARRIER.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reads THAMESBARRIER data files and returns the UUIDS of the Datasources</span>
+<span class="sd">            the processed data has been assigned to</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                data_filepath (str or Path): Path of file to load</span>
+<span class="sd">                site (str, default=None): Site name</span>
+<span class="sd">                network (str, default=None): Network name</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                list: UUIDs of Datasources data has been assigned to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+        <span class="kn">from</span> <span class="nn">openghg.processing</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
+
+        <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
+
+        <span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;TMB&quot;</span>
+
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">gas_data</span></div>
+
+<div class="viewcode-block" id="THAMESBARRIER.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.THAMESBARRIER.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Separates the gases stored in the dataframe in</span>
+<span class="sd">            separate dataframes and returns a dictionary of gases</span>
+<span class="sd">            with an assigned UUID as gas:UUID and a list of the processed</span>
+<span class="sd">            dataframes</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                data_filepath (pathlib.Path): Path of datafile</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                dict: Dictionary containing attributes, data and metadata keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span>
+            <span class="n">data_filepath</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">infer_datetime_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)</span>
+        <span class="c1"># Drop NaNs from the data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;rows&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">)</span>
+
+        <span class="n">rename_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="s2">&quot;Methane&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">rename_dict</span><span class="p">[</span><span class="s2">&quot;Methane&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;CH4&quot;</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_dict</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span>
+
+        <span class="n">combined_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">processed_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="n">species</span><span class="p">]]</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
+
+            <span class="c1"># Convert methane to ppb</span>
+            <span class="k">if</span> <span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;CH4&quot;</span><span class="p">:</span>
+                <span class="n">processed_data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">*=</span> <span class="mi">1000</span>
+
+            <span class="c1"># No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate</span>
+            <span class="c1"># when averaging</span>
+            <span class="n">processed_data</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> variability&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">species</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">processed_data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.0</span>
+            <span class="p">)</span>
+
+            <span class="n">site_attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tb_params</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
+            <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tb_params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+            <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tb_params</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
+
+            <span class="c1"># TODO - add in metadata reading</span>
+            <span class="n">combined_data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">processed_data</span><span class="p">,</span>
+                <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">site_attributes</span><span class="p">,</span>
+            <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">combined_data</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 OpenGHG development team
+      <span class="lastupdated">
+        Last updated on Oct 21, 2020.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

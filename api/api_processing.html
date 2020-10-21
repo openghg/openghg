@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>processing API Detail &mdash; OpenGHG 0+untagged.1.ga03f122 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/custom.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Developer’s guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index_devapi.html">Developer API documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenGHG</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>processing API Detail</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="processing-api-detail">
+<h1>processing API Detail<a class="headerlink" href="#processing-api-detail" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="openghg.processing.assign_attributes">
+<code class="sig-prename descclassname">openghg.processing.</code><code class="sig-name descname">assign_attributes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">site</span></em>, <em class="sig-param"><span class="n">sampling_period</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">network</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_attributes.html#assign_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.processing.assign_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign attributes to the data we’ve processed. This ensures that the xarray Datasets produced
+as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
+to the Datasource allowing more detailed searching of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>combined_data</strong> (<em>dict</em>) – Dictionary containing data, metadata and attributes</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary of combined data with correct attributes assigned to Datasets</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="openghg.processing.get_attributes">
+<code class="sig-prename descclassname">openghg.processing.</code><code class="sig-name descname">get_attributes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ds</span></em>, <em class="sig-param"><span class="n">species</span></em>, <em class="sig-param"><span class="n">site</span></em>, <em class="sig-param"><span class="n">network</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">global_attributes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">units</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_period</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">date_range</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_attributes.html#get_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.processing.get_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function writes attributes to an xarray.Dataset so that they conform with
+the CF Convention v1.7</p>
+<p>Attributes of the xarray DataSet are modified, and variable names are changed</p>
+<dl class="simple">
+<dt>If the species is a standard mole fraction then either:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>species name will used in lower case in the file and variable names</dt><dd><p>but with any hyphens taken out</p>
+</dd>
+</dl>
+</li>
+<li><p>name will be changed according to the species_translator dictionary</p></li>
+</ul>
+</dd>
+<dt>If the species is isotopic data or a non-standard variable (e.g. APO):</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>Isotopes species names should begin with a “D”</dt><dd><dl class="simple">
+<dt>(Annoyingly, the code currently picks up “Desflurane” too. I’ve</dt><dd><p>fixed this for now, but if we get a lot of other “D” species, we
+should make this better)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>I suggest naming for isotopologues should be d&lt;species&gt;&lt;isotope&gt;, e.g.</dt><dd><p>dCH4C13, or dCO2C14</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Any non-standard variables should be listed in the species_translator</dt><dd><p>dictionary</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds</strong> (<em>xarray.Dataset</em>) – Should contain variables such as “ch4”, “ch4 repeatability”.
+Must have a “time” dimension.</p></li>
+<li><p><strong>species</strong> (<em>str</em>) – Species name. e.g. “CH4”, “HFC-134a”, “dCH4C13”</p></li>
+<li><p><strong>site</strong> (<em>string</em>) – Three-letter site code</p></li>
+<li><p><strong>network</strong> (<em>str</em><em>, </em><em>default=None</em>) – Network site is associated with</p></li>
+<li><p><strong>global_attribuates</strong> (<em>dict</em><em>, </em><em>default=None</em>) – Dictionary containing any info you want to
+add to the file header (e.g. {“Contact”: “Matt Rigby”})</p></li>
+<li><p><strong>units</strong> (<em>str</em><em>, </em><em>default=None</em>) – This routine will try to guess the units
+unless this is specified. Options are in units_interpret</p></li>
+<li><p><strong>scale</strong> (<em>str</em><em>, </em><em>default=None</em>) – Calibration scale for species.</p></li>
+<li><p><strong>sampling_period</strong> (<em>int</em><em>, </em><em>default=None</em>) – Number of seconds for which air
+sample is taken. Only for time variable attribute</p></li>
+<li><p><strong>date_range</strong> (<em>list of two strings</em><em>, </em><em>optional</em>) – Start and end date for output
+If you only want an end date, just put a very early start date
+(e.g. [“1900-01-01”, “2010-01-01”])</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="openghg.processing.get_ceda_file">
+<code class="sig-prename descclassname">openghg.processing.</code><code class="sig-name descname">get_ceda_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">site</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">instrument</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">height</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">write_yaml</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">date_range</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_export.html#get_ceda_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.processing.get_ceda_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a JSON (with a yaml extension for CEDA reasons) object
+for export for a CEDA upload</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<em>str</em><em> or </em><em>Path</em><em>, </em><em>default=None</em>) – Path for file output. If file not passed a</p></li>
+<li><p><strong>is returned</strong> (<em>dictionary</em>) – </p></li>
+<li><p><strong>site</strong> (<em>str</em><em>, </em><em>default=None</em>) – Three letter site code (such as BSD for Bilsdale)</p></li>
+<li><p><strong>instrument</strong> (<em>str</em><em>, </em><em>default=None</em>) – Name of instrument</p></li>
+<li><p><strong>height</strong> (<em>str</em><em>, </em><em>default=None</em>) – Height of instrument</p></li>
+<li><p><strong>write_yaml</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True write to YAML, otherwise JSON file is written</p></li>
+<li><p><strong>date_range</strong> (<em>tuple</em><em>, </em><em>default=None</em>) – Start, end Python datetime objects</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary for upload to CEDA</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="openghg.processing.recombine_sections">
+<code class="sig-prename descclassname">openghg.processing.</code><code class="sig-name descname">recombine_sections</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_keys</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_recombination.html#recombine_sections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.processing.recombine_sections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines separate dataframes into a single dataframe for
+processing to NetCDF for output</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_keys</strong> (<em>list</em>) – Dictionary of object store keys keyed by search</p></li>
+<li><p><strong>term</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Combined dataframes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Pandas.Dataframe or list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="openghg.processing.search">
+<code class="sig-prename descclassname">openghg.processing.</code><code class="sig-name descname">search</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">locations</span></em>, <em class="sig-param"><span class="n">species</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">inlet</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">instrument</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">find_all</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">start_datetime</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_datetime</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_search.html#search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.processing.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search for gas data (optionally within a daterange)</p>
+<p>TODO - review this function - feel like it can be tidied and simplified</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>species</strong> (<em>str</em><em> or </em><em>list</em>) – Terms to search for in Datasources</p></li>
+<li><p><strong>locations</strong> (<em>str</em><em> or </em><em>list</em>) – Where to search for the terms in species</p></li>
+<li><p><strong>inlet</strong> (<em>str</em><em>, </em><em>default=None</em>) – Inlet height such as 100m</p></li>
+<li><p><strong>instrument</strong> (<em>str</em><em>, </em><em>default=None</em>) – Instrument name such as picarro</p></li>
+<li><p><strong>find_all</strong> (<em>bool</em><em>, </em><em>default=True</em>) – Require all search terms to be satisfied</p></li>
+<li><p><strong>start_datetime</strong> (<em>datetime</em><em>, </em><em>default=None</em>) – Start datetime for search</p></li>
+<li><p><strong>None a start datetime of UNIX epoch</strong> (<em>If</em>) – </p></li>
+<li><p><strong>end_datetime</strong> (<em>datetime</em><em>, </em><em>default=None</em>) – End datetime for search</p></li>
+<li><p><strong>None an end datetime of the current datetime is set</strong> (<em>If</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of keys of Datasources matching the search parameters</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="openghg.processing.assign_data">
+<code class="sig-prename descclassname">openghg.processing.</code><code class="sig-name descname">assign_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gas_data</span></em>, <em class="sig-param"><span class="n">lookup_results</span></em>, <em class="sig-param"><span class="n">overwrite</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_segment.html#assign_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.processing.assign_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign data to a Datasource. This will either create a new Datasource
+Create or get an existing Datasource for each gas in the file</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Args:</dt><dd><p>gas_data (dict): Dictionary containing data and metadata for species
+lookup_results (dict): Dictionary of lookup results]
+overwrite (bool): If True overwrite current data stored</p>
+</dd>
+<dt>Returns:</dt><dd><p>dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 OpenGHG development team
+      <span class="lastupdated">
+        Last updated on Oct 21, 2020.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

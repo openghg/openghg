@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>openghg.localclient._rank_sources &mdash; OpenGHG 0+untagged.1.ga03f122 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script src="../../../_static/custom.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../features.html">Features</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Developer’s guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index_devapi.html">Developer API documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenGHG</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>openghg.localclient._rank_sources</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for openghg.localclient._rank_sources</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span><span class="p">,</span> <span class="n">ObsSurface</span>
+<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">valid_site</span>
+<span class="kn">from</span> <span class="nn">pyvis.network</span> <span class="kn">import</span> <span class="n">Network</span>
+<span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="k">as</span> <span class="nn">cm</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;RankSources&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="RankSources"><a class="viewcode-back" href="../../../api/api_localclient.html#openghg.localclient.RankSources">[docs]</a><span class="k">class</span> <span class="nc">RankSources</span><span class="p">:</span>
+<div class="viewcode-block" id="RankSources.get_sources"><a class="viewcode-back" href="../../../api/api_localclient.html#openghg.localclient.RankSources.get_sources">[docs]</a>    <span class="k">def</span> <span class="nf">get_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the datasources for this site and species to allow a ranking to be set</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                site (str): Three letter site code</span>
+<span class="sd">                species (str): Species name</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                dict: Dictionary of datasource metadata</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">site</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">valid_site</span><span class="p">(</span><span class="n">site</span><span class="p">):</span>
+            <span class="c1"># raise InvalidSiteError(f&quot;{site} is not a valid site code&quot;)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> is not a valid site code&quot;</span><span class="p">)</span>
+
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">datasources</span><span class="p">()</span>
+
+        <span class="c1"># Shallow load the Datasources (only get their JSON metadata)</span>
+        <span class="n">datasources</span> <span class="o">=</span> <span class="p">[</span><span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">datasource_uuids</span><span class="p">]</span>
+
+        <span class="n">search_terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">search_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+
+        <span class="n">matching_sources</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datasources</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">search_metadata</span><span class="p">(</span><span class="n">search_terms</span><span class="o">=</span><span class="n">search_terms</span><span class="p">,</span> <span class="n">find_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)]</span>
+
+        <span class="k">def</span> <span class="nf">name_str</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">species</span><span class="p">(),</span> <span class="n">d</span><span class="o">.</span><span class="n">site</span><span class="p">(),</span> <span class="n">d</span><span class="o">.</span><span class="n">inlet</span><span class="p">(),</span> <span class="n">d</span><span class="o">.</span><span class="n">instrument</span><span class="p">()])</span>
+
+        <span class="n">rank_info</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">name_str</span><span class="p">(</span><span class="n">d</span><span class="p">):</span> <span class="p">{</span><span class="s2">&quot;rank&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">rank</span><span class="p">(),</span> <span class="s2">&quot;data_range&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">daterange_str</span><span class="p">(),</span> <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">uuid</span><span class="p">(),</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">metadata</span><span class="p">()}</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">matching_sources</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">rank_info</span><span class="p">)</span>
+        <span class="c1"># self._key_uuids = {key: rank_info[key][&quot;uuid&quot;] for key in rank_info}</span>
+
+        <span class="k">return</span> <span class="n">rank_info</span></div>
+
+<div class="viewcode-block" id="RankSources.set_rank"><a class="viewcode-back" href="../../../api/api_localclient.html#openghg.localclient.RankSources.set_rank">[docs]</a>    <span class="k">def</span> <span class="nf">set_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rank_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rank_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the rank data for the </span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                rank_key: Key of ranking data from the original dict</span>
+<span class="sd">                return by get_sources.</span>
+<span class="sd">                rank_data: Dictionary of ranking data for example</span>
+<span class="sd">                co2_hfd_50m_picarro: {1: [daterange_1], 2: [daterange_2]}</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First find the UUID</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">[</span><span class="n">rank_key</span><span class="p">][</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span>
+
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">dateranges</span> <span class="ow">in</span> <span class="n">rank_data</span><span class="p">[</span><span class="n">rank_key</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">for</span> <span class="n">daterange</span> <span class="ow">in</span> <span class="n">dateranges</span><span class="p">:</span>
+                <span class="n">obs</span><span class="o">.</span><span class="n">set_rank</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span> <span class="n">daterange</span><span class="o">=</span><span class="n">daterange</span><span class="p">)</span>
+
+        <span class="c1"># Update local version of data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">[</span><span class="n">rank_key</span><span class="p">][</span><span class="s2">&quot;rank&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank_data</span>
+
+        <span class="n">obs</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="RankSources.visualise_rankings"><a class="viewcode-back" href="../../../api/api_localclient.html#openghg.localclient.RankSources.visualise_rankings">[docs]</a>    <span class="k">def</span> <span class="nf">visualise_rankings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Network</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Creates a small network graph of ranked data with each rank given a colour</span>
+
+<span class="sd">            Note that this function should only be run from a Jupyter Notebook</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                rank_data (dict): Dictionary of the form given by RankSources.get_sources()</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                pyvis.network.Network: Network graph</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">header_text</span> <span class="o">=</span> <span class="s2">&quot;OpenGHG ranked data&quot;</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="s2">&quot;800px&quot;</span><span class="p">,</span> <span class="s2">&quot;100%&quot;</span><span class="p">,</span> <span class="n">notebook</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">heading</span><span class="o">=</span><span class="n">header_text</span><span class="p">)</span>
+        <span class="c1"># Set the physics layout of the network</span>
+        <span class="n">net</span><span class="o">.</span><span class="n">force_atlas_2based</span><span class="p">()</span>
+
+        <span class="n">rank_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span>
+
+        <span class="n">a_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rank_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">site</span> <span class="o">=</span> <span class="n">rank_data</span><span class="p">[</span><span class="n">a_key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span><span class="s2">&quot;site&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">mapper</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">tab10</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">colour_mapper</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">to_hex</span><span class="p">(</span><span class="n">mapper</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+        <span class="n">net</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;brown&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">rank_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">rank</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;rank&quot;</span><span class="p">]</span>
+            <span class="n">site_name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span><span class="s2">&quot;site&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="n">data_range</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data_range&quot;</span><span class="p">]</span>
+
+            <span class="c1"># HTML to show when the mouse is hovered over a node</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;&lt;/br&gt;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;&lt;b&gt;Rank:&lt;/b&gt; </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;&lt;b&gt;Site:&lt;/b&gt; </span><span class="si">{</span><span class="n">site_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;&lt;b&gt;Data range:&lt;/b&gt; </span><span class="si">{</span><span class="n">data_range</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">colour</span> <span class="o">=</span> <span class="n">colour_mapper</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># For now just use the highest rank for the color</span>
+                <span class="n">highest_rank</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">rank</span><span class="o">.</span><span class="n">keys</span><span class="p">()))[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">colour</span> <span class="o">=</span> <span class="n">colour_mapper</span><span class="p">(</span><span class="n">highest_rank</span><span class="p">)</span>
+
+            <span class="n">split_key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">split_key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">split_key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">split_key</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">split_key</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+
+            <span class="n">net</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colour</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
+            <span class="n">net</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">net</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s2">&quot;openghg_rankings.html&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RankSources.rank_sources"><a class="viewcode-back" href="../../../api/api_localclient.html#openghg.localclient.RankSources.rank_sources">[docs]</a>    <span class="k">def</span> <span class="nf">rank_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updated_rankings</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Assign the precendence of sources for each.</span>
+<span class="sd">            This function expects a dictionary of the form</span>
+
+<span class="sd">            {&#39;site_string&#39;: {&#39;rank&#39;: [daterange_str, ...], &#39;daterange&#39;: &#39;start_end&#39;, &#39;uuid&#39;: uuid}, </span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                updated_ranking (dict): Dictionary of ranking</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+        <span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s2">&quot;This function will soon be removed, please use set_rank instead&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">updated_rankings</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">updated_rankings</span><span class="p">:</span>
+            <span class="n">uuid</span> <span class="o">=</span> <span class="n">updated_rankings</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">daterange</span> <span class="ow">in</span> <span class="n">updated_rankings</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;rank&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">daterange</span><span class="p">:</span>
+                    <span class="n">obs</span><span class="o">.</span><span class="n">set_rank</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span> <span class="n">daterange</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
+
+        <span class="n">obs</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="RankSources.create_daterange"><a class="viewcode-back" href="../../../api/api_localclient.html#openghg.localclient.RankSources.create_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">create_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create a JSON serialisable daterange string for use in ranking dict</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                start (datetime): Start of daterange</span>
+<span class="sd">                end (datetime): End of daterange</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                str: Serialisable daterange string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">datetime_to_string</span>
+        <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">end</span><span class="p">)</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">datetime_to_string</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">datetime_to_string</span><span class="p">(</span><span class="n">end</span><span class="p">)])</span></div></div>
+
+    <span class="c1"># def visualise_ranks():</span>
+    <span class="c1">#     &quot;&quot;&quot; Return a dic</span>
+
+    <span class="c1">#     &quot;&quot;&quot;</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 OpenGHG development team
+      <span class="lastupdated">
+        Last updated on Oct 21, 2020.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

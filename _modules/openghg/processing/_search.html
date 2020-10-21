@@ -1,0 +1,477 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>openghg.processing._search &mdash; OpenGHG 0+untagged.1.ga03f122 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script src="../../../_static/custom.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../features.html">Features</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Developer’s guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index_devapi.html">Developer API documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenGHG</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>openghg.processing._search</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for openghg.processing._search</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Generic search functions that can be used to find data in</span>
+<span class="sd">    the object store</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;search&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lookup_gas_datasources&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lookup_footprint_datasources&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="search"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.search">[docs]</a><span class="k">def</span> <span class="nf">search</span><span class="p">(</span>
+    <span class="n">locations</span><span class="p">,</span>
+    <span class="n">species</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">instrument</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">find_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">start_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Search for gas data (optionally within a daterange)</span>
+
+<span class="sd">        TODO - review this function - feel like it can be tidied and simplified</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            species (str or list): Terms to search for in Datasources</span>
+<span class="sd">            locations (str or list): Where to search for the terms in species</span>
+<span class="sd">            inlet (str, default=None): Inlet height such as 100m</span>
+<span class="sd">            instrument (str, default=None): Instrument name such as picarro</span>
+<span class="sd">            find_all (bool, default=True): Require all search terms to be satisfied</span>
+<span class="sd">            start_datetime (datetime, default=None): Start datetime for search</span>
+<span class="sd">            If None a start datetime of UNIX epoch (1970-01-01) is set</span>
+<span class="sd">            end_datetime (datetime, default=None): End datetime for search</span>
+<span class="sd">            If None an end datetime of the current datetime is set</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: List of keys of Datasources matching the search parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+    <span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">load</span>
+    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span><span class="p">,</span> <span class="n">ObsSurface</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span><span class="n">get_datetime_now</span><span class="p">,</span> <span class="n">get_datetime_epoch</span><span class="p">,</span> <span class="n">create_daterange_str</span><span class="p">,</span> 
+                            <span class="n">timestamp_tzaware</span><span class="p">,</span> <span class="n">get_datapath</span><span class="p">)</span>
+
+    <span class="c1"># if species is not None and not isinstance(species, list):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="p">[</span><span class="n">species</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">locations</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">locations</span> <span class="o">=</span> <span class="p">[</span><span class="n">locations</span><span class="p">]</span>
+
+    <span class="c1"># Allow passing of location names instead of codes</span>
+    <span class="n">site_codes_json</span> <span class="o">=</span> <span class="n">get_datapath</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;site_codes.json&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">site_codes_json</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">site_codes</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;name_code&quot;</span><span class="p">]</span>
+
+    <span class="n">updated_locations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># Check locations, if they&#39;re longer than three letters do a lookup</span>
+    <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">locations</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">site_code</span> <span class="o">=</span> <span class="n">site_codes</span><span class="p">[</span><span class="n">loc</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+                <span class="n">updated_locations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">site_code</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid site </span><span class="si">{</span><span class="n">loc</span><span class="si">}</span><span class="s2"> passed&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">updated_locations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+
+    <span class="n">locations</span> <span class="o">=</span> <span class="n">updated_locations</span>
+
+    <span class="k">if</span> <span class="n">start_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">get_datetime_epoch</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">end_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">get_datetime_now</span><span class="p">()</span>
+
+    <span class="c1"># Ensure passed datetimes are timezone aware</span>
+    <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_datetime</span><span class="p">)</span>
+    <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_datetime</span><span class="p">)</span>
+
+    <span class="c1"># Here we want to load in the ObsSurface module for now</span>
+    <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">datasources</span><span class="p">()</span>
+
+    <span class="c1"># Shallow load the Datasources so we can search their metadata</span>
+    <span class="n">datasources</span> <span class="o">=</span> <span class="p">[</span><span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">datasource_uuids</span><span class="p">]</span>
+
+    <span class="c1"># First we find the Datasources from locations we want to narrow down our search</span>
+    <span class="n">location_sources</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="c1"># If we have locations to search</span>
+    <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">locations</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">datasource</span> <span class="ow">in</span> <span class="n">datasources</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">datasource</span><span class="o">.</span><span class="n">search_metadata</span><span class="p">(</span><span class="n">search_terms</span><span class="o">=</span><span class="n">location</span><span class="p">):</span>
+                <span class="n">location_sources</span><span class="p">[</span><span class="n">location</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">datasource</span><span class="p">)</span>
+
+    <span class="c1"># This is returned to the caller</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="c1"># With both inlet and instrument specified we bypass the ranking system</span>
+    <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">instrument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">sources</span> <span class="ow">in</span> <span class="n">location_sources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">species</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">datasource</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">:</span>
+                    <span class="c1"># Just match the single source here</span>
+                    <span class="k">if</span> <span class="n">datasource</span><span class="o">.</span><span class="n">search_metadata</span><span class="p">(</span><span class="n">search_terms</span><span class="o">=</span><span class="p">[</span><span class="n">sp</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">instrument</span><span class="p">],</span> <span class="n">find_all</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                        <span class="n">daterange_str</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start_datetime</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end_datetime</span><span class="p">)</span>
+                        <span class="c1"># Get the data keys for the data in the matching daterange</span>
+                        <span class="n">in_date</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">in_daterange</span><span class="p">(</span><span class="n">daterange</span><span class="o">=</span><span class="n">daterange_str</span><span class="p">)</span>
+
+                        <span class="n">data_date_str</span> <span class="o">=</span> <span class="n">_strip_dates_keys</span><span class="p">(</span><span class="n">in_date</span><span class="p">)</span>
+
+                        <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sp</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">instrument</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+                        <span class="c1"># Find the keys that match the correct data</span>
+                        <span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">data_date_str</span><span class="p">:</span> <span class="n">in_date</span><span class="p">}</span>
+                        <span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">for</span> <span class="n">location</span><span class="p">,</span> <span class="n">sources</span> <span class="ow">in</span> <span class="n">location_sources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Loop over and look for the species</span>
+        <span class="n">species_data</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">datasource</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species</span><span class="p">:</span>
+                <span class="n">search_terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">instrument</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+                <span class="c1"># Check the species and the daterange</span>
+                <span class="k">if</span> <span class="n">datasource</span><span class="o">.</span><span class="n">search_metadata</span><span class="p">(</span><span class="n">search_terms</span><span class="o">=</span><span class="n">search_terms</span><span class="p">,</span> <span class="n">find_all</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                    <span class="n">species_data</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">datasource</span><span class="p">)</span>
+
+        <span class="c1"># For each location we want to find the highest ranking sources for the selected species</span>
+        <span class="k">for</span> <span class="n">sp</span><span class="p">,</span> <span class="n">sources</span> <span class="ow">in</span> <span class="n">species_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ranked_sources</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># How to return all the sources if they&#39;re all 0?</span>
+            <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">:</span>
+                <span class="n">rank_data</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">get_rank</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">start_datetime</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_datetime</span><span class="p">)</span>
+
+                <span class="c1"># With no rank set we get an empty dictionary</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">rank_data</span><span class="p">:</span>
+                    <span class="n">ranked_sources</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Just get the highest ranked datasources and return them</span>
+                <span class="c1"># Find the highest ranked data from this site</span>
+                <span class="n">highest_rank</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rank_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">highest_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ranked_sources</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">continue</span>
+
+                <span class="n">ranked_sources</span><span class="p">[</span><span class="n">source</span><span class="o">.</span><span class="n">uuid</span><span class="p">()]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;rank&quot;</span><span class="p">:</span> <span class="n">highest_rank</span><span class="p">,</span> <span class="s2">&quot;dateranges&quot;</span><span class="p">:</span> <span class="n">rank_data</span><span class="p">[</span><span class="n">highest_rank</span><span class="p">],</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source</span><span class="p">}</span>
+
+            <span class="c1"># If it&#39;s all zeroes we want to return all sources</span>
+            <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">ranked_sources</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">:</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">species</span><span class="p">()</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">site</span><span class="p">()</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">inlet</span><span class="p">()</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">instrument</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+                    <span class="n">daterange_str</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start_datetime</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end_datetime</span><span class="p">)</span>
+                    <span class="n">data_keys</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">in_daterange</span><span class="p">(</span><span class="n">daterange</span><span class="o">=</span><span class="n">daterange_str</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">data_keys</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># Get a key that covers the daterange of the actual data and not from epoch to now</span>
+                    <span class="c1"># if no start/end datetimes are passed</span>
+                    <span class="n">data_date_str</span> <span class="o">=</span> <span class="n">_strip_dates_keys</span><span class="p">(</span><span class="n">data_keys</span><span class="p">)</span>
+
+                    <span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">data_date_str</span><span class="p">:</span> <span class="n">data_keys</span><span class="p">}</span>
+                    <span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span>
+
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># TODO - find a cleaner way of doing this</span>
+                <span class="c1"># We might have a zero rank, delete it as we have higher ranked data</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">ranked_sources</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="c1"># Otherwise iterate over the sources that are ranked and extract the keys</span>
+            <span class="k">for</span> <span class="n">uid</span> <span class="ow">in</span> <span class="n">ranked_sources</span><span class="p">:</span>
+                <span class="n">source</span> <span class="o">=</span> <span class="n">ranked_sources</span><span class="p">[</span><span class="n">uid</span><span class="p">][</span><span class="s2">&quot;source&quot;</span><span class="p">]</span>
+                <span class="n">source_dateranges</span> <span class="o">=</span> <span class="n">ranked_sources</span><span class="p">[</span><span class="n">uid</span><span class="p">][</span><span class="s2">&quot;dateranges&quot;</span><span class="p">]</span>
+
+                <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">species</span><span class="p">()</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">site</span><span class="p">()</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">inlet</span><span class="p">()</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">instrument</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+                <span class="n">data_keys</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="c1"># Get the keys for each daterange</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">source_dateranges</span><span class="p">:</span>
+                    <span class="n">keys_in_date</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">in_daterange</span><span class="p">(</span><span class="n">daterange</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;+00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">keys_in_date</span><span class="p">:</span>
+                        <span class="n">data_keys</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="n">keys_in_date</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">data_keys</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_keys</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<span class="k">def</span> <span class="nf">_strip_dates_keys</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Strips the date from a key, could this data just be read from JSON instead?</span>
+<span class="sd">        Read dates covered from the Datasource?</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            keys (list): List of keys containing data</span>
+<span class="sd">            data/uuid/&lt;uuid&gt;/&lt;version&gt;/2019-03-01-04:14:30+00:00_2019-05-31-20:44:30+00:00</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Daterange string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">keys</span><span class="p">]</span>
+
+    <span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">start_key</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">end_key</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># Get the first and last dates from the keys in the search results</span>
+    <span class="n">start_date</span> <span class="o">=</span> <span class="n">start_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;+00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">end_date</span> <span class="o">=</span> <span class="n">end_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;+00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">lookup_gas_datasources</span><span class="p">(</span><span class="n">lookup_dict</span><span class="p">,</span> <span class="n">gas_data</span><span class="p">,</span> <span class="n">source_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Check if the passed data exists in the lookup dict</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lookup_dict (dict): Dictionary to search for exisiting Datasources</span>
+<span class="sd">            gas_data (list): Gas data to process</span>
+<span class="sd">            source_name (str): Name of course</span>
+<span class="sd">            source_id (str, default=None): UUID of source. Not currently implemented.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: source_name: Datasource UUID (key: value)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">warnings</span>
+    <span class="c1"># If we already have data from these datasources then return that UUID</span>
+    <span class="c1"># otherwise return False</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;This function will be removed in a future release&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">)</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">gas_data</span><span class="p">:</span>
+        <span class="n">datasource_name</span> <span class="o">=</span> <span class="n">source_name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">species</span>
+        <span class="n">results</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">results</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lookup_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">datasource_name</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_name</span>
+
+    <span class="k">return</span> <span class="n">results</span>
+
+
+<span class="k">def</span> <span class="nf">lookup_footprint_datasources</span><span class="p">(</span><span class="n">lookup_dict</span><span class="p">,</span> <span class="n">source_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Check if we&#39;ve had data from this Datasource before</span>
+
+<span class="sd">        TODO - This seems like a waste - combine this with lookup_gasDatasources ?</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lookup_dict (dict): Dictionary to search for exisiting Datasources</span>
+<span class="sd">            source_name (str): Name of course</span>
+<span class="sd">            source_id (str, default=None): UUID of source. Not currently implemented.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: source_name: Datasource UUID (key: value)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="n">source_name</span><span class="p">:</span> <span class="p">{}}</span>
+    <span class="n">results</span><span class="p">[</span><span class="n">source_name</span><span class="p">][</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lookup_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">source_name</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">results</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020 OpenGHG development team
+      <span class="lastupdated">
+        Last updated on Oct 21, 2020.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
