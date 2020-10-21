@@ -2,7 +2,7 @@ name: OpenGHG tests
 
 on:
   push:
-    branches: [master, devel]
+    branches: [master, devel, docs]
     tags:
     - '*'
   pull_request:
@@ -19,17 +19,22 @@ jobs:
         operating-system: [ubuntu-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8]
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout 🛎️
+      uses: actions/checkout@v2.3.1
+      with:
+        persist-credentials: false
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Install openghg
       run: |
-        python -m pip install --upgrade pip
-        pip install pytest pytest-cov flake8
-        pip install -r requirements.txt
+        python -m pip install --upgrade pip wheel
         pip install -r requirements-dev.txt
+        pip install .
+    - name: Install pandoc for building of documentation
+      run: |
+        sudo apt-get install -yq pandoc
     - name: 'Clone Acquire for services folder required for tests'
       run: |
         git clone -b testStore https://github.com/gareth-j/acquire.git ../acquire
@@ -46,3 +51,21 @@ jobs:
     - name: Upload coverage to Codecov
       run: |
         bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+    - name: Build the documentation
+      run: |
+        cd doc
+        make
+      if: matrix.python-version == 3.7 && matrix.config.os == 'ubuntu-latest' && github.event_name == 'push'
+    - name: Deploy to GitHub pages
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: gh-pages 
+        FOLDER: doc/build/html
+        CLEAN: true 
+      if: matrix.python-version == 3.7 && matrix.config.os == 'ubuntu-latest' && github.event_name == 'push'
+      
+        
+
+
+    

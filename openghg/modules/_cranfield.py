@@ -1,12 +1,15 @@
 __all__ = ["CRANFIELD"]
 
+from typing import Optional, Union
+from pathlib import Path
+
 
 class CRANFIELD:
     """ Interface for processing Cranfield data """
 
     def read_file(
         self, 
-        data_filepath: Union[str, pathlib.Path, list], 
+        data_filepath: Union[str, Path, list], 
         site: Optional[str] = None, 
         network: Optional[str] = None
     ) -> dict:
@@ -20,7 +23,6 @@ class CRANFIELD:
         Returns:
             dict: Dictionary of gas data
         """
-        from pathlib import Path
         from pandas import read_csv
 
         data_filepath = Path(data_filepath)

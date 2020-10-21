@@ -1,6 +1,7 @@
 __all___ = ["Datasource"]
 
 from pandas import DataFrame, Timestamp
+from typing import Optional, Tuple, Union
 from xarray import Dataset
 
 
@@ -211,7 +212,7 @@ class Datasource:
 
         self.update_daterange()
 
-    def get_dataframe_daterange(self, dataframe: DataFrame) -> tuple[Timestamp, Timestamp]:
+    def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
         """Returns the daterange for the passed DataFrame
 
         Args:

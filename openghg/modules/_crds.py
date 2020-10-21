@@ -3,6 +3,9 @@ from openghg.util import load_hugs_json
 __all__ = ["CRDS"]
 
 from pandas import DataFrame
+from pathlib import Path
+from typing import Optional, Tuple, Union
+
 
 class CRDS:
     """
@@ -20,7 +23,7 @@ class CRDS:
 
     def read_file(
         self, 
-        data_filepath: Union[str, pathlib.Path, list], 
+        data_filepath: Union[str, Path, list], 
         site: Optional[str] = None, 
         network: Optional[str] = None
     ) -> dict:
@@ -39,11 +42,8 @@ class CRDS:
         if not isinstance(data_filepath, Path):
             data_filepath = Path(data_filepath)
 
-        if not source_name:
-            source_name = data_filepath.stem
-
         if not site:
-            site = source_name.split(".")[0]
+            site = data_filepath.stem.split(".")[0]
 
         # Process the data into separate Datasets
         gas_data = self.read_data(data_filepath=data_filepath, site=site, network=network)
@@ -52,7 +52,7 @@ class CRDS:
 
         return gas_data
 
-    def read_data(self, data_filepath: pathlib.Path, site: str, network: str) -> dict:
+    def read_data(self, data_filepath: Path, site: str, network: str) -> dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -156,7 +156,7 @@ class CRDS:
 
         return combined_data
 
-    def read_metadata(self, filepath: pathlib.Path, data: DataFrame) -> dict:
+    def read_metadata(self, filepath: Path, data: DataFrame) -> dict:
         """ Parse CRDS files and create a metadata dict
 
         Args:
@@ -225,7 +225,7 @@ class CRDS:
 
         return attributes
 
-    def gas_info(self, data: DataFrame) -> tuple[int, int]:
+    def gas_info(self, data: DataFrame) -> Tuple[int, int]:
         """Returns the number of columns of data for each gas
         that is present in the dataframe
 

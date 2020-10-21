@@ -94,6 +94,14 @@ Documentation
 To build the documentation you will need to install `pandoc <https://pandoc.org/>`__, a standalone document converter tool.
 Please see the `pandoc installation instructions <https://pandoc.org/installing.html>`__.
 
+.. note::
+    If you haven't installed ``openghg`` to your virtual environment you can add the folder path to your PYTHONPATH.
+    This allows the library to be used easily without the need for reinstallation after changes.
+
+    .. code-block:: bash
+
+        export PYTHONPATH="${PYTHONPATH}:/path/to/cloned/repo"
+
 You can now build the documentation.
 
 .. code-block:: bash

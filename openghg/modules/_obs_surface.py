@@ -1,5 +1,8 @@
 from openghg.modules import BaseModule
 
+from pathlib import Path
+from typing import Optional, Union
+
 
 class ObsSurface(BaseModule):
     """This class is used to process surface observation data"""
@@ -61,7 +64,7 @@ class ObsSurface(BaseModule):
 
     @staticmethod
     def read_file(
-        filepath: Union[str, pathlib.Path, list],
+        filepath: Union[str, Path, list],
         data_type: str,
         site: Optional[str] = None,
         network: Optional[str] = None,
@@ -157,7 +160,7 @@ class ObsSurface(BaseModule):
 
     @staticmethod
     def read_folder(
-        folder_path: Union[str, pathlib.Path], data_type: str, network: str, extension: Optional[str] = "dat"
+        folder_path: Union[str, Path], data_type: str, network: str, extension: Optional[str] = "dat"
     ) -> dict:
         """Find files with the given extension (by default dat) in the passed folder
 
