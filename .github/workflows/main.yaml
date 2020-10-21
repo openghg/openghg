@@ -19,7 +19,7 @@ jobs:
         operating-system: [ubuntu-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8]
     steps:
-    - name: Checkout 🛎️
+    - name: Checkout
       uses: actions/checkout@v2.3.1
       with:
         persist-credentials: false
@@ -42,7 +42,7 @@ jobs:
         pip install oci retry
     - name: Lint with flake8
       run: |
-        flake8 HUGS/ --count --statistics
+        flake8 openghg/ --count --statistics
     - name: Test with pytest
       env:
         OPENGHG_PATH: /tmp/openghg_store
