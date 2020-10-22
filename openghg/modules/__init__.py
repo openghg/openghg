@@ -7,7 +7,6 @@ from ._cranfield import CRANFIELD
 from ._crds import CRDS
 from ._datasource import Datasource
 from ._eurocom import EUROCOM
-from ._footprint import Footprint
 from ._gcwerks import GCWERKS
 from ._icos import ICOS
 from ._noaa import NOAA
