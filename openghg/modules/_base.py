@@ -1,6 +1,9 @@
 """ This file contains the BaseModule class from which other processing
     modules inherit.
 """
+from typing import Dict, List, Optional, Union, Type, TypeVar
+
+T = TypeVar("T", bound="BaseModule")
 
 
 class BaseModule:
@@ -8,12 +11,12 @@ class BaseModule:
         return not self.datasources
 
     @classmethod
-    def exists(cls, bucket=None):
+    def exists(cls: Type[T], bucket: Optional[str] = None) -> bool:
         """ Check if a GC object is already saved in the object
             store
 
             Args:
-                bucket (dict, default=None): Bucket for data storage
+                bucket: Bucket for data storage
             Returns:
                 bool: True if object exists
         """
@@ -27,12 +30,12 @@ class BaseModule:
         return exists(bucket=bucket, key=key)
 
     @classmethod
-    def from_data(cls, data, bucket=None):
+    def from_data(cls: Type[T], data: str, bucket: Optional[Dict] = None) -> T:
         """ Create an object from data
 
             Args:
-                data (str): JSON data
-                bucket (dict, default=None): Bucket for data storage
+                data: JSON data
+                bucket: Bucket for data storage
             Returns:
                 cls: Class object of cls type
         """
@@ -62,15 +65,14 @@ class BaseModule:
         return c
 
     @classmethod
-    def load(cls, bucket=None):
+    def load(cls: Type[T], bucket: Optional[str] = None) -> T:
         """ Load an object from the datastore using the passed
             bucket and UUID
 
             Args:
-                inst (CRDS): CRDS instance
-                bucket (dict, default=None): Bucket to store object
+                bucket: Bucket to store object
             Returns:
-                Datasource: Datasource object created from JSON
+                class: Class created from JSON data
         """
         from openghg.objectstore import get_bucket, get_object_from_json
 
@@ -86,7 +88,7 @@ class BaseModule:
         return cls.from_data(data=data, bucket=bucket)
 
     @classmethod
-    def uuid(cls):
+    def uuid(cls: Type[T]) -> str:
         """ Return the UUID of this object
 
             Returns:
@@ -94,11 +96,11 @@ class BaseModule:
         """
         return cls._uuid
 
-    def add_datasources(self, datasource_uuids):
+    def add_datasources(self: T, datasource_uuids: Dict) -> None:
         """ Add the passed list of Datasources to the current list
 
             Args:
-                datasource_uuids (dict): Dict of Datasource UUIDs
+                datasource_uuids: Dict of Datasource UUIDs
             Returns:
                 None
         """
@@ -107,7 +109,7 @@ class BaseModule:
         uuid_keyed = {v: k for k, v in datasource_uuids.items()}
         self._datasource_uuids.update(uuid_keyed)
 
-    def datasources(self):
+    def datasources(self: T) -> List[str]:
         """ Return the list of Datasources UUIDs associated with this object
 
             Returns:
@@ -115,27 +117,30 @@ class BaseModule:
         """
         return list(self._datasource_uuids.keys())
 
-    def datasource_names(self):
+    def datasource_names(self: T) -> Dict:
         """ Return the names of the datasources
 
-
-
+            Returns:
+                dict: Dictionary of Datasource names
         """
         import warnings
+
         warnings.warn("This may be removed in a future release", category=DeprecationWarning)
 
         return self._datasource_names
 
-    def remove_datasource(self, uuid):
+    def remove_datasource(self: T, uuid: str) -> None:
         """ Remove the Datasource with the given uuid from the list
             of Datasources
 
             Args:
                 uuid (str): UUID of Datasource to be removed
+            Returns: 
+                None
         """
         del self._datasource_uuids[uuid]
 
-    def set_rank(self, uuid, rank, daterange):
+    def set_rank(self: T, uuid: str, rank: Union[int, str], daterange: Union[str, List[str]]) -> None:
         """ Set the rank of a Datasource associated with this object.
 
             This function performs checks to ensure multiple ranks aren't set for
@@ -173,8 +178,10 @@ class BaseModule:
 
                         intersection = daterange_obj.intersection(e)
                         if len(intersection) > 0 and int(existing_rank) != int(rank):
-                            raise ValueError(f"This datasource has already got the rank {existing_rank} for dates that overlap the ones given. \
-                                                Overlapping dates are {intersection}")
+                            raise ValueError(
+                                f"This datasource has already got the rank {existing_rank} for dates that overlap the ones given. \
+                                                Overlapping dates are {intersection}"
+                            )
         except KeyError:
             pass
 
@@ -188,7 +195,7 @@ class BaseModule:
         except KeyError:
             self._rank_data[uuid][rank] = daterange
 
-    def clear_datasources(self):
+    def clear_datasources(self: T) -> None:
         """ Remove all Datasources from the object
 
             Returns:

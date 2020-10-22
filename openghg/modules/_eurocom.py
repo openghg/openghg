@@ -1,14 +1,17 @@
+from typing import Dict, Optional, Union
+from pathlib import Path
+
 __all__ = ["EUROCOM"]
 
 
-class EUROCOM():
+class EUROCOM:
     """ Interface for processing EUROCOM data
 
-        This is only a temporary module to processing the ICOS EUROCOM study data
+        This is only a temporary module to process the ICOS EUROCOM study data
 
-        ICOS data processing will be done in the ICOS module
-
+        ICOS data processing is done by the ICOS module
     """
+
     def __init__(self):
         from openghg.util import load_hugs_json
 
@@ -19,14 +22,14 @@ class EUROCOM():
         data = load_hugs_json(filename="attributes.json")
         self._eurocom_params = data["EUROCOM"]
 
-    def read_file(self, data_filepath, site=None, overwrite=False):
+    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, overwrite: Optional[bool] = False) -> Dict:
         """ Reads EUROCOM data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
             Args:
-                filepath (str or Path): Path of file to load
+                filepath: Path of file to load
             Returns:
-                list: UUIDs of Datasources data has been assigned to
+                dict: Dictionary of Datasource UUIDs and keys
         """
         from pathlib import Path
         from openghg.processing import assign_attributes
@@ -44,14 +47,14 @@ class EUROCOM():
 
         return gas_data
 
-    def read_data(self, data_filepath, site, height=None):
+    def read_data(self, data_filepath: Path, site: str, height: Optional[str] = None) -> Dict:
         """ Separates the gases stored in the dataframe in
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
             dataframes
 
             Args:
-                data_filepath (pathlib.Path): Path of datafile
+                data_filepath: Path of datafile
             Returns:
                 dict: Dictionary containing attributes, data and metadata keys
         """
@@ -130,13 +133,7 @@ class EUROCOM():
         except KeyError:
             calibration_scale = {}
 
-        gas_data = get_attributes(
-            ds=data,
-            species=species,
-            site=site,
-            global_attributes=site_attributes,
-            units="ppm",
-        )
+        gas_data = get_attributes(ds=data, species=species, site=site, global_attributes=site_attributes, units="ppm",)
 
         # Create a copy of the metadata dict
         metadata = {}
@@ -154,11 +151,11 @@ class EUROCOM():
 
         return combined_data
 
-    def get_site_attributes(self, site, inlet):
+    def get_site_attributes(self, site: str, inlet: str) -> Dict:
         """ Gets the site specific attributes for writing to Datsets
 
             Args:
-                site (str): Site name
+                site: Site name
             Returns:
                 dict: Dictionary of attributes
         """

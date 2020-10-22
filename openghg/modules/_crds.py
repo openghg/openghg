@@ -4,14 +4,11 @@ __all__ = ["CRDS"]
 
 from pandas import DataFrame
 from pathlib import Path
-from typing import Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 
 class CRDS:
-    """
-    Interface for processing CRDS data
-    """
-
+    """ Module for processing CRDS data """
     def __init__(self):
         # Holds parameters used for writing attributes to Datasets
         self._crds_params = {}
@@ -23,10 +20,10 @@ class CRDS:
 
     def read_file(
         self, 
-        data_filepath: Union[str, Path, list], 
+        data_filepath: Union[str, Path], 
         site: Optional[str] = None, 
         network: Optional[str] = None
-    ) -> dict:
+    ) -> Dict:
         """Creates a CRDS object holding data stored within Datasources
 
         Args:
@@ -52,7 +49,7 @@ class CRDS:
 
         return gas_data
 
-    def read_data(self, data_filepath: Path, site: str, network: str) -> dict:
+    def read_data(self, data_filepath: Path, site: str, network: str) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -156,7 +153,7 @@ class CRDS:
 
         return combined_data
 
-    def read_metadata(self, filepath: Path, data: DataFrame) -> dict:
+    def read_metadata(self, filepath: Path, data: DataFrame) -> Dict:
         """ Parse CRDS files and create a metadata dict
 
         Args:
@@ -200,7 +197,7 @@ class CRDS:
 
         return metadata
 
-    def get_site_attributes(self, site: str, inlet: str) -> dict:
+    def get_site_attributes(self, site: str, inlet: str) -> Dict:
         """Gets the site specific attributes for writing to Datsets
 
         Args:

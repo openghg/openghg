@@ -1,3 +1,7 @@
+from typing import Dict, List, Optional, Union, Tuple
+from pathlib import Path
+from pandas import DataFrame
+
 __all__ = ["GCWERKS"]
 
 
@@ -12,15 +16,22 @@ class GCWERKS:
         # Site codes for inlet readings
         self._site_codes = load_hugs_json(filename="site_codes.json")
 
-    def read_file(self, data_filepath, precision_filepath, site=None, instrument=None, network=None):
+    def read_file(
+        self,
+        data_filepath: Union[str, Path],
+        precision_filepath: Union[str, Path],
+        site: Optional[str] = None,
+        instrument: Optional[str] = None,
+        network: Optional[str] = None,
+    ) -> Dict:
         """ Reads a GC data file by creating a GC object and associated datasources
 
             Args:
-                data_filepath (str, pathlib.Path): Path of data file
-                precision_filepath (str, pathlib.Path): Path of precision file
-                site (str, default=None): Three letter code or name for site
-                instrument (str, default=None): Instrument name
-                network (str, default=None): Network name
+                data_filepath: Path of data file
+                precision_filepath: Path of precision file
+                site: Three letter code or name for site
+                instrument: Instrument name
+                network: Network name
             Returns:
                 dict: Dictionary of source_name : UUIDs
         """
@@ -62,15 +73,15 @@ class GCWERKS:
 
         return gas_data
 
-    def read_data(self, data_filepath, precision_filepath, site, instrument, network):
+    def read_data(self, data_filepath: Path, precision_filepath: Path, site: str, instrument: str, network: str) -> Dict:
         """ Read data from the data and precision files
 
             Args:
-                data_filepath (pathlib.Path): Path of data file
-                precision_filepath (pathlib.Path): Path of precision file
-                site (str): Name of site
-                instrument (str): Instrument name
-                network (str): Network name
+                data_filepath: Path of data file
+                precision_filepath: Path of precision file
+                site: Name of site
+                instrument: Instrument name
+                network: Network name
             Returns:
                 dict: Dictionary of gas data keyed by species
         """
@@ -134,8 +145,7 @@ class GCWERKS:
         # Rename columns to include the gas this flag represents
         data = data.rename(columns=columns_renamed, inplace=False)
 
-        # Read and parse precisions file
-        precision, precision_species = self.read_precision(precision_filepath)
+        precision, precision_species = self.read_precision(filepath=precision_filepath)
 
         for sp in species:
             precision_index = precision_species.index(sp) * 2 + 1
@@ -155,11 +165,11 @@ class GCWERKS:
 
         return gas_data
 
-    def read_precision(self, filepath):
+    def read_precision(self, filepath: Path) -> Tuple[DataFrame, List]:
         """ Read GC precision file
 
             Args:
-                filepath (pathlib.Path): Path of precision file
+                filepath: Path of precision file
             Returns:
                 tuple (Pandas.DataFrame, list): Precision DataFrame and list of species in
                 precision data
@@ -168,7 +178,7 @@ class GCWERKS:
         from datetime import datetime
 
         # Function for parsing datetime
-        def parser(date):
+        def prec_date_parser(date):
             return datetime.strptime(date, "%y%m%d")
 
         # Read precision species
@@ -176,7 +186,9 @@ class GCWERKS:
 
         precision_species = precision_header.values[0][1:].tolist()
 
-        precision = read_csv(filepath, skiprows=5, header=None, sep=r"\s+", index_col=0, parse_dates=[0], date_parser=parser,)
+        precision = read_csv(
+            filepath, skiprows=5, header=None, sep=r"\s+", index_col=0, parse_dates=[0], date_parser=prec_date_parser,
+        )
 
         precision.index.name = "Datetime"
         # Drop any duplicates from the index
@@ -184,17 +196,17 @@ class GCWERKS:
 
         return precision, precision_species
 
-    def split_species(self, data, site, instrument, species, metadata, units, scale):
+    def split_species(self, data: DataFrame, site: str, instrument: str, species: str, metadata: Dict, units: Dict, scale: Dict) -> Dict:
         """ Splits the species into separate dataframe into sections to be stored within individual Datasources
 
             Args:
-                data (Pandas.DataFrame): DataFrame of raw data
-                site (str): Name of site from which this data originates
-                instrument (str): Name of instrument
-                species (list): List of species contained in data
-                metadata (dict): Dictionary of metadata
-                units (dict): Dictionary of units for each species
-                scale (dict): Dictionary of scales for each species
+                data: DataFrame of raw data
+                site: Name of site from which this data originates
+                instrument: Name of instrument
+                species: List of species contained in data
+                metadata: Dictionary of metadata
+                units: Dictionary of units for each species
+                scale: Dictionary of scales for each species
             Returns:
                 dict: Dataframe of gas data and metadata
         """
@@ -206,8 +218,10 @@ class GCWERKS:
         try:
             data_inlets = data["Inlet"].unique().tolist()
         except KeyError:
-            raise KeyError("Unable to read inlets from data, please ensure this data is of the GC \
-                                    type expected by this processing module")
+            raise KeyError(
+                "Unable to read inlets from data, please ensure this data is of the GC \
+                                    type expected by this processing module"
+            )
 
         # For now just add air to the expected inlets
         expected_inlets.append("air")
@@ -215,8 +229,10 @@ class GCWERKS:
         matching_inlets = [data_inlet for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)]
 
         if not matching_inlets:
-            raise ValueError("Inlet mismatch - please ensure correct site is selected. \
-                                Mismatch between inlet in data and inlet in parameters file.")
+            raise ValueError(
+                "Inlet mismatch - please ensure correct site is selected. \
+                                Mismatch between inlet in data and inlet in parameters file."
+            )
 
         combined_data = {}
 
@@ -266,7 +282,7 @@ class GCWERKS:
 
         return combined_data
 
-    def is_valid_instrument(self, instrument):
+    def is_valid_instrument(self, instrument: str) -> bool:
         """ Check if the instrument string passed is valid
 
             Returns:
@@ -276,7 +292,7 @@ class GCWERKS:
 
         return instrument.lower() in valid_instruments
 
-    def get_precision(self, instrument):
+    def get_precision(self, instrument: str) -> int:
         """ Get the precision of the instrument in seconds
 
             Args:
@@ -294,7 +310,7 @@ class GCWERKS:
 
         return sampling_period
 
-    def get_inlets(self, site_code):
+    def get_inlets(self, site_code: str) -> List:
         """ Get the inlets used at this site
 
             Args:
@@ -304,7 +320,7 @@ class GCWERKS:
         """
         return self._gc_params[site_code]["inlets"]
 
-    def get_site_code(self, site):
+    def get_site_code(self, site: str) -> str:
         """ Get the site code
 
             Args:
@@ -319,7 +335,7 @@ class GCWERKS:
 
         return site_code
 
-    def get_site_attributes(self, site, inlet, instrument):
+    def get_site_attributes(self, site: str, inlet: str, instrument: str) -> Dict:
         """ Gets the site specific attributes for writing to Datsets
 
             Args:
