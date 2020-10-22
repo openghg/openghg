@@ -1,12 +1,15 @@
 from openghg.modules import BaseModule
+from pathlib import Path
+from typing import Dict, Optional, Union
 
 __all__ = ["NOAA"]
 
 
 class NOAA(BaseModule):
-    """ Interface for processing NOAA data
+    """ Class for processing NOAA data
 
     """
+
     def __init__(self):
         from openghg.util import load_hugs_json
 
@@ -16,19 +19,18 @@ class NOAA(BaseModule):
 
     def read_file(
         self,
-        data_filepath,
-        species=None,
-        site=None,
-        network="NOAA"
-    ):
+        data_filepath: Union[str, Path],
+        species: Optional[str] = None,
+        site: Optional[str] = None,
+        network: Optional[str] = None,
+    ) -> Dict:
         """ Reads NOAA data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
             Args:
-                data_filepath (str or Path): Path of file to load
-                species (str, default=None): Species name
-                site (str, default=None): Site name
-                network (str, default="NOAA"): Network name
+                data_filepath: Path of file to load
+                species: Species name
+                site: Site name
             Returns:
                 list: UUIDs of Datasources data has been assigned to
         """
@@ -53,15 +55,16 @@ class NOAA(BaseModule):
 
         return gas_data
 
-    def read_data(self, data_filepath, species, measurement_type="flask"):
+    def read_data(self, data_filepath: Path, species: str, measurement_type: Optional[str] = "flask") -> Dict:
         """ Separates the gases stored in the dataframe in
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
             dataframes
 
             Args:
-                data_filepath (pathlib.Path): Path of datafile
-                species (str): Species string such as CH4, CO
+                data_filepath: Path of datafile
+                species: Species string such as CH4, CO
+                measurement_type: Type of measurements e.g. flask
             Returns:
                 dict: Dictionary containing attributes, data and metadata keys
         """
@@ -76,16 +79,7 @@ class NOAA(BaseModule):
         def date_parser(year, month, day, hour, minute, second):
             return Timestamp(year, month, day, hour, minute, second)
 
-        date_parsing = {
-            "time": [
-                "sample_year",
-                "sample_month",
-                "sample_day",
-                "sample_hour",
-                "sample_minute",
-                "sample_seconds",
-            ]
-        }
+        date_parsing = {"time": ["sample_year", "sample_month", "sample_day", "sample_hour", "sample_minute", "sample_seconds"]}
 
         data_types = {
             "sample_year": np.int,

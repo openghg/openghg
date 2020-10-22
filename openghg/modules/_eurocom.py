@@ -22,12 +22,13 @@ class EUROCOM:
         data = load_hugs_json(filename="attributes.json")
         self._eurocom_params = data["EUROCOM"]
 
-    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, overwrite: Optional[bool] = False) -> Dict:
+    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None) -> Dict:
         """ Reads EUROCOM data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
             Args:
                 filepath: Path of file to load
+                site: Site code
             Returns:
                 dict: Dictionary of Datasource UUIDs and keys
         """

@@ -1,8 +1,11 @@
+from typing import Dict, Optional, Union
+from pathlib import Path
+
 __all__ = ["ICOS"]
 
 
 class ICOS:
-    """ Interface for processing ICOS data
+    """ Class for processing ICOS data
 
     """
 
@@ -10,14 +13,15 @@ class ICOS:
         # Sampling period of ICOS data in seconds
         self._sampling_period = "NA"
 
-    def read_file(self, data_filepath, site=None, network=None):
+    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, network: Optional[str] = None) -> Dict:
         """ Reads ICOS data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
             Args:
-                data_filepath (str or Path): Path of file to load
+                data_filepath: Path of file to load
+                site: Site code
             Returns:
-                list: UUIDs of Datasources data has been assigned to
+                dict: Dictionary of source_name : UUIDs
         """
         from pathlib import Path
         from openghg.processing import assign_attributes
@@ -38,7 +42,7 @@ class ICOS:
 
         return gas_data
 
-    def read_data(self, data_filepath, species, site=None):
+    def read_data(self, data_filepath: Path, species: str, site: Optional[str] = None) -> Dict:
         """ Separates the gases stored in the dataframe in
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
@@ -47,8 +51,8 @@ class ICOS:
             TODO - update this to process multiple species here?
 
             Args:
-                data_filepath (pathlib.Path): Path of datafile
-                species (str): Species to process
+                data_filepath : Path of datafile
+                species: Species to process
             Returns:
                 dict: Dictionary containing attributes, data and metadata keys
         """

@@ -1,4 +1,6 @@
 from openghg.modules import BaseModule
+from typing import Dict, Optional, Union
+from pathlib import Path
 
 # flake8: noqa
 
@@ -11,7 +13,7 @@ __all__ = ["TEMPLATE"]
 
 
 class TEMPLATE(BaseModule):
-    """ Interface for processing TEMPLATE data
+    """ Class for processing TEMPLATE data
 
     """
 
@@ -20,174 +22,50 @@ class TEMPLATE(BaseModule):
     _uuid = "CHANGEME"
 
     def __init__(self):
-        from Acquire.ObjectStore import get_datetime_now
-
-        self._creation_datetime = get_datetime_now()
-        self._stored = False
-        # self._datasources = []
-        # Keyed by name - allows retrieval of UUID from name
-        self._datasource_names = {}
-        # Keyed by UUID - allows retrieval of name by UUID
-        self._datasource_uuids = {}
-        # Hashes of previously uploaded files
-        self._file_hashes = {}
-        # Holds parameters used for writing attributes to Datasets
-        self._template_params = {}
-        # Sampling period of TEMPLATE data in seconds
         self._sampling_period = 60
-        # Store the ranking data for all CRDS measurements
-        # Keyed by UUID
-        self._rank_data = defaultdict(dict)
 
-    def to_data(self):
-        """ Return a JSON-serialisable dictionary of object
-            for storage in object store
-
-            Returns:
-                dict: Dictionary version of object
-        """
-        from Acquire.ObjectStore import datetime_to_string
-
-        data = {}
-        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_uuids"] = self._datasource_uuids
-        data["datasource_names"] = self._datasource_names
-        data["file_hashes"] = self._file_hashes
-        data["rank_data"] = self._rank_data
-
-        return data
-
-    def save(self, bucket=None):
-        """ Save the object to the object store
-
-            Args:
-                bucket (dict, default=None): Bucket for data
-            Returns:
-                None
-        """
-        from openghg.objectstore import get_bucket, set_object_from_json
-
-        if bucket is None:
-            bucket = get_bucket()
-
-        key = f"{TEMPLATE._root}/uuid/{TEMPLATE._uuid}"
-
-        self._stored = True
-        set_object_from_json(bucket=bucket, key=key, data=self.to_data())
-
-    @staticmethod
-    def read_folder(folder_path, extension=".dat", recursive=True):
-        """ Read all data matching filter in folder
-
-            Args:
-                folder_path (str): Path of folder
-                extension (str, default=".dat"): File extension for data files in folder
-                recursive (bool, default=True)
-            Returns:
-                None
-        """
-        from glob import glob
-        from os import path
-
-        datasource_uuids = {}
-
-        # This finds data files in sub-folders
-        folder_path = path.join(folder_path, f"./*.{extension}")
-        # This finds files in the current folder, get recursive
-        # folder_path = _path.join(folder_path, "*.dat")
-        filepaths = glob(folder_path, recursive=recursive)
-
-        if not filepaths:
-            raise FileNotFoundError("No data files found")
-
-        for fp in filepaths:
-            datasource_uuids[fp] = TEMPLATE.read_file(data_filepath=fp)
-
-        return datasource_uuids
-
-    @staticmethod
-    def read_file(
-        data_filepath, source_name, site=None, source_id=None, overwrite=False
-    ):
+    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None) -> Dict:
         """ Reads TEMPLATE data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
             Args:
-                filepath (str or Path): Path of file to load
+                filepath: Path of file to load
+                site: Site code
             Returns:
-                list: UUIDs of Datasources data has been assigned to
+                dict: UUIDs of Datasources data has been assigned to
         """
-        from openghg.processing import assign_data, lookup_gas_datasources
-        from openghg.util import hash_file
+        from openghg.processing import assign_attributes
         from pathlib import Path
-
-        template = TEMPLATE.load()
-
-        # Check if the file has been uploaded already
-        file_hash = hash_file(filepath=data_filepath)
-        if file_hash in template._file_hashes and not overwrite:
-            raise ValueError(
-                f"This file has been uploaded previously with the \
-                    filename: {template._file_hashes[file_hash]}"
-            )
 
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
 
-        if not source_name:
-            source_name = filename.stem
-
         if not site:
-            site = source_name.split(".")[0]
+            site = filename.stem.split(".")[0]
 
         # This should return xarray Datasets
         gas_data = template.read_data(data_filepath=data_filepath, site=site)
 
         # Assign attributes to the xarray Datasets here data here makes it a lot easier to test
-        gas_data = template.assign_attributes(data=gas_data, site=site)
+        gas_data = assign_attributes(data=gas_data, site=site)
 
-        # Check if we've got data from these sources before
-        lookup_results = lookup_gas_datasources(
-            lookup_dict=template._datasource_names,
-            gas_data=gas_data,
-            source_name=source_name,
-            source_id=source_id,
-        )
+        return gas_data
 
-        # Assign the data to the correct datasources
-        datasource_uuids = assign_data(
-            gas_data=gas_data, lookup_results=lookup_results, overwrite=overwrite
-        )
-
-        # Add the Datasources to the list of datasources associated with this object
-        template.add_datasources(datasource_uuids)
-
-        # Store the hash as the key for easy searching, store the filename as well for
-        # ease of checking by user
-        template._file_hashes[file_hash] = filename
-
-        template.save()
-
-        return datasource_uuids
-
-    def read_data(self, data_filepath, site):
+    def read_data(self, data_filepath: Path, site: str) -> Dict:
         """ Separates the gases stored in the dataframe in
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
             dataframes
 
             Args:
-                data_filepath (pathlib.Path): Path of datafile
+                data_filepath: Path of datafile
             Returns:
                 dict: Dictionary containing attributes, data and metadata keys
         """
         from pandas import RangeIndex, concat, read_csv, datetime, NaT
         from openghg.processing import get_attributes, read_metadata
 
-        metadata = read_metadata(
-            filepath=data_filepath, data=data, data_type="TEMPLATE"
-        )
+        metadata = read_metadata(filepath=data_filepath, data=data, data_type="TEMPLATE")
         # This dictionary is used to store the gas data and its associated metadata
         combined_data = {}
 
@@ -196,7 +74,7 @@ class TEMPLATE(BaseModule):
             # Load in the JSON we need to process attributes
             gas_data = gas_data.to_xarray()
 
-            site_attributes = self.site_attributes(site=site, inlet=inlet)
+            site_attributes = {"attribute_a": 1, "attribute_b": 2}
 
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
@@ -210,30 +88,3 @@ class TEMPLATE(BaseModule):
             }
 
         return combined_data
-
-    def assign_attributes(self, data, site, network=None):
-        """ Assign attributes to the data we've processed
-
-            Args:
-                combined_data (dict): Dictionary containing data, metadata and attributes
-            Returns:
-                dict: Dictionary of combined data with correct attributes assigned to Datasets
-        """
-        from openghg.processing import get_attributes
-
-        for species in data:
-            site_attributes = data[species]["attributes"]
-
-            # TODO - save Dataset attributes to metadata for storage within Datasource
-            data[species]["data"] = get_attributes(
-                ds=data[species]["data"],
-                species=species,
-                site=site,
-                network=network,
-                global_attributes=site_attributes,
-                sampling_period=self._sampling_period,
-            )
-
-        return data
-
-    

@@ -1,8 +1,8 @@
-__all___ = ["Datasource"]
-
 from pandas import DataFrame, Timestamp
 from typing import Dict, List, Optional, Tuple, Union
 from xarray import Dataset
+
+__all___ = ["Datasource"]
 
 
 class Datasource:

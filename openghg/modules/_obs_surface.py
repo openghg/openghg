@@ -1,7 +1,8 @@
 from openghg.modules import BaseModule
-
 from pathlib import Path
-from typing import Optional, Union
+from typing import Dict, Optional, Union
+
+__all__ = ["ObsSurface"]
 
 
 class ObsSurface(BaseModule):
@@ -25,8 +26,8 @@ class ObsSurface(BaseModule):
         # Keyed by UUID
         self._rank_data = defaultdict(dict)
 
-    def to_data(self):
-        """Return a JSON-serialisable dictionary of object
+    def to_data(self) -> Dict:
+        """ Return a JSON-serialisable dictionary of object
         for storage in object store
 
         Returns:
@@ -44,8 +45,8 @@ class ObsSurface(BaseModule):
 
         return data
 
-    def save(self, bucket: Optional[dict] = None):
-        """Save the object to the object store
+    def save(self, bucket: Optional[dict] = None) -> None:
+        """ Save the object to the object store
 
         Args:
             bucket: Bucket for data
@@ -70,8 +71,8 @@ class ObsSurface(BaseModule):
         network: Optional[str] = None,
         instrument: Optional[str] = None,
         overwrite: Optional[bool] = False,
-    ) -> dict:
-        """Process files and store in the object store. This function
+    ) -> Dict:
+        """ Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
             to handle each data type.
 
@@ -105,9 +106,7 @@ class ObsSurface(BaseModule):
         for fp in filepath:
             if data_type == "GCWERKS":
                 if not isinstance(fp, tuple):
-                    raise TypeError(
-                        "To process GCWERKS data a data filepath and a precision filepath must be suppled as a tuple"
-                    )
+                    raise TypeError("To process GCWERKS data a data filepath and a precision filepath must be suppled as a tuple")
 
                 data_filepath = Path(fp[0])
                 precision_filepath = Path(fp[1])
@@ -130,9 +129,7 @@ class ObsSurface(BaseModule):
             # Hash the file and if we've seen this file before raise an error
             file_hash = hash_file(filepath=data_filepath)
             if file_hash in obs._file_hashes and not overwrite:
-                raise ValueError(
-                    f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
-                )
+                raise ValueError(f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}.")
 
             datasource_table = defaultdict(dict)
             # For each species check if we have a Datasource
@@ -159,9 +156,7 @@ class ObsSurface(BaseModule):
         return results
 
     @staticmethod
-    def read_folder(
-        folder_path: Union[str, Path], data_type: str, network: str, extension: Optional[str] = "dat"
-    ) -> dict:
+    def read_folder(folder_path: Union[str, Path], data_type: str, network: str, extension: Optional[str] = "dat") -> Dict:
         """Find files with the given extension (by default dat) in the passed folder
 
         Args:

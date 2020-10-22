@@ -1,4 +1,6 @@
 from openghg.modules import BaseModule
+from typing import Dict, Optional, Union
+from pathlib import Path
 
 __all__ = ["THAMESBARRIER"]
 
@@ -7,6 +9,7 @@ class THAMESBARRIER(BaseModule):
     """ Interface for processing THAMESBARRIER data
 
     """
+
     def __init__(self):
         from openghg.util import load_hugs_json
 
@@ -18,18 +21,16 @@ class THAMESBARRIER(BaseModule):
         data = load_hugs_json(filename="attributes.json")
         self._tb_params = data["TMB"]
 
-    def read_file(self, data_filepath, site=None, network=None):
+    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, network: Optional[str] = None) -> Dict:
         """ Reads THAMESBARRIER data files and returns the UUIDS of the Datasources
             the processed data has been assigned to
 
             Args:
-                data_filepath (str or Path): Path of file to load
-                site (str, default=None): Site name
-                network (str, default=None): Network name
+                data_filepath: Path of file to load
+                site: Site name
             Returns:
                 list: UUIDs of Datasources data has been assigned to
         """
-        from pathlib import Path
         from openghg.processing import assign_attributes
 
         data_filepath = Path(data_filepath)
@@ -41,7 +42,7 @@ class THAMESBARRIER(BaseModule):
 
         return gas_data
 
-    def read_data(self, data_filepath):
+    def read_data(self, data_filepath: Path) -> Dict:
         """ Separates the gases stored in the dataframe in
             separate dataframes and returns a dictionary of gases
             with an assigned UUID as gas:UUID and a list of the processed
@@ -54,9 +55,7 @@ class THAMESBARRIER(BaseModule):
         """
         from pandas import read_csv
 
-        data = read_csv(
-            data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0
-        )
+        data = read_csv(data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0)
         # Drop NaNs from the data
         data = data.dropna(axis="rows", how="any")
 
@@ -78,9 +77,7 @@ class THAMESBARRIER(BaseModule):
 
             # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate
             # when averaging
-            processed_data["{} variability".format(species)] = (
-                processed_data[species] * 0.0
-            )
+            processed_data["{} variability".format(species)] = processed_data[species] * 0.0
 
             site_attributes = self._tb_params["global_attributes"]
             site_attributes["inlet_height_magl"] = self._tb_params["inlet"]

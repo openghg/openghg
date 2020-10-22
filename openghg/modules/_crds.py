@@ -1,14 +1,14 @@
 from openghg.util import load_hugs_json
-
-__all__ = ["CRDS"]
-
 from pandas import DataFrame
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
 
+__all__ = ["CRDS"]
+
 
 class CRDS:
-    """ Module for processing CRDS data """
+    """ Class for processing CRDS data """
+
     def __init__(self):
         # Holds parameters used for writing attributes to Datasets
         self._crds_params = {}
@@ -18,12 +18,7 @@ class CRDS:
         data = load_hugs_json(filename="process_gcwerks_parameters.json")
         self._crds_params = data["CRDS"]
 
-    def read_file(
-        self, 
-        data_filepath: Union[str, Path], 
-        site: Optional[str] = None, 
-        network: Optional[str] = None
-    ) -> Dict:
+    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, network: Optional[str] = None) -> Dict:
         """Creates a CRDS object holding data stored within Datasources
 
         Args:
@@ -80,13 +75,7 @@ class CRDS:
                 return NaT
 
         data = read_csv(
-            data_filepath,
-            header=None,
-            skiprows=1,
-            sep=r"\s+",
-            index_col=["0_1"],
-            parse_dates=[[0, 1]],
-            date_parser=parse_date,
+            data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"], parse_dates=[[0, 1]], date_parser=parse_date,
         )
 
         data.index.name = "time"

@@ -1,18 +1,13 @@
-__all__ = ["CRANFIELD"]
-
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 from pathlib import Path
+
+__all__ = ["CRANFIELD"]
 
 
 class CRANFIELD:
-    """ Interface for processing Cranfield data """
+    """ Class for processing Cranfield data """
 
-    def read_file(
-        self, 
-        data_filepath: Union[str, Path, list], 
-        site: Optional[str] = None, 
-        network: Optional[str] = None
-    ) -> dict:
+    def read_file(self, data_filepath: Union[str, Path, list], site: Optional[str] = None, network: Optional[str] = None) -> Dict:
         """Creates a CRDS object holding data stored within Datasources
 
         Args:

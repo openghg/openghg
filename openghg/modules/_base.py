@@ -3,6 +3,8 @@
 """
 from typing import Dict, List, Optional, Union, Type, TypeVar
 
+__all__ = ["BaseModule"]
+
 T = TypeVar("T", bound="BaseModule")
 
 

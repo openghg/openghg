@@ -6,6 +6,10 @@ __all__ = ["GCWERKS"]
 
 
 class GCWERKS:
+    """ Class for processing ICOS data
+
+    """
+
     def __init__(self):
         from openghg.util import load_hugs_json
 
@@ -196,7 +200,9 @@ class GCWERKS:
 
         return precision, precision_species
 
-    def split_species(self, data: DataFrame, site: str, instrument: str, species: str, metadata: Dict, units: Dict, scale: Dict) -> Dict:
+    def split_species(
+        self, data: DataFrame, site: str, instrument: str, species: str, metadata: Dict, units: Dict, scale: Dict
+    ) -> Dict:
         """ Splits the species into separate dataframe into sections to be stored within individual Datasources
 
             Args:
