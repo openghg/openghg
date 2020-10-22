@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.modules._eurocom &mdash; OpenGHG 0+untagged.1.gdf552d5 documentation</title>
+  <title>openghg.modules._eurocom &mdash; OpenGHG 0+untagged.1.gfb7d397 documentation</title>
   
 
   
@@ -164,17 +164,20 @@
            <div itemprop="articleBody">
             
   <h1>Source code for openghg.modules._eurocom</h1><div class="highlight"><pre>
-<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;EUROCOM&quot;</span><span class="p">]</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;EUROCOM&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="EUROCOM"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.EUROCOM">[docs]</a><span class="k">class</span> <span class="nc">EUROCOM</span><span class="p">():</span>
+<div class="viewcode-block" id="EUROCOM"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.EUROCOM">[docs]</a><span class="k">class</span> <span class="nc">EUROCOM</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Interface for processing EUROCOM data</span>
 
-<span class="sd">        This is only a temporary module to processing the ICOS EUROCOM study data</span>
+<span class="sd">        This is only a temporary module to process the ICOS EUROCOM study data</span>
 
-<span class="sd">        ICOS data processing will be done in the ICOS module</span>
-
+<span class="sd">        ICOS data processing is done by the ICOS module</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="EUROCOM.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.EUROCOM.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_hugs_json</span>
 
@@ -185,14 +188,15 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_eurocom_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;EUROCOM&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EUROCOM.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.EUROCOM.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="EUROCOM.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.EUROCOM.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Reads EUROCOM data files and returns the UUIDS of the Datasources</span>
 <span class="sd">            the processed data has been assigned to</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                filepath (str or Path): Path of file to load</span>
+<span class="sd">                filepath: Path of file to load</span>
+<span class="sd">                site: Site code</span>
 <span class="sd">            Returns:</span>
-<span class="sd">                list: UUIDs of Datasources data has been assigned to</span>
+<span class="sd">                dict: Dictionary of Datasource UUIDs and keys</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
         <span class="kn">from</span> <span class="nn">openghg.processing</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
@@ -210,14 +214,14 @@
 
         <span class="k">return</span> <span class="n">gas_data</span></div>
 
-<div class="viewcode-block" id="EUROCOM.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.EUROCOM.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="EUROCOM.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.EUROCOM.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Separates the gases stored in the dataframe in</span>
 <span class="sd">            separate dataframes and returns a dictionary of gases</span>
 <span class="sd">            with an assigned UUID as gas:UUID and a list of the processed</span>
 <span class="sd">            dataframes</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                data_filepath (pathlib.Path): Path of datafile</span>
+<span class="sd">                data_filepath: Path of datafile</span>
 <span class="sd">            Returns:</span>
 <span class="sd">                dict: Dictionary containing attributes, data and metadata keys</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -296,13 +300,7 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="n">calibration_scale</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">get_attributes</span><span class="p">(</span>
-            <span class="n">ds</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-            <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-            <span class="n">global_attributes</span><span class="o">=</span><span class="n">site_attributes</span><span class="p">,</span>
-            <span class="n">units</span><span class="o">=</span><span class="s2">&quot;ppm&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">get_attributes</span><span class="p">(</span><span class="n">ds</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">global_attributes</span><span class="o">=</span><span class="n">site_attributes</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;ppm&quot;</span><span class="p">,)</span>
 
         <span class="c1"># Create a copy of the metadata dict</span>
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
@@ -320,11 +318,11 @@
 
         <span class="k">return</span> <span class="n">combined_data</span></div>
 
-<div class="viewcode-block" id="EUROCOM.get_site_attributes"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.EUROCOM.get_site_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">inlet</span><span class="p">):</span>
+<div class="viewcode-block" id="EUROCOM.get_site_attributes"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.EUROCOM.get_site_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Gets the site specific attributes for writing to Datsets</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                site (str): Site name</span>
+<span class="sd">                site: Site name</span>
 <span class="sd">            Returns:</span>
 <span class="sd">                dict: Dictionary of attributes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -355,7 +353,7 @@
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Oct 21, 2020.
+        Last updated on Oct 22, 2020.
       </span>
 
     </p>

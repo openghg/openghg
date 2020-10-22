@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.1.gdf552d5 documentation</title>
+  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.1.gfb7d397 documentation</title>
   
 
   
@@ -164,19 +164,19 @@
            <div itemprop="articleBody">
             
   <h1>Source code for openghg.modules._datasource</h1><div class="highlight"><pre>
-<span></span><span class="n">__all___</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Datasource&quot;</span><span class="p">]</span>
-
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Timestamp</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span></span><span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Timestamp</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+
+<span class="n">__all___</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Datasource&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Datasource"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource">[docs]</a><span class="k">class</span> <span class="nc">Datasource</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;A Datasource holds data relating to a single source, such as a specific species</span>
+    <span class="sd">&quot;&quot;&quot; A Datasource holds data relating to a single source, such as a specific species</span>
 <span class="sd">    at a certain height on a specific instrument</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        name (str, default=None): Name of Datasource</span>
+<span class="sd">        name: Name of Datasource</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_datasource_root</span> <span class="o">=</span> <span class="s2">&quot;datasource&quot;</span>
@@ -209,7 +209,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Datasource.start_datetime"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.start_datetime">[docs]</a>    <span class="k">def</span> <span class="nf">start_datetime</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Timestamp</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the starting datetime for the data in this Datasource</span>
+        <span class="sd">&quot;&quot;&quot; Returns the starting datetime for the data in this Datasource</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Timestamp: Timestamp for start of data</span>
@@ -217,7 +217,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_datetime</span></div>
 
 <div class="viewcode-block" id="Datasource.end_datetime"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.end_datetime">[docs]</a>    <span class="k">def</span> <span class="nf">end_datetime</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Timestamp</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the end datetime for the data in this Datasource</span>
+        <span class="sd">&quot;&quot;&quot; Returns the end datetime for the data in this Datasource</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Timestamp: Timestamp for end of data</span>
@@ -225,7 +225,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_datetime</span></div>
 
 <div class="viewcode-block" id="Datasource.add_metadata"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.add_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">add_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Add a label to the metadata dictionary with the key value pair</span>
+        <span class="sd">&quot;&quot;&quot; Add a label to the metadata dictionary with the key value pair</span>
 <span class="sd">        This will overwrite any previous entry stored at that key.</span>
 
 <span class="sd">        Args:</span>
@@ -238,9 +238,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Datasource.add_data_dataframe"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.add_data_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">add_data_dataframe</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Add data to this Datasource and segment the data by size.</span>
+        <span class="sd">&quot;&quot;&quot; Add data to this Datasource and segment the data by size.</span>
 <span class="sd">        The data is stored as a tuple of the data and the daterange it covers.</span>
 
 <span class="sd">        Args:</span>
@@ -295,17 +295,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_daterange</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Datasource.add_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.add_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_data</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Add data to this Datasource and segment the data by size.</span>
+        <span class="sd">&quot;&quot;&quot; Add data to this Datasource and segment the data by size.</span>
 <span class="sd">        The data is stored as a tuple of the data and the daterange it covers.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            metadata (dict): Metadata on the data for this Datasource</span>
-<span class="sd">            data (Pandas.DataFrame): Data</span>
-<span class="sd">            data_type (str, default=None): Placeholder for combination of this fn</span>
-<span class="sd">            with add_footprint_data in the future</span>
-<span class="sd">            overwrite (bool, default=False): Overwrite existing data</span>
+<span class="sd">            metadata: Metadata on the data for this Datasource</span>
+<span class="sd">            data: Data</span>
+<span class="sd">            data_type: Placeholder for combination of this fn with add_footprint_data in the future</span>
+<span class="sd">            overwrite: Overwrite existing data</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -379,7 +378,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">update_daterange</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Datasource.get_dataframe_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.get_dataframe_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">get_dataframe_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the daterange for the passed DataFrame</span>
+        <span class="sd">&quot;&quot;&quot; Returns the daterange for the passed DataFrame</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            dataframe: DataFrame to parse</span>
@@ -398,8 +397,8 @@
 
         <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span></div>
 
-<div class="viewcode-block" id="Datasource.get_dataset_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.get_dataset_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">get_dataset_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the daterange for the passed Dataset</span>
+<div class="viewcode-block" id="Datasource.get_dataset_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.get_dataset_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">get_dataset_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Get the daterange for the passed Dataset</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            dataset (xarray.DataSet): Dataset to parse</span>
@@ -417,7 +416,7 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;This dataset does not have a time attribute, unable to read date range&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">get_dataset_daterange_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_dataset_daterange_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset_daterange</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
 
         <span class="c1"># Tidy the string and concatenate them</span>
@@ -429,8 +428,8 @@
         <span class="k">return</span> <span class="n">daterange_str</span>
 
 <div class="viewcode-block" id="Datasource.exists"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.exists">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="n">datasource_id</span><span class="p">,</span> <span class="n">bucket</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Check if a datasource with this ID is already stored in the object store</span>
+    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="n">datasource_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Check if a datasource with this ID is already stored in the object store</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            datasource_id (str): ID of datasource created from data</span>
@@ -446,16 +445,13 @@
 
         <span class="k">return</span> <span class="n">exists</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Datasource.to_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.to_data">[docs]</a>    <span class="k">def</span> <span class="nf">to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a JSON-serialisable dictionary of object</span>
+<div class="viewcode-block" id="Datasource.to_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.to_data">[docs]</a>    <span class="k">def</span> <span class="nf">to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Return a JSON-serialisable dictionary of object</span>
 <span class="sd">        for storage in object store</span>
 
 <span class="sd">        Storing of the data within the Datasource is done in</span>
 <span class="sd">        the save function</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            store (bool, default=False): True if we are storing this</span>
-<span class="sd">            in the object store</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary version of object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -475,12 +471,12 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="Datasource.load_dataframe"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.load_dataframe">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">load_dataframe</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Loads data from the object store for creation of a Datasource object</span>
+    <span class="k">def</span> <span class="nf">load_dataframe</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Loads data from the object store for creation of a Datasource object</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            bucket (dict): Bucket containing data</span>
-<span class="sd">            key (str): Key for data</span>
+<span class="sd">            bucket: Bucket containing data</span>
+<span class="sd">            key: Key for data</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Pandas.Dataframe: Dataframe from stored HDF file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -491,8 +487,8 @@
         <span class="k">return</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">hdf_to_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Datasource.load_dataset"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.load_dataset">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Loads a xarray Dataset from the passed key for creation of a Datasource object</span>
+    <span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Loads a xarray Dataset from the passed key for creation of a Datasource object</span>
 
 <span class="sd">        Currently this function gets binary data back from the object store, writes it</span>
 <span class="sd">        to a temporary file and then gets xarray to read from this file.</span>
@@ -554,62 +550,51 @@
     <span class="c1"># Modified from</span>
     <span class="c1"># https://github.com/pandas-dev/pandas/issues/9246</span>
 <div class="viewcode-block" id="Datasource.dataframe_to_hdf"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.dataframe_to_hdf">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">dataframe_to_hdf</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Writes this Datasource&#39;s data to a compressed in-memory HDF5 file</span>
+    <span class="k">def</span> <span class="nf">dataframe_to_hdf</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Writes this Datasource&#39;s data to a compressed in-memory HDF5 file</span>
 
 <span class="sd">        This function is partnered with hdf_to_dataframe()</span>
 <span class="sd">        which reads a datframe from the in-memory HDF5 bytes object</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            dataframe (Pandas.Dataframe): Dataframe containing raw data</span>
+<span class="sd">            dataframe: Dataframe containing raw data</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            bytes: HDF5 file as bytes object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">HDFStore</span>
 
         <span class="k">with</span> <span class="n">HDFStore</span><span class="p">(</span>
-            <span class="s2">&quot;write.hdf&quot;</span><span class="p">,</span>
-            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
-            <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;H5FD_CORE&quot;</span><span class="p">,</span>
-            <span class="n">driver_core_backing_store</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">complevel</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-            <span class="n">complib</span><span class="o">=</span><span class="s2">&quot;blosc:blosclz&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;write.hdf&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;H5FD_CORE&quot;</span><span class="p">,</span> <span class="n">driver_core_backing_store</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">complevel</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">complib</span><span class="o">=</span><span class="s2">&quot;blosc:blosclz&quot;</span><span class="p">,</span>
         <span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
 
             <span class="n">out</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
             <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">_handle</span><span class="o">.</span><span class="n">get_file_image</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Datasource.hdf_to_dataframe"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.hdf_to_dataframe">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">hdf_to_dataframe</span><span class="p">(</span><span class="n">hdf_data</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Reads a dataframe from the passed HDF5 bytes object buffer</span>
+    <span class="k">def</span> <span class="nf">hdf_to_dataframe</span><span class="p">(</span><span class="n">hdf_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Reads a dataframe from the passed HDF5 bytes object buffer</span>
 
 <span class="sd">        This function is partnered with dataframe_to_hdf()</span>
 <span class="sd">        which writes a dataframe to an in-memory HDF5 file</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data (bytes): Bytes object containing HDF5 file</span>
+<span class="sd">            data: Bytes object containing HDF5 file</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Pandas.Dataframe: Dataframe read from HDF5 file buffer</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">HDFStore</span><span class="p">,</span> <span class="n">read_hdf</span>
 
-        <span class="k">with</span> <span class="n">HDFStore</span><span class="p">(</span>
-            <span class="s2">&quot;read.hdf&quot;</span><span class="p">,</span>
-            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
-            <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;H5FD_CORE&quot;</span><span class="p">,</span>
-            <span class="n">driver_core_backing_store</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">driver_core_image</span><span class="o">=</span><span class="n">hdf_data</span><span class="p">,</span>
-        <span class="p">)</span> <span class="k">as</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">HDFStore</span><span class="p">(</span><span class="s2">&quot;read.hdf&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;H5FD_CORE&quot;</span><span class="p">,</span> <span class="n">driver_core_backing_store</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">driver_core_image</span><span class="o">=</span><span class="n">hdf_data</span><span class="p">,)</span> <span class="k">as</span> <span class="n">data</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">read_hdf</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Datasource.from_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.from_data">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">shallow</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct from a JSON-deserialised dictionary</span>
+    <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">shallow</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Construct from a JSON-deserialised dictionary</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            bucket (dict): Bucket containing data</span>
-<span class="sd">            data (dict): JSON data</span>
-<span class="sd">            shallow (bool): Load only the JSON data, do not retrieve data from the object store</span>
+<span class="sd">            bucket: Bucket containing data</span>
+<span class="sd">            data: JSON data</span>
+<span class="sd">            shallow: Load only the JSON data, do not retrieve data from the object store</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Datasource: Datasource created from JSON</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -637,11 +622,11 @@
 
         <span class="k">return</span> <span class="n">d</span></div>
 
-<div class="viewcode-block" id="Datasource.save"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Save this Datasource object as JSON to the object store</span>
+<div class="viewcode-block" id="Datasource.save"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Save this Datasource object as JSON to the object store</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            bucket (str, default=None): Bucket to hold data</span>
+<span class="sd">            bucket: Bucket to hold data</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -696,18 +681,19 @@
         <span class="n">set_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">datasource_key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">to_data</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="Datasource.load"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.load">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Load a Datasource from the object store either by name or UUID</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span>
+        <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">shallow</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Load a Datasource from the object store either by name or UUID</span>
 
 <span class="sd">        uuid or name must be passed to the function</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            bucket (dict, default=None): Bucket to store object</span>
-<span class="sd">            uuid (str, default=None): UID of Datasource</span>
-<span class="sd">            name (str, default=None): Name of Datasource</span>
-<span class="sd">            shallow (bool, default=False): Only load JSON data, do not</span>
-<span class="sd">            read Datasets from object store. This will speed up creation</span>
-<span class="sd">            of the Datasource object.</span>
+<span class="sd">            bucket: Bucket to store object</span>
+<span class="sd">            uuid: UID of Datasource</span>
+<span class="sd">            name: Name of Datasource</span>
+<span class="sd">            shallow: Only load JSON data, do not read Datasets from object store. </span>
+<span class="sd">            This will speed up creation of the Datasource object.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Datasource: Datasource object created from JSON</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -726,15 +712,15 @@
 
         <span class="k">return</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="n">shallow</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Datasource.data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the data stored in this Datasource</span>
+<div class="viewcode-block" id="Datasource.data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get the data stored in this Datasource</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            list: List of tuples of Pandas.DataFrame and start, end datetime tuple</span>
+<span class="sd">            dict: Dictionary of data keyed by daterange</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div>
 
-<div class="viewcode-block" id="Datasource.update_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.update_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">update_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Datasource.update_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.update_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">update_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Update the dates stored by this Datasource</span>
 
 <span class="sd">        Returns:</span>
@@ -753,20 +739,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_start_datetime</span> <span class="o">=</span> <span class="n">start</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_end_datetime</span> <span class="o">=</span> <span class="n">end</span></div>
 
-<div class="viewcode-block" id="Datasource.daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.daterange">[docs]</a>    <span class="k">def</span> <span class="nf">daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the daterange the data in this Datasource covers as tuple</span>
+<div class="viewcode-block" id="Datasource.daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.daterange">[docs]</a>    <span class="k">def</span> <span class="nf">daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Get the daterange the data in this Datasource covers as tuple</span>
 <span class="sd">        of start, end datetime objects</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            tuple (datetime, datetime): Start, end datetimes</span>
+<span class="sd">            tuple (Timestamp, Timestamp): Start, end Timestamps</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_datetime</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_daterange</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_datetime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_datetime</span></div>
 
-<div class="viewcode-block" id="Datasource.daterange_str"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.daterange_str">[docs]</a>    <span class="k">def</span> <span class="nf">daterange_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the daterange this Datasource covers as a string in</span>
+<div class="viewcode-block" id="Datasource.daterange_str"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.daterange_str">[docs]</a>    <span class="k">def</span> <span class="nf">daterange_str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get the daterange this Datasource covers as a string in</span>
 <span class="sd">        the form start_end</span>
 
 <span class="sd">        Returns:</span>
@@ -777,12 +763,12 @@
         <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">daterange</span><span class="p">()</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">datetime_to_string</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">datetime_to_string</span><span class="p">(</span><span class="n">end</span><span class="p">)])</span></div>
 
-<div class="viewcode-block" id="Datasource.search_metadata"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.search_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">search_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_terms</span><span class="p">,</span> <span class="n">find_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Search the values of the metadata of this Datasource for search_term</span>
+<div class="viewcode-block" id="Datasource.search_metadata"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.search_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">search_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_terms</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">find_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Search the values of the metadata of this Datasource for search_term</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            search_term (str, list): String or list of strings to search for in metadata</span>
-<span class="sd">            find_all (bool, default=False): If True all search terms must be matched</span>
+<span class="sd">            search_term: String or list of strings to search for in metadata</span>
+<span class="sd">            find_all: If True all search terms must be matched</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if found else False</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -804,8 +790,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span> <span class="ow">in</span> <span class="n">results</span></div>
 
-<div class="viewcode-block" id="Datasource.in_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.in_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">in_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">daterange</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the keys for data within the specified daterange</span>
+<div class="viewcode-block" id="Datasource.in_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.in_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">in_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">daterange</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Return the keys for data within the specified daterange</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            daterange (str): Daterange string of the form</span>
@@ -845,61 +831,56 @@
 
         <span class="k">return</span> <span class="n">in_date</span></div>
 
-<div class="viewcode-block" id="Datasource.species"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.species">[docs]</a>    <span class="k">def</span> <span class="nf">species</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the species of this Datasource</span>
+<div class="viewcode-block" id="Datasource.species"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.species">[docs]</a>    <span class="k">def</span> <span class="nf">species</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns the species of this Datasource</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: Species of this Datasource</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Datasource.inlet"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.inlet">[docs]</a>    <span class="k">def</span> <span class="nf">inlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the inlet height of this Datasource</span>
+<div class="viewcode-block" id="Datasource.inlet"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.inlet">[docs]</a>    <span class="k">def</span> <span class="nf">inlet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns the inlet height of this Datasource</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: Inlet height of this Datasource</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Datasource.site"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.site">[docs]</a>    <span class="k">def</span> <span class="nf">site</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the instrument</span>
+<div class="viewcode-block" id="Datasource.site"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.site">[docs]</a>    <span class="k">def</span> <span class="nf">site</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Return the site name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Site name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;site&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Datasource.instrument"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.instrument">[docs]</a>    <span class="k">def</span> <span class="nf">instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Return the instrument name</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: Instrument name</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;site&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;instrument&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;instrument&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">)</span>
-
-<div class="viewcode-block" id="Datasource.uuid"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.uuid">[docs]</a>    <span class="k">def</span> <span class="nf">uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the UUID of this object</span>
+<div class="viewcode-block" id="Datasource.uuid"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.uuid">[docs]</a>    <span class="k">def</span> <span class="nf">uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Return the UUID of this object</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: UUID</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span></div>
 
-<div class="viewcode-block" id="Datasource.metadata"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.metadata">[docs]</a>    <span class="k">def</span> <span class="nf">metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Retur the metadata of this Datasource</span>
+<div class="viewcode-block" id="Datasource.metadata"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.metadata">[docs]</a>    <span class="k">def</span> <span class="nf">metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the metadata of this Datasource</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Metadata of Datasource</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span></div>
 
-<div class="viewcode-block" id="Datasource.set_id"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.set_id">[docs]</a>    <span class="k">def</span> <span class="nf">set_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set the UUID for this Datasource</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            id (str): UUID</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span> <span class="o">=</span> <span class="n">uid</span></div>
-
-<div class="viewcode-block" id="Datasource.rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.rank">[docs]</a>    <span class="k">def</span> <span class="nf">rank</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the rank of this Datasource</span>
+<div class="viewcode-block" id="Datasource.rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.rank">[docs]</a>    <span class="k">def</span> <span class="nf">rank</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Return the rank of this Datasource</span>
 
 <span class="sd">        Where a value of 0 means no rank, 1 the highest</span>
 
@@ -911,21 +892,21 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span></div>
 
-<div class="viewcode-block" id="Datasource.set_rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.set_rank">[docs]</a>    <span class="k">def</span> <span class="nf">set_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">daterange</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set the rank of this Datsource. This allows users to select</span>
+<div class="viewcode-block" id="Datasource.set_rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.set_rank">[docs]</a>    <span class="k">def</span> <span class="nf">set_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rank</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">daterange</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Set the rank of this Datsource. This allows users to select</span>
 <span class="sd">        the best data for a specific species at a site. By default</span>
 <span class="sd">        a Datasource is unranked with a value of 0. The highest rank is 1 and the lowest 10.</span>
 
 <span class="sd">        TODO - add a check to ensure multiple ranks aren&#39;t set for the same daterange</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            rank (int): Rank number between 0 and 10.</span>
-<span class="sd">            daterange (list): List of daterange strings such as 2019-01-01T00:00:00_2019-12-31T00:00:00</span>
+<span class="sd">            rank: Rank number between 0 and 10.</span>
+<span class="sd">            daterange: List of daterange strings such as 2019-01-01T00:00:00_2019-12-31T00:00:00</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">daterange</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">daterange</span> <span class="o">=</span> <span class="p">[</span><span class="n">daterange</span><span class="p">]</span>
@@ -936,15 +917,15 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span><span class="p">[</span><span class="n">rank</span><span class="p">]</span> <span class="o">=</span> <span class="n">daterange</span></div>
 
-<div class="viewcode-block" id="Datasource.combine_dateranges"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.combine_dateranges">[docs]</a>    <span class="k">def</span> <span class="nf">combine_dateranges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dateranges</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Checks a list of daterange strings for overlapping and combines</span>
+<div class="viewcode-block" id="Datasource.combine_dateranges"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.combine_dateranges">[docs]</a>    <span class="k">def</span> <span class="nf">combine_dateranges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dateranges</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Checks a list of daterange strings for overlapping and combines</span>
 <span class="sd">        those that do.</span>
 
 <span class="sd">        Note : this function expects daterange strings in the form</span>
 <span class="sd">        2019-01-01T00:00:00_2019-12-31T00:00:00</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            dateranges (list): List of strings</span>
+<span class="sd">            dateranges: List of strings</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            list: List of dateranges with overlapping ranges combined</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1003,8 +984,8 @@
 
         <span class="k">return</span> <span class="n">combined_dateranges</span></div>
 
-<div class="viewcode-block" id="Datasource.split_datrange_str"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.split_datrange_str">[docs]</a>    <span class="k">def</span> <span class="nf">split_datrange_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">daterange_str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Split a daterange string to the component start and end</span>
+<div class="viewcode-block" id="Datasource.split_datrange_str"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.split_datrange_str">[docs]</a>    <span class="k">def</span> <span class="nf">split_datrange_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">daterange_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Split a daterange string to the component start and end</span>
 <span class="sd">        Timestamps</span>
 
 <span class="sd">        Args:</span>
@@ -1023,22 +1004,20 @@
 
         <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span></div>
 
-<div class="viewcode-block" id="Datasource.get_rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.get_rank">[docs]</a>    <span class="k">def</span> <span class="nf">get_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the ranks of data contained within Datasource for the passed daterange.</span>
+<div class="viewcode-block" id="Datasource.get_rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.get_rank">[docs]</a>    <span class="k">def</span> <span class="nf">get_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get the ranks of data contained within Datasource for the passed daterange.</span>
 
 <span class="sd">        If no rank has been set zero is returned.</span>
 <span class="sd">        If no start or end date is passed all ranking data will be returned.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            start_date (datetime, default=None)</span>
-<span class="sd">            end_date (datetime, default=None)</span>
+<span class="sd">            start_date</span>
+<span class="sd">            end_date</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary of rank: daterange</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">daterange_from_str</span><span class="p">,</span> <span class="n">daterange_to_str</span><span class="p">,</span> <span class="n">create_daterange</span>
-
-        <span class="c1"># Need to search ranks in descending order</span>
 
         <span class="c1"># If we don&#39;t have a rank return 9</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span><span class="p">:</span>
@@ -1061,21 +1040,21 @@
 
         <span class="k">return</span> <span class="n">results</span></div>
 
-<div class="viewcode-block" id="Datasource.data_type"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.data_type">[docs]</a>    <span class="k">def</span> <span class="nf">data_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the data type held by this Datasource</span>
+<div class="viewcode-block" id="Datasource.data_type"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.data_type">[docs]</a>    <span class="k">def</span> <span class="nf">data_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns the data type held by this Datasource</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: Data type held by Datasource</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span></div>
 
-<div class="viewcode-block" id="Datasource.data_keys"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.data_keys">[docs]</a>    <span class="k">def</span> <span class="nf">data_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;latest&quot;</span><span class="p">,</span> <span class="n">return_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the object store keys where data related</span>
+<div class="viewcode-block" id="Datasource.data_keys"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.data_keys">[docs]</a>    <span class="k">def</span> <span class="nf">data_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">,</span> <span class="n">return_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns the object store keys where data related</span>
 <span class="sd">        to this Datasource is stored</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            version (str, default=&quot;latest&quot;): Version of keys to get</span>
-<span class="sd">            return_all (bool, default=False): Return all data keys</span>
+<span class="sd">            version: Version of keys to retrieve</span>
+<span class="sd">            return_all: Return all data keys</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            list: List of data keys</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1089,7 +1068,7 @@
 
         <span class="k">return</span> <span class="n">keys</span></div>
 
-<div class="viewcode-block" id="Datasource.versions"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.versions">[docs]</a>    <span class="k">def</span> <span class="nf">versions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Datasource.versions"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.versions">[docs]</a>    <span class="k">def</span> <span class="nf">versions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return a summary of the versions of data stored for</span>
 <span class="sd">        this Datasource</span>
 
@@ -1098,7 +1077,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span></div>
 
-<div class="viewcode-block" id="Datasource.latest_version"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.latest_version">[docs]</a>    <span class="k">def</span> <span class="nf">latest_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Datasource.latest_version"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.latest_version">[docs]</a>    <span class="k">def</span> <span class="nf">latest_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return the string of the latest version</span>
 
 <span class="sd">        Returns:</span>
@@ -1120,7 +1099,7 @@
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Oct 21, 2020.
+        Last updated on Oct 22, 2020.
       </span>
 
     </p>

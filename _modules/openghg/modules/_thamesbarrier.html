@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.modules._thamesbarrier &mdash; OpenGHG 0+untagged.1.gdf552d5 documentation</title>
+  <title>openghg.modules._thamesbarrier &mdash; OpenGHG 0+untagged.1.gfb7d397 documentation</title>
   
 
   
@@ -165,6 +165,8 @@
             
   <h1>Source code for openghg.modules._thamesbarrier</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">BaseModule</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;THAMESBARRIER&quot;</span><span class="p">]</span>
 
@@ -173,6 +175,7 @@
     <span class="sd">&quot;&quot;&quot; Interface for processing THAMESBARRIER data</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="THAMESBARRIER.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.THAMESBARRIER.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_hugs_json</span>
 
@@ -184,18 +187,16 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tb_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;TMB&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="THAMESBARRIER.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.THAMESBARRIER.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="THAMESBARRIER.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.THAMESBARRIER.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Reads THAMESBARRIER data files and returns the UUIDS of the Datasources</span>
 <span class="sd">            the processed data has been assigned to</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                data_filepath (str or Path): Path of file to load</span>
-<span class="sd">                site (str, default=None): Site name</span>
-<span class="sd">                network (str, default=None): Network name</span>
+<span class="sd">                data_filepath: Path of file to load</span>
+<span class="sd">                site: Site name</span>
 <span class="sd">            Returns:</span>
 <span class="sd">                list: UUIDs of Datasources data has been assigned to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
         <span class="kn">from</span> <span class="nn">openghg.processing</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
 
         <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
@@ -207,7 +208,7 @@
 
         <span class="k">return</span> <span class="n">gas_data</span></div>
 
-<div class="viewcode-block" id="THAMESBARRIER.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.THAMESBARRIER.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">):</span>
+<div class="viewcode-block" id="THAMESBARRIER.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.THAMESBARRIER.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Separates the gases stored in the dataframe in</span>
 <span class="sd">            separate dataframes and returns a dictionary of gases</span>
 <span class="sd">            with an assigned UUID as gas:UUID and a list of the processed</span>
@@ -220,9 +221,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span>
-            <span class="n">data_filepath</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">infer_datetime_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span>
-        <span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">infer_datetime_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="c1"># Drop NaNs from the data</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;rows&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">)</span>
 
@@ -244,9 +243,7 @@
 
             <span class="c1"># No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate</span>
             <span class="c1"># when averaging</span>
-            <span class="n">processed_data</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> variability&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">species</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">processed_data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.0</span>
-            <span class="p">)</span>
+            <span class="n">processed_data</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> variability&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">species</span><span class="p">)]</span> <span class="o">=</span> <span class="n">processed_data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.0</span>
 
             <span class="n">site_attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tb_params</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
             <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tb_params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
@@ -275,7 +272,7 @@
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Oct 21, 2020.
+        Last updated on Oct 22, 2020.
       </span>
 
     </p>

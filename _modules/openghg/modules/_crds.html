@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.modules._crds &mdash; OpenGHG 0+untagged.1.gdf552d5 documentation</title>
+  <title>openghg.modules._crds &mdash; OpenGHG 0+untagged.1.gfb7d397 documentation</title>
   
 
   
@@ -165,18 +165,15 @@
             
   <h1>Source code for openghg.modules._crds</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_hugs_json</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CRDS&quot;</span><span class="p">]</span>
 
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
-
 
 <div class="viewcode-block" id="CRDS"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS">[docs]</a><span class="k">class</span> <span class="nc">CRDS</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Interface for processing CRDS data</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Class for processing CRDS data &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="CRDS.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Holds parameters used for writing attributes to Datasets</span>
@@ -187,12 +184,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;CRDS&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="CRDS.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> 
-        <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span> 
-        <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
-        <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<div class="viewcode-block" id="CRDS.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a CRDS object holding data stored within Datasources</span>
 
 <span class="sd">        Args:</span>
@@ -218,7 +210,7 @@
 
         <span class="k">return</span> <span class="n">gas_data</span></div>
 
-<div class="viewcode-block" id="CRDS.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<div class="viewcode-block" id="CRDS.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Separates the gases stored in the dataframe in</span>
 <span class="sd">        separate dataframes and returns a dictionary of gases</span>
 <span class="sd">        with an assigned UUID as gas:UUID and a list of the processed</span>
@@ -249,13 +241,7 @@
                 <span class="k">return</span> <span class="n">NaT</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span>
-            <span class="n">data_filepath</span><span class="p">,</span>
-            <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span>
-            <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;0_1&quot;</span><span class="p">],</span>
-            <span class="n">parse_dates</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
-            <span class="n">date_parser</span><span class="o">=</span><span class="n">parse_date</span><span class="p">,</span>
+            <span class="n">data_filepath</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;0_1&quot;</span><span class="p">],</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">date_parser</span><span class="o">=</span><span class="n">parse_date</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span>
@@ -322,7 +308,7 @@
 
         <span class="k">return</span> <span class="n">combined_data</span></div>
 
-<div class="viewcode-block" id="CRDS.read_metadata"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.read_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">read_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<div class="viewcode-block" id="CRDS.read_metadata"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.read_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">read_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Parse CRDS files and create a metadata dict</span>
 
 <span class="sd">        Args:</span>
@@ -366,7 +352,7 @@
 
         <span class="k">return</span> <span class="n">metadata</span></div>
 
-<div class="viewcode-block" id="CRDS.get_site_attributes"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.get_site_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<div class="viewcode-block" id="CRDS.get_site_attributes"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.get_site_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Gets the site specific attributes for writing to Datsets</span>
 
 <span class="sd">        Args:</span>
@@ -436,7 +422,7 @@
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Oct 21, 2020.
+        Last updated on Oct 22, 2020.
       </span>
 
     </p>

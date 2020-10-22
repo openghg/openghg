@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.modules._icos &mdash; OpenGHG 0+untagged.1.gdf552d5 documentation</title>
+  <title>openghg.modules._icos &mdash; OpenGHG 0+untagged.1.gfb7d397 documentation</title>
   
 
   
@@ -164,11 +164,14 @@
            <div itemprop="articleBody">
             
   <h1>Source code for openghg.modules._icos</h1><div class="highlight"><pre>
-<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ICOS&quot;</span><span class="p">]</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ICOS&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="ICOS"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.ICOS">[docs]</a><span class="k">class</span> <span class="nc">ICOS</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Interface for processing ICOS data</span>
+    <span class="sd">&quot;&quot;&quot; Class for processing ICOS data</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -176,14 +179,15 @@
         <span class="c1"># Sampling period of ICOS data in seconds</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_period</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span></div>
 
-<div class="viewcode-block" id="ICOS.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.ICOS.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ICOS.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.ICOS.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Reads ICOS data files and returns the UUIDS of the Datasources</span>
 <span class="sd">            the processed data has been assigned to</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                data_filepath (str or Path): Path of file to load</span>
+<span class="sd">                data_filepath: Path of file to load</span>
+<span class="sd">                site: Site code</span>
 <span class="sd">            Returns:</span>
-<span class="sd">                list: UUIDs of Datasources data has been assigned to</span>
+<span class="sd">                dict: Dictionary of source_name : UUIDs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
         <span class="kn">from</span> <span class="nn">openghg.processing</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
@@ -204,7 +208,7 @@
 
         <span class="k">return</span> <span class="n">gas_data</span></div>
 
-<div class="viewcode-block" id="ICOS.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.ICOS.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ICOS.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.ICOS.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Separates the gases stored in the dataframe in</span>
 <span class="sd">            separate dataframes and returns a dictionary of gases</span>
 <span class="sd">            with an assigned UUID as gas:UUID and a list of the processed</span>
@@ -213,8 +217,8 @@
 <span class="sd">            TODO - update this to process multiple species here?</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                data_filepath (pathlib.Path): Path of datafile</span>
-<span class="sd">                species (str): Species to process</span>
+<span class="sd">                data_filepath : Path of datafile</span>
+<span class="sd">                species: Species to process</span>
 <span class="sd">            Returns:</span>
 <span class="sd">                dict: Dictionary containing attributes, data and metadata keys</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -330,7 +334,7 @@
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Oct 21, 2020.
+        Last updated on Oct 22, 2020.
       </span>
 
     </p>

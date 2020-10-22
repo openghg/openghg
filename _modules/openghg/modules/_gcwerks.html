@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.modules._gcwerks &mdash; OpenGHG 0+untagged.1.gdf552d5 documentation</title>
+  <title>openghg.modules._gcwerks &mdash; OpenGHG 0+untagged.1.gfb7d397 documentation</title>
   
 
   
@@ -164,10 +164,18 @@
            <div itemprop="articleBody">
             
   <h1>Source code for openghg.modules._gcwerks</h1><div class="highlight"><pre>
-<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;GCWERKS&quot;</span><span class="p">]</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;GCWERKS&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="GCWERKS"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS">[docs]</a><span class="k">class</span> <span class="nc">GCWERKS</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Class for processing ICOS data</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="GCWERKS.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_hugs_json</span>
 
@@ -178,15 +186,22 @@
         <span class="c1"># Site codes for inlet readings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_site_codes</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;site_codes.json&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GCWERKS.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">,</span> <span class="n">precision_filepath</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instrument</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="GCWERKS.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+        <span class="n">precision_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+        <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Reads a GC data file by creating a GC object and associated datasources</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                data_filepath (str, pathlib.Path): Path of data file</span>
-<span class="sd">                precision_filepath (str, pathlib.Path): Path of precision file</span>
-<span class="sd">                site (str, default=None): Three letter code or name for site</span>
-<span class="sd">                instrument (str, default=None): Instrument name</span>
-<span class="sd">                network (str, default=None): Network name</span>
+<span class="sd">                data_filepath: Path of data file</span>
+<span class="sd">                precision_filepath: Path of precision file</span>
+<span class="sd">                site: Three letter code or name for site</span>
+<span class="sd">                instrument: Instrument name</span>
+<span class="sd">                network: Network name</span>
 <span class="sd">            Returns:</span>
 <span class="sd">                dict: Dictionary of source_name : UUIDs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -228,15 +243,15 @@
 
         <span class="k">return</span> <span class="n">gas_data</span></div>
 
-<div class="viewcode-block" id="GCWERKS.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">,</span> <span class="n">precision_filepath</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span> <span class="n">network</span><span class="p">):</span>
+<div class="viewcode-block" id="GCWERKS.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">precision_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Read data from the data and precision files</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                data_filepath (pathlib.Path): Path of data file</span>
-<span class="sd">                precision_filepath (pathlib.Path): Path of precision file</span>
-<span class="sd">                site (str): Name of site</span>
-<span class="sd">                instrument (str): Instrument name</span>
-<span class="sd">                network (str): Network name</span>
+<span class="sd">                data_filepath: Path of data file</span>
+<span class="sd">                precision_filepath: Path of precision file</span>
+<span class="sd">                site: Name of site</span>
+<span class="sd">                instrument: Instrument name</span>
+<span class="sd">                network: Network name</span>
 <span class="sd">            Returns:</span>
 <span class="sd">                dict: Dictionary of gas data keyed by species</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -300,8 +315,7 @@
         <span class="c1"># Rename columns to include the gas this flag represents</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns_renamed</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="c1"># Read and parse precisions file</span>
-        <span class="n">precision</span><span class="p">,</span> <span class="n">precision_species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_precision</span><span class="p">(</span><span class="n">precision_filepath</span><span class="p">)</span>
+        <span class="n">precision</span><span class="p">,</span> <span class="n">precision_species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_precision</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">precision_filepath</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">species</span><span class="p">:</span>
             <span class="n">precision_index</span> <span class="o">=</span> <span class="n">precision_species</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
@@ -321,11 +335,11 @@
 
         <span class="k">return</span> <span class="n">gas_data</span></div>
 
-<div class="viewcode-block" id="GCWERKS.read_precision"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.read_precision">[docs]</a>    <span class="k">def</span> <span class="nf">read_precision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+<div class="viewcode-block" id="GCWERKS.read_precision"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.read_precision">[docs]</a>    <span class="k">def</span> <span class="nf">read_precision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot; Read GC precision file</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                filepath (pathlib.Path): Path of precision file</span>
+<span class="sd">                filepath: Path of precision file</span>
 <span class="sd">            Returns:</span>
 <span class="sd">                tuple (Pandas.DataFrame, list): Precision DataFrame and list of species in</span>
 <span class="sd">                precision data</span>
@@ -334,7 +348,7 @@
         <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
         <span class="c1"># Function for parsing datetime</span>
-        <span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">date</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">prec_date_parser</span><span class="p">(</span><span class="n">date</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="s2">&quot;%y%m</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># Read precision species</span>
@@ -342,7 +356,9 @@
 
         <span class="n">precision_species</span> <span class="o">=</span> <span class="n">precision_header</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-        <span class="n">precision</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">date_parser</span><span class="o">=</span><span class="n">parser</span><span class="p">,)</span>
+        <span class="n">precision</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span>
+            <span class="n">filepath</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">date_parser</span><span class="o">=</span><span class="n">prec_date_parser</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="n">precision</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Datetime&quot;</span>
         <span class="c1"># Drop any duplicates from the index</span>
@@ -350,17 +366,19 @@
 
         <span class="k">return</span> <span class="n">precision</span><span class="p">,</span> <span class="n">precision_species</span></div>
 
-<div class="viewcode-block" id="GCWERKS.split_species"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.split_species">[docs]</a>    <span class="k">def</span> <span class="nf">split_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+<div class="viewcode-block" id="GCWERKS.split_species"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.split_species">[docs]</a>    <span class="k">def</span> <span class="nf">split_species</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="n">Dict</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Splits the species into separate dataframe into sections to be stored within individual Datasources</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                data (Pandas.DataFrame): DataFrame of raw data</span>
-<span class="sd">                site (str): Name of site from which this data originates</span>
-<span class="sd">                instrument (str): Name of instrument</span>
-<span class="sd">                species (list): List of species contained in data</span>
-<span class="sd">                metadata (dict): Dictionary of metadata</span>
-<span class="sd">                units (dict): Dictionary of units for each species</span>
-<span class="sd">                scale (dict): Dictionary of scales for each species</span>
+<span class="sd">                data: DataFrame of raw data</span>
+<span class="sd">                site: Name of site from which this data originates</span>
+<span class="sd">                instrument: Name of instrument</span>
+<span class="sd">                species: List of species contained in data</span>
+<span class="sd">                metadata: Dictionary of metadata</span>
+<span class="sd">                units: Dictionary of units for each species</span>
+<span class="sd">                scale: Dictionary of scales for each species</span>
 <span class="sd">            Returns:</span>
 <span class="sd">                dict: Dataframe of gas data and metadata</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -372,8 +390,10 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">data_inlets</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Inlet&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Unable to read inlets from data, please ensure this data is of the GC </span><span class="se">\</span>
-<span class="s2">                                    type expected by this processing module&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="s2">&quot;Unable to read inlets from data, please ensure this data is of the GC </span><span class="se">\</span>
+<span class="s2">                                    type expected by this processing module&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># For now just add air to the expected inlets</span>
         <span class="n">expected_inlets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;air&quot;</span><span class="p">)</span>
@@ -381,8 +401,10 @@
         <span class="n">matching_inlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_inlet</span> <span class="k">for</span> <span class="n">data_inlet</span> <span class="ow">in</span> <span class="n">data_inlets</span> <span class="k">for</span> <span class="n">inlet</span> <span class="ow">in</span> <span class="n">expected_inlets</span> <span class="k">if</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">data_inlet</span><span class="p">,</span> <span class="n">inlet</span><span class="p">)]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_inlets</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Inlet mismatch - please ensure correct site is selected. </span><span class="se">\</span>
-<span class="s2">                                Mismatch between inlet in data and inlet in parameters file.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Inlet mismatch - please ensure correct site is selected. </span><span class="se">\</span>
+<span class="s2">                                Mismatch between inlet in data and inlet in parameters file.&quot;</span>
+            <span class="p">)</span>
 
         <span class="n">combined_data</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -432,7 +454,7 @@
 
         <span class="k">return</span> <span class="n">combined_data</span></div>
 
-<div class="viewcode-block" id="GCWERKS.is_valid_instrument"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.is_valid_instrument">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instrument</span><span class="p">):</span>
+<div class="viewcode-block" id="GCWERKS.is_valid_instrument"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.is_valid_instrument">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Check if the instrument string passed is valid</span>
 
 <span class="sd">            Returns:</span>
@@ -442,7 +464,7 @@
 
         <span class="k">return</span> <span class="n">instrument</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">valid_instruments</span></div>
 
-<div class="viewcode-block" id="GCWERKS.get_precision"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_precision">[docs]</a>    <span class="k">def</span> <span class="nf">get_precision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instrument</span><span class="p">):</span>
+<div class="viewcode-block" id="GCWERKS.get_precision"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_precision">[docs]</a>    <span class="k">def</span> <span class="nf">get_precision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Get the precision of the instrument in seconds</span>
 
 <span class="sd">            Args:</span>
@@ -460,7 +482,7 @@
 
         <span class="k">return</span> <span class="n">sampling_period</span></div>
 
-<div class="viewcode-block" id="GCWERKS.get_inlets"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_inlets">[docs]</a>    <span class="k">def</span> <span class="nf">get_inlets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site_code</span><span class="p">):</span>
+<div class="viewcode-block" id="GCWERKS.get_inlets"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_inlets">[docs]</a>    <span class="k">def</span> <span class="nf">get_inlets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Get the inlets used at this site</span>
 
 <span class="sd">            Args:</span>
@@ -470,7 +492,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="n">site_code</span><span class="p">][</span><span class="s2">&quot;inlets&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="GCWERKS.get_site_code"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_site_code">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">):</span>
+<div class="viewcode-block" id="GCWERKS.get_site_code"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_site_code">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Get the site code</span>
 
 <span class="sd">            Args:</span>
@@ -485,7 +507,7 @@
 
         <span class="k">return</span> <span class="n">site_code</span></div>
 
-<div class="viewcode-block" id="GCWERKS.get_site_attributes"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_site_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">instrument</span><span class="p">):</span>
+<div class="viewcode-block" id="GCWERKS.get_site_attributes"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_site_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Gets the site specific attributes for writing to Datsets</span>
 
 <span class="sd">            Args:</span>
@@ -519,7 +541,7 @@
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Oct 21, 2020.
+        Last updated on Oct 22, 2020.
       </span>
 
     </p>
