@@ -179,7 +179,7 @@ def get_attributes(
     for key in ds.variables:
         key = key.lower()
 
-        if species_label in key:
+        if species_label.lower() in key:
             # Standard name attribute
             # ds[key].attrs["standard_name"]=key.replace(species_label, sp_long)
             ds[key].attrs["long_name"] = key.replace(species_label, sp_long)
@@ -228,7 +228,7 @@ def get_attributes(
         try:
             long_name = ds[species_label].attrs["long_name"]
         except KeyError:
-            raise KeyError(key, quality_flags)
+            raise KeyError(ds, species_label, key, quality_flags)
 
         ds[key].attrs = {
             "flag_meaning": "0 = unflagged, 1 = flagged",

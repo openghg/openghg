@@ -136,13 +136,21 @@ class GCWERKS:
                 units[gas_name] = header.iloc[1, col_loc + col_shift]
                 scale[gas_name] = header.iloc[0, col_loc + col_shift]
 
+                if units[gas_name] == "--":
+                    units[gas_name] = "NA"
+
+                if scale[gas_name] == "--":
+                    scale[gas_name] = "NA"
+
+                # Note - have removed this due to some files such as those from capegrim
+                # not having units or scales in the data
                 # Ensure the units and scale have been read in correctly
                 # Have this in case the column shift between the header and data changes
-                if units[gas_name] == "--" or scale[gas_name] == "--":
-                    raise ValueError(
-                        f"Error reading units and scale, ensure columns are correct \
-                        between header and dataframe. File: {data_filepath}, species: {gas_name}"
-                    )
+                # if units[gas_name] == "--" or scale[gas_name] == "--":
+                #     raise ValueError(
+                #         f"Error reading units and scale, ensure columns are correct \
+                #         between header and dataframe. File: {data_filepath}, species: {gas_name}"
+                #     )
 
                 species.append(gas_name)
 
