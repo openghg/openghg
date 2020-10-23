@@ -41,7 +41,7 @@ of libraries can be installed without making changes to versions of libraries ne
 
 .. code-block:: bash
 
-    python -m venv /path/to/env
+    python -m venv /path/to/env/openghg_env
     # Activate the environment
     source /path/to/end/bin/activate
 
@@ -65,6 +65,7 @@ To upgrade a currently installed version
 .. code-block:: bash
 
     pip install --upgrade openghg
+
 
 Developers
 ==========

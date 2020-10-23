@@ -136,13 +136,11 @@ class GCWERKS:
                 units[gas_name] = header.iloc[1, col_loc + col_shift]
                 scale[gas_name] = header.iloc[0, col_loc + col_shift]
 
-                # Ensure the units and scale have been read in correctly
-                # Have this in case the column shift between the header and data changes
-                if units[gas_name] == "--" or scale[gas_name] == "--":
-                    raise ValueError(
-                        f"Error reading units and scale, ensure columns are correct \
-                        between header and dataframe. File: {data_filepath}, species: {gas_name}"
-                    )
+                if units[gas_name] == "--":
+                    units[gas_name] = "NA"
+
+                if scale[gas_name] == "--":
+                    scale[gas_name] = "NA"
 
                 species.append(gas_name)
 
@@ -220,25 +218,28 @@ class GCWERKS:
 
         # Read inlets from the parameters dictionary
         expected_inlets = self.get_inlets(site_code=site)
-        # Get the inlets in the dataframe
-        try:
-            data_inlets = data["Inlet"].unique().tolist()
-        except KeyError:
-            raise KeyError(
-                "Unable to read inlets from data, please ensure this data is of the GC \
-                                    type expected by this processing module"
-            )
 
-        # For now just add air to the expected inlets
-        expected_inlets.append("air")
+        if len(expected_inlets) == 1 and expected_inlets[0] == "any":
+            matching_inlets = expected_inlets
+        else:
+            # Get the inlets in the dataframe
+            try:
+                data_inlets = data["Inlet"].unique().tolist()
+            except KeyError:
+                raise KeyError(
+                    "Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module"
+                )
 
-        matching_inlets = [data_inlet for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)]
+            # For now just add air to the expected inlets
+            expected_inlets.append("air")
 
-        if not matching_inlets:
-            raise ValueError(
-                "Inlet mismatch - please ensure correct site is selected. \
-                                Mismatch between inlet in data and inlet in parameters file."
-            )
+            matching_inlets = [data_inlet for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)]
+
+            if not matching_inlets:
+                raise ValueError(
+                    "Inlet mismatch - please ensure correct site is selected."
+                    "Mismatch between inlet in data and inlet in parameters file."
+                )
 
         combined_data = {}
 

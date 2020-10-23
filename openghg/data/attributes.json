@@ -113,7 +113,7 @@
             "name": "hydrogen"
         },
         "NE_PDD": {
-            "chem": "Ne",
+            "chem": "ne",
             "name": "neon"
         },
         "DO2N2": {
