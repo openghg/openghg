@@ -86,10 +86,12 @@ class ObsSurface(BaseModule):
             dict: Dictionary of Datasource UUIDs
         """
         from collections import defaultdict
+        import logging
         from pathlib import Path
+        import sys
+        from tqdm import tqdm
         from openghg.util import load_object, hash_file
         from openghg.processing import assign_data, DataTypes
-        import logging
 
         logging.getLogger("numexpr").setLevel(logging.WARNING)
 
@@ -101,54 +103,59 @@ class ObsSurface(BaseModule):
 
         obs = ObsSurface.load()
 
+        # Create a progress bar object using the filepaths, iterate over this below
         results = {}
+        with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
+            for fp in filepath:
+                progress_bar.set_description(f"Processing: {fp}")
 
-        for fp in filepath:
-            if data_type == "GCWERKS":
-                if not isinstance(fp, tuple):
-                    raise TypeError("To process GCWERKS data a data filepath and a precision filepath must be suppled as a tuple")
+                if data_type == "GCWERKS":
+                    if not isinstance(fp, tuple):
+                        raise TypeError("To process GCWERKS data a data filepath and a precision filepath must be suppled as a tuple")
 
-                data_filepath = Path(fp[0])
-                precision_filepath = Path(fp[1])
+                    data_filepath = Path(fp[0])
+                    precision_filepath = Path(fp[1])
 
-                data = data_obj.read_file(
-                    data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, network=network
-                )
-            else:
-                if isinstance(fp, tuple):
-                    raise TypeError(
-                        "Only a single data file may be passed for this data type. Please check you have the correct type selected."
+                    data = data_obj.read_file(
+                        data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, network=network
                     )
+                else:
+                    if isinstance(fp, tuple):
+                        raise TypeError(
+                            "Only a single data file may be passed for this data type. Please check you have the correct type selected."
+                        )
 
-                data_filepath = Path(fp)
-                data = data_obj.read_file(data_filepath=data_filepath, site=site, network=network)
+                    data_filepath = Path(fp)
+                    data = data_obj.read_file(data_filepath=data_filepath, site=site, network=network)
 
-            # TODO - need a new way of creating the source name
-            source_name = data_filepath.stem
+                # TODO - need a new way of creating the source name
+                source_name = data_filepath.stem
 
-            # Hash the file and if we've seen this file before raise an error
-            file_hash = hash_file(filepath=data_filepath)
-            if file_hash in obs._file_hashes and not overwrite:
-                raise ValueError(f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}.")
+                # Hash the file and if we've seen this file before raise an error
+                file_hash = hash_file(filepath=data_filepath)
+                if file_hash in obs._file_hashes and not overwrite:
+                    raise ValueError(f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}.")
 
-            datasource_table = defaultdict(dict)
-            # For each species check if we have a Datasource
-            for species in data:
-                name = "_".join([source_name, species])
-                datasource_table[species]["uuid"] = obs._datasource_names.get(name, False)
-                datasource_table[species]["name"] = name
+                datasource_table = defaultdict(dict)
+                # For each species check if we have a Datasource
+                for species in data:
+                    name = "_".join([source_name, species])
+                    datasource_table[species]["uuid"] = obs._datasource_names.get(name, False)
+                    datasource_table[species]["name"] = name
 
-            # Create Datasources, save them to the object store and get their UUIDs
-            datasource_uuids = assign_data(gas_data=data, lookup_results=datasource_table, overwrite=overwrite)
+                # Create Datasources, save them to the object store and get their UUIDs
+                datasource_uuids = assign_data(gas_data=data, lookup_results=datasource_table, overwrite=overwrite)
 
-            results[data_filepath.name] = datasource_uuids
+                results[data_filepath.name] = datasource_uuids
 
-            # Record the Datasources we've created / appended to
-            obs.add_datasources(datasource_uuids)
+                # Record the Datasources we've created / appended to
+                obs.add_datasources(datasource_uuids)
 
-            # Store the hash as the key for easy searching, store the filename as well for
-            # ease of checking by user
-            obs._file_hashes[file_hash] = data_filepath.name
+                # Store the hash as the key for easy searching, store the filename as well for
+                # ease of checking by user
+                obs._file_hashes[file_hash] = data_filepath.name
+
+                progress_bar.update(1)
 
         # Save this object back to the object store
         obs.save()
