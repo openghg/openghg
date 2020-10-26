@@ -1,4 +1,4 @@
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)![OpenGHG tests](https://github.com/openghg/openghg/workflows/OpenGHG%20tests/badge.svg?branch=master)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![OpenGHG tests](https://github.com/openghg/openghg/workflows/HUGS%20tests/badge.svg)
 
 ## OpenGHG - a cloud platform for greenhouse gas data analysis and collaboration
 
