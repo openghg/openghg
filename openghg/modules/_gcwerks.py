@@ -63,7 +63,10 @@ class GCWERKS:
 
             if is_number(instrument):
                 # has picked out the year, rather than the instrument. Default to GCMD for this type of file
-                instrument = "GCMD"
+                instrument = "md"
+
+            # Now do the lookup for suffix to instrument name
+            instrument = self._gc_params["suffix_to_instrument"][instrument]
 
         if network is None:
             network = "NA"
@@ -233,7 +236,9 @@ class GCWERKS:
             # For now just add air to the expected inlets
             expected_inlets.append("air")
 
-            matching_inlets = [data_inlet for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)]
+            matching_inlets = [
+                data_inlet for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)
+            ]
 
             if not matching_inlets:
                 raise ValueError(
@@ -300,13 +305,13 @@ class GCWERKS:
         return instrument.lower() in valid_instruments
 
     def get_precision(self, instrument: str) -> int:
-        """ Get the precision of the instrument in seconds
+        """ Process the suffix from the filename to get the correct instrument name
+            then retrieve the precision of that instrument.
 
             Args:
                 instrument (str): Instrument name
             Returns:
                 int: Precision of instrument in seconds
-
         """
         try:
             sampling_period = self._gc_params["sampling_period"][instrument]

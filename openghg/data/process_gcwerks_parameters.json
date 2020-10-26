@@ -45,6 +45,15 @@
             "medusa": "Medusa measurements. Output from GCWerks. See Miller et al. (2008)."
         },
         "directory_output" : "/data/shared/obs_2018",
+        "BRI" : {
+            "gcwerks_site_name": "bristol",
+            "long_name": "Bristol, UK",
+            "inlets": ["any"],
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
         "BSD" : {
             "gcwerks_site_name": "bilsdale",
             "long_name": "Bilsdale, UK",
