@@ -5,7 +5,11 @@
 OpenGHG is a project based on the prototype [HUGS platform](https://www.hugs-cloud.com) which aims to be a platform for collaboration and analysis
 of greenhouse gas (GHG) data.
 
+<<<<<<< HEAD
 The platform will be build on open-source technologies and will allow researchers to collaborate on large datasets whilst harnessing the
+=======
+The platform will be built on open-source technologies and will allow researchers to collaborate on large datasets by harnessing the
+>>>>>>> c4e89ab
 power and scalability of the cloud.
 
 For more information please see [our documentation](https://docs.openghg.org/).
