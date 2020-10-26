@@ -1,4 +1,4 @@
-name: HUGS tests
+name: OpenGHG tests
 
 on:
   push:
