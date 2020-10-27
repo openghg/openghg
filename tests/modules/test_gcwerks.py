@@ -38,13 +38,18 @@ def test_read_file(data_path, precision_path):
 
     gas_data = gc.read_file(data_filepath=data_path, precision_filepath=precision_path, site="CGO", instrument="medusa",)
 
-    expected_eight = ["C4F10_75m_4", "C6F14_75m_4", "CCl4_75m_4", "CF4_75m_4", "CFC-112_75m_4", "CFC-113_75m_4", "CFC-114_75m_4"]
+    expected_eight = [
+        "C4F10_75m_4",
+        "C6F14_75m_4",
+        "CCl4_75m_4",
+        "CF4_75m_4",
+        "CFC-112_75m_4",
+        "CFC-113_75m_4",
+        "CFC-114_75m_4",
+        "CFC-115_75m_4",
+    ]
 
     sorted_keys = sorted(list(gas_data.keys()))
-
-    print(sorted_keys)
-
-    return False
 
     assert sorted_keys[:8] == expected_eight
 
@@ -93,8 +98,6 @@ def test_read_data(data_path, precision_path):
     data = gc.read_data(
         data_filepath=data_path, precision_filepath=precision_path, site=site, instrument=instrument, network="AGAGE"
     )
-
-    print(sorted(data.keys()))
 
     return False
 

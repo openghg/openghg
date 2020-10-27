@@ -22,6 +22,7 @@
   "AMS": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 55.0,
       "latitude": -37.798,
       "long_name": "Amsterdam Island, France",
@@ -30,8 +31,8 @@
   },
   "AMT": {
     "NOAA": {
-      "height": ["107m"],
-      "height_name": ["107magl"],
+      "height": ["110m"],
+      "height_name": ["110magl"],
       "height_station_masl": 53.0,
       "latitude": 45.0345,
       "long_name": "Argyle, Maine, United States",
@@ -41,6 +42,7 @@
   "ARH": {
     "NIWA": {
       "height": ["5m"],
+      "height_name": ["5magl"],
       "height_station_masl": 104.0,
       "latitude": -77.8,
       "long_name": "Arrival Heights, New Zealand",
@@ -50,6 +52,7 @@
   "ASC": {
     "RHUL": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 54.0,
       "latitude": -7.92,
       "long_name": "Ascension Island, UK",
@@ -59,6 +62,7 @@
   "ASK": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 2710.0,
       "latitude": 23.262,
       "long_name": "Assekrem, Algeria",
@@ -78,6 +82,7 @@
   "AZR": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 19.0,
       "latitude": 38.766,
       "long_name": "Terceira Island, Azores, Portugal",
@@ -107,6 +112,7 @@
   "BHD": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 85.0,
       "latitude": -41.41,
       "long_name": "Baring Head, New Zealand",
@@ -140,7 +146,7 @@
       "height_station_masl": 11.0,
       "latitude": 51.46,
       "long_name": "Bristol, UK",
-      "longitude": -2.60
+      "longitude": -2.6
     }
   },
   "BRW": {
@@ -155,6 +161,14 @@
   },
   "BSD": {
     "DECC": {
+      "height": ["108m", "42m", "248m"],
+      "height_name": ["110magl", "50magl", "250magl"],
+      "height_station_masl": 380.0,
+      "latitude": 54.35858,
+      "long_name": "Bilsdale, UK",
+      "longitude": -1.15033
+    },
+    "EUROCOM": {
       "height": ["108m", "42m", "248m"],
       "height_name": ["110magl", "50magl", "250magl"],
       "height_station_masl": 380.0,
@@ -198,6 +212,14 @@
       "latitude": 58.97,
       "long_name": "Cabauw Tower, Netherlands",
       "longitude": -4.926
+    },
+    "EUROCOM": {
+      "height": ["120m", "20m", "60m", "200m"],
+      "height_name": ["120magl", "20magl", "60magl", "200magl"],
+      "height_station_masl": 213.0,
+      "latitude": 58.97,
+      "long_name": "Cabauw Tower, Netherlands",
+      "longitude": -4.926
     }
   },
   "CBY": {
@@ -213,7 +235,7 @@
   "CGO": {
     "AGAGE": {
       "height": ["70m", "10m"],
-      "height_name": ["70magl", "70magl"],
+      "height_name": ["70magl", "10magl"],
       "height_station_masl": 94.0,
       "latitude": -40.683,
       "long_name": "Cape Grim, Tasmania",
@@ -245,11 +267,20 @@
       "latitude": 44.193889,
       "long_name": "Monte Cimone, Italy",
       "longitude": 10.701389
+    },
+    "EUROCOM": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 2155.0,
+      "latitude": 44.193889,
+      "long_name": "Monte Cimone, Italy",
+      "longitude": 10.701389
     }
   },
   "CMO": {
-    "NOAA": {
+    "EUROCOM": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 30.0,
       "latitude": 45.478,
       "long_name": "Cape Mears, Oregon",
@@ -262,7 +293,7 @@
       "height_name": ["46magl"],
       "height_station_masl": 41.0,
       "latitude": 43.167,
-      "long_name": "Cape Oshi-Ishi, Japan",
+      "long_name": "Cape Ochiishi, Japan",
       "longitude": 145.5
     }
   },
@@ -295,7 +326,7 @@
   },
   "CRZ": {
     "NOAA": {
-      "height": ["10m"],
+      "height": ["Variable"],
       "height_station_masl": 197.0,
       "latitude": -46.434,
       "long_name": "Crozet Island, France",
@@ -303,8 +334,9 @@
     }
   },
   "CVO": {
-    "WMO": {
+    "UEXETER": {
       "height": ["30m"],
+      "height_name": ["30m"],
       "height_station_masl": 10.0,
       "latitude": 16.8636,
       "long_name": "Cape Verde, Africa",
@@ -341,6 +373,7 @@
   "EIC": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 47.0,
       "latitude": -27.16,
       "long_name": "Easter Island, Chile",
@@ -526,6 +559,22 @@
       "latitude": 50.97675,
       "long_name": "Heathfield, UK",
       "longitude": 0.23048
+    },
+    "DECC": {
+      "height": ["100m", "50m"],
+      "height_name": ["100magl", "50magl"],
+      "height_station_masl": 150.0,
+      "latitude": 50.97675,
+      "long_name": "Heathfield, UK",
+      "longitude": 0.23048
+    },
+    "EUROCOM": {
+      "height": ["100m", "50m"],
+      "height_name": ["100magl", "50magl"],
+      "height_station_masl": 150.0,
+      "latitude": 50.97675,
+      "long_name": "Heathfield, UK",
+      "longitude": 0.23048
     }
   },
   "HFM": {
@@ -561,6 +610,7 @@
   "ICE": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 118.0,
       "latitude": 63.4,
       "long_name": "Storhofdi, Vestmannaeyjar, Iceland",
@@ -580,19 +630,28 @@
   "IZA": {
     "UHei": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 2367.0,
       "latitude": 28.3,
       "long_name": "Izana, Tenerife",
-      "longitude": -16.5
+      "longitude": 16.5
     }
   },
   "IZO": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 2372.0,
       "latitude": 28.309,
       "long_name": "Izana, Tenerife",
-      "longitude": -16.499
+      "longitude": 16.499
+    },
+    "EUROCOM": {
+      "height": ["10m"],
+      "height_station_masl": 2372.0,
+      "latitude": 28.309,
+      "long_name": "Izana, Tenerife",
+      "longitude": 16.499
     }
   },
   "JFJ": {
@@ -603,12 +662,20 @@
       "latitude": 46.5475,
       "long_name": "Jungfraujoch, Switzerland",
       "longitude": 7.979167
+    },
+    "EUROCOM": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 3570.0,
+      "latitude": 46.5475,
+      "long_name": "Jungfraujoch, Switzerland",
+      "longitude": 7.979167
     }
   },
   "KAS": {
     "EUROCOM": {
-      "height": ["5m"],
-      "height_name": ["5magl"],
+      "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 1989.0,
       "latitude": 49.232,
       "long_name": "Kasprowy, Poland",
@@ -617,8 +684,8 @@
   },
   "KEY": {
     "NOAA": {
-      "height": ["5m"],
-      "height_name": ["5magl"],
+      "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 1.0,
       "latitude": 25.6654,
       "long_name": "Key Biscane, Florida",
@@ -628,6 +695,7 @@
   "KUM": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 3.0,
       "latitude": 19.52,
       "long_name": "Cape Kumukahi, Hawaii",
@@ -644,8 +712,8 @@
   },
   "LEF": {
     "NOAA": {
-      "height": ["396m"],
-      "height_name": ["396magl"],
+      "height": ["400m"],
+      "height_name": ["400magl"],
       "height_station_masl": 472.0,
       "latitude": 45.9451,
       "long_name": "Park Falls, Wisconsin, United States",
@@ -693,6 +761,7 @@
   "MBC": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 30.0,
       "latitude": 76.247,
       "long_name": "Mould Bay, Canada",
@@ -702,6 +771,7 @@
   "MBO": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 2731.0,
       "latitude": 43.977,
       "long_name": "Mt. Bachelor Observatory, USA",
@@ -711,6 +781,7 @@
   "MDO": {
     "UCI": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 10.0,
       "latitude": 35.2639,
       "long_name": "Montana de Oro, USA",
@@ -733,15 +804,24 @@
       "latitude": 53.32611,
       "long_name": "Mace Head, Ireland",
       "longitude": -9.90389
+    },
+    "EUROCOM": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 5.0,
+      "latitude": 53.32611,
+      "long_name": "Mace Head, Ireland",
+      "longitude": -9.90389
     }
   },
   "MLO": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 3397.0,
-      "latitude": 19.536,
+      "latitude": 19.5362,
       "long_name": "Mauna Loa, Hawaii",
-      "longitude": -155.576
+      "longitude": -155.5763
     }
   },
   "MONSOON-FAAM": {
@@ -785,6 +865,7 @@
   "NMY": {
     "UHei": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 42.0,
       "latitude": -70.65,
       "long_name": "Neumayer, Antarctica",
@@ -822,7 +903,7 @@
     }
   },
   "ORG": {
-    "NOAA": {
+    "ALE": {
       "height": ["10m"],
       "height_name": ["10magl"],
       "height_station_masl": 10,
@@ -844,8 +925,6 @@
   "POC": {
     "NOAA": {
       "height": ["20m"],
-      "latitude": 28,
-      "longitude": -175,
       "height_name": ["20magl"],
       "height_station_masl": 0.0,
       "long_name": "Pacific Ocean"
@@ -854,6 +933,7 @@
   "PSA": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 10.0,
       "latitude": -64.92,
       "long_name": "Palmer Station, Antarctica",
@@ -868,6 +948,14 @@
       "latitude": 51.997435,
       "long_name": "Ridge Hill, UK",
       "longitude": -2.5399
+    },
+    "EUROCOM": {
+      "height": ["90m", "45m"],
+      "height_name": ["90magl", "45magl"],
+      "height_station_masl": 200.0,
+      "latitude": 51.997435,
+      "long_name": "Ridge Hill, UK",
+      "longitude": -2.5399
     }
   },
   "RPB": {
@@ -875,15 +963,16 @@
       "height": ["10m"],
       "height_name": ["10magl"],
       "height_station_masl": 32.0,
-      "latitude": 13.17,
+      "latitude": 13.16512,
       "long_name": "Ragged Point, Barbados",
-      "longitude": -59.43
+      "longitude": -59.43208,
+      "w3w": "///munched.brimmed.elect"
     }
   },
   "SCT": {
     "NOAA": {
-      "height": ["305m"],
-      "height_name": ["305magl"],
+      "height": ["310m"],
+      "height_name": ["310magl"],
       "height_station_masl": 115.2,
       "latitude": 33.4057,
       "long_name": "Beech Island, South Carolina, United States",
@@ -913,6 +1002,7 @@
   "SHM": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 23.0,
       "latitude": 52.711,
       "long_name": "Shemya Island, Alaska",
@@ -959,6 +1049,7 @@
   "SPO": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 2810.0,
       "latitude": -89.98,
       "long_name": "South Pole, Antarctica",
@@ -979,10 +1070,8 @@
     "NOAA": {
       "height": ["5m"],
       "height_name": ["10magl"],
-      "latitude": 66.0,
-      "longitude": 2.0,
       "height_station_masl": 0.0,
-      "long_name": "Ocean Station M, Norway"
+      "long_name": "Ocean Station M"
     }
   },
   "STR": {
@@ -998,6 +1087,7 @@
   "SUM": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 3209.5,
       "latitude": 72.596,
       "long_name": "Summit, Greenland",
@@ -1007,6 +1097,7 @@
   "SYO": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 14.0,
       "latitude": -69.013,
       "long_name": "Syowa Station, Antarctica",
@@ -1021,11 +1112,20 @@
       "latitude": 52.51775,
       "long_name": "Tacolneston Tower, UK",
       "longitude": 1.13872
+    },
+    "EUROCOM": {
+      "height": ["100m", "54m", "185m"],
+      "height_name": ["100magl", "50magl", "185magl"],
+      "height_station_masl": 50.0,
+      "latitude": 52.51775,
+      "long_name": "Tacolneston Tower, UK",
+      "longitude": 1.13872
     }
   },
   "TAP": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 20.0,
       "latitude": 36.72,
       "long_name": "Tae-ahn Peninsula, Korea",
@@ -1069,13 +1169,13 @@
     }
   },
   "TMB": {
-    "TMB": {
+    "CRANFIELD": {
       "height": ["5m"],
       "height_name": ["5magl"],
       "height_station_masl": 5.0,
-      "latitude": 51.496769,
-      "long_name": "Thames Barrier, London, UK",
-      "longitude": 0.036995
+      "latitude": 51.497,
+      "long_name": "Thames Barrier, UK",
+      "longitude": 0.037
     }
   },
   "TPD": {
@@ -1106,11 +1206,20 @@
       "latitude": 56.55511,
       "long_name": "Angus Tower, UK",
       "longitude": -2.98598
+    },
+    "EUROCOM": {
+      "height": ["222m"],
+      "height_name": ["222magl"],
+      "height_station_masl": 300.0,
+      "latitude": 56.55511,
+      "long_name": "Angus Tower, UK",
+      "longitude": -2.98598
     }
   },
   "USH": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 12.0,
       "latitude": -54.848,
       "long_name": "Ushaia, Argentina",
@@ -1119,8 +1228,8 @@
   },
   "UTA": {
     "NOAA": {
-      "height": ["5m"],
-      "height_name": ["5magl"],
+      "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 1327.0,
       "latitude": 39.9018,
       "long_name": "Wendover, Utah, United States",
@@ -1130,6 +1239,7 @@
   "UUM": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 1007.0,
       "latitude": 44.452,
       "long_name": "Ulaan Uul, Mongolia",
@@ -1137,7 +1247,23 @@
     }
   },
   "WAO": {
+    "UEA": {
+      "height": ["21m"],
+      "height_name": ["20magl"],
+      "height_station_masl": 10.0,
+      "latitude": 52.95042,
+      "long_name": "Weybourne Observatory, UK",
+      "longitude": 1.12194
+    },
     "UCAM": {
+      "height": ["21m"],
+      "height_name": ["20magl"],
+      "height_station_masl": 10.0,
+      "latitude": 52.95042,
+      "long_name": "Weybourne Observatory, UK",
+      "longitude": 1.12194
+    },
+    "EUROCOM": {
       "height": ["21m"],
       "height_name": ["20magl"],
       "height_station_masl": 10.0,
@@ -1148,8 +1274,8 @@
   },
   "WBI": {
     "NOAA": {
-      "height": ["379m"],
-      "height_name": ["379magl"],
+      "height": ["380m"],
+      "height_name": ["380magl"],
       "height_station_masl": 241.7,
       "latitude": 41.7248,
       "long_name": "West Branch, Iowa, United States",
@@ -1168,8 +1294,8 @@
   },
   "WKT": {
     "NOAA": {
-      "height": ["457m"],
-      "height_name": ["457magl"],
+      "height": ["460m"],
+      "height_name": ["460magl"],
       "height_station_masl": 251.0,
       "latitude": 31.3149,
       "long_name": "Moody, Texas, United States",
@@ -1179,6 +1305,7 @@
   "WLG": {
     "NOAA": {
       "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 3810.0,
       "latitude": 36.28,
       "long_name": "Mt. Waliguan, China",
@@ -1207,32 +1334,42 @@
   },
   "BIS": {
     "EUROCOM": {
-      "long_name": "Biscarosse, France",
+      "height": ["47m"],
+      "height_name": ["47magl"],
+      "height_station_masl": 73.0,
       "latitude": 44.38,
+      "long_name": "Biscarosse",
       "longitude": -1.23
     }
   },
   "BIK": {
     "EUROCOM": {
-      "long_name": "Bialystok, Poland",
+      "height": ["300m"],
+      "height_name": ["300magl"],
+      "height_station_masl": 150.0,
       "latitude": 53.23,
-      "longitude": 23.01
+      "long_name": "Bialystok",
+      "longitude": 23.03
     }
   },
   "BIR": {
     "EUROCOM": {
-      "long_name": "Birkenes Observatory, Norway",
       "height": ["10m"],
-      "latitude": 58.23,
-      "longitude": 8.15
+      "height_name": ["10magl"],
+      "height_station_masl": 190.0,
+      "latitude": 58.39,
+      "long_name": "Birkenes",
+      "longitude": 8.25
     }
   },
   "PRS": {
     "EUROCOM": {
-      "long_name": "Plateau Rosa, Italy",
-      "height_masl": "3480m",
-      "latitude": 45.935,
-      "longitude": 7.707
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 3480.0,
+      "latitude": 45.93,
+      "long_name": "Plateau Rosa",
+      "longitude": 7.7
     }
   },
   "SVB": {
@@ -1240,6 +1377,176 @@
       "long_name": "Svartberget, Sweden",
       "latitude": 64.14,
       "longitude": 19.46
+    }
+  },
+  "AND": {
+    "NOAA": {
+      "height": ["47m"],
+      "height_name": ["47magl"],
+      "height_station_masl": 47.0,
+      "latitude": 36.539,
+      "long_name": "Anmyeon-do, South Korea",
+      "longitude": 126.329
+    }
+  },
+  "BWD": {
+    "NOAA": {
+      "height_station_masl": 16.8,
+      "latitude": 38.9343,
+      "long_name": "Brentwood, Maryland, United States",
+      "longitude": -76.9556
+    }
+  },
+  "CRV": {
+    "NOAA": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 611.43,
+      "latitude": 64.9863,
+      "long_name": "Carbon in Arctic Reservoirs Vulnerability Experiment (CARVE), United States",
+      "longitude": -147.598
+    }
+  },
+  "FLK": {
+    "BAS": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 147.0,
+      "latitude": -51.707,
+      "long_name": "Sapper Hill, Falkland Islands, Malvinas",
+      "longitude": -57.87
+    }
+  },
+  "GOSAT-BRAZIL-LAND-upp": {
+    "GOSAT/GOSAT-BRAZIL-LAND-upp": {
+      "height": ["column"],
+      "height_name": ["column"],
+      "long_name": "GOSAT, Brazil, land points, upper XCO2 bound",
+      "platform": "satellite"
+    }
+  },
+  "GOSAT-BRAZIL-LAND-low": {
+    "GOSAT/GOSAT-BRAZIL-LAND-low": {
+      "height": ["column"],
+      "height_name": ["column"],
+      "long_name": "GOSAT, Brazil, land points, lower XCO2 bound",
+      "platform": "satellite"
+    }
+  },
+  "GOSAT-SOUTHAMERICA": {
+    "GOSAT/GOSAT-SOUTHAMERICA": {
+      "height": ["column"],
+      "height_name": ["column"],
+      "long_name": "GOSAT, South America",
+      "platform": "satellite"
+    }
+  },
+  "GOSAT-SOUTHAMERICA-LAND": {
+    "GOSAT/GOSAT-SOUTHAMERICA-LAND": {
+      "height": ["column"],
+      "height_name": ["column"],
+      "long_name": "GOSAT, South America, land points only",
+      "platform": "satellite"
+    }
+  },
+  "INX": {
+    "NOAA": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": "Variable",
+      "latitude": 39.5805,
+      "long_name": "INFLUX (Indianapolis Flux Experiment), United States",
+      "longitude": -86.4207
+    }
+  },
+  "LEW": {
+    "NOAA": {
+      "height": ["5m"],
+      "height_name": ["5magl"],
+      "height_station_masl": 161.0,
+      "latitude": 40.9447,
+      "long_name": "Lewisburg, Pennsylvania, United States",
+      "longitude": -76.8789
+    }
+  },
+  "MSH": {
+    "NOAA": {
+      "height": ["?5m"],
+      "height_name": ["?5magl"],
+      "height_station_masl": 32.3,
+      "latitude": 41.6568,
+      "long_name": "Mashpee, Massachusetts, United States",
+      "longitude": -70.4973
+    }
+  },
+  "NEB": {
+    "NOAA": {
+      "height": ["?5m"],
+      "height_name": ["?5magl"],
+      "height_station_masl": 44.0,
+      "latitude": 39.3154,
+      "long_name": "NE Baltimore, Maryland, United States",
+      "longitude": -76.583
+    }
+  },
+  "NWB": {
+    "NOAA": {
+      "height": ["?5m"],
+      "height_name": ["?5magl"],
+      "height_station_masl": 135.0,
+      "latitude": 39.3445,
+      "long_name": "NW Baltimore, United States ",
+      "longitude": -76.6851
+    }
+  },
+  "RHL": {
+    "RHUL": {
+      "height": ["20m"],
+      "height_name": ["20magl"],
+      "height_station_masl": 70.0,
+      "latitude": 51.426209,
+      "long_name": "Royal Holloway, University of London, UK",
+      "longitude": -0.561312
+    }
+  },
+  "RWA": {
+    "AGAGE": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 2600.0,
+      "latitude": -1.6,
+      "long_name": "Mt Mugogo",
+      "longitude": 29.6
+    }
+  },
+  "TMD": {
+    "NOAA": {
+      "height": ["?5m"],
+      "height_name": ["?5magl"],
+      "height_station_masl": 561.0,
+      "latitude": 39.5768,
+      "long_name": "Thurmont, Maryland, United States",
+      "longitude": -77.4881
+    }
+  },
+  "TOB": {
+    "AGAGE": {
+      "height": ["12m"],
+      "height_name": ["12magl"],
+      "height_station_masl": 825.0,
+      "latitude": 50.221884,
+      "long_name": "Taunus, Germany",
+      "longitude": 8.446397
+    }
+  },
+  "WIS": {
+    "NOAA": {
+      "height": ["5m"],
+      "height_name": ["5magl"],
+      "height_station_masl": 151.0,
+      "latitude": 29.9646,
+      "long_name": "Weizmann Institute of Science at Arva Institute, Israel",
+      "longitude": 35.0605
     }
   }
 }

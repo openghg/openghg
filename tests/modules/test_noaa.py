@@ -64,8 +64,6 @@ def test_read_file():
         "Processed by": "auto@hugs-cloud.com",
         "species": "co",
         "Calibration_scale": "unknown",
-        "station_longitude": -175,
-        "station_latitude": 28,
         "station_long_name": "Pacific Ocean",
         "station_height_masl": 0.0,
     }

@@ -50,8 +50,8 @@ def test_read_file():
                     'Conditions of use': 'Ensure that you contact the data owner at the outset of your project.', 
                     'Source': 'In situ measurements of air', 'Conventions': 'CF-1.6', 
                     'Processed by': 'auto@hugs-cloud.com', 'species': 'co', 
-                    'Calibration_scale': 'unknown', 'station_longitude': 0.036995, 'station_latitude': 51.496769, 
-                    'station_long_name': 'Thames Barrier, London, UK', 'station_height_masl': 5.0}
+                    'Calibration_scale': 'unknown', 'station_longitude': 0.037, 'station_latitude': 51.497, 
+                    'station_long_name': 'Thames Barrier, UK', 'station_height_masl': 5.0}
 
     del co_data.attrs["File created"]
     
