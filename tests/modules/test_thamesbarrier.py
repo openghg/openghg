@@ -77,7 +77,7 @@ def test_read_data():
 
     assert sorted(list(data.keys())) == sorted(["CH4", "CO", "CO2"])
     assert data["CH4"]["attributes"] == attributes
-    assert data["CH4"]["metadata"] == {}
+    assert data["CH4"]["metadata"] == {"species": "CH4"}
 
     ch4_data = data["CH4"]["data"]
 

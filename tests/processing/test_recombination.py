@@ -75,7 +75,7 @@ def test_recombination_GC():
 
     data = gc.read_data(data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa", network="AGAGE")
 
-    toluene_data = data["toluene"]["data"]
+    toluene_data = data["toluene_75m_4"]["data"]
 
     gas_name = "toluene"
     location = "CGO"

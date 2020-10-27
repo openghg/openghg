@@ -12,11 +12,7 @@ def get_datapath(filename, data_type):
         Returns:
             pathlib.Path
     """
-    return (
-        Path(__file__)
-        .resolve()
-        .parent.parent.joinpath("data", "proc_test_data", data_type, filename)
-    )
+    return Path(__file__).resolve().parent.parent.joinpath("data", "proc_test_data", data_type, filename)
 
 
 def test_read_CRDS():
@@ -28,13 +24,7 @@ def test_read_CRDS():
 
     keys = results["bsd.picarro.1minute.248m.dat"].keys()
 
-    expected_keys = sorted(
-        [
-            "bsd.picarro.1minute.248m_ch4",
-            "bsd.picarro.1minute.248m_co",
-            "bsd.picarro.1minute.248m_co2",
-        ]
-    )
+    expected_keys = sorted(["bsd.picarro.1minute.248m_ch4", "bsd.picarro.1minute.248m_co", "bsd.picarro.1minute.248m_co2",])
     assert sorted(keys) == expected_keys
 
     # Load up the assigned Datasources and check they contain the correct data
@@ -58,79 +48,75 @@ def test_read_GC():
     get_local_bucket(empty=True)
 
     data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
-    precision_filepath = get_datapath(
-        filename="capegrim-medusa.18.precisions.C", data_type="GC"
-    )
+    precision_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    results = ObsSurface.read_file(
-        filepath=(data_filepath, precision_filepath), data_type="GCWERKS"
-    )
+    results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS")
 
     expected_keys = sorted(
         [
-            "capegrim-medusa.18_NF3",
-            "capegrim-medusa.18_CF4",
-            "capegrim-medusa.18_PFC-116",
-            "capegrim-medusa.18_PFC-218",
-            "capegrim-medusa.18_PFC-318",
-            "capegrim-medusa.18_C4F10",
-            "capegrim-medusa.18_C6F14",
-            "capegrim-medusa.18_SF6",
-            "capegrim-medusa.18_SO2F2",
-            "capegrim-medusa.18_SF5CF3",
-            "capegrim-medusa.18_HFC-23",
-            "capegrim-medusa.18_HFC-32",
-            "capegrim-medusa.18_HFC-125",
-            "capegrim-medusa.18_HFC-134a",
-            "capegrim-medusa.18_HFC-143a",
-            "capegrim-medusa.18_HFC-152a",
-            "capegrim-medusa.18_HFC-227ea",
-            "capegrim-medusa.18_HFC-236fa",
-            "capegrim-medusa.18_HFC-245fa",
-            "capegrim-medusa.18_HFC-365mfc",
-            "capegrim-medusa.18_HFC-4310mee",
-            "capegrim-medusa.18_HCFC-22",
-            "capegrim-medusa.18_HCFC-124",
-            "capegrim-medusa.18_HCFC-132b",
-            "capegrim-medusa.18_HCFC-133a",
-            "capegrim-medusa.18_HCFC-141b",
-            "capegrim-medusa.18_HCFC-142b",
-            "capegrim-medusa.18_CFC-11",
-            "capegrim-medusa.18_CFC-12",
-            "capegrim-medusa.18_CFC-13",
-            "capegrim-medusa.18_CFC-112",
-            "capegrim-medusa.18_CFC-113",
-            "capegrim-medusa.18_CFC-114",
-            "capegrim-medusa.18_CFC-115",
-            "capegrim-medusa.18_H-1211",
-            "capegrim-medusa.18_H-1301",
-            "capegrim-medusa.18_H-2402",
-            "capegrim-medusa.18_CH3Cl",
-            "capegrim-medusa.18_CH3Br",
-            "capegrim-medusa.18_CH3I",
-            "capegrim-medusa.18_CH2Cl2",
-            "capegrim-medusa.18_CHCl3",
-            "capegrim-medusa.18_CCl4",
-            "capegrim-medusa.18_CH2Br2",
-            "capegrim-medusa.18_CHBr3",
-            "capegrim-medusa.18_CH3CCl3",
-            "capegrim-medusa.18_TCE",
-            "capegrim-medusa.18_PCE",
-            "capegrim-medusa.18_ethyne",
-            "capegrim-medusa.18_ethane",
-            "capegrim-medusa.18_propane",
-            "capegrim-medusa.18_c-propane",
-            "capegrim-medusa.18_benzene",
-            "capegrim-medusa.18_toluene",
-            "capegrim-medusa.18_COS",
-            "capegrim-medusa.18_desflurane",
+            "capegrim-medusa.18_C4F10_75m_4",
+            "capegrim-medusa.18_C6F14_75m_4",
+            "capegrim-medusa.18_CCl4_75m_4",
+            "capegrim-medusa.18_CF4_75m_4",
+            "capegrim-medusa.18_CFC-112_75m_4",
+            "capegrim-medusa.18_CFC-113_75m_4",
+            "capegrim-medusa.18_CFC-114_75m_4",
+            "capegrim-medusa.18_CFC-115_75m_4",
+            "capegrim-medusa.18_CFC-11_75m_4",
+            "capegrim-medusa.18_CFC-12_75m_4",
+            "capegrim-medusa.18_CFC-13_75m_4",
+            "capegrim-medusa.18_CH2Br2_75m_4",
+            "capegrim-medusa.18_CH2Cl2_75m_4",
+            "capegrim-medusa.18_CH3Br_75m_4",
+            "capegrim-medusa.18_CH3CCl3_75m_4",
+            "capegrim-medusa.18_CH3Cl_75m_4",
+            "capegrim-medusa.18_CH3I_75m_4",
+            "capegrim-medusa.18_CHBr3_75m_4",
+            "capegrim-medusa.18_CHCl3_75m_4",
+            "capegrim-medusa.18_COS_75m_4",
+            "capegrim-medusa.18_H-1211_75m_4",
+            "capegrim-medusa.18_H-1301_75m_4",
+            "capegrim-medusa.18_H-2402_75m_4",
+            "capegrim-medusa.18_HCFC-124_75m_4",
+            "capegrim-medusa.18_HCFC-132b_75m_4",
+            "capegrim-medusa.18_HCFC-133a_75m_4",
+            "capegrim-medusa.18_HCFC-141b_75m_4",
+            "capegrim-medusa.18_HCFC-142b_75m_4",
+            "capegrim-medusa.18_HCFC-22_75m_4",
+            "capegrim-medusa.18_HFC-125_75m_4",
+            "capegrim-medusa.18_HFC-134a_75m_4",
+            "capegrim-medusa.18_HFC-143a_75m_4",
+            "capegrim-medusa.18_HFC-152a_75m_4",
+            "capegrim-medusa.18_HFC-227ea_75m_4",
+            "capegrim-medusa.18_HFC-236fa_75m_4",
+            "capegrim-medusa.18_HFC-23_75m_4",
+            "capegrim-medusa.18_HFC-245fa_75m_4",
+            "capegrim-medusa.18_HFC-32_75m_4",
+            "capegrim-medusa.18_HFC-365mfc_75m_4",
+            "capegrim-medusa.18_HFC-4310mee_75m_4",
+            "capegrim-medusa.18_NF3_75m_4",
+            "capegrim-medusa.18_PCE_75m_4",
+            "capegrim-medusa.18_PFC-116_75m_4",
+            "capegrim-medusa.18_PFC-218_75m_4",
+            "capegrim-medusa.18_PFC-318_75m_4",
+            "capegrim-medusa.18_SF5CF3_75m_4",
+            "capegrim-medusa.18_SF6_75m_4",
+            "capegrim-medusa.18_SO2F2_75m_4",
+            "capegrim-medusa.18_TCE_75m_4",
+            "capegrim-medusa.18_benzene_75m_4",
+            "capegrim-medusa.18_c-propane_75m_4",
+            "capegrim-medusa.18_desflurane_75m_4",
+            "capegrim-medusa.18_ethane_75m_4",
+            "capegrim-medusa.18_ethyne_75m_4",
+            "capegrim-medusa.18_propane_75m_4",
+            "capegrim-medusa.18_toluene_75m_4",
         ]
     )
 
-    sorted(list(results["capegrim-medusa.18.C"].keys())) == expected_keys
+    assert sorted(list(results["capegrim-medusa.18.C"].keys())) == expected_keys
 
     # Load in some data
-    uuid = results["capegrim-medusa.18.C"]["capegrim-medusa.18_HFC-152a"]
+    uuid = results["capegrim-medusa.18.C"]["capegrim-medusa.18_HFC-152a_75m_4"]
 
     hfc152a_data = Datasource.load(uuid=uuid, shallow=False).data()
     hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:33:00+00:00"]
@@ -179,19 +165,11 @@ def test_read_GC():
 def test_read_cranfield():
     get_local_bucket(empty=True)
 
-    data_filepath = get_datapath(
-        filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS"
-    )
+    data_filepath = get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="CRANFIELD")
 
-    expected_keys = sorted(
-        [
-            "THB_hourly_means_test_ch4",
-            "THB_hourly_means_test_co2",
-            "THB_hourly_means_test_co",
-        ]
-    )
+    expected_keys = sorted(["THB_hourly_means_test_ch4", "THB_hourly_means_test_co2", "THB_hourly_means_test_co",])
 
     assert sorted(results["THB_hourly_means_test.csv"].keys()) == expected_keys
 
@@ -212,17 +190,15 @@ def test_read_cranfield():
     # Check obs has stored the keys correctly
     obs = ObsSurface.load()
 
-    assert sorted(list(obs._datasource_names.keys())) == sorted(['THB_hourly_means_test_ch4', 
-                                                                'THB_hourly_means_test_co2', 
-                                                                'THB_hourly_means_test_co'])
+    assert sorted(list(obs._datasource_names.keys())) == sorted(
+        ["THB_hourly_means_test_ch4", "THB_hourly_means_test_co2", "THB_hourly_means_test_co"]
+    )
 
 
 def test_read_icos():
     get_local_bucket(empty=True)
 
-    data_filepath = get_datapath(
-        filename="tta.co2.1minute.222m.min.dat", data_type="ICOS"
-    )
+    data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS")
 
@@ -319,7 +295,7 @@ def test_read_thames_barrier():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER")
 
-    expected_keys = sorted(['thames_test_20190707_CH4', 'thames_test_20190707_CO2', 'thames_test_20190707_CO'])
+    expected_keys = sorted(["thames_test_20190707_CH4", "thames_test_20190707_CO2", "thames_test_20190707_CO"])
 
     assert sorted(list(results["thames_test_20190707.csv"].keys())) == expected_keys
 

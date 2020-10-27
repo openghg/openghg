@@ -93,6 +93,7 @@ class ObsSurface(BaseModule):
         from openghg.util import load_object, hash_file
         from openghg.processing import assign_data, DataTypes
 
+        # Suppress numexpr thread count info info warnings
         logging.getLogger("numexpr").setLevel(logging.WARNING)
 
         if not isinstance(filepath, list):

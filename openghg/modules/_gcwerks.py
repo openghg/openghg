@@ -277,20 +277,30 @@ class GCWERKS:
                 else:
                     # Take only data for this inlet from the dataframe
                     inlet_data = data.loc[data["Inlet"] == inlet]
+
                     spec_data = inlet_data[
                         [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
                     ]
+
                     spec_data = spec_data.dropna(axis="index", how="any")
+
+                # Check that the Dataframe has something in it
+                if spec_data.empty:
+                    continue
 
                 attributes = self.get_site_attributes(site=site, inlet=inlet, instrument=instrument)
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
 
-                combined_data[spec] = {}
-                combined_data[spec]["metadata"] = spec_metadata
-                combined_data[spec]["data"] = spec_data
-                combined_data[spec]["attributes"] = attributes
+                # As a single species may have measurements from multiple inlets we
+                # use the species and inlet as a key
+                data_key = f"{spec}_{inlet}"
+
+                combined_data[data_key] = {}
+                combined_data[data_key]["metadata"] = spec_metadata
+                combined_data[data_key]["data"] = spec_data
+                combined_data[data_key]["attributes"] = attributes
 
         return combined_data
 

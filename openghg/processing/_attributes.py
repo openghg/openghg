@@ -11,14 +11,15 @@ def assign_attributes(data, site, sampling_period=None, network=None):
         Returns:
             dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
-    for species in data:
-        site_attributes = data[species]["attributes"]
+    for key in data:
+        site_attributes = data[key]["attributes"]
+        species = data[key]["metadata"]["species"]
 
-        units = data[species].get("metadata", {}).get("units")
-        scale = data[species].get("metadata", {}).get("scale")
+        units = data[key].get("metadata", {}).get("units")
+        scale = data[key].get("metadata", {}).get("scale")
 
-        data[species]["data"] = get_attributes(
-            ds=data[species]["data"],
+        data[key]["data"] = get_attributes(
+            ds=data[key]["data"],
             species=species,
             site=site,
             network=network,
@@ -256,7 +257,7 @@ def get_attributes(
 
     # TODO - fix this - just remove duplicates?
     if len(set(ds.time.values)) < len(ds.time.values):
-        print("WARNING. Dupliate time stamps")
+        print("WARNING. Duplicate time stamps")
 
     first_year = pd_Timestamp(ds.time[0].values).year
 
