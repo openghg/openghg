@@ -113,6 +113,10 @@ class GCWERKS:
             parse_dates=[[1, 2, 3, 4, 5]],
             date_parser=parser,
         )
+
+        if data.empty:
+            raise ValueError("Cannot process empty file.")
+
         data.index.name = "Datetime"
 
         # This metadata will be added to when species are split and attributes are written

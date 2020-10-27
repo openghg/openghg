@@ -7,6 +7,7 @@
         "capepoint": "CPT", 
         "heathfield": "HFD", 
         "gosan": "GSN",
+        "india": "DJI",
         "jungfraujoch": "JFJ", 
         "mtecimone": "CMN", 
         "macehead": "MHD",
@@ -19,6 +20,7 @@
         "trinidadhead": "THD", 
         "angus": "TTA", 
         "zeppelin": "ZEP"
+
     },
 
     "code_name":
@@ -27,6 +29,7 @@
         "BRI": "bristol",
         "CGO": "capegrim",
         "CPT": "capepoint",
+        "DJI": "india",
         "HFD": "heathfield",
         "GSN": "gosan",
         "JFJ": "jungfraujoch",
