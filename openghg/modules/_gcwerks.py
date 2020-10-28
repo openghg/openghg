@@ -180,7 +180,11 @@ class GCWERKS:
             precision = precision.sort_index()
 
         for sp in species:
-            precision_index = precision_species.index(sp) * 2 + 1
+            try:
+                precision_index = precision_species.index(sp) * 2 + 1
+            except ValueError:
+                raise ValueError(f"Cannot find {sp} in precisions file.")
+
             data[sp + " repeatability"] = precision[precision_index].astype(float).reindex_like(data, method="pad")
 
         # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period

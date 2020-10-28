@@ -305,3 +305,12 @@ def test_split(data_path, precision_path):
     assert len(data) == 56
 
     assert sorted(list(data.keys()))[:10] == sorted_species
+
+
+def test_no_precisions_species_raises(data_path):
+    missing_species_prec = get_datapath(filename="capegrim-medusa.18.precisions.broke.C")
+
+    gc = GC()
+
+    with pytest.raises(ValueError):
+        gc.read_file(data_filepath=data_path, precision_filepath=missing_species_prec)
