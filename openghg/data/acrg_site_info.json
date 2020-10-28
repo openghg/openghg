@@ -347,7 +347,10 @@
     "AGAGE": {
       "height": ["10m"],
       "height_name": ["500magl"],
-      "long_name": "Darjeeling, India"
+      "height_station_masl": 2042.0,
+      "long_name": "Darjeeling, India",
+      "latitude": 27.049,
+      "longitude": 88.267
     }
   },
   "EGB": {

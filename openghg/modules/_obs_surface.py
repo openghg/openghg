@@ -148,7 +148,7 @@ class ObsSurface(BaseModule):
                     # Create Datasources, save them to the object store and get their UUIDs
                     datasource_uuids = assign_data(gas_data=data, lookup_results=datasource_table, overwrite=overwrite)
 
-                    # results[data_filepath.name] = datasource_uuids
+                    results["processed"][data_filepath.name] = datasource_uuids
 
                     # Record the Datasources we've created / appended to
                     obs.add_datasources(datasource_uuids)
@@ -156,10 +156,9 @@ class ObsSurface(BaseModule):
                     # Store the hash as the key for easy searching, store the filename as well for
                     # ease of checking by user
                     obs._file_hashes[file_hash] = data_filepath.name
-                except:
-                    import traceback
-                    results[data_filepath.stem] = traceback.format_exc()
-            
+                except Exception as e:
+                    results["error"][data_filepath.stem] = e
+
                 progress_bar.update(1)
 
         # Save this object back to the object store

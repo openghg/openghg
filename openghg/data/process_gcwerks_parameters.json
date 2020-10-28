@@ -74,6 +74,16 @@
                 "data_owner_email": "paul.krummel@csiro.au"
             }
         },
+        "DJI" : {
+            "gcwerks_site_name": "darjeeling",
+            "long_name": "Darjeeling, India",
+            "inlets": ["any"],
+            "inlet_label": ["any"],
+            "global_attributes": {
+                "data_owner": "Anita Ganesan",
+                "data_owner_email": "anita.ganesan@bristol.ac.uk"
+            }
+        },
         "CPT" : {
             "gcwerks_site_name": "capepoint",
             "long_name": "Cape Point, South Africa",
