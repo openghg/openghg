@@ -112,7 +112,7 @@ class ICOS:
 
         # Check if the index is sorted
         if not data.index.is_monotonic_increasing:
-            data.sort_index()
+            data = data.sort_index()
 
         rename_dict = {
             "Stdev": species + " variability",

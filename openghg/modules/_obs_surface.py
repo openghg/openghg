@@ -105,7 +105,8 @@ class ObsSurface(BaseModule):
         obs = ObsSurface.load()
 
         # Create a progress bar object using the filepaths, iterate over this below
-        results = {}
+        results = defaultdict(dict)
+
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
             for fp in filepath:
                 try:

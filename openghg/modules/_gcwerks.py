@@ -156,6 +156,10 @@ class GCWERKS:
 
         precision, precision_species = self.read_precision(filepath=precision_filepath)
 
+        # Check if the index is sorted
+        if not precision.index.is_monotonic_increasing:
+            precision = precision.sort_index()
+
         for sp in species:
             precision_index = precision_species.index(sp) * 2 + 1
             data[sp + " repeatability"] = precision[precision_index].astype(float).reindex_like(data, method="pad")
