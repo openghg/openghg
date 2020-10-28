@@ -109,35 +109,31 @@ class ObsSurface(BaseModule):
 
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
             for fp in filepath:
+                if data_type == "GCWERKS":
+                    try:
+                        data_filepath = Path(fp[0])
+                        precision_filepath = Path(fp[1])
+                    except ValueError:
+                        raise ValueError("For GCWERKS data both data and precision filepaths must be given.")
+                else:
+                    data_filepath = Path(fp)
+
+                file_hash = hash_file(filepath=data_filepath)
+                if file_hash in obs._file_hashes and not overwrite:
+                    raise ValueError(f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}.")
+
                 try:
                     progress_bar.set_description(f"Processing: {fp}")
 
                     if data_type == "GCWERKS":
-                        if not isinstance(fp, tuple):
-                            raise TypeError("To process GCWERKS data a data filepath and a precision filepath must be suppled as a tuple")
-
-                        data_filepath = Path(fp[0])
-                        precision_filepath = Path(fp[1])
-
                         data = data_obj.read_file(
                             data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, network=network
                         )
                     else:
-                        if isinstance(fp, tuple):
-                            raise TypeError(
-                                "Only a single data file may be passed for this data type. Please check you have the correct type selected."
-                            )
-
-                        data_filepath = Path(fp)
                         data = data_obj.read_file(data_filepath=data_filepath, site=site, network=network)
 
                     # TODO - need a new way of creating the source name
                     source_name = data_filepath.stem
-
-                    # Hash the file and if we've seen this file before raise an error
-                    file_hash = hash_file(filepath=data_filepath)
-                    if file_hash in obs._file_hashes and not overwrite:
-                        raise ValueError(f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}.")
 
                     datasource_table = defaultdict(dict)
                     # For each species check if we have a Datasource

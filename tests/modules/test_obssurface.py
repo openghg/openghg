@@ -22,13 +22,13 @@ def test_read_CRDS():
 
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS")
 
-    keys = results["bsd.picarro.1minute.248m.dat"].keys()
+    keys = results["processed"]["bsd.picarro.1minute.248m.dat"].keys()
 
     expected_keys = sorted(["bsd.picarro.1minute.248m_ch4", "bsd.picarro.1minute.248m_co", "bsd.picarro.1minute.248m_co2",])
     assert sorted(keys) == expected_keys
 
     # Load up the assigned Datasources and check they contain the correct data
-    data = results["bsd.picarro.1minute.248m.dat"]
+    data = results["processed"]["bsd.picarro.1minute.248m.dat"]
 
     ch4_data = Datasource.load(uuid=data["bsd.picarro.1minute.248m_ch4"]).data()
     ch4_data = ch4_data["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"]
@@ -113,10 +113,10 @@ def test_read_GC():
         ]
     )
 
-    assert sorted(list(results["capegrim-medusa.18.C"].keys())) == expected_keys
+    assert sorted(list(results["processed"]["capegrim-medusa.18.C"].keys())) == expected_keys
 
     # Load in some data
-    uuid = results["capegrim-medusa.18.C"]["capegrim-medusa.18_HFC-152a_75m_4"]
+    uuid = results["processed"]["capegrim-medusa.18.C"]["capegrim-medusa.18_HFC-152a_75m_4"]
 
     hfc152a_data = Datasource.load(uuid=uuid, shallow=False).data()
     hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:33:00+00:00"]
@@ -171,9 +171,9 @@ def test_read_cranfield():
 
     expected_keys = sorted(["THB_hourly_means_test_ch4", "THB_hourly_means_test_co2", "THB_hourly_means_test_co",])
 
-    assert sorted(results["THB_hourly_means_test.csv"].keys()) == expected_keys
+    assert sorted(results["processed"]["THB_hourly_means_test.csv"].keys()) == expected_keys
 
-    uuid = results["THB_hourly_means_test.csv"]["THB_hourly_means_test_ch4"]
+    uuid = results["processed"]["THB_hourly_means_test.csv"]["THB_hourly_means_test_ch4"]
 
     ch4_data = Datasource.load(uuid=uuid, shallow=False).data()
     ch4_data = ch4_data["2018-05-05-00:00:00+00:00_2018-05-13-16:00:00+00:00"]
@@ -202,9 +202,9 @@ def test_read_icos():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS")
 
-    assert list(results["tta.co2.1minute.222m.min.dat"].keys())[0] == "tta.co2.1minute.222m.min_co2"
+    assert list(results["processed"]["tta.co2.1minute.222m.min.dat"].keys())[0] == "tta.co2.1minute.222m.min_co2"
 
-    uuid = results["tta.co2.1minute.222m.min.dat"]["tta.co2.1minute.222m.min_co2"]
+    uuid = results["processed"]["tta.co2.1minute.222m.min.dat"]["tta.co2.1minute.222m.min_co2"]
 
     data = Datasource.load(uuid=uuid, shallow=False).data()
 
@@ -263,7 +263,7 @@ def test_read_noaa():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="NOAA")
 
-    uuid = results["co_pocn25_surface-flask_1_ccgg_event.txt"]["co_pocn25_surface-flask_1_ccgg_event_co"]
+    uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co_pocn25_surface-flask_1_ccgg_event_co"]
 
     co_data = Datasource.load(uuid=uuid, shallow=False).data()
 
@@ -297,9 +297,9 @@ def test_read_thames_barrier():
 
     expected_keys = sorted(["thames_test_20190707_CH4", "thames_test_20190707_CO2", "thames_test_20190707_CO"])
 
-    assert sorted(list(results["thames_test_20190707.csv"].keys())) == expected_keys
+    assert sorted(list(results["processed"]["thames_test_20190707.csv"].keys())) == expected_keys
 
-    uuid = results["thames_test_20190707.csv"]["thames_test_20190707_CO2"]
+    uuid = results["processed"]["thames_test_20190707.csv"]["thames_test_20190707_CO2"]
 
     data = Datasource.load(uuid=uuid, shallow=False).data()
     data = data["2019-07-01-00:39:55+00:00_2019-08-01-00:10:30+00:00"]

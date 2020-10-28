@@ -12,8 +12,9 @@ def test_process_files():
 
     results = process_files(files=filepath, site="hfd", instrument="picarro", network="DECC", data_type="CRDS")
 
-    results = results["hfd.picarro.1minute.100m.min.dat"]
+    results = results["processed"]["hfd.picarro.1minute.100m.min.dat"]
 
+    assert not results.get("error")
     assert "hfd.picarro.1minute.100m.min_ch4" in results
     assert "hfd.picarro.1minute.100m.min_co2" in results
 
