@@ -89,6 +89,41 @@ def test_read_valid_instrument_passed(data_path_no_instrument, precision_path_no
     assert sorted(list(data.keys())) == expected_keys
 
 
+def test_instrument_translator_works():
+    gc = GC()
+
+    instrument_suffix = "md"
+
+    instrument_name = gc.instrument_translator(instrument=instrument_suffix)
+
+    assert instrument_name == "GCMD"
+
+    instrument_suffix = "gcms"
+
+    instrument_name = gc.instrument_translator(instrument=instrument_suffix)
+
+    assert instrument_name == "GCMS"
+
+    instrument_suffix = "medusa"
+
+    instrument_name = gc.instrument_translator(instrument=instrument_suffix)
+
+    assert instrument_name == "medusa"
+
+    instrument_suffix = "medusa21"
+
+    instrument_name = gc.instrument_translator(instrument=instrument_suffix)
+
+    assert instrument_name == "medusa"
+
+
+def test_instrument_translator_raises():
+    with pytest.raises(KeyError):
+        gc = GC()
+        instrument_suffix = "spam"
+        gc.instrument_translator(instrument=instrument_suffix)
+
+
 def test_read_data(data_path, precision_path):
     # Capegrim
     site = "CGO"

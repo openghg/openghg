@@ -57,7 +57,7 @@ class GCWERKS:
 
         # Try and find the instrument name in the filename
         if instrument is None:
-            # Get the first part of the filename
+            # Get the instrument from the filename
             # Example filename: capegrim-medusa.18.C
             instrument = re.findall(r"[\w']+", str(data_filepath.name))[1]
 
@@ -66,7 +66,7 @@ class GCWERKS:
                 instrument = "md"
 
             # Now do the lookup for suffix to instrument name
-            instrument = self._gc_params["suffix_to_instrument"][instrument]
+            instrument = self.instrument_translator(instrument=instrument)
 
         if network is None:
             network = "NA"
@@ -79,6 +79,25 @@ class GCWERKS:
         gas_data = assign_attributes(data=gas_data, site=site)
 
         return gas_data
+
+    def instrument_translator(self, instrument: str) -> str:
+        """ Ensure we have the correct instrument or translate an instrument
+            suffix to an instrument name.
+
+            Args:
+                instrument_suffix: Instrument suffix such as md
+            Returns:
+                str: Instrument name
+        """
+        try:
+            instrument = self._gc_params["suffix_to_instrument"][instrument]
+        except KeyError:
+            if "medusa" in instrument:
+                instrument = "medusa"
+            else:
+                raise KeyError(f"Invalid instrument {instrument}")
+
+        return instrument
 
     def read_data(self, data_filepath: Path, precision_filepath: Path, site: str, instrument: str, network: str) -> Dict:
         """ Read data from the data and precision files
@@ -311,16 +330,6 @@ class GCWERKS:
                 combined_data[data_key]["attributes"] = attributes
 
         return combined_data
-
-    def is_valid_instrument(self, instrument: str) -> bool:
-        """ Check if the instrument string passed is valid
-
-            Returns:
-                bool: True if valid
-        """
-        valid_instruments = self._gc_params["suffix_to_instrument"].keys()
-
-        return instrument.lower() in valid_instruments
 
     def get_precision(self, instrument: str) -> int:
         """ Process the suffix from the filename to get the correct instrument name
