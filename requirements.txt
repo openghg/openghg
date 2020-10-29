@@ -22,5 +22,6 @@ requests
 scipy
 tables
 tblib
+tqdm
 voila
 xarray
