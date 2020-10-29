@@ -256,8 +256,8 @@ def get_attributes(
     # See this https://github.com/pydata/xarray/issues/2108
 
     # TODO - fix this - just remove duplicates?
-    if len(set(ds.time.values)) < len(ds.time.values):
-        print("WARNING. Duplicate time stamps")
+    # if len(set(ds.time.values)) < len(ds.time.values):
+    #     print("WARNING. Duplicate time stamps")
 
     first_year = pd_Timestamp(ds.time[0].values).year
 

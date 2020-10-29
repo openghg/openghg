@@ -1,10 +1,12 @@
 {
     "name_code":
     {
+        "aspendale": "ASP",
         "bilsdale": "BSD", 
         "bristol": "BRI",
         "capegrim": "CGO", 
         "capepoint": "CPT", 
+        "carnsore": "CPI",
         "heathfield": "HFD", 
         "gosan": "GSN",
         "india": "DJI",
@@ -20,15 +22,15 @@
         "trinidadhead": "THD", 
         "angus": "TTA", 
         "zeppelin": "ZEP"
-
     },
-
     "code_name":
     {
+        "ASP": "aspendale",
         "BSD": "bilsdale",
         "BRI": "bristol",
         "CGO": "capegrim",
         "CPT": "capepoint",
+        "CPI": "carnsore",
         "DJI": "india",
         "HFD": "heathfield",
         "GSN": "gosan",

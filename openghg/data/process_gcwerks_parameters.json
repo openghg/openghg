@@ -45,6 +45,15 @@
             "medusa": "Medusa measurements. Output from GCWerks. See Miller et al. (2008)."
         },
         "directory_output" : "/data/shared/obs_2018",
+        "ASP" : {
+            "gcwerks_site_name": "aspendale",
+            "long_name": "Aspendale, Australia",
+            "inlets": ["any"],
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
+            }
+        },
         "BRI" : {
             "gcwerks_site_name": "bristol",
             "long_name": "Bristol, UK",
@@ -92,6 +101,16 @@
             "global_attributes": {
                 "data_owner": "Brett Kuyper",
                 "data_owner_email": "brett.kuyper@gmail.com"
+            }
+        },
+        "CPI" : {
+            "gcwerks_site_name": "carnsore",
+            "long_name": "Carnsore Point, Ireland",
+            "inlets": ["any"],
+            "inlet_label": ["any"],
+            "global_attributes": {
+                "data_owner": "Simon O'Doherty",
+                "data_owner_email": "s.odoherty@bristol.ac.uk"
             }
         },
         "HFD" : {

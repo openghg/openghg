@@ -69,6 +69,16 @@
       "longitude": 5.632
     }
   },
+  "ASP": {
+    "AGAGE": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 10.0,
+      "latitude": -38.0,
+      "long_name": "Aspendale, Australia",
+      "longitude": 145.1
+    }
+  },
   "ATO": {
     "ATTO": {
       "long_name": "Amazon Tall Tower Observatory, State of Amazonas, Brazil",
@@ -295,6 +305,16 @@
       "latitude": 43.167,
       "long_name": "Cape Ochiishi, Japan",
       "longitude": 145.5
+    }
+  },
+  "CPI": {
+    "AGAGE": {
+      "height": ["15m"],
+      "height_name": ["15magl"],
+      "height_station_masl": 15.0,
+      "latitude": 52.17,
+      "long_name": "Carnsore Point, Ireland",
+      "longitude": -6.37
     }
   },
   "CPS": {

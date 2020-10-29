@@ -57,6 +57,7 @@ class CRDS:
         """
         from datetime import datetime
         from pandas import RangeIndex, read_csv, NaT
+        import warnings
 
         # At the moment we're using the filename as the source name
         source_name = data_filepath.stem
@@ -74,9 +75,13 @@ class CRDS:
             except ValueError:
                 return NaT
 
-        data = read_csv(
-            data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"], parse_dates=[[0, 1]], date_parser=parse_date,
-        )
+        # Catch dtype warnings
+        # TODO - look at setting dtypes - read header and data separately?
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            data = read_csv(
+                data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"], parse_dates=[[0, 1]], date_parser=parse_date
+            )
 
         data.index.name = "time"
 

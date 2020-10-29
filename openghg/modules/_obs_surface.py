@@ -123,7 +123,7 @@ class ObsSurface(BaseModule):
                     if file_hash in obs._file_hashes and not overwrite:
                         raise ValueError(f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}.")
 
-                    progress_bar.set_description(f"Processing: {fp}")
+                    progress_bar.set_description(f"Processing: {data_filepath.name}")
 
                     if data_type == "GCWERKS":
                         data = data_obj.read_file(
