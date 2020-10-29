@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.modules._gcwerks &mdash; OpenGHG 0+untagged.1.g4ea4909 documentation</title>
+  <title>openghg.modules._gcwerks &mdash; OpenGHG 0+untagged.1.gdf01cfb documentation</title>
   
 
   
@@ -172,10 +172,9 @@
 
 
 <div class="viewcode-block" id="GCWERKS"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS">[docs]</a><span class="k">class</span> <span class="nc">GCWERKS</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Class for processing ICOS data</span>
+    <span class="sd">&quot;&quot;&quot; Class for processing GCWERKS data</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="GCWERKS.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_hugs_json</span>
 
@@ -185,6 +184,50 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;GCWERKS&quot;</span><span class="p">]</span>
         <span class="c1"># Site codes for inlet readings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_site_codes</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;site_codes.json&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GCWERKS.find_files"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.find_files">[docs]</a>    <span class="k">def</span> <span class="nf">find_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">skip_str</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="s2">&quot;sf6&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot; A helper file to find GCWERKS data and precisions file in a given folder. </span>
+<span class="sd">            It searches for .C files of the format macehead.19.C, looks for a precisions file</span>
+<span class="sd">            named macehead.19.precions.C and if it exists creates a tuple for these files.</span>
+
+<span class="sd">            Please note the limited scope of this function, it will only work with</span>
+<span class="sd">            files that are named in the correct pattern.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                data_path: Folder path to search</span>
+<span class="sd">                skip_str: String or list of strings, if found in filename these files are skipped</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                list: List of tuples</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">re</span>
+        <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+        <span class="n">data_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+
+        <span class="n">files</span> <span class="o">=</span> <span class="n">data_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.C&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">skip_str</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">skip_str</span> <span class="o">=</span> <span class="p">[</span><span class="n">skip_str</span><span class="p">]</span>
+
+        <span class="n">data_regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[\w&#39;-]+\.\d+.C&quot;</span><span class="p">)</span>
+
+        <span class="n">data_precision_tuples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">data_match</span> <span class="o">=</span> <span class="n">data_regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">data_match</span><span class="p">:</span>
+                <span class="n">prec_filepath</span> <span class="o">=</span> <span class="n">data_path</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span> <span class="o">+</span> <span class="s2">&quot;.precisions.C&quot;</span><span class="p">)</span>
+                <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">data_path</span> <span class="o">/</span> <span class="n">data_match</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">s</span> <span class="ow">in</span> <span class="n">data_match</span><span class="o">.</span><span class="n">group</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">skip_str</span><span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="n">prec_filepath</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">data_precision_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">prec_filepath</span><span class="p">))</span>
+
+        <span class="n">data_precision_tuples</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">data_precision_tuples</span></div>
 
 <div class="viewcode-block" id="GCWERKS.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -223,13 +266,16 @@
 
         <span class="c1"># Try and find the instrument name in the filename</span>
         <span class="k">if</span> <span class="n">instrument</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Get the first part of the filename</span>
+            <span class="c1"># Get the instrument from the filename</span>
             <span class="c1"># Example filename: capegrim-medusa.18.C</span>
             <span class="n">instrument</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[\w&#39;]+&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">is_number</span><span class="p">(</span><span class="n">instrument</span><span class="p">):</span>
                 <span class="c1"># has picked out the year, rather than the instrument. Default to GCMD for this type of file</span>
-                <span class="n">instrument</span> <span class="o">=</span> <span class="s2">&quot;GCMD&quot;</span>
+                <span class="n">instrument</span> <span class="o">=</span> <span class="s2">&quot;md&quot;</span>
+
+            <span class="c1"># Now do the lookup for suffix to instrument name</span>
+            <span class="n">instrument</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instrument_translator</span><span class="p">(</span><span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
@@ -242,6 +288,25 @@
         <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">gas_data</span></div>
+
+<div class="viewcode-block" id="GCWERKS.instrument_translator"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.instrument_translator">[docs]</a>    <span class="k">def</span> <span class="nf">instrument_translator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Ensure we have the correct instrument or translate an instrument</span>
+<span class="sd">            suffix to an instrument name.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                instrument_suffix: Instrument suffix such as md</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                str: Instrument name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">instrument</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="s2">&quot;suffix_to_instrument&quot;</span><span class="p">][</span><span class="n">instrument</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;medusa&quot;</span> <span class="ow">in</span> <span class="n">instrument</span><span class="p">:</span>
+                <span class="n">instrument</span> <span class="o">=</span> <span class="s2">&quot;medusa&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid instrument </span><span class="si">{</span><span class="n">instrument</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">instrument</span></div>
 
 <div class="viewcode-block" id="GCWERKS.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">precision_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Read data from the data and precision files</span>
@@ -276,6 +341,10 @@
             <span class="n">parse_dates</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]],</span>
             <span class="n">date_parser</span><span class="o">=</span><span class="n">parser</span><span class="p">,</span>
         <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot process empty file.&quot;</span><span class="p">)</span>
+
         <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Datetime&quot;</span>
 
         <span class="c1"># This metadata will be added to when species are split and attributes are written</span>
@@ -315,8 +384,16 @@
 
         <span class="n">precision</span><span class="p">,</span> <span class="n">precision_species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_precision</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">precision_filepath</span><span class="p">)</span>
 
+        <span class="c1"># Check if the index is sorted</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">precision</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">is_monotonic_increasing</span><span class="p">:</span>
+            <span class="n">precision</span> <span class="o">=</span> <span class="n">precision</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+
         <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">species</span><span class="p">:</span>
-            <span class="n">precision_index</span> <span class="o">=</span> <span class="n">precision_species</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">precision_index</span> <span class="o">=</span> <span class="n">precision_species</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot find </span><span class="si">{</span><span class="n">sp</span><span class="si">}</span><span class="s2"> in precisions file.&quot;</span><span class="p">)</span>
+
             <span class="n">data</span><span class="p">[</span><span class="n">sp</span> <span class="o">+</span> <span class="s2">&quot; repeatability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">precision</span><span class="p">[</span><span class="n">precision_index</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">reindex_like</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;pad&quot;</span><span class="p">)</span>
 
         <span class="c1"># Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period</span>
@@ -399,7 +476,9 @@
             <span class="c1"># For now just add air to the expected inlets</span>
             <span class="n">expected_inlets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;air&quot;</span><span class="p">)</span>
 
-            <span class="n">matching_inlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_inlet</span> <span class="k">for</span> <span class="n">data_inlet</span> <span class="ow">in</span> <span class="n">data_inlets</span> <span class="k">for</span> <span class="n">inlet</span> <span class="ow">in</span> <span class="n">expected_inlets</span> <span class="k">if</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">data_inlet</span><span class="p">,</span> <span class="n">inlet</span><span class="p">)]</span>
+            <span class="n">matching_inlets</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">data_inlet</span> <span class="k">for</span> <span class="n">data_inlet</span> <span class="ow">in</span> <span class="n">data_inlets</span> <span class="k">for</span> <span class="n">inlet</span> <span class="ow">in</span> <span class="n">expected_inlets</span> <span class="k">if</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">data_inlet</span><span class="p">,</span> <span class="n">inlet</span><span class="p">)</span>
+            <span class="p">]</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_inlets</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -438,41 +517,41 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># Take only data for this inlet from the dataframe</span>
                     <span class="n">inlet_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;Inlet&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">inlet</span><span class="p">]</span>
+
                     <span class="n">spec_data</span> <span class="o">=</span> <span class="n">inlet_data</span><span class="p">[</span>
                         <span class="p">[</span><span class="n">spec</span><span class="p">,</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; repeatability&quot;</span><span class="p">,</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; status_flag&quot;</span><span class="p">,</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; integration_flag&quot;</span><span class="p">,</span> <span class="s2">&quot;Inlet&quot;</span><span class="p">]</span>
                     <span class="p">]</span>
+
                     <span class="n">spec_data</span> <span class="o">=</span> <span class="n">spec_data</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Check that the Dataframe has something in it</span>
+                <span class="k">if</span> <span class="n">spec_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                    <span class="k">continue</span>
 
                 <span class="n">attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_site_attributes</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">)</span>
 
                 <span class="c1"># We want an xarray Dataset</span>
                 <span class="n">spec_data</span> <span class="o">=</span> <span class="n">spec_data</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
 
-                <span class="n">combined_data</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="n">combined_data</span><span class="p">[</span><span class="n">spec</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spec_metadata</span>
-                <span class="n">combined_data</span><span class="p">[</span><span class="n">spec</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spec_data</span>
-                <span class="n">combined_data</span><span class="p">[</span><span class="n">spec</span><span class="p">][</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span>
+                <span class="c1"># As a single species may have measurements from multiple inlets we</span>
+                <span class="c1"># use the species and inlet as a key</span>
+                <span class="n">data_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">spec</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span>
+
+                <span class="n">combined_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">combined_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spec_metadata</span>
+                <span class="n">combined_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spec_data</span>
+                <span class="n">combined_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">][</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span>
 
         <span class="k">return</span> <span class="n">combined_data</span></div>
 
-<div class="viewcode-block" id="GCWERKS.is_valid_instrument"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.is_valid_instrument">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Check if the instrument string passed is valid</span>
-
-<span class="sd">            Returns:</span>
-<span class="sd">                bool: True if valid</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">valid_instruments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="s2">&quot;suffix_to_instrument&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="n">instrument</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">valid_instruments</span></div>
-
 <div class="viewcode-block" id="GCWERKS.get_precision"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_precision">[docs]</a>    <span class="k">def</span> <span class="nf">get_precision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Get the precision of the instrument in seconds</span>
+        <span class="sd">&quot;&quot;&quot; Process the suffix from the filename to get the correct instrument name</span>
+<span class="sd">            then retrieve the precision of that instrument.</span>
 
 <span class="sd">            Args:</span>
 <span class="sd">                instrument (str): Instrument name</span>
 <span class="sd">            Returns:</span>
 <span class="sd">                int: Precision of instrument in seconds</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">sampling_period</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">][</span><span class="n">instrument</span><span class="p">]</span>
@@ -542,7 +621,7 @@
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Oct 23, 2020.
+        Last updated on Oct 29, 2020.
       </span>
 
     </p>

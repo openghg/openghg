@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development API modules &mdash; OpenGHG 0+untagged.1.g4ea4909 documentation</title>
+  <title>Development API modules &mdash; OpenGHG 0+untagged.1.gdf01cfb documentation</title>
   
 
   
@@ -415,11 +415,35 @@ the processed data has been assigned to</p>
 <dl class="py class">
 <dt id="openghg.modules.GCWERKS">
 <em class="property">class </em><code class="sig-prename descclassname">openghg.modules.</code><code class="sig-name descname">GCWERKS</code><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.GCWERKS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class for processing ICOS data</p>
+<dd><p>Class for processing GCWERKS data</p>
 <dl class="py method">
 <dt id="openghg.modules.GCWERKS.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.GCWERKS.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="openghg.modules.GCWERKS.find_files">
+<code class="sig-name descname">find_files</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_path</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>pathlib.Path<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">skip_str</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>str<span class="p">, </span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'sf6'</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>Tuple<span class="p">[</span>pathlib.Path<span class="p">, </span>pathlib.Path<span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.find_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.GCWERKS.find_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper file to find GCWERKS data and precisions file in a given folder.
+It searches for .C files of the format macehead.19.C, looks for a precisions file
+named macehead.19.precions.C and if it exists creates a tuple for these files.</p>
+<p>Please note the limited scope of this function, it will only work with
+files that are named in the correct pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_path</strong> – Folder path to search</p></li>
+<li><p><strong>skip_str</strong> – String or list of strings, if found in filename these files are skipped</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of tuples</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -442,7 +466,8 @@ the processed data has been assigned to</p>
 <dl class="py method">
 <dt id="openghg.modules.GCWERKS.get_precision">
 <code class="sig-name descname">get_precision</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">instrument</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.get_precision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.GCWERKS.get_precision" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the precision of the instrument in seconds</p>
+<dd><p>Process the suffix from the filename to get the correct instrument name
+then retrieve the precision of that instrument.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>instrument</strong> (<em>str</em>) – Instrument name</p>
@@ -494,15 +519,19 @@ the processed data has been assigned to</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.modules.GCWERKS.is_valid_instrument">
-<code class="sig-name descname">is_valid_instrument</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">instrument</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.is_valid_instrument"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.GCWERKS.is_valid_instrument" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if the instrument string passed is valid</p>
+<dt id="openghg.modules.GCWERKS.instrument_translator">
+<code class="sig-name descname">instrument_translator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">instrument</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; str<a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.instrument_translator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.GCWERKS.instrument_translator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure we have the correct instrument or translate an instrument
+suffix to an instrument name.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>True if valid</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>instrument_suffix</strong> – Instrument suffix such as md</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>bool</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Instrument name</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -725,7 +754,7 @@ the processed data has been assigned to</p>
 <dl class="py class">
 <dt id="openghg.modules.THAMESBARRIER">
 <em class="property">class </em><code class="sig-prename descclassname">openghg.modules.</code><code class="sig-name descname">THAMESBARRIER</code><a class="reference internal" href="../_modules/openghg/modules/_thamesbarrier.html#THAMESBARRIER"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.THAMESBARRIER" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interface for processing THAMESBARRIER data</p>
+<dd><p>Class for processing THAMESBARRIER data</p>
 <dl class="py method">
 <dt id="openghg.modules.THAMESBARRIER.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/modules/_thamesbarrier.html#THAMESBARRIER.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.THAMESBARRIER.__init__" title="Permalink to this definition">¶</a></dt>
@@ -1618,7 +1647,7 @@ this Datasource</p>
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Oct 23, 2020.
+        Last updated on Oct 29, 2020.
       </span>
 
     </p>

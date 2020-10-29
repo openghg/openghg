@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.modules._obs_surface &mdash; OpenGHG 0+untagged.1.g4ea4909 documentation</title>
+  <title>openghg.modules._obs_surface &mdash; OpenGHG 0+untagged.1.gdf01cfb documentation</title>
   
 
   
@@ -252,11 +252,14 @@
 <span class="sd">            dict: Dictionary of Datasource UUIDs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+        <span class="kn">import</span> <span class="nn">logging</span>
         <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+        <span class="kn">import</span> <span class="nn">sys</span>
+        <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_object</span><span class="p">,</span> <span class="n">hash_file</span>
         <span class="kn">from</span> <span class="nn">openghg.processing</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">DataTypes</span>
-        <span class="kn">import</span> <span class="nn">logging</span>
 
+        <span class="c1"># Suppress numexpr thread count info info warnings</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;numexpr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -267,54 +270,59 @@
 
         <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 
-        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Create a progress bar object using the filepaths, iterate over this below</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">filepath</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;To process GCWERKS data a data filepath and a precision filepath must be suppled as a tuple&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">filepath</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span> <span class="k">as</span> <span class="n">progress_bar</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">filepath</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">precision_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;For GCWERKS data both data and precision filepaths must be given.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
 
-                <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">precision_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
-                    <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">precision_filepath</span><span class="o">=</span><span class="n">precision_filepath</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span>
-                <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                        <span class="s2">&quot;Only a single data file may be passed for this data type. Please check you have the correct type selected.&quot;</span>
-                    <span class="p">)</span>
+                    <span class="n">progress_bar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-                <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
+                            <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">precision_filepath</span><span class="o">=</span><span class="n">precision_filepath</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>
 
-            <span class="c1"># TODO - need a new way of creating the source name</span>
-            <span class="n">source_name</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span>
+                    <span class="c1"># TODO - need a new way of creating the source name</span>
+                    <span class="n">source_name</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span>
 
-            <span class="c1"># Hash the file and if we&#39;ve seen this file before raise an error</span>
-            <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                    <span class="n">datasource_table</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+                    <span class="c1"># For each species check if we have a Datasource</span>
+                    <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">source_name</span><span class="p">,</span> <span class="n">species</span><span class="p">])</span>
+                        <span class="n">datasource_table</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">_datasource_names</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                        <span class="n">datasource_table</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
 
-            <span class="n">datasource_table</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
-            <span class="c1"># For each species check if we have a Datasource</span>
-            <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">source_name</span><span class="p">,</span> <span class="n">species</span><span class="p">])</span>
-                <span class="n">datasource_table</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">_datasource_names</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-                <span class="n">datasource_table</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+                    <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
+                    <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span><span class="n">gas_data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">lookup_results</span><span class="o">=</span><span class="n">datasource_table</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">)</span>
 
-            <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
-            <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span><span class="n">gas_data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">lookup_results</span><span class="o">=</span><span class="n">datasource_table</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">)</span>
+                    <span class="n">results</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">][</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_uuids</span>
 
-            <span class="n">results</span><span class="p">[</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_uuids</span>
+                    <span class="c1"># Record the Datasources we&#39;ve created / appended to</span>
+                    <span class="n">obs</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">datasource_uuids</span><span class="p">)</span>
 
-            <span class="c1"># Record the Datasources we&#39;ve created / appended to</span>
-            <span class="n">obs</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">datasource_uuids</span><span class="p">)</span>
+                    <span class="c1"># Store the hash as the key for easy searching, store the filename as well for</span>
+                    <span class="c1"># ease of checking by user</span>
+                    <span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">results</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">][</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span>
 
-            <span class="c1"># Store the hash as the key for easy searching, store the filename as well for</span>
-            <span class="c1"># ease of checking by user</span>
-            <span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">progress_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Save this object back to the object store</span>
         <span class="n">obs</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
@@ -395,7 +403,7 @@
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Oct 23, 2020.
+        Last updated on Oct 29, 2020.
       </span>
 
     </p>
