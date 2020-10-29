@@ -6,7 +6,7 @@ __all__ = ["THAMESBARRIER"]
 
 
 class THAMESBARRIER(BaseModule):
-    """ Interface for processing THAMESBARRIER data
+    """ Class for processing THAMESBARRIER data
 
     """
 
