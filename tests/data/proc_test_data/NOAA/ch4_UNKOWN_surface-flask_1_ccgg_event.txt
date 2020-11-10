@@ -1,0 +1,71 @@
+# number_of_header_lines: 61
+# comment:  
+# comment:  ************ USE OF ESRL GMD DATA ****************
+# comment:  
+# comment: These data are made freely available to the public and the
+# comment: scientific community in the belief that their wide dissemination
+# comment: will lead to greater understanding and new scientific insights.
+# comment: The availability of these data does not constitute publication
+# comment: of the data.  NOAA relies on the ethics and integrity of the user to
+# comment: insure that ESRL receives fair credit for their work.  If the data 
+# comment: are obtained for potential use in a publication or presentation, 
+# comment: ESRL should be informed at the outset of the nature of this work.  
+# comment: If the ESRL data are essential to the work, or if an important 
+# comment: result or conclusion depends on the ESRL data, co-authorship
+# comment: may be appropriate.  This should be discussed at an early stage in
+# comment: the work.  Manuscripts using the ESRL data should be sent to ESRL
+# comment: for review before they are submitted for publication so we can
+# comment: insure that the quality and limitations of the data are accurately
+# comment: represented.
+# comment:  
+# comment: Every effort is made to produce the most accurate and precise
+# comment: measurements possible.  However, we reserve the right to make
+# comment: corrections to the data based on recalibration of standard gases
+# comment: or for other reasons deemed scientifically justified.
+# comment: 
+# comment: We are not responsible for results and conclusions based on use
+# comment: of these data without regard to this warning.
+# comment: 
+# contact_parameter: CH4 CCGG (Individual Flasks)
+# contact_name: Ed Dlugokencky
+# contact_telephone: (303) 497-6228
+# contact_email: Ed.Dlugokencky@noaa.gov
+# comment: 
+# comment:  ************ RECIPROCITY AGREEMENT ***************
+# comment: 
+# comment: Use of these data implies an agreement to reciprocate.
+# comment: Laboratories making similar measurements agree to make their
+# comment: own data available to the general public and to the scientific
+# comment: community in an equally complete and easily accessible form.
+# comment: Modelers are encouraged to make available to the community,
+# comment: upon request, their own tools used in the interpretation
+# comment: of the ESRL data, namely well documented model code, transport
+# comment: fields, and additional information necessary for other
+# comment: scientists to repeat the work and to run modified versions.
+# comment: Model availability includes collaborative support for new
+# comment: users of the models.
+# comment:
+# comment:  ************ DATA DESCRIPTION ***************
+# comment:
+# description_site-code: scsn06
+# description_project-abbr: ccg_surface
+# description_strategy-abbr: flask
+# description_sample-constraints: date:1900-01-01,2016-12-31
+# description_creation-time: 2017-07-28 12:43:31
+# comment:
+# comment:  ************ DATA DOCUMENTATION ***************
+# comment:
+# comment: Please refer to the species-specific README file in the
+# comment: appropriate directory folder at ftp://aftp.cmdl.noaa.gov/data/trace_gases/.
+# comment:
+# data_fields: sample_site_code sample_year sample_month sample_day sample_hour sample_minute sample_seconds sample_id sample_method parameter_formula analysis_group_abbr analysis_value analysis_uncertainty analysis_flag analysis_instrument analysis_year analysis_month analysis_day analysis_hour analysis_minute analysis_seconds sample_latitude sample_longitude sample_altitude sample_elevation sample_intake_height event_number
+UNKOWN 1991 07 05 17 00 00  3254-66 T      ch4     CCGG  1713.210     2.400 ...  CS 1991 08 13 14 30 00   6.0500  107.9800    20.00     0.00    20.00   109025
+UNKOWN 1991 07 05 17 00 00  3254-66 T      ch4     CCGG  1710.440     2.400 ...  CS 1991 08 13 14 47 00   6.0500  107.9800    20.00     0.00    20.00   109025
+UNKOWN 1991 07 13 15 05 00  3258-66 T      ch4     CCGG  1693.190     2.400 ...  CS 1991 08 14 13 06 00   6.0300  107.0500    20.00     0.00    20.00   109046
+UNKOWN 1991 07 13 15 05 00  3258-66 T      ch4     CCGG  1694.240     2.400 ...  CS 1991 08 14 13 24 00   6.0300  107.0500    20.00     0.00    20.00   109046
+UNKOWN 1991 07 18 08 00 00  3276-66 T      ch4     CCGG  1715.370     2.400 ...  CS 1991 08 26 12 27 00   6.0000  105.6800    20.00     0.00    20.00   109052
+UNKOWN 1998 09 23 15 12 00  1058-91 D      ch4     CCGG  1733.390     1.700 ...  H4 1998 10 13 16 08 00   5.9500  107.3200    20.00     0.00    20.00   112296
+UNKOWN 1998 10 01 08 50 00   851-91 D      ch4     CCGG  1754.850     1.700 ...  H4 1998 11 03 11 18 00   6.0200  107.2700    20.00     0.00    20.00   112314
+UNKOWN 1998 10 01 08 50 00   852-91 D      ch4     CCGG  1754.350     1.700 ...  H4 1998 11 03 11 04 00   6.0200  107.2700    20.00     0.00    20.00   112315
+UNKOWN 1998 10 09 08 38 00  4529-91 D      ch4     CCGG  1750.090     1.700 ...  H4 1998 10 29 14 42 00   6.0800  107.3800    20.00     0.00    20.00   112320
+UNKOWN 1998 10 09 08 38 00  4530-91 D      ch4     CCGG  1748.480     1.700 ...  H4 1998 10 29 14 55 00   6.0800  107.3800    20.00     0.00    20.00   112321

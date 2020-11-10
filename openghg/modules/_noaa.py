@@ -118,10 +118,18 @@ class NOAA(BaseModule):
 
         # If this isn't a site we recognize try and read it from the filename
         if site not in self._site_data:
-            site = str(data_filepath).split("_")[1].upper()
+            site = str(data_filepath.name).split("_")[1].upper()
 
             if site not in self._site_data:
                 raise ValueError(f"The site {site} is not recognized.")
+
+        if species is not None:
+            # If we're passed a species ensure that it is in fact the correct species
+            data_species = str(data["parameter_formula"].values[0]).lower()
+
+            passed_species = species.lower()
+            if data_species != passed_species:
+                raise ValueError(f"Mismatch between passed species ({passed_species}) and species read from data ({data_species})")
 
         species = species.upper()
 
