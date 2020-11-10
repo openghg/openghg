@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Beginner workflow &mdash; OpenGHG 0+untagged.1.g31d3af9 documentation</title>
+  <title>Beginner workflow &mdash; OpenGHG 0+untagged.1.g4e19b0d documentation</title>
   
 
   
@@ -550,7 +550,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 5/5 [00:00&lt;00:00,  7.86it/s]
+Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 5/5 [00:00&lt;00:00,  7.23it/s]
 </pre></div></div>
 </div>
 <p>Here <code class="docutils literal notranslate"><span class="pre">decc_results</span></code> will give us a dictionary with the UUIDs (universally unique identifiers) for each of the Datasources the data has been assigned to. This tells us that the data has been processed and stored correctly.</p>
@@ -560,12 +560,9 @@ Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 5
 <p>Datasources are objects that are stored in the object store (add link to object store notes) that hold the data and metadata associated with each measurement we upload to the platform.</p>
 <p>For example, if we upload a file that contains readings for three gas species from a single site at a specific inlet height OpenGHG will assign this data to three different Datasources, one for each species. Metadata such as the site, inlet height, species, network etc are stored alongside the measurements for easy searching.</p>
 <p>Datasources can also handle multiple versions of data from a single site, so if scales or other factors change multiple versions may be stored for easy future comparison.</p>
-<div class="admonition note">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">When</span> <span class="n">you</span> <span class="n">run</span> <span class="n">this</span> <span class="n">notebook</span> <span class="n">different</span> <span class="n">UUIDs</span> <span class="n">will</span> <span class="n">be</span> <span class="n">created</span> <span class="k">for</span> <span class="n">the</span> <span class="n">Datasources</span><span class="o">.</span> <span class="n">This</span> <span class="ow">is</span> <span class="n">expected</span> <span class="k">as</span>
-<span class="n">each</span> <span class="n">time</span> <span class="n">a</span> <span class="n">Datasource</span> <span class="ow">is</span> <span class="n">created</span> <span class="kn">from</span> <span class="nn">scratch</span> <span class="n">it</span> <span class="ow">is</span> <span class="n">assigned</span> <span class="n">a</span> <span class="n">unique</span> <span class="n">UUID</span><span class="o">.</span>
-</pre></div>
-</div>
-</div>
+<div class="section" id="Note">
+<h4>Note<a class="headerlink" href="#Note" title="Permalink to this headline">¶</a></h4>
+<p>When you run this notebook different UUIDs will be created for the Datasources. This is expected as each time a Datasource is created from scratch it is assigned a unique UUID.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -582,19 +579,19 @@ Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 5
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 defaultdict(dict,
-            {&#39;processed&#39;: {&#39;tac.picarro.1minute.100m.min.dat&#39;: {&#39;tac.picarro.1minute.100m.min_ch4&#39;: &#39;4b971e7a-516d-4dcf-af2f-7e97dab70662&#39;,
-               &#39;tac.picarro.1minute.100m.min_co2&#39;: &#39;975db69e-251b-454f-bfef-37b8558964c3&#39;},
-              &#39;tac.picarro.1minute.100m.test.dat&#39;: {&#39;tac.picarro.1minute.100m.test_ch4&#39;: &#39;af7945d5-fd17-4e90-9932-e8b318b08eb5&#39;,
-               &#39;tac.picarro.1minute.100m.test_co2&#39;: &#39;52b28667-571a-4f5a-90ec-2b9b629c39a7&#39;},
-              &#39;hfd.picarro.1minute.100m.min.dat&#39;: {&#39;hfd.picarro.1minute.100m.min_ch4&#39;: &#39;cddbb81a-cd07-4bbe-b3c7-2304ed1c032c&#39;,
-               &#39;hfd.picarro.1minute.100m.min_co2&#39;: &#39;80033eae-5728-4fa4-8214-d949f909b33d&#39;,
-               &#39;hfd.picarro.1minute.100m.min_co&#39;: &#39;bfde6b8f-6ecb-43de-8cc3-668fed9ec563&#39;},
-              &#39;hfd.picarro.1minute.50m.min.dat&#39;: {&#39;hfd.picarro.1minute.50m.min_ch4&#39;: &#39;42add2ff-15f2-4c94-aeea-370486c6616b&#39;,
-               &#39;hfd.picarro.1minute.50m.min_co2&#39;: &#39;398b6b38-9f16-4c7b-b653-3603e0fafe88&#39;,
-               &#39;hfd.picarro.1minute.50m.min_co&#39;: &#39;4e880d44-1b4a-4679-929c-0004dd40fa84&#39;},
-              &#39;bsd.picarro.1minute.248m.dat&#39;: {&#39;bsd.picarro.1minute.248m_ch4&#39;: &#39;1de79490-33c1-4254-a8b7-d17f27697733&#39;,
-               &#39;bsd.picarro.1minute.248m_co2&#39;: &#39;4c63eb33-54bc-475d-a6ce-d770ee3de3f5&#39;,
-               &#39;bsd.picarro.1minute.248m_co&#39;: &#39;130eff07-7500-4c4d-8b51-74260e558f4f&#39;}}})
+            {&#39;processed&#39;: {&#39;tac.picarro.1minute.100m.min.dat&#39;: {&#39;tac.picarro.1minute.100m.min_ch4&#39;: &#39;67645a60-cb18-49a2-be4d-ebf4ebd1c041&#39;,
+               &#39;tac.picarro.1minute.100m.min_co2&#39;: &#39;118b15dd-4d4e-4088-b5c5-0a480e91b814&#39;},
+              &#39;tac.picarro.1minute.100m.test.dat&#39;: {&#39;tac.picarro.1minute.100m.test_ch4&#39;: &#39;8e8acb53-a530-45b3-899d-387dd1c96c2e&#39;,
+               &#39;tac.picarro.1minute.100m.test_co2&#39;: &#39;67424a97-6fc8-426a-a9e0-e071f5748a27&#39;},
+              &#39;hfd.picarro.1minute.100m.min.dat&#39;: {&#39;hfd.picarro.1minute.100m.min_ch4&#39;: &#39;72b85a16-7b3e-4862-b721-37b0c89c0947&#39;,
+               &#39;hfd.picarro.1minute.100m.min_co2&#39;: &#39;ab3d992f-0324-46c9-8b67-c83a3d3e1b2b&#39;,
+               &#39;hfd.picarro.1minute.100m.min_co&#39;: &#39;f3e8cb01-85e0-48ac-928f-fa92948f9316&#39;},
+              &#39;hfd.picarro.1minute.50m.min.dat&#39;: {&#39;hfd.picarro.1minute.50m.min_ch4&#39;: &#39;ce82904a-40b9-4fbf-afd8-d09e0836e360&#39;,
+               &#39;hfd.picarro.1minute.50m.min_co2&#39;: &#39;c8aca231-9a86-4994-9dc3-93d96d9fbf5e&#39;,
+               &#39;hfd.picarro.1minute.50m.min_co&#39;: &#39;73e5bc02-4253-4277-922d-ad048669c699&#39;},
+              &#39;bsd.picarro.1minute.248m.dat&#39;: {&#39;bsd.picarro.1minute.248m_ch4&#39;: &#39;fd3e4738-644a-4728-b474-f3e28423cdfc&#39;,
+               &#39;bsd.picarro.1minute.248m_co2&#39;: &#39;37e3a0bd-1b0a-4496-ab5d-5a03d99356ee&#39;,
+               &#39;bsd.picarro.1minute.248m_co&#39;: &#39;2cedc7a1-8b37-43e7-8981-c1e3f0ad4f74&#39;}}})
 </pre></div></div>
 </div>
 <p>We can now process the AGAGE data. The functions that process the AGAGE data expect data to have an accompanying precisions file. For each data file we create a tuple with the data filename and the precisions filename. A simpler method of uploading these file types is planne.</p>
@@ -627,7 +624,7 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Processing: trinidadhead.01.C: 100%|██████████| 2/2 [00:02&lt;00:00,  1.03s/it]
+Processing: trinidadhead.01.C: 100%|██████████| 2/2 [00:02&lt;00:00,  1.09s/it]
 </pre></div></div>
 </div>
 <p>When viewing <code class="docutils literal notranslate"><span class="pre">agage_results</span></code> there will be a large number of Datasource UUIDs shown due to the large number of gases in each data file</p>
@@ -647,82 +644,81 @@ Processing: trinidadhead.01.C: 100%|██████████| 2/2 [00:02&l
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 defaultdict(dict,
-            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;capegrim-medusa.18_NF3_75m_4&#39;: &#39;55d43493-5204-41e8-9ecf-b0ffefa9a271&#39;,
-               &#39;capegrim-medusa.18_CF4_75m_4&#39;: &#39;f557523f-a160-4f87-9ac8-ee24d6b867b6&#39;,
-               &#39;capegrim-medusa.18_PFC-116_75m_4&#39;: &#39;ad1ef4c8-3730-4692-841f-4ff2a693380c&#39;,
-               &#39;capegrim-medusa.18_PFC-218_75m_4&#39;: &#39;57c96751-f76c-4928-bafd-af1b5c84c0f6&#39;,
-               &#39;capegrim-medusa.18_PFC-318_75m_4&#39;: &#39;d32a8c89-e783-4f27-b868-57e6418f2afd&#39;,
-               &#39;capegrim-medusa.18_C4F10_75m_4&#39;: &#39;fc163b7a-81ab-41bf-8a09-fe6cddf8f780&#39;,
-               &#39;capegrim-medusa.18_C6F14_75m_4&#39;: &#39;173a809e-811f-4dd4-b6e4-20c536499ba2&#39;,
-               &#39;capegrim-medusa.18_SF6_75m_4&#39;: &#39;b8cf6192-5d3b-4f60-b6e2-ad33443e7066&#39;,
-               &#39;capegrim-medusa.18_SO2F2_75m_4&#39;: &#39;d32bb7af-9e79-453f-b177-f30dea82fc39&#39;,
-               &#39;capegrim-medusa.18_SF5CF3_75m_4&#39;: &#39;349c6ec9-ca34-4f68-8681-cff758c27ab0&#39;,
-               &#39;capegrim-medusa.18_HFC-23_75m_4&#39;: &#39;2b898aa4-b0fb-45a1-8e5c-89a0d6214ea2&#39;,
-               &#39;capegrim-medusa.18_HFC-32_75m_4&#39;: &#39;b3be0d09-8417-4cdb-8925-7903a03647ab&#39;,
-               &#39;capegrim-medusa.18_HFC-125_75m_4&#39;: &#39;a3dc751c-6312-44e8-9882-e01643778ef7&#39;,
-               &#39;capegrim-medusa.18_HFC-134a_75m_4&#39;: &#39;90591c3d-c15c-4f92-afa1-c270b544f8e4&#39;,
-               &#39;capegrim-medusa.18_HFC-143a_75m_4&#39;: &#39;b9e86787-5efa-45d9-82de-a0c656d7360e&#39;,
-               &#39;capegrim-medusa.18_HFC-152a_75m_4&#39;: &#39;cf0df23b-93ea-45e2-9b65-9b4e0f721994&#39;,
-               &#39;capegrim-medusa.18_HFC-227ea_75m_4&#39;: &#39;5a832708-a579-434e-82b3-d8db650c7ce7&#39;,
-               &#39;capegrim-medusa.18_HFC-236fa_75m_4&#39;: &#39;9d1cc407-3174-4279-8e44-49bec9ea842f&#39;,
-               &#39;capegrim-medusa.18_HFC-245fa_75m_4&#39;: &#39;b6384a3d-5dd6-493d-8820-c04501790849&#39;,
-               &#39;capegrim-medusa.18_HFC-365mfc_75m_4&#39;: &#39;73844bda-bc86-4718-aaac-6a0ff56cc675&#39;,
-               &#39;capegrim-medusa.18_HFC-4310mee_75m_4&#39;: &#39;b91a455c-a163-42f6-a504-ffd1056211db&#39;,
-               &#39;capegrim-medusa.18_HCFC-22_75m_4&#39;: &#39;0ac3df4e-1c33-485e-9a8f-5bb255254ad7&#39;,
-               &#39;capegrim-medusa.18_HCFC-124_75m_4&#39;: &#39;348e7765-ac86-413e-99d7-a14105e4dda2&#39;,
-               &#39;capegrim-medusa.18_HCFC-132b_75m_4&#39;: &#39;54c823de-d407-4750-aabf-03aa94510998&#39;,
-               &#39;capegrim-medusa.18_HCFC-133a_75m_4&#39;: &#39;a5cd616e-2208-4b89-b6e0-0e0e6e582ee8&#39;,
-               &#39;capegrim-medusa.18_HCFC-141b_75m_4&#39;: &#39;75a1ef2b-44b6-4fcd-8e4d-a7b044b849ae&#39;,
-               &#39;capegrim-medusa.18_HCFC-142b_75m_4&#39;: &#39;abbc5474-6e40-420f-8869-5afea80d219e&#39;,
-               &#39;capegrim-medusa.18_CFC-11_75m_4&#39;: &#39;fc1b14d8-616e-42be-b223-052b0ff11118&#39;,
-               &#39;capegrim-medusa.18_CFC-12_75m_4&#39;: &#39;93601446-57f2-446e-958d-7db2163f676c&#39;,
-               &#39;capegrim-medusa.18_CFC-13_75m_4&#39;: &#39;cfef1c0b-6c10-42f7-8647-1b3ce4777b98&#39;,
-               &#39;capegrim-medusa.18_CFC-112_75m_4&#39;: &#39;62961ba5-dfed-427b-b6fc-455605fd886f&#39;,
-               &#39;capegrim-medusa.18_CFC-113_75m_4&#39;: &#39;fa7b8981-c78c-4018-8555-5cd833592d93&#39;,
-               &#39;capegrim-medusa.18_CFC-114_75m_4&#39;: &#39;1557a8d6-cfc8-4f32-88d9-0c014650f167&#39;,
-               &#39;capegrim-medusa.18_CFC-115_75m_4&#39;: &#39;f03ed99f-9a81-4d5b-a91f-411df8b587ce&#39;,
-               &#39;capegrim-medusa.18_H-1211_75m_4&#39;: &#39;11a2fcf1-4b58-4cdf-8066-8493e47c1d51&#39;,
-               &#39;capegrim-medusa.18_H-1301_75m_4&#39;: &#39;042b6fbe-0e61-41cd-a050-5b4a5e35477b&#39;,
-               &#39;capegrim-medusa.18_H-2402_75m_4&#39;: &#39;92ab98ec-c428-4ed4-a5fc-eaa0f7560dcd&#39;,
-               &#39;capegrim-medusa.18_CH3Cl_75m_4&#39;: &#39;4159be83-ec60-4fae-9f5e-7ba161ff063c&#39;,
-               &#39;capegrim-medusa.18_CH3Br_75m_4&#39;: &#39;6592d52b-dfbd-44f6-b7a9-073a7a032fc0&#39;,
-               &#39;capegrim-medusa.18_CH3I_75m_4&#39;: &#39;af3e3f99-fa9d-486c-9530-e8f06d39a4af&#39;,
-               &#39;capegrim-medusa.18_CH2Cl2_75m_4&#39;: &#39;eb17a106-8bfe-43a9-b318-efc74f96da9c&#39;,
-               &#39;capegrim-medusa.18_CHCl3_75m_4&#39;: &#39;7e2d403c-f44f-4c98-a71d-b5a762c35ab2&#39;,
-               &#39;capegrim-medusa.18_CCl4_75m_4&#39;: &#39;1d2a6fd9-bfe3-455e-803d-fc970a770382&#39;,
-               &#39;capegrim-medusa.18_CH2Br2_75m_4&#39;: &#39;2db82e31-6788-406f-918c-185031adb87e&#39;,
-               &#39;capegrim-medusa.18_CHBr3_75m_4&#39;: &#39;38864716-1805-457d-9eb1-69189ca2e946&#39;,
-               &#39;capegrim-medusa.18_CH3CCl3_75m_4&#39;: &#39;9d102209-b26f-4e1e-a7f6-4531151e5423&#39;,
-               &#39;capegrim-medusa.18_TCE_75m_4&#39;: &#39;5d9be9d6-ed5d-45c4-a3f7-27d82d031ea3&#39;,
-               &#39;capegrim-medusa.18_PCE_75m_4&#39;: &#39;13e23206-2715-4188-94ab-047af1b3377b&#39;,
-               &#39;capegrim-medusa.18_ethyne_75m_4&#39;: &#39;35114d7c-03a5-45ad-b178-937d01d749a7&#39;,
-               &#39;capegrim-medusa.18_ethane_75m_4&#39;: &#39;ddad0733-a6d3-4e5c-8f2c-04188176e462&#39;,
-               &#39;capegrim-medusa.18_propane_75m_4&#39;: &#39;7e34f866-872a-4bdf-b90e-b29da237484a&#39;,
-               &#39;capegrim-medusa.18_c-propane_75m_4&#39;: &#39;8c99e537-2d14-4d18-948a-57123bbdb527&#39;,
-               &#39;capegrim-medusa.18_benzene_75m_4&#39;: &#39;c7aed46c-1bd1-46bc-99db-d09c90ed971c&#39;,
-               &#39;capegrim-medusa.18_toluene_75m_4&#39;: &#39;52ea118d-3af8-4d6b-8f17-e730e194bc1a&#39;,
-               &#39;capegrim-medusa.18_COS_75m_4&#39;: &#39;e3e70ba6-697f-4019-8707-817ddaa44147&#39;,
-               &#39;capegrim-medusa.18_desflurane_75m_4&#39;: &#39;3035db8e-b613-41b2-85dc-b288a48a6955&#39;},
-              &#39;trinidadhead.01.C&#39;: {&#39;trinidadhead.01_CH4_any&#39;: &#39;3c0d0260-ed95-45ba-b656-8b5e44f8bd73&#39;,
-               &#39;trinidadhead.01_CFC-12_any&#39;: &#39;8893b3f0-b694-4601-9ab9-80f935d18caf&#39;,
-               &#39;trinidadhead.01_N2O_any&#39;: &#39;838f582b-a598-4a00-bb7f-49836250bafd&#39;,
-               &#39;trinidadhead.01_CFC-11_any&#39;: &#39;711e7e86-7ed1-4d22-ba77-46cb0ed96fdb&#39;,
-               &#39;trinidadhead.01_CFC-113_any&#39;: &#39;7e18991c-ba4e-4f5a-8eb9-4d819cf0e0b2&#39;,
-               &#39;trinidadhead.01_CHCl3_any&#39;: &#39;c1bddd00-3cbf-4fe9-82c9-dba6f6badbe5&#39;,
-               &#39;trinidadhead.01_CH3CCl3_any&#39;: &#39;8eebe910-eb0e-476b-92f1-57b2c2aab2b3&#39;,
-               &#39;trinidadhead.01_CCl4_any&#39;: &#39;dd5c3a37-031c-4ee0-81df-309be28d784d&#39;}}})
+            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;capegrim-medusa.18_NF3_75m_4&#39;: &#39;bf294fc9-b425-496e-ab07-b1fcf03b625f&#39;,
+               &#39;capegrim-medusa.18_CF4_75m_4&#39;: &#39;33804a27-5ee1-4784-b9ef-dd3fcb603bdd&#39;,
+               &#39;capegrim-medusa.18_PFC-116_75m_4&#39;: &#39;15447b52-6ebd-4734-bb92-2232cfe33a5e&#39;,
+               &#39;capegrim-medusa.18_PFC-218_75m_4&#39;: &#39;d4e71a3a-de9e-4222-8e26-4b7f8cd5d591&#39;,
+               &#39;capegrim-medusa.18_PFC-318_75m_4&#39;: &#39;a70c3c74-6dce-4404-82a8-c14996ac82ac&#39;,
+               &#39;capegrim-medusa.18_C4F10_75m_4&#39;: &#39;86120fae-e706-4600-96f2-0e3264ba4c0d&#39;,
+               &#39;capegrim-medusa.18_C6F14_75m_4&#39;: &#39;e23a22aa-bc9a-4212-9d35-3c6f05f301b8&#39;,
+               &#39;capegrim-medusa.18_SF6_75m_4&#39;: &#39;666112fc-c974-42bb-b7a0-a54af48a6dc8&#39;,
+               &#39;capegrim-medusa.18_SO2F2_75m_4&#39;: &#39;d06093d2-bf42-445a-86d1-2288b13b00df&#39;,
+               &#39;capegrim-medusa.18_SF5CF3_75m_4&#39;: &#39;202adf4e-aade-49ba-9ed3-633c8a8ba3bf&#39;,
+               &#39;capegrim-medusa.18_HFC-23_75m_4&#39;: &#39;b42c76c3-f92f-4aea-8ec3-8fd10c2fa50b&#39;,
+               &#39;capegrim-medusa.18_HFC-32_75m_4&#39;: &#39;00aeb2ee-0b31-4262-9140-49d989678a55&#39;,
+               &#39;capegrim-medusa.18_HFC-125_75m_4&#39;: &#39;0744dd54-c0df-4b79-a0d6-c5144e8832dc&#39;,
+               &#39;capegrim-medusa.18_HFC-134a_75m_4&#39;: &#39;934b2115-c035-4e1f-aed2-4910560f7311&#39;,
+               &#39;capegrim-medusa.18_HFC-143a_75m_4&#39;: &#39;92c8d37f-c672-483b-9eab-afa0f3822030&#39;,
+               &#39;capegrim-medusa.18_HFC-152a_75m_4&#39;: &#39;fe764146-d0d6-4820-b6ce-26633b44c839&#39;,
+               &#39;capegrim-medusa.18_HFC-227ea_75m_4&#39;: &#39;4934dec4-db63-455f-8ba0-cf518ce3139d&#39;,
+               &#39;capegrim-medusa.18_HFC-236fa_75m_4&#39;: &#39;b5cc955f-263f-4dfa-a3ea-3280e7c89bbf&#39;,
+               &#39;capegrim-medusa.18_HFC-245fa_75m_4&#39;: &#39;82eb65d1-fada-4673-aacb-f313194d04c5&#39;,
+               &#39;capegrim-medusa.18_HFC-365mfc_75m_4&#39;: &#39;5c4899df-1522-4e57-9e28-8b4ab5fb03d7&#39;,
+               &#39;capegrim-medusa.18_HFC-4310mee_75m_4&#39;: &#39;4de10b57-f027-49f1-8b54-094b52b8d653&#39;,
+               &#39;capegrim-medusa.18_HCFC-22_75m_4&#39;: &#39;8706d7c9-0f26-4c51-95fb-bb76abcffe15&#39;,
+               &#39;capegrim-medusa.18_HCFC-124_75m_4&#39;: &#39;e53afb98-3619-40b9-bd67-00f566c76dfc&#39;,
+               &#39;capegrim-medusa.18_HCFC-132b_75m_4&#39;: &#39;65ad53a9-2413-4005-8592-b3661428d969&#39;,
+               &#39;capegrim-medusa.18_HCFC-133a_75m_4&#39;: &#39;9ea6c427-3a24-494f-9cd2-1048b008271a&#39;,
+               &#39;capegrim-medusa.18_HCFC-141b_75m_4&#39;: &#39;70ea0bea-4c0d-4372-b6eb-8309e9726d6a&#39;,
+               &#39;capegrim-medusa.18_HCFC-142b_75m_4&#39;: &#39;6a3a06f3-5987-43cb-b04f-3b36596fb4b8&#39;,
+               &#39;capegrim-medusa.18_CFC-11_75m_4&#39;: &#39;a159a64f-7582-4cae-bfbe-1826ff61f478&#39;,
+               &#39;capegrim-medusa.18_CFC-12_75m_4&#39;: &#39;b1bcb034-b42f-4b6b-87f6-b9625457271c&#39;,
+               &#39;capegrim-medusa.18_CFC-13_75m_4&#39;: &#39;8715befa-b4d7-47a2-9434-15e72f895ea2&#39;,
+               &#39;capegrim-medusa.18_CFC-112_75m_4&#39;: &#39;8cbd0079-672f-45c0-9bbc-430f8e543a14&#39;,
+               &#39;capegrim-medusa.18_CFC-113_75m_4&#39;: &#39;c1dae1db-1913-4ec3-a5b1-04a3f8d294f9&#39;,
+               &#39;capegrim-medusa.18_CFC-114_75m_4&#39;: &#39;d82376a7-3b76-4fdd-badd-8c382632b80e&#39;,
+               &#39;capegrim-medusa.18_CFC-115_75m_4&#39;: &#39;d6803489-2bda-4d37-87ba-140e58f11654&#39;,
+               &#39;capegrim-medusa.18_H-1211_75m_4&#39;: &#39;3d803a85-d1dd-4fe4-a35e-2233db2bdc15&#39;,
+               &#39;capegrim-medusa.18_H-1301_75m_4&#39;: &#39;719ecc28-b3a1-4657-9213-3bea51323bef&#39;,
+               &#39;capegrim-medusa.18_H-2402_75m_4&#39;: &#39;81d8ed4d-6d8c-4550-a4e7-58fda85335a1&#39;,
+               &#39;capegrim-medusa.18_CH3Cl_75m_4&#39;: &#39;9d1fa598-e161-4be7-8cb9-d90abd0149ac&#39;,
+               &#39;capegrim-medusa.18_CH3Br_75m_4&#39;: &#39;a90c394c-59ee-4f75-807c-a46228a58545&#39;,
+               &#39;capegrim-medusa.18_CH3I_75m_4&#39;: &#39;294bf2eb-d41e-457b-b90c-dc4c519f1183&#39;,
+               &#39;capegrim-medusa.18_CH2Cl2_75m_4&#39;: &#39;7314205b-57c2-4eb6-85e2-f1cab4932ff1&#39;,
+               &#39;capegrim-medusa.18_CHCl3_75m_4&#39;: &#39;fe8762c9-d739-49fc-8070-03183cf56edb&#39;,
+               &#39;capegrim-medusa.18_CCl4_75m_4&#39;: &#39;65eb891f-8cc6-4a13-8896-540e0511f3f0&#39;,
+               &#39;capegrim-medusa.18_CH2Br2_75m_4&#39;: &#39;afa1cfbb-20bc-4fb8-bc43-e98696930d10&#39;,
+               &#39;capegrim-medusa.18_CHBr3_75m_4&#39;: &#39;69791efa-8b85-49ce-8164-a251b7a014d3&#39;,
+               &#39;capegrim-medusa.18_CH3CCl3_75m_4&#39;: &#39;5be33a7d-9f23-426c-8883-eaf72451cb48&#39;,
+               &#39;capegrim-medusa.18_TCE_75m_4&#39;: &#39;dc3e6978-2ed1-49b6-bc48-b998c793996c&#39;,
+               &#39;capegrim-medusa.18_PCE_75m_4&#39;: &#39;2503118f-783a-4f8f-a6ea-b3dcfa9900a3&#39;,
+               &#39;capegrim-medusa.18_ethyne_75m_4&#39;: &#39;4d504ffa-ed90-440a-b807-ba54ef3ab3e3&#39;,
+               &#39;capegrim-medusa.18_ethane_75m_4&#39;: &#39;2900ba73-6b2b-4cf7-b26e-3c76f1dd437d&#39;,
+               &#39;capegrim-medusa.18_propane_75m_4&#39;: &#39;39cb54dc-ea6f-43cf-b6bc-f875429066dd&#39;,
+               &#39;capegrim-medusa.18_c-propane_75m_4&#39;: &#39;ac07138f-7549-4278-9ee1-4aaccb41a235&#39;,
+               &#39;capegrim-medusa.18_benzene_75m_4&#39;: &#39;910f83ba-12b2-447d-9c4d-bb498282d122&#39;,
+               &#39;capegrim-medusa.18_toluene_75m_4&#39;: &#39;89b60243-7251-4d60-8dee-4b04a7489fc2&#39;,
+               &#39;capegrim-medusa.18_COS_75m_4&#39;: &#39;085277b0-29f1-4f59-aaea-516d4d7c52ac&#39;,
+               &#39;capegrim-medusa.18_desflurane_75m_4&#39;: &#39;201ee350-2190-4d62-b68c-fb84b7b1f4e8&#39;},
+              &#39;trinidadhead.01.C&#39;: {&#39;trinidadhead.01_CH4_any&#39;: &#39;9a32a153-b9bb-4876-9503-879fbdfbbdf6&#39;,
+               &#39;trinidadhead.01_CFC-12_any&#39;: &#39;48a53cf5-4ce7-4ec4-9e26-a53d50feac3b&#39;,
+               &#39;trinidadhead.01_N2O_any&#39;: &#39;da80f024-8538-4dfb-93cd-bc1113825d97&#39;,
+               &#39;trinidadhead.01_CFC-11_any&#39;: &#39;2be96135-e2e5-44bf-b649-643580129bab&#39;,
+               &#39;trinidadhead.01_CFC-113_any&#39;: &#39;9972c752-b02f-4673-ad02-3a5ab42dcb84&#39;,
+               &#39;trinidadhead.01_CHCl3_any&#39;: &#39;657ce372-2880-476c-9b13-dafa2ad1dc36&#39;,
+               &#39;trinidadhead.01_CH3CCl3_any&#39;: &#39;fc4d1923-db85-4442-b974-10f95f354a15&#39;,
+               &#39;trinidadhead.01_CCl4_any&#39;: &#39;6b785622-4afb-41dc-b053-f186ad9509df&#39;}}})
 </pre></div></div>
+</div>
 </div>
 </div>
 <div class="section" id="3.-Visualising-the-object-store">
 <h3>3. Visualising the object store<a class="headerlink" href="#3.-Visualising-the-object-store" title="Permalink to this headline">¶</a></h3>
 <p>Now that we have a simple object store created we can view the objects within it in a simple force graph model. To do this we use the <code class="docutils literal notranslate"><span class="pre">view_store</span></code> function from the <code class="docutils literal notranslate"><span class="pre">objectstore</span></code> submodule. Note that the cell may take a few moments to load as the force graph is created.</p>
 <p>In the force graph the central blue node is the <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> node. Associated with this node are all the data processed by it. The next node in the topology are networks, shown in green. In the graph you will see <code class="docutils literal notranslate"><span class="pre">DECC</span></code> and <code class="docutils literal notranslate"><span class="pre">AGAGE</span></code> nodes. From these you’ll see site nodes in red and then individual datasources in orange.</p>
-<div class="admonition note">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="nb">object</span> <span class="n">store</span> <span class="n">visualisation</span> <span class="n">created</span> <span class="n">by</span> <span class="n">this</span> <span class="n">function</span> <span class="ow">is</span> <span class="n">commented</span> <span class="n">out</span> <span class="n">here</span> <span class="ow">and</span> <span class="n">won</span><span class="s1">&#39;t be visible in the documentation but can be uncommented and run when you use the notebook version.</span>
-</pre></div>
-</div>
-</div>
+<div class="section" id="id1">
+<h4>Note<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<p>The object store visualisation created by this function is commented out here and won’t be visible in the documentation but can be uncommented and run when you use the notebook version.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
@@ -733,6 +729,7 @@ defaultdict(dict,
 </div>
 </div>
 <p>Now we know we have this data in the object store we can search it and retrieve data from it.</p>
+</div>
 </div>
 <div class="section" id="4.-Retrieving-data">
 <h3>4. Retrieving data<a class="headerlink" href="#4.-Retrieving-data" title="Permalink to this headline">¶</a></h3>
@@ -778,7 +775,7 @@ defaultdict(dict,
      Conditions of use:    Ensure that you contact the data owner at the outse...
      Source:               In situ measurements of air
      Conventions:          CF-1.6
-     File created:         2020-11-10 17:15:59.741491+00:00
+     File created:         2020-11-10 18:21:34.222619+00:00
      Processed by:         auto@hugs-cloud.com
      species:              CO
      station_longitude:    0.23048
@@ -802,7 +799,7 @@ defaultdict(dict,
      Conditions of use:    Ensure that you contact the data owner at the outse...
      Source:               In situ measurements of air
      Conventions:          CF-1.6
-     File created:         2020-11-10 17:15:59.890969+00:00
+     File created:         2020-11-10 18:21:34.389554+00:00
      Processed by:         auto@hugs-cloud.com
      species:              CO
      station_longitude:    0.23048
@@ -1805,7 +1802,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='d91d333a-ccb9-4ac8-af7d-cc2d230c564b'></div></div>
+<div id='4be023b0-1ce0-4de2-ab68-38a2ee1ffd17'></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
@@ -1813,7 +1810,7 @@ if (IPython.notebook.kernel !== null) {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7fa3878d2850&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7fa70fb0ba50&gt;]
 </pre></div></div>
 </div>
 </div>
@@ -1840,7 +1837,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="highlight"><pre>
 {&#39;co_hfd_100m_picarro&#39;: {&#39;rank&#39;: 0,
   &#39;data_range&#39;: &#39;2013-12-04T14:02:30_2019-05-21T15:46:30&#39;,
-  &#39;uuid&#39;: &#39;bfde6b8f-6ecb-43de-8cc3-668fed9ec563&#39;,
+  &#39;uuid&#39;: &#39;f3e8cb01-85e0-48ac-928f-fa92948f9316&#39;,
   &#39;metadata&#39;: {&#39;site&#39;: &#39;hfd&#39;,
    &#39;instrument&#39;: &#39;picarro&#39;,
    &#39;time_resolution&#39;: &#39;1_minute&#39;,
@@ -1853,7 +1850,7 @@ if (IPython.notebook.kernel !== null) {
    &#39;data_type&#39;: &#39;timeseries&#39;}},
  &#39;co_hfd_50m_picarro&#39;: {&#39;rank&#39;: 0,
   &#39;data_range&#39;: &#39;2013-11-23T12:28:30_2020-06-24T09:41:30&#39;,
-  &#39;uuid&#39;: &#39;4e880d44-1b4a-4679-929c-0004dd40fa84&#39;,
+  &#39;uuid&#39;: &#39;73e5bc02-4253-4277-922d-ad048669c699&#39;,
   &#39;metadata&#39;: {&#39;site&#39;: &#39;hfd&#39;,
    &#39;instrument&#39;: &#39;picarro&#39;,
    &#39;time_resolution&#39;: &#39;1_minute&#39;,
@@ -1937,7 +1934,7 @@ if (IPython.notebook.kernel !== null) {
 {&#39;co_hfd_100m_picarro&#39;: {&#39;rank&#39;: defaultdict(list,
               {&#39;1&#39;: [&#39;2013-11-01T00:00:00_2016-01-01T00:00:00&#39;]}),
   &#39;data_range&#39;: &#39;2013-12-04T14:02:30_2019-05-21T15:46:30&#39;,
-  &#39;uuid&#39;: &#39;bfde6b8f-6ecb-43de-8cc3-668fed9ec563&#39;,
+  &#39;uuid&#39;: &#39;f3e8cb01-85e0-48ac-928f-fa92948f9316&#39;,
   &#39;metadata&#39;: {&#39;site&#39;: &#39;hfd&#39;,
    &#39;instrument&#39;: &#39;picarro&#39;,
    &#39;time_resolution&#39;: &#39;1_minute&#39;,
@@ -1950,7 +1947,7 @@ if (IPython.notebook.kernel !== null) {
    &#39;data_type&#39;: &#39;timeseries&#39;}},
  &#39;co_hfd_50m_picarro&#39;: {&#39;rank&#39;: 0,
   &#39;data_range&#39;: &#39;2013-11-23T12:28:30_2020-06-24T09:41:30&#39;,
-  &#39;uuid&#39;: &#39;4e880d44-1b4a-4679-929c-0004dd40fa84&#39;,
+  &#39;uuid&#39;: &#39;73e5bc02-4253-4277-922d-ad048669c699&#39;,
   &#39;metadata&#39;: {&#39;site&#39;: &#39;hfd&#39;,
    &#39;instrument&#39;: &#39;picarro&#39;,
    &#39;time_resolution&#39;: &#39;1_minute&#39;,
@@ -2009,7 +2006,7 @@ if (IPython.notebook.kernel !== null) {
      Conditions of use:    Ensure that you contact the data owner at the outse...
      Source:               In situ measurements of air
      Conventions:          CF-1.6
-     File created:         2020-11-10 17:15:59.741491+00:00
+     File created:         2020-11-10 18:21:34.222619+00:00
      Processed by:         auto@hugs-cloud.com
      species:              CO
      station_longitude:    0.23048
@@ -2061,7 +2058,7 @@ if (IPython.notebook.kernel !== null) {
      Conditions of use:    Ensure that you contact the data owner at the outse...
      Source:               In situ measurements of air
      Conventions:          CF-1.6
-     File created:         2020-11-10 17:15:59.890969+00:00
+     File created:         2020-11-10 18:21:34.389554+00:00
      Processed by:         auto@hugs-cloud.com
      species:              CO
      station_longitude:    0.23048
@@ -2076,17 +2073,29 @@ if (IPython.notebook.kernel !== null) {
 <h3>6. Viewing ranked data<a class="headerlink" href="#6.-Viewing-ranked-data" title="Permalink to this headline">¶</a></h3>
 <p>We can also view the ranks we have given to data with a similar layout to the object store visualisation we created earlier.</p>
 <p>To do this we use the <code class="docutils literal notranslate"><span class="pre">visualise_rankings</span></code> method of of the <code class="docutils literal notranslate"><span class="pre">RankSources</span></code> class. In this figure we’ll only see Datasources that contain ranked data. Hover over the nodes for further information.</p>
-<div class="admonition note">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">rankings</span> <span class="n">visualisation</span> <span class="n">created</span> <span class="n">by</span> <span class="n">this</span> <span class="n">function</span> <span class="ow">is</span> <span class="n">commented</span> <span class="n">out</span> <span class="n">here</span> <span class="ow">and</span> <span class="n">won</span><span class="s1">&#39;t be visible in the documentation but can be uncommented and run when you use the notebook version.</span>
-</pre></div>
-</div>
-</div>
+<div class="section" id="id2">
+<h4>Note<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<p>The rankings visualisation created by this function is commented out here and won’t be visible in the documentation but can be uncommented and run when you use the notebook version.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># r.visualise_rankings()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="7.-Cleanup">
+<h3>7. Cleanup<a class="headerlink" href="#7.-Cleanup" title="Permalink to this headline">¶</a></h3>
+<p>If you used the <code class="docutils literal notranslate"><span class="pre">tmp_dir</span></code> as a location for your object store at the start of the tutorial you can run the cell below to remove any files that were created.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">tmp_dir</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
