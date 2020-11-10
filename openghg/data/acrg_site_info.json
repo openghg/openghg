@@ -81,6 +81,14 @@
       "longitude": 126.329
     }
   },
+  "AOC": {
+    "NOAA": {
+      "height": ["0m"],
+      "height_name": ["0magl"],
+      "height_station_masl": 0,
+      "long_name": "Atlantic Ocean Cruise"
+    }
+  },
   "ARH": {
     "NIWA": {
       "height": ["5m"],
@@ -1529,6 +1537,12 @@
       "longitude": 24.1157
     }
   },
+  "PAO": {
+    "NOAA": {
+      "height_station_masl": 0.0,
+      "long_name": "Pacific-Atlantic Ocean, N/A"
+    }
+  },
   "PCO": {
     "NOAA": {
       "height_station_masl": 2225.0,
@@ -2329,6 +2343,12 @@
       "latitude": 36.28,
       "long_name": "Mt. Waliguan, China",
       "longitude": 100.9
+    }
+  },
+  "WPC": {
+    "NOAA": {
+      "height_station_masl": 0.0,
+      "long_name": "Western Pacific Cruise, N/A"
     }
   },
   "WPCN00": {
