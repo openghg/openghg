@@ -312,22 +312,22 @@ def visualise_store() -> pyvis.network.Network:
         net.add_node(network, label=network_name, color="#59a14f", value=2500)
         net.add_edge(source=0, to=network)
 
-    # Then we want a subnode for each site  
-    for site, data in sites.items():
-        # Don't want to use a site here as a site might be in multiple networks
-        site_name = site.upper()
-        site_id = str(uuid4())
-        net.add_node(site_id, label=site_name, color="#e15759", value=1000)
-        net.add_edge(source=network, to=site_id)
+        # Then we want a subnode for each site  
+        for site, data in sites.items():
+            # Don't want to use a site here as a site might be in multiple networks
+            site_name = site.upper()
+            site_id = str(uuid4())
+            net.add_node(site_id, label=site_name, color="#e15759", value=1000)
+            net.add_edge(source=network, to=site_id)
 
-        # Now for each site create the datasource nodes
-        for uid, datasource in data.items():
-            species = datasource["species"]
-            instrument = datasource["instrument"].upper()
+            # Now for each site create the datasource nodes
+            for uid, datasource in data.items():
+                species = datasource["species"]
+                instrument = datasource["instrument"].upper()
 
-            label = f"{site.upper()} {species.upper()} {instrument}"
-            title = "\n".join([f"Site: {site.upper()}", f"Species : {species.upper()}", f"Instrument: {instrument}"])
-            net.add_node(uid, label=label, title=title, color="#f28e2b", value=100)
-            net.add_edge(source=site_id, to=uid)
+                label = f"{site.upper()} {species.upper()} {instrument}"
+                title = "\n".join([f"Site: {site.upper()}", f"Species : {species.upper()}", f"Instrument: {instrument}"])
+                net.add_node(uid, label=label, title=title, color="#f28e2b", value=100)
+                net.add_edge(source=site_id, to=uid)
 
     return net.show("openghg_objstore.html")
