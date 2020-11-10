@@ -2,7 +2,7 @@ name: OpenGHG tests
 
 on:
   push:
-    branches: [master, devel, docs]
+    branches: [master, devel]
     tags:
     - '*'
   pull_request:
