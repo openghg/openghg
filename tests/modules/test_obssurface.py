@@ -209,31 +209,18 @@ def test_read_icos():
     data = Datasource.load(uuid=uuid, shallow=False).data()
 
     assert sorted(list(data.keys())) == sorted(
-        [
-            "2011-12-07-01:38:00+00:00_2011-12-31-19:57:00+00:00",
-            "2011-06-01-05:54:00+00:00_2011-08-31-17:58:00+00:00",
-            "2011-03-30-08:52:00+00:00_2011-05-31-20:59:00+00:00",
-            "2011-09-01-11:20:00+00:00_2011-11-30-03:39:00+00:00",
-            "2012-12-01-04:03:00+00:00_2012-12-31-15:41:00+00:00",
-            "2012-06-01-11:15:00+00:00_2012-08-07-19:16:00+00:00",
-            "2012-04-07-06:20:00+00:00_2012-05-31-18:00:00+00:00",
-            "2012-09-05-02:15:00+00:00_2012-11-30-19:08:00+00:00",
-            "2013-01-01-00:01:00+00:00_2013-01-17-18:06:00+00:00",
-        ]
+        ["2011-03-30-08:52:00+00:00_2011-04-10-16:06:00+00:00", "2013-01-09-17:49:00+00:00_2013-01-17-18:06:00+00:00"]
     )
 
-    co2_data = data["2012-12-01-04:03:00+00:00_2012-12-31-15:41:00+00:00"]
+    co2_data = data["2011-03-30-08:52:00+00:00_2011-04-10-16:06:00+00:00"]
 
-    assert co2_data.time[0] == Timestamp("2012-12-01T04:03:00")
-    assert co2_data.time[-1] == Timestamp("2012-12-31T15:41:00")
-
-    assert co2_data["co2"][0] == 397.765
-    assert co2_data["co2"][-1] == 398.374
-
-    assert co2_data["co2_variability"][0] == 0.057
-    assert co2_data["co2_variability"][-1] == 0.063
-
-    assert co2_data["co2_number_of_observations"][0] == 12
+    assert co2_data.time[0] == Timestamp("2011-03-30T08:52:00")
+    assert co2_data.time[-1] == Timestamp("2011-04-10T16:06:00")
+    assert co2_data["co2"][0] == pytest.approx(401.645)
+    assert co2_data["co2"][-1] == pytest.approx(391.443)
+    assert co2_data["co2_variability"][0] == pytest.approx(0.087)
+    assert co2_data["co2_variability"][-1] == pytest.approx(0.048)
+    assert co2_data["co2_number_of_observations"][0] == 13
     assert co2_data["co2_number_of_observations"][-1] == 13
 
     del co2_data.attrs["File created"]
@@ -267,21 +254,18 @@ def test_read_noaa():
 
     co_data = Datasource.load(uuid=uuid, shallow=False).data()
 
-    assert len(co_data.keys()) == 95
+    assert len(co_data.keys()) == 16
 
-    old_data = co_data["1990-12-02-12:23:00+00:00_1990-12-02-12:23:00+00:00"]
+    co_data = co_data["1990-06-29-05:00:00+00:00_1990-07-10-21:28:00+00:00"]
 
-    assert old_data.time[0] == Timestamp("1990-12-02T12:23:00")
-    assert old_data.time[-1] == Timestamp("1990-12-02T12:23:00")
+    assert co_data["co"][0] == pytest.approx(94.9)
+    assert co_data["co"][-1] == pytest.approx(95.65)
 
-    assert old_data["co"][0] == 141.61
-    assert old_data["co"][-1] == 141.61
+    assert co_data["co_repeatability"][0] == pytest.approx(-999.99)
+    assert co_data["co_repeatability"][-1] == pytest.approx(-999.99)
 
-    assert old_data["co_repeatability"][0] == -999.99
-    assert old_data["co_repeatability"][-1] == -999.99
-
-    assert old_data["co_selection_flag"][0] == 0
-    assert old_data["co_selection_flag"][-1] == 0
+    assert co_data["co_selection_flag"][0] == 0
+    assert co_data["co_selection_flag"][-1] == 0
 
     obs = ObsSurface.load()
 
@@ -343,10 +327,10 @@ def test_delete_Datasource():
 
     datasource = Datasource.load(uuid=uuid)
 
-    data = datasource.data()["2011-12-07-01:38:00+00:00_2011-12-31-19:57:00+00:00"]
+    data = datasource.data()["2011-03-30-08:52:00+00:00_2011-04-10-16:06:00+00:00"]
 
-    assert data["co2"][0] == pytest.approx(397.334)
-    assert data.time[0] == Timestamp("2011-12-07T01:38:00")
+    assert data["co2"][0] == pytest.approx(401.645)
+    assert data.time[0] == Timestamp("2011-03-30T08:52:00")
 
     data_keys = datasource.data_keys()
 

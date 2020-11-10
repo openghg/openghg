@@ -86,10 +86,10 @@ def test_get_single_site_datetime_selection():
     data = results[0]
 
     assert data.time[0] == Timestamp("2013-12-04T14:02:30")
-    assert data.time[-1] == Timestamp("2014-12-28T08:02:30")
+    assert data.time[-1] == Timestamp("2014-05-07T00:28:30")
 
     assert data["mf"][0] == pytest.approx(414.21)
-    assert data["mf"][-1] == pytest.approx(407.55)
+    assert data["mf"][-1] == pytest.approx(405.95)
 
 
 def test_scale_convert():
