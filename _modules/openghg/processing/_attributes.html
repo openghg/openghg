@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.processing._attributes &mdash; OpenGHG 0+untagged.1.g3d814bc documentation</title>
+  <title>openghg.processing._attributes &mdash; OpenGHG 0+untagged.1.g31d3af9 documentation</title>
   
 
   
@@ -466,9 +466,9 @@
 
     <span class="c1"># Read site info file</span>
     <span class="n">data_filename</span> <span class="o">=</span> <span class="s2">&quot;acrg_site_info.json&quot;</span>
-    <span class="n">filepath</span> <span class="o">=</span> <span class="n">get_datapath</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">data_filename</span><span class="p">)</span>
+    <span class="n">acrg_site_info_path</span> <span class="o">=</span> <span class="n">get_datapath</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">data_filename</span><span class="p">)</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">acrg_site_info_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">site_params</span> <span class="o">=</span> <span class="n">json_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -492,7 +492,7 @@
                 <span class="n">attributes</span><span class="p">[</span><span class="n">attr_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_params</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Invalid site passed. Please use a valid site code such as BSD for Bilsdale&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Invalid site </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> passed. Please use a valid site code such as BSD for Bilsdale&quot;</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">attributes</span>
@@ -511,7 +511,7 @@
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Oct 29, 2020.
+        Last updated on Nov 10, 2020.
       </span>
 
     </p>
