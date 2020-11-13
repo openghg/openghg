@@ -28,7 +28,7 @@ def crds():
 def test_get_single_site_few_args():
     result = get_single_site(site="hfd", species="co2")
 
-    data = result[0]
+    data = result[0].data
 
     assert data.time[0] == Timestamp("2013-12-04T14:02:30")
 
@@ -61,11 +61,11 @@ def test_get_single_site_few_args():
 def test_get_single_site_with_average():
     result_no_average = get_single_site(site="hfd", species="co2")
 
-    data_no_average = result_no_average[0]
+    data_no_average = result_no_average[0].data
 
     result = get_single_site(site="hfd", species="co2", average="2h")
 
-    data = result[0]
+    data = result[0].data
 
     assert not data["mf"].equals(data_no_average["mf"])
 
@@ -75,7 +75,7 @@ def test_get_single_site_with_average():
 
     result_with_missing = get_single_site(site="hfd", species="co2", average="2h", keep_missing=True)
 
-    data_missing = result_with_missing[0]
+    data_missing = result_with_missing[0].data
 
     assert data_missing.time.equals(data.time)
 
@@ -83,7 +83,7 @@ def test_get_single_site_with_average():
 def test_get_single_site_datetime_selection():
     results = get_single_site(site="hfd", species="co2", start_date="2001-01-01", end_date="2015-01-01")
 
-    data = results[0]
+    data = results[0].data
 
     assert data.time[0] == Timestamp("2013-12-04T14:02:30")
     assert data.time[-1] == Timestamp("2014-05-07T00:28:30")
@@ -95,7 +95,7 @@ def test_get_single_site_datetime_selection():
 def test_scale_convert():
     results = get_single_site(site="hfd", species="co", start_date="2001-01-01", end_date="2015-01-01")
 
-    data = results[0]
+    data = results[0].data
 
     assert data["mf"][0] == pytest.approx(214.28)
     assert data["co_stdev"][0] == pytest.approx(4.081)
@@ -116,7 +116,7 @@ def test_scale_convert():
 
     results = get_single_site(site="hfd", species="ch4", start_date="2001-01-01", end_date="2015-01-01")
 
-    data = results[0]
+    data = results[0].data
 
     assert data["mf"][0] == pytest.approx(1993.83)
     assert data["ch4_stdev"][0] == pytest.approx(1.555)

@@ -1,9 +1,10 @@
 __all__ = ["get_single_site", "scale_convert"]
 
 from xarray import Dataset
-from typing import Optional, Union
+from typing import Dict, List, Optional, Union
 from pandas import Timestamp
-
+from dataclasses import dataclass
+from openghg.localclient import ObsData
 
 def get_obs(
     sites,
@@ -48,7 +49,7 @@ def get_single_site(
     instrument: Optional[str] = None,
     keep_missing: Optional[bool] = False,
     calibration_scale: Optional[str] = None,
-) -> list:
+) -> List[ObsData]:
     """ Get measurements from one site as a list of xarray datasets.
         If there are multiple instruments and inlets at a particular site, 
         note that the acrg_obs_defaults.csv file may be referenced to determine which instrument and inlet to use for each time period.
@@ -86,6 +87,7 @@ def get_single_site(
     from openghg.localclient import Search
     from openghg.util import load_hugs_json
 
+
     site_info = load_hugs_json(filename="acrg_site_info.json")
     site = site.upper()
 
@@ -93,9 +95,9 @@ def get_single_site(
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
     # Ensure we have the Timestamps we expect
-    if start_date is not None and not isinstance(start_date, Timestamp):
+    if start_date is not None:
         start_date = Timestamp(start_date)
-    if end_date is not None and not isinstance(end_date, Timestamp):
+    if end_date is not None:
         end_date = Timestamp(end_date)
 
     # Find the correct synonym for the passed species
@@ -108,7 +110,7 @@ def get_single_site(
     )
 
     # Retrieve all the data found
-    selected_keys = [k for k in results]
+    selected_keys = list(results.keys())
     retrieved_data = search.retrieve(selected_keys=selected_keys)
 
     obs_files = []
@@ -202,16 +204,19 @@ def get_single_site(
             if calibration_scale is not None:
                 data = scale_convert(data, species, calibration_scale)
 
-            obs_files.append(data)
+            metadata = data.attrs
+            obs_data = ObsData(name=key, data=data, metadata=data.attrs)
+
+            obs_files.append(obs_data)
 
     # Now check if the units match for each of the observation Datasets
-    units = set([f.mf.attrs["units"] for f in obs_files])
+    units = set([f.data.mf.attrs["units"] for f in obs_files])
     if len(units) > 1:
         raise ValueError(
             f"Units do not match for these observation Datasets {[(f.mf.attrs['units'],f.attrs['filename']) for f in obs_files]}"
         )
 
-    scales = set([f.attrs["scale"] for f in obs_files])
+    scales = set([f.data.attrs["scale"] for f in obs_files])
     if len(scales) > 1:
         print(f"Scales do not match for these observation Datasets {[(f.attrs['scale'],f.attrs['filename']) for f in obs_files]}")
         print("Suggestion: set calibration_scale to convert scales")
