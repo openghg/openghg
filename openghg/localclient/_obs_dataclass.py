@@ -21,4 +21,4 @@ class ObsData:
     doi: str = "NA"
 
     def __str__(self):
-        return f"fName: {self.name}\n {self.data}\n Metadata : {self.metadata}\n DOI: {self.doi}"
+        return f"Name: {self.name}\nData: {self.data}\nMetadata : {self.metadata}\nDOI: {self.doi}"
