@@ -12,3 +12,4 @@ from ._icos import ICOS
 from ._noaa import NOAA
 from ._thamesbarrier import THAMESBARRIER
 from ._obs_surface import ObsSurface
+from ._ecmwf import retrieve_met

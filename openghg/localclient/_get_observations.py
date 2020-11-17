@@ -6,6 +6,7 @@ from pandas import Timestamp
 from dataclasses import dataclass
 from openghg.localclient import ObsData
 
+
 def get_obs(
     sites,
     species,
@@ -86,7 +87,6 @@ def get_single_site(
     from xarray import concat as xr_concat
     from openghg.localclient import Search
     from openghg.util import load_hugs_json
-
 
     site_info = load_hugs_json(filename="acrg_site_info.json")
     site = site.upper()
