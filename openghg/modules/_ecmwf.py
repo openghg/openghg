@@ -1,12 +1,12 @@
 import cdsapi
-import json
 from dataclasses import dataclass
 from pandas import DataFrame
 import numpy as np
 from typing import Dict, List, Tuple
-import io
 import requests
 import xarray as xr
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 __all__ = ["retrieve_met"]
 
@@ -45,38 +45,61 @@ def retrieve_met(site, network, year) -> ECMWF:
         "pressure_level": ecmwf_pressure_levels,
         "year": str(year),
         "month": [str(x).zfill(2) for x in range(1, 2)],
-        "day": [str(x).zfill(2) for x in range(1, 3)],
-        "time": [f"{str(x).zfill(2)}:00" for x in range(0, 5)],
+        "day": [str(x).zfill(2) for x in range(1, 2)],
+        "time": [f"{str(x).zfill(2)}:00" for x in range(0, 3)],
         "area": ecmwf_area,
     }
 
     result = client.retrieve(name=dataset_name, request=request)
 
-    r = requests.get(url=result.location)
+    dataset = _download_data(url=result.location)
 
-    netcdf_data = r.content
-
-    dataset = xr.open_dataset(netcdf_data)
-
-    print(dataset.attrs)
-    
-    # # Get the URL of the data from the object
-    # url = result._url
-    # # We want to get the URL from the result and retrieve that data ourselves instead
-    # timeout = 60
-    # # Retrieve the data itself
-    # r = requests.get(url, stream=True, verify=0, headers=None, timeout=timeout)
-    
-    # Get the binary content 
-    # print(r.content)
-
-
-
-    
-    
-    ecmwf_data = ECMWF(data=result, metadata={"some": "metadata"})
+    ecmwf_data = ECMWF(data=dataset, metadata=request)
 
     return ecmwf_data
+
+
+def _download_data(url: str) -> xr.Dataset:
+    """ Retrieve data from the passed URL. This is used to retrieve data from
+        the Copernicus data store.
+
+        Args:
+            url: URL string
+        Returns:
+            xarray.Dataset: NetCDF data retrieved
+    """
+    # If we get any of these codes we'll try again
+    retriable_status_codes = [requests.codes.internal_server_error,
+                            requests.codes.bad_gateway,
+                            requests.codes.service_unavailable,
+                            requests.codes.gateway_timeout,
+                            requests.codes.too_many_requests,
+                            requests.codes.request_timeout]
+
+    # How long to wait (in seconds) for the server to return data
+    timeout = 20
+
+    retry_strategy = Retry(
+        total=3,
+        status_forcelist=retriable_status_codes,
+        method_whitelist=["HEAD", "GET", "OPTIONS"],
+        backoff_factor=1
+    )
+
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+
+    http = requests.Session()
+    http.mount("https://", adapter)
+    http.mount("http://", adapter)
+
+    data = http.get(url, timeout=timeout).content
+
+    try:
+        dataset = xr.open_dataset(data)
+    except ValueError:
+        raise ValueError(f"Invalid data returned, cannot create dataset.")
+
+    return dataset
 
 
 def _two_closest_values(diff) -> np.ndarray:
@@ -185,11 +208,3 @@ def _altitude_to_ecmwf_pressure(measure_pressure) -> List:
     desired_era5_pressure = era5_pressure_levels[np.unique(ecwmf_pressure_indices).astype(int)]
 
     return desired_era5_pressure.astype(str).tolist()
-
-
-
-if __name__ == "__main__":
-    import sys
-    sys.path.insert(0, "../..")
-    data = retrieve_met(site="CGO", network="AGAGE", year="2012")
-    # print(data)
