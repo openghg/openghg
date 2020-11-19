@@ -226,10 +226,7 @@ def date_overlap(daterange_a, daterange_b):
     start_b = Timestamp(ts_input=daterange_b[0], tz="UTC")
     end_b = Timestamp(ts_input=daterange_b[1], tz="UTC")
 
-    if start_a <= end_b and end_a >= start_b:
-        return True
-    else:
-        return False
+    return start_a <= end_b and end_a >= start_b
 
 
 def dates_overlap(range_a, range_b):

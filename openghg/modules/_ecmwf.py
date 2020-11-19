@@ -1,29 +1,33 @@
 import cdsapi
 from dataclasses import dataclass
-from pandas import DataFrame
 import numpy as np
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 import requests
 import xarray as xr
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-__all__ = ["retrieve_met"]
+from openghg.util import timestamp_tzaware
+
+__all__ = ["retrieve_met", "METData"]
 
 
 @dataclass(frozen=True)
-class ECMWF:
-    data: DataFrame
+class METData:
+    data: xr.Dataset
     metadata: Dict
 
 
-def retrieve_met(site, network, year) -> ECMWF:
-    """ Retrieve ECMWF data
+# def retrieve_met(site: str, network: str, year: str) -> METData:
+def retrieve_met(site: str, network: str, years: Union[str, List[str]]) -> METData:
+    """ Retrieve METData data. Note that this function will only download a
+        full year of data which may take some time.
 
         Args:
             site: Three letter sitec code
             network: Network
-            year: Four digit year e.g. 2012
+            start_date: Start date
+            end_date: End date
     """
     latitude, longitude, inlet_height, site_height = _get_site_loc(site=site, network=network)
 
@@ -34,27 +38,54 @@ def retrieve_met(site, network, year) -> ECMWF:
     # Calculate the ERA5 pressure levels required
     ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure)
 
-    client = cdsapi.Client()
+    if not isinstance(years, list):
+        years = [years]
+    else:
+        years = sorted(years)
 
-    dataset_name = "reanalysis-era5-pressure-levels"
-
+    # TODO - we might need to customise this further in the future to
+    # request other types of weather data
     request = {
         "product_type": "reanalysis",
         "format": "netcdf",
         "variable": ["u_component_of_wind", "v_component_of_wind"],
         "pressure_level": ecmwf_pressure_levels,
-        "year": str(year),
-        "month": [str(x).zfill(2) for x in range(1, 2)],
-        "day": [str(x).zfill(2) for x in range(1, 2)],
-        "time": [f"{str(x).zfill(2)}:00" for x in range(0, 3)],
+        "year": [str(x) for x in years],
+        "month": [str(x).zfill(2) for x in range(1, 13)],
+        "day": [str(x).zfill(2) for x in range(1, 32)],
+        "time": [f"{str(x).zfill(2)}:00" for x in range(0, 24)],
         "area": ecmwf_area,
     }
 
-    result = client.retrieve(name=dataset_name, request=request)
+    cds_client = cdsapi.Client()
+    dataset_name = "reanalysis-era5-pressure-levels"
 
-    dataset = _download_data(url=result.location)
+    # Retrieve metadata from Copernicus about the dataset, this includes
+    # the location of the data netCDF file.
+    # result = cds_client.retrieve(name=dataset_name, request=request)
+    # Download the data itself
+    # dataset = _download_data(url=result.location)
+    dataset = xr.open_dataset("/home/gar/Documents/Devel/RSE/openghg/tests/data/request_return.nc")
 
-    ecmwf_data = ECMWF(data=dataset, metadata=request)
+    # Add some information to the metadata
+    request["site"] = site
+    request["network"] = network
+
+    # We replace the date data with a start and end date here
+    start_date = str(timestamp_tzaware(f"{years[0]}-1-1"))
+    end_date = str(timestamp_tzaware(f"{years[-1]}-12-31"))
+
+    metadata = {
+        "product_type": request["product_type"],
+        "format": request["format"],
+        "variable": request["variable"],
+        "pressure_level": request["pressure_level"],
+        "area": request["area"],
+        "start_date": start_date,
+        "end_date": end_date
+    }
+
+    ecmwf_data = METData(data=dataset, metadata=metadata)
 
     return ecmwf_data
 

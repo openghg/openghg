@@ -34,6 +34,6 @@ def test_receive_404(requests_mock, mock_return, mock_data):
 
     requests_mock.post(ANY, json=mock_return, status_code=200)
     requests_mock.get("https://www.example.com", text=mock_content, status_code=404)
-    
+
     with pytest.raises(ValueError):
         retrieve_met(site="CGO", network="AGAGE", year="2012")

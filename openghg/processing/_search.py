@@ -104,7 +104,7 @@ def search(
                     if datasource.search_metadata(search_terms=[sp, site, inlet, instrument], find_all=True):
                         daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
                         # Get the data keys for the data in the matching daterange
-                        in_date = datasource.in_daterange(daterange=daterange_str)
+                        in_date = datasource.keys_in_daterange(daterange=daterange_str)
 
                         data_date_str = _strip_dates_keys(in_date)
 
@@ -155,7 +155,7 @@ def search(
                     key = f"{source.species()}_{source.site()}_{source.inlet()}_{source.instrument()}".lower()
 
                     daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
-                    data_keys = source.in_daterange(daterange=daterange_str)
+                    data_keys = source.keys_in_daterange(daterange=daterange_str)
 
                     if not data_keys:
                         continue
@@ -186,7 +186,7 @@ def search(
                 data_keys = {}
                 # Get the keys for each daterange
                 for d in source_dateranges:
-                    keys_in_date = source.in_daterange(daterange=d)
+                    keys_in_date = source.keys_in_daterange(daterange=d)
                     d = d.replace("+00:00", "")
                     if keys_in_date:
                         data_keys[d] = keys_in_date

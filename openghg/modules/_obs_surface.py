@@ -45,7 +45,7 @@ class ObsSurface(BaseModule):
 
         return data
 
-    def save(self, bucket: Optional[dict] = None) -> None:
+    def save(self, bucket: Optional[Dict] = None) -> None:
         """ Save the object to the object store
 
         Args:

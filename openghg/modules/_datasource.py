@@ -144,7 +144,7 @@ class Datasource:
         """
         from openghg.util import date_overlap
 
-        data_types = ["footprint", "timeseries"]
+        data_types = ["footprint", "timeseries", "met"]
 
         if data_type not in data_types:
             raise TypeError(f"Incorrect data type selected. Please select from one of {data_types}")
@@ -423,7 +423,7 @@ class Datasource:
 
     @staticmethod
     def from_data(bucket: str, data: Dict, shallow: bool):
-        """ Construct from a JSON-deserialised dictionary
+        """ Construct a Datasource from JSON
 
         Args:
             bucket: Bucket containing data
@@ -552,6 +552,15 @@ class Datasource:
         Returns:
             dict: Dictionary of data keyed by daterange
         """
+        from openghg.objectstore import get_bucket
+
+        if not self._data:
+            bucket = get_bucket()
+
+            for date_key in self._data_keys["latest"]["keys"]:
+                data_key = self._data_keys["latest"]["keys"][date_key]
+                self._data[date_key] = Datasource.load_dataset(bucket=bucket, key=data_key)
+
         return self._data
 
     def update_daterange(self) -> None:
@@ -624,7 +633,24 @@ class Datasource:
         else:
             return True in results
 
-    def in_daterange(self, daterange: str) -> bool:
+    def in_daterange(self, start: Union[str, Timestamp], end: Union[str, Timestamp]) -> bool:
+        """ Check if the data contained within this Datasource overlaps with the 
+            dates given.
+
+            Args:
+                start: Start datetime
+                end: End datetime
+            Returns:
+                bool: True if overlap
+        """
+        from pandas import Timestamp
+
+        start = Timestamp(start)
+        end = Timestamp(end)
+
+        return (start <= self._end_datetime) and (end >= self._start_datetime)
+
+    def keys_in_daterange(self, daterange: str) -> bool:
         """ Return the keys for data within the specified daterange
 
         Args:

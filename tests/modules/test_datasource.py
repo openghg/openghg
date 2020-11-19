@@ -451,14 +451,27 @@ def test_in_daterange(data):
     d._data_keys["latest"]["2015-01-30-10:52:30+00:00_2016-01-30-14:20:30+00:00"] = ['data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2015-01-30-10:52:30+00:00_2016-01-30-14:20:30+00:00']
     d._data_keys["latest"]["2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00"] = ['data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00']
 
-    keys = d.in_daterange(daterange=daterange)
+    keys = d.keys_in_daterange(daterange=daterange)
 
     assert keys[0].split("/")[-1] == '2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00'
 
 
+def test_shallow_then_load_data(data):
+    metadata = data["ch4"]["metadata"]
+    data = data["ch4"]["data"]
 
+    d = Datasource()
+    d.add_data(metadata=metadata, data=data)
+    d.save()
 
+    new_d = Datasource.load(uuid=d.uuid(), shallow=True)
 
+    assert not new_d._data 
 
+    ds_data = new_d.data()
 
+    assert ds_data
 
+    ch4_data = ds_data["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"]
+
+    assert ch4_data.time[0] == pd.Timestamp("2014-01-30T10:52:30")
