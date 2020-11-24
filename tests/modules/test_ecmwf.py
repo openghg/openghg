@@ -2,7 +2,6 @@ import pytest
 from openghg.modules import retrieve_met
 from requests_mock import ANY
 from pandas import Timestamp
-import requests
 
 
 @pytest.fixture(scope="session")

@@ -63,14 +63,11 @@ def retrieve_met(site: str, network: str, years: Union[str, List[str]]) -> METDa
 
     # Retrieve metadata from Copernicus about the dataset, this includes
     # the location of the data netCDF file.
-    # result = cds_client.retrieve(name=dataset_name, request=request)
-    # Download the data itself
-    # dataset = _download_data(url=result.location)
-    dataset = xr.open_dataset("/home/gar/Documents/Devel/RSE/openghg/tests/data/request_return.nc")
+    result = cds_client.retrieve(name=dataset_name, request=request)
 
-    # Add some information to the metadata
-    request["site"] = site
-    request["network"] = network
+    # Download the data itself
+    dataset = _download_data(url=result.location)
+    # dataset = xr.open_dataset("/home/gar/Documents/Devel/RSE/openghg/tests/data/request_return.nc")
 
     # We replace the date data with a start and end date here
     start_date = str(timestamp_tzaware(f"{years[0]}-1-1"))
@@ -82,8 +79,10 @@ def retrieve_met(site: str, network: str, years: Union[str, List[str]]) -> METDa
         "variable": request["variable"],
         "pressure_level": request["pressure_level"],
         "area": request["area"],
+        "site": site,
+        "network": network,
         "start_date": start_date,
-        "end_date": end_date
+        "end_date": end_date,
     }
 
     return METData(data=dataset, metadata=metadata)
@@ -126,7 +125,7 @@ def _download_data(url: str) -> xr.Dataset:
     try:
         dataset = xr.open_dataset(data)
     except ValueError:
-        raise ValueError(f"Invalid data returned, cannot create dataset.")
+        raise ValueError("Invalid data returned, cannot create dataset.")
 
     return dataset
 
@@ -157,10 +156,15 @@ def _get_site_loc(site: str, network: str) -> Tuple[str]:
 
     site_info = load_hugs_json("acrg_site_info.json")
 
-    latitude = site_info[site][network]["latitude"]
-    longitute = site_info[site][network]["longitude"]
-    inlet_height = site_info[site][network]["height_name"]
-    site_height = site_info[site][network]["height_station_masl"]
+    try:
+        site_data = site_info[site][network]
+
+        latitude = site_data["latitude"]
+        longitute = site_data["longitude"]
+        inlet_height = site_data["height_name"]
+        site_height = site_data["height_station_masl"]
+    except KeyError as e:
+        raise KeyError(f"Incorrect site or network : {e}")
 
     return latitude, longitute, inlet_height, site_height
 

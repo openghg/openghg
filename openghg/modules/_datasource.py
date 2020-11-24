@@ -209,13 +209,7 @@ class Datasource:
         else:
             self._data = additional_data
 
-        if data_type == "timeseries":
-            self._data_type = data_type
-            self.add_metadata(key="data_type", value=data_type)
-        else:
-            self._data_type = "footprint"
-            self.add_metadata(key="data_type", value="footprint")
-
+        self.add_metadata(key="data_type", value=data_type)
         self.update_daterange()
 
     def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
@@ -571,10 +565,10 @@ class Datasource:
         return self._data
 
     def update_daterange(self) -> None:
-        """Update the dates stored by this Datasource
+        """ Update the dates stored by this Datasource
 
-        Returns:
-            None
+            Returns:
+                None
         """
         # If we've only shallow loaded (without the data)
         # this Datasource we use the latest data keys
@@ -654,7 +648,7 @@ class Datasource:
 
         start_date = Timestamp(start_date)
         end_date = Timestamp(end_date)
-
+        return True
         return (start_date <= self._end_datetime) and (end_date >= self._start_datetime)
 
     def keys_in_daterange(self, daterange: str) -> bool:

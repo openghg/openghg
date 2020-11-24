@@ -42,7 +42,7 @@ class METStore(BaseModule):
         data["stored"] = self._stored
         data["datasource_uuids"] = self._datasource_uuids
         data["datasource_names"] = self._datasource_names
-        data["hashes"] = self._hashes
+        data["file_hashes"] = self._hashes
 
         return data
 
@@ -96,7 +96,7 @@ class METStore(BaseModule):
         if result is None:
             result = retrieve_met(site=site, network=network, years=years)
 
-            store.store(met_data=result)
+            store._store(met_data=result)
 
         return result
 
@@ -112,15 +112,16 @@ class METStore(BaseModule):
         """
         from openghg.modules import Datasource, METData
 
-        datasources = [Datasource.load(uuid=d.uuid(), shallow=True) for d in self._datasource_uuids]
+        datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in self._datasource_uuids]
 
         # We should only get one datasource here currently
         for datasource in datasources:
             if datasource.search_metadata(search_terms=search_terms, find_all=True):
                 if datasource.in_daterange(start_date=start_date, end_date=end_date):
-                    return METData(data=datasource.data(), metadata=datasource.metadata())
+                    data = next(iter(datasource.data().values()))
+                    return METData(data=data, metadata=datasource.metadata())
 
-    def store(self, met_data) -> None:
+    def _store(self, met_data) -> None:
         """ Store MET data within a Datasource
 
             Here we do some processing on the request JSON to
@@ -129,23 +130,16 @@ class METStore(BaseModule):
 
         """
         from openghg.modules import Datasource
-        from pandas import Timestamp
 
         metadata = met_data.metadata
-
-        print(metadata)
-        # Adding in some abilities we'll need in the future when we do more
-        # complex searching for MET data over time periods
-        try:
-            metadata["start_date"] = str(Timestamp(f"{metadata['year'][0]}-1-1"))
-            metadata["end_date"] = str(Timestamp(f"{metadata['year'][0]}-12-31"))
-        except (KeyError, IndexError):
-            metadata["start_date"] = "NA"
-            metadata["end_date"] = "NA"
 
         datasource = Datasource()
         datasource.add_data(metadata=metadata, data=met_data.data, data_type="met")
         datasource.save()
 
-        name = "_".join(metadata["site"], metadata["network"], metadata["year"])
+        date_str = f"{metadata['start_date']}_{metadata['end_date']}"
+
+        name = "_".join((metadata["site"], metadata["network"], date_str))
         self._datasource_uuids[datasource.uuid()] = name
+        # Write this updated object back to the object store
+        self.save()
