@@ -149,11 +149,18 @@ class Datasource:
         if data_type not in data_types:
             raise TypeError(f"Incorrect data type selected. Please select from one of {data_types}")
 
-        # Ensure metadata values are all lowercase
-        if data_type != "footprint":
-            metadata = {k: v.lower() for k, v in metadata.items() if v is not None}
+        for k, v in metadata.items():
+            if v is None:
+                continue
 
-        self._metadata.update(metadata)
+            k = k.lower()
+            # We might have a list of lat/longs or something
+            try:
+                v = v.lower()
+            except AttributeError:
+                pass
+
+            self._metadata[k] = v
 
         # We expect a tuple below but won't group footprint data at the moment, so create one here
         if data_type == "footprint":
@@ -633,7 +640,7 @@ class Datasource:
         else:
             return True in results
 
-    def in_daterange(self, start: Union[str, Timestamp], end: Union[str, Timestamp]) -> bool:
+    def in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> bool:
         """ Check if the data contained within this Datasource overlaps with the 
             dates given.
 
@@ -645,10 +652,10 @@ class Datasource:
         """
         from pandas import Timestamp
 
-        start = Timestamp(start)
-        end = Timestamp(end)
+        start_date = Timestamp(start_date)
+        end_date = Timestamp(end_date)
 
-        return (start <= self._end_datetime) and (end >= self._start_datetime)
+        return (start_date <= self._end_datetime) and (end_date >= self._start_datetime)
 
     def keys_in_daterange(self, daterange: str) -> bool:
         """ Return the keys for data within the specified daterange

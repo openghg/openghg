@@ -26,8 +26,9 @@ def retrieve_met(site: str, network: str, years: Union[str, List[str]]) -> METDa
         Args:
             site: Three letter sitec code
             network: Network
-            start_date: Start date
-            end_date: End date
+            years: Year(s) of data required
+        Returns:
+            METData: METData object holding data and metadata
     """
     latitude, longitude, inlet_height, site_height = _get_site_loc(site=site, network=network)
 
@@ -85,9 +86,7 @@ def retrieve_met(site: str, network: str, years: Union[str, List[str]]) -> METDa
         "end_date": end_date
     }
 
-    ecmwf_data = METData(data=dataset, metadata=metadata)
-
-    return ecmwf_data
+    return METData(data=dataset, metadata=metadata)
 
 
 def _download_data(url: str) -> xr.Dataset:
@@ -107,8 +106,7 @@ def _download_data(url: str) -> xr.Dataset:
                             requests.codes.too_many_requests,
                             requests.codes.request_timeout]
 
-    # How long to wait (in seconds) for the server to return data
-    timeout = 20
+    timeout = 20  # seconds
 
     retry_strategy = Retry(
         total=3,
@@ -133,7 +131,7 @@ def _download_data(url: str) -> xr.Dataset:
     return dataset
 
 
-def _two_closest_values(diff) -> np.ndarray:
+def _two_closest_values(diff: np.ndarray) -> np.ndarray:
     """ Get location of two closest values in an array of differences.
 
         Args:
@@ -216,7 +214,7 @@ def _get_site_pressure(inlet_height: List, site_height: float) -> List[float]:
     return measured_pressure
 
 
-def _altitude_to_ecmwf_pressure(measure_pressure) -> List:
+def _altitude_to_ecmwf_pressure(measure_pressure: np.ndarray) -> List:
     """ Find out what pressure levels are required from ERA5. 
 
         Args:

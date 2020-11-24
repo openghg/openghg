@@ -22,7 +22,7 @@ def test_retrieve_met(requests_mock, mock_data, mock_return):
     requests_mock.post(ANY, json=mock_return, status_code=200)
     requests_mock.get("https://www.example.com", content=mock_data, status_code=503)
 
-    ecm = retrieve_met(site="CGO", network="AGAGE", year="2012")
+    ecm = retrieve_met(site="CGO", network="AGAGE", years="2012")
 
     assert ecm.data.time[0] == Timestamp("2012-01-01T00:00:00.000000000")
     assert ecm.data.latitude[0] == -40.5
@@ -36,4 +36,4 @@ def test_receive_404(requests_mock, mock_return, mock_data):
     requests_mock.get("https://www.example.com", text=mock_content, status_code=404)
 
     with pytest.raises(ValueError):
-        retrieve_met(site="CGO", network="AGAGE", year="2012")
+        retrieve_met(site="CGO", network="AGAGE", years="2012")

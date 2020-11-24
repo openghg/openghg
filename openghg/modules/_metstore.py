@@ -1,4 +1,5 @@
 from openghg.modules import BaseModule
+from pandas import Timestamp
 from typing import Dict, List, Tuple, Optional, Union
 
 from openghg.modules import METData
@@ -10,6 +11,7 @@ class METStore(BaseModule):
         Currently met data is retrieved from the ECMWF Copernicus data storage
         archive and then cached locally.
     """
+
     _root = "METStore"
     _uuid = "9fcabd0c-9b68-4ab4-a116-bc30a4472d67"
 
@@ -84,41 +86,39 @@ class METStore(BaseModule):
 
         store = METStore.load()
 
+        # We'll just do full years for now, I don't think it's a huge amount of data (currently)
         start_date = Timestamp(f"{years[0]}-1-1")
         end_date = Timestamp(f"{years[-1]}-12-31")
 
-        result = store.search(search_terms=[site, network], daterange=years)
+        result = store.search(search_terms=[site, network], start_date=start_date, end_date=end_date)
 
         # Retrieve from the Copernicus store
         if result is None:
             result = retrieve_met(site=site, network=network, years=years)
 
-            store.store(met_data=result)          
+            store.store(met_data=result)
 
         return result
 
-    def search(self, search_terms: Union[str, List, Tuple]) -> METData:
+    def search(
+        self, search_terms: Union[str, List, Tuple], start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]
+    ) -> Union[METData, None]:
         """ Search the stored MET data
 
             Args:
                 search_terms: Search term(s)
             Returns:
-                METData: METData object
+                METData or None: METData object if found else None
         """
         from openghg.modules import Datasource, METData
 
         datasources = [Datasource.load(uuid=d.uuid(), shallow=True) for d in self._datasource_uuids]
 
         # We should only get one datasource here currently
-        met = None
         for datasource in datasources:
             if datasource.search_metadata(search_terms=search_terms, find_all=True):
-                if datasource.in_daterange()
-                met = METData(data=datasource.data(), metadata=datasource.metadata())
-
-                return met
-
-        return met
+                if datasource.in_daterange(start_date=start_date, end_date=end_date):
+                    return METData(data=datasource.data(), metadata=datasource.metadata())
 
     def store(self, met_data) -> None:
         """ Store MET data within a Datasource
@@ -132,6 +132,8 @@ class METStore(BaseModule):
         from pandas import Timestamp
 
         metadata = met_data.metadata
+
+        print(metadata)
         # Adding in some abilities we'll need in the future when we do more
         # complex searching for MET data over time periods
         try:

@@ -5,7 +5,7 @@ from timeit import default_timer as timer
 def test_retrieve():
 
     start = timer()
-    met = METStore.retrieve(site="CGO", network="AGAGE", year="2012")
+    met = METStore.retrieve(site="CGO", network="AGAGE", years="2012")
     elapsed = timer() - start
 
     print(f"To download a whole year's data it took : {elapsed} s")
