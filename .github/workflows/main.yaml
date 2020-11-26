@@ -41,6 +41,9 @@ jobs:
     - name: Lint with flake8
       run: |
         flake8 openghg/ --count --statistics
+    - name: Create mock cdsapi config file
+      run: |
+        echo $'url: https://www.openghg.org\nkey: 00000:f5690ad7-test-test-test-6fb0573991ca\n' > ~/.cdsapirc
     - name: Test with pytest
       env:
         OPENGHG_PATH: /tmp/openghg_store
