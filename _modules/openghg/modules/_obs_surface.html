@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.modules._obs_surface &mdash; OpenGHG 0+untagged.1.g0ddaedd documentation</title>
+  <title>openghg.modules._obs_surface &mdash; OpenGHG 0+untagged.1.g23213fa documentation</title>
   
 
   
@@ -265,7 +265,11 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">filepath</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepath</span><span class="p">]</span>
 
-        <span class="n">data_type</span> <span class="o">=</span> <span class="n">DataTypes</span><span class="p">[</span><span class="n">data_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">DataTypes</span><span class="p">[</span><span class="n">data_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incorrect data type </span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> selected.&quot;</span><span class="p">)</span>
+
         <span class="n">data_obj</span> <span class="o">=</span> <span class="n">load_object</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
 
         <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
