@@ -19,10 +19,10 @@ from ._local_store import (
 
 
 if _sys.version_info.major < 3:
-    raise ImportError("openghg requires Python 3.6 minimum")
+    raise ImportError("openghg requires Python 3.7 minimum")
 
-if _sys.version_info.minor < 6:
-    raise ImportError("openghg requires Python 3.6 minimum")
+if _sys.version_info.minor < 7:
+    raise ImportError("openghg requires Python 3.7 minimum")
 
 # from ._hugs_objstore import (delete_object, exists, get_abs_filepaths, get_bucket,
 #                              get_object, get_object_from_json, get_md5,

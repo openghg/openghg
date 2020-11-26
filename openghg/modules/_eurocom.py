@@ -13,13 +13,13 @@ class EUROCOM:
     """
 
     def __init__(self):
-        from openghg.util import load_hugs_json
+        from openghg.util import load_json
 
         self._eurocom_params = {}
         # Sampling period of EUROCOM data in seconds
         self._sampling_period = 60
 
-        data = load_hugs_json(filename="attributes.json")
+        data = load_json(filename="attributes.json")
         self._eurocom_params = data["EUROCOM"]
 
     def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None) -> Dict:

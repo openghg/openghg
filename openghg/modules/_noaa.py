@@ -11,12 +11,12 @@ class NOAA(BaseModule):
     """
 
     def __init__(self):
-        from openghg.util import load_hugs_json
+        from openghg.util import load_json
 
         # Holds parameters used for writing attributes to Datasets
-        data = load_hugs_json("attributes.json")
+        data = load_json("attributes.json")
         self._noaa_params = data["NOAA"]
-        self._site_data = load_hugs_json("acrg_site_info.json")
+        self._site_data = load_json("acrg_site_info.json")
 
     def read_file(
         self,

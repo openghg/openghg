@@ -86,9 +86,9 @@ def get_single_site(
     import numpy as np
     from xarray import concat as xr_concat
     from openghg.localclient import Search
-    from openghg.util import load_hugs_json
+    from openghg.util import load_json
 
-    site_info = load_hugs_json(filename="acrg_site_info.json")
+    site_info = load_json(filename="acrg_site_info.json")
     site = site.upper()
 
     if site not in site_info:
@@ -235,10 +235,10 @@ def synonyms(species: str) -> str:
     Returns:
         str: Matched species string
     """
-    from openghg.util import load_hugs_json
+    from openghg.util import load_json
 
     # Load in the species data
-    species_data = load_hugs_json(filename="acrg_species_info.json")
+    species_data = load_json(filename="acrg_species_info.json")
 
     # First test whether site matches keys (case insensitive)
     matched_strings = [k for k in species_data if k.upper() == species.upper()]

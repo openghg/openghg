@@ -10,14 +10,14 @@ class GCWERKS:
 
     """
     def __init__(self):
-        from openghg.util import load_hugs_json
+        from openghg.util import load_json
 
         self._sampling_period = 0
         # Load site data
-        data = load_hugs_json(filename="process_gcwerks_parameters.json")
+        data = load_json(filename="process_gcwerks_parameters.json")
         self._gc_params = data["GCWERKS"]
         # Site codes for inlet readings
-        self._site_codes = load_hugs_json(filename="site_codes.json")
+        self._site_codes = load_json(filename="site_codes.json")
 
     def find_files(self, data_path: Union[str, Path], skip_str: Optional[Union[str, List[str]]] = "sf6") -> List[Tuple[Path, Path]]:
         """ A helper file to find GCWERKS data and precisions file in a given folder. 

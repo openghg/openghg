@@ -11,14 +11,14 @@ class THAMESBARRIER(BaseModule):
     """
 
     def __init__(self):
-        from openghg.util import load_hugs_json
+        from openghg.util import load_json
 
         # Holds parameters used for writing attributes to Datasets
         self._tb_params = {}
         # Sampling period of  data in seconds
         self._sampling_period = "NA"
 
-        data = load_hugs_json(filename="attributes.json")
+        data = load_json(filename="attributes.json")
         self._tb_params = data["TMB"]
 
     def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, network: Optional[str] = None) -> Dict:

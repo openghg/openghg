@@ -149,12 +149,12 @@ def _get_site_loc(site: str, network: str) -> Tuple[str]:
         Returns:
             dict: Dictionary of site data
     """
-    from openghg.util import load_hugs_json
+    from openghg.util import load_json
 
     network = network.upper()
     site = site.upper()
 
-    site_info = load_hugs_json("acrg_site_info.json")
+    site_info = load_json("acrg_site_info.json")
 
     try:
         site_data = site_info[site][network]
