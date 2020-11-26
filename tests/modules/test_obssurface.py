@@ -242,6 +242,14 @@ def test_read_icos():
 
     assert list(obs._datasource_names.keys())[0] == "tta.co2.1minute.222m.min_co2"
 
+def test_read_beaco2n():
+    get_local_bucket(empty=True)
+
+    data_filepath = get_datapath(filename="Charlton_Community_Center.csv", data_type="BEACO2N")
+
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="BEACO2N")
+
+    print(results)
 
 def test_read_noaa():
     get_local_bucket(empty=True)
