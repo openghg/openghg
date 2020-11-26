@@ -12,6 +12,7 @@ class DataTypes(Enum):
     THAMESBARRIER = "THAMESBARRIER"
     ICOS = "ICOS"
     CRANFIELD = "CRANFIELD"
+    BEACO2N = "BEACO2N"
 
 
 class ObsTypes(Enum):

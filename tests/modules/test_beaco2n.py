@@ -12,7 +12,7 @@ def test_read_file():
     beacon = BEACO2N()
     filepath = get_datapath(filename="Charlton_Community_Center.csv", data_type="BEACO2N") 
 
-    result = beacon.read_file(filepath=filepath)
+    result = beacon.read_file(data_filepath=filepath)
 
     pm_data = result["pm"]["data"]
     co2_data = result["co2"]["data"]
@@ -60,7 +60,7 @@ def test_incorrect_file_read_raises():
 
     beacon = BEACO2N()
     with pytest.raises(ValueError):
-        beacon.read_file(filepath=filepath)
+        beacon.read_file(data_filepath=filepath)
 
 
 def test_incorrect_site_raises():
@@ -69,5 +69,5 @@ def test_incorrect_site_raises():
     beacon = BEACO2N()
 
     with pytest.raises(ValueError):
-        beacon.read_file(filepath=filepath)
+        beacon.read_file(data_filepath=filepath)
 

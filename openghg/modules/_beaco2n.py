@@ -8,7 +8,7 @@ class BEACO2N:
     """ Read BEACO2N data files
 
     """
-    def read_file(self, filepath: Union[str, Path], site: Optional[str] = None) -> Dict:
+    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, **kwargs) -> Dict:
         """ Read BEACO2N data files
 
             Args:
@@ -26,11 +26,11 @@ class BEACO2N:
         rename_cols = {"PM_ug/m3": "pm", "PM_ug/m3_QC_level": "pm_qc", "co2_ppm": "co2", "co2_ppm_QC_level": "co2_qc"}
         use_cols = [1, 5, 6, 7, 8]
 
-        filepath = Path(filepath)
+        data_filepath = Path(data_filepath)
 
         try:
             data = pd.read_csv(
-                filepath,
+                data_filepath,
                 index_col="time",
                 parse_dates=datetime_columns,
                 na_values=[-999.0, "1a"],
@@ -41,7 +41,7 @@ class BEACO2N:
 
         beaco2n_site_data = load_json("beaco2n_site_data.json")
 
-        site_name = filepath.stem.upper().replace(" ", "").replace("_", "")
+        site_name = data_filepath.stem.upper().replace(" ", "").replace("_", "")
 
         try:
             site_metadata = beaco2n_site_data[site_name]

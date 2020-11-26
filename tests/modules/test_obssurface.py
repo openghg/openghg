@@ -242,6 +242,7 @@ def test_read_icos():
 
     assert list(obs._datasource_names.keys())[0] == "tta.co2.1minute.222m.min_co2"
 
+
 def test_read_beaco2n():
     get_local_bucket(empty=True)
 
@@ -249,7 +250,19 @@ def test_read_beaco2n():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="BEACO2N")
 
-    print(results)
+    uuid = results["processed"]["Charlton_Community_Center.csv"]["Charlton_Community_Center_co2"]
+
+    co2_data = Datasource.load(uuid=uuid, shallow=False).data()
+    co2_data = co2_data["2015-04-18-04:00:00+00:00_2015-04-18-10:00:00+00:00"]
+
+    assert co2_data.time[0] == Timestamp("2015-04-18T04:00:00")
+    assert co2_data["co2"][0] == 410.4
+    assert co2_data["co2_qc"][0] == 2
+
+    obs = ObsSurface.load()
+
+    assert list(obs._datasource_names.keys())[0] == "Charlton_Community_Center_pm"
+
 
 def test_read_noaa():
     get_local_bucket(empty=True)

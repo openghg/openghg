@@ -99,7 +99,11 @@ class ObsSurface(BaseModule):
         if not isinstance(filepath, list):
             filepath = [filepath]
 
-        data_type = DataTypes[data_type.upper()].name
+        try:
+            data_type = DataTypes[data_type.upper()].name
+        except KeyError:
+            raise ValueError(f"Incorrect data type {data_type} selected.")
+
         data_obj = load_object(class_name=data_type)
 
         obs = ObsSurface.load()
