@@ -2,11 +2,14 @@ import pytest
 from openghg.modules import retrieve_met
 from requests_mock import ANY
 from pandas import Timestamp
+from pathlib import Path
 
 
 @pytest.fixture(scope="session")
 def mock_data():
-    with open("/home/gar/Documents/Devel/RSE/openghg/tests/data/request_return.nc", "rb") as f:
+    filepath = Path(__file__).resolve(strict=True).parent.parent.joinpath(f"data/request_return.nc")
+
+    with open(filepath, "rb") as f:
         mock_data = f.read()
 
     return mock_data
