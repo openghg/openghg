@@ -3,3 +3,10 @@ fdk==0.0.35
 flake8
 pytest
 pytest-tornasync
+pytest-cov
+nbsphinx
+requests-mock
+sphinx
+sphinx-issues
+sphinx_rtd_theme
+sphinxcontrib-programoutput
