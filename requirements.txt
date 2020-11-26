@@ -2,6 +2,7 @@ Acquire @ git+git://github.com/gareth-j/acquire@testStore#egg=Acquire
 backports-datetime-fromisoformat
 bqplot==0.11.9
 cachetools
+cdsapi
 # cfchecker @ git+git://github.com/gareth-j/cf-checker@removeBasestring#egg=cfchecker
 cryptography
 ipyleaflet
@@ -15,11 +16,13 @@ pandas
 paramiko
 pyotp
 pytz
+pyvis
 PyYAML
 qrcode[pil]
 requests
 scipy
 tables
 tblib
+tqdm
 voila
 xarray

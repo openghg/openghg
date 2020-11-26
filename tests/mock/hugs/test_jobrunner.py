@@ -9,12 +9,12 @@
 # import os
 # import uuid
 
-# from HUGS.Client import Process
-# from HUGS.ObjectStore import get_local_bucket
+# from openghg.client import Process
+# from openghg.objectstore import get_local_bucket
 # from Acquire.Client import ACLRule, User, Drive, Service, StorageCreds, PAR, Authorisation, Location
 # from Acquire.ObjectStore import ObjectStore
-# from HUGS.Client import JobRunner
-# from HUGS.Jobs import JobDrive
+# from openghg.client import JobRunner
+# from openghg.jobs import JobDrive
 
 # @pytest.fixture(scope="session")
 # def tempdir(tmpdir_factory):
@@ -68,10 +68,10 @@
 #     par_lifetime = datetime.datetime.now() + datetime.timedelta(days=1)
 #     par = PAR(location=location, user=authenticated_user,
 #   expires_datetime=par_lifetime, aclrule=ACLRule.writer())
-#     par_secret = hugs.encrypt_data(par.secret())
+#     par_secret = openghg.encrypt_data(par.secret())
 
 #     password = os.environ["RUNNER_PWD"]
-#     encrypted_password = hugs.encrypt_data(password)
+#     encrypted_password = openghg.encrypt_data(password)
 
 #     args = {}
 #     args["authorisation"] = auth.to_data()
@@ -80,7 +80,7 @@
 #     args["requirements"] = reqs
 #     args["key_password"] = encrypted_password
 
-#     response = hugs.call_function(function="job_runner", args=args)
+#     response = openghg.call_function(function="job_runner", args=args)
 
 #     print(response)
 

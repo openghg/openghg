@@ -1,7 +1,7 @@
 from Acquire.Client import Authorisation
 from Acquire.Service import get_this_service
 
-from HUGS.Jobs import run_job
+from openghg.jobs import run_job
 
 
 def job_runner(args):
@@ -23,7 +23,7 @@ def job_runner(args):
     # # Pass the PAR through to allow use in the control script
     job_data["par"] = args["par"]
     # Pass the decrypted PAR secret here as we're on the server already
-    job_data["par_secret"] = hugs.decrypt_data(args["par_secret"])
+    job_data["par_secret"] = openghg.decrypt_data(args["par_secret"])
 
     hostname = job_data["hostname"]
     username = job_data["username"]
@@ -35,7 +35,7 @@ def job_runner(args):
         known_host = False
 
     # Decrypt the password we use to access the private key
-    password = hugs.decrypt_data(args["key_password"])
+    password = openghg.decrypt_data(args["key_password"])
 
     results = run_job(
         username=username,

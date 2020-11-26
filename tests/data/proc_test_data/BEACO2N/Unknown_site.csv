@@ -1,0 +1,2 @@
+local_timestamp,datetime,node_id,epoch,julian_day,PM_ug/m3,PM_ug/m3_QC_level,co2_ppm,co2_ppm_QC_level
+2015-04-17 21:00:00,2015-04-18 04:00:00,8,1429329600.0,108.16666666666667,20.3,2,410.4,2

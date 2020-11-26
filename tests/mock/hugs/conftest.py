@@ -1,6 +1,6 @@
 # import pytest
 
-# from HUGS.Modules import CRDS, GC
+# from openghg.modules import CRDS, GC
 
 # # If this doesn't exist in the object store, create it
 # @pytest.fixture(scope="session", autouse=True)

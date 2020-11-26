@@ -1,6 +1,6 @@
 def search(args):
     from Acquire.ObjectStore import string_to_datetime
-    from HUGS.Processing import search as hugs_search
+    from openghg.processing import search as hugs_search
 
     if "start_datetime" in args:
         start_datetime = string_to_datetime(args["start_datetime"])

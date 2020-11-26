@@ -1,0 +1,135 @@
+{
+    "name_code":
+    {
+        "aspendale": "ASP",
+        "bilsdale": "BSD", 
+        "bristol": "BRI",
+        "capegrim": "CGO", 
+        "capepoint": "CPT", 
+        "carnsore": "CPI",
+        "heathfield": "HFD", 
+        "gosan": "GSN",
+        "india": "DJI",
+        "jungfraujoch": "JFJ", 
+        "mtecimone": "CMN", 
+        "macehead": "MHD",
+        "ridgehill": "RGL", 
+        "barbados": "RPB", 
+        "shangdianzi": "SDZ",
+        "sio": "SIO", 
+        "samoa": "SMO", 
+        "tacolneston": "TAC",
+        "trinidadhead": "THD", 
+        "angus": "TTA", 
+        "zeppelin": "ZEP"
+    },
+    "code_name":
+    {
+        "ASP": "aspendale",
+        "BSD": "bilsdale",
+        "BRI": "bristol",
+        "CGO": "capegrim",
+        "CPT": "capepoint",
+        "CPI": "carnsore",
+        "DJI": "india",
+        "HFD": "heathfield",
+        "GSN": "gosan",
+        "JFJ": "jungfraujoch",
+        "CMN": "mtecimone",
+        "MHD": "macehead",
+        "RGL": "ridgehill",
+        "RPB": "barbados",
+        "SDZ": "shangdianzi",
+        "SIO": "sio",
+        "SMO": "samoa",
+        "TAC": "tacolneston",
+        "THD": "trinidadhead",
+        "TTA": "angus",
+        "ZEP": "zeppelin"
+    },
+
+    "locations":
+    {
+        "BSD": {
+            "latitude": 54.942544,
+            "longitude":-1.369204,
+            "name":"Bilsdale"
+        },
+        "CGO": {
+            "latitude": 40.683,
+            "longitude": 144.689,
+            "name": "Cape Grim"
+        },
+        "CPT": {
+            "latitude": -34.356,
+            "longitude": 18.495,
+            "name": "Cape Point"
+        },
+        "HFD": {
+            "latitude": 50.967430,
+            "longitude": 0.255235,
+            "name": "Heathfield"
+        },
+        "GSN": {
+            "latitude": 33,
+            "longitude": 126,
+            "name": "Gosan"
+        },
+        "JFJ": {
+            "latitude": 46.547,
+            "longtiude": 7.985,
+            "name": "Jungfraujoch" 
+        },
+        "CMN": {
+            "latitude": 44.197,
+            "longitude": 10.703,
+            "name": "Monte Cimone"
+        },
+        "MHD": {
+            "latitude": 53.3252,
+            "longitude": -9.9041,
+            "name": "Macehead"
+        },
+        "RGL": {
+            "latitude": 52.021,
+            "longitude": -2.713,
+            "name": "Ridge Hill"
+        },
+        "RPB": {
+            "latitude": 13.165,
+            "longtiude": -59.433,
+            "name": "Barbados"
+        },
+        "SDZ": {
+            "latitude": 40.131,
+            "longitude": 117.269,
+            "name": "Shangdianzi"
+        },
+        "SIO": "sio",
+        "SMO": {
+            "latitude": 14.25,
+            "longtiude": 17,
+            "name": "Samoa"
+        },
+        "TAC": {
+            "latitude": 52.511,
+            "longitude": 1.155,
+            "name": "Tacolneston"
+        },
+        "THD": {
+            "latitude": 41.05,
+            "longitude": 124.15,
+            "name": "Trinidad Head"
+        },
+        "TTA": {
+            "latitude": 56.702,
+            "longitude": -2.909,
+            "name": "Angus"
+        },
+        "ZEP": {
+            "latitude": 78.907,
+            "longitude": 11.889,
+            "name": "Zeppelin"
+        }
+    }
+}

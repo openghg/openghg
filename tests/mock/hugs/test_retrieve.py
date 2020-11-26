@@ -3,8 +3,8 @@ import os
 import pandas as pd
 import pytest
 from Acquire.Client import PAR, Authorisation, Drive, Service, StorageCreds
-from HUGS.Client import Search
-from HUGS.ObjectStore import get_local_bucket
+from openghg.client import Search
+from openghg.objectstore import get_local_bucket
 
 
 @pytest.fixture(scope="session")
@@ -27,7 +27,7 @@ def crds(authenticated_user):
     par = PAR(location=filemeta.location(), user=authenticated_user)
 
     hugs = Service(service_url="hugs")
-    par_secret = hugs.encrypt_data(par.secret())
+    par_secret = openghg.encrypt_data(par.secret())
 
     auth = Authorisation(resource="process", user=authenticated_user)
 
@@ -39,7 +39,7 @@ def crds(authenticated_user):
         "source_name": "bsd.picarro.1minute.248m",
     }
 
-    hugs.call_function(function="process", args=args)
+    openghg.call_function(function="process", args=args)
 
 
 @pytest.mark.skip(reason="Need to fix dependence on Acquire")

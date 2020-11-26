@@ -66,9 +66,6 @@ instance/
 # Scrapy stuff:
 .scrapy
 
-# Sphinx documentation
-docs/_build/
-
 # PyBuilder
 target/
 
@@ -134,3 +131,6 @@ runner.txt
 services/base_image/runner_key
 services/base_image/pass_key
 keys/
+
+# Sphinx documentation
+doc/build/*

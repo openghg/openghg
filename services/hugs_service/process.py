@@ -1,7 +1,7 @@
 from Acquire.Client import PAR, Authorisation
 from Acquire.Service import get_this_service
 
-from HUGS.Processing import process_data
+from openghg.processing import process_data
 
 
 def process(args):
@@ -26,7 +26,7 @@ def process(args):
 
     hugs = get_this_service(need_private_access=True)
 
-    data_secret = hugs.decrypt_data(data_secret)
+    data_secret = openghg.decrypt_data(data_secret)
     data_filename = data_par.resolve(secret=data_secret)
     # Here we're downloading the data to the tmp directory
     # Be good if we could load it directly from the object store
@@ -35,7 +35,7 @@ def process(args):
     if data_type == "GC":
         precision_par = PAR.from_data(args["par"]["precision"])
         precision_secret = args["par_secret"]["precision"]
-        precision_secret = hugs.decrypt_data(precision_secret)
+        precision_secret = openghg.decrypt_data(precision_secret)
         precision_filename = precision_par.resolve(precision_secret)
         precision_file = precision_filename.download(dir="/tmp")
         site = args["site"]
