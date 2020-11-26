@@ -32,7 +32,6 @@ jobs:
         python -m pip install --upgrade pip wheel
         pip install -r requirements-dev.txt
         pip install .
-   
     - name: 'Clone Acquire for services folder required for tests'
       run: |
         git clone -b testStore https://github.com/gareth-j/acquire.git ../acquire
@@ -44,6 +43,10 @@ jobs:
     - name: Create mock cdsapi config file
       run: |
         echo $'url: https://www.openghg.org\nkey: 00000:f5690ad7-test-test-test-6fb0573991ca\n' > ~/.cdsapirc
+    - name: Install HDF5 for Python 3.9 on macOS
+      run: |
+        brew install hdf5
+      if: matrix.python-version == 3.9 && matrix.operating-system == 'macos-latest'
     - name: Test with pytest
       env:
         OPENGHG_PATH: /tmp/openghg_store
