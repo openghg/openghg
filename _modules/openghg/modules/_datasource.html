@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.1.g4e19b0d documentation</title>
+  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.1.g442bc8f documentation</title>
   
 
   
@@ -310,16 +310,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">date_overlap</span>
 
-        <span class="n">data_types</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;footprint&quot;</span><span class="p">,</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">]</span>
+        <span class="n">data_types</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;footprint&quot;</span><span class="p">,</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="s2">&quot;met&quot;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">data_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_types</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Incorrect data type selected. Please select from one of </span><span class="si">{</span><span class="n">data_types</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Ensure metadata values are all lowercase</span>
-        <span class="k">if</span> <span class="n">data_type</span> <span class="o">!=</span> <span class="s2">&quot;footprint&quot;</span><span class="p">:</span>
-            <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="c1"># We might have a list of lat/longs or something</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
 
         <span class="c1"># We expect a tuple below but won&#39;t group footprint data at the moment, so create one here</span>
         <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;footprint&quot;</span><span class="p">:</span>
@@ -368,13 +375,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">additional_data</span>
 
-        <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span> <span class="o">=</span> <span class="n">data_type</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_metadata</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;data_type&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span> <span class="o">=</span> <span class="s2">&quot;footprint&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_metadata</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;data_type&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;footprint&quot;</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_metadata</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;data_type&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_daterange</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Datasource.get_dataframe_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.get_dataframe_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">get_dataframe_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]:</span>
@@ -589,7 +590,7 @@
 
 <div class="viewcode-block" id="Datasource.from_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.from_data">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">shallow</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Construct from a JSON-deserialised dictionary</span>
+        <span class="sd">&quot;&quot;&quot; Construct a Datasource from JSON</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            bucket: Bucket containing data</span>
@@ -718,13 +719,22 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary of data keyed by daterange</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_bucket</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span>
+            <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">date_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span><span class="p">[</span><span class="s2">&quot;latest&quot;</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]:</span>
+                <span class="n">data_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span><span class="p">[</span><span class="s2">&quot;latest&quot;</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">][</span><span class="n">date_key</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">date_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load_dataset</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">data_key</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div>
 
 <div class="viewcode-block" id="Datasource.update_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.update_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">update_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Update the dates stored by this Datasource</span>
+        <span class="sd">&quot;&quot;&quot; Update the dates stored by this Datasource</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># If we&#39;ve only shallow loaded (without the data)</span>
         <span class="c1"># this Datasource we use the latest data keys</span>
@@ -790,7 +800,24 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span> <span class="ow">in</span> <span class="n">results</span></div>
 
-<div class="viewcode-block" id="Datasource.in_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.in_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">in_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">daterange</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="Datasource.in_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.in_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">in_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">],</span> <span class="n">end_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Check if the data contained within this Datasource overlaps with the </span>
+<span class="sd">            dates given.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                start: Start datetime</span>
+<span class="sd">                end: End datetime</span>
+<span class="sd">            Returns:</span>
+<span class="sd">                bool: True if overlap</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
+
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">start_date</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_datetime</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">end_date</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_datetime</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Datasource.keys_in_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.keys_in_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">keys_in_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">daterange</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Return the keys for data within the specified daterange</span>
 
 <span class="sd">        Args:</span>
@@ -1099,7 +1126,7 @@
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Nov 10, 2020.
+        Last updated on Nov 26, 2020.
       </span>
 
     </p>

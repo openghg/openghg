@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.modules._gcwerks &mdash; OpenGHG 0+untagged.1.g4e19b0d documentation</title>
+  <title>openghg.modules._gcwerks &mdash; OpenGHG 0+untagged.1.g442bc8f documentation</title>
   
 
   
@@ -176,14 +176,14 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="GCWERKS.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_hugs_json</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_period</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="c1"># Load site data</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;GCWERKS&quot;</span><span class="p">]</span>
         <span class="c1"># Site codes for inlet readings</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_site_codes</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;site_codes.json&quot;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_site_codes</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;site_codes.json&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GCWERKS.find_files"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.find_files">[docs]</a>    <span class="k">def</span> <span class="nf">find_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">skip_str</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="s2">&quot;sf6&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot; A helper file to find GCWERKS data and precisions file in a given folder. </span>
@@ -621,7 +621,7 @@
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Nov 10, 2020.
+        Last updated on Nov 26, 2020.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>openghg.modules._noaa &mdash; OpenGHG 0+untagged.1.g4e19b0d documentation</title>
+  <title>openghg.modules._noaa &mdash; OpenGHG 0+untagged.1.g442bc8f documentation</title>
   
 
   
@@ -177,12 +177,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="NOAA.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_hugs_json</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
 
         <span class="c1"># Holds parameters used for writing attributes to Datasets</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_noaa_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;NOAA&quot;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_site_data</span> <span class="o">=</span> <span class="n">load_hugs_json</span><span class="p">(</span><span class="s2">&quot;acrg_site_info.json&quot;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_site_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;acrg_site_info.json&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="NOAA.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -367,7 +367,7 @@
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Nov 10, 2020.
+        Last updated on Nov 26, 2020.
       </span>
 
     </p>

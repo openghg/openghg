@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development API modules &mdash; OpenGHG 0+untagged.1.g4e19b0d documentation</title>
+  <title>Development API modules &mdash; OpenGHG 0+untagged.1.g442bc8f documentation</title>
   
 
   
@@ -1200,7 +1200,7 @@ the form start_end</p>
 <dl class="py method">
 <dt id="openghg.modules.Datasource.from_data">
 <em class="property">static </em><code class="sig-name descname">from_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bucket</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span></em>, <em class="sig-param"><span class="n">shallow</span><span class="p">:</span> <span class="n">bool</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.from_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.Datasource.from_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Construct from a JSON-deserialised dictionary</p>
+<dd><p>Construct a Datasource from JSON</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1295,20 +1295,21 @@ which writes a dataframe to an in-memory HDF5 file</p>
 
 <dl class="py method">
 <dt id="openghg.modules.Datasource.in_daterange">
-<code class="sig-name descname">in_daterange</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">daterange</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.in_daterange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.Datasource.in_daterange" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the keys for data within the specified daterange</p>
+<code class="sig-name descname">in_daterange</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start_date</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>pandas._libs.tslibs.timestamps.Timestamp<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">end_date</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>pandas._libs.tslibs.timestamps.Timestamp<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.in_daterange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.Datasource.in_daterange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the data contained within this Datasource overlaps with the
+dates given.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>daterange</strong> (<em>str</em>) – Daterange string of the form</p></li>
-<li><p><strong>2019-01-01T00</strong> – 00:00_2019-12-31T00:00:00</p></li>
+<li><p><strong>start</strong> – Start datetime</p></li>
+<li><p><strong>end</strong> – End datetime</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>List of keys to data</p>
+<dd class="field-even"><p>True if overlap</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list</p>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1337,6 +1338,26 @@ which writes a dataframe to an in-memory HDF5 file</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="openghg.modules.Datasource.keys_in_daterange">
+<code class="sig-name descname">keys_in_daterange</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">daterange</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.keys_in_daterange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.Datasource.keys_in_daterange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the keys for data within the specified daterange</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>daterange</strong> (<em>str</em>) – Daterange string of the form</p></li>
+<li><p><strong>2019-01-01T00</strong> – 00:00_2019-12-31T00:00:00</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of keys to data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1647,7 +1668,7 @@ this Datasource</p>
         
         &copy; Copyright 2020 OpenGHG development team
       <span class="lastupdated">
-        Last updated on Nov 10, 2020.
+        Last updated on Nov 26, 2020.
       </span>
 
     </p>
