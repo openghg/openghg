@@ -6,10 +6,10 @@ from openghg.modules import METData
 
 
 class METStore(BaseModule):
-    """ Controls the storage and retrieveal of meteorological data.
+    """Controls the storage and retrieveal of meteorological data.
 
-        Currently met data is retrieved from the ECMWF Copernicus data storage
-        archive and then cached locally.
+    Currently met data is retrieved from the ECMWF Copernicus data storage
+    archive and then cached locally.
     """
 
     _root = "METStore"
@@ -21,7 +21,7 @@ class METStore(BaseModule):
         self._creation_datetime = get_datetime_now()
         self._stored = False
         # Keyed by name - allows retrieval of UUID from name
-        self._datasource_names = {}
+        self._datasource_names = {}  
         # Keyed by UUID - allows retrieval of name by UUID
         self._datasource_uuids = {}
         # Hashes of retrieved data to ensure we aren't overwriting / duplicating
@@ -29,11 +29,11 @@ class METStore(BaseModule):
         self._hashes = {}
 
     def to_data(self) -> Dict:
-        """ Return a JSON-serialisable dictionary of object
-            for storage in object store
+        """Return a JSON-serialisable dictionary of object
+        for storage in object store
 
-            Returns:
-                dict: Dictionary version of object
+        Returns:
+            dict: Dictionary version of object
         """
         from Acquire.ObjectStore import datetime_to_string
 
@@ -47,12 +47,12 @@ class METStore(BaseModule):
         return data
 
     def save(self, bucket: Optional[Dict] = None) -> None:
-        """ Save the object to the object store
+        """Save the object to the object store
 
-            Args:
-                bucket: Bucket for data
-            Returns:
-                None
+        Args:
+            bucket: Bucket for data
+        Returns:
+            None
         """
         from openghg.objectstore import get_bucket, set_object_from_json
 
@@ -66,15 +66,15 @@ class METStore(BaseModule):
 
     @staticmethod
     def retrieve(site: str, network: str, years: Union[str, List[str]]) -> METData:
-        """ Retrieve data from either the local METStore or from a 
-            remote store if we don't have it locally
+        """Retrieve data from either the local METStore or from a
+        remote store if we don't have it locally
 
-            Args:
-                site: Three letter site code
-                network: Network name
-                year: Year(s) required
-            Returns:
-                METData: METData object holding data and metadata
+        Args:
+            site: Three letter site code
+            network: Network name
+            year: Year(s) required
+        Returns:
+            METData: METData object holding data and metadata
         """
         from openghg.modules import retrieve_met
         from pandas import Timestamp
@@ -103,12 +103,12 @@ class METStore(BaseModule):
     def search(
         self, search_terms: Union[str, List, Tuple], start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]
     ) -> Union[METData, None]:
-        """ Search the stored MET data
+        """Search the stored MET data
 
-            Args:
-                search_terms: Search term(s)
-            Returns:
-                METData or None: METData object if found else None
+        Args:
+            search_terms: Search term(s)
+        Returns:
+            METData or None: METData object if found else None
         """
         from openghg.modules import Datasource, METData
 
@@ -122,11 +122,11 @@ class METStore(BaseModule):
                     return METData(data=data, metadata=datasource.metadata())
 
     def _store(self, met_data) -> None:
-        """ Store MET data within a Datasource
+        """Store MET data within a Datasource
 
-            Here we do some processing on the request JSON to
-            make the metadata more easily searchable and of a similar
-            format to Datasources used in other modules of OpenGHG.
+        Here we do some processing on the request JSON to
+        make the metadata more easily searchable and of a similar
+        format to Datasources used in other modules of OpenGHG.
 
         """
         from openghg.modules import Datasource
