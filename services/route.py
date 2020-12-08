@@ -30,12 +30,12 @@ def route(ctx: InvokeContext, data: Union[Dict, BytesIO]) -> Response:
     args = data["args"]
 
     # Here we import the module and function from the hugs_service module
-    # Need to add openghg_service. to the start
-    base_module_name = "openghg_service"
+    # Need to add openghg_services. to the start
+    base_module_name = "openghg_services"
     module_name = ".".join((base_module_name, function_name))
 
-    # Here we import the module and function from the openghg_service module
-    # Need to add openghg_service. to the start
+    # Here we import the module and function from the openghg_services module
+    # Need to add openghg_services. to the start
     try:
         module = import_module(module_name)
         fn_to_call = getattr(module, function_name)

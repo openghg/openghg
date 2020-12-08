@@ -1,0 +1,21 @@
+FROM openghg/openghg-base:latest
+
+WORKDIR /function
+# USER root
+
+# Copy in openghg
+ADD openghg /python/openghg
+RUN python3 -m compileall /python/openghg/*
+
+# Copy in the service files
+RUN mkdir /python/openghg_service
+ADD openghg_services /python/openghg_services
+RUN python3 -m compileall /python/openghg_services/*.py
+
+# Now add in the functin that routes calls
+ADD openghg_services/route.py ./
+
+# Become the $FN_USER so that nothing runs as root
+# USER $FN_USER
+
+ENTRYPOINT ["/python/bin/fdk", "/function/route.py", "route"]

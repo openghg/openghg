@@ -1,23 +1,24 @@
-FROM chryswoods/acquire-base:latest
+FROM fnproject/python:3.8.5-dev as build-stage
 
-WORKDIR /function
-USER root
+ADD requirements.txt requirements-server.txt ./
 
-ADD requirements.txt .
+RUN apt-get update && apt-get install git -y
+# pip 20.2.1 is the version before the new resolver was introduced
+RUN pip3 install pip==20.2.4 wheel setuptools
+RUN pip3 install --target /python/ -r requirements.txt -r requirements-server.txt
 
-RUN pip3 install -U pip
+FROM fnproject/python:3.8.5
 
-RUN pip3 install --upgrade --target /python/ --no-cache --no-cache-dir \
-                 -r requirements.txt && \
-    rm -fr ~/.cache/pip /tmp* requirements.txt func.yaml Dockerfile .venv
-
-ADD HUGS $PYTHON_EXT/HUGS
-
-ADD runner_key /home/$FN_USER/.ssh/
-
-RUN python3 -m compileall $PYTHON_EXT/HUGS/*
+COPY --from=build-stage /python/ /python/
+ENV PYTHONPATH=/python
 
 ENTRYPOINT ["bash"]
 
-# Become the $FN_USER so that nothing runs as root
-USER $FN_USER
+
+# FROM fnproject/python:3.8.5
+
+# COPY --from=build-stage /function /function
+# COPY --from=build-stage /python /python
+# ENV PYTHONPATH=/python
+
+# ENTRYPOINT ["/python/bin/fdk", "/function/func.py", "handler"]
