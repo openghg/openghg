@@ -293,6 +293,4 @@ image. This ensures all dependencies are installed in the base image.
 Calling from OpenGHG
 --------------------
 
-Now we've got our functions setup and deployed to Fn we can call them from within OpenGHG. To do this please see the functions
-section of the documentation.
-
+For information on how we've setup calling functions from OpenGHG please see the :doc:`fn_usage` section of the documentation.
