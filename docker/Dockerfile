@@ -2,7 +2,6 @@ FROM openghg/openghg-base:latest
 
 ADD openghg_services/route.py /function/
 WORKDIR /function
-# USER root
 
 # Copy in openghg
 ADD openghg /python/openghg
@@ -15,6 +14,6 @@ RUN python3 -m compileall /python/openghg_services/*.py
 
 ENV PYTHONPATH=/python
 # Become the $FN_USER so that nothing runs as root
-# USER $FN_USER
+USER $FN_USER
 
 ENTRYPOINT ["/python/bin/fdk", "/function/route.py", "route"]

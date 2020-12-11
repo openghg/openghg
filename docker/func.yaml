@@ -1,0 +1,9 @@
+schema_version: 20180708
+name: openghg_root
+version: 0.0.55
+runtime: docker
+memory: 2048
+triggers:
+- name: route
+  type: http
+  source: /openghg
