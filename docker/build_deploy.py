@@ -48,6 +48,10 @@ if args.base:
     subprocess.check_call(["python", "build.py", "--tag", tag], cwd="../base_image")
 
 if args.deploy:
+    # Make sure we have an app calld openghg, we ignore its return code as this could 
+    # mean it already exists
+    subprocess.run(["fn", "create", "app", "openghg"])
+    # Build and deploy the function container
     p = subprocess.check_call(["fn", "--verbose", "deploy", "--local"])
 
 if args.push:
