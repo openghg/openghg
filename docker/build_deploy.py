@@ -4,6 +4,13 @@ import shutil
 import subprocess
 
 
+def cleanup():
+    shutil.rmtree("openghg")
+    shutil.rmtree("openghg_services")
+    os.remove("requirements.txt")
+    os.remove("requirements-server.txt")
+
+
 parser = argparse.ArgumentParser(description="Build the base Docker image and optionally push to DockerHub")
 parser.add_argument(
     "--tag",
@@ -48,22 +55,18 @@ if args.base:
     subprocess.check_call(["python", "build.py", "--tag", tag], cwd="base_image")
 
 if args.deploy:
-    # Make sure we have an app calld openghg, we ignore its return code as this could 
-    # mean it already exists
+    # Make sure we have an app calld openghg
     subprocess.run(["fn", "create", "app", "openghg"])
     # Build and deploy the function container
     try:
         subprocess.check_call(["fn", "--verbose", "deploy", "--local"])
-    except subprocess.CalledProcessError:
-        raise subprocess.CalledProcessError("Please make sure you've already built the base image, or call this script with --build-base")
-
-    if p.retuncode = 
+    except subprocess.CalledProcessError as e:
+        cleanup()
+        raise ValueError(
+            (f"Error {e}.\n\nPlease make sure you've already built the base image "
+            "(or pass --build-base to this script) and have Fn running"))
 
 if args.push:
     subprocess.check_call(["docker", "push", tag_str])
 
-
-shutil.rmtree("openghg")
-shutil.rmtree("openghg_services")
-os.remove("requirements.txt")
-os.remove("requirements-server.txt")
+cleanup()

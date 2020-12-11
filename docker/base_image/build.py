@@ -20,7 +20,7 @@ args = parser.parse_args()
 shutil.copy("../../requirements.txt", "requirements.txt")
 shutil.copy("../../requirements-server.txt", "requirements-server.txt")
 # A tag for the image
-tag_str = ":".join(("openghg/openghg-base", str(args.tag[0])))
+tag_str = ":".join(("openghg/openghg-base", args.tag))
 
 subprocess.run(["docker", "build", "--tag", tag_str, "."])
 
