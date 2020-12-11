@@ -45,14 +45,19 @@ if args.build:
     subprocess.check_call(["docker", "build", "--tag", tag_str, "."])
 
 if args.base:
-    subprocess.check_call(["python", "build.py", "--tag", tag], cwd="../base_image")
+    subprocess.check_call(["python", "build.py", "--tag", tag], cwd="base_image")
 
 if args.deploy:
     # Make sure we have an app calld openghg, we ignore its return code as this could 
     # mean it already exists
     subprocess.run(["fn", "create", "app", "openghg"])
     # Build and deploy the function container
-    p = subprocess.check_call(["fn", "--verbose", "deploy", "--local"])
+    try:
+        subprocess.check_call(["fn", "--verbose", "deploy", "--local"])
+    except subprocess.CalledProcessError:
+        raise subprocess.CalledProcessError("Please make sure you've already built the base image, or call this script with --build-base")
+
+    if p.retuncode = 
 
 if args.push:
     subprocess.check_call(["docker", "push", tag_str])
