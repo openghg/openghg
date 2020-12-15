@@ -52,7 +52,7 @@ if args.build:
     subprocess.check_call(["docker", "build", "--tag", tag_str, "."])
 
 if args.base:
-    subprocess.check_call(["python", "build.py", "--tag", tag], cwd="base_image")
+    subprocess.check_call(["python3", "build.py", "--tag", tag], cwd="base_image")
 
 if args.deploy:
     # Make sure we have an app calld openghg
