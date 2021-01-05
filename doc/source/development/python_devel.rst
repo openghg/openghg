@@ -1,6 +1,6 @@
-=================
-Developer's guide
-=================
+==================
+Python development
+==================
 
 The source code for OpenGHG is available on `GitHub <https://github.com/openghg/openghg>`__.
 
