@@ -300,9 +300,9 @@ def _site_info_attributes(site, network=None):
 
     # Read site info file
     data_filename = "acrg_site_info.json"
-    filepath = get_datapath(filename=data_filename)
+    acrg_site_info_path = get_datapath(filename=data_filename)
 
-    with open(filepath, "r") as f:
+    with open(acrg_site_info_path, "r") as f:
         site_params = json_load(f)
 
     if network is None:
@@ -326,7 +326,7 @@ def _site_info_attributes(site, network=None):
                 attributes[attr_key] = site_params[site][network][attr]
     else:
         raise ValueError(
-            "Invalid site passed. Please use a valid site code such as BSD for Bilsdale"
+            f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale"
         )
 
     return attributes

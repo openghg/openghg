@@ -1,3 +1,4 @@
+from ._obs_dataclass import ObsData
 from ._process import process_files
 from ._search import Search
 from ._rank_sources import RankSources

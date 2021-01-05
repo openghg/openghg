@@ -6,19 +6,62 @@ __all__ = ["GCWERKS"]
 
 
 class GCWERKS:
-    """ Class for processing ICOS data
+    """ Class for processing GCWERKS data
 
     """
-
     def __init__(self):
-        from openghg.util import load_hugs_json
+        from openghg.util import load_json
 
         self._sampling_period = 0
         # Load site data
-        data = load_hugs_json(filename="process_gcwerks_parameters.json")
+        data = load_json(filename="process_gcwerks_parameters.json")
         self._gc_params = data["GCWERKS"]
         # Site codes for inlet readings
-        self._site_codes = load_hugs_json(filename="site_codes.json")
+        self._site_codes = load_json(filename="site_codes.json")
+
+    def find_files(self, data_path: Union[str, Path], skip_str: Optional[Union[str, List[str]]] = "sf6") -> List[Tuple[Path, Path]]:
+        """ A helper file to find GCWERKS data and precisions file in a given folder. 
+            It searches for .C files of the format macehead.19.C, looks for a precisions file
+            named macehead.19.precions.C and if it exists creates a tuple for these files.
+
+            Please note the limited scope of this function, it will only work with
+            files that are named in the correct pattern.
+
+            Args:
+                data_path: Folder path to search
+                skip_str: String or list of strings, if found in filename these files are skipped
+            Returns:
+                list: List of tuples
+        """
+        import re
+        from pathlib import Path
+
+        data_path = Path(data_path)
+
+        files = data_path.glob("*.C")
+
+        if not isinstance(skip_str, list):
+            skip_str = [skip_str]
+
+        data_regex = re.compile(r"[\w'-]+\.\d+.C")
+
+        data_precision_tuples = []
+        for file in files:
+            data_match = data_regex.match(file.name)
+
+            if data_match:
+                prec_filepath = data_path / Path(Path(file).stem + ".precisions.C")
+                data_filepath = data_path / data_match.group()
+
+                if any(s in data_match.group() for s in skip_str):
+                    continue
+
+                if prec_filepath.exists():
+                    data_precision_tuples.append((data_filepath, prec_filepath))
+
+        data_precision_tuples.sort()
+
+        return data_precision_tuples
 
     def read_file(
         self,

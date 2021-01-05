@@ -1,4 +1,4 @@
-from openghg.util import load_hugs_json
+from openghg.util import load_json
 from pandas import DataFrame
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
@@ -15,7 +15,7 @@ class CRDS:
         # Sampling period of CRDS data in seconds
         self._sampling_period = 60
 
-        data = load_hugs_json(filename="process_gcwerks_parameters.json")
+        data = load_json(filename="process_gcwerks_parameters.json")
         self._crds_params = data["CRDS"]
 
     def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, network: Optional[str] = None) -> Dict:
@@ -101,7 +101,7 @@ class CRDS:
             metadata["network"] = network
 
         # Read the scale from JSON
-        crds_data = load_hugs_json(filename="process_gcwerks_parameters.json")
+        crds_data = load_json(filename="process_gcwerks_parameters.json")
 
         # This dictionary is used to store the gas data and its associated metadata
         combined_data = {}
@@ -200,10 +200,10 @@ class CRDS:
         Returns:
             dict: Dictionary of attributes
         """
-        from openghg.util import load_hugs_json
+        from openghg.util import load_json
 
         if not self._crds_params:
-            data = load_hugs_json(filename="process_gcwerks_parameters.json")
+            data = load_json(filename="process_gcwerks_parameters.json")
             self._crds_params = data["CRDS"]
 
         try:

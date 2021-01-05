@@ -20,7 +20,7 @@ import pandas as pd
 from Acquire.Client import User
 
 from openghg.client import Process, Retrieve, Search
-from openghg.util import load_hugs_json
+from openghg.util import load_json
 
 # flake8: noqa
 
@@ -108,7 +108,7 @@ class Interface:
             ]
         )
 
-        self._site_locations = load_hugs_json("acrg_with_locations.json")
+        self._site_locations = load_json("acrg_with_locations.json")
 
         self._plot_box = []
 

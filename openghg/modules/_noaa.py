@@ -11,11 +11,12 @@ class NOAA(BaseModule):
     """
 
     def __init__(self):
-        from openghg.util import load_hugs_json
+        from openghg.util import load_json
 
         # Holds parameters used for writing attributes to Datasets
-        data = load_hugs_json("attributes.json")
+        data = load_json("attributes.json")
         self._noaa_params = data["NOAA"]
+        self._site_data = load_json("acrg_site_info.json")
 
     def read_file(
         self,
@@ -51,7 +52,7 @@ class NOAA(BaseModule):
         if site is None:
             site = gas_data[species.lower()]["metadata"]["site"]
 
-        gas_data = assign_attributes(data=gas_data, site=site)
+        gas_data = assign_attributes(data=gas_data, site=site, network="NOAA")
 
         return gas_data
 
@@ -105,6 +106,7 @@ class NOAA(BaseModule):
             skipinitialspace=True,
         )
 
+        # Drop duplicates
         data = data.loc[~data.index.duplicated(keep="first")]
 
         # Check if the index is sorted
@@ -112,8 +114,22 @@ class NOAA(BaseModule):
             data = data.sort_index()
 
         # Read the site code from the Dataframe
-        site = str(data["sample_site_code"][0])
-        site = site.upper()
+        site = str(data["sample_site_code"][0]).upper()
+
+        # If this isn't a site we recognize try and read it from the filename
+        if site not in self._site_data:
+            site = str(data_filepath.name).split("_")[1].upper()
+
+            if site not in self._site_data:
+                raise ValueError(f"The site {site} is not recognized.")
+
+        if species is not None:
+            # If we're passed a species ensure that it is in fact the correct species
+            data_species = str(data["parameter_formula"].values[0]).lower()
+
+            passed_species = species.lower()
+            if data_species != passed_species:
+                raise ValueError(f"Mismatch between passed species ({passed_species}) and species read from data ({data_species})")
 
         species = species.upper()
 

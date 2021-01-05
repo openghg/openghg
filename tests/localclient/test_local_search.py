@@ -22,7 +22,7 @@ def test_search_and_download(crds):
 
     results = s.search(species="co2", locations="hfd")
 
-    assert len(results["co2_hfd_100m_picarro"]["keys"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]) == 23
+    assert len(results["co2_hfd_100m_picarro"]["keys"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]) == 5
 
     expected_metadata = {'site': 'hfd', 'instrument': 'picarro', 'time_resolution': '1_minute', 
                         'inlet': '100m', 'port': '10', 'type': 'air', 'species': 'co2', 

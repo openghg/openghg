@@ -13,7 +13,7 @@ __all__ = [
     "get_datapath",
     "date_overlap",
     "read_header",
-    "load_hugs_json",
+    "load_json",
     "valid_site",
     "daterange_from_str",
     "daterange_to_str",
@@ -184,7 +184,7 @@ def get_datapath(filename, directory=None):
         )
 
 
-def load_hugs_json(filename):
+def load_json(filename):
     """ Returns a dictionary created from the OpenGHG JSON at filename
 
         Args:
@@ -226,10 +226,7 @@ def date_overlap(daterange_a, daterange_b):
     start_b = Timestamp(ts_input=daterange_b[0], tz="UTC")
     end_b = Timestamp(ts_input=daterange_b[1], tz="UTC")
 
-    if start_a <= end_b and end_a >= start_b:
-        return True
-    else:
-        return False
+    return start_a <= end_b and end_a >= start_b
 
 
 def dates_overlap(range_a, range_b):
@@ -368,13 +365,13 @@ def valid_site(site):
         Returns:
             bool: True if site is valid
     """
-    site_data = load_hugs_json("acrg_site_info.json")
+    site_data = load_json("acrg_site_info.json")
 
     site = site.upper()
 
     if site not in site_data:
         site = site.lower()
-        site_name_code = load_hugs_json("site_codes.json")
+        site_name_code = load_json("site_codes.json")
         return site in site_name_code["name_code"]
 
     return True

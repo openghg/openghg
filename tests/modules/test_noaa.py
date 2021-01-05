@@ -16,28 +16,59 @@ mpl_logger.setLevel(logging.WARNING)
 
 
 def get_datapath(filename, data_type):
-    return (
-        Path(__file__)
-        .resolve(strict=True)
-        .parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
-    )
+    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+
+
+def test_read_file_site_filename_read():
+    noaa = NOAA()
+
+    filepath = get_datapath(filename="ch4_scsn06_surface-flask_1_ccgg_event.txt", data_type="NOAA")
+
+    data = noaa.read_file(data_filepath=filepath)
+
+    ch4_data = data["ch4"]["data"]
+
+    assert ch4_data.time[0] == Timestamp("1991-07-05T17:00:00")
+    assert ch4_data["ch4"][0] == pytest.approx(1713.21)
+    assert ch4_data["ch4_repeatability"][0] == pytest.approx(2.4)
+    assert ch4_data["ch4_selection_flag"][0] == 0
+
+    metadata = data["ch4"]["metadata"]
+
+    expected_metadata = {"species": "ch4", "site": "SCSN06", "measurement_type": "flask", "network": "NOAA"}
+
+    assert metadata == expected_metadata
+
+    expected_attrs = {
+        "data_owner": "Ed Dlugokencky, Gabrielle Petron (CO)",
+        "data_owner_email": "ed.dlugokencky@noaa.gov, gabrielle.petron@noaa.gov",
+        "inlet_height_magl": "NA",
+        "instrument": "GC-FID",
+        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
+        "Source": "In situ measurements of air",
+        "Conventions": "CF-1.6",
+        "Processed by": "auto@hugs-cloud.com",
+        "species": "ch4",
+        "Calibration_scale": "unknown",
+        "station_longitude": 107.0,
+        "station_latitude": 6.0,
+        "station_long_name": "South China Sea (6 N), N/A",
+        "station_height_masl": 15.0,
+    }
+
+    del ch4_data.attrs["File created"]
+
+    assert ch4_data.attrs == expected_attrs
 
 
 def test_read_file():
     noaa = NOAA()
 
-    filepath = get_datapath(
-        filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA"
-    )
+    filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
     data = noaa.read_file(data_filepath=filepath, species="CO")
 
-    assert data["co"]["metadata"] == {
-        "species": "co",
-        "site": "POC",
-        "measurement_type": "flask",
-        "network": "NOAA"
-    }
+    assert data["co"]["metadata"] == {"species": "co", "site": "POC", "measurement_type": "flask", "network": "NOAA"}
 
     co_data = data["co"]["data"]
 
@@ -72,6 +103,22 @@ def test_read_file():
 
     assert attrs == expected_attrs
 
+def test_read_incorrect_site_raises():
+    noaa = NOAA()
+
+    filepath = get_datapath(filename="ch4_UNKOWN_surface-flask_1_ccgg_event.txt", data_type="NOAA")
+
+    with pytest.raises(ValueError):
+        data = noaa.read_file(data_filepath=filepath)
+
+def test_incorrect_species_passed_raises():
+    noaa = NOAA()
+
+    filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
+
+    with pytest.raises(ValueError):
+        data = noaa.read_file(data_filepath=filepath, species="CH4")
+
 
 def test_read_data():
     noaa = NOAA()
@@ -86,10 +133,12 @@ def test_read_data():
 
     expected_metadata = {"species": "co", "site": "POC", "measurement_type": "flask", "network": "NOAA"}
 
-    expected_attrs = {'data_owner': 'Ed Dlugokencky, Gabrielle Petron (CO)', 
-                    'data_owner_email': 'ed.dlugokencky@noaa.gov, gabrielle.petron@noaa.gov', 
-                    'inlet_height_magl': 'NA', 'instrument': 'GC-HgO-VUV'}
-    
+    expected_attrs = {
+        "data_owner": "Ed Dlugokencky, Gabrielle Petron (CO)",
+        "data_owner_email": "ed.dlugokencky@noaa.gov, gabrielle.petron@noaa.gov",
+        "inlet_height_magl": "NA",
+        "instrument": "GC-HgO-VUV",
+    }
 
     assert co_data["CO"][0] == 94.9
     assert co_data["CO"][-1] == 73.16
