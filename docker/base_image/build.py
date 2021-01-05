@@ -22,10 +22,10 @@ shutil.copy("../../requirements-server.txt", "requirements-server.txt")
 # A tag for the image
 tag_str = ":".join(("openghg/openghg-base", args.tag))
 
-subprocess.run(["docker", "build", "--tag", tag_str, "."])
+subprocess.check_call(["docker", "build", "--tag", tag_str, "."])
 
 if args.push:
-    subprocess.run(["docker", "push", tag_str])
+    subprocess.check_call(["docker", "push", tag_str])
 
 if args.cleanup:
     os.remove("requirements.txt")
