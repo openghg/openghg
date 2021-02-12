@@ -13,7 +13,26 @@ To run through this tutorial you must have both Docker and Fn.
 For Docker installation instructions please visit `the Docker installation instruction <https://docs.docker.com/get-docker/>`__.
 
 To install Fn follow the instructions for your operating system given on `their GitHub repo <https://github.com/fnproject/fn>`__.
-Please make sure you can start up Fn using ``fn start`` before continuing.
+
+Starting Fn
+-----------
+
+As we'll be developing functions locally we'll want to start up an instance of ``Fn`` to allow us to run (invoke) the functions
+we build. During development setting the log level of ``Fn`` to ``DEBUG`` is highly recommended. This pipes errors that may occur 
+within the containers to the terminal. Without setting the log level the only error reporting shown is a less helpful
+``Error invoking function. status: 502 message: function failed`` message.
+
+So, open a terminal and run (and leave running)
+
+.. code-block:: bash
+
+   fn start --log-level DEBUG
+
+If you don't want extra debug information from each invocation just run
+
+.. code-block:: bash
+
+   fn start
 
 First function
 --------------

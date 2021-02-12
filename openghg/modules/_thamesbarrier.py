@@ -6,7 +6,7 @@ __all__ = ["THAMESBARRIER"]
 
 
 class THAMESBARRIER(BaseModule):
-    """ Class for processing THAMESBARRIER data
+    """ Class for processing Thames Barrier data
 
     """
 

@@ -9,12 +9,13 @@ with a development environment.
 Python development
 ------------------
 
-Covers how we develop OpenGHG and the standards and tooling (such as ``PEP8``, linting with ``flake8`` etc) 
+Covers how we develop OpenGHG and the standards we hope to adhere to
 
 .. toctree::
    :maxdepth: 1
 
    python_devel
+
 
 
 Fn functions

@@ -64,7 +64,7 @@ if args.deploy:
         cleanup()
         raise ValueError(
             (f"Error {e}.\n\nPlease make sure you've already built the base image "
-            "(or pass --build-base to this script) and have Fn running"))
+            "(or pass --build-base to this script) and have Fn running\n\n"))
 
 if args.push:
     subprocess.check_call(["docker", "push", tag_str])
