@@ -153,11 +153,38 @@
       "CO": "WMO-CO-X2014"
     },
     "instrument": "Picarro G2401",
-    "inlet": "10m",
+    "inlet": "5 m",
     "global_attributes": {
       "data_owner": "Valerio Ferracci",
       "data_owner_email": "V.Ferracci@cranfield.ac.uk",
       "Notes": "~5m above high tide water level, in tidal region of the Thames"
+    }
+  },
+  "NPL": {
+    "unit_species": { "CO2": "ppm", "CH4": "ppb" },
+    "scale": {
+      "CH4": "WMO-CH4-X2004A",
+      "CO2": "WMO-CO2-X2007"
+    },
+    "instrument": "Picarro G2401",
+    "inlet": "17m",
+    "global_attributes": {
+      "data_owner": "Tim Arnold",
+      "data_owner_email": "tim.arnold@npl.co.uk",
+      "Notes": "Rooftop instrument at NPL campus in Teddington"
+    }
+  },
+  "BTT": {
+    "unit_species": { "CO2": "ppm", "CH4": "ppb", "N2O": "1e-9", "CO": "ppm" },
+    "scale": {
+      "CH4": "WMO-CH4-X2004",
+      "CO2": "WMO-CO2-X2007"
+    },
+    "instrument": "Picarro 2311-f",
+    "inlet": "192m",
+    "global_attributes": {
+      "data_owner": "Carole Helfter",
+      "data_owner_email": "caro2@ceh.ac.uk"
     }
   },
   "NOAA": {

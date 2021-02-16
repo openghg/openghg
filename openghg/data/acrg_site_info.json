@@ -327,6 +327,13 @@
       "latitude": 51.5215,
       "long_name": "BT Tower, UK",
       "longitude": -0.1389
+    },
+    "LGHG": {
+      "height": ["185m"],
+      "height_name": ["185magl"],
+      "latitude": 51.5215,
+      "long_name": "BT Tower, UK",
+      "longitude": -0.1389
     }
   },
   "BWD": {
@@ -1439,6 +1446,16 @@
       "latitude": -70.65,
       "long_name": "Neumayer, Antarctica",
       "longitude": -8.25
+    }
+  },
+  "NPL": {
+    "LGHG": {
+      "height": ["NA"],
+      "height_name": ["NA"],
+      "height_station_masl": 0,
+      "latitude": 51.4241,
+      "long_name": "National Physical Laboratory",
+      "longitude": -0.3487
     }
   },
   "NWB": {
