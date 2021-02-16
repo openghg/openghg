@@ -1,5 +1,5 @@
 coverage
-fdk==0.0.35
+fdk
 flake8
 pytest
 pytest-tornasync

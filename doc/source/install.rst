@@ -57,57 +57,8 @@ the library is by cloning the repository and installing manually using pip.
    cd openghg
    pip install . 
 
-Upgrade
--------
-
-To upgrade a currently installed version
-
-.. code-block:: bash
-
-    pip install --upgrade openghg
-
 
 Developers
 ==========
 
-For developers please follow the instructions for creation of a virtual environment above and then follow the instructions below.
-
-.. code-block:: bash
-
-    git clone https://github.com/openghg/openghg
-    cd openghg
-    pip install -r requirements.txt
-    pip install -r requirements-dev.txt
-    
-Tests
------
-
-As a developer you may want to run the tests and add new tests for functions you'd like to 
-contribute the project. To do this type:
-
-.. code-block:: bash
-
-    pytest tests
-
-Documentation
--------------
-
-To build the documentation you will need to install `pandoc <https://pandoc.org/>`__, a standalone document converter tool.
-Please see the `pandoc installation instructions <https://pandoc.org/installing.html>`__.
-
-.. note::
-    If you haven't installed ``openghg`` to your virtual environment you can add the folder path to your PYTHONPATH.
-    This allows the library to be used easily without the need for reinstallation after changes.
-
-    .. code-block:: bash
-
-        export PYTHONPATH="${PYTHONPATH}:/path/to/cloned/repo"
-
-You can now build the documentation.
-
-.. code-block:: bash
-
-    cd doc
-    make
-
-
+For developers please see the :doc:`development/python_devel`.

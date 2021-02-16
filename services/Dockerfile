@@ -1,4 +1,4 @@
-FROM chryswoods/hugs-base:latest
+FROM openghg/openghg-base:latest
 
 # Need to be user root or Fn exits with
 # {"message":"internal server error"}

@@ -83,4 +83,3 @@ def test_ranking(crds):
     }
 
     assert results == expected_results
-
