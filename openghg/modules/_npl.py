@@ -17,7 +17,7 @@ class NPL(BaseModule):
         data = load_json(filename="attributes.json")
         self._params = data["NPL"]
 
-    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = "NPL", network: Optional[str] = "LondonGHG") -> Dict:
+    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = "NPL", network: Optional[str] = "LGHG") -> Dict:
         """Reads NPL data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 
@@ -66,7 +66,6 @@ class NPL(BaseModule):
         rename_dict = {"Cal_CO2_dry": "CO2", "Cal_CH4_dry": "CH4"}
 
         data = data.rename(columns=rename_dict)
-        data = data.set_index("time")
 
         combined_data = {}
         for species in data.columns:

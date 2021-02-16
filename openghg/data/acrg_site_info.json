@@ -2180,7 +2180,15 @@
       "latitude": 51.497,
       "long_name": "Thames Barrier, UK",
       "longitude": 0.037
-    }
+    },
+    "LGHG": {
+        "height": ["5m"],
+        "height_name": ["5magl"],
+        "height_station_masl": 5.0,
+        "latitude": 51.497,
+        "long_name": "Thames Barrier, UK",
+        "longitude": 0.037
+      }
   },
   "TMD": {
     "NOAA": {

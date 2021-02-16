@@ -57,7 +57,9 @@ class THAMESBARRIER(BaseModule):
 
         data = read_csv(data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0)
         # Drop NaNs from the data
-        data = data.dropna(axis="rows", how="any")
+        data = data.dropna(axis="rows", how="all")
+        # Drop a column if it's all NaNs
+        data = data.dropna(axis="columns", how="all")
 
         rename_dict = {}
         if "Methane" in data.columns:

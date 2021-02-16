@@ -2,7 +2,7 @@ from openghg.modules import BaseModule
 from typing import Dict, Optional, Union
 from pathlib import Path
 
-__all__ = ["NPL"]
+__all__ = ["BTT"]
 
 
 class BTT(BaseModule):
@@ -18,7 +18,7 @@ class BTT(BaseModule):
         self._params = data["BTT"]
 
     def read_file(
-        self, data_filepath: Union[str, Path], site: Optional[str] = None, network: Optional[str] = "LondonGHG"
+        self, data_filepath: Union[str, Path], site: Optional[str] = "BTT", network: Optional[str] = "LGHG"
     ) -> Dict:
         """Reads NPL data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -71,21 +71,25 @@ class BTT(BaseModule):
 
         combined_data = {}
         for species in species_extract:
-            # Convert to a Dataset
-            processed_data = data.loc[:, [species]].sort_index().to_xarray()
+            processed_data = data.loc[:, [species]].sort_index()
             # Create a variability column
             species_stddev_label = species_sd[species]
             processed_data[species][f"{species} variability"] = data[species_stddev_label]
 
             # Replace any values below zero with NaNs
             processed_data[processed_data < 0] = np_nan
+            # Drop NaNs
+            processed_data = processed_data.dropna()
+            # Convert to a Dataset
+            processed_data = processed_data.to_xarray()
 
             site_attributes = self._params["global_attributes"]
             site_attributes["inlet_height_magl"] = self._params["inlet"]
             site_attributes["instrument"] = self._params["instrument"]
 
-            metadata = {"species": species}
             # TODO - add in better metadata reading
+            metadata = {"species": species}
+
             combined_data[species] = {
                 "metadata": metadata,
                 "data": processed_data,
