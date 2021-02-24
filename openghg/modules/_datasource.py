@@ -212,6 +212,52 @@ class Datasource:
         self.add_metadata(key="data_type", value=data_type)
         self.update_daterange()
 
+    def add_metadata(self, metadata: Dict) -> None:
+        """ Add all metadata in the dictionary to this Datasource
+
+            An improved add metadata the lowercases things etc
+
+            Args:
+                metadata: Dictionary of metadata
+            Returns:
+                None
+        """
+        return NotImplementedError()
+        # See 
+        # https://stackoverflow.com/a/14962509/1303032
+        # First we want to lower case
+        # def lower_case_me(d):
+        #     new = {}
+        #     for k, v in d.items():
+        #         if isinstance(v, dict):
+        #             v = lower_case_me(v)
+        #         k = k.lower()
+        #         new[k] = v
+        #     return new
+        
+    def new_search(self, search_terms):
+        return NotImplementedError()
+        # Do want to recursively search the metadata or just flatten the metadata
+        # when we're given it?
+        # https://stackoverflow.com/a/14962509/1303032
+        # if key in obj: return obj[key]
+        # for k, v in obj.items():
+        #     if isinstance(v,dict):
+        #         item = _finditem(v, key)
+        #         if item is not None:
+        #             return item
+
+    def add_footprint_data(self, data: Dataset, metadata: Dict) -> None:
+        """ Add footprint data to this Datasource
+
+            Args:
+                data: Footprint data in an xarray.Dataset 
+                metadata: Metadata
+            Returns:
+                None
+        """
+        return NotImplementedError()
+
     def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
         """ Returns the daterange for the passed DataFrame
 

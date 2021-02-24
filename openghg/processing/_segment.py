@@ -1,6 +1,9 @@
 """ Segment the data into Datasources
 
 """
+from typing import Dict, Optional, Union
+from xarray import Dataset
+
 __all__ = ["get_split_frequency", "create_footprint_datasources", "assign_data"]
 
 # def create_datasources(gas_data):
@@ -43,14 +46,14 @@ __all__ = ["get_split_frequency", "create_footprint_datasources", "assign_data"]
 #     return uuids
 
 
-def assign_data(gas_data, lookup_results, overwrite):
+def assign_data(gas_data: Dict, lookup_results: Dict, overwrite: bool) -> Dict:
     """ Assign data to a Datasource. This will either create a new Datasource 
     Create or get an existing Datasource for each gas in the file
 
         Args:
-            gas_data (dict): Dictionary containing data and metadata for species
-            lookup_results (dict): Dictionary of lookup results]
-            overwrite (bool): If True overwrite current data stored
+            gas_data: Dictionary containing data and metadata for species
+            lookup_results: Dictionary of lookup results]
+            overwrite: If True overwrite current data stored
         Returns:
             dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
     """
@@ -81,15 +84,35 @@ def assign_data(gas_data, lookup_results, overwrite):
     return uuids
 
 
-def create_footprint_datasources(footprint_data):
+def assign_footprint_data(data: Dataset, metadata: Dict, datasource_uid: Union[str, bool]) -> str:
     """ Create Datasources for the passed footprint data
 
         Args:
-            footprint_data (list): List of tupes of footprint name, datasource_id, xarray.Dataset
+            data: xarray Dataset of footprint data
+            metadata: Associated metadata
+            datasource_uid: The UUID of the datasource if we've processed footprint data from this
+            source before, otherwise False
         Returns:
-            list: List of UUIDs of used/created Datasources
+            str: UUID of Datasource
     """
-    raise NotImplementedError()
+    # We'll only accept footprints for a specific site etc at once for ease / probably
+    # size constraints
+    from openghg.modules import Datasource
+
+    if datasource_uid is False:
+        datasource = Datasource.load(uuid=datasource_uid)
+    else:
+        datasource = Datasource()
+
+    datasource.add_footprint_data(data=data, metadata=metadata)
+    datasource.save()
+
+    return datasource.uuid()
+
+
+
+
+    
 
 
 def get_split_frequency(data):

@@ -27,7 +27,7 @@ class BTT(BaseModule):
             data_filepath: Path of file to load
             site: Site name
         Returns:
-            list: UUIDs of Datasources data has been assigned to
+            dict: UUIDs of Datasources data has been assigned to
         """
         from openghg.processing import assign_attributes
 

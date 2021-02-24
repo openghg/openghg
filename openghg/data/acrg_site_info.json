@@ -953,6 +953,15 @@
       "longitude": -72.18
     }
   },
+  "HFT": {
+    "LGHG": {
+      "height_name": "45magl",
+      "height_station_masl": "45m",
+      "latitude": 51.608031,
+      "long_name": "Highfield Tower",
+      "longitude": 0.174544
+    }
+  },
   "HIL": {
     "NOAA": {
       "height_station_masl": 201.5,
@@ -1784,6 +1793,15 @@
       "longitude": -0.561312
     }
   },
+  "RHO": {
+    "LGHG": {
+      "height_name": "20magl",
+      "height_station_masl": "20m",
+      "latitude": 51.427582,
+      "long_name": "Royal Holloway",
+      "longitude": -0.56278
+    }
+  },
   "RPB": {
     "AGAGE": {
       "height": ["10m"],
@@ -1969,6 +1987,15 @@
       "longitude": -117.27
     }
   },
+  "SMA": {
+    "LGHG": {
+      "height_name": "36magl",
+      "height_station_masl": "36m",
+      "latitude": 51.504423,
+      "long_name": "St Mary's Church",
+      "longitude": -0.305762
+    }
+  },
   "SMO": {
     "AGAGE": {
       "height": ["10m"],
@@ -2036,6 +2063,15 @@
       "latitude": 54.0,
       "long_name": "Ocean Station Charlie, United States",
       "longitude": -35.0
+    }
+  },
+  "STJ": {
+    "LGHG": {
+      "height_name": "20magl",
+      "height_station_masl": "20m",
+      "latitude": 51.580154,
+      "long_name": "St Jude's Church",
+      "longitude": -0.189911
     }
   },
   "STM": {
@@ -2182,13 +2218,13 @@
       "longitude": 0.037
     },
     "LGHG": {
-        "height": ["5m"],
-        "height_name": ["5magl"],
-        "height_station_masl": 5.0,
-        "latitude": 51.497,
-        "long_name": "Thames Barrier, UK",
-        "longitude": 0.037
-      }
+      "height": ["5m"],
+      "height_name": ["5magl"],
+      "height_station_masl": 5.0,
+      "latitude": 51.497,
+      "long_name": "Thames Barrier, UK",
+      "longitude": 0.037
+    }
   },
   "TMD": {
     "NOAA": {
@@ -2262,6 +2298,15 @@
       "latitude": 47.4,
       "long_name": "Ulaanbaatar, Mongolia",
       "longitude": 106.0
+    }
+  },
+  "UOW": {
+    "LGHG": {
+      "height_name": "40magl",
+      "height_station_masl": "40m",
+      "latitude": 51.577558,
+      "long_name": "University of Westminster, Harrow Campus",
+      "longitude": -0.324358
     }
   },
   "USH": {
@@ -2338,6 +2383,15 @@
       "latitude": 38.265,
       "long_name": "Walnut Grove, California, United States",
       "longitude": -121.4911
+    }
+  },
+  "WGF": {
+    "LGHG": {
+      "height_name": "6magl",
+      "height_station_masl": "6m",
+      "latitude": 51.700313,
+      "long_name": "Woodgreen Farm",
+      "longitude": -0.083932
     }
   },
   "WIS": {
