@@ -1,6 +1,7 @@
 from openghg.modules import BaseModule
 from typing import Dict, Optional, Union
 from pathlib import Path
+from pandas import Timestamp
 
 __all__ = ["FOOTPRINTS"]
 
@@ -97,6 +98,18 @@ class FOOTPRINTS(BaseModule):
 
         return {str(data_filepath.name): uid}
 
+    def search(self, site: str, network: str, start_date: Optional[str, Timestamp], end_date: Optional[str, Timestamp]):
+        """ Search for a footprint from a specific site and network, return a dictionary of data
+            so the user can choose
+        """
+        raise NotImplementedError()
+
+    def retrive(self, uuid, dates):
+        """
+
+        """
+        raise NotImplementedError()
+
     def _get_metdata():
         """This retrieves the metadata for this footprint"""
         raise NotImplementedError()
@@ -104,6 +117,12 @@ class FOOTPRINTS(BaseModule):
     def _get_site_hash(self, site, network, height):
         from openghg.util import hash_string
         import re
+
+        # Extract only the number from the height
+        try:
+            height = re.findall(r"\d+(?:\.\d+)?", height)[0]
+        except IndexError:
+            raise ValueError("Cannot read height string, please check it contains the correct value.")
 
         terms = [site, network, height]
         safer_terms = []

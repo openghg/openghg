@@ -99,4 +99,11 @@ def test_valid_site():
     result = util.valid_site(site=site)
 
     assert result is False
-    
+
+
+def test_to_lowercase():
+    d = {"THIS": "ISANUPPERCASE", "spam": {"ALSO_BIG": "FOO", "BAAAR": 123}}
+
+    lower = util.to_lowercase(d)
+
+    assert lower == {'this': 'isanuppercase', 'spam': {'also_big': 'foo', 'baaar': 123}}

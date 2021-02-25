@@ -18,8 +18,10 @@ mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
 # Disable this for long strings below - Line break occurred before a binary operator (W503)
 # flake8: noqa: W503
 
+
 def get_datapath(filename, data_type):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+
 
 @pytest.fixture(scope="session")
 def data():
@@ -35,7 +37,9 @@ def data():
 
 @pytest.fixture
 def datasource():
-    return Datasource(name="test_name",)
+    return Datasource(
+        name="test_name",
+    )
 
 
 @pytest.fixture
@@ -110,8 +114,6 @@ def test_versioning(data):
     d.save()
 
     keys = d.versions()
-
-    
 
     assert (
         keys["v1"]["keys"]["2014-01-30-10:52:30+00:00_2014-01-30-12:20:30+00:00"]
@@ -190,12 +192,22 @@ def test_save_footprint():
     assert float(data.pressure[-1].values) == pytest.approx(1021.303)
 
 
-def test_add_metadata(datasource):
-    datasource.add_metadata(key="foo", value=123)
-    datasource.add_metadata(key="bar", value=456)
+def test_add_metadata_key(datasource):
+    datasource.add_metadata_key(key="foo", value=123)
+    datasource.add_metadata_key(key="bar", value=456)
 
     assert datasource._metadata["foo"] == "123"
     assert datasource._metadata["bar"] == "456"
+
+
+def test_add_metadata_lowercases_correctly(datasource):
+    metadata = {"AAA": {"INLETS": {"inlet_A": "158m", "inlet_b": "12m"}, "some_metadata": {"OWNER": "foo", "eMAIL": "this@that"}}}
+
+    datasource.add_metadata(metadata=metadata)
+
+    assert datasource.metadata() == {
+        "aaa": {"inlets": {"inlet_a": "158m", "inlet_b": "12m"}, "some_metadata": {"owner": "foo", "email": "this@that"}}
+    }
 
 
 def test_exists():
@@ -327,6 +339,7 @@ def test_search_metadata():
     assert d.search_metadata("beans") == False
     assert d.search_metadata("flamingo") == False
 
+
 def test_search_metadata_find_all():
     d = Datasource(name="test_search")
 
@@ -340,37 +353,58 @@ def test_search_metadata_find_all():
 
     assert result is False
 
+def test_search_metadata_finds_recursively():
+    d = Datasource(name="test_search")
+
+    d._metadata = {"car": "toyota", "inlets": {"inlet_a": "45m", "inlet_b": "3580m"}}
+
+    result = d.search_metadata(search_terms=["45m", "3580m", "toyota"], find_all=True)
+
+    assert result is True
+
+    result = d.search_metadata(search_terms=["100m", "violin", "toyota", "swallow"], find_all=True)
+
+    assert result is False
+
+    result = d.search_metadata(search_terms=["100m", "violin", "toyota", "swallow"], find_all=False)
+
+    assert result is True
+
+
 def test_set_rank():
-    d = Datasource()    
+    d = Datasource()
 
     daterange = "2027-08-01-00:00:00_2027-12-01-00:00:00"
 
     d.set_rank(rank=1, daterange=daterange)
 
-    assert d._rank[1] == ['2027-08-01-00:00:00_2027-12-01-00:00:00']
+    assert d._rank[1] == ["2027-08-01-00:00:00_2027-12-01-00:00:00"]
+
 
 def test_set_incorrect_rank_raises():
-    d = Datasource()    
+    d = Datasource()
 
     daterange = "2027-08-01-00:00:00_2027-12-01-00:00:00"
 
     with pytest.raises(ValueError):
         d.set_rank(rank=42, daterange=daterange)
 
+
 def test_setting_overlapping_dateranges():
-    d = Datasource()    
+    d = Datasource()
 
     daterange = "2027-08-01-00:00:00_2027-12-01-00:00:00"
 
     d.set_rank(rank=1, daterange=daterange)
-    
-    assert d._rank[1] == ['2027-08-01-00:00:00_2027-12-01-00:00:00']
+
+    assert d._rank[1] == ["2027-08-01-00:00:00_2027-12-01-00:00:00"]
 
     daterange_two = "2027-11-01-00:00:00_2028-06-01-00:00:00"
 
     d.set_rank(rank=1, daterange=daterange_two)
-    
-    assert d._rank[1] == ['2027-08-01-00:00:00+00:00_2028-06-01-00:00:00+00:00']
+
+    assert d._rank[1] == ["2027-08-01-00:00:00+00:00_2028-06-01-00:00:00+00:00"]
+
 
 def test_combining_single_dateranges_returns():
     d = Datasource()
@@ -380,6 +414,7 @@ def test_combining_single_dateranges_returns():
     combined = d.combine_dateranges(dateranges=[daterange])
 
     assert combined[0] == daterange
+
 
 def test_combining_overlapping_dateranges():
     d = Datasource()
@@ -391,7 +426,7 @@ def test_combining_overlapping_dateranges():
 
     combined = d.combine_dateranges(dateranges=dateranges)
 
-    assert combined == ['2001-01-01-00:00:00+00:00_2001-06-01-00:00:00+00:00']
+    assert combined == ["2001-01-01-00:00:00+00:00_2001-06-01-00:00:00+00:00"]
 
     daterange_1 = "2001-01-01-00:00:00_2001-03-01-00:00:00"
     daterange_2 = "2001-02-01-00:00:00_2001-06-01-00:00:00"
@@ -404,9 +439,12 @@ def test_combining_overlapping_dateranges():
 
     combined = d.combine_dateranges(dateranges=dateranges)
 
-    assert combined == ['2001-01-01-00:00:00+00:00_2001-08-01-00:00:00+00:00', 
-                        '2004-04-01-00:00:00+00:00_2004-09-01-00:00:00+00:00', 
-                        '2007-04-01-00:00:00+00:00_2007-09-01-00:00:00+00:00']
+    assert combined == [
+        "2001-01-01-00:00:00+00:00_2001-08-01-00:00:00+00:00",
+        "2004-04-01-00:00:00+00:00_2004-09-01-00:00:00+00:00",
+        "2007-04-01-00:00:00+00:00_2007-09-01-00:00:00+00:00",
+    ]
+
 
 def test_combining_no_overlap():
     d = Datasource()
@@ -417,7 +455,11 @@ def test_combining_no_overlap():
 
     combined = d.combine_dateranges(dateranges=dateranges)
 
-    assert combined == ['2001-01-01-00:00:00+00:00_2001-03-01-00:00:00+00:00', '2011-02-01-00:00:00+00:00_2011-06-01-00:00:00+00:00']
+    assert combined == [
+        "2001-01-01-00:00:00+00:00_2001-03-01-00:00:00+00:00",
+        "2011-02-01-00:00:00+00:00_2011-06-01-00:00:00+00:00",
+    ]
+
 
 def test_split_daterange_str():
     d = Datasource()
@@ -426,7 +468,6 @@ def test_split_daterange_str():
     end_true = pd.Timestamp("2001-03-01-00:00:00", tz="UTC")
 
     daterange_1 = "2001-01-01-00:00:00_2001-03-01-00:00:00"
-
 
     start, end = d.split_datrange_str(daterange_str=daterange_1)
 
@@ -447,13 +488,19 @@ def test_in_daterange(data):
 
     daterange = create_daterange_str(start=start, end=end)
 
-    d._data_keys["latest"]["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"] = ['data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00']
-    d._data_keys["latest"]["2015-01-30-10:52:30+00:00_2016-01-30-14:20:30+00:00"] = ['data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2015-01-30-10:52:30+00:00_2016-01-30-14:20:30+00:00']
-    d._data_keys["latest"]["2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00"] = ['data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00']
+    d._data_keys["latest"]["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"] = [
+        "data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
+    ]
+    d._data_keys["latest"]["2015-01-30-10:52:30+00:00_2016-01-30-14:20:30+00:00"] = [
+        "data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2015-01-30-10:52:30+00:00_2016-01-30-14:20:30+00:00"
+    ]
+    d._data_keys["latest"]["2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00"] = [
+        "data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00"
+    ]
 
     keys = d.keys_in_daterange(daterange=daterange)
 
-    assert keys[0].split("/")[-1] == '2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00'
+    assert keys[0].split("/")[-1] == "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
 
 
 def test_shallow_then_load_data(data):
@@ -466,7 +513,7 @@ def test_shallow_then_load_data(data):
 
     new_d = Datasource.load(uuid=d.uuid(), shallow=True)
 
-    assert not new_d._data 
+    assert not new_d._data
 
     ds_data = new_d.data()
 

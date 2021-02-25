@@ -1,6 +1,7 @@
 """ Utility functions that are used by multiple modules
 
 """
+from typing import Dict
 
 __all__ = [
     "get_datetime_epoch",
@@ -20,16 +21,17 @@ __all__ = [
     "create_daterange_str",
     "create_daterange",
     "create_aligned_timestamp",
-    "is_number"
+    "is_number",
+    "to_lowercase"
 ]
 
 
 def get_datetime_epoch():
-    """ Returns the UNIX epoch time
-        1st of January 1970
+    """Returns the UNIX epoch time
+    1st of January 1970
 
-        Returns:
-            pandas.Timestamp: Timestamp object at epoch
+    Returns:
+        pandas.Timestamp: Timestamp object at epoch
     """
     from pandas import Timestamp
 
@@ -37,10 +39,10 @@ def get_datetime_epoch():
 
 
 def get_datetime_now():
-    """ Returns a Timestamp for the current time
+    """Returns a Timestamp for the current time
 
-        Returns:
-            Timestamp: Timestamp now
+    Returns:
+        Timestamp: Timestamp now
     """
     from pandas import Timestamp
 
@@ -48,38 +50,36 @@ def get_datetime_now():
 
 
 def get_datetime(year, month, day, hour=None, minute=None, second=None):
-    """ Returns a timezone aware datetime object
+    """Returns a timezone aware datetime object
 
-        Args:
-            year (int): Year
-            month (int): Month of year
-            day (int): Day of month
-            hour (int, default=None): Hour of day
-            minute (int, default=None): Minute of hour
-            second (int, default=None): Second of minute
-        Returns:
-            datetime: Timezone aware datetime object
+    Args:
+        year (int): Year
+        month (int): Month of year
+        day (int): Day of month
+        hour (int, default=None): Hour of day
+        minute (int, default=None): Minute of hour
+        second (int, default=None): Second of minute
+    Returns:
+        datetime: Timezone aware datetime object
     """
     from datetime import datetime
     from Acquire.ObjectStore import datetime_to_datetime
 
-    date = datetime(
-        year=year, month=month, day=day
-    )  # , hour=hour, minute=minute, second=second)
+    date = datetime(year=year, month=month, day=day)  # , hour=hour, minute=minute, second=second)
 
     return datetime_to_datetime(date)
 
 
 def unanimous(seq):
-    """ Checks that all values in an iterable object
-                are the same
+    """Checks that all values in an iterable object
+    are the same
 
-                Args:
-                    seq: Iterable object
-                Returns
-                    bool: True if all values are the same
+    Args:
+        seq: Iterable object
+    Returns
+        bool: True if all values are the same
 
-            """
+    """
     it = iter(seq.values())
     try:
         first = next(it)
@@ -90,12 +90,12 @@ def unanimous(seq):
 
 
 def load_object(class_name):
-    """ Load an object of type class_name
+    """Load an object of type class_name
 
-        Args:
-            class_name (str): Name of class to load
-        Returns:
-            class_name: class_name object
+    Args:
+        class_name (str): Name of class to load
+    Returns:
+        class_name: class_name object
     """
     module_path = "openghg.modules"
     class_name = str(class_name).upper()
@@ -117,14 +117,14 @@ def load_object(class_name):
 
 
 def hash_file(filepath):
-    """ Opens the file at filepath and calculates its SHA1 hash
+    """Opens the file at filepath and calculates its SHA1 hash
 
-        Taken from https://stackoverflow.com/a/22058673
+    Taken from https://stackoverflow.com/a/22058673
 
-        Args:
-            filepath (pathlib.Path): Path to file
-        Returns:
-            str: SHA1 hash
+    Args:
+        filepath (pathlib.Path): Path to file
+    Returns:
+        str: SHA1 hash
     """
     import hashlib
 
@@ -143,13 +143,13 @@ def hash_file(filepath):
 
 
 def timestamp_tzaware(timestamp):
-    """ Returns the pandas Timestamp passed as a timezone (UTC) aware
-        Timestamp.
+    """Returns the pandas Timestamp passed as a timezone (UTC) aware
+    Timestamp.
 
-        Args:
-            timestamp (pandas.Timestamp): Timezone naive Timestamp
-        Returns:
-            pandas.Timestamp: Timezone aware
+    Args:
+        timestamp (pandas.Timestamp): Timezone naive Timestamp
+    Returns:
+        pandas.Timestamp: Timezone aware
     """
     from pandas import Timestamp
 
@@ -163,12 +163,12 @@ def timestamp_tzaware(timestamp):
 
 
 def get_datapath(filename, directory=None):
-    """ Returns the correct path to JSON files used for assigning attributes
+    """Returns the correct path to JSON files used for assigning attributes
 
-        Args:
-            filename (str): Name of JSON file
-        Returns:
-            pathlib.Path: Path of file
+    Args:
+        filename (str): Name of JSON file
+    Returns:
+        pathlib.Path: Path of file
     """
     from pathlib import Path
 
@@ -177,20 +177,16 @@ def get_datapath(filename, directory=None):
     if directory is None:
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{filename}")
     else:
-        return (
-            Path(__file__)
-            .resolve()
-            .parent.parent.joinpath(f"data/{directory}/{filename}")
-        )
+        return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
 def load_json(filename):
-    """ Returns a dictionary created from the OpenGHG JSON at filename
+    """Returns a dictionary created from the OpenGHG JSON at filename
 
-        Args:
-            filename (str): Name of JSON file
-        Returns:
-            dict: Dictionary created from JSON
+    Args:
+        filename (str): Name of JSON file
+    Returns:
+        dict: Dictionary created from JSON
     """
     from json import load
 
@@ -203,17 +199,17 @@ def load_json(filename):
 
 
 def date_overlap(daterange_a, daterange_b):
-    """ Check if daterange_a is within daterange_b.
+    """Check if daterange_a is within daterange_b.
 
-        For this logic see
-        https://stackoverflow.com/a/325964
+    For this logic see
+    https://stackoverflow.com/a/325964
 
-        Args:
-            daterange_a (str): Timezone aware daterange string. Example:
-            2014-01-30-10:52:30+00:00_2014-01-30-13:22:30+00:00
-            daterange_b (str): As daterange_a
-        Returns:
-            bool: True if daterange included
+    Args:
+        daterange_a (str): Timezone aware daterange string. Example:
+        2014-01-30-10:52:30+00:00_2014-01-30-13:22:30+00:00
+        daterange_b (str): As daterange_a
+    Returns:
+        bool: True if daterange included
     """
     from pandas import Timestamp
 
@@ -230,9 +226,7 @@ def date_overlap(daterange_a, daterange_b):
 
 
 def dates_overlap(range_a, range_b):
-    """ Check if two dateranges overlap
-
-    """
+    """Check if two dateranges overlap"""
     # For this logic see
     # https://stackoverflow.com/a/325964
     # if (start_key <= end_date) and (end_key >= start_date):
@@ -240,14 +234,14 @@ def dates_overlap(range_a, range_b):
 
 
 def create_aligned_timestamp(time):
-    """ Align the passed datetime / Timestamp object to the minute
-        interval for use in dateranges and overlap checks.
+    """Align the passed datetime / Timestamp object to the minute
+    interval for use in dateranges and overlap checks.
 
-        Args:   
-            time (str, pandas.Timestamp)
-        Returns:
-            pandas.Timestamp: Timestamp aligned to minute 
-            with UTC timezone
+    Args:
+        time (str, pandas.Timestamp)
+    Returns:
+        pandas.Timestamp: Timestamp aligned to minute
+        with UTC timezone
     """
     from pandas import Timedelta, Timestamp
 
@@ -265,13 +259,13 @@ def create_aligned_timestamp(time):
 
 
 def create_daterange(start, end):
-    """ Create a minute aligned daterange
+    """Create a minute aligned daterange
 
-        Args:
-            start (Timestamp)
-            end (Timestamp)
-        Returns:
-            pandas.DatetimeIndex
+    Args:
+        start (Timestamp)
+        end (Timestamp)
+    Returns:
+        pandas.DatetimeIndex
     """
     from pandas import date_range
 
@@ -285,14 +279,14 @@ def create_daterange(start, end):
 
 
 def create_daterange_str(start, end):
-    """ Convert the passed datetimes into a daterange string
-        for use in searches and Datasource interactions
+    """Convert the passed datetimes into a daterange string
+    for use in searches and Datasource interactions
 
-        Args:
-            start_datetime (Timestamp)
-            end_datetime (Timestamp)
-        Returns:
-            str: Daterange string
+    Args:
+        start_datetime (Timestamp)
+        end_datetime (Timestamp)
+    Returns:
+        str: Daterange string
     """
     daterange = create_daterange(start=start, end=end)
 
@@ -300,14 +294,14 @@ def create_daterange_str(start, end):
 
 
 def daterange_from_str(daterange_str):
-    """ Get a Pandas DatetimeIndex from a string. The created 
-        DatetimeIndex has minute frequency.
+    """Get a Pandas DatetimeIndex from a string. The created
+    DatetimeIndex has minute frequency.
 
-        Args:
-            daterange_str (str): Daterange string
-            of the form 2019-01-01T00:00:00_2019-12-31T00:00:00
-        Returns:
-            pandas.DatetimeIndex: DatetimeIndex with minute frequency
+    Args:
+        daterange_str (str): Daterange string
+        of the form 2019-01-01T00:00:00_2019-12-31T00:00:00
+    Returns:
+        pandas.DatetimeIndex: DatetimeIndex with minute frequency
     """
     from pandas import date_range
 
@@ -321,13 +315,13 @@ def daterange_from_str(daterange_str):
 
 
 def daterange_to_str(daterange):
-    """ Takes a pandas DatetimeIndex created by pandas date_range converts it to a
-        string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00
+    """Takes a pandas DatetimeIndex created by pandas date_range converts it to a
+    string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00
 
-        Args:
-            daterange (pandas.DatetimeIndex)
-        Returns:
-            str: Daterange in string format
+    Args:
+        daterange (pandas.DatetimeIndex)
+    Returns:
+        str: Daterange in string format
     """
     start = str(daterange[0]).replace(" ", "-")
     end = str(daterange[-1]).replace(" ", "-")
@@ -336,12 +330,12 @@ def daterange_to_str(daterange):
 
 
 def read_header(filepath, comment_char="#"):
-    """ Reads the header lines denoted by the comment_char
+    """Reads the header lines denoted by the comment_char
 
-        Args:
-            filepath (str or Path): Path to file
-            comment_char (str, default="#"): Character that denotes a comment line
-            at the start of a file
+    Args:
+        filepath (str or Path): Path to file
+        comment_char (str, default="#"): Character that denotes a comment line
+        at the start of a file
     """
     comment_char = str(comment_char)
 
@@ -358,12 +352,12 @@ def read_header(filepath, comment_char="#"):
 
 
 def valid_site(site):
-    """ Check if the passed site is a valid one
+    """Check if the passed site is a valid one
 
-        Args:
-            site (str): Three letter site code
-        Returns:
-            bool: True if site is valid
+    Args:
+        site (str): Three letter site code
+    Returns:
+        bool: True if site is valid
     """
     site_data = load_json("acrg_site_info.json")
 
@@ -378,13 +372,32 @@ def valid_site(site):
 
 
 def is_number(s):
-    ''' Is it a number?
+    """Is it a number?
 
-        Args:
-            s (str): String which may be a number
-    '''
+    Args:
+        s (str): String which may be a number
+    """
     try:
         float(s)
         return True
     except ValueError:
         return False
+
+
+def to_lowercase(d: Dict) -> Dict:
+    """ Convert all keys and values in a dictionary to lowercase
+
+        Args:
+            d: Dictionary to lower case
+        Returns:
+            dict: Dictionary of lower case keys and values
+    """
+    if isinstance(d, dict):
+        return {k.lower(): to_lowercase(v) for k, v in d.items()}
+    elif isinstance(d, (list, set, tuple)):
+        t = type(d)
+        return t(to_lowercase(o) for o in d)
+    elif isinstance(d, str):
+        return d.lower()
+    else:
+        return d

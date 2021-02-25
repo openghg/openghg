@@ -1,10 +1,10 @@
 """ Segment the data into Datasources
 
 """
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 from xarray import Dataset
 
-__all__ = ["get_split_frequency", "create_footprint_datasources", "assign_data"]
+__all__ = ["get_split_frequency", "assign_footprint_data", "assign_data"]
 
 # def create_datasources(gas_data):
 #     """ Create or get an existing Datasource for each gas in the file
@@ -108,11 +108,6 @@ def assign_footprint_data(data: Dataset, metadata: Dict, datasource_uid: Union[s
     datasource.save()
 
     return datasource.uuid()
-
-
-
-
-    
 
 
 def get_split_frequency(data):
