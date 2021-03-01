@@ -18,28 +18,27 @@ def search(
     start_datetime=None,
     end_datetime=None,
 ):
-    """ Search for gas data (optionally within a daterange)
+    """Search for gas data (optionally within a daterange)
 
-        TODO - review this function - feel like it can be tidied and simplified
+    TODO - review this function - feel like it can be tidied and simplified
 
-        Args:
-            species (str or list): Terms to search for in Datasources
-            locations (str or list): Where to search for the terms in species
-            inlet (str, default=None): Inlet height such as 100m
-            instrument (str, default=None): Instrument name such as picarro
-            find_all (bool, default=True): Require all search terms to be satisfied
-            start_datetime (datetime, default=None): Start datetime for search
-            If None a start datetime of UNIX epoch (1970-01-01) is set
-            end_datetime (datetime, default=None): End datetime for search
-            If None an end datetime of the current datetime is set
-        Returns:
-            dict: List of keys of Datasources matching the search parameters
+    Args:
+        species (str or list): Terms to search for in Datasources
+        locations (str or list): Where to search for the terms in species
+        inlet (str, default=None): Inlet height such as 100m
+        instrument (str, default=None): Instrument name such as picarro
+        find_all (bool, default=True): Require all search terms to be satisfied
+        start_datetime (datetime, default=None): Start datetime for search
+        If None a start datetime of UNIX epoch (1970-01-01) is set
+        end_datetime (datetime, default=None): End datetime for search
+        If None an end datetime of the current datetime is set
+    Returns:
+        dict: List of keys of Datasources matching the search parameters
     """
     from collections import defaultdict
     from json import load
     from openghg.modules import Datasource, ObsSurface
-    from openghg.util import (get_datetime_now, get_datetime_epoch, create_daterange_str, 
-                            timestamp_tzaware, get_datapath)
+    from openghg.util import get_datetime_now, get_datetime_epoch, create_daterange_str, timestamp_tzaware, get_datapath
 
     # if species is not None and not isinstance(species, list):
     if not isinstance(species, list):
@@ -201,14 +200,14 @@ def search(
 
 
 def _strip_dates_keys(keys):
-    """ Strips the date from a key, could this data just be read from JSON instead?
-        Read dates covered from the Datasource?
+    """Strips the date from a key, could this data just be read from JSON instead?
+    Read dates covered from the Datasource?
 
-        Args:
-            keys (list): List of keys containing data
-            data/uuid/<uuid>/<version>/2019-03-01-04:14:30+00:00_2019-05-31-20:44:30+00:00
-        Returns:
-            str: Daterange string
+    Args:
+        keys (list): List of keys containing data
+        data/uuid/<uuid>/<version>/2019-03-01-04:14:30+00:00_2019-05-31-20:44:30+00:00
+    Returns:
+        str: Daterange string
     """
     if not isinstance(keys, list):
         keys = [keys]
@@ -224,17 +223,18 @@ def _strip_dates_keys(keys):
 
 
 def lookup_gas_datasources(lookup_dict, gas_data, source_name):
-    """ Check if the passed data exists in the lookup dict
+    """Check if the passed data exists in the lookup dict
 
-        Args:
-            lookup_dict (dict): Dictionary to search for exisiting Datasources
-            gas_data (list): Gas data to process
-            source_name (str): Name of course
-            source_id (str, default=None): UUID of source. Not currently implemented.
-        Returns:
-            dict: source_name: Datasource UUID (key: value)
+    Args:
+        lookup_dict (dict): Dictionary to search for exisiting Datasources
+        gas_data (list): Gas data to process
+        source_name (str): Name of course
+        source_id (str, default=None): UUID of source. Not currently implemented.
+    Returns:
+        dict: source_name: Datasource UUID (key: value)
     """
     import warnings
+
     # If we already have data from these datasources then return that UUID
     # otherwise return False
     warnings.warn("This function will be removed in a future release", category=DeprecationWarning)
@@ -250,16 +250,16 @@ def lookup_gas_datasources(lookup_dict, gas_data, source_name):
 
 
 def lookup_footprint_datasources(lookup_dict, source_name):
-    """ Check if we've had data from this Datasource before
+    """Check if we've had data from this Datasource before
 
-        TODO - This seems like a waste - combine this with lookup_gasDatasources ?
+    TODO - This seems like a waste - combine this with lookup_gasDatasources ?
 
-        Args:
-            lookup_dict (dict): Dictionary to search for exisiting Datasources
-            source_name (str): Name of course
-            source_id (str, default=None): UUID of source. Not currently implemented.
-        Returns:
-            dict: source_name: Datasource UUID (key: value)
+    Args:
+        lookup_dict (dict): Dictionary to search for exisiting Datasources
+        source_name (str): Name of course
+        source_id (str, default=None): UUID of source. Not currently implemented.
+    Returns:
+        dict: source_name: Datasource UUID (key: value)
     """
     results = {source_name: {}}
     results[source_name]["uuid"] = lookup_dict.get(source_name, False)

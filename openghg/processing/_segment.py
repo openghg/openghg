@@ -99,7 +99,7 @@ def assign_footprint_data(data: Dataset, metadata: Dict, datasource_uid: Union[s
     # size constraints
     from openghg.modules import Datasource
 
-    if datasource_uid is False:
+    if datasource_uid is not False:
         datasource = Datasource.load(uuid=datasource_uid)
     else:
         datasource = Datasource()

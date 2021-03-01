@@ -174,7 +174,8 @@ class Datasource:
             self._data = updated_data
         else:
             self._data = additional_data
-
+        
+        self._data_type = "timeseries"
         self.add_metadata_key(key="data_type", value=data_type)
         self.update_daterange()
 
@@ -242,6 +243,7 @@ class Datasource:
         else:
             self._data = new_data
 
+        self._data_type = "footprint"
         self.add_metadata_key(key="data_type", value="footprint")
         self.update_daterange()
 

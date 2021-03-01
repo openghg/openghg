@@ -17,3 +17,4 @@ from ._metstore import METStore
 from ._beaco2n import BEACO2N
 from ._btt import BTT
 from ._npl import NPL
+from ._footprints import FOOTPRINTS

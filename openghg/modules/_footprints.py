@@ -18,13 +18,16 @@ class FOOTPRINTS(BaseModule):
         self._creation_datetime = get_datetime_now()
         self._stored = False
         # How we identify a
-        self._datasource_hashes = {}
+        self._datasource_uuids = {}
+        # TODO - remove this - currently here for compatibility with other 
+        # storage objects
+        self._datasource_names = {}
         # Hashes of previously uploaded files
         self._file_hashes = {}
+        self._rank_data = {}
 
     @staticmethod
     def read_file(
-        self,
         data_filepath: Union[str, Path],
         site: str,
         network: str,
@@ -57,8 +60,6 @@ class FOOTPRINTS(BaseModule):
         file_hash = hash_file(filepath=data_filepath)
         if file_hash in fp._file_hashes and not overwrite:
             raise ValueError(f"This file has been uploaded previously with the filename : {fp._file_hashes[file_hash]}.")
-        else:
-            fp._file_hashes[file_hash]
 
         data_filepath = Path(data_filepath)
         fp_data = open_dataset(data_filepath)
@@ -68,8 +69,8 @@ class FOOTPRINTS(BaseModule):
         metadata = {}
 
         metadata["data_type"] = "footprint"
-        metadata["start_date"] = str(timestamp_tzaware(fp_data.time[0]))
-        metadata["end_date"] = str(timestamp_tzaware(fp_data.time[-1]))
+        metadata["start_date"] = str(timestamp_tzaware(fp_data.time[0].values))
+        metadata["end_date"] = str(timestamp_tzaware(fp_data.time[-1].values))
 
         metadata["max_longitude"] = float(fp_data["lon_high"].max())
         metadata["min_longitude"] = float(fp_data["lon_high"].min())
@@ -77,34 +78,74 @@ class FOOTPRINTS(BaseModule):
         metadata["max_latitude"] = float(fp_data["lat_high"].max())
         metadata["min_latitude"] = float(fp_data["lat_high"].min())
 
-        metadata["heights"] = list(fp_data.height.values)
+        metadata["heights"] = [float(h) for h in fp_data.height.values]
+        metadata["variables"] = list(fp.keys())
 
-        metadata["model_paramters"] = model_params
+        metadata["model_parameters"] = model_params
+
+        # Do we also need to save all the variables we have available in this footprint?
 
         # Check if we've seen data from this site before
         site_hash = fp._get_site_hash(site=site, network=network, height=height)
-        if site_hash in fp._datasource_hashes:
-            datasource_uid = False
+
+        if site_hash in fp._datasource_uuids:
+            datasource_uid = fp._datasource_uuids[site_hash]
         else:
-            datasource_uid = fp._datasource_hashes[site_hash]
+            datasource_uid = False
 
         # Then we want to assign the data
         uid = assign_footprint_data(data=fp_data, metadata=metadata, datasource_uid=datasource_uid)
 
         # Record the datasource uuid
-        fp._datasource_hashes[site_hash] = uid
+        fp._datasource_uuids[site_hash] = uid
         # Record the file hash in case we see this file again
         fp._file_hashes[file_hash] = data_filepath.name
 
+        fp.save()
+
         return {str(data_filepath.name): uid}
 
-    def search(self, site: str, network: str, start_date: Optional[str, Timestamp], end_date: Optional[str, Timestamp]):
+    def to_data(self) -> Dict:
+        """ Return a JSON-serialisable dictionary of object
+        for storage in object store
+
+        Returns:
+            dict: Dictionary version of object
+        """
+        from Acquire.ObjectStore import datetime_to_string
+
+        data = {}
+        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
+        data["stored"] = self._stored
+        data["datasource_uuids"] = self._datasource_uuids
+        data["datasource_names"] = self._datasource_names
+        data["file_hashes"] = self._file_hashes
+        data["rank_data"] = self._rank_data
+
+        return data
+
+    def save(self) -> None:
+        """ Save the object to the object store
+
+        Returns:
+            None
+        """
+        from openghg.objectstore import get_bucket, set_object_from_json
+
+        bucket = get_bucket()
+
+        obs_key = f"{FOOTPRINTS._root}/uuid/{FOOTPRINTS._uuid}"
+
+        self._stored = True
+        set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
+
+    def search(self, site: str, network: str, start_date: Optional[Union[str, Timestamp]], end_date: Optional[Union[str, Timestamp]]):
         """ Search for a footprint from a specific site and network, return a dictionary of data
             so the user can choose
         """
         raise NotImplementedError()
 
-    def retrive(self, uuid, dates):
+    def retrieve(self, uuid, dates):
         """
 
         """
