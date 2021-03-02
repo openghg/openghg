@@ -234,7 +234,6 @@ def _altitude_to_ecmwf_pressure(measure_pressure: np.ndarray) -> List:
 
     ecmwf_metadata = load_json("ecmwf_dataset_info.json")
     dataset_metadata = ecmwf_metadata["datasets"]
-    print(dataset_metadata)
     valid_levels = dataset_metadata["reanalysis_era5_pressure_levels"]["valid_levels"]
 
     # Available ERA5 pressure levels

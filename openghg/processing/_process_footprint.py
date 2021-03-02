@@ -6,6 +6,8 @@ from pandas import Timestamp
 from xarray import Dataset
 from typing import Union
 
+__all__ = ["single_site_footprint"]
+
 
 def single_site_footprint(
     site: str, height: str, network: str, resample_data: bool, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]
@@ -20,19 +22,31 @@ def single_site_footprint(
     Returns:
         xarray.Dataset
     """
-    from openghg.processing import search_footprints
+    from openghg.processing import search, recombine_sections, search_footprints
     from openghg.util import timestamp_tzaware
 
     start_date = timestamp_tzaware(start_date)
     end_date = timestamp_tzaware(end_date)
 
-    # Get all species data from that site
-    results = search_footprints(locations=site, inlet=height, start_date=start_date, end_date=end_date)
-    
-    # Retrieve measurement data from the object store using search
-    # footprint_results = search_footprints()    
+    # Get the measurement data
+    measurement_results = search(locations=site, inlet=height, start_date=start_date, end_date=end_date)
 
-    #
+    site_key = next(iter(measurement_results.keys()))
+    measurement_keys = measurement_results[site_key]
+
+    measurement_data = recombine_sections(data_keys=measurement_keys)
+
+    # Get the footprint data
+    footprint_results = search_footprints(locations=site, inlet=height, start_date=start_date, end_date=end_date)
+
+    fp_site_key = next(iter(measurement_results.keys()))
+    footprint_keys = footprint_results[fp_site_key]
+
+    footprint_data = recombine_sections(data_keys=footprint_keys, sort=False)
+
+    return measurement_data, footprint_data
+
+    # Now need to test these two parts work
 
 
 def footprints_data_merge():

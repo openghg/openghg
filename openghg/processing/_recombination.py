@@ -2,23 +2,25 @@
     into the data requested by the user
 
 """
+from typing import List
+from xarray import Dataset
+
 __all__ = ["recombine_sections"]
 
 
-def recombine_sections(data_keys):
-    """ Combines separate dataframes into a single dataframe for
-        processing to NetCDF for output
+def recombine_sections(data_keys: List[str], sort=True) -> Dataset:
+    """ Combines datasets stored separately in the object store
+        into a single datasets
 
         Args:
-            data_keys (list): Dictionary of object store keys keyed by search
+            data_keys: List of object store keys
             term
         Returns:
-            Pandas.Dataframe or list: Combined dataframes
+            xarray.Dataset: Combined Dataset
     """
-    # from pandas import concat as _concat
     from xarray import concat as xr_concat
-    from openghg.objectstore import get_bucket
     from openghg.modules import Datasource
+    from openghg.objectstore import get_bucket
 
     bucket = get_bucket()
 
@@ -26,7 +28,8 @@ def recombine_sections(data_keys):
 
     combined = xr_concat(data, dim="time")
 
-    combined = combined.sortby("time")
+    if sort:
+        combined = combined.sortby("time")
 
     # Check for duplicates?
     # This is taken from https://stackoverflow.com/questions/51058379/drop-duplicate-times-in-xarray

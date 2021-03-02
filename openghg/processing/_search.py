@@ -163,7 +163,7 @@ def search(
                 for source in sources:
                     key = f"{source.species()}_{source.site()}_{source.inlet()}_{source.instrument()}".lower()
 
-                    data_keys = source.keys_in_daterange(start_date=start_date, end=end_date)
+                    data_keys = source.keys_in_daterange(start_date=start_date, end_date=end_date)
 
                     if not data_keys:
                         continue

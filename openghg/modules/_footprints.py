@@ -28,7 +28,7 @@ class FOOTPRINTS(BaseModule):
 
     @staticmethod
     def read_file(
-        data_filepath: Union[str, Path],
+        filepath: Union[str, Path],
         site: str,
         network: str,
         height: str,
@@ -40,7 +40,7 @@ class FOOTPRINTS(BaseModule):
         the processed data has been assigned to
 
         Args:
-            data_filepath: Path of file to load
+            filepath: Path of file to load
             site: Site name
             network: Network name
             height: Height above ground level in metres
@@ -57,12 +57,12 @@ class FOOTPRINTS(BaseModule):
 
         fp = FOOTPRINTS.load()
 
-        file_hash = hash_file(filepath=data_filepath)
+        file_hash = hash_file(filepath=filepath)
         if file_hash in fp._file_hashes and not overwrite:
             raise ValueError(f"This file has been uploaded previously with the filename : {fp._file_hashes[file_hash]}.")
 
-        data_filepath = Path(data_filepath)
-        fp_data = open_dataset(data_filepath)
+        filepath = Path(filepath)
+        fp_data = open_dataset(filepath)
 
         # Need to read the metadata from the footprint and then store it
         # Do we need to chunk the footprint / will a Datasource store it correctly?
@@ -79,7 +79,7 @@ class FOOTPRINTS(BaseModule):
         metadata["min_latitude"] = float(fp_data["lat_high"].min())
 
         metadata["heights"] = [float(h) for h in fp_data.height.values]
-        metadata["variables"] = list(fp.keys())
+        metadata["variables"] = list(fp_data.keys())
 
         metadata["model_parameters"] = model_params
 
@@ -99,11 +99,11 @@ class FOOTPRINTS(BaseModule):
         # Record the datasource uuid
         fp._datasource_uuids[site_hash] = uid
         # Record the file hash in case we see this file again
-        fp._file_hashes[file_hash] = data_filepath.name
+        fp._file_hashes[file_hash] = filepath.name
 
         fp.save()
 
-        return {str(data_filepath.name): uid}
+        return {str(filepath.name): uid}
 
     def to_data(self) -> Dict:
         """ Return a JSON-serialisable dictionary of object

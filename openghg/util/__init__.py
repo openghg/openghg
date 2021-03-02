@@ -9,3 +9,4 @@ from ._util import (date_overlap, get_datapath, get_datetime, get_datetime_epoch
                     create_aligned_timestamp, create_daterange, is_number, to_lowercase)
 
 from ._hashing import hash_string
+from ._strings import clean_string

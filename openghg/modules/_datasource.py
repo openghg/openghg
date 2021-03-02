@@ -174,7 +174,7 @@ class Datasource:
             self._data = updated_data
         else:
             self._data = additional_data
-        
+
         self._data_type = "timeseries"
         self.add_metadata_key(key="data_type", value=data_type)
         self.update_daterange()
@@ -704,7 +704,7 @@ class Datasource:
         return (start_date <= self._end_date) and (end_date >= self._start_date)
 
     def keys_in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> List[str]:
-        """ Return the keys for data between the two passed dates
+        """Return the keys for data between the two passed dates
 
         Args:
             start_date: Start date
@@ -719,7 +719,7 @@ class Datasource:
 
         data_keys = self._data_keys["latest"]["keys"]
 
-       return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
+        return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
 
     def keys_in_daterange_str(self, daterange: str) -> List[str]:
         """Return the keys for data within the specified daterange string
@@ -746,14 +746,14 @@ class Datasource:
         return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
 
     def key_date_compare(self, keys: List[str], start_date: Timestamp, end_date: Timestamp) -> List:
-        """ Returns the keys in the key list that are between the given dates
+        """Returns the keys in the key list that are between the given dates
 
-            Args:
-                keys: List of object store keys
-                start_date: Start date
-                end_date: End date
-            Returns:
-                list: List of keys
+        Args:
+            keys: List of object store keys
+            start_date: Start date
+            end_date: End date
+        Returns:
+            list: List of keys
         """
         from openghg.util import timestamp_tzaware
 
