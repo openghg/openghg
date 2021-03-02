@@ -106,7 +106,7 @@ def get_single_site(
     search = Search()
 
     results = search.search(
-        species=species, locations=site, inlet=inlet, instrument=instrument, start_datetime=start_date, end_datetime=end_date,
+        species=species, locations=site, inlet=inlet, instrument=instrument, start_date=start_date, end_date=end_date,
     )
 
     # Retrieve all the data found

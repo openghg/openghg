@@ -59,8 +59,8 @@ def test_location_search(crds_read):
         species=species,
         locations=locations,
         find_all=False,
-        start_datetime=start,
-        end_datetime=end,
+        start_date=start,
+        end_date=end,
     )
 
     results_list = sorted(list(results.keys()))
@@ -91,8 +91,8 @@ def test_search_datetimes(crds_read):
         species=species,
         locations=locations,
         find_all=False,
-        start_datetime=start,
-        end_datetime=end,
+        start_date=start,
+        end_date=end,
     )
 
     result_keys = results["co2_bsd_108m_picarro"]["keys"]
@@ -132,8 +132,8 @@ def test_search_find_all():
         species=species,
         locations=locations,
         find_all=True,
-        start_datetime=start,
-        end_datetime=end,
+        start_date=start,
+        end_date=end,
         inlet=inlet,
         instrument=instrument
     )

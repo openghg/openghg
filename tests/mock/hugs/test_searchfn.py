@@ -201,8 +201,8 @@ def test_search_and_rank(load_two_data):
     results = search.search(
         species=species,
         locations=location,
-        start_datetime=start_search,
-        end_datetime=end_search,
+        start_date=start_search,
+        end_date=end_search,
     )
 
     assert results["co_bsd_108m_picarro5310"]["metadata"] == {

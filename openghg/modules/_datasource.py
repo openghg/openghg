@@ -28,8 +28,8 @@ class Datasource:
         # Dictionary keyed by daterange of data in each Dataset
         self._data = {}
 
-        self._start_datetime = None
-        self._end_datetime = None
+        self._start_date = None
+        self._end_date = None
 
         self._stored = False
         # This dictionary stored the keys for each version of data uploaded
@@ -42,21 +42,21 @@ class Datasource:
         # A rank of -1 is unset, 1 is a primary source, 2 secondary
         self._rank = defaultdict(list)
 
-    def start_datetime(self) -> Timestamp:
+    def start_date(self) -> Timestamp:
         """Returns the starting datetime for the data in this Datasource
 
         Returns:
             Timestamp: Timestamp for start of data
         """
-        return self._start_datetime
+        return self._start_date
 
-    def end_datetime(self) -> Timestamp:
+    def end_date(self) -> Timestamp:
         """Returns the end datetime for the data in this Datasource
 
         Returns:
             Timestamp: Timestamp for end of data
         """
-        return self._end_datetime
+        return self._end_date
 
     def add_metadata_key(self, key: str, value: str) -> None:
         """Add a label to the metadata dictionary with the key value pair
@@ -626,8 +626,8 @@ class Datasource:
         start, _ = self.split_datrange_str(daterange_str=keys[0])
         _, end = self.split_datrange_str(daterange_str=keys[-1])
 
-        self._start_datetime = start
-        self._end_datetime = end
+        self._start_date = start
+        self._end_date = end
 
     def daterange(self) -> Tuple[Timestamp, Timestamp]:
         """Get the daterange the data in this Datasource covers as tuple
@@ -636,10 +636,10 @@ class Datasource:
         Returns:
             tuple (Timestamp, Timestamp): Start, end Timestamps
         """
-        if self._start_datetime is None and self._data is not None:
+        if self._start_date is None and self._data is not None:
             self.update_daterange()
 
-        return self._start_datetime, self._end_datetime
+        return self._start_date, self._end_date
 
     def daterange_str(self) -> str:
         """Get the daterange this Datasource covers as a string in
@@ -701,18 +701,36 @@ class Datasource:
         start_date = Timestamp(start_date)
         end_date = Timestamp(end_date)
 
-        return (start_date <= self._end_datetime) and (end_date >= self._start_datetime)
+        return (start_date <= self._end_date) and (end_date >= self._start_date)
 
-    def keys_in_daterange(self, daterange: str) -> bool:
-        """Return the keys for data within the specified daterange
+    def keys_in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> List[str]:
+        """ Return the keys for data between the two passed dates
 
         Args:
-            daterange (str): Daterange string of the form
+            start_date: Start date
+            end_date: end date
+        Return:
+            list: List of keys to data
+        """
+        from openghg.util import timestamp_tzaware
+
+        start_date = timestamp_tzaware(start_date)
+        end_date = timestamp_tzaware(end_date)
+
+        data_keys = self._data_keys["latest"]["keys"]
+
+       return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
+
+    def keys_in_daterange_str(self, daterange: str) -> List[str]:
+        """Return the keys for data within the specified daterange string
+
+        Args:
+            daterange: Daterange string of the form
             2019-01-01T00:00:00_2019-12-31T00:00:00
         Return:
             list: List of keys to data
         """
-        from pandas import Timestamp
+        from openghg.util import timestamp_tzaware
 
         split_daterange = daterange.split("_")
 
@@ -720,13 +738,27 @@ class Datasource:
             # raise DateError("")
             raise TypeError("Invalid daterange string passed.")
 
-        start_date = Timestamp(split_daterange[0], tz="UTC").to_pydatetime()
-        end_date = Timestamp(split_daterange[1], tz="UTC").to_pydatetime()
+        start_date = timestamp_tzaware(split_daterange[0])
+        end_date = timestamp_tzaware(split_daterange[1])
 
         data_keys = self._data_keys["latest"]["keys"]
 
+        return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
+
+    def key_date_compare(self, keys: List[str], start_date: Timestamp, end_date: Timestamp) -> List:
+        """ Returns the keys in the key list that are between the given dates
+
+            Args:
+                keys: List of object store keys
+                start_date: Start date
+                end_date: End date
+            Returns:
+                list: List of keys
+        """
+        from openghg.util import timestamp_tzaware
+
         in_date = []
-        for key in data_keys:
+        for key in keys:
 
             end_key = key.split("/")[-1]
             dates = end_key.split("_")
@@ -734,13 +766,13 @@ class Datasource:
             if len(dates) > 2:
                 raise ValueError("Invalid date string")
 
-            start_key = Timestamp(dates[0], tz="UTC")
-            end_key = Timestamp(dates[1], tz="UTC")
+            start_key = timestamp_tzaware(dates[0])
+            end_key = timestamp_tzaware(dates[1])
 
             # For this logic see
             # https://stackoverflow.com/a/325964
             if (start_key <= end_date) and (end_key >= start_date):
-                in_date.append(data_keys[key])
+                in_date.append(keys[key])
 
         return in_date
 

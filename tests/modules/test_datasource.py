@@ -286,8 +286,8 @@ def test_update_daterange_replacement(data):
 
     d.add_data(metadata=metadata, data=ch4_data)
 
-    assert d._start_datetime == pd.Timestamp("2014-01-30 10:52:30+00:00")
-    assert d._end_datetime == pd.Timestamp("2014-01-30 14:20:30+00:00")
+    assert d._start_date == pd.Timestamp("2014-01-30 10:52:30+00:00")
+    assert d._end_date == pd.Timestamp("2014-01-30 14:20:30+00:00")
 
     ch4_short = ch4_data.head(40)
 
@@ -295,8 +295,8 @@ def test_update_daterange_replacement(data):
 
     d.add_data(metadata=metadata, data=ch4_short, overwrite=True)
 
-    assert d._start_datetime == pd.Timestamp("2014-01-30 10:52:30+00:00")
-    assert d._end_datetime == pd.Timestamp("2014-01-30 13:22:30+00:00")
+    assert d._start_date == pd.Timestamp("2014-01-30 10:52:30+00:00")
+    assert d._end_date == pd.Timestamp("2014-01-30 13:22:30+00:00")
 
 
 def test_load_dataset():

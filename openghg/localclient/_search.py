@@ -16,8 +16,8 @@ class Search:
         locations,
         inlet=None,
         instrument=None,
-        start_datetime=None,
-        end_datetime=None,
+        start_date=None,
+        end_date=None,
     ):
         """ This is just a wrapper for the search function that allows easy access through LocalClient
 
@@ -27,9 +27,9 @@ class Search:
                 inlet (str, default=None): Inlet height such as 100m
                 instrument (str, default=None): Instrument name such as picarro
                 find_all (bool, default=False): Require all search terms to be satisfied
-                start_datetime (datetime, default=None): Start datetime for search
+                start_date (datetime, default=None): Start datetime for search
                 If None a start datetime of UNIX epoch (1970-01-01) is set
-                end_datetime (datetime, default=None): End datetime for search
+                end_date (datetime, default=None): End datetime for search
                 If None an end datetime of the current datetime is set
             Returns:
                 dict: List of keys of Datasources matching the search parameters
@@ -39,8 +39,8 @@ class Search:
             locations=locations,
             inlet=inlet,
             instrument=instrument,
-            start_datetime=start_datetime,
-            end_datetime=end_datetime,
+            start_date=start_date,
+            end_date=end_date,
         )
 
         self._results = results

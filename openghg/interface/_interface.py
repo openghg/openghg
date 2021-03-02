@@ -393,8 +393,8 @@ class Interface:
                 search_terms=split_search_terms,
                 locations=split_locations,
                 data_type=data_type.value,
-                start_datetime=start,
-                end_datetime=end,
+                start_date=start,
+                end_date=end,
             )
 
             if search_results:

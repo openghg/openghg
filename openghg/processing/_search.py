@@ -2,11 +2,10 @@
     the object store
 
 """
-__all__ = [
-    "search",
-    "lookup_gas_datasources",
-    "lookup_footprint_datasources",
-]
+from pandas import Timestamp
+from typing import Dict, List, Union
+
+__all__ = ["search", "search_footprints"]
 
 
 def search(
@@ -15,10 +14,11 @@ def search(
     inlet=None,
     instrument=None,
     find_all=True,
-    start_datetime=None,
-    end_datetime=None,
+    start_date=None,
+    end_date=None,
+    data_type="timeseries",
 ):
-    """Search for gas data (optionally within a daterange)
+    """Search for gas data
 
     TODO - review this function - feel like it can be tidied and simplified
 
@@ -28,9 +28,9 @@ def search(
         inlet (str, default=None): Inlet height such as 100m
         instrument (str, default=None): Instrument name such as picarro
         find_all (bool, default=True): Require all search terms to be satisfied
-        start_datetime (datetime, default=None): Start datetime for search
+        start_date (datetime, default=None): Start datetime for search
         If None a start datetime of UNIX epoch (1970-01-01) is set
-        end_datetime (datetime, default=None): End datetime for search
+        end_date (datetime, default=None): End datetime for search
         If None an end datetime of the current datetime is set
     Returns:
         dict: List of keys of Datasources matching the search parameters
@@ -38,7 +38,7 @@ def search(
     from collections import defaultdict
     from json import load
     from openghg.modules import Datasource, ObsSurface
-    from openghg.util import get_datetime_now, get_datetime_epoch, create_daterange_str, timestamp_tzaware, get_datapath
+    from openghg.util import get_datetime_now, get_datetime_epoch, timestamp_tzaware, get_datapath
 
     # if species is not None and not isinstance(species, list):
     if not isinstance(species, list):
@@ -46,6 +46,16 @@ def search(
 
     if not isinstance(locations, list):
         locations = [locations]
+
+    if data_type in ["footprint", "footprints"]:
+        return search_footprints(
+            locations=locations,
+            species=species,
+            inlet=inlet,
+            find_all=find_all,
+            start_date=start_date,
+            end_date=end_date,
+        )
 
     # Allow passing of location names instead of codes
     site_codes_json = get_datapath(filename="site_codes.json")
@@ -67,21 +77,22 @@ def search(
 
     locations = updated_locations
 
-    if start_datetime is None:
-        start_datetime = get_datetime_epoch()
-    if end_datetime is None:
-        end_datetime = get_datetime_now()
+    if start_date is None:
+        start_date = get_datetime_epoch()
+    if end_date is None:
+        end_date = get_datetime_now()
 
     # Ensure passed datetimes are timezone aware
-    start_datetime = timestamp_tzaware(start_datetime)
-    end_datetime = timestamp_tzaware(end_datetime)
+    start_date = timestamp_tzaware(start_date)
+    end_date = timestamp_tzaware(end_date)
 
     # Here we want to load in the ObsSurface module for now
     obs = ObsSurface.load()
     datasource_uuids = obs.datasources()
 
     # Shallow load the Datasources so we can search their metadata
-    datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
+    # datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
+    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
     # First we find the Datasources from locations we want to narrow down our search
     location_sources = defaultdict(list)
@@ -101,9 +112,8 @@ def search(
                 for datasource in sources:
                     # Just match the single source here
                     if datasource.search_metadata(search_terms=[sp, site, inlet, instrument], find_all=True):
-                        daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
                         # Get the data keys for the data in the matching daterange
-                        in_date = datasource.keys_in_daterange(daterange=daterange_str)
+                        in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
 
                         data_date_str = _strip_dates_keys(in_date)
 
@@ -131,7 +141,7 @@ def search(
 
             # How to return all the sources if they're all 0?
             for source in sources:
-                rank_data = source.get_rank(start_date=start_datetime, end_date=end_datetime)
+                rank_data = source.get_rank(start_date=start_date, end_date=end_date)
 
                 # With no rank set we get an empty dictionary
                 if not rank_data:
@@ -153,8 +163,7 @@ def search(
                 for source in sources:
                     key = f"{source.species()}_{source.site()}_{source.inlet()}_{source.instrument()}".lower()
 
-                    daterange_str = create_daterange_str(start=start_datetime, end=end_datetime)
-                    data_keys = source.keys_in_daterange(daterange=daterange_str)
+                    data_keys = source.keys_in_daterange(start_date=start_date, end=end_date)
 
                     if not data_keys:
                         continue
@@ -185,7 +194,7 @@ def search(
                 data_keys = {}
                 # Get the keys for each daterange
                 for d in source_dateranges:
-                    keys_in_date = source.keys_in_daterange(daterange=d)
+                    keys_in_date = source.keys_in_daterange_str(daterange=d)
                     d = d.replace("+00:00", "")
                     if keys_in_date:
                         data_keys[d] = keys_in_date
@@ -197,6 +206,39 @@ def search(
                 results[key]["metadata"] = source.metadata()
 
     return results
+
+
+def search_footprints(locations: Union[str, List[str]], inlet: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
+    """Search for footprints for the given locations and inlet height.
+
+    Args:
+        locations: Location name or list of names
+        inlet: Inlet height
+        start_date: Start date
+        end_date: End date
+    Returns:
+        dict: Dictionary of keys keyed by location
+    """
+    from openghg.modules import Datasource, FOOTPRINTS
+
+    if not isinstance(locations, list):
+        locations = [locations]
+
+    footprints = FOOTPRINTS.load()
+    datasource_uuids = footprints.datasources()
+    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+
+    keys = {}
+    # If we have locations to search
+    # for location in locations:
+    for datasource in datasources:
+        for location in locations:
+            if datasource.search_metadata(search_terms=[inlet, location]):
+                # Get the data keys for the data in the matching daterange
+                in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+                keys = in_date
+
+    return keys
 
 
 def _strip_dates_keys(keys):
@@ -220,48 +262,3 @@ def _strip_dates_keys(keys):
     end_date = end_key.split("/")[-1].split("_")[-1].replace("+00:00", "")
 
     return "_".join([start_date, end_date])
-
-
-def lookup_gas_datasources(lookup_dict, gas_data, source_name):
-    """Check if the passed data exists in the lookup dict
-
-    Args:
-        lookup_dict (dict): Dictionary to search for exisiting Datasources
-        gas_data (list): Gas data to process
-        source_name (str): Name of course
-        source_id (str, default=None): UUID of source. Not currently implemented.
-    Returns:
-        dict: source_name: Datasource UUID (key: value)
-    """
-    import warnings
-
-    # If we already have data from these datasources then return that UUID
-    # otherwise return False
-    warnings.warn("This function will be removed in a future release", category=DeprecationWarning)
-
-    results = {}
-    for species in gas_data:
-        datasource_name = source_name + "_" + species
-        results[species] = {}
-        results[species]["uuid"] = lookup_dict.get(datasource_name, False)
-        results[species]["name"] = datasource_name
-
-    return results
-
-
-def lookup_footprint_datasources(lookup_dict, source_name):
-    """Check if we've had data from this Datasource before
-
-    TODO - This seems like a waste - combine this with lookup_gasDatasources ?
-
-    Args:
-        lookup_dict (dict): Dictionary to search for exisiting Datasources
-        source_name (str): Name of course
-        source_id (str, default=None): UUID of source. Not currently implemented.
-    Returns:
-        dict: source_name: Datasource UUID (key: value)
-    """
-    results = {source_name: {}}
-    results[source_name]["uuid"] = lookup_dict.get(source_name, False)
-
-    return results

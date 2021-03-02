@@ -283,8 +283,8 @@ def create_daterange_str(start, end):
     for use in searches and Datasource interactions
 
     Args:
-        start_datetime (Timestamp)
-        end_datetime (Timestamp)
+        start_date (Timestamp)
+        end_date (Timestamp)
     Returns:
         str: Daterange string
     """
