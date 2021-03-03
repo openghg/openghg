@@ -51,6 +51,11 @@ def single_site_footprint(
     footprint_keys = footprint_results[fp_site_key]["keys"]
     footprint_data = recombine_sections(data_keys=footprint_keys, sort=False)
 
+    # As we're not processing any satellite data yet just set toleranc to None
+    tolerance = None
+
+
+
     return measurement_data, footprint_data
 
     # Now need to test these two parts work
@@ -197,3 +202,76 @@ def indexesMatch(dsa, dsb):
             return False
 
     return True
+
+
+def align_datasets(dataset_1, dataset_2, platform=None, resample_to_dataset_1=False):
+    """
+    Slice and resample two datasets to align along time
+
+    Args:
+        dataset_1, dataset_2 (xarray.Dataset) :
+            Datasets with time dimension. It is assumed that dataset_1 is obs data and dataset_2 is footprint data
+
+        platform (str) :
+            obs platform used to decide whether to resample
+
+        resample_to_dataset_1 (boolean) :
+            Override resampling to coarser resolution and resample to dataset_1 regardless
+
+    Returns:
+        2 xarray.dataset with aligned time dimensions
+    """
+    import numpy as np
+
+    platform_skip_resample = ("satellite", "flask")
+
+    if platform in platform_skip_resample:
+        return dataset_1, dataset_2
+
+    # lw13938: 12/04/2018 - This should slice the date to the smallest time frame
+    # spanned by both the footprint and obs, then resamples the data
+    # using the mean to the one with coarsest median resolution
+    # starting from the sliced start date.
+
+    dataset_1_timeperiod = np.nanmedian((dataset_1.time.data[1:] - dataset_1.time.data[0:-1]).astype("int64"))
+    dataset_2_timeperiod = np.nanmedian((dataset_2.time.data[1:] - dataset_2.time.data[0:-1]).astype("int64"))
+
+    dataset_1_st = dataset_1.time[0]
+    dataset_1_et = dataset_1.time[-1]
+    dataset_2_st = dataset_2.time[0]
+    dataset_2_et = dataset_2.time[-1]
+
+    if int(dataset_1_st.data) > int(dataset_2_st.data):
+        start_date = dataset_1_st
+    else:
+        start_date = dataset_2_st
+    if int(dataset_1_et.data) < int(dataset_2_et.data):
+        end_date = dataset_1_et
+    else:
+        end_date = dataset_2_et
+
+    start_s = str(
+        np.round(start_date.data.astype(np.int64) - 5e8, -9).astype("datetime64[ns]")
+    )  # subtract half a second to ensure lower range covered
+    end_s = str(
+        np.round(end_date.data.astype(np.int64) + 5e8, -9).astype("datetime64[ns]")
+    )  # add half a second to ensure upper range covered
+
+    dataset_1 = dataset_1.sel(time=slice(start_s, end_s))
+    dataset_2 = dataset_2.sel(time=slice(start_s, end_s))
+
+    # only non satellite datasets with different periods need to be resampled
+    if not np.isclose(dataset_1_timeperiod, dataset_2_timeperiod):
+        base = start_date.dt.hour.data + start_date.dt.minute.data / 60.0 + start_date.dt.second.data / 3600.0
+        if (dataset_1_timeperiod >= dataset_2_timeperiod) or (resample_to_dataset_1 == True):
+            resample_period = (
+                str(round(dataset_1_timeperiod / 3600e9, 5)) + "H"
+            )  # rt17603: Added 24/07/2018 - stops pandas frequency error for too many dp.
+            dataset_2 = dataset_2.resample(indexer={"time": resample_period}, base=base).mean()
+        elif dataset_1_timeperiod < dataset_2_timeperiod or (resample_to_dataset_1 == False):
+            resample_period = (
+                str(round(dataset_2_timeperiod / 3600e9, 5)) + "H"
+            )  # rt17603: Added 24/07/2018 - stops pandas frequency error for too many dp.
+            dataset_1 = dataset_1.resample(indexer={"time": resample_period}, base=base).mean()
+
+    return dataset_1, dataset_2

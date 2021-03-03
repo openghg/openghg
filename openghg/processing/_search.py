@@ -38,7 +38,7 @@ def search(
     from collections import defaultdict
     from json import load
     from openghg.modules import Datasource, ObsSurface
-    from openghg.util import get_datetime_now, get_datetime_epoch, timestamp_tzaware, get_datapath
+    from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, get_datapath
 
     # if species is not None and not isinstance(species, list):
     if not isinstance(species, list):
@@ -78,9 +78,9 @@ def search(
     locations = updated_locations
 
     if start_date is None:
-        start_date = get_datetime_epoch()
+        start_date = timestamp_epoch()
     if end_date is None:
-        end_date = get_datetime_now()
+        end_date = timestamp_now()
 
     # Ensure passed datetimes are timezone aware
     start_date = timestamp_tzaware(start_date)

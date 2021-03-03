@@ -13,9 +13,9 @@ class FOOTPRINTS(BaseModule):
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
 
     def __init__(self):
-        from Acquire.ObjectStore import get_datetime_now
+        from openghg.util import timestamp_now
 
-        self._creation_datetime = get_datetime_now()
+        self._creation_datetime = timestamp_now()
         self._stored = False
         # How we identify a
         self._datasource_uuids = {}
@@ -52,7 +52,7 @@ class FOOTPRINTS(BaseModule):
         """
         # from openghg.processing import assign_attributes
         from xarray import open_dataset
-        from openghg.util import hash_file, timestamp_tzaware
+        from openghg.util import hash_file, timestamp_tzaware, timestamp_now
         from openghg.processing import assign_footprint_data
 
         fp = FOOTPRINTS.load()
@@ -86,6 +86,9 @@ class FOOTPRINTS(BaseModule):
         metadata["variables"] = list(fp_data.keys())
 
         metadata["model_parameters"] = model_params
+
+        # Set the attributes of this Dataset
+        fp_data.attrs = {"author": "OpenGHG Cloud", "processed": str(timestamp_now())}
 
         # Check if we've seen data from this site before
         site_hash = fp._get_site_hash(site=site, network=network, height=height)
