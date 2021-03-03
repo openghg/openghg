@@ -31,17 +31,24 @@ def single_site_footprint(
     # Get the measurement data
     measurement_results = search(locations=site, inlet=height, start_date=start_date, end_date=end_date)
 
-    site_key = next(iter(measurement_results.keys()))
-    measurement_keys = measurement_results[site_key]
+    try:
+        site_key = list(measurement_results.keys())[0]
+    except IndexError:
+        raise ValueError(f"Unable to find any measuremnt results for {site} at a height of {height} in the {network} network.")
 
-    measurement_data = recombine_sections(data_keys=measurement_keys)
+    measurement_keys = measurement_results[site_key]["keys"]
+
+    measurement_data = recombine_sections(data_keys=measurement_keys, sort=True)
 
     # Get the footprint data
     footprint_results = search_footprints(locations=site, inlet=height, start_date=start_date, end_date=end_date)
 
-    fp_site_key = next(iter(measurement_results.keys()))
-    footprint_keys = footprint_results[fp_site_key]
+    try:
+        fp_site_key = list(footprint_results.keys())[0]
+    except IndexError:
+        raise ValueError(f"Unable to find any footprints for {site} at a height of {height} in the {network} network.")
 
+    footprint_keys = footprint_results[fp_site_key]["keys"]
     footprint_data = recombine_sections(data_keys=footprint_keys, sort=False)
 
     return measurement_data, footprint_data

@@ -2,21 +2,21 @@
     into the data requested by the user
 
 """
-from typing import List
+from typing import List, Optional
 from xarray import Dataset
 
 __all__ = ["recombine_sections"]
 
 
-def recombine_sections(data_keys: List[str], sort=True) -> Dataset:
-    """ Combines datasets stored separately in the object store
-        into a single datasets
+def recombine_sections(data_keys: List[str], sort: Optional[bool] = True) -> Dataset:
+    """Combines datasets stored separately in the object store
+    into a single datasets
 
-        Args:
-            data_keys: List of object store keys
-            term
-        Returns:
-            xarray.Dataset: Combined Dataset
+    Args:
+        data_keys: List of object store keys
+        term
+    Returns:
+        xarray.Dataset: Combined Dataset
     """
     from xarray import concat as xr_concat
     from openghg.modules import Datasource

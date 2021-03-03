@@ -91,7 +91,6 @@ def search(
     datasource_uuids = obs.datasources()
 
     # Shallow load the Datasources so we can search their metadata
-    # datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
     # First we find the Datasources from locations we want to narrow down our search
@@ -113,14 +112,12 @@ def search(
                     # Just match the single source here
                     if datasource.search_metadata(search_terms=[sp, site, inlet, instrument], find_all=True):
                         # Get the data keys for the data in the matching daterange
-                        in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-
-                        data_date_str = _strip_dates_keys(in_date)
+                        data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
 
                         key = f"{sp}_{site}_{inlet}_{instrument}".lower()
 
                         # Find the keys that match the correct data
-                        results[key]["keys"] = {data_date_str: in_date}
+                        results[key]["keys"] = data_keys
                         results[key]["metadata"] = datasource.metadata()
 
         return results
@@ -168,11 +165,7 @@ def search(
                     if not data_keys:
                         continue
 
-                    # Get a key that covers the daterange of the actual data and not from epoch to now
-                    # if no start/end datetimes are passed
-                    data_date_str = _strip_dates_keys(data_keys)
-
-                    results[key]["keys"] = {data_date_str: data_keys}
+                    results[key]["keys"] = data_keys
                     results[key]["metadata"] = source.metadata()
 
                 continue
@@ -191,13 +184,12 @@ def search(
 
                 key = f"{source.species()}_{source.site()}_{source.inlet()}_{source.instrument()}".lower()
 
-                data_keys = {}
+                data_keys = []
                 # Get the keys for each daterange
                 for d in source_dateranges:
                     keys_in_date = source.keys_in_daterange_str(daterange=d)
-                    d = d.replace("+00:00", "")
                     if keys_in_date:
-                        data_keys[d] = keys_in_date
+                        data_keys.extend(keys_in_date)
 
                 if not data_keys:
                     continue
@@ -219,6 +211,7 @@ def search_footprints(locations: Union[str, List[str]], inlet: str, start_date: 
     Returns:
         dict: Dictionary of keys keyed by location
     """
+    from collections import defaultdict
     from openghg.modules import Datasource, FOOTPRINTS
 
     if not isinstance(locations, list):
@@ -228,7 +221,7 @@ def search_footprints(locations: Union[str, List[str]], inlet: str, start_date: 
     datasource_uuids = footprints.datasources()
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
-    keys = {}
+    keys = defaultdict(dict)
     # If we have locations to search
     # for location in locations:
     for datasource in datasources:
@@ -236,7 +229,8 @@ def search_footprints(locations: Union[str, List[str]], inlet: str, start_date: 
             if datasource.search_metadata(search_terms=[inlet, location]):
                 # Get the data keys for the data in the matching daterange
                 in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-                keys = in_date
+                keys[location]["keys"] = in_date
+                keys[location]["metadata"] = datasource.metadata()
 
     return keys
 

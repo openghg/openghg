@@ -69,21 +69,23 @@ class FOOTPRINTS(BaseModule):
         metadata = {}
 
         metadata["data_type"] = "footprint"
+        metadata["site"] = site
+        metadata["network"] = network
+        metadata["height"] = height
+
         metadata["start_date"] = str(timestamp_tzaware(fp_data.time[0].values))
         metadata["end_date"] = str(timestamp_tzaware(fp_data.time[-1].values))
 
-        metadata["max_longitude"] = float(fp_data["lon_high"].max())
-        metadata["min_longitude"] = float(fp_data["lon_high"].min())
-
-        metadata["max_latitude"] = float(fp_data["lat_high"].max())
-        metadata["min_latitude"] = float(fp_data["lat_high"].min())
+        metadata["max_longitude"] = round(float(fp_data["lon_high"].max()), 5)
+        metadata["min_longitude"] = round(float(fp_data["lon_high"].min()), 5)
+        metadata["max_latitude"] = round(float(fp_data["lat_high"].max()), 5)
+        metadata["min_latitude"] = round(float(fp_data["lat_high"].min()), 5)
 
         metadata["heights"] = [float(h) for h in fp_data.height.values]
+        # Do we also need to save all the variables we have available in this footprint?
         metadata["variables"] = list(fp_data.keys())
 
         metadata["model_parameters"] = model_params
-
-        # Do we also need to save all the variables we have available in this footprint?
 
         # Check if we've seen data from this site before
         site_hash = fp._get_site_hash(site=site, network=network, height=height)
@@ -94,10 +96,11 @@ class FOOTPRINTS(BaseModule):
             datasource_uid = False
 
         # Then we want to assign the data
+        # This only returns the UID string, not a dictionary including the name
+        # This behaviour is different to assign_data which will be changed soon
         uid = assign_footprint_data(data=fp_data, metadata=metadata, datasource_uid=datasource_uid)
 
-        # Record the datasource uuid
-        fp._datasource_uuids[site_hash] = uid
+        fp.add_datasources(datasource_uuids={site_hash: uid})
         # Record the file hash in case we see this file again
         fp._file_hashes[file_hash] = filepath.name
 

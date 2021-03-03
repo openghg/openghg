@@ -665,6 +665,7 @@ class Datasource:
         if not isinstance(search_terms, list):
             search_terms = [search_terms]
 
+        # TODO - improve this search metadata function 
         search_terms = [s.lower() for s in search_terms]
 
         results = []
@@ -681,10 +682,10 @@ class Datasource:
 
         # If we want all the terms to match these should be the same length
         if find_all:
-            return len(search_terms) == len(results)
+            return len(results) >= len(search_terms) 
         # Otherwise there should be at least a True in results
         else:
-            return True in results
+            return any(results)
 
     def in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> bool:
         """Check if the data contained within this Datasource overlaps with the
