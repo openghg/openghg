@@ -4,7 +4,7 @@ footprints_data_merge
 """
 from pandas import Timestamp
 from xarray import Dataset
-from typing import Union
+from typing import Optional, Tuple, Union
 
 __all__ = ["single_site_footprint"]
 
@@ -28,17 +28,20 @@ def single_site_footprint(
     start_date = timestamp_tzaware(start_date)
     end_date = timestamp_tzaware(end_date)
 
-    # Get the measurement data
-    measurement_results = search(locations=site, inlet=height, start_date=start_date, end_date=end_date)
+    # As we're not processing any satellite data yet just set toleranc to None
+    tolerance = None
+    platform = None
+
+    # Get the observation data
+    obs_results = search(locations=site, inlet=height, start_date=start_date, end_date=end_date)
 
     try:
-        site_key = list(measurement_results.keys())[0]
+        site_key = list(obs_results.keys())[0]
     except IndexError:
         raise ValueError(f"Unable to find any measuremnt results for {site} at a height of {height} in the {network} network.")
 
-    measurement_keys = measurement_results[site_key]["keys"]
-
-    measurement_data = recombine_sections(data_keys=measurement_keys, sort=True)
+    obs_keys = obs_results[site_key]["keys"]
+    obs_data = recombine_sections(data_keys=obs_keys, sort=True)
 
     # Get the footprint data
     footprint_results = search_footprints(locations=site, inlet=height, start_date=start_date, end_date=end_date)
@@ -51,12 +54,21 @@ def single_site_footprint(
     footprint_keys = footprint_results[fp_site_key]["keys"]
     footprint_data = recombine_sections(data_keys=footprint_keys, sort=False)
 
-    # As we're not processing any satellite data yet just set toleranc to None
-    tolerance = None
+    # Align the two Datasets
+    aligned_obs, aligned_footprint = align_datasets(
+        obs_data=obs_data, footprint_data=footprint_data, platform=platform, resample_to_obs_data=False
+    )
 
+    combined_dataset = combine_datasets(dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance)
 
+    # Transpose to keep time in the last dimension position in case it has been moved in resample
+    expected_dim_order = ["height", "lat", "lon", "lev", "time", "H_back"]
+    dataset_dims = combined_dataset.dims
+    to_transpose = [d for d in expected_dim_order if d in dataset_dims]
 
-    return measurement_data, footprint_data
+    combined_dataset = combined_dataset.transpose(*to_transpose)
+
+    return obs_data, footprint_data
 
     # Now need to test these two parts work
 
@@ -122,156 +134,139 @@ def retrieve_footprints(site, others, HiTRes=False):
         pass
 
 
-#
-def combine_datasets(dsa, dsb, method="ffill", tolerance=None):
-    """
-    This is taken from the ACRG repo
+def combine_datasets(
+    dataset_A: Dataset, dataset_B: Dataset, method: Optional[str] = "ffill", tolerance: Optional[str] = None
+) -> Dataset:
+    """Merges two datasets and re-indexes to the first dataset. 
 
-    The combine_datasets function merges two datasets and re-indexes to the FIRST dataset.
-    If "fp" variable is found within the combined dataset, the "time" values where the "lat","lon"
-    dimensions didn't match are removed.
-
-    Example:
-        ds = combine_datasets(dsa, dsb)
+        If "fp" variable is found within the combined dataset,
+        the "time" values where the "lat","lon" dimensions didn't match are removed.
 
     Args:
-        dsa (xarray.Dataset) :
-            First dataset to merge
-        dsb (xarray.Dataset) :
-            Second dataset to merge
-        method (str, optional) :
-            One of {None, ‘nearest’, ‘pad’/’ffill’, ‘backfill’/’bfill’}
-            See xarray.DataArray.reindex_like for list of options and meaning.
-            Default = "ffill" (forward fill)
-        tolerance (int/float??) :
-            Maximum allowed tolerance between matches.
-
+        dataset_A: First dataset to merge
+        dataset_B: Second dataset to merge
+        method: One of {None, ‘nearest’, ‘pad’/’ffill’, ‘backfill’/’bfill’}
+                See xarray.DataArray.reindex_like for list of options and meaning.
+                Defaults to ffill (forward fill)
+        tolerance: Maximum allowed tolerance between matches.
     Returns:
-        xarray.Dataset:
-            Combined dataset indexed to dsa
+        xarray.Dataset: Combined dataset indexed to dataset_A
     """
     import numpy as np
 
-    # merge the two datasets within a tolerance and remove times that are NaN (i.e. when FPs don't exist)
-
-    if not indexesMatch(dsa, dsb):
-        dsb_temp = dsb.reindex_like(dsa, method, tolerance=tolerance)
+    if indexes_match(dataset_A, dataset_B):
+        dataset_B_temp = dataset_B
     else:
-        dsb_temp = dsb
+        dataset_B_temp = dataset_B.reindex_like(dataset_A, method, tolerance=tolerance)
 
-    ds_temp = dsa.merge(dsb_temp)
-    if "fp" in list(ds_temp.keys()):
-        flag = np.where(np.isfinite(ds_temp.fp.mean(dim=["lat", "lon"]).values))
-        ds_temp = ds_temp[dict(time=flag[0])]
-    return ds_temp
+    merged_ds = dataset_A.merge(dataset_B_temp)
+
+    if "fp" in merged_ds:
+        flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
+        merged_ds = merged_ds[dict(time=flag[0])]
+
+    return merged_ds
 
 
-def indexesMatch(dsa, dsb):
-    """
-    Check if two datasets need to be reindexed_like for combine_datasets
+def indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
+    """Check if two datasets need to be reindexed_like for combine_datasets
 
     Args:
-        dsa (xarray.Dataset) :
-            First dataset to check
-        dsb (xarray.Dataset) :
-            Second dataset to check
-
+        dataset_A: First dataset to check
+        dataset_B: Second dataset to check
     Returns:
-        boolean:
-            True if indexes match, False if datasets must be reindexed
+        bool: True if indexes match, else False
     """
+    import numpy as np
 
-    commonIndicies = [key for key in dsa.indexes.keys() if key in dsb.indexes.keys()]
+    common_indices = (key for key in dataset_A.indexes.keys() if key in dataset_B.indexes.keys())
 
-    # test if each comon index is the same
-    for index in commonIndicies:
-        # first check lengths are the same to avoid error in second check
-        if not len(dsa.indexes[index]) == len(dsb.indexes[index]):
+    for index in common_indices:
+        if not len(dataset_A.indexes[index]) == len(dataset_B.indexes[index]):
             return False
 
-        # check number of values that are not close (testing for equality with floating point)
+        # Check number of values that are not close (testing for equality with floating point)
         if index == "time":
-            # for time iverride the default to have ~ second precision
+            # For time override the default to have ~ second precision
             rtol = 1e-10
         else:
             rtol = 1e-5
-        if (
-            not np.sum(~np.isclose(dsa.indexes[index].values.astype(float), dsb.indexes[index].values.astype(float), rtol=rtol))
-            == 0
-        ):
+
+        index_diff = np.sum(
+            ~np.isclose(dataset_A.indexes[index].values.astype(float), dataset_B.indexes[index].values.astype(float), rtol=rtol)
+        )
+
+        if not index_diff == 0:
             return False
 
     return True
 
 
-def align_datasets(dataset_1, dataset_2, platform=None, resample_to_dataset_1=False):
-    """
-    Slice and resample two datasets to align along time
+def align_datasets(
+    obs_data: Dataset, footprint_data: Dataset, platform: Optional[str] = None, resample_to_obs_data: Optional[bool] = False
+) -> Tuple[Dataset, Dataset]:
+    """Slice and resample two datasets to align along time
+
+    This slices the date to the smallest time frame
+    spanned by both the footprint and obs, then resamples the data
+    using the mean to the one with coarsest median resolution
+    starting from the sliced start date.
 
     Args:
-        dataset_1, dataset_2 (xarray.Dataset) :
-            Datasets with time dimension. It is assumed that dataset_1 is obs data and dataset_2 is footprint data
-
-        platform (str) :
-            obs platform used to decide whether to resample
-
-        resample_to_dataset_1 (boolean) :
-            Override resampling to coarser resolution and resample to dataset_1 regardless
-
+        obs_data: Observations Dataset
+        footprint_data: Footprint Dataset
+        platform: Observation platform used to decide whether to resample
+        resample_to_obs_data: Override resampling to coarser resolution and resample to obs_data regardless
     Returns:
-        2 xarray.dataset with aligned time dimensions
+        tuple: Two xarray.Dataset with aligned time dimensions
     """
     import numpy as np
 
     platform_skip_resample = ("satellite", "flask")
 
     if platform in platform_skip_resample:
-        return dataset_1, dataset_2
+        return obs_data, footprint_data
 
-    # lw13938: 12/04/2018 - This should slice the date to the smallest time frame
-    # spanned by both the footprint and obs, then resamples the data
-    # using the mean to the one with coarsest median resolution
-    # starting from the sliced start date.
+    obs_data_timeperiod = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]).astype("int64"))
+    footprint_data_timeperiod = np.nanmedian((footprint_data.time.data[1:] - footprint_data.time.data[0:-1]).astype("int64"))
 
-    dataset_1_timeperiod = np.nanmedian((dataset_1.time.data[1:] - dataset_1.time.data[0:-1]).astype("int64"))
-    dataset_2_timeperiod = np.nanmedian((dataset_2.time.data[1:] - dataset_2.time.data[0:-1]).astype("int64"))
+    obs_startdate = obs_data.time[0]
+    obs_enddate = obs_data.time[-1]
+    footprint_startdate = footprint_data.time[0]
+    footprint_enddate = footprint_data.time[-1]
 
-    dataset_1_st = dataset_1.time[0]
-    dataset_1_et = dataset_1.time[-1]
-    dataset_2_st = dataset_2.time[0]
-    dataset_2_et = dataset_2.time[-1]
-
-    if int(dataset_1_st.data) > int(dataset_2_st.data):
-        start_date = dataset_1_st
+    if int(obs_startdate.data) > int(footprint_startdate.data):
+        start_date = obs_startdate
     else:
-        start_date = dataset_2_st
-    if int(dataset_1_et.data) < int(dataset_2_et.data):
-        end_date = dataset_1_et
+        start_date = footprint_startdate
+
+    if int(obs_enddate.data) < int(footprint_enddate.data):
+        end_date = obs_enddate
     else:
-        end_date = dataset_2_et
+        end_date = footprint_enddate
 
-    start_s = str(
-        np.round(start_date.data.astype(np.int64) - 5e8, -9).astype("datetime64[ns]")
-    )  # subtract half a second to ensure lower range covered
-    end_s = str(
-        np.round(end_date.data.astype(np.int64) + 5e8, -9).astype("datetime64[ns]")
-    )  # add half a second to ensure upper range covered
+    # Subtract half a second to ensure lower range covered
+    start_s = str(np.round(start_date.data.astype(np.int64) - 5e8, -9).astype("datetime64[ns]"))
+    # Add half a second to ensure upper range covered
+    end_s = str(np.round(end_date.data.astype(np.int64) + 5e8, -9).astype("datetime64[ns]"))
 
-    dataset_1 = dataset_1.sel(time=slice(start_s, end_s))
-    dataset_2 = dataset_2.sel(time=slice(start_s, end_s))
+    obs_data = obs_data.sel(time=slice(start_s, end_s))
+    footprint_data = footprint_data.sel(time=slice(start_s, end_s))
 
     # only non satellite datasets with different periods need to be resampled
-    if not np.isclose(dataset_1_timeperiod, dataset_2_timeperiod):
+    if not np.isclose(obs_data_timeperiod, footprint_data_timeperiod):
         base = start_date.dt.hour.data + start_date.dt.minute.data / 60.0 + start_date.dt.second.data / 3600.0
-        if (dataset_1_timeperiod >= dataset_2_timeperiod) or (resample_to_dataset_1 == True):
-            resample_period = (
-                str(round(dataset_1_timeperiod / 3600e9, 5)) + "H"
-            )  # rt17603: Added 24/07/2018 - stops pandas frequency error for too many dp.
-            dataset_2 = dataset_2.resample(indexer={"time": resample_period}, base=base).mean()
-        elif dataset_1_timeperiod < dataset_2_timeperiod or (resample_to_dataset_1 == False):
-            resample_period = (
-                str(round(dataset_2_timeperiod / 3600e9, 5)) + "H"
-            )  # rt17603: Added 24/07/2018 - stops pandas frequency error for too many dp.
-            dataset_1 = dataset_1.resample(indexer={"time": resample_period}, base=base).mean()
 
-    return dataset_1, dataset_2
+        if (obs_data_timeperiod >= footprint_data_timeperiod) or resample_to_obs_data is True:
+
+            resample_period = str(round(obs_data_timeperiod / 3600e9, 5)) + "H"
+
+            footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
+
+        elif obs_data_timeperiod < footprint_data_timeperiod or resample_to_obs_data is False:
+
+            resample_period = str(round(footprint_data_timeperiod / 3600e9, 5)) + "H"
+
+            obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
+
+    return obs_data, footprint_data
