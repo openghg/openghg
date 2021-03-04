@@ -4,13 +4,20 @@ footprints_data_merge
 """
 from pandas import Timestamp
 from xarray import Dataset
-from typing import Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 __all__ = ["single_site_footprint"]
 
 
 def single_site_footprint(
-    site: str, height: str, network: str, resample_data: bool, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]
+    site: str,
+    height: str,
+    network: str,
+    resample_data: bool,
+    start_date: Union[str, Timestamp],
+    end_date: Union[str, Timestamp],
+    site_modifier: Optional[str] = None,
+    platofmr: Optional[str] = None,
 ) -> Dataset:
     """Creates a Dataset for a single site's measurement data and footprints
 
@@ -19,6 +26,11 @@ def single_site_footprint(
         height
         network
         resample_data
+        site_modifier: The name of the site given in the footprint.
+                       This is useful for example if the same site footprints are run with a different met and
+                       they are named slightly differently from the obs file. E.g.
+                       site="DJI", site_modifier = "DJI-SAM" - station called DJI, footprint site called DJI-SAM
+        platform:
     Returns:
         xarray.Dataset
     """
@@ -31,6 +43,10 @@ def single_site_footprint(
     # As we're not processing any satellite data yet just set toleranc to None
     tolerance = None
     platform = None
+    # Where are these units read from? Attributes? NetCDFs I've read from BP don't have these attrs
+    units = None
+
+    site_modifier_fp = site_modifier if site_modifier else site
 
     # Get the observation data
     obs_results = search(locations=site, inlet=height, start_date=start_date, end_date=end_date)
@@ -38,7 +54,7 @@ def single_site_footprint(
     try:
         site_key = list(obs_results.keys())[0]
     except IndexError:
-        raise ValueError(f"Unable to find any measuremnt results for {site} at a height of {height} in the {network} network.")
+        raise ValueError(f"Unable to find any measurement data for {site} at a height of {height} in the {network} network.")
 
     obs_keys = obs_results[site_key]["keys"]
     obs_data = recombine_sections(data_keys=obs_keys, sort=True)
@@ -49,10 +65,12 @@ def single_site_footprint(
     try:
         fp_site_key = list(footprint_results.keys())[0]
     except IndexError:
-        raise ValueError(f"Unable to find any footprints for {site} at a height of {height} in the {network} network.")
+        raise ValueError(f"Unable to find any footprint data for {site} at a height of {height} in the {network} network.")
 
     footprint_keys = footprint_results[fp_site_key]["keys"]
     footprint_data = recombine_sections(data_keys=footprint_keys, sort=False)
+
+    # Do we need to check
 
     # Align the two Datasets
     aligned_obs, aligned_footprint = align_datasets(
@@ -61,6 +79,8 @@ def single_site_footprint(
 
     combined_dataset = combine_datasets(dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance)
 
+    return combined_dataset
+
     # Transpose to keep time in the last dimension position in case it has been moved in resample
     expected_dim_order = ["height", "lat", "lon", "lev", "time", "H_back"]
     dataset_dims = combined_dataset.dims
@@ -68,12 +88,14 @@ def single_site_footprint(
 
     combined_dataset = combined_dataset.transpose(*to_transpose)
 
-    return obs_data, footprint_data
+    return combined_dataset
 
     # Now need to test these two parts work
 
 
-def footprints_data_merge():
+def footprints_data_merge(
+    site_modifier: Optional[Dict] = None,
+):
     """This retrieves mol/frac data and footprints from the object store and combines them into a
     single xarray Dataset
 
@@ -137,7 +159,7 @@ def retrieve_footprints(site, others, HiTRes=False):
 def combine_datasets(
     dataset_A: Dataset, dataset_B: Dataset, method: Optional[str] = "ffill", tolerance: Optional[str] = None
 ) -> Dataset:
-    """Merges two datasets and re-indexes to the first dataset. 
+    """Merges two datasets and re-indexes to the first dataset.
 
         If "fp" variable is found within the combined dataset,
         the "time" values where the "lat","lon" dimensions didn't match are removed.
@@ -160,6 +182,8 @@ def combine_datasets(
         dataset_B_temp = dataset_B.reindex_like(dataset_A, method, tolerance=tolerance)
 
     merged_ds = dataset_A.merge(dataset_B_temp)
+
+    return merged_ds
 
     if "fp" in merged_ds:
         flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
