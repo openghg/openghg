@@ -104,23 +104,23 @@ def search(
     # This is returned to the caller
     results = defaultdict(dict)
 
-    # With both inlet and instrument specified we bypass the ranking system
-    if inlet is not None and instrument is not None:
-        for site, sources in location_sources.items():
-            for sp in species:
-                for datasource in sources:
-                    # Just match the single source here
-                    if datasource.search_metadata(search_terms=[sp, site, inlet, instrument], find_all=True):
-                        # Get the data keys for the data in the matching daterange
-                        data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+    # # With both inlet and instrument specified we bypass the ranking system
+    # if inlet is not None and instrument is not None:
+    #     for site, sources in location_sources.items():
+    #         for sp in species:
+    #             for datasource in sources:
+    #                 # Just match the single source here
+    #                 if datasource.search_metadata(search_terms=[sp, site, inlet, instrument], find_all=True):
+    #                     # Get the data keys for the data in the matching daterange
+    #                     data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
 
-                        key = f"{sp}_{site}_{inlet}_{instrument}".lower()
+    #                     key = f"{sp}_{site}_{inlet}_{instrument}".lower()
 
-                        # Find the keys that match the correct data
-                        results[key]["keys"] = data_keys
-                        results[key]["metadata"] = datasource.metadata()
+    #                     # Find the keys that match the correct data
+    #                     results[key]["keys"] = data_keys
+    #                     results[key]["metadata"] = datasource.metadata()
 
-        return results
+    #     return results
 
     for location, sources in location_sources.items():
         # Loop over and look for the species

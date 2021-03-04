@@ -143,7 +143,7 @@ def get_attributes(
         global_attributes = global_attributes_default
 
     global_attributes["File created"] = str(pd_Timestamp.now(tz="UTC"))
-    global_attributes["Processed by"] = "auto@hugs-cloud.com"
+    global_attributes["Processed by"] = "OpenGHG_Cloud"
     global_attributes["species"] = species_label
 
     if scale is None:

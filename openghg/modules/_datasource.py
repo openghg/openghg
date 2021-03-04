@@ -666,7 +666,7 @@ class Datasource:
             search_terms = [search_terms]
 
         # TODO - improve this search metadata function 
-        search_terms = [s.lower() for s in search_terms]
+        search_terms = [s.lower() for s in search_terms if s is not None]
 
         results = []
 

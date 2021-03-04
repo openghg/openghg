@@ -22,6 +22,9 @@ def recombine_sections(data_keys: List[str], sort: Optional[bool] = True) -> Dat
     from openghg.modules import Datasource
     from openghg.objectstore import get_bucket
 
+    if not data_keys:
+        raise ValueError("No data keys passed.")
+
     bucket = get_bucket()
 
     data = [Datasource.load_dataset(bucket=bucket, key=k) for k in data_keys]

@@ -36,6 +36,7 @@ class FOOTPRINTS(BaseModule):
         model_params: Dict,
         retrieve_met: Optional[bool] = False,
         overwrite: Optional[bool] = False,
+        high_res: Optional[bool] = False
     ) -> Dict:
         """Reads footprint data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -79,10 +80,22 @@ class FOOTPRINTS(BaseModule):
         metadata["start_date"] = str(timestamp_tzaware(fp_data.time[0].values))
         metadata["end_date"] = str(timestamp_tzaware(fp_data.time[-1].values))
 
-        metadata["max_longitude"] = round(float(fp_data["lon_high"].max()), 5)
-        metadata["min_longitude"] = round(float(fp_data["lon_high"].min()), 5)
-        metadata["max_latitude"] = round(float(fp_data["lat_high"].max()), 5)
-        metadata["min_latitude"] = round(float(fp_data["lat_high"].min()), 5)
+        metadata["max_longitude"] = round(float(fp_data["lon"].max()), 5)
+        metadata["min_longitude"] = round(float(fp_data["lon"].min()), 5)
+        metadata["max_latitude"] = round(float(fp_data["lat"].max()), 5)
+        metadata["min_latitude"] = round(float(fp_data["lat"].min()), 5)
+        metadata["high_resolution"] = False
+
+        # If it's a high resolution footprint file we'll have two sets of lat/long values
+        if high_res:
+            try:
+                metadata["max_longitude_high"] = round(float(fp_data["lon_high"].max()), 5)
+                metadata["min_longitude_high"] = round(float(fp_data["lon_high"].min()), 5)
+                metadata["max_latitude_high"] = round(float(fp_data["lat_high"].max()), 5)
+                metadata["min_latitude_high"] = round(float(fp_data["lat_high"].min()), 5)
+                metadata["high_resolution"] = True
+            except KeyError:
+                raise KeyError("Unable to find lat_high or lon_high data.")
 
         metadata["heights"] = [float(h) for h in fp_data.height.values]
         # Do we also need to save all the variables we have available in this footprint?
@@ -107,6 +120,7 @@ class FOOTPRINTS(BaseModule):
         uid = assign_footprint_data(data=fp_data, metadata=metadata, datasource_uid=datasource_uid)
 
         fp.add_datasources(datasource_uuids={site_hash: uid})
+
         # Record the file hash in case we see this file again
         fp._file_hashes[file_hash] = filepath.name
 

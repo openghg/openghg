@@ -4,7 +4,7 @@ footprints_data_merge
 """
 from pandas import Timestamp
 from xarray import Dataset
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 __all__ = ["single_site_footprint"]
 
@@ -17,7 +17,10 @@ def single_site_footprint(
     start_date: Union[str, Timestamp],
     end_date: Union[str, Timestamp],
     site_modifier: Optional[str] = None,
-    platofmr: Optional[str] = None,
+    platform: Optional[str] = None,
+    instrument: Optional[str] = None,
+    species: Optional[Union[str, List]] = None
+
 ) -> Dataset:
     """Creates a Dataset for a single site's measurement data and footprints
 
@@ -31,12 +34,14 @@ def single_site_footprint(
                        they are named slightly differently from the obs file. E.g.
                        site="DJI", site_modifier = "DJI-SAM" - station called DJI, footprint site called DJI-SAM
         platform:
+        instrument:
+        species:
     Returns:
         xarray.Dataset
     """
     from openghg.processing import search, recombine_sections, search_footprints
     from openghg.util import timestamp_tzaware
-    from past.utils import old_div
+    # from past.utils import old_div
 
     start_date = timestamp_tzaware(start_date)
     end_date = timestamp_tzaware(end_date)
@@ -50,7 +55,7 @@ def single_site_footprint(
     site_modifier_fp = site_modifier if site_modifier else site
 
     # Get the observation data
-    obs_results = search(locations=site, inlet=height, start_date=start_date, end_date=end_date)
+    obs_results = search(locations=site, inlet=height, start_date=start_date, end_date=end_date, species="nf3", instrument="medusa")
 
     try:
         site_key = list(obs_results.keys())[0]
@@ -71,8 +76,6 @@ def single_site_footprint(
     footprint_keys = footprint_results[fp_site_key]["keys"]
     footprint_data = recombine_sections(data_keys=footprint_keys, sort=False)
 
-    # Do we need to check
-
     # Align the two Datasets
     aligned_obs, aligned_footprint = align_datasets(
         obs_data=obs_data, footprint_data=footprint_data, platform=platform, resample_to_obs_data=False
@@ -87,10 +90,10 @@ def single_site_footprint(
 
     combined_dataset = combined_dataset.transpose(..., "time")
 
-    if units:
-        combined_dataset.update({"fp": (combined_dataset.fp.dims, old_div(combined_dataset.fp, units))})
-        # if HiTRes:
-        #     combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, old_div(combined_dataset.fp_HiTRes, units))})
+    # if units:
+    #     combined_dataset.update({"fp": (combined_dataset.fp.dims, old_div(combined_dataset.fp, units))})
+    # if HiTRes:
+    #     combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, old_div(combined_dataset.fp_HiTRes, units))})
 
     return combined_dataset
 
