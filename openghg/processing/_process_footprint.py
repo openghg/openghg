@@ -36,6 +36,7 @@ def single_site_footprint(
     """
     from openghg.processing import search, recombine_sections, search_footprints
     from openghg.util import timestamp_tzaware
+    from past.utils import old_div
 
     start_date = timestamp_tzaware(start_date)
     end_date = timestamp_tzaware(end_date)
@@ -79,14 +80,17 @@ def single_site_footprint(
 
     combined_dataset = combine_datasets(dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance)
 
-    return combined_dataset
-
     # Transpose to keep time in the last dimension position in case it has been moved in resample
-    expected_dim_order = ["height", "lat", "lon", "lev", "time", "H_back"]
-    dataset_dims = combined_dataset.dims
-    to_transpose = [d for d in expected_dim_order if d in dataset_dims]
+    # expected_dim_order = ["height", "lat", "lon", "lev", "time", "H_back"]
+    # dataset_dims = combined_dataset.dims
+    # to_transpose = [d for d in expected_dim_order if d in dataset_dims]
 
-    combined_dataset = combined_dataset.transpose(*to_transpose)
+    combined_dataset = combined_dataset.transpose(..., "time")
+
+    if units:
+        combined_dataset.update({"fp": (combined_dataset.fp.dims, old_div(combined_dataset.fp, units))})
+        # if HiTRes:
+        #     combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, old_div(combined_dataset.fp_HiTRes, units))})
 
     return combined_dataset
 
@@ -162,12 +166,12 @@ def combine_datasets(
     """Merges two datasets and re-indexes to the first dataset.
 
         If "fp" variable is found within the combined dataset,
-        the "time" values where the "lat","lon" dimensions didn't match are removed.
+        the "time" values where the "lat", "lon" dimensions didn't match are removed.
 
     Args:
         dataset_A: First dataset to merge
         dataset_B: Second dataset to merge
-        method: One of {None, ‘nearest’, ‘pad’/’ffill’, ‘backfill’/’bfill’}
+        method: One of None, nearest, ffill, bfill.
                 See xarray.DataArray.reindex_like for list of options and meaning.
                 Defaults to ffill (forward fill)
         tolerance: Maximum allowed tolerance between matches.
@@ -183,11 +187,10 @@ def combine_datasets(
 
     merged_ds = dataset_A.merge(dataset_B_temp)
 
-    return merged_ds
-
     if "fp" in merged_ds:
-        flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
-        merged_ds = merged_ds[dict(time=flag[0])]
+        if all(k in merged_ds.fp.dims for k in ("lat", "long")):
+            flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
+            merged_ds = merged_ds[dict(time=flag[0])]
 
     return merged_ds
 

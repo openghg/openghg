@@ -32,6 +32,7 @@ class FOOTPRINTS(BaseModule):
         site: str,
         network: str,
         height: str,
+        domain: str,
         model_params: Dict,
         retrieve_met: Optional[bool] = False,
         overwrite: Optional[bool] = False,
@@ -44,6 +45,7 @@ class FOOTPRINTS(BaseModule):
             site: Site name
             network: Network name
             height: Height above ground level in metres
+            domain: Domain of footprint
             model_params: Model run parameters
             retrieve_met: Whether to also download meterological data for this footprint area
             overwrite: Overwrite any currently stored data
@@ -72,6 +74,7 @@ class FOOTPRINTS(BaseModule):
         metadata["site"] = site
         metadata["network"] = network
         metadata["height"] = height
+        metadata["domain"] = domain
 
         metadata["start_date"] = str(timestamp_tzaware(fp_data.time[0].values))
         metadata["end_date"] = str(timestamp_tzaware(fp_data.time[-1].values))
