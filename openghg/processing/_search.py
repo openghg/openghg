@@ -3,34 +3,32 @@
 
 """
 from pandas import Timestamp
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 __all__ = ["search", "search_footprints"]
 
 
 def search(
-    locations,
-    species=None,
-    inlet=None,
-    instrument=None,
-    find_all=True,
-    start_date=None,
-    end_date=None,
-    data_type="timeseries",
-):
-    """Search for gas data
-
-    TODO - review this function - feel like it can be tidied and simplified
+    locations: Union[str, List],
+    species: Optional[str, List] = None,
+    inlet: Optional[str, List] = None,
+    instrument: Optional[str] = None,
+    find_all: Optional[bool] = True,
+    start_date: Optional[str, Timestamp] = None,
+    end_date: Optional[str, Timestamp] = None,
+    data_type: Optional[str] = "timeseries",
+) -> Dict:
+    """Search for observations data
 
     Args:
-        species (str or list): Terms to search for in Datasources
-        locations (str or list): Where to search for the terms in species
-        inlet (str, default=None): Inlet height such as 100m
-        instrument (str, default=None): Instrument name such as picarro
-        find_all (bool, default=True): Require all search terms to be satisfied
-        start_date (datetime, default=None): Start datetime for search
+        species: Terms to search for in Datasources
+        locations: Where to search for the terms in species
+        inlet: Inlet height such as 100m
+        instrument: Instrument name such as picarro
+        find_all: Require all search terms to be satisfied
+        start_date: Start datetime for search.
         If None a start datetime of UNIX epoch (1970-01-01) is set
-        end_date (datetime, default=None): End datetime for search
+        end_date: End datetime for search.
         If None an end datetime of the current datetime is set
     Returns:
         dict: List of keys of Datasources matching the search parameters
@@ -103,24 +101,24 @@ def search(
 
     # This is returned to the caller
     results = defaultdict(dict)
+    # With both inlet and instrument specified we bypass the ranking system
+    if inlet is not None and instrument is not None:
+        for site, sources in location_sources.items():
+            for sp in species:
+                for datasource in sources:
+                    search_terms = [x for x in (sp, site, inlet, instrument) if x is not None]
+                    # Just match the single source here
+                    if datasource.search_metadata(search_terms=search_terms, find_all=True):
+                        # Get the data keys for the data in the matching daterange
+                        data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
 
-    # # With both inlet and instrument specified we bypass the ranking system
-    # if inlet is not None and instrument is not None:
-    #     for site, sources in location_sources.items():
-    #         for sp in species:
-    #             for datasource in sources:
-    #                 # Just match the single source here
-    #                 if datasource.search_metadata(search_terms=[sp, site, inlet, instrument], find_all=True):
-    #                     # Get the data keys for the data in the matching daterange
-    #                     data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+                        key = f"{datasource.species()}_{site}_{inlet}_{instrument}".lower()
 
-    #                     key = f"{sp}_{site}_{inlet}_{instrument}".lower()
+                        # Find the keys that match the correct data
+                        results[key]["keys"] = data_keys
+                        results[key]["metadata"] = datasource.metadata()
 
-    #                     # Find the keys that match the correct data
-    #                     results[key]["keys"] = data_keys
-    #                     results[key]["metadata"] = datasource.metadata()
-
-    #     return results
+        return results
 
     for location, sources in location_sources.items():
         # Loop over and look for the species
@@ -136,7 +134,6 @@ def search(
         for sp, sources in species_data.items():
             ranked_sources = {}
 
-            # How to return all the sources if they're all 0?
             for source in sources:
                 rank_data = source.get_rank(start_date=start_date, end_date=end_date)
 
