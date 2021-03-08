@@ -10,12 +10,12 @@ __all__ = ["search", "search_footprints"]
 
 def search(
     locations: Union[str, List],
-    species: Optional[str, List] = None,
-    inlet: Optional[str, List] = None,
+    species: Optional[Union[str, List]] = None,
+    inlet: Optional[Union[str, List]] = None,
     instrument: Optional[str] = None,
     find_all: Optional[bool] = True,
-    start_date: Optional[str, Timestamp] = None,
-    end_date: Optional[str, Timestamp] = None,
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
     data_type: Optional[str] = "timeseries",
 ) -> Dict:
     """Search for observations data
@@ -96,7 +96,7 @@ def search(
     # If we have locations to search
     for location in locations:
         for datasource in datasources:
-            if datasource.search_metadata(search_terms=location):
+            if datasource.search_metadata(search_terms=location, start_date=start_date, end_date=end_date):
                 location_sources[location].append(datasource)
 
     # This is returned to the caller
@@ -105,10 +105,12 @@ def search(
     if inlet is not None and instrument is not None:
         for site, sources in location_sources.items():
             for sp in species:
+                search_terms = [x for x in (sp, site, inlet, instrument) if x is not None]
                 for datasource in sources:
-                    search_terms = [x for x in (sp, site, inlet, instrument) if x is not None]
                     # Just match the single source here
-                    if datasource.search_metadata(search_terms=search_terms, find_all=True):
+                    if datasource.search_metadata(
+                        search_terms=search_terms, start_date=start_date, end_date=end_date, find_all=True
+                    ):
                         # Get the data keys for the data in the matching daterange
                         data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
 
@@ -127,7 +129,7 @@ def search(
             for s in species:
                 search_terms = [x for x in (s, location, inlet, instrument) if x is not None]
                 # Check the species and the daterange
-                if datasource.search_metadata(search_terms=search_terms, find_all=True):
+                if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date, find_all=True):
                     species_data[s].append(datasource)
 
         # For each location we want to find the highest ranking sources for the selected species
@@ -223,7 +225,7 @@ def search_footprints(locations: Union[str, List[str]], inlet: str, start_date: 
     # for location in locations:
     for datasource in datasources:
         for location in locations:
-            if datasource.search_metadata(search_terms=[inlet, location]):
+            if datasource.search_metadata(search_terms=[inlet, location], start_date=start_date, end_date=end_date):
                 # Get the data keys for the data in the matching daterange
                 in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
                 keys[location]["keys"] = in_date

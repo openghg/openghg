@@ -653,8 +653,14 @@ class Datasource:
         start, end = self.daterange()
         return "".join([datetime_to_string(start), "_", datetime_to_string(end)])
 
-    def search_metadata(self, search_terms: Union[str, List[str]], find_all: Optional[bool] = False) -> bool:
-        """Search the values of the metadata of this Datasource for search_term
+    def search_metadata(
+        self,
+        search_terms: Union[str, List[str]],
+        start_date: Optional[Timestamp] = None,
+        end_date: Optional[Timestamp] = None,
+        find_all: Optional[bool] = False,
+    ) -> bool:
+        """Search the values of the metadata of this Datasource for search terms
 
         Args:
             search_term: String or list of strings to search for in metadata
@@ -662,18 +668,21 @@ class Datasource:
         Returns:
             bool: True if found else False
         """
+        if start_date is not None and end_date is not None:
+            if not self.in_daterange(start_date=start_date, end_date=end_date):
+                return False
+
         if not isinstance(search_terms, list):
             search_terms = [search_terms]
 
-        # TODO - improve this search metadata function 
         search_terms = [s.lower() for s in search_terms if s is not None]
 
-        results = []
+        results = {}
 
         def search_recurse(term, data):
             for v in data.values():
                 if v == term:
-                    results.append(True)
+                    results[term] = True
                 elif isinstance(v, dict):
                     search_recurse(term, v)
 
@@ -682,10 +691,10 @@ class Datasource:
 
         # If we want all the terms to match these should be the same length
         if find_all:
-            return len(results) >= len(search_terms) 
+            return len(results) == len(search_terms)
         # Otherwise there should be at least a True in results
         else:
-            return any(results)
+            return len(results) > 0
 
     def in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> bool:
         """Check if the data contained within this Datasource overlaps with the
@@ -697,10 +706,10 @@ class Datasource:
         Returns:
             bool: True if overlap
         """
-        from pandas import Timestamp
+        from openghg.util import timestamp_tzaware
 
-        start_date = Timestamp(start_date)
-        end_date = Timestamp(end_date)
+        start_date = timestamp_tzaware(start_date)
+        end_date = timestamp_tzaware(end_date)
 
         return (start_date <= self._end_date) and (end_date >= self._start_date)
 

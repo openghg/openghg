@@ -152,7 +152,7 @@ def test_save(mock_uuid2):
     bucket = get_local_bucket()
 
     datasource = Datasource(name="test_name")
-    datasource.add_metadata(key="data_type", value="timeseries")
+    datasource.add_metadata_key(key="data_type", value="timeseries")
     datasource.save(bucket)
 
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
@@ -175,7 +175,7 @@ def test_save_footprint():
     data = xarray.open_dataset(filepath)
 
     datasource = Datasource(name="test_name")
-    datasource.add_data(metadata=metadata, data=data, data_type="footprint")
+    datasource.add_footprint_data(data=data, metadata=metadata)
     datasource.save()
 
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
@@ -311,7 +311,7 @@ def test_load_dataset():
 
     d = Datasource("dataset_test")
 
-    d.add_data(metadata=metadata, data=ds, data_type="footprint")
+    d.add_footprint_data(metadata=metadata, data=ds)
 
     d.save()
 
@@ -340,6 +340,29 @@ def test_search_metadata():
     assert d.search_metadata("flamingo") == False
 
 
+def test_dated_metadata_search():
+    d = Datasource()
+
+    start = pd.Timestamp("2001-01-01-00:00:00", tz="UTC")
+    end = pd.Timestamp("2001-03-01-00:00:00", tz="UTC")
+
+    d._start_date = start
+    d._end_date = end
+
+    d._metadata = {"inlet": "100m", "instrument": "violin", "site": "timbuktu"}
+
+    assert d.search_metadata(search_terms=["100m", "violin"]) == True
+
+    assert (
+        d.search_metadata(search_terms=["100m", "violin"], start_date=pd.Timestamp("2015-01-01"), end_date=pd.Timestamp("2021-01-01"))
+        == False
+    )
+    assert (
+        d.search_metadata(search_terms=["100m", "violin"], start_date=pd.Timestamp("2001-01-01"), end_date=pd.Timestamp("2002-01-01"))
+        == True
+    )
+
+
 def test_search_metadata_find_all():
     d = Datasource(name="test_search")
 
@@ -352,6 +375,7 @@ def test_search_metadata_find_all():
     result = d.search_metadata(search_terms=["100m", "violin", "toyota", "swallow"], find_all=True)
 
     assert result is False
+
 
 def test_search_metadata_finds_recursively():
     d = Datasource(name="test_search")
@@ -498,7 +522,7 @@ def test_in_daterange(data):
         "data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00"
     ]
 
-    keys = d.keys_in_daterange(daterange=daterange)
+    keys = d.keys_in_daterange_str(daterange=daterange)
 
     assert keys[0].split("/")[-1] == "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
 
