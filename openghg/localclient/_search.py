@@ -59,17 +59,14 @@ class Search:
         if not isinstance(selected_keys, list):
             selected_keys = [selected_keys]
 
-        # Select the keys we want to download
-        key_dict = {key: self._results[key]["keys"] for key in selected_keys}
+        results = {}
 
-        results = defaultdict(dict)
-        for key, dateranges in key_dict.items():
-            for daterange in dateranges:
-                # Create a key for this range
-                data_keys = key_dict[key][daterange]
+        for key in selected_keys:
+            try:
+                data_keys = self._results[key]["keys"]
                 # Retrieve the data from the object store and combine into a NetCDF
-                recombined_data = recombine_sections(data_keys)
-
-                results[key][daterange] = recombined_data
+                results[key] = recombine_sections(data_keys, sort=True)
+            except KeyError:
+                raise KeyError(f"Invalid key {key} passed for retrieval. Please check it is correct and try again.")
 
         return results

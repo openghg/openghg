@@ -38,6 +38,7 @@ def search(
     from openghg.modules import Datasource, ObsSurface
     from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, get_datapath
 
+
     # if species is not None and not isinstance(species, list):
     if not isinstance(species, list):
         species = [species]
@@ -122,6 +123,8 @@ def search(
 
         return results
 
+    # TODO - this section of the function needs refactoring
+    # GJ - 2021-03-09
     for location, sources in location_sources.items():
         # Loop over and look for the species
         species_data = defaultdict(list)
