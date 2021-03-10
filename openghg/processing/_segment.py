@@ -67,6 +67,11 @@ def assign_data(gas_data: Dict, lookup_results: Dict, overwrite: bool) -> Dict:
         name = lookup_results[species]["name"]
         uuid = lookup_results[species]["uuid"]
 
+        # Add the read metadata to the Dataset attributes being careful 
+        # not to overwrite any attributes that are already there
+        to_add = {k: v for k, v in metadata.items() if k not in data.attrs}
+        data.attrs.update(to_add)
+
         # If we have a UUID for this Datasource load the existing object
         # from the object store
         if uuid:

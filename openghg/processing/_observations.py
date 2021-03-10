@@ -178,15 +178,25 @@ def get_single_site(
                         np.sqrt((data[var] ** 2).resample(time=average).sum()) / data[var].resample(time=average).count()
                     )
 
-                elif "variability" in var:
-                    # Calculate std of 1 min mf obs in av period as new vmf
-                    ds_resampled[var] = data[var].resample(time=average, keep_attrs=True).std(skipna=False)
-
                 # Copy over some attributes
                 if "long_name" in data[var].attrs:
                     ds_resampled[var].attrs["long_name"] = data[var].attrs["long_name"]
+
                 if "units" in data[var].attrs:
                     ds_resampled[var].attrs["units"] = data[var].attrs["units"]
+
+             # Create a new variability variable, containing the standard deviation within the resampling period
+            ds_resampled[f"{species}_variability"] = data[species].resample(time = average, keep_attrs = True).std(skipna=False)
+            # If there are any periods where only one measurement was resampled, just use the median variability
+            ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.] = \
+                                                                ds_resampled[f"{species}_variability"].median()
+            # Create attributes for variability variable
+            ds_resampled[f"{species}_variability"].attrs["long_name"] = f"{data[species].attrs['long_name']}_variability"
+            ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
+
+            # Resampling may introduce NaNs, so remove, if not keep_missing
+            if keep_missing is False:
+                ds_resampled = ds_resampled.dropna(dim="time")
 
             data = ds_resampled
 
