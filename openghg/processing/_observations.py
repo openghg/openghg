@@ -2,13 +2,13 @@ from xarray import Dataset
 from typing import Dict, List, Optional, Union
 from pandas import Timestamp
 from dataclasses import dataclass
-from openghg.localclient import ObsData
+from openghg.dataobjects import ObsData
 
-__all__ = ["get_single_site", "scale_convert"]
+__all__ = ["get_observations", "get_single_site", "scale_convert"]
 
 
-def get_obs(
-    sites: str,
+def get_observations(
+    site: str,
     species: str,
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
@@ -24,27 +24,17 @@ def get_obs(
     Usage and return values are the same whilst implementation may differ.
 
     Args:
-        site:
-            Site of interest e.g. MHD for the Mace Head site.
-        species_in (str) :
-            Species identifier e.g. ch4 for methane.
-        start_date:
-            Output start date in a format that Pandas can interpret
-        end_date:
-            Output end date in a format that Pandas can interpret
-        inlet:
-            Inlet label. If you want to merge all inlets, use "all"
-        average:
-            Averaging period for each dataset.
-            Each value should be a string of the form e.g. "2H", "30min" (should match pandas offset aliases format).
-        keep_missing:
-            Whether to keep missing data points or drop them.
-        network:
-            Network for the site/instrument (must match number of sites).
-        instrument:
-            Specific instrument for the site (must match number of sites).
-        calibration_scale:
-            Convert to this calibration scale (original scale and new scale must both be in acrg_obs_scale_convert.csv)
+        site: Site of interest e.g. MHD for the Mace Head site.
+        species: Species identifier e.g. ch4 for methane.
+        start_date: Output start date in a format that Pandas can interpret
+        end_date: Output end date in a format that Pandas can interpret
+        inlet: Inlet label
+        average: Averaging period for each dataset. Each value should be a string of
+        the form e.g. "2H", "30min" (should match pandas offset aliases format).
+        keep_missing: Keep missing data points or drop them.
+        network: Network for the site/instrument (must match number of sites).
+        instrument: Specific instrument for the site (must match number of sites).
+        calibration_scale: Convert to this calibration scale
     Returns:
         list: List of ObsData objects
     """
@@ -67,7 +57,7 @@ def get_obs(
 
 def get_single_site(
     site: str,
-    species: str,
+    species: Optional[str] = None,
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
     inlet: Optional[str] = None,
@@ -102,7 +92,7 @@ def get_single_site(
     from pandas import Timestamp, Timedelta
     import numpy as np
     from xarray import concat as xr_concat
-    from openghg.localclient import Search
+    from openghg.processing import search, recombine_multisite
     from openghg.util import load_json, timestamp_tzaware
 
     site_info = load_json(filename="acrg_site_info.json")
@@ -114,20 +104,21 @@ def get_single_site(
     # Find the correct synonym for the passed species
     species = synonyms(species)
 
-    search = Search()
-
-    results = search.search(
-        species=species,
-        locations=site,
-        inlet=inlet,
-        instrument=instrument,
-        start_date=start_date,
-        end_date=end_date,
+    # Get the observation data
+    obs_results = search(
+        locations=site, inlet=inlet, start_date=start_date, end_date=end_date, species=species, instrument=instrument
     )
 
-    # Retrieve all the data found
-    selected_keys = list(results.keys())
-    retrieved_data = search.retrieve(selected_keys=selected_keys)
+    try:
+        site_key = list(obs_results.keys())[0]
+    except IndexError:
+        raise ValueError(f"Unable to find any measurement data for {site} at a height of {height} in the {network} network.")
+    
+    # TODO - update Search to return a SearchResult object that makes it easier to retrieve data
+    # GJ 2021-03-09
+    # This is clunky
+    to_retrieve = {site: obs_results[site_key]["keys"]}
+    retrieved_data = recombine_multisite(keys=to_retrieve, sort=True)
 
     obs_files = []
 
@@ -226,7 +217,7 @@ def get_single_site(
             data = scale_convert(data, species, calibration_scale)
 
         metadata = data.attrs
-        obs_data = ObsData(name=key, data=data, metadata=data.attrs)
+        obs_data = ObsData(data=data, metadata=data.attrs)
 
         obs_files.append(obs_data)
 

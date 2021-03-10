@@ -2,7 +2,7 @@ from openghg.processing import search as search_fn
 
 __all__ = ["Search"]
 
-from openghg.processing import recombine_sections
+from openghg.processing import recombine_datasets
 from collections import defaultdict
 
 
@@ -65,7 +65,7 @@ class Search:
             try:
                 data_keys = self._results[key]["keys"]
                 # Retrieve the data from the object store and combine into a NetCDF
-                results[key] = recombine_sections(data_keys, sort=True)
+                results[key] = recombine_datasets(data_keys, sort=True)
             except KeyError:
                 raise KeyError(f"Invalid key {key} passed for retrieval. Please check it is correct and try again.")
 

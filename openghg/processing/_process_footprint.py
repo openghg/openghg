@@ -39,7 +39,7 @@ def single_site_footprint(
     Returns:
         xarray.Dataset
     """
-    from openghg.processing import search, recombine_sections, search_footprints
+    from openghg.processing import get_observations, recombine_datasets, search_footprints, search
     from openghg.util import timestamp_tzaware
     # from past.utils import old_div
 
@@ -54,16 +54,17 @@ def single_site_footprint(
 
     site_modifier_fp = site_modifier if site_modifier else site
 
-    # Get the observation data
-    obs_results = search(locations=site, inlet=height, start_date=start_date, end_date=end_date, species="nf3", instrument="medusa")
+    # Here we want to use get_observations
+    obs_results = get_observations(site=site, inlet=height, start_date=start_date, end_date=end_date, species=species, instrument=instrument)
+
+    if len(obs_results) > 1:
+        raise ValueError("More than one ObsData object returned. Unable to continue.")
 
     try:
-        site_key = list(obs_results.keys())[0]
+        obs_data = obs_results[0].data
+        # TODO - remove this once further checks are in place within get_obs and here to combine the returned data - GJ - 2021-03-10
     except IndexError:
-        raise ValueError(f"Unable to find any measurement data for {site} at a height of {height} in the {network} network.")
-
-    obs_keys = obs_results[site_key]["keys"]
-    obs_data = recombine_sections(data_keys=obs_keys, sort=True)
+        raise IndexError("Unable to find data for the passed parameters.")
 
     # Get the footprint data
     footprint_results = search_footprints(locations=site, inlet=height, start_date=start_date, end_date=end_date)
@@ -74,7 +75,7 @@ def single_site_footprint(
         raise ValueError(f"Unable to find any footprint data for {site} at a height of {height} in the {network} network.")
 
     footprint_keys = footprint_results[fp_site_key]["keys"]
-    footprint_data = recombine_sections(data_keys=footprint_keys, sort=False)
+    footprint_data = recombine_datasets(data_keys=footprint_keys, sort=False)
 
     # Align the two Datasets
     aligned_obs, aligned_footprint = align_datasets(

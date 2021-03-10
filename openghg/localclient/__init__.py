@@ -1,5 +1,4 @@
-from ._obs_dataclass import ObsData
 from ._process import process_files
 from ._search import Search
 from ._rank_sources import RankSources
-from ._get_observations import get_single_site, scale_convert
+from ._observations import get_observations, get_single_site, scale_convert
