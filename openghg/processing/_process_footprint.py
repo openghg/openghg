@@ -13,14 +13,14 @@ def single_site_footprint(
     site: str,
     height: str,
     network: str,
+    domain: str,
     resample_data: bool,
     start_date: Union[str, Timestamp],
     end_date: Union[str, Timestamp],
     site_modifier: Optional[str] = None,
     platform: Optional[str] = None,
     instrument: Optional[str] = None,
-    species: Optional[Union[str, List]] = None
-
+    species: Optional[Union[str, List]] = None,
 ) -> Dataset:
     """Creates a Dataset for a single site's measurement data and footprints
 
@@ -39,34 +39,45 @@ def single_site_footprint(
     Returns:
         xarray.Dataset
     """
-    from openghg.processing import search, recombine_sections, search_footprints
+    from openghg.processing import get_observations, recombine_datasets, search_footprints
     from openghg.util import timestamp_tzaware
-    # from past.utils import old_div
 
     start_date = timestamp_tzaware(start_date)
     end_date = timestamp_tzaware(end_date)
 
-    # As we're not processing any satellite data yet just set toleranc to None
+    # As we're not processing any satellite data yet just set tolerance to None
     tolerance = None
     platform = None
-    # Where are these units read from? Attributes? NetCDFs I've read from BP don't have these attrs
-    units = None
 
-    site_modifier_fp = site_modifier if site_modifier else site
+    # Here we want to use get_observations
+    obs_results = get_observations(
+        site=site, inlet=height, start_date=start_date, end_date=end_date, species=species, instrument=instrument
+    )
 
-    # Get the observation data
-    obs_results = search(locations=site, inlet=height, start_date=start_date, end_date=end_date, species="nf3", instrument="medusa")
+    if len(obs_results) > 1:
+        raise ValueError("More than one ObsData object returned. Unable to continue.")
 
     try:
-        site_key = list(obs_results.keys())[0]
+        obs_data = obs_results[0].data
+        # TODO - remove this once further checks are in place within get_obs and here to combine the returned data - GJ - 2021-03-10
     except IndexError:
-        raise ValueError(f"Unable to find any measurement data for {site} at a height of {height} in the {network} network.")
+        raise IndexError("Unable to find observation data for the passed parameters.")
 
-    obs_keys = obs_results[site_key]["keys"]
-    obs_data = recombine_sections(data_keys=obs_keys, sort=True)
+    # Save the observation data units
+    try:
+        units = float(obs_data.mf.attrs["units"])
+    except KeyError:
+        units = None
+    except AttributeError:
+        raise AttributeError("Unable to read mf attribute from observation data.")
+
+    footprint_site = site
+    # If the site for the footprint has a different name pass that in
+    if site_modifier:
+        footprint_site = site_modifier
 
     # Get the footprint data
-    footprint_results = search_footprints(locations=site, inlet=height, start_date=start_date, end_date=end_date)
+    footprint_results = search_footprints(sites=footprint_site, domains=domain, inlet=height, start_date=start_date, end_date=end_date)
 
     try:
         fp_site_key = list(footprint_results.keys())[0]
@@ -74,7 +85,7 @@ def single_site_footprint(
         raise ValueError(f"Unable to find any footprint data for {site} at a height of {height} in the {network} network.")
 
     footprint_keys = footprint_results[fp_site_key]["keys"]
-    footprint_data = recombine_sections(data_keys=footprint_keys, sort=False)
+    footprint_data = recombine_datasets(data_keys=footprint_keys, sort=False)
 
     # Align the two Datasets
     aligned_obs, aligned_footprint = align_datasets(
@@ -84,31 +95,75 @@ def single_site_footprint(
     combined_dataset = combine_datasets(dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance)
 
     # Transpose to keep time in the last dimension position in case it has been moved in resample
-    # expected_dim_order = ["height", "lat", "lon", "lev", "time", "H_back"]
-    # dataset_dims = combined_dataset.dims
-    # to_transpose = [d for d in expected_dim_order if d in dataset_dims]
-
     combined_dataset = combined_dataset.transpose(..., "time")
 
-    # if units:
-    #     combined_dataset.update({"fp": (combined_dataset.fp.dims, old_div(combined_dataset.fp, units))})
-    # if HiTRes:
-    #     combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, old_div(combined_dataset.fp_HiTRes, units))})
+    if units:
+        combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset.fp / units))})
+        # if HiTRes:
+        #     combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, old_div(combined_dataset.fp_HiTRes, units))})
 
     return combined_dataset
 
-    # Now need to test these two parts work
-
 
 def footprints_data_merge(
-    site_modifier: Optional[Dict] = None,
+    sites: Union[str, List[str]],
+    domain: str,
+    species: str,
+    load_flux: Optional[bool] = True,
+    load_bc: Optional[bool] = True,
 ):
-    """This retrieves mol/frac data and footprints from the object store and combines them into a
-    single xarray Dataset
+    """ 
+    TODO - Should this be renamed?
 
+    Args:
+        site: Site or list of sites to retrieve combined footprint data for
+        domain: Footprint domain name(s).
+        species: Species of measurements to retrieve.
+        load_flux: True includes fluxes in output, False does not. Default True.
+        load_bc: True includes boundary conditions in output, False does not. Default True.
     Returns:
-        dict: Dictionary of merged Datasets
+        dict: Dictionary footprint data objects
     """
+
+    raise NotImplementedError()
+
+    if load_flux:
+        flux_dict = {}
+        basestring = (str, bytes)
+        for source in list(emissions_name.keys()):
+
+            if isinstance(emissions_name[source], basestring):
+                flux_dict[source] = flux(
+                    domain, emissions_name[source], start=flux_bc_start, end=flux_bc_end, flux_directory=flux_directory
+                )
+
+            elif isinstance(emissions_name[source], dict):
+                if HiTRes == False:
+                    print(
+                        "HiTRes is set to False and a dictionary has been found as the emissions_name dictionary value\
+                          for source %s. Either enter your emissions names as separate entries in the emissions_name\
+                          dictionary or turn HiTRes to True to use the two emissions files together with HiTRes footprints."
+                        % source
+                    )
+                    # return None
+                else:
+                    flux_dict[source] = flux_for_HiTRes(
+                        domain, emissions_name[source], start=flux_bc_start, end=flux_bc_end, flux_directory=flux_directory
+                    )
+
+        fp_and_data[".flux"] = flux_dict
+
+    # We we're going to need multiple dictionaries
+    # results = {}
+    # # We want to get a footprint and observations for each site
+    # for site in sites:
+    #     single_site_footprint(site=site, domain=domain, species=species)
+        
+
+
+
+
+
     # Takes in a dictionary of dataframes
 
     # Checks they all have the same species
@@ -152,15 +207,6 @@ def footprints_data_merge(
     # Don't think we need to do this
 
     # Returns a dictionary keyed by site
-
-
-def retrieve_footprints(site, others, HiTRes=False):
-    """This retrieves the correct footprints from the object store"""
-
-    if HiTRes:
-        # get high time resolution footprints
-        # OpenGHG doesn't currently differentiate between these and normal footprints
-        pass
 
 
 def combine_datasets(

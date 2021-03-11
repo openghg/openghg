@@ -115,7 +115,7 @@ class CRDS:
             species = gas_data[0][0]
             species = species.lower()
 
-            column_labels = [species, f"{species} stdev", f"{species} n_meas"]
+            column_labels = [species, f"{species}_variability", f"{species}_number_of_observations"]
 
             # Name columns
             gas_data = gas_data.set_axis(column_labels, axis="columns", inplace=False)

@@ -501,6 +501,8 @@ class Datasource:
 
         d._stored = False
 
+        d.update_daterange()
+
         return d
 
     def save(self, bucket: Optional[str] = None) -> None:
@@ -707,6 +709,9 @@ class Datasource:
             bool: True if overlap
         """
         from openghg.util import timestamp_tzaware
+
+        # if self._start_date is None or self._end_date is None:
+        #     self.update_daterange()
 
         start_date = timestamp_tzaware(start_date)
         end_date = timestamp_tzaware(end_date)

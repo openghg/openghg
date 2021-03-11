@@ -2,13 +2,29 @@
     into the data requested by the user
 
 """
-from typing import List, Optional
+from typing import Dict, List, Optional
 from xarray import Dataset
 
-__all__ = ["recombine_sections"]
+__all__ = ["recombine_multisite", "recombine_datasets"]
 
 
-def recombine_sections(data_keys: List[str], sort: Optional[bool] = True) -> Dataset:
+def recombine_multisite(keys: Dict, sort: Optional[bool] = True) -> Dict:
+    """ Recombine the keys from multiple sites into a single Dataset for each site
+
+    Args:
+        site_keys: A dictionary of lists of keys, keyed by site
+        sort: Sort the resulting Dataset by the time dimension
+    Returns:
+        dict: Dictionary of xarray.Datasets
+    """
+    result = {}
+    for key, key_list in keys.items():
+        result[key] = recombine_datasets(data_keys=key_list, sort=sort)
+
+    return result
+
+
+def recombine_datasets(data_keys: List[str], sort: Optional[bool] = True) -> Dataset:
     """Combines datasets stored separately in the object store
     into a single datasets
 
