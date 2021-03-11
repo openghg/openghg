@@ -100,14 +100,17 @@ def assign_footprint_data(data: Dataset, metadata: Dict, datasource_uid: Union[s
         Returns:
             str: UUID of Datasource
     """
-    # We'll only accept footprints for a specific site etc at once for ease / probably
-    # size constraints
     from openghg.modules import Datasource
 
     if datasource_uid is not False:
         datasource = Datasource.load(uuid=datasource_uid)
     else:
         datasource = Datasource()
+
+    # Add the read metadata to the Dataset attributes being careful 
+    # not to overwrite any attributes that are already there
+    to_add = {k: v for k, v in metadata.items() if k not in data.attrs}
+    data.attrs.update(to_add)
 
     datasource.add_footprint_data(data=data, metadata=metadata)
     datasource.save()

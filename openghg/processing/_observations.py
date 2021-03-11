@@ -109,6 +109,7 @@ def get_single_site(
         locations=site, inlet=inlet, start_date=start_date, end_date=end_date, species=species, instrument=instrument
     )
 
+    # TODO - what if we want to return observations from multiple heights?
     try:
         site_key = list(obs_results.keys())[0]
     except IndexError:

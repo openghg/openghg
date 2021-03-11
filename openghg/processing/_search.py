@@ -38,7 +38,6 @@ def search(
     from openghg.modules import Datasource, ObsSurface
     from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, get_datapath
 
-
     # if species is not None and not isinstance(species, list):
     if not isinstance(species, list):
         species = [species]
@@ -202,7 +201,9 @@ def search(
     return results
 
 
-def search_footprints(locations: Union[str, List[str]], inlet: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
+def search_footprints(
+    sites: Union[str, List[str]], domains: Union[str, List[str]], inlet: str, start_date: Timestamp, end_date: Timestamp
+) -> Dict:
     """Search for footprints for the given locations and inlet height.
 
     Args:
@@ -216,8 +217,8 @@ def search_footprints(locations: Union[str, List[str]], inlet: str, start_date: 
     from collections import defaultdict
     from openghg.modules import Datasource, FOOTPRINTS
 
-    if not isinstance(locations, list):
-        locations = [locations]
+    if not isinstance(sites, list):
+        sites = [sites]
 
     footprints = FOOTPRINTS.load()
     datasource_uuids = footprints.datasources()
@@ -225,14 +226,16 @@ def search_footprints(locations: Union[str, List[str]], inlet: str, start_date: 
 
     keys = defaultdict(dict)
     # If we have locations to search
-    # for location in locations:
+    # for sites in sites:
     for datasource in datasources:
-        for location in locations:
-            if datasource.search_metadata(search_terms=[inlet, location], start_date=start_date, end_date=end_date):
+        for site in sites:
+            # TODO - should we iterate over the domains? Will there be the same site in multiple footprint domains?
+            search_terms = [inlet, site].extend(domains)
+            if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):
                 # Get the data keys for the data in the matching daterange
                 in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-                keys[location]["keys"] = in_date
-                keys[location]["metadata"] = datasource.metadata()
+                keys[site]["keys"] = in_date
+                keys[site]["metadata"] = datasource.metadata()
 
     return keys
 
