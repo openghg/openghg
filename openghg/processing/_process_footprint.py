@@ -100,7 +100,7 @@ def single_site_footprint(
     if units:
         combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset.fp / units))})
         # if HiTRes:
-        #     combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, old_div(combined_dataset.fp_HiTRes, units))})
+        #     combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes / units))})
 
     return combined_dataset
 
@@ -346,3 +346,114 @@ def align_datasets(
             obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
 
     return obs_data, footprint_data
+
+# Maybe we should have an
+
+def flux(domain, species, start=None, end=None, flux_directory=None):
+    """
+    The flux function reads in all flux files for the domain and species as an xarray Dataset.
+    Note that at present ALL flux data is read in per species per domain or by emissions name.
+    To be consistent with the footprints, fluxes should be in mol/m2/s.
+
+    Expect filenames of the form:
+        [flux_directory]/domain/species.lower()_*.nc
+        e.g. [/data/shared/LPDM/emissions]/EUROPE/ch4_EUROPE_2013.nc
+
+    TODO: This may get slow for very large flux datasets, and we may want to subset.
+
+    Args:
+        domain (str) :
+            Domain name. The flux files should be sub-categorised by the domain.
+        species (str) :
+            Species name. All species names are defined acrg_species_info.json.
+        start (str, optional) :
+            Start date in format "YYYY-MM-DD" to output only a time slice of all the flux files.
+            The start date used will be the first of the input month. I.e. if "2014-01-06" is input,
+            "2014-01-01" will be used.  This is to mirror the time slice functionality of the filenames
+            function.
+        end (str, optional) :
+            End date in same format as start to output only a time slice of all the flux files.
+            The end date used will be the first of the input month and the timeslice will go up
+            to, but not include, this time. I.e. if "2014-02-25' is input, "2014-02-01" will be used.
+            This is to mirror the time slice functionality of the filenames function.
+        flux_directory (str, optional) :
+            flux_directory can be specified if files are not in the default directory.
+            Must point to a directory which contains subfolders organized by domain.
+    Returns:
+        xarray.Dataset : combined dataset of all matching flux files
+    """
+
+    if flux_directory is None:
+        flux_directory = join(data_path, "LPDM/emissions/")
+
+    filename = os.path.join(flux_directory, domain, species.lower() + "_" + "*.nc")
+    print("\nSearching for flux files: {}".format(filename))
+
+    files = sorted(glob.glob(filename))
+
+    if len(files) == 0:
+        raise IOError("\nError: Can't find flux files for domain '{0}' and species '{1}' ".format(domain, species))
+
+    flux_ds = read_netcdfs(files)
+    # Check that time coordinate is present
+    if not "time" in list(flux_ds.coords.keys()):
+        raise KeyError("ERROR: No 'time' coordinate in flux dataset for domain '{0}' species '{1}'".format(domain, species))
+
+    # Check for level coordinate. If one level, assume surface and drop
+    if "lev" in list(flux_ds.coords.keys()):
+        print(
+            "WARNING: Can't support multi-level fluxes. Trying to remove 'lev' coordinate "
+            + "from flux dataset for "
+            + domain
+            + ", "
+            + species
+        )
+        if len(flux_ds.lev) > 1:
+            print("ERROR: More than one flux level")
+        else:
+            return flux_ds.drop("lev")
+
+    if start == None or end == None:
+        print("To get fluxes for a certain time period you must specify a start or end date.")
+        return flux_ds
+    else:
+
+        # Change timeslice to be the beginning and end of months in the dates specified.
+        start = pd.to_datetime(start)
+        month_start = dt.datetime(start.year, start.month, 1, 0, 0)
+
+        end = pd.to_datetime(end)
+        month_end = dt.datetime(end.year, end.month, 1, 0, 0) - dt.timedelta(seconds=1)
+
+        if "climatology" in species:
+            ndate = pd.to_datetime(flux_ds.time.values)
+            if len(ndate) == 1:  # If it's a single climatology value
+                dateadj = ndate - month_start  # Adjust climatology to start in same year as obs
+            else:  # Else if a monthly climatology
+                dateadj = ndate[month_start.month - 1] - month_start  # Adjust climatology to start in same year as obs
+            ndate = ndate - dateadj
+            flux_ds = flux_ds.update({"time": ndate})
+            flux_tmp = flux_ds.copy()
+            while month_end > ndate[-1]:
+                ndate = ndate + pd.DateOffset(years=1)
+                flux_ds = xr.merge([flux_ds, flux_tmp.update({"time": ndate})])
+
+        flux_timeslice = flux_ds.sel(time=slice(month_start, month_end))
+        if np.logical_and(
+            month_start.year != month_end.year,
+            len(flux_timeslice.time) != dateutil.relativedelta.relativedelta(end, start).months,
+        ):
+            month_start = dt.datetime(start.year, 1, 1, 0, 0)
+            flux_timeslice = flux_ds.sel(time=slice(month_start, month_end))
+        if len(flux_timeslice.time) == 0:
+            flux_timeslice = flux_ds.sel(time=start, method="ffill")
+            flux_timeslice = flux_timeslice.expand_dims("time", axis=-1)
+            print(
+                "Warning: No fluxes available during the time period specified so outputting\
+                          flux from %s"
+                % flux_timeslice.time.values[0]
+            )
+        else:
+            print("Slicing time to range {} - {}".format(month_start, month_end))
+
+        return flux_timeslice

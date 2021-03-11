@@ -4,7 +4,7 @@
 from typing import Dict, Union
 from xarray import Dataset
 
-__all__ = ["get_split_frequency", "assign_footprint_data", "assign_data"]
+__all__ = ["get_split_frequency", "assign_footprint_data", "assign_data", "assign_emissions_data"]
 
 # def create_datasources(gas_data):
 #     """ Create or get an existing Datasource for each gas in the file
@@ -113,6 +113,35 @@ def assign_footprint_data(data: Dataset, metadata: Dict, datasource_uid: Union[s
     data.attrs.update(to_add)
 
     datasource.add_footprint_data(data=data, metadata=metadata)
+    datasource.save()
+
+    return datasource.uuid()
+
+
+def assign_emissions_data(data: Dataset, metadata: Dict, datasource_uid: Union[str, bool]) -> str:
+    """ Create Datasources for the passed flux data
+
+        Args:
+            data: xarray Dataset of footprint data
+            metadata: Associated metadata
+            datasource_uid: The UUID of the datasource if we've processed flux data from this
+            source before, otherwise False
+        Returns:
+            str: UUID of Datasource
+    """
+    from openghg.modules import Datasource
+
+    if datasource_uid is not False:
+        datasource = Datasource.load(uuid=datasource_uid)
+    else:
+        datasource = Datasource()
+
+    # Add the read metadata to the Dataset attributes being careful 
+    # not to overwrite any attributes that are already there
+    to_add = {k: v for k, v in metadata.items() if k not in data.attrs}
+    data.attrs.update(to_add)
+
+    datasource.add_emissions_data(data=data, metadata=metadata)
     datasource.save()
 
     return datasource.uuid()
