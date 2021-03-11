@@ -192,17 +192,16 @@ class Datasource:
         metadata = to_lowercase(metadata)
         self._metadata.update(metadata)
 
-    def new_search(self, search_terms):
-        return NotImplementedError()
-        # Do want to recursively search the metadata or just flatten the metadata
-        # when we're given it?
-        # https://stackoverflow.com/a/14962509/1303032
-        # if key in obj: return obj[key]
-        # for k, v in obj.items():
-        #     if isinstance(v,dict):
-        #         item = _finditem(v, key)
-        #         if item is not None:
-        #             return item
+    def add_emissions_data(self, data: Dataset, metadata: Dict) -> None:
+        """Add flux data to this Datasource
+
+        Args:
+            data: Flux data as an xarray.Dataset
+            metadata: Metadata
+        Returns:
+            None
+        """
+        self.add_field_data(data=data, metadata=metadata, data_type="emissions")
 
     def add_footprint_data(self, data: Dataset, metadata: Dict) -> None:
         """Add footprint data to this Datasource
@@ -210,6 +209,21 @@ class Datasource:
         Args:
             data: Footprint data in an xarray.Dataset
             metadata: Metadata
+        Returns:
+            None
+        """
+        self.add_field_data(data=data, metadata=metadata, data_type="footprint")
+
+    def add_field_data(self, data: Dataset, metadata: Dict, data_type: str) -> None:
+        """Add footprint data to this Datasource
+
+        TODO - unsure if add_field_data is the best name for this function
+        Could add a more general function that allows toggle of chunking
+
+        Args:
+            data: Footprint data in an xarray.Dataset
+            metadata: Metadata
+            data_type: Type of data (footprint, flux, met)
         Returns:
             None
         """
@@ -243,8 +257,8 @@ class Datasource:
         else:
             self._data = new_data
 
-        self._data_type = "footprint"
-        self.add_metadata_key(key="data_type", value="footprint")
+        self._data_type = data_type
+        self.add_metadata_key(key="data_type", value=data_type)
         self.update_daterange()
 
     def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
