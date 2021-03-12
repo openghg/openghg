@@ -14,9 +14,9 @@ def single_site_footprint(
     height: str,
     network: str,
     domain: str,
-    resample_data: bool,
     start_date: Union[str, Timestamp],
     end_date: Union[str, Timestamp],
+    resample_to: Optional[str] = "obs",
     site_modifier: Optional[str] = None,
     platform: Optional[str] = None,
     instrument: Optional[str] = None,
@@ -25,10 +25,14 @@ def single_site_footprint(
     """Creates a Dataset for a single site's measurement data and footprints
 
     Args:
-        site:
-        height
-        network
-        resample_data
+        site: Site name
+        height: Height of inlet in metres
+        network: Network name
+        resample_to: Resample the data to a given time dataset.
+        Valid options are ["obs", "footprint", "coarsen"].
+            - "obs" resamples the footprint to the observation time series data
+            - "footprint" resamples to to the footprint time series
+            - "coarsest" resamples to the data with the coarsest time resolution
         site_modifier: The name of the site given in the footprint.
                        This is useful for example if the same site footprints are run with a different met and
                        they are named slightly differently from the obs file. E.g.
@@ -44,6 +48,11 @@ def single_site_footprint(
 
     start_date = timestamp_tzaware(start_date)
     end_date = timestamp_tzaware(end_date)
+
+    resample_to = resample_to.lower()
+    resample_choices = ("obs", "footprint", "coarsen")
+    if resample_to not in resample_choices:
+        raise ValueError(f"Invalid resample choice {resample_to} past, please select from one of {resample_choices}")
 
     # As we're not processing any satellite data yet just set tolerance to None
     tolerance = None
@@ -77,7 +86,9 @@ def single_site_footprint(
         footprint_site = site_modifier
 
     # Get the footprint data
-    footprint_results = search_footprints(sites=footprint_site, domains=domain, inlet=height, start_date=start_date, end_date=end_date)
+    footprint_results = search_footprints(
+        sites=footprint_site, domains=domain, inlet=height, start_date=start_date, end_date=end_date
+    )
 
     try:
         fp_site_key = list(footprint_results.keys())[0]
@@ -89,7 +100,7 @@ def single_site_footprint(
 
     # Align the two Datasets
     aligned_obs, aligned_footprint = align_datasets(
-        obs_data=obs_data, footprint_data=footprint_data, platform=platform, resample_to_obs_data=False
+        obs_data=obs_data, footprint_data=footprint_data, platform=platform, resample_to=resample_to
     )
 
     combined_dataset = combine_datasets(dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance)
@@ -112,7 +123,7 @@ def footprints_data_merge(
     load_flux: Optional[bool] = True,
     load_bc: Optional[bool] = True,
 ):
-    """ 
+    """
     TODO - Should this be renamed?
 
     Args:
@@ -127,86 +138,31 @@ def footprints_data_merge(
 
     raise NotImplementedError()
 
-    if load_flux:
-        flux_dict = {}
-        basestring = (str, bytes)
-        for source in list(emissions_name.keys()):
+    # if load_flux:
+    #     flux_dict = {}
+    #     basestring = (str, bytes)
+    #     for source in list(emissions_name.keys()):
 
-            if isinstance(emissions_name[source], basestring):
-                flux_dict[source] = flux(
-                    domain, emissions_name[source], start=flux_bc_start, end=flux_bc_end, flux_directory=flux_directory
-                )
+    #         if isinstance(emissions_name[source], basestring):
+    #             flux_dict[source] = flux(
+    #                 domain, emissions_name[source], start=flux_bc_start, end=flux_bc_end, flux_directory=flux_directory
+    #             )
 
-            elif isinstance(emissions_name[source], dict):
-                if HiTRes == False:
-                    print(
-                        "HiTRes is set to False and a dictionary has been found as the emissions_name dictionary value\
-                          for source %s. Either enter your emissions names as separate entries in the emissions_name\
-                          dictionary or turn HiTRes to True to use the two emissions files together with HiTRes footprints."
-                        % source
-                    )
-                    # return None
-                else:
-                    flux_dict[source] = flux_for_HiTRes(
-                        domain, emissions_name[source], start=flux_bc_start, end=flux_bc_end, flux_directory=flux_directory
-                    )
+    #         elif isinstance(emissions_name[source], dict):
+    #             if HiTRes == False:
+    #                 print(
+    #                     "HiTRes is set to False and a dictionary has been found as the emissions_name dictionary value\
+    #                       for source %s. Either enter your emissions names as separate entries in the emissions_name\
+    #                       dictionary or turn HiTRes to True to use the two emissions files together with HiTRes footprints."
+    #                     % source
+    #                 )
+    #                 # return None
+    #             else:
+    #                 flux_dict[source] = flux_for_HiTRes(
+    #                     domain, emissions_name[source], start=flux_bc_start, end=flux_bc_end, flux_directory=flux_directory
+    #                 )
 
-        fp_and_data[".flux"] = flux_dict
-
-    # We we're going to need multiple dictionaries
-    # results = {}
-    # # We want to get a footprint and observations for each site
-    # for site in sites:
-    #     single_site_footprint(site=site, domain=domain, species=species)
-        
-
-
-
-
-
-    # Takes in a dictionary of dataframes
-
-    # Checks they all have the same species
-
-    # Checks they have an emissions file attached - we can create an emissions class for this
-
-    # Iterates over the sites
-    # For each site
-    # Reads data for the site etc from acrg_site_info - what if sites have multiple networks?
-    # If network isn't passed we'll just use the first network
-    # Read platform from acrg_site_info
-
-    # Gets the start and end dates - beginning of the month for both
-    # Checks flux boundary condition start dates - leave this for now
-
-    # Check the height - get the user to pass this in
-    # Then it checks if it's a satellite else finds the height closest to the inlet
-
-    # Then it retrievs the footprints - do this from FOOTPRINTS
-    # def footprints() loads the footprints from NetCDF
-
-    # Retrieves the units for this dataset
-
-    # Does some satellite dependent checks
-
-    # Then it aligns the datasets using align_datasets
-    # So we need to have the mol/frac data AND the footprint data available at this point
-
-    # Then it does a transpose to ensure time is in the last dimension position ?
-
-    # Updates the units using a scaling factor
-
-    # This creates a list of Datasets for each site and then combines them into one Dataset for each site
-
-    # Then it does some flux and boundary condition work I'll leave for now
-
-    # Then it reads the scales for each of the site datasets
-    # Adds units if we have them
-
-    # It adds these as . keys for some reason to be backwards compatible?
-    # Don't think we need to do this
-
-    # Returns a dictionary keyed by site
+    #     fp_and_data[".flux"] = flux_dict
 
 
 def combine_datasets(
@@ -279,7 +235,10 @@ def indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 
 def align_datasets(
-    obs_data: Dataset, footprint_data: Dataset, platform: Optional[str] = None, resample_to_obs_data: Optional[bool] = False
+    obs_data: Dataset,
+    footprint_data: Dataset,
+    resample_to: str,
+    platform: Optional[str] = None,
 ) -> Tuple[Dataset, Dataset]:
     """Slice and resample two datasets to align along time
 
@@ -297,26 +256,29 @@ def align_datasets(
         tuple: Two xarray.Dataset with aligned time dimensions
     """
     import numpy as np
+    from openghg.util import timestamp_tzaware
 
+    platform = platform.lower()
     platform_skip_resample = ("satellite", "flask")
 
     if platform in platform_skip_resample:
         return obs_data, footprint_data
 
+
     obs_data_timeperiod = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]).astype("int64"))
     footprint_data_timeperiod = np.nanmedian((footprint_data.time.data[1:] - footprint_data.time.data[0:-1]).astype("int64"))
 
-    obs_startdate = obs_data.time[0]
-    obs_enddate = obs_data.time[-1]
-    footprint_startdate = footprint_data.time[0]
-    footprint_enddate = footprint_data.time[-1]
+    obs_startdate = timestamp_tzaware(obs_data.time[0].values)
+    obs_enddate = timestamp_tzaware(obs_data.time[-1].values)
+    footprint_startdate = timestamp_tzaware(footprint_data.time[0].values)
+    footprint_enddate = timestamp_tzaware(footprint_data.time[-1].values)
 
-    if int(obs_startdate.data) > int(footprint_startdate.data):
+    if obs_startdate > footprint_startdate:
         start_date = obs_startdate
     else:
         start_date = footprint_startdate
 
-    if int(obs_enddate.data) < int(footprint_enddate.data):
+    if obs_enddate < footprint_enddate:
         end_date = obs_enddate
     else:
         end_date = footprint_enddate
@@ -333,13 +295,13 @@ def align_datasets(
     if not np.isclose(obs_data_timeperiod, footprint_data_timeperiod):
         base = start_date.dt.hour.data + start_date.dt.minute.data / 60.0 + start_date.dt.second.data / 3600.0
 
-        if (obs_data_timeperiod >= footprint_data_timeperiod) or resample_to_obs_data is True:
+        if (obs_data_timeperiod >= footprint_data_timeperiod) or resample_to == "obs":
 
             resample_period = str(round(obs_data_timeperiod / 3600e9, 5)) + "H"
 
             footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
 
-        elif obs_data_timeperiod < footprint_data_timeperiod or resample_to_obs_data is False:
+        elif obs_data_timeperiod < footprint_data_timeperiod or resample_to == "footprint":
 
             resample_period = str(round(footprint_data_timeperiod / 3600e9, 5)) + "H"
 
@@ -347,113 +309,50 @@ def align_datasets(
 
     return obs_data, footprint_data
 
-# Maybe we should have an
 
-def flux(domain, species, start=None, end=None, flux_directory=None):
+def flux(
+    domain: Union[str, List[str]],
+    species: Union[str, List[str]],
+    start_date: Optional[Timestamp] = None,
+    end_date: Optional[Timestamp] = None,
+) -> Dict:
     """
     The flux function reads in all flux files for the domain and species as an xarray Dataset.
     Note that at present ALL flux data is read in per species per domain or by emissions name.
     To be consistent with the footprints, fluxes should be in mol/m2/s.
 
-    Expect filenames of the form:
-        [flux_directory]/domain/species.lower()_*.nc
-        e.g. [/data/shared/LPDM/emissions]/EUROPE/ch4_EUROPE_2013.nc
-
-    TODO: This may get slow for very large flux datasets, and we may want to subset.
-
     Args:
-        domain (str) :
-            Domain name. The flux files should be sub-categorised by the domain.
-        species (str) :
-            Species name. All species names are defined acrg_species_info.json.
-        start (str, optional) :
-            Start date in format "YYYY-MM-DD" to output only a time slice of all the flux files.
-            The start date used will be the first of the input month. I.e. if "2014-01-06" is input,
-            "2014-01-01" will be used.  This is to mirror the time slice functionality of the filenames
-            function.
-        end (str, optional) :
-            End date in same format as start to output only a time slice of all the flux files.
-            The end date used will be the first of the input month and the timeslice will go up
-            to, but not include, this time. I.e. if "2014-02-25' is input, "2014-02-01" will be used.
-            This is to mirror the time slice functionality of the filenames function.
-        flux_directory (str, optional) :
-            flux_directory can be specified if files are not in the default directory.
-            Must point to a directory which contains subfolders organized by domain.
+        domain: Domain name. The flux files should be sub-categorised by the domain.
+        species: Species name. All species names are defined acrg_species_info.json.
+        start_date: Start date
+        end_date: End date
     Returns:
         xarray.Dataset : combined dataset of all matching flux files
     """
+    from openghg.processing import search_emissions, recombine_datasets
+    from openghg.util import timestamp_epoch, timestamp_now
 
-    if flux_directory is None:
-        flux_directory = join(data_path, "LPDM/emissions/")
+    if start_date is None:
+        start_date = timestamp_epoch()
+    if end_date is None:
+        end_date = timestamp_now()
 
-    filename = os.path.join(flux_directory, domain, species.lower() + "_" + "*.nc")
-    print("\nSearching for flux files: {}".format(filename))
+    results = search_emissions(species=species, domains=domain, start_date=start_date, end_date=end_date)
 
-    files = sorted(glob.glob(filename))
+    # TODO - more than one emissions file
+    try:
+        em_key = list(results.keys())[0]
+    except IndexError:
+        raise ValueError(f"Unable to find any footprint data for {domain} for {species}.")
 
-    if len(files) == 0:
-        raise IOError("\nError: Can't find flux files for domain '{0}' and species '{1}' ".format(domain, species))
-
-    flux_ds = read_netcdfs(files)
-    # Check that time coordinate is present
-    if not "time" in list(flux_ds.coords.keys()):
-        raise KeyError("ERROR: No 'time' coordinate in flux dataset for domain '{0}' species '{1}'".format(domain, species))
+    data_keys = results[em_key]["keys"]
+    em_ds = recombine_datasets(data_keys=data_keys, sort=False)
 
     # Check for level coordinate. If one level, assume surface and drop
-    if "lev" in list(flux_ds.coords.keys()):
-        print(
-            "WARNING: Can't support multi-level fluxes. Trying to remove 'lev' coordinate "
-            + "from flux dataset for "
-            + domain
-            + ", "
-            + species
-        )
-        if len(flux_ds.lev) > 1:
-            print("ERROR: More than one flux level")
-        else:
-            return flux_ds.drop("lev")
+    if "lev" in em_ds.coords:
+        if len(em_ds.lev) > 1:
+            raise ValueError("Error: More than one flux level")
 
-    if start == None or end == None:
-        print("To get fluxes for a certain time period you must specify a start or end date.")
-        return flux_ds
-    else:
+        return em_ds.drop("lev")
 
-        # Change timeslice to be the beginning and end of months in the dates specified.
-        start = pd.to_datetime(start)
-        month_start = dt.datetime(start.year, start.month, 1, 0, 0)
-
-        end = pd.to_datetime(end)
-        month_end = dt.datetime(end.year, end.month, 1, 0, 0) - dt.timedelta(seconds=1)
-
-        if "climatology" in species:
-            ndate = pd.to_datetime(flux_ds.time.values)
-            if len(ndate) == 1:  # If it's a single climatology value
-                dateadj = ndate - month_start  # Adjust climatology to start in same year as obs
-            else:  # Else if a monthly climatology
-                dateadj = ndate[month_start.month - 1] - month_start  # Adjust climatology to start in same year as obs
-            ndate = ndate - dateadj
-            flux_ds = flux_ds.update({"time": ndate})
-            flux_tmp = flux_ds.copy()
-            while month_end > ndate[-1]:
-                ndate = ndate + pd.DateOffset(years=1)
-                flux_ds = xr.merge([flux_ds, flux_tmp.update({"time": ndate})])
-
-        flux_timeslice = flux_ds.sel(time=slice(month_start, month_end))
-        if np.logical_and(
-            month_start.year != month_end.year,
-            len(flux_timeslice.time) != dateutil.relativedelta.relativedelta(end, start).months,
-        ):
-            month_start = dt.datetime(start.year, 1, 1, 0, 0)
-            flux_timeslice = flux_ds.sel(time=slice(month_start, month_end))
-        if len(flux_timeslice.time) == 0:
-            flux_timeslice = flux_ds.sel(time=start, method="ffill")
-            flux_timeslice = flux_timeslice.expand_dims("time", axis=-1)
-            print(
-                "Warning: No fluxes available during the time period specified so outputting\
-                          flux from %s"
-                % flux_timeslice.time.values[0]
-            )
-        else:
-            print("Slicing time to range {} - {}".format(month_start, month_end))
-
-        return flux_timeslice
+    return em_ds

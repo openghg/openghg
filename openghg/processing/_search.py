@@ -5,7 +5,7 @@
 from pandas import Timestamp
 from typing import Dict, List, Optional, Union
 
-__all__ = ["search", "search_footprints"]
+__all__ = ["search", "search_footprints", "search_emissions"]
 
 
 def search(
@@ -45,7 +45,7 @@ def search(
     if not isinstance(locations, list):
         locations = [locations]
 
-    if data_type in ["footprint", "footprints"]:
+    if data_type in ["footprint", "emissions"]:
         return search_footprints(
             locations=locations,
             species=species,
@@ -204,7 +204,7 @@ def search(
 def search_footprints(
     sites: Union[str, List[str]], domains: Union[str, List[str]], inlet: str, start_date: Timestamp, end_date: Timestamp
 ) -> Dict:
-    """Search for footprints for the given locations and inlet height.
+    """Search for emissions for the given locations and inlet height.
 
     Args:
         locations: Location name or list of names
@@ -215,13 +215,13 @@ def search_footprints(
         dict: Dictionary of keys keyed by location
     """
     from collections import defaultdict
-    from openghg.modules import Datasource, FOOTPRINTS
+    from openghg.modules import Datasource, emissions
 
     if not isinstance(sites, list):
         sites = [sites]
 
-    footprints = FOOTPRINTS.load()
-    datasource_uuids = footprints.datasources()
+    emissions = emissions.load()
+    datasource_uuids = emissions.datasources()
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
     keys = defaultdict(dict)
@@ -236,6 +236,63 @@ def search_footprints(
                 in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
                 keys[site]["keys"] = in_date
                 keys[site]["metadata"] = datasource.metadata()
+
+    return keys
+
+
+def search_emissions(
+    species: Union[str, List[str]],
+    domains: Union[str, List[str]],
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
+) -> Dict:
+    """Search for emissions for the given locations and inlet height.
+
+    Args:
+        locations: Location name or list of names
+        inlet: Inlet height
+        start_date: Start date
+        end_date: End date
+    Returns:
+        dict: Dictionary of keys keyed by location
+    """
+    from collections import defaultdict
+    from openghg.modules import Datasource, Emissions
+    from openghg.util import timestamp_epoch, timestamp_now, timestamp_tzaware
+
+    if not isinstance(species, list):
+        species = [species]
+
+    if not isinstance(domains, list):
+        domains = [domains]
+
+    if start_date is None:
+        start_date = timestamp_epoch()
+    else:
+        start_date = timestamp_tzaware(start_date)
+
+    if end_date is None:
+        end_date = timestamp_now()
+    else:
+        end_date = timestamp_tzaware(end_date)
+
+    emissions = Emissions.load()
+    datasource_uuids = emissions.datasources()
+    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+
+    keys = defaultdict(dict)
+    # If we have locations to search
+    # for sites in sites:
+    for datasource in datasources:
+        for sp in species:
+            for domain in domains:
+                search_terms = [sp, domain]
+                if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):
+                    # Get the data keys for the data in the matching daterange
+                    in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+                    key = "_".join(search_terms)
+                    keys[key]["keys"] = in_date
+                    keys[key]["metadata"] = datasource.metadata()
 
     return keys
 

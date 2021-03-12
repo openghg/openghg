@@ -202,3 +202,5 @@ class FOOTPRINTS(BaseModule):
         combined_str = "_".join(safer_terms)
 
         return hash_string(to_hash=combined_str)
+
+    
