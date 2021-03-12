@@ -256,6 +256,7 @@ def align_datasets(
         tuple: Two xarray.Dataset with aligned time dimensions
     """
     import numpy as np
+    from pandas import Timedelta
     from openghg.util import timestamp_tzaware
 
     platform = platform.lower()
@@ -264,21 +265,96 @@ def align_datasets(
     if platform in platform_skip_resample:
         return obs_data, footprint_data
 
+    # Get the frequency / period of measurements in time
+    # obs_data_timeperiod = np.diff(obs_data.time.data).min().astype("int64")
+    # footprint_data_timeperiod = np.diff(footprint_data.time.data).min().astype("int64")
+
+    # Check if the periods differ
+    # if obs_data_timeperiod != np.diff(obs_data.time.data).max().astype("int64"):
+    #     raise ValueError("Frequency of observations data not fixed")
+
+    # TODO - RT to check - will these time periods change or can we just do the above?
+    # This gets the median period / frequency between measurements in both Datasets
+    obs_data_timeperiod = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]).astype("int64"))
+    footprint_data_timeperiod = np.nanmedian((footprint_data.time.data[1:] - footprint_data.time.data[0:-1]).astype("int64"))
+
+    # Here we want timezone naive Timestamps
+    obs_startdate = Timestamp(obs_data.time[0].values)
+    obs_enddate = Timestamp(obs_data.time[-1].values)
+    footprint_startdate = Timestamp(footprint_data.time[0].values)
+    footprint_enddate = Timestamp(footprint_data.time[-1].values)
+
+    start_date = max(obs_startdate, footprint_startdate)
+    end_date = min(obs_enddate, footprint_enddate)
+
+    # Subtract half a second to ensure lower range covered
+    start_slice = start_date - Timedelta("0.5s")
+    # Add half a second to ensure upper range covered
+    end_slice = end_date + Timedelta("0.5s")
+
+    obs_data = obs_data.sel(time=slice(start_slice, end_slice))
+    footprint_data = footprint_data.sel(time=slice(start_slice, end_slice))
+
+    # only non satellite datasets with different periods need to be resampled
+    if not np.isclose(obs_data_timeperiod, footprint_data_timeperiod):
+        base = start_date.dt.hour.data + start_date.dt.minute.data / 60.0 + start_date.dt.second.data / 3600.0
+
+        if (obs_data_timeperiod >= footprint_data_timeperiod) or resample_to == "obs":
+
+            resample_period = str(round(obs_data_timeperiod / 3600e9, 5)) + "H"
+
+            resample_period = pd.
+
+            footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
+
+        elif obs_data_timeperiod < footprint_data_timeperiod or resample_to == "footprint":
+
+            resample_period = str(round(footprint_data_timeperiod / 3600e9, 5)) + "H"
+
+            obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
+
+    return obs_data, footprint_data
+
+
+def align_datasets_orig(
+    obs_data: Dataset, footprint_data: Dataset, platform: Optional[str] = None, resample_to_obs_data: Optional[bool] = False
+) -> Tuple[Dataset, Dataset]:
+    """Slice and resample two datasets to align along time
+
+    This slices the date to the smallest time frame
+    spanned by both the footprint and obs, then resamples the data
+    using the mean to the one with coarsest median resolution
+    starting from the sliced start date.
+
+    Args:
+        obs_data: Observations Dataset
+        footprint_data: Footprint Dataset
+        platform: Observation platform used to decide whether to resample
+        resample_to_obs_data: Override resampling to coarser resolution and resample to obs_data regardless
+    Returns:
+        tuple: Two xarray.Dataset with aligned time dimensions
+    """
+    import numpy as np
+
+    platform_skip_resample = ("satellite", "flask")
+
+    if platform in platform_skip_resample:
+        return obs_data, footprint_data
 
     obs_data_timeperiod = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]).astype("int64"))
     footprint_data_timeperiod = np.nanmedian((footprint_data.time.data[1:] - footprint_data.time.data[0:-1]).astype("int64"))
 
-    obs_startdate = timestamp_tzaware(obs_data.time[0].values)
-    obs_enddate = timestamp_tzaware(obs_data.time[-1].values)
-    footprint_startdate = timestamp_tzaware(footprint_data.time[0].values)
-    footprint_enddate = timestamp_tzaware(footprint_data.time[-1].values)
+    obs_startdate = obs_data.time[0]
+    obs_enddate = obs_data.time[-1]
+    footprint_startdate = footprint_data.time[0]
+    footprint_enddate = footprint_data.time[-1]
 
-    if obs_startdate > footprint_startdate:
+    if int(obs_startdate.data) > int(footprint_startdate.data):
         start_date = obs_startdate
     else:
         start_date = footprint_startdate
 
-    if obs_enddate < footprint_enddate:
+    if int(obs_enddate.data) < int(footprint_enddate.data):
         end_date = obs_enddate
     else:
         end_date = footprint_enddate
@@ -295,20 +371,19 @@ def align_datasets(
     if not np.isclose(obs_data_timeperiod, footprint_data_timeperiod):
         base = start_date.dt.hour.data + start_date.dt.minute.data / 60.0 + start_date.dt.second.data / 3600.0
 
-        if (obs_data_timeperiod >= footprint_data_timeperiod) or resample_to == "obs":
+        if (obs_data_timeperiod >= footprint_data_timeperiod) or resample_to_obs_data is True:
 
             resample_period = str(round(obs_data_timeperiod / 3600e9, 5)) + "H"
 
             footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
 
-        elif obs_data_timeperiod < footprint_data_timeperiod or resample_to == "footprint":
+        elif obs_data_timeperiod < footprint_data_timeperiod or resample_to_obs_data is False:
 
             resample_period = str(round(footprint_data_timeperiod / 3600e9, 5)) + "H"
 
             obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
 
     return obs_data, footprint_data
-
 
 def flux(
     domain: Union[str, List[str]],
