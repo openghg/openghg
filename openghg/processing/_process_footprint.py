@@ -257,7 +257,8 @@ def align_datasets(
     """
     import numpy as np
     from pandas import Timedelta
-    from openghg.util import timestamp_tzaware
+
+    # from openghg.util import timestamp_tzaware
 
     platform = platform.lower()
     platform_skip_resample = ("satellite", "flask")
@@ -303,7 +304,7 @@ def align_datasets(
 
             resample_period = str(round(obs_data_timeperiod / 3600e9, 5)) + "H"
 
-            resample_period = pd.
+            # resample_period = pd.
 
             footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
 
@@ -312,6 +313,8 @@ def align_datasets(
             resample_period = str(round(footprint_data_timeperiod / 3600e9, 5)) + "H"
 
             obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
+
+        print(obs_data_timeperiod, resample_period)
 
     return obs_data, footprint_data
 
@@ -384,6 +387,7 @@ def align_datasets_orig(
             obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
 
     return obs_data, footprint_data
+
 
 def flux(
     domain: Union[str, List[str]],

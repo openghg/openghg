@@ -215,13 +215,13 @@ def search_footprints(
         dict: Dictionary of keys keyed by location
     """
     from collections import defaultdict
-    from openghg.modules import Datasource, emissions
+    from openghg.modules import Datasource, FOOTPRINTS
 
     if not isinstance(sites, list):
         sites = [sites]
 
-    emissions = emissions.load()
-    datasource_uuids = emissions.datasources()
+    footprint = FOOTPRINTS.load()
+    datasource_uuids = footprint.datasources()
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
     keys = defaultdict(dict)

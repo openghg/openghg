@@ -84,7 +84,7 @@ class FOOTPRINTS(BaseModule):
         metadata["min_longitude"] = round(float(fp_data["lon"].min()), 5)
         metadata["max_latitude"] = round(float(fp_data["lat"].max()), 5)
         metadata["min_latitude"] = round(float(fp_data["lat"].min()), 5)
-        metadata["high_resolution"] = False
+        metadata["high_resolution"] = 0
 
         # If it's a high resolution footprint file we'll have two sets of lat/long values
         if high_res:
@@ -93,7 +93,7 @@ class FOOTPRINTS(BaseModule):
                 metadata["min_longitude_high"] = round(float(fp_data["lon_high"].min()), 5)
                 metadata["max_latitude_high"] = round(float(fp_data["lat_high"].max()), 5)
                 metadata["min_latitude_high"] = round(float(fp_data["lat_high"].min()), 5)
-                metadata["high_resolution"] = True
+                metadata["high_resolution"] = 1
             except KeyError:
                 raise KeyError("Unable to find lat_high or lon_high data.")
 
@@ -101,7 +101,7 @@ class FOOTPRINTS(BaseModule):
         # Do we also need to save all the variables we have available in this footprint?
         metadata["variables"] = list(fp_data.keys())
 
-        metadata["model_parameters"] = model_params
+        # metadata["model_parameters"] = model_params
 
         # Set the attributes of this Dataset
         fp_data.attrs = {"author": "OpenGHG Cloud", "processed": str(timestamp_now())}
