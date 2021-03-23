@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from typing import Dict
+
 from ._basedata import _BaseData
 
 __all__ = ["FootprintData"]
@@ -13,4 +15,9 @@ class FootprintData(_BaseData):
             metadata: Dictionary of metadata including model run parameters
             doi: DOI string
     """
-    pass
+    flux: Dict
+    bc: Dict
+    species: str
+    scales: str
+    units: str
+

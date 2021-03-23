@@ -204,7 +204,7 @@ def search(
 def search_footprints(
     sites: Union[str, List[str]], domains: Union[str, List[str]], inlet: str, start_date: Timestamp, end_date: Timestamp
 ) -> Dict:
-    """Search for emissions for the given locations and inlet height.
+    """Search for footprints for the given locations and inlet height.
 
     Args:
         locations: Location name or list of names
@@ -220,8 +220,11 @@ def search_footprints(
     if not isinstance(sites, list):
         sites = [sites]
 
-    footprint = FOOTPRINTS.load()
-    datasource_uuids = footprint.datasources()
+    if not isinstance(domains, list):
+        domains = [domains]
+
+    footprints = FOOTPRINTS.load()
+    datasource_uuids = footprints.datasources()
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
     keys = defaultdict(dict)
@@ -230,7 +233,7 @@ def search_footprints(
     for datasource in datasources:
         for site in sites:
             # TODO - should we iterate over the domains? Will there be the same site in multiple footprint domains?
-            search_terms = [inlet, site].extend(domains)
+            search_terms = [inlet, site] + domains
             if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):
                 # Get the data keys for the data in the matching daterange
                 in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
@@ -242,7 +245,9 @@ def search_footprints(
 
 def search_emissions(
     species: Union[str, List[str]],
+    sources: Union[str, List[str]],
     domains: Union[str, List[str]],
+    high_time_res: Optional[bool] = False,
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
 ) -> Dict:
@@ -266,6 +271,9 @@ def search_emissions(
     if not isinstance(domains, list):
         domains = [domains]
 
+    if not isinstance(sources, list):
+        sources = [sources]
+
     if start_date is None:
         start_date = timestamp_epoch()
     else:
@@ -280,13 +288,17 @@ def search_emissions(
     datasource_uuids = emissions.datasources()
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
+    search_terms = sources 
+    if high_time_res:
+        search_terms.append("high_time_resolution")
+
     keys = defaultdict(dict)
     # If we have locations to search
     # for sites in sites:
     for datasource in datasources:
         for sp in species:
             for domain in domains:
-                search_terms = [sp, domain]
+                search_terms += [sp, domain]
                 if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):
                     # Get the data keys for the data in the matching daterange
                     in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)

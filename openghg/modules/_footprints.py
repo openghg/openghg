@@ -84,7 +84,7 @@ class FOOTPRINTS(BaseModule):
         metadata["min_longitude"] = round(float(fp_data["lon"].min()), 5)
         metadata["max_latitude"] = round(float(fp_data["lat"].max()), 5)
         metadata["min_latitude"] = round(float(fp_data["lat"].min()), 5)
-        metadata["high_resolution"] = 0
+        metadata["time_resolution"] = "standard_time_resolution"
 
         # If it's a high resolution footprint file we'll have two sets of lat/long values
         if high_res:
@@ -93,7 +93,7 @@ class FOOTPRINTS(BaseModule):
                 metadata["min_longitude_high"] = round(float(fp_data["lon_high"].min()), 5)
                 metadata["max_latitude_high"] = round(float(fp_data["lat_high"].max()), 5)
                 metadata["min_latitude_high"] = round(float(fp_data["lat_high"].min()), 5)
-                metadata["high_resolution"] = 1
+                metadata["time_resolution"] = "high_time_resolution"
             except KeyError:
                 raise KeyError("Unable to find lat_high or lon_high data.")
 
