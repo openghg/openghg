@@ -271,7 +271,7 @@ def search_emissions(
     if not isinstance(domains, list):
         domains = [domains]
 
-    if not isinstance(sources, list):
+    if sources is not None and not isinstance(sources, list):
         sources = [sources]
 
     if start_date is None:
@@ -288,9 +288,11 @@ def search_emissions(
     datasource_uuids = emissions.datasources()
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
-    search_terms = sources 
+    gen_search_terms = []
+    if sources is not None:
+        gen_search_terms += sources
     if high_time_res:
-        search_terms.append("high_time_resolution")
+        gen_search_terms.append("high_time_resolution")
 
     keys = defaultdict(dict)
     # If we have locations to search
@@ -298,7 +300,7 @@ def search_emissions(
     for datasource in datasources:
         for sp in species:
             for domain in domains:
-                search_terms += [sp, domain]
+                search_terms = [sp, domain] + gen_search_terms
                 if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):
                     # Get the data keys for the data in the matching daterange
                     in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)

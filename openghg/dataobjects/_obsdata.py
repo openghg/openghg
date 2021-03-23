@@ -11,6 +11,5 @@ class ObsData(_BaseData):
         Args:
             data: Dictionary of xarray Dataframes
             metadata: Dictionary of metadata
-            doi: DOI string
     """
     pass

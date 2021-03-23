@@ -13,7 +13,11 @@ class FootprintData(_BaseData):
         Args:
             data: Dictionary of xarray Dataframes
             metadata: Dictionary of metadata including model run parameters
-            doi: DOI string
+            flux: Dictionary of flux data
+            bc: Boundary conditions dictionary
+            species: Species name
+            scales: Measurements scale
+            units: Measurements units
     """
     flux: Dict
     bc: Dict
@@ -21,3 +25,5 @@ class FootprintData(_BaseData):
     scales: str
     units: str
 
+    def __str__(self):
+        return f"Data: {self.data}\nMetadata : {self.metadata}"

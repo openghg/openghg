@@ -6,7 +6,7 @@ from pandas import Timestamp
 from xarray import Dataset
 from typing import Dict, List, Optional, Tuple, Union
 
-__all__ = ["single_site_footprint"]
+__all__ = ["single_site_footprint", "footprints_data_merge"]
 
 
 def single_site_footprint(
@@ -98,8 +98,6 @@ def single_site_footprint(
     footprint_keys = footprint_results[fp_site_key]["keys"]
     footprint_data = recombine_datasets(data_keys=footprint_keys, sort=False)
 
-    return obs_data, footprint_data
-
     # Align the two Datasets
     aligned_obs, aligned_footprint = align_datasets(
         obs_data=obs_data, footprint_data=footprint_data, platform=platform, resample_to=resample_to
@@ -145,6 +143,8 @@ def footprints_data_merge(
     Returns:
         dict: Dictionary footprint data objects
     """
+    from openghg.dataobjects import FootprintData
+
     # First get the site data
     combined_dataset = single_site_footprint(
         site=site,
@@ -161,44 +161,20 @@ def footprints_data_merge(
     )
 
     # So here we iterate over the emissions types and get the fluxes
-    if flux_sources is not None:
-        flux_data = get_flux(species=species, domain=domain, high_time_res=False, start_date=start_date, end_date=end_date)
+    flux_dict = {}
+    if load_flux:
+        flux_dict["standard"] = get_flux(
+            species=species, domain=domain, sources=flux_sources, high_time_res=False, start_date=start_date, end_date=end_date
+        )
 
         if high_time_res:
-            high_res_flux_data = get_flux(
-                species=species, domain=domain, high_time_res=True, start_date=start_date, end_date=end_date
+            flux_dict["high_time_res"] = get_flux(
+                species=species, domain=domain, sources=flux_sources, high_time_res=True, start_date=start_date, end_date=end_date
             )
 
-    #     species: Union[str, List[str]],
-    # domain: Union[str, List[str]],
-    # start_date: Optional[Timestamp] = None,
-    # end_date: Optional[Timestamp] = None,
-
-    # if load_flux:
-    #     flux_dict = {}
-    #     basestring = (str, bytes)
-    #     for source in list(emissions_name.keys()):
-
-    #         if isinstance(emissions_name[source], basestring):
-    #             flux_dict[source] = get_flux(
-    #                 domain, emissions_name[source], start=flux_bc_start, end=flux_bc_end, flux_directory=flux_directory
-    #             )
-
-    #         elif isinstance(emissions_name[source], dict):
-    #             if HiTRes == False:
-    #                 print(
-    #                     "HiTRes is set to False and a dictionary has been found as the emissions_name dictionary value\
-    #                       for source %s. Either enter your emissions names as separate entries in the emissions_name\
-    #                       dictionary or turn HiTRes to True to use the two emissions files together with HiTRes footprints."
-    #                     % source
-    #                 )
-    #                 # return None
-    #             else:
-    #                 flux_dict[source] = flux_for_HiTRes(
-    #                     domain, emissions_name[source], start=flux_bc_start, end=flux_bc_end, flux_directory=flux_directory
-    #                 )
-
-    #     fp_and_data[".flux"] = flux_dict
+    return FootprintData(
+        data=combined_dataset, metadata={}, flux=flux_dict, bc={}, species=species, scales="scale", units="units"
+    )
 
 
 def combine_datasets(

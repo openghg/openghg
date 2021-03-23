@@ -27,7 +27,7 @@ class Emissions(BaseModule):
         self._rank_data = defaultdict(dict)
 
     def to_data(self) -> Dict:
-        """ Return a JSON-serialisable dictionary of object
+        """Return a JSON-serialisable dictionary of object
         for storage in object store
 
         Returns:
@@ -46,7 +46,7 @@ class Emissions(BaseModule):
         return data
 
     def save(self, bucket: Optional[Dict] = None) -> None:
-        """ Save the object to the object store
+        """Save the object to the object store
 
         Args:
             bucket: Bucket for data
@@ -64,14 +64,27 @@ class Emissions(BaseModule):
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
     @staticmethod
-    def read_file(filepath: Union[str, Path], species: str, domain: str, overwrite: Optional[bool] = False):
-        """ Read emissions file
+    def read_file(
+        filepath: Union[str, Path],
+        species: str,
+        domain: str,
+        source: str,
+        high_time_resolution: bool,
+        period: Optional[str] = None,
+        overwrite: Optional[bool] = False,
+    ):
+        """Read emissions file
 
-            Args:
-                filepath: Path of emissions file
-                metadata: Dictionary of metadata
+        Args:
+            filepath: Path of emissions file
+            species: Species name
+            domain: Emissions domain
+            source: Emissions source
+            high_time_resolution: If this is a high resolution file
+            period: Period of measurements, if not passed this is inferred from the time coords
+            overwrite: Should this data overwrite currently stored data.
         """
-        from xarray import open_dataset
+        from xarray import open_dataset, infer_freq
         from openghg.processing import assign_emissions_data
         from openghg.util import hash_file, timestamp_tzaware, timestamp_now
 
@@ -93,12 +106,15 @@ class Emissions(BaseModule):
             except AttributeError:
                 attrs[key] = value
 
+        author_name = "OpenGHG Cloud"
+        em_data.attrs["author"] = author_name 
+
         metadata = {}
         metadata.update(attrs)
 
         metadata["species"] = species
         metadata["domain"] = domain
-        metadata["author"] = "OpenGHG Cloud"
+        metadata["author"] = author_name
         metadata["processed"] = str(timestamp_now())
 
         metadata["start_date"] = str(timestamp_tzaware(em_data.time[0].values))
@@ -108,6 +124,13 @@ class Emissions(BaseModule):
         metadata["min_longitude"] = round(float(em_data["lon"].min()), 5)
         metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
         metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
+
+        metadata["time_resolution"] = "high_resolution" if high_time_resolution else "standard_resolution"
+
+        if period is not None:
+            metadata["time_period"] = period
+        else:
+            metadata["time_period"] = infer_freq(em_data.time)
 
         # Check if we've seen data from this site before
         em_hash = em_store._get_emissions_hash(species=species, domain=domain)

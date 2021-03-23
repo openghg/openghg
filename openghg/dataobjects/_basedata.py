@@ -10,7 +10,6 @@ from typing import Dict
 class _BaseData:
     data: Dataset
     metadata: Dict
-    doi: str = "NA"
 
     def __str__(self):
-        return f"Data: {self.data}\nMetadata : {self.metadata}\nDOI: {self.doi}"
+        return f"Data: {self.data}\nMetadata : {self.metadata}"
