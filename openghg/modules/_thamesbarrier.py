@@ -66,7 +66,7 @@ class THAMESBARRIER(BaseModule):
             site_attributes = self._tb_params["global_attributes"]
             site_attributes["inlet_height_magl"] = clean_string(self._tb_params["inlet"])
             site_attributes["instrument"] = clean_string(self._tb_params["instrument"])
-            site_attributes["inlet"] = clean_string(self._tb_params["inlet"])
+            # site_attributes["inlet"] = clean_string(self._tb_params["inlet"])
             # site_attributes["unit_species"] = self._tb_params["unit_species"]
             # site_attributes["scale"] = self._tb_params["scale"]
 
@@ -84,15 +84,3 @@ class THAMESBARRIER(BaseModule):
 
         return gas_data
 
-    def read_data(self, data_filepath: Path) -> Dict:
-        """Separates the gases stored in the dataframe in
-        separate dataframes and returns a dictionary of gases
-        with an assigned UUID as gas:UUID and a list of the processed
-        dataframes
-
-        Args:
-            data_filepath (pathlib.Path): Path of datafile
-        Returns:
-            dict: Dictionary containing attributes, data and metadata keys
-        """
-        from pandas import read_csv

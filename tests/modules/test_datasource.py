@@ -65,16 +65,16 @@ def test_add_data(data):
     ch4_data = data["ch4"]["data"]
 
     assert ch4_data["ch4"][0] == pytest.approx(1960.24)
-    assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
-    assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
+    assert ch4_data["ch4_variability"][0] == pytest.approx(0.236)
+    assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(26.0)
 
     d.add_data(metadata=metadata, data=ch4_data)
 
     date_key = "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
 
     assert d._data[date_key]["ch4"].equals(ch4_data["ch4"])
-    assert d._data[date_key]["ch4 stdev"].equals(ch4_data["ch4 stdev"])
-    assert d._data[date_key]["ch4 n_meas"].equals(ch4_data["ch4 n_meas"])
+    assert d._data[date_key]["ch4_variability"].equals(ch4_data["ch4_variability"])
+    assert d._data[date_key]["ch4_number_of_observations"].equals(ch4_data["ch4_number_of_observations"])
 
     datasource_metadata = d.metadata()
 
@@ -226,8 +226,8 @@ def test_to_data(data):
     ch4_data = data["ch4"]["data"]
 
     assert ch4_data["ch4"][0] == pytest.approx(1960.24)
-    assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
-    assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
+    assert ch4_data["ch4_variability"][0] == pytest.approx(0.236)
+    assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(26.0)
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
 
@@ -250,6 +250,7 @@ def test_from_data(data):
     ch4_data = data["ch4"]["data"]
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
+    d.save()
 
     obj_data = d.to_data()
 
@@ -264,7 +265,8 @@ def test_from_data(data):
     assert metadata["time_resolution"] == "1_minute"
     assert metadata["inlet"] == "248m"
 
-    assert d_2.to_data() == d.to_data()
+    assert d_2.data_keys() == d.data_keys()
+    assert d_2.metadata() == d.metadata()
 
 
 def test_incorrect_datatype_raises(data):

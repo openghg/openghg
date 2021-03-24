@@ -93,9 +93,9 @@ def search(
 
     # First we find the Datasources from locations we want to narrow down our search
     location_sources = defaultdict(list)
-    # If we have locations to search
-    for location in locations:
-        for datasource in datasources:
+
+    for datasource in datasources:
+        for location in locations:
             if datasource.search_metadata(search_terms=location, start_date=start_date, end_date=end_date):
                 location_sources[location].append(datasource)
 

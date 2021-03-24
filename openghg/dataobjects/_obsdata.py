@@ -4,7 +4,7 @@ from ._basedata import _BaseData
 __all__ = ["ObsData"]
 
 
-@dataclass
+@dataclass(frozen=True)
 class ObsData(_BaseData):
     """ This class is used to return observations data from the get_observations function
 

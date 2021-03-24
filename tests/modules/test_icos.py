@@ -25,7 +25,7 @@ def test_read_file():
 
     expected_attrs = {'Conditions of use': 'Ensure that you contact the data owner at the outset of your project.', 
                     'Source': 'In situ measurements of air', 'Conventions': 'CF-1.6', 
-                    'Processed by': 'auto@hugs-cloud.com', 'species': 'co2', 'Calibration_scale': 'unknown', 
+                    'Processed by': 'OpenGHG_Cloud', 'species': 'co2', 'Calibration_scale': 'unknown', 
                     'station_longitude': -2.98598, 'station_latitude': 56.55511, 'station_long_name': 'Angus Tower, UK', 
                     'station_height_masl': 300.0}
 

@@ -6,7 +6,7 @@ from ._basedata import _BaseData
 __all__ = ["FootprintData"]
 
 
-@dataclass
+@dataclass(frozen=True)
 class FootprintData(_BaseData):
     """ This class is used to return observations data from the get_observations function
 

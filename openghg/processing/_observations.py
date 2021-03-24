@@ -102,7 +102,7 @@ def get_single_site(
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
     # Find the correct synonym for the passed species
-    species = synonyms(species)
+    species = synonyms(species).lower()
 
     # Get the observation data
     obs_results = search(
@@ -134,7 +134,6 @@ def get_single_site(
 
         if average is not None:
             # GJ - 2021-03-09
-            # I've commented this out as I don't know why we'd want to to do this with OpenGHG
             # TODO - check by RT
 
             # # Average the Dataset over a given period
@@ -186,7 +185,7 @@ def get_single_site(
                 if "units" in data[var].attrs:
                     ds_resampled[var].attrs["units"] = data[var].attrs["units"]
 
-             # Create a new variability variable, containing the standard deviation within the resampling period
+            # Create a new variability variable, containing the standard deviation within the resampling period
             ds_resampled[f"{species}_variability"] = data[species].resample(time = average, keep_attrs = True).std(skipna=False)
             # If there are any periods where only one measurement was resampled, just use the median variability
             ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.] = \

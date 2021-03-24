@@ -6,7 +6,7 @@ from xarray import Dataset
 from typing import Dict
 
 
-@dataclass
+@dataclass(frozen=True)
 class _BaseData:
     data: Dataset
     metadata: Dict

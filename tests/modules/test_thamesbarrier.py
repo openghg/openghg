@@ -13,12 +13,9 @@ mpl_logger.setLevel(logging.WARNING)
 # Disable this for long strings below - Line break occurred before a binary operator (W503)
 # flake8: noqa: W503
 
+
 def get_datapath(filename, data_type):
-    return (
-        Path(__file__)
-        .resolve(strict=True)
-        .parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
-    )
+    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 
 def test_read_file():
@@ -44,44 +41,24 @@ def test_read_file():
     assert co_data["co"][0] == pytest.approx(0.08788712)
     assert co_data["co_variability"][0] == 0
 
-    expected_attrs = {'data_owner': 'Valerio Ferracci', 'data_owner_email': 'V.Ferracci@cranfield.ac.uk', 
-                    'Notes': '~5m above high tide water level, in tidal region of the Thames', 
-                    'inlet_height_magl': '5 m', 'instrument': 'Picarro G2401', 
-                    'Conditions of use': 'Ensure that you contact the data owner at the outset of your project.', 
-                    'Source': 'In situ measurements of air', 'Conventions': 'CF-1.6', 
-                    'Processed by': 'auto@hugs-cloud.com', 'species': 'co', 
-                    'Calibration_scale': 'unknown', 'station_longitude': 0.037, 'station_latitude': 51.497, 
-                    'station_long_name': 'Thames Barrier, UK', 'station_height_masl': 5.0}
-
-    del co_data.attrs["File created"]
-    
-    assert co_data.attrs == expected_attrs
-
-
-
-def test_read_data():
-    tb = THAMESBARRIER()
-
-    filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
-
-    data = tb.read_data(data_filepath=filepath)
-
-    del data["CH4"]["attributes"]["data_owner"]
-    del data["CH4"]["attributes"]["data_owner_email"]
-
-    attributes = {
+    expected_attrs = {
+        "data_owner": "Valerio Ferracci",
+        "data_owner_email": "V.Ferracci@cranfield.ac.uk",
         "Notes": "~5m above high tide water level, in tidal region of the Thames",
         "inlet_height_magl": "5 m",
         "instrument": "Picarro G2401",
+        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
+        "Source": "In situ measurements of air",
+        "Conventions": "CF-1.6",
+        "Processed by": "OpenGHG_Cloud",
+        "species": "co",
+        "Calibration_scale": "unknown",
+        "station_longitude": 0.037,
+        "station_latitude": 51.497,
+        "station_long_name": "Thames Barrier, UK",
+        "station_height_masl": 5.0,
     }
 
-    assert sorted(list(data.keys())) == sorted(["CH4", "CO", "CO2"])
-    assert data["CH4"]["attributes"] == attributes
-    assert data["CH4"]["metadata"] == {"species": "CH4"}
+    del co_data.attrs["File created"]
 
-    ch4_data = data["CH4"]["data"]
-
-    assert ch4_data.time[0] == pd.Timestamp("2019-07-01T00:39:55.000000000")
-    assert ch4_data.time[-1] == pd.Timestamp("2019-08-01T00:10:30.000000000")
-    assert ch4_data["CH4"][0] == pytest.approx(1960.8357162)
-    assert ch4_data["CH4"][-1] == pytest.approx(2002.003717)
+    assert co_data.attrs == expected_attrs
