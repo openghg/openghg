@@ -95,7 +95,8 @@ def test_search_datetimes(crds_read):
     )
 
     expected_keys = ["co2_bsd_248m_picarro", "co2_bsd_108m_picarro"]
-    assert list(results.keys()) == expected_keys
+
+    assert sorted(list(results.keys())) == sorted(expected_keys)
 
     bsd_108_keys = results["co2_bsd_108m_picarro"]["keys"]
     bsd_248_keys = results["co2_bsd_248m_picarro"]["keys"]
