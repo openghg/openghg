@@ -83,4 +83,3 @@ class THAMESBARRIER(BaseModule):
         gas_data = assign_attributes(data=gas_data, site=site)
 
         return gas_data
-

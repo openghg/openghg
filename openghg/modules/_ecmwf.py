@@ -115,7 +115,7 @@ def _download_data(url: str) -> xr.Dataset:
     timeout = 20  # seconds
 
     retry_strategy = Retry(
-        total=3, status_forcelist=retriable_status_codes, method_whitelist=["HEAD", "GET", "OPTIONS"], backoff_factor=1
+        total=3, status_forcelist=retriable_status_codes, allowed_methods=["HEAD", "GET", "OPTIONS"], backoff_factor=1
     )
 
     adapter = HTTPAdapter(max_retries=retry_strategy)

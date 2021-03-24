@@ -3,7 +3,6 @@ from openghg.processing import search as search_fn
 __all__ = ["Search"]
 
 from openghg.processing import recombine_datasets
-from collections import defaultdict
 
 
 class Search:

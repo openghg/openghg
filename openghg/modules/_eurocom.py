@@ -60,7 +60,6 @@ class EUROCOM:
                 dict: Dictionary containing attributes, data and metadata keys
         """
         from pandas import read_csv, Timestamp
-        import numpy as np
         from openghg.processing import get_attributes
         from openghg.util import read_header
         from pathlib import Path
@@ -97,15 +96,15 @@ class EUROCOM:
         ]
 
         dtypes = {
-            "Day": np.int,
-            "Month": np.int,
-            "Year": np.int,
-            "Hour": np.int,
-            "Minute": np.int,
-            species.lower(): np.float,
-            "Stdev": np.float,
-            "SamplingHeight": np.float,
-            "NbPoints": np.int,
+            "Day": int,
+            "Month": int,
+            "Year": int,
+            "Hour": int,
+            "Minute": int,
+            species.lower(): float,
+            "Stdev": float,
+            "SamplingHeight": float,
+            "NbPoints": int,
         }
 
         data = read_csv(

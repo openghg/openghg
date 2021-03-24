@@ -7,7 +7,7 @@ from pathlib import Path
 
 @pytest.fixture(scope="session")
 def mock_data():
-    return Path(__file__).resolve(strict=True).parent.parent.joinpath(f"data/request_return.nc").read_bytes()
+    return Path(__file__).resolve(strict=True).parent.parent.joinpath("data/request_return.nc").read_bytes()
 
 
 @pytest.fixture(scope="session")
