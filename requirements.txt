@@ -5,6 +5,7 @@ cdsapi
 # cfchecker @ git+git://github.com/gareth-j/cf-checker@removeBasestring#egg=cfchecker
 cryptography
 lazy_import
+matplotlib
 netcdf4
 numexpr
 numpy
