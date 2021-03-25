@@ -12,12 +12,12 @@ class Search:
         if service_url:
             self._service_url = service_url
         else:
-            self._service_url = "https://openghg.acquire-aaai.com/t"
+            self._service_url = "https://fn.openghg.org/t"
 
         wallet = Wallet()
-        self._service = wallet.get_service(service_url=f"{self._service_url}/hugs")
+        self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
 
-    def search(self, locations, species=None, inlet=None, instrument=None, start_datetime=None, end_datetime=None):
+    def search(self, locations, species=None, inlet=None, instrument=None, start_date=None, end_date=None):
         """ Document me!
 
         """
@@ -34,10 +34,10 @@ class Search:
         if instrument is not None:
             args["instrument"] = instrument
 
-        if start_datetime:
-            args["start_datetime"] = datetime_to_string(start_datetime)
-        if end_datetime:
-            args["end_datetime"] = datetime_to_string(end_datetime)
+        if start_date:
+            args["start_date"] = datetime_to_string(start_date)
+        if end_date:
+            args["end_date"] = datetime_to_string(end_date)
 
         response = self._service.call_function(function="search", args=args)["results"]
 

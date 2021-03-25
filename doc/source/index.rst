@@ -47,7 +47,7 @@ Development
 .. toctree::
    :maxdepth: 2
 
-   development
+   development/index_devel
 
 
 API Reference

@@ -1,7 +1,10 @@
 """ Segment the data into Datasources
 
 """
-__all__ = ["get_split_frequency", "create_footprint_datasources", "assign_data"]
+from typing import Dict, Union
+from xarray import Dataset
+
+__all__ = ["get_split_frequency", "assign_footprint_data", "assign_data", "assign_emissions_data"]
 
 # def create_datasources(gas_data):
 #     """ Create or get an existing Datasource for each gas in the file
@@ -43,14 +46,14 @@ __all__ = ["get_split_frequency", "create_footprint_datasources", "assign_data"]
 #     return uuids
 
 
-def assign_data(gas_data, lookup_results, overwrite):
+def assign_data(gas_data: Dict, lookup_results: Dict, overwrite: bool) -> Dict:
     """ Assign data to a Datasource. This will either create a new Datasource 
     Create or get an existing Datasource for each gas in the file
 
         Args:
-            gas_data (dict): Dictionary containing data and metadata for species
-            lookup_results (dict): Dictionary of lookup results]
-            overwrite (bool): If True overwrite current data stored
+            gas_data: Dictionary containing data and metadata for species
+            lookup_results: Dictionary of lookup results]
+            overwrite: If True overwrite current data stored
         Returns:
             dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
     """
@@ -63,6 +66,11 @@ def assign_data(gas_data, lookup_results, overwrite):
         data = gas_data[species]["data"]
         name = lookup_results[species]["name"]
         uuid = lookup_results[species]["uuid"]
+
+        # Add the read metadata to the Dataset attributes being careful 
+        # not to overwrite any attributes that are already there
+        to_add = {k: v for k, v in metadata.items() if k not in data.attrs}
+        data.attrs.update(to_add)
 
         # If we have a UUID for this Datasource load the existing object
         # from the object store
@@ -81,15 +89,62 @@ def assign_data(gas_data, lookup_results, overwrite):
     return uuids
 
 
-def create_footprint_datasources(footprint_data):
+def assign_footprint_data(data: Dataset, metadata: Dict, datasource_uid: Union[str, bool]) -> str:
     """ Create Datasources for the passed footprint data
 
         Args:
-            footprint_data (list): List of tupes of footprint name, datasource_id, xarray.Dataset
+            data: xarray Dataset of footprint data
+            metadata: Associated metadata
+            datasource_uid: The UUID of the datasource if we've processed footprint data from this
+            source before, otherwise False
         Returns:
-            list: List of UUIDs of used/created Datasources
+            str: UUID of Datasource
     """
-    raise NotImplementedError()
+    from openghg.modules import Datasource
+
+    if datasource_uid is not False:
+        datasource = Datasource.load(uuid=datasource_uid)
+    else:
+        datasource = Datasource()
+
+    # Add the read metadata to the Dataset attributes being careful 
+    # not to overwrite any attributes that are already there
+    to_add = {k: v for k, v in metadata.items() if k not in data.attrs}
+    data.attrs.update(to_add)
+
+    datasource.add_footprint_data(data=data, metadata=metadata)
+    datasource.save()
+
+    return datasource.uuid()
+
+
+def assign_emissions_data(data: Dataset, metadata: Dict, datasource_uid: Union[str, bool]) -> str:
+    """ Create Datasources for the passed flux data
+
+        Args:
+            data: xarray Dataset of footprint data
+            metadata: Associated metadata
+            datasource_uid: The UUID of the datasource if we've processed flux data from this
+            source before, otherwise False
+        Returns:
+            str: UUID of Datasource
+    """
+    from openghg.modules import Datasource
+
+    if datasource_uid is not False:
+        datasource = Datasource.load(uuid=datasource_uid)
+    else:
+        datasource = Datasource()
+
+    # Add the read metadata to the Dataset attributes being careful 
+    # not to overwrite any attributes that are already there
+    to_add = {k: v for k, v in metadata.items() if k not in data.attrs}
+    data.attrs.update(to_add)
+
+    datasource.add_emissions_data(data=data, metadata=metadata)
+    datasource.save()
+
+    return datasource.uuid()
 
 
 def get_split_frequency(data):

@@ -2,12 +2,12 @@
 localclient API Detail
 =========================
 
-get_single_site
-===============
+get_observations
+================
 
 Used to search the object store using a site name, species and daterange and returns the data found.
 
-.. autofunction:: openghg.localclient.get_single_site
+.. autofunction:: openghg.localclient.get_observations
     
 
 process_files

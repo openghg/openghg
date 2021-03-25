@@ -66,7 +66,7 @@ def test_retrieve(authenticated_user, crds):
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
-        "Processed by": "auto@hugs-cloud.com",
+        'Processed by': 'OpenGHG_Cloud',
         "species": "co",
         "Calibration_scale": "unknown",
         "station_longitude": -1.15033,

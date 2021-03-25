@@ -78,7 +78,7 @@ class ObsSurface(BaseModule):
 
         Args:
             filepath: Filepath(s)
-            data_type: Data type
+            data_type: Data type, for example CRDS, GCWERKS, ICOS
             site: Site code/name
             network: Network name
             overwrite: Overwrite previously uploaded data

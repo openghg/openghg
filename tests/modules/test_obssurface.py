@@ -7,10 +7,10 @@ from openghg.objectstore import get_local_bucket, exists
 
 
 def get_datapath(filename, data_type):
-    """ Get the path of a file in the tests directory 
+    """Get the path of a file in the tests directory
 
-        Returns:
-            pathlib.Path
+    Returns:
+        pathlib.Path
     """
     return Path(__file__).resolve().parent.parent.joinpath("data", "proc_test_data", data_type, filename)
 
@@ -24,7 +24,13 @@ def test_read_CRDS():
 
     keys = results["processed"]["bsd.picarro.1minute.248m.dat"].keys()
 
-    expected_keys = sorted(["bsd.picarro.1minute.248m_ch4", "bsd.picarro.1minute.248m_co", "bsd.picarro.1minute.248m_co2",])
+    expected_keys = sorted(
+        [
+            "bsd.picarro.1minute.248m_ch4",
+            "bsd.picarro.1minute.248m_co",
+            "bsd.picarro.1minute.248m_co2",
+        ]
+    )
     assert sorted(keys) == expected_keys
 
     # Load up the assigned Datasources and check they contain the correct data
@@ -36,8 +42,8 @@ def test_read_CRDS():
     assert ch4_data.time[0] == Timestamp("2014-01-30T10:52:30")
     assert ch4_data["ch4"][0] == 1960.24
     assert ch4_data["ch4"][-1] == 1952.24
-    assert ch4_data["ch4_stdev"][-1] == 0.674
-    assert ch4_data["ch4_n_meas"][-1] == 25.0
+    assert ch4_data["ch4_variability"][-1] == 0.674
+    assert ch4_data["ch4_number_of_observations"][-1] == 25.0
 
     obs = ObsSurface.load()
 
@@ -152,13 +158,19 @@ def test_read_GC():
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
-        "Processed by": "auto@hugs-cloud.com",
+        "Processed by": "OpenGHG_Cloud",
         "species": "hfc152a",
         "Calibration_scale": "SIO-05",
         "station_longitude": 144.689,
         "station_latitude": -40.683,
         "station_long_name": "Cape Grim, Tasmania",
         "station_height_masl": 94.0,
+        "instrument": "medusa",
+        "site": "CGO",
+        "network": "NA",
+        "units": "ppt",
+        "scale": "SIO-05",
+        "inlet": "75m_4",
     }
 
 
@@ -169,7 +181,13 @@ def test_read_cranfield():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="CRANFIELD")
 
-    expected_keys = sorted(["THB_hourly_means_test_ch4", "THB_hourly_means_test_co2", "THB_hourly_means_test_co",])
+    expected_keys = sorted(
+        [
+            "THB_hourly_means_test_ch4",
+            "THB_hourly_means_test_co2",
+            "THB_hourly_means_test_co",
+        ]
+    )
 
     assert sorted(results["processed"]["THB_hourly_means_test.csv"].keys()) == expected_keys
 
@@ -193,7 +211,6 @@ def test_read_cranfield():
     assert sorted(list(obs._datasource_names.keys())) == sorted(
         ["THB_hourly_means_test_ch4", "THB_hourly_means_test_co2", "THB_hourly_means_test_co"]
     )
-
 
 
 def test_read_icos():
@@ -230,13 +247,17 @@ def test_read_icos():
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
-        "Processed by": "auto@hugs-cloud.com",
+        "Processed by": "OpenGHG_Cloud",
         "species": "co2",
         "Calibration_scale": "unknown",
         "station_longitude": -2.98598,
         "station_latitude": 56.55511,
         "station_long_name": "Angus Tower, UK",
         "station_height_masl": 300.0,
+        "site": "tta",
+        "inlet": "222m",
+        "time_resolution": "1minute",
+        "network": "ICOS",
     }
 
     obs = ObsSurface.load()

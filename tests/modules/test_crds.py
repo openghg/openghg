@@ -40,16 +40,16 @@ def test_read_file():
     co_data = gas_data["co"]["data"]
 
     assert ch4_data["ch4"][0].values == pytest.approx(1993.83)
-    assert ch4_data["ch4_stdev"][0].values == pytest.approx(1.555)
-    assert ch4_data["ch4_n_meas"][0].values == pytest.approx(19.0)
+    assert ch4_data["ch4_variability"][0].values == pytest.approx(1.555)
+    assert ch4_data["ch4_number_of_observations"][0].values == pytest.approx(19.0)
 
     assert co2_data["co2"][0] == pytest.approx(414.21)
-    assert co2_data["co2_stdev"][0] == pytest.approx(0.109)
-    assert co2_data["co2_n_meas"][0] == pytest.approx(19.0)
+    assert co2_data["co2_variability"][0] == pytest.approx(0.109)
+    assert co2_data["co2_number_of_observations"][0] == pytest.approx(19.0)
 
     assert co_data["co"][0] == pytest.approx(214.28)
-    assert co_data["co_stdev"][0] == pytest.approx(4.081)
-    assert co_data["co_n_meas"][0] == pytest.approx(19.0)
+    assert co_data["co_variability"][0] == pytest.approx(4.081)
+    assert co_data["co_number_of_observations"][0] == pytest.approx(19.0)
 
 
 def test_read_data():
@@ -78,8 +78,8 @@ def test_read_data():
 
     assert ch4_data.time[0] == pd.Timestamp("2012-07-31 14:50:30")
     assert ch4_data["ch4"][0] == pytest.approx(1905.28)
-    assert ch4_data["ch4 stdev"][0] == pytest.approx(0.268)
-    assert ch4_data["ch4 n_meas"][0] == pytest.approx(20)
+    assert ch4_data["ch4_variability"][0] == pytest.approx(0.268)
+    assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(20)
 
 
 def test_read_data_no_inlet_raises():

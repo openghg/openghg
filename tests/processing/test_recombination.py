@@ -6,7 +6,7 @@ import pytest
 
 from openghg.modules import CRDS, GCWERKS, ObsSurface
 from openghg.objectstore import get_local_bucket
-from openghg.processing import recombine_sections, search
+from openghg.processing import recombine_datasets, search
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -14,20 +14,12 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def data_path():
-    return (
-        os.path.dirname(os.path.abspath(__file__))
-        + os.path.sep
-        + "../data/proc_test_data/GC/capegrim-medusa.18.C"
-    )
+    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.C"
 
 
 @pytest.fixture(scope="session")
 def precision_path():
-    return (
-        os.path.dirname(os.path.abspath(__file__))
-        + os.path.sep
-        + "../data/proc_test_data/GC/capegrim-medusa.18.precisions.C"
-    )
+    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.precisions.C"
 
 
 def get_datapath(filename, data_type):
@@ -53,9 +45,9 @@ def test_recombination_CRDS():
 
     keys = search(species=gas_name, locations=location)
 
-    to_download = keys["ch4_hfd_100m_picarro"]["keys"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]
+    to_download = keys["ch4_hfd_100m_picarro"]["keys"]
 
-    ch4_data_recombined = recombine_sections(data_keys=to_download)
+    ch4_data_recombined = recombine_datasets(data_keys=to_download)
 
     ch4_data_recombined.attrs = {}
 
@@ -82,9 +74,9 @@ def test_recombination_GC():
 
     keys = search(species=gas_name, locations=location)
 
-    to_download = keys["toluene_cgo_75m_4_medusa"]["keys"]["2018-01-01-02:24:00_2018-01-31-23:33:00"]
+    to_download = keys["toluene_cgo_75m_4_medusa"]["keys"]
 
-    toluene_data_recombined = recombine_sections(data_keys=to_download)
+    toluene_data_recombined = recombine_datasets(data_keys=to_download)
 
     toluene_data.attrs = {}
     toluene_data_recombined.attrs = {}

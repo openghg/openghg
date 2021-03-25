@@ -2,17 +2,14 @@ import pytest
 from pandas import Timestamp
 from pathlib import Path
 
-from openghg.localclient import get_single_site, scale_convert
+from openghg.localclient import get_observations
 from openghg.modules import ObsSurface
 from openghg.objectstore import get_local_bucket
+from openghg.processing import scale_convert
 
 
 def get_datapath(filename, data_type):
-    return (
-        Path(__file__)
-        .resolve(strict=True)
-        .parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
-    )
+    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -25,16 +22,16 @@ def crds():
     ObsSurface.read_file(filepath=filepath, data_type="CRDS")
 
 
-def test_get_single_site_few_args():
-    result = get_single_site(site="hfd", species="co2")
+def test_get_observations_few_args():
+    result = get_observations(site="hfd", species="co2")
 
     data = result[0].data
 
     assert data.time[0] == Timestamp("2013-12-04T14:02:30")
 
     assert data["mf"][0] == pytest.approx(414.21)
-    assert data["co2_stdev"][0] == pytest.approx(0.109)
-    assert data["co2_n_meas"][0] == 19.0
+    assert data["mf_variability"][0] == pytest.approx(0.109)
+    assert data["mf_number_of_observations"][0] == 19.0
 
     del data.attrs["File created"]
 
@@ -46,24 +43,30 @@ def test_get_single_site_few_args():
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
-        "Processed by": "auto@hugs-cloud.com",
-        "species": "CO2",
+        "Processed by": "OpenGHG_Cloud",
+        "species": "co2",
         "station_longitude": 0.23048,
         "station_latitude": 50.97675,
         "station_long_name": "Heathfield, UK",
         "station_height_masl": 150.0,
+        "site": "hfd",
+        "instrument": "picarro",
+        "time_resolution": "1_minute",
+        "inlet": "100m",
+        "port": "10",
+        "type": "air",
         "scale": "WMO-X2007",
     }
 
-    assert data.attrs == expected_attrs 
+    assert data.attrs == expected_attrs
 
 
-def test_get_single_site_with_average():
-    result_no_average = get_single_site(site="hfd", species="co2")
+def test_get_observations_with_average():
+    result_no_average = get_observations(site="hfd", species="co2")
 
     data_no_average = result_no_average[0].data
 
-    result = get_single_site(site="hfd", species="co2", average="2h")
+    result = get_observations(site="hfd", species="co2", average="2h")
 
     data = result[0].data
 
@@ -73,15 +76,15 @@ def test_get_single_site_with_average():
     assert data["mf"][0] == pytest.approx(414.21)
     assert data["mf"][-1] == pytest.approx(411.08)
 
-    result_with_missing = get_single_site(site="hfd", species="co2", average="2h", keep_missing=True)
+    result_with_missing = get_observations(site="hfd", species="co2", average="2h", keep_missing=True)
 
     data_missing = result_with_missing[0].data
 
-    assert data_missing.time.equals(data.time)
+    assert not data_missing.time.equals(data.time)
 
 
-def test_get_single_site_datetime_selection():
-    results = get_single_site(site="hfd", species="co2", start_date="2001-01-01", end_date="2015-01-01")
+def test_get_observations_datetime_selection():
+    results = get_observations(site="hfd", species="co2", start_date="2001-01-01", end_date="2015-01-01")
 
     data = results[0].data
 
@@ -90,42 +93,3 @@ def test_get_single_site_datetime_selection():
 
     assert data["mf"][0] == pytest.approx(414.21)
     assert data["mf"][-1] == pytest.approx(405.95)
-
-
-def test_scale_convert():
-    results = get_single_site(site="hfd", species="co", start_date="2001-01-01", end_date="2015-01-01")
-
-    data = results[0].data
-
-    assert data["mf"][0] == pytest.approx(214.28)
-    assert data["co_stdev"][0] == pytest.approx(4.081)
-    assert data["co_n_meas"][0] == 19.0
-
-    # # Fix the scale for test purposes
-    data.attrs["scale"] = "WMO-X2014A"
-
-    new_scale = "CSIRO94"
-
-    data = scale_convert(data=data, species="co", to_scale=new_scale)
-
-    assert data["mf"][0] == pytest.approx(902.755)
-    assert data["co_stdev"][0] == pytest.approx(4.081)
-    assert data["co_n_meas"][0] == 19.0
-
-    assert data.attrs["scale"] == new_scale
-
-    results = get_single_site(site="hfd", species="ch4", start_date="2001-01-01", end_date="2015-01-01")
-
-    data = results[0].data
-
-    assert data["mf"][0] == pytest.approx(1993.83)
-    assert data["ch4_stdev"][0] == pytest.approx(1.555)
-    assert data["ch4_n_meas"][0] == 19.0
-
-    data.attrs["scale"] = "WMO-X2014A"
-
-    data = scale_convert(data=data, species="co", to_scale=new_scale)
-
-    assert data["mf"][0] == pytest.approx(8399.95)
-    assert data["ch4_stdev"][0] == pytest.approx(1.555)
-    assert data["ch4_n_meas"][0] == 19.0

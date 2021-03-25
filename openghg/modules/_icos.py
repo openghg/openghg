@@ -5,23 +5,21 @@ __all__ = ["ICOS"]
 
 
 class ICOS:
-    """ Class for processing ICOS data
-
-    """
+    """Class for processing ICOS data"""
 
     def __init__(self):
         # Sampling period of ICOS data in seconds
         self._sampling_period = "NA"
 
     def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, network: Optional[str] = None) -> Dict:
-        """ Reads ICOS data files and returns the UUIDS of the Datasources
-            the processed data has been assigned to
+        """Reads ICOS data files and returns the UUIDS of the Datasources
+        the processed data has been assigned to
 
-            Args:
-                data_filepath: Path of file to load
-                site: Site code
-            Returns:
-                dict: Dictionary of source_name : UUIDs
+        Args:
+            data_filepath: Path of file to load
+            site: Site code
+        Returns:
+            dict: Dictionary of source_name : UUIDs
         """
         from pathlib import Path
         from openghg.processing import assign_attributes
@@ -43,21 +41,20 @@ class ICOS:
         return gas_data
 
     def read_data(self, data_filepath: Path, species: str, site: Optional[str] = None) -> Dict:
-        """ Separates the gases stored in the dataframe in
-            separate dataframes and returns a dictionary of gases
-            with an assigned UUID as gas:UUID and a list of the processed
-            dataframes
+        """Separates the gases stored in the dataframe in
+        separate dataframes and returns a dictionary of gases
+        with an assigned UUID as gas:UUID and a list of the processed
+        dataframes
 
-            TODO - update this to process multiple species here?
+        TODO - update this to process multiple species here?
 
-            Args:
-                data_filepath : Path of datafile
-                species: Species to process
-            Returns:
-                dict: Dictionary containing attributes, data and metadata keys
+        Args:
+            data_filepath : Path of datafile
+            species: Species to process
+        Returns:
+            dict: Dictionary containing attributes, data and metadata keys
         """
         from pandas import read_csv, Timestamp
-        import numpy as np
         from openghg.util import read_header
 
         # metadata = read_metadata(filepath=data_filepath, data=data, data_type="ICOS")
@@ -82,15 +79,15 @@ class ICOS:
         ]
 
         dtypes = {
-            "Day": np.int,
-            "Month": np.int,
-            "Year": np.int,
-            "Hour": np.int,
-            "Minute": np.int,
-            species.lower(): np.float,
-            "Stdev": np.float,
-            "SamplingHeight": np.float,
-            "NbPoints": np.int,
+            "Day": int,
+            "Month": int,
+            "Year": int,
+            "Hour": int,
+            "Minute": int,
+            species.lower(): float,
+            "Stdev": float,
+            "SamplingHeight": float,
+            "NbPoints": int,
         }
 
         data = read_csv(

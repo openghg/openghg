@@ -1,15 +1,27 @@
+from typing import Dict, Optional, List
+from xarray import Dataset
+
 __all__ = ["assign_attributes", "get_attributes"]
 
 
-def assign_attributes(data, site, sampling_period=None, network=None):
-    """ Assign attributes to the data we've processed. This ensures that the xarray Datasets produced
-        as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata 
-        to the Datasource allowing more detailed searching of data.
+def assign_attributes(
+    data: Dict,
+    site: str,
+    network: Optional[str] = None,
+    sampling_period: Optional[int] = None,
+) -> Dict:
+    """Assign attributes to the data we've processed. This ensures that the xarray Datasets produced
+    as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
+    to the Datasource allowing more detailed searching of data.
 
-        Args:
-            combined_data (dict): Dictionary containing data, metadata and attributes
-        Returns:
-            dict: Dictionary of combined data with correct attributes assigned to Datasets
+    Args:
+        data: Dictionary containing data, metadata and attributes
+        site: Site code
+        sampling_period: Number of seconds for which air
+                         sample is taken. Only for time variable attribute
+        network: Network name
+    Returns:
+        dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
     for key in data:
         site_attributes = data[key]["attributes"]
@@ -33,16 +45,16 @@ def assign_attributes(data, site, sampling_period=None, network=None):
 
 
 def get_attributes(
-    ds,
-    species,
-    site,
-    network=None,
-    global_attributes=None,
-    units=None,
-    scale=None,
-    sampling_period=None,
-    date_range=None,
-):
+    ds: Dataset,
+    species: str,
+    site: str,
+    network: Optional[str] = None,
+    global_attributes: Optional[Dict] = None,
+    units: Optional[str] = None,
+    scale: Optional[str] = None,
+    sampling_period: Optional[int] = None,
+    date_range: Optional[List[str]] = None,
+) -> Dict:
     """
     This function writes attributes to an xarray.Dataset so that they conform with
     the CF Convention v1.7
@@ -65,28 +77,29 @@ def get_attributes(
             dictionary
 
     Args:
-        ds (xarray.Dataset): Should contain variables such as "ch4", "ch4 repeatability".
+        ds: Should contain variables such as "ch4", "ch4 repeatability".
             Must have a "time" dimension.
-        species (str): Species name. e.g. "CH4", "HFC-134a", "dCH4C13"
-        site (string): Three-letter site code
-        network (str, default=None): Network site is associated with
-        global_attribuates (dict, default=None): Dictionary containing any info you want to
-            add to the file header (e.g. {"Contact": "Matt Rigby"})
-        units (str, default=None): This routine will try to guess the units
+        species: Species name. e.g. "CH4", "HFC-134a", "dCH4C13"
+        site: Three-letter site code
+        network: Network site is associated with
+        global_attribuates: Dictionary containing any info you want to
+            add to the file header (e.g. {"Contact": "Contact_Name"})
+        units: This routine will try to guess the units
             unless this is specified. Options are in units_interpret
-        scale (str, default=None): Calibration scale for species.
-        sampling_period (int, default=None): Number of seconds for which air
+        scale: Calibration scale for species.
+        sampling_period: Number of seconds for which air
             sample is taken. Only for time variable attribute
-        date_range (list of two strings, optional): Start and end date for output
+        date_range: Start and end date for output
             If you only want an end date, just put a very early start date
             (e.g. ["1900-01-01", "2010-01-01"])
     """
     import json
     from pandas import Timestamp as pd_Timestamp
     from openghg.util import get_datapath
-    from xarray import Dataset as xr_Dataset
 
-    if not isinstance(ds, xr_Dataset):
+    # from numpy import unique as np_unique
+
+    if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
 
     # Current CF Conventions (v1.7) demand that valid variable names
@@ -143,7 +156,7 @@ def get_attributes(
         global_attributes = global_attributes_default
 
     global_attributes["File created"] = str(pd_Timestamp.now(tz="UTC"))
-    global_attributes["Processed by"] = "auto@hugs-cloud.com"
+    global_attributes["Processed by"] = "OpenGHG_Cloud"
     global_attributes["species"] = species_label
 
     if scale is None:
@@ -198,17 +211,13 @@ def get_attributes(
                         ds[key].attrs["units"] = unit_species[species_upper]
                     except KeyError:
                         try:
-                            ds[key].attrs["units"] = species_attrs[
-                                species_label.upper()
-                            ]["units"]
+                            ds[key].attrs["units"] = species_attrs[species_label.upper()]["units"]
                         except KeyError:
                             ds[key].attrs["units"] = "NA"
 
                 # If units are non-standard, add explanation
                 if species_upper in unit_species_long:
-                    ds[key].attrs["units_description"] = unit_species_long[
-                        species_upper
-                    ]
+                    ds[key].attrs["units_description"] = unit_species_long[species_upper]
 
             # Add to list of ancilliary variables
             if key != species_label:
@@ -255,8 +264,8 @@ def get_attributes(
     # but xarray doesn't currently have a duplicates method
     # See this https://github.com/pydata/xarray/issues/2108
 
-    # TODO - fix this - just remove duplicates?
     # if len(set(ds.time.values)) < len(ds.time.values):
+    # if len(np_unique(ds.time.values)) < len(ds.time.values):
     #     print("WARNING. Duplicate time stamps")
 
     first_year = pd_Timestamp(ds.time[0].values).year
@@ -284,26 +293,22 @@ def get_attributes(
     return ds
 
 
-def _site_info_attributes(site, network=None):
-    """ Reads site attributes from JSON
+def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
+    """Reads site attributes from JSON
 
-        Args:
-            site (str): Site code
-            network (str, default=None): Network name
-        Returns:
-            dict: Dictionary of site attributes
+    Args:
+        site: Site code
+        network: Network name
+    Returns:
+        dict: Dictionary of site attributes
     """
-    from openghg.util import get_datapath
-    from json import load as json_load
+    from openghg.util import load_json
 
     site = site.upper()
 
     # Read site info file
     data_filename = "acrg_site_info.json"
-    acrg_site_info_path = get_datapath(filename=data_filename)
-
-    with open(acrg_site_info_path, "r") as f:
-        site_params = json_load(f)
+    site_params = load_json(filename=data_filename)
 
     if network is None:
         network = list(site_params[site].keys())[0]
@@ -325,8 +330,6 @@ def _site_info_attributes(site, network=None):
 
                 attributes[attr_key] = site_params[site][network][attr]
     else:
-        raise ValueError(
-            f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale"
-        )
+        raise ValueError(f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale")
 
     return attributes
