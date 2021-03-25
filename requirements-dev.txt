@@ -1,10 +1,11 @@
 coverage
 fdk
 flake8
+notebook
+nbsphinx
 pytest
 pytest-tornasync
 pytest-cov
-nbsphinx
 requests-mock
 sphinx
 sphinx-issues
