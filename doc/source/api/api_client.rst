@@ -11,8 +11,8 @@ The ``Process`` class is used to upload locally stored files to cloud for proces
     :members:
     :private-members:
 
-Search
-======
+Search (Client)
+===============
 
 The ``Search`` class is used to search for data in the object store.
 
