@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.processing._segment &mdash; OpenGHG 0+untagged.1.g71446d3 documentation</title>
+  <title>openghg.processing._segment &mdash; OpenGHG 0+untagged.1.gc7b541a documentation</title>
   
 
   
@@ -33,8 +33,8 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/custom.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../../../_static/custom.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -95,7 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index_devel.html">Development</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Documentation</a></li>
@@ -171,7 +171,10 @@
 <span></span><span class="sd">&quot;&quot;&quot; Segment the data into Datasources</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_split_frequency&quot;</span><span class="p">,</span> <span class="s2">&quot;create_footprint_datasources&quot;</span><span class="p">,</span> <span class="s2">&quot;assign_data&quot;</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_split_frequency&quot;</span><span class="p">,</span> <span class="s2">&quot;assign_footprint_data&quot;</span><span class="p">,</span> <span class="s2">&quot;assign_data&quot;</span><span class="p">,</span> <span class="s2">&quot;assign_emissions_data&quot;</span><span class="p">]</span>
 
 <span class="c1"># def create_datasources(gas_data):</span>
 <span class="c1">#     &quot;&quot;&quot; Create or get an existing Datasource for each gas in the file</span>
@@ -213,14 +216,14 @@
 <span class="c1">#     return uuids</span>
 
 
-<div class="viewcode-block" id="assign_data"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.assign_data">[docs]</a><span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">lookup_results</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">):</span>
+<div class="viewcode-block" id="assign_data"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.assign_data">[docs]</a><span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="n">gas_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">lookup_results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Assign data to a Datasource. This will either create a new Datasource </span>
 <span class="sd">    Create or get an existing Datasource for each gas in the file</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            gas_data (dict): Dictionary containing data and metadata for species</span>
-<span class="sd">            lookup_results (dict): Dictionary of lookup results]</span>
-<span class="sd">            overwrite (bool): If True overwrite current data stored</span>
+<span class="sd">            gas_data: Dictionary containing data and metadata for species</span>
+<span class="sd">            lookup_results: Dictionary of lookup results]</span>
+<span class="sd">            overwrite: If True overwrite current data stored</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -233,6 +236,11 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">lookup_results</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
         <span class="n">uuid</span> <span class="o">=</span> <span class="n">lookup_results</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Add the read metadata to the Dataset attributes being careful </span>
+        <span class="c1"># not to overwrite any attributes that are already there</span>
+        <span class="n">to_add</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">}</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
 
         <span class="c1"># If we have a UUID for this Datasource load the existing object</span>
         <span class="c1"># from the object store</span>
@@ -251,15 +259,62 @@
     <span class="k">return</span> <span class="n">uuids</span></div>
 
 
-<span class="k">def</span> <span class="nf">create_footprint_datasources</span><span class="p">(</span><span class="n">footprint_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">assign_footprint_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">datasource_uid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Create Datasources for the passed footprint data</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            footprint_data (list): List of tupes of footprint name, datasource_id, xarray.Dataset</span>
+<span class="sd">            data: xarray Dataset of footprint data</span>
+<span class="sd">            metadata: Associated metadata</span>
+<span class="sd">            datasource_uid: The UUID of the datasource if we&#39;ve processed footprint data from this</span>
+<span class="sd">            source before, otherwise False</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            list: List of UUIDs of used/created Datasources</span>
+<span class="sd">            str: UUID of Datasource</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span>
+
+    <span class="k">if</span> <span class="n">datasource_uid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">datasource_uid</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">()</span>
+
+    <span class="c1"># Add the read metadata to the Dataset attributes being careful </span>
+    <span class="c1"># not to overwrite any attributes that are already there</span>
+    <span class="n">to_add</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">}</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
+
+    <span class="n">datasource</span><span class="o">.</span><span class="n">add_footprint_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
+    <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">assign_emissions_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">datasource_uid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Create Datasources for the passed flux data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: xarray Dataset of footprint data</span>
+<span class="sd">            metadata: Associated metadata</span>
+<span class="sd">            datasource_uid: The UUID of the datasource if we&#39;ve processed flux data from this</span>
+<span class="sd">            source before, otherwise False</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: UUID of Datasource</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span>
+
+    <span class="k">if</span> <span class="n">datasource_uid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">datasource_uid</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">()</span>
+
+    <span class="c1"># Add the read metadata to the Dataset attributes being careful </span>
+    <span class="c1"># not to overwrite any attributes that are already there</span>
+    <span class="n">to_add</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">}</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
+
+    <span class="n">datasource</span><span class="o">.</span><span class="n">add_emissions_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
+    <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">()</span>
 
 
 <span class="k">def</span> <span class="nf">get_split_frequency</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
@@ -324,7 +379,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jan 05, 2021.
+        Last updated on Mar 25, 2021.
       </span>
 
     </p>

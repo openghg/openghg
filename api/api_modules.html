@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>modules API Detail &mdash; OpenGHG 0+untagged.1.g71446d3 documentation</title>
+  <title>modules API Detail &mdash; OpenGHG 0+untagged.1.gc7b541a documentation</title>
   
 
   
@@ -33,8 +33,8 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/custom.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../_static/custom.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -95,7 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../development.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index_devel.html">Development</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Documentation</a></li>
@@ -198,17 +198,17 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> class is used to process surface observation data.</p>
 <dl class="py class">
 <dt id="openghg.modules.ObsSurface">
-<em class="property">class </em><code class="sig-prename descclassname">openghg.modules.</code><code class="sig-name descname">ObsSurface</code><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.ObsSurface" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">openghg.modules.</span></code><code class="sig-name descname"><span class="pre">ObsSurface</span></code><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.ObsSurface" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class is used to process surface observation data</p>
 <dl class="py method">
 <dt id="openghg.modules.ObsSurface.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.ObsSurface.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.ObsSurface.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="openghg.modules.ObsSurface.delete">
-<code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">uuid</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.ObsSurface.delete" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">delete</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uuid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.ObsSurface.delete" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete a Datasource with the given UUID</p>
 <p>This function deletes both the record of the object store in he</p>
 <dl class="field-list simple">
@@ -223,7 +223,7 @@
 
 <dl class="py method">
 <dt id="openghg.modules.ObsSurface.read_file">
-<em class="property">static </em><code class="sig-name descname">read_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>pathlib.Path<span class="p">, </span>list<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">data_type</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">site</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">network</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">instrument</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Dict<a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.read_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.ObsSurface.read_file" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">read_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">,</span> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.ObsSurface.read_file" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Process files and store in the object store. This function</dt><dd><p>utilises the process functions of the other classes in this submodule
 to handle each data type.</p>
@@ -233,7 +233,7 @@ to handle each data type.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filepath</strong> – Filepath(s)</p></li>
-<li><p><strong>data_type</strong> – Data type</p></li>
+<li><p><strong>data_type</strong> – Data type, for example CRDS, GCWERKS, ICOS</p></li>
 <li><p><strong>site</strong> – Site code/name</p></li>
 <li><p><strong>network</strong> – Network name</p></li>
 <li><p><strong>overwrite</strong> – Overwrite previously uploaded data</p></li>
@@ -250,7 +250,7 @@ to handle each data type.</p>
 
 <dl class="py method">
 <dt id="openghg.modules.ObsSurface.read_folder">
-<em class="property">static </em><code class="sig-name descname">read_folder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">folder_path</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>pathlib.Path<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">data_type</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">network</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">extension</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'dat'</span></em><span class="sig-paren">)</span> &#x2192; Dict<a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.read_folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.ObsSurface.read_folder" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">read_folder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'dat'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.read_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.ObsSurface.read_folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find files with the given extension (by default dat) in the passed folder</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -271,7 +271,7 @@ to handle each data type.</p>
 
 <dl class="py method">
 <dt id="openghg.modules.ObsSurface.save">
-<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bucket</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.ObsSurface.save" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">save</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.ObsSurface.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the object to the object store</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -285,7 +285,7 @@ to handle each data type.</p>
 
 <dl class="py method">
 <dt id="openghg.modules.ObsSurface.to_data">
-<code class="sig-name descname">to_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.to_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.modules.ObsSurface.to_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">to_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.to_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.ObsSurface.to_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a JSON-serialisable dictionary of object
 for storage in object store</p>
 <dl class="field-list simple">
@@ -317,7 +317,7 @@ for storage in object store</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jan 05, 2021.
+        Last updated on Mar 25, 2021.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.processing._recombination &mdash; OpenGHG 0+untagged.1.g71446d3 documentation</title>
+  <title>openghg.processing._recombination &mdash; OpenGHG 0+untagged.1.gc7b541a documentation</title>
   
 
   
@@ -33,8 +33,8 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/custom.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../../../_static/custom.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -95,7 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index_devel.html">Development</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Documentation</a></li>
@@ -172,23 +172,44 @@
 <span class="sd">    into the data requested by the user</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;recombine_sections&quot;</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;recombine_multisite&quot;</span><span class="p">,</span> <span class="s2">&quot;recombine_datasets&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="recombine_sections"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.recombine_sections">[docs]</a><span class="k">def</span> <span class="nf">recombine_sections</span><span class="p">(</span><span class="n">data_keys</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Combines separate dataframes into a single dataframe for</span>
-<span class="sd">        processing to NetCDF for output</span>
+<span class="k">def</span> <span class="nf">recombine_multisite</span><span class="p">(</span><span class="n">keys</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Recombine the keys from multiple sites into a single Dataset for each site</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            data_keys (list): Dictionary of object store keys keyed by search</span>
-<span class="sd">            term</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            Pandas.Dataframe or list: Combined dataframes</span>
+<span class="sd">    Args:</span>
+<span class="sd">        site_keys: A dictionary of lists of keys, keyed by site</span>
+<span class="sd">        sort: Sort the resulting Dataset by the time dimension</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary of xarray.Datasets</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># from pandas import concat as _concat</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">key_list</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">recombine_datasets</span><span class="p">(</span><span class="n">data_keys</span><span class="o">=</span><span class="n">key_list</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="recombine_datasets"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.recombine_datasets">[docs]</a><span class="k">def</span> <span class="nf">recombine_datasets</span><span class="p">(</span><span class="n">data_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Combines datasets stored separately in the object store</span>
+<span class="sd">    into a single datasets</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_keys: List of object store keys</span>
+<span class="sd">        term</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        xarray.Dataset: Combined Dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">concat</span> <span class="k">as</span> <span class="n">xr_concat</span>
-    <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_bucket</span>
     <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span>
+    <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_bucket</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data_keys</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No data keys passed.&quot;</span><span class="p">)</span>
 
     <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">()</span>
 
@@ -196,7 +217,8 @@
 
     <span class="n">combined</span> <span class="o">=</span> <span class="n">xr_concat</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
 
-    <span class="n">combined</span> <span class="o">=</span> <span class="n">combined</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sort</span><span class="p">:</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="n">combined</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
 
     <span class="c1"># Check for duplicates?</span>
     <span class="c1"># This is taken from https://stackoverflow.com/questions/51058379/drop-duplicate-times-in-xarray</span>
@@ -224,7 +246,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jan 05, 2021.
+        Last updated on Mar 25, 2021.
       </span>
 
     </p>

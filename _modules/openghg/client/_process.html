@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.client._process &mdash; OpenGHG 0+untagged.1.g71446d3 documentation</title>
+  <title>openghg.client._process &mdash; OpenGHG 0+untagged.1.gc7b541a documentation</title>
   
 
   
@@ -33,8 +33,8 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/custom.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../../../_static/custom.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -95,7 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index_devel.html">Development</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Documentation</a></li>
@@ -203,7 +203,7 @@
         <span class="n">data_type</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">extension</span><span class="o">=</span><span class="s2">&quot;dat&quot;</span><span class="p">,</span>
-        <span class="n">hugs_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">openghg_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">storage_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Process the passed directory of data files</span>
@@ -214,7 +214,7 @@
 <span class="sd">                user (User): Authenticated Acquire User</span>
 <span class="sd">                folder_path (str, pathlib.Path): Path of folder containing files to be processed</span>
 <span class="sd">                data_type (str): Type of data to be processed (CRDS, GC etc)</span>
-<span class="sd">                hugs_url (str): URL of OpenGHG service. Currently used for testing</span>
+<span class="sd">                openghg_url (str): URL of OpenGHG service. Currently used for testing</span>
 <span class="sd">                This may be removed in the future.</span>
 <span class="sd">                storage_url (str): URL of storage service. Currently used for testing</span>
 <span class="sd">                This may be removed in the future.</span>
@@ -229,7 +229,7 @@
         <span class="n">data_type</span><span class="p">,</span>
         <span class="n">source_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">hugs_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">openghg_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">storage_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">datasource</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">site</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -241,7 +241,7 @@
 <span class="sd">                user (User): Authenticated Acquire User</span>
 <span class="sd">                files (str, list): Path of files to be processed</span>
 <span class="sd">                data_type (str): Type of data to be processed (CRDS, GC etc)</span>
-<span class="sd">                hugs_url (str): URL of OpenGHG service. Currently used for testing</span>
+<span class="sd">                openghg_url (str): URL of OpenGHG service. Currently used for testing</span>
 <span class="sd">                datasource (str): Datasource name or UUID</span>
 <span class="sd">                This may be removed in the future.</span>
 <span class="sd">                storage_url (str): URL of storage service. Currently used for testing</span>
@@ -273,13 +273,13 @@
         <span class="k">if</span> <span class="n">storage_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">storage_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service_url</span> <span class="o">+</span> <span class="s2">&quot;/storage&quot;</span>
 
-        <span class="k">if</span> <span class="n">hugs_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">hugs_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service_url</span> <span class="o">+</span> <span class="s2">&quot;/hugs&quot;</span>
+        <span class="k">if</span> <span class="n">openghg_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">openghg_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service_url</span> <span class="o">+</span> <span class="s2">&quot;/openghg&quot;</span>
 
         <span class="c1"># # Take the filename without the file extension</span>
         <span class="c1"># source_name = [os.path.splitext((filepath.name).split(&quot;/&quot;)[-1])[0] for filepath in files]</span>
 
-        <span class="n">openghg</span> <span class="o">=</span> <span class="n">Service</span><span class="p">(</span><span class="n">service_url</span><span class="o">=</span><span class="n">hugs_url</span><span class="p">)</span>
+        <span class="n">openghg</span> <span class="o">=</span> <span class="n">Service</span><span class="p">(</span><span class="n">service_url</span><span class="o">=</span><span class="n">openghg_url</span><span class="p">)</span>
         <span class="n">creds</span> <span class="o">=</span> <span class="n">StorageCreds</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">service_url</span><span class="o">=</span><span class="n">storage_url</span><span class="p">)</span>
         <span class="n">drive</span> <span class="o">=</span> <span class="n">Drive</span><span class="p">(</span><span class="n">creds</span><span class="o">=</span><span class="n">creds</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test_drive&quot;</span><span class="p">)</span>
         <span class="n">auth</span> <span class="o">=</span> <span class="n">Authorisation</span><span class="p">(</span><span class="n">resource</span><span class="o">=</span><span class="s2">&quot;process&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
@@ -356,7 +356,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jan 05, 2021.
+        Last updated on Mar 25, 2021.
       </span>
 
     </p>

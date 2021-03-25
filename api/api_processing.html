@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>processing API Detail &mdash; OpenGHG 0+untagged.1.g71446d3 documentation</title>
+  <title>processing API Detail &mdash; OpenGHG 0+untagged.1.gc7b541a documentation</title>
   
 
   
@@ -33,8 +33,8 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/custom.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../_static/custom.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -95,7 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../development.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index_devel.html">Development</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Documentation</a></li>
@@ -195,13 +195,19 @@
 <h1>processing API Detail<a class="headerlink" href="#processing-api-detail" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt id="openghg.processing.assign_attributes">
-<code class="sig-prename descclassname">openghg.processing.</code><code class="sig-name descname">assign_attributes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">site</span></em>, <em class="sig-param"><span class="n">sampling_period</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">network</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_attributes.html#assign_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.processing.assign_attributes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">openghg.processing.</span></code><code class="sig-name descname"><span class="pre">assign_attributes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/processing/_attributes.html#assign_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.processing.assign_attributes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign attributes to the data we’ve processed. This ensures that the xarray Datasets produced
 as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
 to the Datasource allowing more detailed searching of data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>combined_data</strong> (<em>dict</em>) – Dictionary containing data, metadata and attributes</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Dictionary containing data, metadata and attributes</p></li>
+<li><p><strong>site</strong> – Site code</p></li>
+<li><p><strong>sampling_period</strong> – Number of seconds for which air
+sample is taken. Only for time variable attribute</p></li>
+<li><p><strong>network</strong> – Network name</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Dictionary of combined data with correct attributes assigned to Datasets</p>
@@ -214,7 +220,7 @@ to the Datasource allowing more detailed searching of data.</p>
 
 <dl class="py function">
 <dt id="openghg.processing.get_attributes">
-<code class="sig-prename descclassname">openghg.processing.</code><code class="sig-name descname">get_attributes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ds</span></em>, <em class="sig-param"><span class="n">species</span></em>, <em class="sig-param"><span class="n">site</span></em>, <em class="sig-param"><span class="n">network</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">global_attributes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">units</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sampling_period</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">date_range</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_attributes.html#get_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.processing.get_attributes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">openghg.processing.</span></code><code class="sig-name descname"><span class="pre">get_attributes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_attributes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/processing/_attributes.html#get_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.processing.get_attributes" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function writes attributes to an xarray.Dataset so that they conform with
 the CF Convention v1.7</p>
 <p>Attributes of the xarray DataSet are modified, and variable names are changed</p>
@@ -254,19 +260,19 @@ should make this better)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> (<em>xarray.Dataset</em>) – Should contain variables such as “ch4”, “ch4 repeatability”.
+<li><p><strong>ds</strong> – Should contain variables such as “ch4”, “ch4 repeatability”.
 Must have a “time” dimension.</p></li>
-<li><p><strong>species</strong> (<em>str</em>) – Species name. e.g. “CH4”, “HFC-134a”, “dCH4C13”</p></li>
-<li><p><strong>site</strong> (<em>string</em>) – Three-letter site code</p></li>
-<li><p><strong>network</strong> (<em>str</em><em>, </em><em>default=None</em>) – Network site is associated with</p></li>
-<li><p><strong>global_attribuates</strong> (<em>dict</em><em>, </em><em>default=None</em>) – Dictionary containing any info you want to
-add to the file header (e.g. {“Contact”: “Matt Rigby”})</p></li>
-<li><p><strong>units</strong> (<em>str</em><em>, </em><em>default=None</em>) – This routine will try to guess the units
+<li><p><strong>species</strong> – Species name. e.g. “CH4”, “HFC-134a”, “dCH4C13”</p></li>
+<li><p><strong>site</strong> – Three-letter site code</p></li>
+<li><p><strong>network</strong> – Network site is associated with</p></li>
+<li><p><strong>global_attribuates</strong> – Dictionary containing any info you want to
+add to the file header (e.g. {“Contact”: “Contact_Name”})</p></li>
+<li><p><strong>units</strong> – This routine will try to guess the units
 unless this is specified. Options are in units_interpret</p></li>
-<li><p><strong>scale</strong> (<em>str</em><em>, </em><em>default=None</em>) – Calibration scale for species.</p></li>
-<li><p><strong>sampling_period</strong> (<em>int</em><em>, </em><em>default=None</em>) – Number of seconds for which air
+<li><p><strong>scale</strong> – Calibration scale for species.</p></li>
+<li><p><strong>sampling_period</strong> – Number of seconds for which air
 sample is taken. Only for time variable attribute</p></li>
-<li><p><strong>date_range</strong> (<em>list of two strings</em><em>, </em><em>optional</em>) – Start and end date for output
+<li><p><strong>date_range</strong> – Start and end date for output
 If you only want an end date, just put a very early start date
 (e.g. [“1900-01-01”, “2010-01-01”])</p></li>
 </ul>
@@ -276,7 +282,7 @@ If you only want an end date, just put a very early start date
 
 <dl class="py function">
 <dt id="openghg.processing.get_ceda_file">
-<code class="sig-prename descclassname">openghg.processing.</code><code class="sig-name descname">get_ceda_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">site</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">instrument</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">height</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">write_yaml</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">date_range</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_export.html#get_ceda_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.processing.get_ceda_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">openghg.processing.</span></code><code class="sig-name descname"><span class="pre">get_ceda_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_yaml</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_export.html#get_ceda_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.processing.get_ceda_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a JSON (with a yaml extension for CEDA reasons) object
 for export for a CEDA upload</p>
 <dl class="field-list simple">
@@ -301,42 +307,41 @@ for export for a CEDA upload</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="openghg.processing.recombine_sections">
-<code class="sig-prename descclassname">openghg.processing.</code><code class="sig-name descname">recombine_sections</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_keys</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_recombination.html#recombine_sections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.processing.recombine_sections" title="Permalink to this definition">¶</a></dt>
-<dd><p>Combines separate dataframes into a single dataframe for
-processing to NetCDF for output</p>
+<dt id="openghg.processing.recombine_datasets">
+<code class="sig-prename descclassname"><span class="pre">openghg.processing.</span></code><code class="sig-name descname"><span class="pre">recombine_datasets</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_keys</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">xarray.core.dataset.Dataset</span><a class="reference internal" href="../_modules/openghg/processing/_recombination.html#recombine_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.processing.recombine_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines datasets stored separately in the object store
+into a single datasets</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data_keys</strong> (<em>list</em>) – Dictionary of object store keys keyed by search</p></li>
+<li><p><strong>data_keys</strong> – List of object store keys</p></li>
 <li><p><strong>term</strong> – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Combined dataframes</p>
+<dd class="field-even"><p>Combined Dataset</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Pandas.Dataframe or list</p>
+<dd class="field-odd"><p>xarray.Dataset</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="openghg.processing.search">
-<code class="sig-prename descclassname">openghg.processing.</code><code class="sig-name descname">search</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">locations</span></em>, <em class="sig-param"><span class="n">species</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">inlet</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">instrument</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">find_all</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">start_datetime</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_datetime</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_search.html#search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.processing.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search for gas data (optionally within a daterange)</p>
-<p>TODO - review this function - feel like it can be tidied and simplified</p>
+<code class="sig-prename descclassname"><span class="pre">openghg.processing.</span></code><code class="sig-name descname"><span class="pre">search</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locations</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">find_all</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'timeseries'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/processing/_search.html#search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.processing.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search for observations data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>str</em><em> or </em><em>list</em>) – Terms to search for in Datasources</p></li>
-<li><p><strong>locations</strong> (<em>str</em><em> or </em><em>list</em>) – Where to search for the terms in species</p></li>
-<li><p><strong>inlet</strong> (<em>str</em><em>, </em><em>default=None</em>) – Inlet height such as 100m</p></li>
-<li><p><strong>instrument</strong> (<em>str</em><em>, </em><em>default=None</em>) – Instrument name such as picarro</p></li>
-<li><p><strong>find_all</strong> (<em>bool</em><em>, </em><em>default=True</em>) – Require all search terms to be satisfied</p></li>
-<li><p><strong>start_datetime</strong> (<em>datetime</em><em>, </em><em>default=None</em>) – Start datetime for search</p></li>
+<li><p><strong>species</strong> – Terms to search for in Datasources</p></li>
+<li><p><strong>locations</strong> – Where to search for the terms in species</p></li>
+<li><p><strong>inlet</strong> – Inlet height such as 100m</p></li>
+<li><p><strong>instrument</strong> – Instrument name such as picarro</p></li>
+<li><p><strong>find_all</strong> – Require all search terms to be satisfied</p></li>
+<li><p><strong>start_date</strong> – Start datetime for search.</p></li>
 <li><p><strong>None a start datetime of UNIX epoch</strong> (<em>If</em>) – </p></li>
-<li><p><strong>end_datetime</strong> (<em>datetime</em><em>, </em><em>default=None</em>) – End datetime for search</p></li>
+<li><p><strong>end_date</strong> – End datetime for search.</p></li>
 <li><p><strong>None an end datetime of the current datetime is set</strong> (<em>If</em>) – </p></li>
 </ul>
 </dd>
@@ -351,14 +356,14 @@ processing to NetCDF for output</p>
 
 <dl class="py function">
 <dt id="openghg.processing.assign_data">
-<code class="sig-prename descclassname">openghg.processing.</code><code class="sig-name descname">assign_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gas_data</span></em>, <em class="sig-param"><span class="n">lookup_results</span></em>, <em class="sig-param"><span class="n">overwrite</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/processing/_segment.html#assign_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.processing.assign_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">openghg.processing.</span></code><code class="sig-name descname"><span class="pre">assign_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gas_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup_results</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/processing/_segment.html#assign_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.processing.assign_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign data to a Datasource. This will either create a new Datasource
 Create or get an existing Datasource for each gas in the file</p>
 <blockquote>
 <div><dl class="simple">
-<dt>Args:</dt><dd><p>gas_data (dict): Dictionary containing data and metadata for species
-lookup_results (dict): Dictionary of lookup results]
-overwrite (bool): If True overwrite current data stored</p>
+<dt>Args:</dt><dd><p>gas_data: Dictionary containing data and metadata for species
+lookup_results: Dictionary of lookup results]
+overwrite: If True overwrite current data stored</p>
 </dd>
 <dt>Returns:</dt><dd><p>dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name</p>
 </dd>
@@ -380,7 +385,7 @@ overwrite (bool): If True overwrite current data stored</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jan 05, 2021.
+        Last updated on Mar 25, 2021.
       </span>
 
     </p>

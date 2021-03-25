@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>localclient API Detail &mdash; OpenGHG 0+untagged.1.g71446d3 documentation</title>
+  <title>localclient API Detail &mdash; OpenGHG 0+untagged.1.gc7b541a documentation</title>
   
 
   
@@ -33,8 +33,8 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/custom.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../_static/custom.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -95,7 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../development.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index_devel.html">Development</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Documentation</a></li>
@@ -193,35 +193,33 @@
 </style>
 <div class="section" id="localclient-api-detail">
 <h1>localclient API Detail<a class="headerlink" href="#localclient-api-detail" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="get-single-site">
-<h2>get_single_site<a class="headerlink" href="#get-single-site" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="get-observations">
+<h2>get_observations<a class="headerlink" href="#get-observations" title="Permalink to this headline">¶</a></h2>
 <p>Used to search the object store using a site name, species and daterange and returns the data found.</p>
 <dl class="py function">
-<dt id="openghg.localclient.get_single_site">
-<code class="sig-prename descclassname">openghg.localclient.</code><code class="sig-name descname">get_single_site</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">site</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">species</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">network</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">start_date</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>str<span class="p">, </span>pandas._libs.tslibs.timestamps.Timestamp<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_date</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>str<span class="p">, </span>pandas._libs.tslibs.timestamps.Timestamp<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">inlet</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">average</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">instrument</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">keep_missing</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">calibration_scale</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>openghg.localclient._obs_dataclass.ObsData<span class="p">]</span><a class="reference internal" href="../_modules/openghg/localclient/_get_observations.html#get_single_site"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.localclient.get_single_site" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get measurements from one site as a list of xarray datasets.
-If there are multiple instruments and inlets at a particular site,
-note that the acrg_obs_defaults.csv file may be referenced to determine which instrument and inlet to use for each time period.
-If an inlet or instrument changes at some point during time period, multiple datasets will be returned,
-one for each inlet/instrument.</p>
+<dt id="openghg.localclient.get_observations">
+<code class="sig-prename descclassname"><span class="pre">openghg.localclient.</span></code><code class="sig-name descname"><span class="pre">get_observations</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_scale</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_missing</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">openghg.dataobjects._obsdata.ObsData</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/openghg/localclient/_observations.html#get_observations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.get_observations" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the equivalent of the get_obs function from the ACRG repository.</p>
+<p>Usage and return values are the same whilst implementation may differ.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>site</strong> – Site of interest e.g. MHD for the Mace Head site.</p></li>
-<li><p><strong>species_in</strong> (<em>str</em>) – Species identifier e.g. ch4 for methane.</p></li>
+<li><p><strong>species</strong> – Species identifier e.g. ch4 for methane.</p></li>
 <li><p><strong>start_date</strong> – Output start date in a format that Pandas can interpret</p></li>
 <li><p><strong>end_date</strong> – Output end date in a format that Pandas can interpret</p></li>
-<li><p><strong>inlet</strong> – Inlet label. If you want to merge all inlets, use “all”</p></li>
-<li><p><strong>average</strong> – Averaging period for each dataset.
-Each value should be a string of the form e.g. “2H”, “30min” (should match pandas offset aliases format).</p></li>
-<li><p><strong>keep_missing</strong> – Whether to keep missing data points or drop them.</p></li>
+<li><p><strong>inlet</strong> – Inlet label</p></li>
+<li><p><strong>average</strong> – Averaging period for each dataset. Each value should be a string of</p></li>
+<li><p><strong>form e.g. &quot;2H&quot;</strong> (<em>the</em>) – </p></li>
+<li><p><strong>&quot;30min&quot;</strong> (<em>should match pandas offset aliases format</em>) – </p></li>
+<li><p><strong>keep_missing</strong> – Keep missing data points or drop them.</p></li>
 <li><p><strong>network</strong> – Network for the site/instrument (must match number of sites).</p></li>
 <li><p><strong>instrument</strong> – Specific instrument for the site (must match number of sites).</p></li>
-<li><p><strong>calibration_scale</strong> – Convert to this calibration scale (original scale and new scale must both be in acrg_obs_scale_convert.csv)</p></li>
+<li><p><strong>calibration_scale</strong> – Convert to this calibration scale</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>List of xarray.Datasets</p>
+<dd class="field-even"><p>List of ObsData objects</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list</p>
@@ -235,7 +233,7 @@ Each value should be a string of the form e.g. “2H”, “30min” (should mat
 <p>Used to process files for storage in the local object store.</p>
 <dl class="py function">
 <dt id="openghg.localclient.process_files">
-<code class="sig-prename descclassname">openghg.localclient.</code><code class="sig-name descname">process_files</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span></em>, <em class="sig-param"><span class="n">data_type</span></em>, <em class="sig-param"><span class="n">site</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">network</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">instrument</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_process.html#process_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.localclient.process_files" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">openghg.localclient.</span></code><code class="sig-name descname"><span class="pre">process_files</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_process.html#process_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.process_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process the passed file(s)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -265,10 +263,10 @@ Each value should be a string of the form e.g. “2H”, “30min” (should mat
 that data from that Datasource will be preferred when a user searches for data.</p>
 <dl class="py class">
 <dt id="openghg.localclient.RankSources">
-<em class="property">class </em><code class="sig-prename descclassname">openghg.localclient.</code><code class="sig-name descname">RankSources</code><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.localclient.RankSources" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">openghg.localclient.</span></code><code class="sig-name descname"><span class="pre">RankSources</span></code><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt id="openghg.localclient.RankSources.create_daterange">
-<code class="sig-name descname">create_daterange</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">end</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.create_daterange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.localclient.RankSources.create_daterange" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">create_daterange</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.create_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.create_daterange" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a JSON serialisable daterange string for use in ranking dict</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -288,7 +286,7 @@ that data from that Datasource will be preferred when a user searches for data.<
 
 <dl class="py method">
 <dt id="openghg.localclient.RankSources.get_sources">
-<code class="sig-name descname">get_sources</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">site</span></em>, <em class="sig-param"><span class="n">species</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.get_sources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.localclient.RankSources.get_sources" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_sources</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.get_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.get_sources" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the datasources for this site and species to allow a ranking to be set</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -308,7 +306,7 @@ that data from that Datasource will be preferred when a user searches for data.<
 
 <dl class="py method">
 <dt id="openghg.localclient.RankSources.rank_sources">
-<code class="sig-name descname">rank_sources</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">updated_rankings</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.rank_sources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.localclient.RankSources.rank_sources" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">rank_sources</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">updated_rankings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.rank_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.rank_sources" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign the precendence of sources for each.
 This function expects a dictionary of the form</p>
 <p>{‘site_string’: {‘rank’: [daterange_str, …], ‘daterange’: ‘start_end’, ‘uuid’: uuid},</p>
@@ -324,7 +322,7 @@ This function expects a dictionary of the form</p>
 
 <dl class="py method">
 <dt id="openghg.localclient.RankSources.set_rank">
-<code class="sig-name descname">set_rank</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rank_key</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">rank_data</span><span class="p">:</span> <span class="n">dict</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.set_rank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.localclient.RankSources.set_rank" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set_rank</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rank_key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.set_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.set_rank" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the rank data for the</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -343,7 +341,7 @@ This function expects a dictionary of the form</p>
 
 <dl class="py method">
 <dt id="openghg.localclient.RankSources.visualise_rankings">
-<code class="sig-name descname">visualise_rankings</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; pyvis.network.Network<a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.visualise_rankings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.localclient.RankSources.visualise_rankings" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">visualise_rankings</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pyvis.network.Network</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.visualise_rankings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.visualise_rankings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a small network graph of ranked data with each rank given a colour</p>
 <p>Note that this function should only be run from a Jupyter Notebook</p>
 <dl class="field-list simple">
@@ -367,11 +365,11 @@ This function expects a dictionary of the form</p>
 <p>Search the local object store for data. This will be removed as it has been replaced with the <code class="docutils literal notranslate"><span class="pre">get_obs</span></code> function above.</p>
 <dl class="py class">
 <dt id="openghg.localclient.Search">
-<em class="property">class </em><code class="sig-prename descclassname">openghg.localclient.</code><code class="sig-name descname">Search</code><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.localclient.Search" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">openghg.localclient.</span></code><code class="sig-name descname"><span class="pre">Search</span></code><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.Search" title="Permalink to this definition">¶</a></dt>
 <dd><p>Used to search and download data from the object store</p>
 <dl class="py method">
 <dt id="openghg.localclient.Search.retrieve">
-<code class="sig-name descname">retrieve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">selected_keys</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search.retrieve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.localclient.Search.retrieve" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">retrieve</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selected_keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search.retrieve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.Search.retrieve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads the selected keys and returns a dictionary of
 xarray Datasets</p>
 <dl class="field-list simple">
@@ -389,7 +387,7 @@ xarray Datasets</p>
 
 <dl class="py method">
 <dt id="openghg.localclient.Search.search">
-<code class="sig-name descname">search</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">species</span></em>, <em class="sig-param"><span class="n">locations</span></em>, <em class="sig-param"><span class="n">inlet</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">instrument</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">start_datetime</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_datetime</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#openghg.localclient.Search.search" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">search</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.Search.search" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is just a wrapper for the search function that allows easy access through LocalClient</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -399,9 +397,9 @@ xarray Datasets</p>
 <li><p><strong>inlet</strong> (<em>str</em><em>, </em><em>default=None</em>) – Inlet height such as 100m</p></li>
 <li><p><strong>instrument</strong> (<em>str</em><em>, </em><em>default=None</em>) – Instrument name such as picarro</p></li>
 <li><p><strong>find_all</strong> (<em>bool</em><em>, </em><em>default=False</em>) – Require all search terms to be satisfied</p></li>
-<li><p><strong>start_datetime</strong> (<em>datetime</em><em>, </em><em>default=None</em>) – Start datetime for search</p></li>
+<li><p><strong>start_date</strong> (<em>datetime</em><em>, </em><em>default=None</em>) – Start datetime for search</p></li>
 <li><p><strong>None a start datetime of UNIX epoch</strong> (<em>If</em>) – </p></li>
-<li><p><strong>end_datetime</strong> (<em>datetime</em><em>, </em><em>default=None</em>) – End datetime for search</p></li>
+<li><p><strong>end_date</strong> (<em>datetime</em><em>, </em><em>default=None</em>) – End datetime for search</p></li>
 <li><p><strong>None an end datetime of the current datetime is set</strong> (<em>If</em>) – </p></li>
 </ul>
 </dd>
@@ -431,7 +429,7 @@ xarray Datasets</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jan 05, 2021.
+        Last updated on Mar 25, 2021.
       </span>
 
     </p>

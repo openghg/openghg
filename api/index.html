@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Documentation &mdash; OpenGHG 0+untagged.1.g71446d3 documentation</title>
+  <title>Documentation &mdash; OpenGHG 0+untagged.1.gc7b541a documentation</title>
   
 
   
@@ -33,8 +33,8 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/custom.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../_static/custom.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -42,7 +42,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Developer API documentation" href="index_devapi.html" />
-    <link rel="prev" title="Developer’s guide" href="../development.html" /> 
+    <link rel="prev" title="Fn usage" href="../development/fn_usage.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -97,7 +97,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../development.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index_devel.html">Development</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation</a><ul>
@@ -177,7 +177,7 @@
         <a href="index_devapi.html" class="btn btn-neutral float-right" title="Developer API documentation" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
       
       
-        <a href="../development.html" class="btn btn-neutral float-left" title="Developer’s guide" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../development/fn_usage.html" class="btn btn-neutral float-left" title="Fn usage" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
       
   </div>
   
@@ -255,7 +255,7 @@ or within the cloud based on a cluster as a service (CaaS) offering (see CitC).<
 of OpenGHG on your local filesystem. Use of this module results in the creation of a local object store in a location controlled by the
 <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code> environment variable.</p>
 <dl class="simple">
-<dt><a class="reference internal" href="api_localclient.html#openghg.localclient.get_single_site" title="openghg.localclient.get_single_site"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_single_site()</span></code></a></dt><dd><p>Search for observations in the object store using a site, species and date range.</p>
+<dt><a class="reference internal" href="api_localclient.html#openghg.localclient.get_observations" title="openghg.localclient.get_observations"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_observations()</span></code></a></dt><dd><p>Search for observations in the object store using a site, species and date range.</p>
 </dd>
 <dt><a class="reference internal" href="api_localclient.html#openghg.localclient.process_files" title="openghg.localclient.process_files"><code class="xref py py-func docutils literal notranslate"><span class="pre">process_files()</span></code></a></dt><dd><p>Process files for storage in the object store</p>
 </dd>
@@ -283,7 +283,7 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
 </dd>
 <dt><a class="reference internal" href="api_processing.html#openghg.processing.get_ceda_file" title="openghg.processing.get_ceda_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_ceda_file()</span></code></a></dt><dd><p>Create a file that contains the correct attributes for uploading to the <a class="reference external" href="http://archive.ceda.ac.uk/">CEDA archive</a></p>
 </dd>
-<dt><a class="reference internal" href="api_processing.html#openghg.processing.recombine_sections" title="openghg.processing.recombine_sections"><code class="xref py py-func docutils literal notranslate"><span class="pre">recombine_sections()</span></code></a></dt><dd><p>Recombine separate NetCDF files into a single file sorted by date</p>
+<dt><a class="reference internal" href="api_processing.html#openghg.processing.recombine_datasets" title="openghg.processing.recombine_datasets"><code class="xref py py-func docutils literal notranslate"><span class="pre">recombine_datasets()</span></code></a></dt><dd><p>Recombine separate NetCDF files into a single file sorted by date</p>
 </dd>
 <dt><a class="reference internal" href="api_processing.html#openghg.processing.search" title="openghg.processing.search"><code class="xref py py-func docutils literal notranslate"><span class="pre">search()</span></code></a></dt><dd><p>The function that is used by <code class="docutils literal notranslate"><span class="pre">openghg.client.Search</span></code> and <code class="docutils literal notranslate"><span class="pre">openghg.localclient.Search</span></code> to search the object store</p>
 </dd>
@@ -300,7 +300,7 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="index_devapi.html" class="btn btn-neutral float-right" title="Developer API documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="../development.html" class="btn btn-neutral float-left" title="Developer’s guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../development/fn_usage.html" class="btn btn-neutral float-left" title="Fn usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
@@ -309,7 +309,7 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jan 05, 2021.
+        Last updated on Mar 25, 2021.
       </span>
 
     </p>

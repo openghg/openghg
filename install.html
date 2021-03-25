@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Installation instructions &mdash; OpenGHG 0+untagged.1.g71446d3 documentation</title>
+  <title>Installation instructions &mdash; OpenGHG 0+untagged.1.gc7b541a documentation</title>
   
 
   
@@ -33,8 +33,8 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/custom.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="_static/custom.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -96,14 +96,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#virtual-environment">Virtual environment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#clone-and-install">Clone and install</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#upgrade">Upgrade</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#developers">Developers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#tests">Tests</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#documentation">Documentation</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#developers">Developers</a></li>
 </ul>
 </li>
 </ul>
@@ -111,7 +106,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="development.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index_devel.html">Development</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/index.html">Documentation</a></li>
@@ -260,49 +255,10 @@ pip install .
 </pre></div>
 </div>
 </div>
-<div class="section" id="upgrade">
-<h3>Upgrade<a class="headerlink" href="#upgrade" title="Permalink to this headline">¶</a></h3>
-<p>To upgrade a currently installed version</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade openghg
-</pre></div>
-</div>
-</div>
 </div>
 <div class="section" id="developers">
 <h2>Developers<a class="headerlink" href="#developers" title="Permalink to this headline">¶</a></h2>
-<p>For developers please follow the instructions for creation of a virtual environment above and then follow the instructions below.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/openghg/openghg
-<span class="nb">cd</span> openghg
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-</pre></div>
-</div>
-<div class="section" id="tests">
-<h3>Tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h3>
-<p>As a developer you may want to run the tests and add new tests for functions you’d like to
-contribute the project. To do this type:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest tests
-</pre></div>
-</div>
-</div>
-<div class="section" id="documentation">
-<h3>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h3>
-<p>To build the documentation you will need to install <a class="reference external" href="https://pandoc.org/">pandoc</a>, a standalone document converter tool.
-Please see the <a class="reference external" href="https://pandoc.org/installing.html">pandoc installation instructions</a>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you haven’t installed <code class="docutils literal notranslate"><span class="pre">openghg</span></code> to your virtual environment you can add the folder path to your PYTHONPATH.
-This allows the library to be used easily without the need for reinstallation after changes.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHONPATH</span><span class="si">}</span><span class="s2">:/path/to/cloned/repo&quot;</span>
-</pre></div>
-</div>
-</div>
-<p>You can now build the documentation.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> doc
-make
-</pre></div>
-</div>
-</div>
+<p>For developers please see the <a class="reference internal" href="development/python_devel.html"><span class="doc">Development</span></a>.</p>
 </div>
 </div>
 
@@ -322,7 +278,7 @@ make
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jan 05, 2021.
+        Last updated on Mar 25, 2021.
       </span>
 
     </p>

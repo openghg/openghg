@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.processing._attributes &mdash; OpenGHG 0+untagged.1.g71446d3 documentation</title>
+  <title>openghg.processing._attributes &mdash; OpenGHG 0+untagged.1.gc7b541a documentation</title>
   
 
   
@@ -33,8 +33,8 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/custom.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../../../_static/custom.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -95,7 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index_devel.html">Development</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Documentation</a></li>
@@ -168,18 +168,30 @@
            <div itemprop="articleBody">
             
   <h1>Source code for openghg.processing._attributes</h1><div class="highlight"><pre>
-<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;assign_attributes&quot;</span><span class="p">,</span> <span class="s2">&quot;get_attributes&quot;</span><span class="p">]</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;assign_attributes&quot;</span><span class="p">,</span> <span class="s2">&quot;get_attributes&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="assign_attributes"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.assign_attributes">[docs]</a><span class="k">def</span> <span class="nf">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Assign attributes to the data we&#39;ve processed. This ensures that the xarray Datasets produced</span>
-<span class="sd">        as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata </span>
-<span class="sd">        to the Datasource allowing more detailed searching of data.</span>
+<div class="viewcode-block" id="assign_attributes"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.assign_attributes">[docs]</a><span class="k">def</span> <span class="nf">assign_attributes</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Assign attributes to the data we&#39;ve processed. This ensures that the xarray Datasets produced</span>
+<span class="sd">    as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata</span>
+<span class="sd">    to the Datasource allowing more detailed searching of data.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            combined_data (dict): Dictionary containing data, metadata and attributes</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            dict: Dictionary of combined data with correct attributes assigned to Datasets</span>
+<span class="sd">    Args:</span>
+<span class="sd">        data: Dictionary containing data, metadata and attributes</span>
+<span class="sd">        site: Site code</span>
+<span class="sd">        sampling_period: Number of seconds for which air</span>
+<span class="sd">                         sample is taken. Only for time variable attribute</span>
+<span class="sd">        network: Network name</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary of combined data with correct attributes assigned to Datasets</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
         <span class="n">site_attributes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span>
@@ -203,16 +215,16 @@
 
 
 <div class="viewcode-block" id="get_attributes"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.get_attributes">[docs]</a><span class="k">def</span> <span class="nf">get_attributes</span><span class="p">(</span>
-    <span class="n">ds</span><span class="p">,</span>
-    <span class="n">species</span><span class="p">,</span>
-    <span class="n">site</span><span class="p">,</span>
-    <span class="n">network</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">global_attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">sampling_period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">date_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">global_attributes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">units</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">date_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function writes attributes to an xarray.Dataset so that they conform with</span>
 <span class="sd">    the CF Convention v1.7</span>
@@ -235,28 +247,29 @@
 <span class="sd">            dictionary</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        ds (xarray.Dataset): Should contain variables such as &quot;ch4&quot;, &quot;ch4 repeatability&quot;.</span>
+<span class="sd">        ds: Should contain variables such as &quot;ch4&quot;, &quot;ch4 repeatability&quot;.</span>
 <span class="sd">            Must have a &quot;time&quot; dimension.</span>
-<span class="sd">        species (str): Species name. e.g. &quot;CH4&quot;, &quot;HFC-134a&quot;, &quot;dCH4C13&quot;</span>
-<span class="sd">        site (string): Three-letter site code</span>
-<span class="sd">        network (str, default=None): Network site is associated with</span>
-<span class="sd">        global_attribuates (dict, default=None): Dictionary containing any info you want to</span>
-<span class="sd">            add to the file header (e.g. {&quot;Contact&quot;: &quot;Matt Rigby&quot;})</span>
-<span class="sd">        units (str, default=None): This routine will try to guess the units</span>
+<span class="sd">        species: Species name. e.g. &quot;CH4&quot;, &quot;HFC-134a&quot;, &quot;dCH4C13&quot;</span>
+<span class="sd">        site: Three-letter site code</span>
+<span class="sd">        network: Network site is associated with</span>
+<span class="sd">        global_attribuates: Dictionary containing any info you want to</span>
+<span class="sd">            add to the file header (e.g. {&quot;Contact&quot;: &quot;Contact_Name&quot;})</span>
+<span class="sd">        units: This routine will try to guess the units</span>
 <span class="sd">            unless this is specified. Options are in units_interpret</span>
-<span class="sd">        scale (str, default=None): Calibration scale for species.</span>
-<span class="sd">        sampling_period (int, default=None): Number of seconds for which air</span>
+<span class="sd">        scale: Calibration scale for species.</span>
+<span class="sd">        sampling_period: Number of seconds for which air</span>
 <span class="sd">            sample is taken. Only for time variable attribute</span>
-<span class="sd">        date_range (list of two strings, optional): Start and end date for output</span>
+<span class="sd">        date_range: Start and end date for output</span>
 <span class="sd">            If you only want an end date, just put a very early start date</span>
 <span class="sd">            (e.g. [&quot;1900-01-01&quot;, &quot;2010-01-01&quot;])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">json</span>
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span> <span class="k">as</span> <span class="n">pd_Timestamp</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_datapath</span>
-    <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span> <span class="k">as</span> <span class="n">xr_Dataset</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">xr_Dataset</span><span class="p">):</span>
+    <span class="c1"># from numpy import unique as np_unique</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;This function only accepts xarray Datasets&quot;</span><span class="p">)</span>
 
     <span class="c1"># Current CF Conventions (v1.7) demand that valid variable names</span>
@@ -313,7 +326,7 @@
         <span class="n">global_attributes</span> <span class="o">=</span> <span class="n">global_attributes_default</span>
 
     <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;File created&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pd_Timestamp</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">tz</span><span class="o">=</span><span class="s2">&quot;UTC&quot;</span><span class="p">))</span>
-    <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;Processed by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;auto@hugs-cloud.com&quot;</span>
+    <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;Processed by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;OpenGHG_Cloud&quot;</span>
     <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species_label</span>
 
     <span class="k">if</span> <span class="n">scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -368,17 +381,13 @@
                         <span class="n">ds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit_species</span><span class="p">[</span><span class="n">species_upper</span><span class="p">]</span>
                     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">ds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species_attrs</span><span class="p">[</span>
-                                <span class="n">species_label</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-                            <span class="p">][</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
+                            <span class="n">ds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species_attrs</span><span class="p">[</span><span class="n">species_label</span><span class="o">.</span><span class="n">upper</span><span class="p">()][</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
                         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                             <span class="n">ds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
 
                 <span class="c1"># If units are non-standard, add explanation</span>
                 <span class="k">if</span> <span class="n">species_upper</span> <span class="ow">in</span> <span class="n">unit_species_long</span><span class="p">:</span>
-                    <span class="n">ds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units_description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit_species_long</span><span class="p">[</span>
-                        <span class="n">species_upper</span>
-                    <span class="p">]</span>
+                    <span class="n">ds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units_description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit_species_long</span><span class="p">[</span><span class="n">species_upper</span><span class="p">]</span>
 
             <span class="c1"># Add to list of ancilliary variables</span>
             <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">species_label</span><span class="p">:</span>
@@ -425,8 +434,8 @@
     <span class="c1"># but xarray doesn&#39;t currently have a duplicates method</span>
     <span class="c1"># See this https://github.com/pydata/xarray/issues/2108</span>
 
-    <span class="c1"># TODO - fix this - just remove duplicates?</span>
     <span class="c1"># if len(set(ds.time.values)) &lt; len(ds.time.values):</span>
+    <span class="c1"># if len(np_unique(ds.time.values)) &lt; len(ds.time.values):</span>
     <span class="c1">#     print(&quot;WARNING. Duplicate time stamps&quot;)</span>
 
     <span class="n">first_year</span> <span class="o">=</span> <span class="n">pd_Timestamp</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">year</span>
@@ -454,26 +463,22 @@
     <span class="k">return</span> <span class="n">ds</span></div>
 
 
-<span class="k">def</span> <span class="nf">_site_info_attributes</span><span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Reads site attributes from JSON</span>
+<span class="k">def</span> <span class="nf">_site_info_attributes</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Reads site attributes from JSON</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            site (str): Site code</span>
-<span class="sd">            network (str, default=None): Network name</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            dict: Dictionary of site attributes</span>
+<span class="sd">    Args:</span>
+<span class="sd">        site: Site code</span>
+<span class="sd">        network: Network name</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary of site attributes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_datapath</span>
-    <span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">load</span> <span class="k">as</span> <span class="n">json_load</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
 
     <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
     <span class="c1"># Read site info file</span>
     <span class="n">data_filename</span> <span class="o">=</span> <span class="s2">&quot;acrg_site_info.json&quot;</span>
-    <span class="n">acrg_site_info_path</span> <span class="o">=</span> <span class="n">get_datapath</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">data_filename</span><span class="p">)</span>
-
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">acrg_site_info_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">site_params</span> <span class="o">=</span> <span class="n">json_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">site_params</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">data_filename</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">network</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">site_params</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
@@ -495,9 +500,7 @@
 
                 <span class="n">attributes</span><span class="p">[</span><span class="n">attr_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_params</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Invalid site </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> passed. Please use a valid site code such as BSD for Bilsdale&quot;</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid site </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> passed. Please use a valid site code such as BSD for Bilsdale&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">attributes</span>
 </pre></div>
@@ -513,7 +516,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jan 05, 2021.
+        Last updated on Mar 25, 2021.
       </span>
 
     </p>

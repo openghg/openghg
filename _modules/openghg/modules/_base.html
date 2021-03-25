@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.1.g71446d3 documentation</title>
+  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.1.gc7b541a documentation</title>
   
 
   
@@ -33,8 +33,8 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/custom.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../../../_static/custom.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -95,7 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index_devel.html">Development</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Documentation</a></li>
@@ -184,13 +184,13 @@
 
 <div class="viewcode-block" id="BaseModule.exists"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.exists">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Check if a GC object is already saved in the object</span>
-<span class="sd">            store</span>
+        <span class="sd">&quot;&quot;&quot;Check if a GC object is already saved in the object</span>
+<span class="sd">        store</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                bucket: Bucket for data storage</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                bool: True if object exists</span>
+<span class="sd">        Args:</span>
+<span class="sd">            bucket: Bucket for data storage</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if object exists</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">exists</span><span class="p">,</span> <span class="n">get_bucket</span>
 
@@ -203,13 +203,13 @@
 
 <div class="viewcode-block" id="BaseModule.from_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.from_data">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Create an object from data</span>
+        <span class="sd">&quot;&quot;&quot;Create an object from data</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                data: JSON data</span>
-<span class="sd">                bucket: Bucket for data storage</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                cls: Class object of cls type</span>
+<span class="sd">        Args:</span>
+<span class="sd">            data: JSON data</span>
+<span class="sd">            bucket: Bucket for data storage</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            cls: Class object of cls type</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">string_to_datetime</span>
         <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_bucket</span>
@@ -238,13 +238,13 @@
 
 <div class="viewcode-block" id="BaseModule.load"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.load">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Load an object from the datastore using the passed</span>
-<span class="sd">            bucket and UUID</span>
+        <span class="sd">&quot;&quot;&quot;Load an object from the datastore using the passed</span>
+<span class="sd">        bucket and UUID</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                bucket: Bucket to store object</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                class: Class created from JSON data</span>
+<span class="sd">        Args:</span>
+<span class="sd">            bucket: Bucket to store object</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            class: Class created from JSON data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_bucket</span><span class="p">,</span> <span class="n">get_object_from_json</span>
 
@@ -261,20 +261,20 @@
 
 <div class="viewcode-block" id="BaseModule.uuid"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.uuid">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">uuid</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Return the UUID of this object</span>
+        <span class="sd">&quot;&quot;&quot;Return the UUID of this object</span>
 
-<span class="sd">            Returns:</span>
-<span class="sd">                str: UUID of object</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: UUID of object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_uuid</span></div>
 
 <div class="viewcode-block" id="BaseModule.add_datasources"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.add_datasources">[docs]</a>    <span class="k">def</span> <span class="nf">add_datasources</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">datasource_uuids</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Add the passed list of Datasources to the current list</span>
+        <span class="sd">&quot;&quot;&quot;Add the passed list of Datasources to the current list</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                datasource_uuids: Dict of Datasource UUIDs</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                None</span>
+<span class="sd">        Args:</span>
+<span class="sd">            datasource_uuids: Dict of Datasource UUIDs</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_names</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">datasource_uuids</span><span class="p">)</span>
         <span class="c1"># Invert the dictionary to update the dict keyed by UUID</span>
@@ -282,18 +282,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">uuid_keyed</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseModule.datasources"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.datasources">[docs]</a>    <span class="k">def</span> <span class="nf">datasources</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Return the list of Datasources UUIDs associated with this object</span>
+        <span class="sd">&quot;&quot;&quot;Return the list of Datasources UUIDs associated with this object</span>
 
-<span class="sd">            Returns:</span>
-<span class="sd">                list: List of Datasource UUIDs</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of Datasource UUIDs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="BaseModule.datasource_names"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.datasource_names">[docs]</a>    <span class="k">def</span> <span class="nf">datasource_names</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Return the names of the datasources</span>
+        <span class="sd">&quot;&quot;&quot;Return the names of the datasources</span>
 
-<span class="sd">            Returns:</span>
-<span class="sd">                dict: Dictionary of Datasource names</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of Datasource names</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">warnings</span>
 
@@ -302,31 +302,31 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_names</span></div>
 
 <div class="viewcode-block" id="BaseModule.remove_datasource"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.remove_datasource">[docs]</a>    <span class="k">def</span> <span class="nf">remove_datasource</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Remove the Datasource with the given uuid from the list</span>
-<span class="sd">            of Datasources</span>
+        <span class="sd">&quot;&quot;&quot;Remove the Datasource with the given uuid from the list</span>
+<span class="sd">        of Datasources</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                uuid (str): UUID of Datasource to be removed</span>
-<span class="sd">            Returns: </span>
-<span class="sd">                None</span>
+<span class="sd">        Args:</span>
+<span class="sd">            uuid (str): UUID of Datasource to be removed</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="BaseModule.set_rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.set_rank">[docs]</a>    <span class="k">def</span> <span class="nf">set_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rank</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">daterange</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Set the rank of a Datasource associated with this object.</span>
+        <span class="sd">&quot;&quot;&quot;Set the rank of a Datasource associated with this object.</span>
 
-<span class="sd">            This function performs checks to ensure multiple ranks aren&#39;t set for</span>
-<span class="sd">            overlapping dateranges.</span>
+<span class="sd">        This function performs checks to ensure multiple ranks aren&#39;t set for</span>
+<span class="sd">        overlapping dateranges.</span>
 
-<span class="sd">            Passing a daterange and rank to this function will overwrite any current </span>
-<span class="sd">            daterange stored for that rank.</span>
+<span class="sd">        Passing a daterange and rank to this function will overwrite any current</span>
+<span class="sd">        daterange stored for that rank.</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                uuid (str): UUID of Datasource</span>
-<span class="sd">                rank (int): Rank of data</span>
-<span class="sd">                daterange (str, list): Daterange(s)</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                None</span>
+<span class="sd">        Args:</span>
+<span class="sd">            uuid (str): UUID of Datasource</span>
+<span class="sd">            rank (int): Rank of data</span>
+<span class="sd">            daterange (str, list): Daterange(s)</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">daterange_from_str</span>
@@ -368,10 +368,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="n">rank</span><span class="p">]</span> <span class="o">=</span> <span class="n">daterange</span></div>
 
 <div class="viewcode-block" id="BaseModule.clear_datasources"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.clear_datasources">[docs]</a>    <span class="k">def</span> <span class="nf">clear_datasources</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Remove all Datasources from the object</span>
+        <span class="sd">&quot;&quot;&quot;Remove all Datasources from the object</span>
 
-<span class="sd">            Returns:</span>
-<span class="sd">                None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_names</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -389,7 +389,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jan 05, 2021.
+        Last updated on Mar 25, 2021.
       </span>
 
     </p>

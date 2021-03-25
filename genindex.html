@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Index &mdash; OpenGHG 0+untagged.1.g71446d3 documentation</title>
+  <title>Index &mdash; OpenGHG 0+untagged.1.gc7b541a documentation</title>
   
 
   
@@ -33,8 +33,8 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/custom.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="_static/custom.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -95,7 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="development.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index_devel.html">Development</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/index.html">Documentation</a></li>
@@ -241,9 +241,17 @@
 </li>
       <li><a href="api/devapi_modules.html#openghg.modules.BaseModule.add_datasources">add_datasources() (openghg.modules.BaseModule method)</a>
 </li>
+      <li><a href="api/devapi_modules.html#openghg.modules.Datasource.add_emissions_data">add_emissions_data() (openghg.modules.Datasource method)</a>
+</li>
+      <li><a href="api/devapi_modules.html#openghg.modules.Datasource.add_field_data">add_field_data() (openghg.modules.Datasource method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/devapi_modules.html#openghg.modules.Datasource.add_footprint_data">add_footprint_data() (openghg.modules.Datasource method)</a>
+</li>
       <li><a href="api/devapi_modules.html#openghg.modules.Datasource.add_metadata">add_metadata() (openghg.modules.Datasource method)</a>
+</li>
+      <li><a href="api/devapi_modules.html#openghg.modules.Datasource.add_metadata_key">add_metadata_key() (openghg.modules.Datasource method)</a>
 </li>
       <li><a href="api/api_processing.html#openghg.processing.assign_attributes">assign_attributes() (in module openghg.processing)</a>
 </li>
@@ -325,7 +333,7 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/devapi_modules.html#openghg.modules.Datasource.end_datetime">end_datetime() (openghg.modules.Datasource method)</a>
+      <li><a href="api/devapi_modules.html#openghg.modules.Datasource.end_date">end_date() (openghg.modules.Datasource method)</a>
 </li>
       <li><a href="api/devapi_modules.html#openghg.modules.EUROCOM">EUROCOM (class in openghg.modules)</a>
 </li>
@@ -377,11 +385,11 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/api_localclient.html#openghg.localclient.get_observations">get_observations() (in module openghg.localclient)</a>
+</li>
       <li><a href="api/devapi_modules.html#openghg.modules.GCWERKS.get_precision">get_precision() (openghg.modules.GCWERKS method)</a>
 </li>
       <li><a href="api/devapi_modules.html#openghg.modules.Datasource.get_rank">get_rank() (openghg.modules.Datasource method)</a>
-</li>
-      <li><a href="api/api_localclient.html#openghg.localclient.get_single_site">get_single_site() (in module openghg.localclient)</a>
 </li>
       <li><a href="api/devapi_modules.html#openghg.modules.CRDS.get_site_attributes">get_site_attributes() (openghg.modules.CRDS method)</a>
 
@@ -443,7 +451,13 @@
 <h2 id="K">K</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/devapi_modules.html#openghg.modules.Datasource.key_date_compare">key_date_compare() (openghg.modules.Datasource method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/devapi_modules.html#openghg.modules.Datasource.keys_in_daterange">keys_in_daterange() (openghg.modules.Datasource method)</a>
+</li>
+      <li><a href="api/devapi_modules.html#openghg.modules.Datasource.keys_in_daterange_str">keys_in_daterange_str() (openghg.modules.Datasource method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -542,8 +556,6 @@
 </li>
         <li><a href="api/devapi_modules.html#openghg.modules.NOAA.read_data">(openghg.modules.NOAA method)</a>
 </li>
-        <li><a href="api/devapi_modules.html#openghg.modules.THAMESBARRIER.read_data">(openghg.modules.THAMESBARRIER method)</a>
-</li>
       </ul></li>
       <li><a href="api/devapi_modules.html#openghg.modules.CRANFIELD.read_file">read_file() (openghg.modules.CRANFIELD method)</a>
 
@@ -571,7 +583,7 @@
 </li>
       <li><a href="api/devapi_modules.html#openghg.modules.GCWERKS.read_precision">read_precision() (openghg.modules.GCWERKS method)</a>
 </li>
-      <li><a href="api/api_processing.html#openghg.processing.recombine_sections">recombine_sections() (in module openghg.processing)</a>
+      <li><a href="api/api_processing.html#openghg.processing.recombine_datasets">recombine_datasets() (in module openghg.processing)</a>
 </li>
       <li><a href="api/devapi_modules.html#openghg.modules.BaseModule.remove_datasource">remove_datasource() (openghg.modules.BaseModule method)</a>
 </li>
@@ -629,7 +641,7 @@
 </li>
       <li><a href="api/api_jobs.html#openghg.jobs.SSHConnect">SSHConnect (class in openghg.jobs)</a>
 </li>
-      <li><a href="api/devapi_modules.html#openghg.modules.Datasource.start_datetime">start_datetime() (openghg.modules.Datasource method)</a>
+      <li><a href="api/devapi_modules.html#openghg.modules.Datasource.start_date">start_date() (openghg.modules.Datasource method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -701,7 +713,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jan 05, 2021.
+        Last updated on Mar 25, 2021.
       </span>
 
     </p>
