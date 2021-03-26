@@ -669,7 +669,7 @@ class Datasource:
         start, end = self.daterange()
         return "".join([datetime_to_string(start), "_", datetime_to_string(end)])
 
-    def search_metadata(
+    def search_metadata_old(
         self,
         search_terms: Union[str, List[str]],
         start_date: Optional[Timestamp] = None,
@@ -684,6 +684,9 @@ class Datasource:
         Returns:
             bool: True if found else False
         """
+        from warnings import warn
+        warn("This function will be removed in a future release", DeprecationWarning)
+
         if start_date is not None and end_date is not None:
             if not self.in_daterange(start_date=start_date, end_date=end_date):
                 return False
@@ -711,6 +714,37 @@ class Datasource:
         # Otherwise there should be at least a True in results
         else:
             return len(results) > 0
+
+    def search_metadata(self, find_all: Optional[bool] = False, **kwargs) -> bool:
+        """Search the metadata for any available keyword
+
+        Args:
+            find_all: If True all arguments must be matched
+        Keyword Arguments:
+            Keyword arguments passed will be checked against the metadata of the Datasource
+        Returns:
+            bool: True if some/all parameters matched
+        """
+        results = []
+        for key, value in kwargs.items():
+            try:
+                # Here we want to check if it's a list and if so iterate over it
+                if isinstance(value, (list, tuple)):
+                    for val in value:
+                        if self._metadata[key.lower()] == str(val).lower():
+                            results.append(True)
+                else:
+                    if self._metadata[key.lower()] == str(value).lower():
+                        results.append(True)
+            except KeyError:
+                pass
+
+        # If we want all the terms to match these should be the same length
+        if find_all:
+            return len(kwargs.keys()) == len(results)
+        # Otherwise there should be at least a True in results
+        else:
+            return True in results
 
     def in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> bool:
         """Check if the data contained within this Datasource overlaps with the

@@ -8,15 +8,15 @@ from typing import Dict, List, Optional, Union
 __all__ = ["search", "search_footprints", "search_emissions"]
 
 
-def search(
-    locations: Union[str, List],
-    species: Optional[Union[str, List]] = None,
-    inlet: Optional[Union[str, List]] = None,
-    instrument: Optional[str] = None,
-    find_all: Optional[bool] = True,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    data_type: Optional[str] = "timeseries",
+def search(**kwargs)
+    # locations: Union[str, List],
+    # species: Optional[Union[str, List]] = None,
+    # inlet: Optional[Union[str, List]] = None,
+    # instrument: Optional[str] = None,
+    # find_all: Optional[bool] = True,
+    # start_date: Optional[Union[str, Timestamp]] = None,
+    # end_date: Optional[Union[str, Timestamp]] = None,
+    # data_type: Optional[str] = "timeseries",
 ) -> Dict:
     """Search for observations data
 
@@ -39,11 +39,11 @@ def search(
     from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, get_datapath
 
     # if species is not None and not isinstance(species, list):
-    if not isinstance(species, list):
-        species = [species]
+    # if not isinstance(species, list):
+    #     species = [species]
 
-    if not isinstance(locations, list):
-        locations = [locations]
+    # if not isinstance(locations, list):
+    #     locations = [locations]
 
     if data_type in ["footprint", "emissions"]:
         return search_footprints(
@@ -61,19 +61,22 @@ def search(
         d = load(f)
         site_codes = d["name_code"]
 
-    updated_locations = []
-    # Check locations, if they're longer than three letters do a lookup
-    for loc in locations:
-        if len(loc) > 3:
-            try:
-                site_code = site_codes[loc.lower()]
-                updated_locations.append(site_code)
-            except KeyError:
-                raise ValueError(f"Invalid site {loc} passed")
-        else:
-            updated_locations.append(loc)
 
-    locations = updated_locations
+    # updated_locations = []
+    # # Check locations, if they're longer than three letters do a lookup
+    # for loc in locations:
+    #     if len(loc) > 3:
+    #         try:
+    #             site_code = site_codes[loc.lower()]
+    #             updated_locations.append(site_code)
+    #         except KeyError:
+    #             raise ValueError(f"Invalid site {loc} passed")
+    #     else:
+    #         updated_locations.append(loc)
+
+    # locations = updated_locations
+    start_date = kwargs.get("start_date")
+    end_date = kwargs.get("end_date")
 
     if start_date is None:
         start_date = timestamp_epoch()
@@ -89,116 +92,117 @@ def search(
     datasource_uuids = obs.datasources()
 
     # Shallow load the Datasources so we can search their metadata
-    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+    datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
+
+
 
     # First we find the Datasources from locations we want to narrow down our search
-    location_sources = defaultdict(list)
+    # location_sources = defaultdict(list)
 
-    for datasource in datasources:
-        for location in locations:
-            if datasource.search_metadata(search_terms=location, start_date=start_date, end_date=end_date):
-                location_sources[location].append(datasource)
+    # for datasource in datasources:
+    #     if datasource.search_metadata(search_terms=location, start_date=start_date, end_date=end_date):
+    #         location_sources[location].append(datasource)
 
-    # This is returned to the caller
-    results = defaultdict(dict)
-    # With both inlet and instrument specified we bypass the ranking system
-    if inlet is not None and instrument is not None:
-        for site, sources in location_sources.items():
-            for sp in species:
-                search_terms = [x for x in (sp, site, inlet, instrument) if x is not None]
-                for datasource in sources:
-                    # Just match the single source here
-                    if datasource.search_metadata(
-                        search_terms=search_terms, start_date=start_date, end_date=end_date, find_all=True
-                    ):
-                        # Get the data keys for the data in the matching daterange
-                        data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+    # # This is returned to the caller
+    # results = defaultdict(dict)
+    # # With both inlet and instrument specified we bypass the ranking system
+    # if inlet is not None and instrument is not None:
+    #     for site, sources in location_sources.items():
+    #         for sp in species:
+    #             search_terms = [x for x in (sp, site, inlet, instrument) if x is not None]
+    #             for datasource in sources:
+    #                 # Just match the single source here
+    #                 if datasource.search_metadata(
+    #                     search_terms=search_terms, start_date=start_date, end_date=end_date, find_all=True
+    #                 ):
+    #                     # Get the data keys for the data in the matching daterange
+    #                     data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
 
-                        key = f"{datasource.species()}_{site}_{inlet}_{instrument}".lower()
+    #                     key = f"{datasource.species()}_{site}_{inlet}_{instrument}".lower()
 
-                        # Find the keys that match the correct data
-                        results[key]["keys"] = data_keys
-                        results[key]["metadata"] = datasource.metadata()
+    #                     # Find the keys that match the correct data
+    #                     results[key]["keys"] = data_keys
+    #                     results[key]["metadata"] = datasource.metadata()
 
-        return results
+    #     return results
 
-    # TODO - this section of the function needs refactoring
-    # GJ - 2021-03-09
-    for location, sources in location_sources.items():
-        # Loop over and look for the species
-        species_data = defaultdict(list)
-        for datasource in sources:
-            for s in species:
-                search_terms = [x for x in (s, location, inlet, instrument) if x is not None]
-                # Check the species and the daterange
-                if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date, find_all=True):
-                    species_data[s].append(datasource)
+    # # TODO - this section of the function needs refactoring
+    # # GJ - 2021-03-09
+    # for location, sources in location_sources.items():
+    #     # Loop over and look for the species
+    #     species_data = defaultdict(list)
+    #     for datasource in sources:
+    #         for s in species:
+    #             search_terms = [x for x in (s, location, inlet, instrument) if x is not None]
+    #             # Check the species and the daterange
+    #             if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date, find_all=True):
+    #                 species_data[s].append(datasource)
 
-        # For each location we want to find the highest ranking sources for the selected species
-        for sp, sources in species_data.items():
-            ranked_sources = {}
+    #     # For each location we want to find the highest ranking sources for the selected species
+    #     for sp, sources in species_data.items():
+    #         ranked_sources = {}
 
-            for source in sources:
-                rank_data = source.get_rank(start_date=start_date, end_date=end_date)
+    #         for source in sources:
+    #             rank_data = source.get_rank(start_date=start_date, end_date=end_date)
 
-                # With no rank set we get an empty dictionary
-                if not rank_data:
-                    ranked_sources[0] = 0
-                    continue
+    #             # With no rank set we get an empty dictionary
+    #             if not rank_data:
+    #                 ranked_sources[0] = 0
+    #                 continue
 
-                # Just get the highest ranked datasources and return them
-                # Find the highest ranked data from this site
-                highest_rank = sorted(rank_data.keys())[-1]
+    #             # Just get the highest ranked datasources and return them
+    #             # Find the highest ranked data from this site
+    #             highest_rank = sorted(rank_data.keys())[-1]
 
-                if highest_rank == 0:
-                    ranked_sources[0] = 0
-                    continue
+    #             if highest_rank == 0:
+    #                 ranked_sources[0] = 0
+    #                 continue
 
-                ranked_sources[source.uuid()] = {"rank": highest_rank, "dateranges": rank_data[highest_rank], "source": source}
+    #             ranked_sources[source.uuid()] = {"rank": highest_rank, "dateranges": rank_data[highest_rank], "source": source}
 
-            # If it's all zeroes we want to return all sources
-            if list(ranked_sources) == [0]:
-                for source in sources:
-                    key = f"{source.species()}_{source.site()}_{source.inlet()}_{source.instrument()}".lower()
+    #         # If it's all zeroes we want to return all sources
+    #         if list(ranked_sources) == [0]:
+    #             for source in sources:
+    #                 key = f"{source.species()}_{source.site()}_{source.inlet()}_{source.instrument()}".lower()
 
-                    data_keys = source.keys_in_daterange(start_date=start_date, end_date=end_date)
+    #                 data_keys = source.keys_in_daterange(start_date=start_date, end_date=end_date)
 
-                    if not data_keys:
-                        continue
+    #                 if not data_keys:
+    #                     continue
 
-                    results[key]["keys"] = data_keys
-                    results[key]["metadata"] = source.metadata()
+    #                 results[key]["keys"] = data_keys
+    #                 results[key]["metadata"] = source.metadata()
 
-                continue
-            else:
-                # TODO - find a cleaner way of doing this
-                # We might have a zero rank, delete it as we have higher ranked data
-                try:
-                    del ranked_sources[0]
-                except KeyError:
-                    pass
+    #             continue
+    #         else:
+    #             # TODO - find a cleaner way of doing this
+    #             # We might have a zero rank, delete it as we have higher ranked data
+    #             try:
+    #                 del ranked_sources[0]
+    #             except KeyError:
+    #                 pass
 
-            # Otherwise iterate over the sources that are ranked and extract the keys
-            for uid in ranked_sources:
-                source = ranked_sources[uid]["source"]
-                source_dateranges = ranked_sources[uid]["dateranges"]
+    #         # Otherwise iterate over the sources that are ranked and extract the keys
+    #         for uid in ranked_sources:
+    #             source = ranked_sources[uid]["source"]
+    #             source_dateranges = ranked_sources[uid]["dateranges"]
 
-                key = f"{source.species()}_{source.site()}_{source.inlet()}_{source.instrument()}".lower()
+    #             key = f"{source.species()}_{source.site()}_{source.inlet()}_{source.instrument()}".lower()
 
-                data_keys = []
-                # Get the keys for each daterange
-                for d in source_dateranges:
-                    keys_in_date = source.keys_in_daterange_str(daterange=d)
-                    if keys_in_date:
-                        data_keys.extend(keys_in_date)
+    #             data_keys = []
+    #             # Get the keys for each daterange
+    #             for d in source_dateranges:
+    #                 keys_in_date = source.keys_in_daterange_str(daterange=d)
+    #                 if keys_in_date:
+    #                     data_keys.extend(keys_in_date)
 
-                if not data_keys:
-                    continue
+    #             if not data_keys:
+    #                 continue
 
-                results[key]["keys"] = data_keys
-                results[key]["metadata"] = source.metadata()
+    #             results[key]["keys"] = data_keys
+    #             results[key]["metadata"] = source.metadata()
 
-    return results
+    # return results
 
 
 def search_footprints(
