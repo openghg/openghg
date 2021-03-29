@@ -1,0 +1,28 @@
+name: openghg
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - backports-datetime-fromisoformat
+  - cachetools
+  - cdsapi
+  - cryptography
+  - lazy_import
+  - matplotlib
+  - netcdf4
+  - numexpr
+  - numpy
+  - pandas
+  - paramiko
+  - pyvis
+  - PyYAML
+  - qrcode
+  - requests
+  - scipy
+  - pytables
+  - tblib
+  - tqdm
+  - xarray
+  - pip
+  - pip:
+    - Acquire @ git+git://github.com/gareth-j/acquire@testStore#egg=Acquire
