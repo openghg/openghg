@@ -33,17 +33,26 @@ If you don't have Python >=3.7 installed, then you can install Python either via
 Installation
 ============
 
-Virtual environment
--------------------
-
 We highly recommend creating a separate virtual environment for ``openghg``. This ensures the correct versions
 of libraries can be installed without making changes to versions of libraries needed for other projects / programs.
+
+Virtual environment - pip
+-------------------------
 
 .. code-block:: bash
 
     python -m venv /path/to/env/openghg_env
     # Activate the environment
     source /path/to/end/bin/activate
+
+Virtual environment - conda
+---------------------------
+
+.. code-block:: bash
+
+    conda create -f environment.yml
+    # Activate the environment
+    conda activate openghg
 
 Clone and install
 -----------------
@@ -56,7 +65,6 @@ the library is by cloning the repository and installing manually using pip.
    git clone https://github.com/openghg/openghg.git
    cd openghg
    pip install . 
-
 
 Developers
 ==========
