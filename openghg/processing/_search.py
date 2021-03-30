@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Union
 __all__ = ["search", "search_footprints", "search_emissions"]
 
 
-def search(**kwargs)
+def search(**kwargs) -> Dict:
     # locations: Union[str, List],
     # species: Optional[Union[str, List]] = None,
     # inlet: Optional[Union[str, List]] = None,
@@ -17,7 +17,6 @@ def search(**kwargs)
     # start_date: Optional[Union[str, Timestamp]] = None,
     # end_date: Optional[Union[str, Timestamp]] = None,
     # data_type: Optional[str] = "timeseries",
-) -> Dict:
     """Search for observations data
 
     Args:
@@ -45,55 +44,71 @@ def search(**kwargs)
     # if not isinstance(locations, list):
     #     locations = [locations]
 
-    if data_type in ["footprint", "emissions"]:
-        return search_footprints(
-            locations=locations,
-            species=species,
-            inlet=inlet,
-            find_all=find_all,
-            start_date=start_date,
-            end_date=end_date,
-        )
+    # if data_type in ["footprint", "emissions"]:
+    #     return search_footprints(
+    #         locations=locations,
+    #         species=species,
+    #         inlet=inlet,
+    #         find_all=find_all,
+    #         start_date=start_date,
+    #         end_date=end_date,
+    #     )
 
-    # Allow passing of location names instead of codes
-    site_codes_json = get_datapath(filename="site_codes.json")
-    with open(site_codes_json, "r") as f:
-        d = load(f)
-        site_codes = d["name_code"]
+    # # Allow passing of location names instead of codes
+    # site_codes_json = get_datapath(filename="site_codes.json")
+    # with open(site_codes_json, "r") as f:
+    #     d = load(f)
+    #     site_codes = d["name_code"]
 
 
-    # updated_locations = []
+    # updated_sites = []
     # # Check locations, if they're longer than three letters do a lookup
-    # for loc in locations:
+    # for loc in site:
     #     if len(loc) > 3:
     #         try:
     #             site_code = site_codes[loc.lower()]
-    #             updated_locations.append(site_code)
+    #             updated_sites.append(site_code)
     #         except KeyError:
     #             raise ValueError(f"Invalid site {loc} passed")
     #     else:
-    #         updated_locations.append(loc)
+    #         updated_sites.append(loc)
 
-    # locations = updated_locations
+    # sites = updated_sites
+
+    # Do this here otherwise we have to produce them for every datasource
     start_date = kwargs.get("start_date")
     end_date = kwargs.get("end_date")
 
     if start_date is None:
         start_date = timestamp_epoch()
+    else:
+        start_date = timestamp_tzaware(start_date)    
+        kwargs["start_date"] = start_date
+
     if end_date is None:
         end_date = timestamp_now()
-
-    # Ensure passed datetimes are timezone aware
-    start_date = timestamp_tzaware(start_date)
-    end_date = timestamp_tzaware(end_date)
+    else:
+        end_date = timestamp_tzaware(end_date)
+        kwargs["end_date"] = end_date
 
     # Here we want to load in the ObsSurface module for now
     obs = ObsSurface.load()
     datasource_uuids = obs.datasources()
 
     # Shallow load the Datasources so we can search their metadata
-    datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids]
+    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
+    matching_sources = defaultdict(dict)
+    for datasource in datasources:
+        if datasource.search_metadata(**kwargs):
+            uid = datasource.uuid()
+            data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+            matching_sources[uid]["keys"] = data_keys
+            matching_sources[uid]["metadata"] = datasource.metadata()
+
+    return matching_sources
+    # Now we have the sources we want to process them so we can extract 
+    # some metadata and return their keys
 
 
     # First we find the Datasources from locations we want to narrow down our search

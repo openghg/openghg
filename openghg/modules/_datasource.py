@@ -18,10 +18,11 @@ class Datasource:
     _data_root = "data"
 
     def __init__(self, name: Optional[str] = None):
-        from Acquire.ObjectStore import create_uuid, get_datetime_now
+        from Acquire.ObjectStore import get_datetime_now
         from collections import defaultdict
+        from uuid import uuid4
 
-        self._uuid = create_uuid()
+        self._uuid = str(uuid4())
         self._name = name
         self._creation_datetime = get_datetime_now()
         self._metadata = {}
@@ -715,7 +716,7 @@ class Datasource:
         else:
             return len(results) > 0
 
-    def search_metadata(self, find_all: Optional[bool] = False, **kwargs) -> bool:
+    def search_metadata(self, find_all: Optional[bool] = True, **kwargs) -> bool:
         """Search the metadata for any available keyword
 
         Args:
@@ -725,26 +726,45 @@ class Datasource:
         Returns:
             bool: True if some/all parameters matched
         """
+        start_date = kwargs.get("start_date")
+        end_date = kwargs.get("end_date")
+
+        if start_date is not None and end_date is not None:
+            if not self.in_daterange(start_date=start_date, end_date=end_date):
+                return False
+
+        # Now we've checked the dates we can remove them as it's unlikely a comparison below
+        # will match the dates exactly
+        try:
+            del kwargs["start_date"]
+            del kwargs["end_date"]
+        except KeyError:
+            pass
+
         results = []
         for key, value in kwargs.items():
             try:
                 # Here we want to check if it's a list and if so iterate over it
                 if isinstance(value, (list, tuple)):
                     for val in value:
-                        if self._metadata[key.lower()] == str(val).lower():
-                            results.append(True)
+                        val = str(val).lower()
+                        if self._metadata[key.lower()] == val:
+                            results.append(val)
                 else:
-                    if self._metadata[key.lower()] == str(value).lower():
-                        results.append(True)
+                    value = str(value).lower()
+                    if self._metadata[key.lower()] == value:
+                        results.append(value)
             except KeyError:
                 pass
 
         # If we want all the terms to match these should be the same length
-        if find_all:
-            return len(kwargs.keys()) == len(results)
-        # Otherwise there should be at least a True in results
+        if find_all and not len(kwargs.keys()) == len(results):
+            return False
+
+        if results:
+            return True
         else:
-            return True in results
+            return False
 
     def in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> bool:
         """Check if the data contained within this Datasource overlaps with the
@@ -775,11 +795,6 @@ class Datasource:
         Return:
             list: List of keys to data
         """
-        from openghg.util import timestamp_tzaware
-
-        start_date = timestamp_tzaware(start_date)
-        end_date = timestamp_tzaware(end_date)
-
         data_keys = self._data_keys["latest"]["keys"]
 
         return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
