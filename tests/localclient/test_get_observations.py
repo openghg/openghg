@@ -16,10 +16,13 @@ def get_datapath(filename, data_type):
 def crds():
     get_local_bucket(empty=True)
 
-    filename = "hfd.picarro.1minute.100m.min.dat"
-    filepath = get_datapath(filename=filename, data_type="CRDS")
+    hfd_filepath = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
 
-    ObsSurface.read_file(filepath=filepath, data_type="CRDS")
+    cgo_data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
+    cgo_prec = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
+
+    ObsSurface.read_file(filepath=hfd_filepath, data_type="CRDS")
+    ObsSurface.read_file(filepath=(cgo_data, cgo_prec), data_type="GCWERKS")
 
 
 def test_get_observations_few_args():
@@ -93,3 +96,9 @@ def test_get_observations_datetime_selection():
 
     assert data["mf"][0] == pytest.approx(414.21)
     assert data["mf"][-1] == pytest.approx(405.95)
+
+
+def test_gcwerks_retrieval():
+    results = get_observations(site="CGO", species="cfc11")
+
+    assert results
