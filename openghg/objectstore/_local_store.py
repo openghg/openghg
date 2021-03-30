@@ -260,7 +260,6 @@ def query_store():
         Returns:
             dict: Dictionary for data to be shown in force graph 
     """
-    from collections import defaultdict
     from openghg.modules import Datasource, ObsSurface
 
     obs = ObsSurface.load()
@@ -268,13 +267,7 @@ def query_store():
     datasource_uuids = obs.datasources()
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
-    data = defaultdict(dict)
-
-    for d in datasources:
-        metadata = d.metadata()
-        result = {"site": metadata["site"], "species": metadata["species"], 
-                    "instrument": metadata.get("instrument", "Unknown"), "network": metadata.get("network", "Unknown")}
-        data[d.uuid()] = result
+    data = {d.uuid(): d.metadata() for d in datasources}
 
     return data
 
@@ -302,10 +295,23 @@ def visualise_store() -> pyvis.network.Network:
     network_split = nested_dict()
 
     for key, value in data.items():
-        # Iterate over Datasources to select the networks
+        # Iterate over Datasources to select the networks etc
         network = value["network"]
         site = value["site"]
-        network_split[network][site][key] = value
+        instrument = value["instrument"]
+
+        # These should be standardised so we always have inlet but check
+        # This type of visualisation will only really work with obs data 
+        # as other data types won't have a fixed inlet height.
+        try:
+            inlet = value["inlet"]
+        except KeyError:
+            try:
+                inlet = value["inlet_height_magl"]
+            except KeyError:
+                inlet = "Unknown Inlet"
+
+        network_split[network][site][instrument][inlet][key] = value
 
     for network, sites in network_split.items():
         network_name = network.upper()
@@ -313,21 +319,33 @@ def visualise_store() -> pyvis.network.Network:
         net.add_edge(source=0, to=network)
 
         # Then we want a subnode for each site  
-        for site, data in sites.items():
+        for site, instrument in sites.items():
             # Don't want to use a site here as a site might be in multiple networks
             site_name = site.upper()
             site_id = str(uuid4())
             net.add_node(site_id, label=site_name, color="#e15759", value=1000)
             net.add_edge(source=network, to=site_id)
 
-            # Now for each site create the datasource nodes
-            for uid, datasource in data.items():
-                species = datasource["species"]
-                instrument = datasource["instrument"].upper()
+            for inst, inlets in instrument.items():
+                inst_id = f"{inst}_{site}"
+                net.add_node(inst_id, label=inst, value=333)
+                net.add_edge(source=site_id, to=inst_id)
 
-                label = f"{site.upper()} {species.upper()} {instrument}"
-                title = "\n".join([f"Site: {site.upper()}", f"Species : {species.upper()}", f"Instrument: {instrument}"])
-                net.add_node(uid, label=label, title=title, color="#f28e2b", value=100)
-                net.add_edge(source=site_id, to=uid)
+                # Now we want to check for multiple heights
+                for inlet, data in inlets.items():
+                    inlet_id = f"{inlet}_{inst}_{site}"
+                    label = inlet.upper()
+                    net.add_node(inlet_id, label=inlet, value=200, color="#B07AA2")
+                    net.add_edge(source=inst_id, to=inlet_id)
+
+                    # Now for each site create the datasource nodes
+                    for uid, datasource in data.items():
+                        species = datasource["species"]
+                        instrument = datasource["instrument"].upper()
+
+                        label = species.upper()
+                        title = "\n".join([f"Site: {site.upper()}", f"Species : {species.upper()}", f"Instrument: {instrument}"])
+                        net.add_node(uid, label=label, title=title, color="#f28e2b", value=100)
+                        net.add_edge(source=inlet_id, to=uid)
 
     return net.show("openghg_objstore.html")
