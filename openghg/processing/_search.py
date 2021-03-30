@@ -9,7 +9,7 @@ __all__ = ["search", "search_footprints", "search_emissions"]
 
 
 def search(**kwargs) -> Dict:
-    # locations: Union[str, List],
+    # site: Union[str, List],
     # species: Optional[Union[str, List]] = None,
     # inlet: Optional[Union[str, List]] = None,
     # instrument: Optional[str] = None,
