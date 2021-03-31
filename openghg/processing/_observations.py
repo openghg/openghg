@@ -106,8 +106,7 @@ def get_single_site(
 
     # Get the observation data
     obs_results = search(
-        site=site, inlet=inlet, start_date=start_date, end_date=end_date, species=species, instrument=instrument,
-        find_all = False
+        site=site, inlet=inlet, start_date=start_date, end_date=end_date, species=species, instrument=instrument, find_all=False
     )
 
     # TODO - what if we want to return observations from multiple heights?
@@ -115,7 +114,7 @@ def get_single_site(
         site_key = list(obs_results.keys())[0]
     except IndexError:
         raise ValueError(f"Unable to find any measurement data for {site} at a height of {inlet} in the {network} network.")
-    
+
     # TODO - update Search to return a SearchResult object that makes it easier to retrieve data
     # GJ 2021-03-09
     # This is clunky
@@ -187,10 +186,11 @@ def get_single_site(
                     ds_resampled[var].attrs["units"] = data[var].attrs["units"]
 
             # Create a new variability variable, containing the standard deviation within the resampling period
-            ds_resampled[f"{species}_variability"] = data[species].resample(time = average, keep_attrs = True).std(skipna=False)
+            ds_resampled[f"{species}_variability"] = data[species].resample(time=average, keep_attrs=True).std(skipna=False)
             # If there are any periods where only one measurement was resampled, just use the median variability
-            ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.] = \
-                                                                ds_resampled[f"{species}_variability"].median()
+            ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
+                f"{species}_variability"
+            ].median()
             # Create attributes for variability variable
             ds_resampled[f"{species}_variability"].attrs["long_name"] = f"{data[species].attrs['long_name']}_variability"
             ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
