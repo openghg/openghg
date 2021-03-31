@@ -1,12 +1,12 @@
 from typing import List, Optional, Union
 from pandas import Timestamp
 from openghg.dataobjects import ObsData
-from openghg.processing import get_observations as proc_getobs
+from openghg.processing import get_obs_surface as proc_get_obs_surface
 
-__all__ = ["get_observations"]
+__all__ = ["get_obs_surface"]
 
 
-def get_observations(
+def get_obs_surface(
     site: str,
     species: str,
     start_date: Optional[Union[str, Timestamp]] = None,
@@ -37,7 +37,7 @@ def get_observations(
     Returns:
         list: List of ObsData objects
     """
-    return proc_getobs(
+    return proc_get_obs_surface(
         site=site,
         species=species,
         start_date=start_date,

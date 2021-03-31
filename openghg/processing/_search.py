@@ -83,13 +83,17 @@ def search(**kwargs) -> Dict:
         start_date = timestamp_epoch()
     else:
         start_date = timestamp_tzaware(start_date)    
-        kwargs["start_date"] = start_date
 
     if end_date is None:
         end_date = timestamp_now()
     else:
         end_date = timestamp_tzaware(end_date)
-        kwargs["end_date"] = end_date
+
+    kwargs["start_date"] = start_date
+    kwargs["end_date"] = end_date
+
+    # As we might have kwargs that are None we want to get rid of those
+    search_kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
     # Here we want to load in the ObsSurface module for now
     obs = ObsSurface.load()
@@ -100,7 +104,7 @@ def search(**kwargs) -> Dict:
 
     matching_sources = defaultdict(dict)
     for datasource in datasources:
-        if datasource.search_metadata(**kwargs):
+        if datasource.search_metadata(**search_kwargs):
             uid = datasource.uuid()
             data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
             matching_sources[uid]["keys"] = data_keys
