@@ -106,14 +106,15 @@ def get_single_site(
 
     # Get the observation data
     obs_results = search(
-        locations=site, inlet=inlet, start_date=start_date, end_date=end_date, species=species, instrument=instrument
+        site=site, inlet=inlet, start_date=start_date, end_date=end_date, species=species, instrument=instrument,
+        find_all = False
     )
 
     # TODO - what if we want to return observations from multiple heights?
     try:
         site_key = list(obs_results.keys())[0]
     except IndexError:
-        raise ValueError(f"Unable to find any measurement data for {site} at a height of {height} in the {network} network.")
+        raise ValueError(f"Unable to find any measurement data for {site} at a height of {inlet} in the {network} network.")
     
     # TODO - update Search to return a SearchResult object that makes it easier to retrieve data
     # GJ 2021-03-09
