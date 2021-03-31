@@ -56,6 +56,7 @@ class BaseModule:
         c._datasource_uuids = data["datasource_uuids"]
         c._datasource_names = data["datasource_names"]
         c._file_hashes = data["file_hashes"]
+        c._datasource_table = data["datasource_table"]
 
         try:
             c._rank_data = defaultdict(dict, data["rank_data"])
@@ -206,3 +207,10 @@ class BaseModule:
         self._datasource_uuids.clear()
         self._datasource_names.clear()
         self._file_hashes.clear()
+
+    def datasource_lookup(self: T, datasource_table) -> Dict:
+        """Lookup the Datasources to store the associated data with
+
+
+        
+        """
