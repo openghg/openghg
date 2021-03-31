@@ -93,7 +93,7 @@ def get_single_site(
     import numpy as np
     from xarray import concat as xr_concat
     from openghg.processing import search, recombine_multisite
-    from openghg.util import load_json, timestamp_tzaware
+    from openghg.util import compliant_species, load_json, timestamp_tzaware
 
     site_info = load_json(filename="acrg_site_info.json")
     site = site.upper()
@@ -114,13 +114,19 @@ def get_single_site(
     try:
         site_key = list(obs_results.keys())[0]
     except IndexError:
-        raise ValueError(f"Unable to find any measurement data for {site} at a height of {inlet} in the {network} network.")
+        raise ValueError(f"Unable to find any measurement data for {site}")
     
     # TODO - update Search to return a SearchResult object that makes it easier to retrieve data
     # GJ 2021-03-09
     # This is clunky
     to_retrieve = {site: obs_results[site_key]["keys"]}
     retrieved_data = recombine_multisite(keys=to_retrieve, sort=True)
+
+    # TODO - GJ - 2021-03-30
+    # Need to make sure the species are stored as compliant species labels
+    # in the Datasource metadata, this works around the lack of compliant strings
+    # for the search function above.
+    species = compliant_species(species)
 
     obs_files = []
 
@@ -217,6 +223,8 @@ def get_single_site(
                 rename[var] = "status_flag"
             if "integration_flag" in var:
                 rename[var] = "integration_flag"
+
+        print(rename)
 
         data = data.rename_vars(rename)
 
