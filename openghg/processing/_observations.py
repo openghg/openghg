@@ -75,7 +75,7 @@ def get_obs_surface(
         site_key = list(obs_results.keys())[0]
     except IndexError:
         raise ValueError(f"Unable to find any measurement data for {site}")
-
+    
     # TODO - update Search to return a SearchResult object that makes it easier to retrieve data
     # GJ 2021-03-09
     # This is clunky
