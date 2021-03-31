@@ -3,7 +3,13 @@
 """
 from typing import Dict
 
-__all__ = ["unanimous", "load_object", "get_datapath", "read_header", "load_json", "valid_site", "is_number", "to_lowercase"]
+__all__ = ["create_uuid", "unanimous", "load_object", "get_datapath", "read_header", "load_json", "valid_site", "is_number", "to_lowercase"]
+
+
+def create_uuid():
+    from uuid import uuid4
+
+    return uuid4()
 
 
 def unanimous(seq):

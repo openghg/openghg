@@ -3,6 +3,7 @@
 """
 
 from ._util import (
+    create_uuid,
     get_datapath,
     load_json,
     load_object,

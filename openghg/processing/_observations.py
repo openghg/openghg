@@ -106,7 +106,8 @@ def get_single_site(
 
     # Get the observation data
     obs_results = search(
-        locations=site, inlet=inlet, start_date=start_date, end_date=end_date, species=species, instrument=instrument
+        site=site, inlet=inlet, start_date=start_date, end_date=end_date, species=species, instrument=instrument,
+        find_all = False
     )
 
     # TODO - what if we want to return observations from multiple heights?
