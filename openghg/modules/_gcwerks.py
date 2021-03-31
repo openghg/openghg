@@ -294,7 +294,7 @@ class GCWERKS:
         from fnmatch import fnmatch
 
         # Read inlets from the parameters dictionary
-        expected_inlets = self.get_inlets(site_code=site)
+        expected_inlets, expected_inlets_label = self.get_inlets(site_code=site)
 
         if len(expected_inlets) == 1 and expected_inlets[0] == "any":
             matching_inlets = expected_inlets
@@ -309,9 +309,10 @@ class GCWERKS:
 
             # For now just add air to the expected inlets
             expected_inlets.append("air")
+            expected_inlets_label.append("")
 
             matching_inlets = [
-                data_inlet for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)
+                (data_inlet, label) for data_inlet in data_inlets for inlet, label in zip(expected_inlets, expected_inlets_label) if fnmatch(data_inlet, inlet)
             ]
 
             if not matching_inlets:
@@ -334,8 +335,9 @@ class GCWERKS:
             spec_metadata["units"] = units[spec]
             spec_metadata["scale"] = scale[spec]
 
-            for inlet in matching_inlets:
-                spec_metadata["inlet"] = inlet
+            for inlet, inlet_label in matching_inlets:
+                # Relabel inlet in metadata
+                spec_metadata["inlet"] = inlet_label
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
                     spec_data = data[[spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]]
@@ -362,14 +364,14 @@ class GCWERKS:
                 if spec_data.empty:
                     continue
 
-                attributes = self.get_site_attributes(site=site, inlet=inlet, instrument=instrument)
+                attributes = self.get_site_attributes(site=site, inlet_label=inlet_label, instrument=instrument)
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
 
                 # As a single species may have measurements from multiple inlets we
                 # use the species and inlet as a key
-                data_key = f"{spec}_{inlet}"
+                data_key = f"{spec}_{inlet_label}"
 
                 combined_data[data_key] = {}
                 combined_data[data_key]["metadata"] = spec_metadata
@@ -396,15 +398,20 @@ class GCWERKS:
 
         return sampling_period
 
-    def get_inlets(self, site_code: str) -> List:
+    def get_inlets(self, site_code: str) -> Tuple[List, List]:
         """ Get the inlets used at this site
 
             Args:
                 site (str): Site of datasources
             Returns:
-                list: List of inlets
+                tuple[list, list]: List of inlets, list of inlet labels
         """
-        return self._gc_params[site_code]["inlets"]
+        inlets=self._gc_params[site_code]["inlets"]
+        if "inlet_label" in self._gc_params[site_code].keys():
+            inlets_label=self._gc_params[site_code]["inlet_label"]
+        else:
+            inlets_label=["" for _ in inlets]
+        return inlets, inlets_label
 
     def get_site_code(self, site: str) -> str:
         """ Get the site code
@@ -421,7 +428,7 @@ class GCWERKS:
 
         return site_code
 
-    def get_site_attributes(self, site: str, inlet: str, instrument: str) -> Dict:
+    def get_site_attributes(self, site: str, inlet_label: str, instrument: str) -> Dict:
         """ Gets the site specific attributes for writing to Datsets
 
             Args:
@@ -432,7 +439,11 @@ class GCWERKS:
         """
         attributes = self._gc_params[site.upper()]["global_attributes"]
 
-        attributes["inlet_height_magl"] = inlet
+        if inlet_label == "":
+            attributes["inlet_height_magl"] = "unknown"
+        else:
+            attributes["inlet_height_magl"] = inlet_label
+
         try:
             attributes["comment"] = self._gc_params["comment"][instrument]
         except KeyError:
