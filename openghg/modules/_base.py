@@ -44,6 +44,7 @@ class BaseModule:
         from Acquire.ObjectStore import string_to_datetime
         from openghg.objectstore import get_bucket
         from collections import defaultdict
+        from openghg.util import to_defaultdict
 
         if not data:
             raise ValueError("Unable to create object with empty dictionary")
@@ -56,10 +57,10 @@ class BaseModule:
         c._datasource_uuids = data["datasource_uuids"]
         c._datasource_names = data["datasource_names"]
         c._file_hashes = data["file_hashes"]
-        c._datasource_table = data["datasource_table"]
+        c._datasource_table = to_defaultdict(data["datasource_table"])
 
         try:
-            c._rank_data = defaultdict(dict, data["rank_data"])
+            c._rank_data = to_defaultdict(data["rank_data"])
         except KeyError:
             c._rank_data = defaultdict(dict)
 
@@ -99,14 +100,31 @@ class BaseModule:
         """
         return cls._uuid
 
-    def add_datasources(self: T, datasource_uuids: Dict) -> None:
+    def add_datasources(self: T, datasource_uuids: Dict, metadata: Dict) -> None:
         """Add the passed list of Datasources to the current list
 
         Args:
-            datasource_uuids: Dict of Datasource UUIDs
+            datasource_uuids: Datasource UUIDs
+            metadata: Metadata for each species
         Returns:
             None
         """
+        for species, uid in datasource_uuids.items():
+            metadata = metadata[species]
+
+            site = metadata["site"]
+            network = metadata["network"]
+            inlet = metadata["inlet"]
+
+            result = self._datasource_table[site][network][inlet][species]
+
+            if result and result != uid:
+                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
+            else:
+                self._datasource_table[site][network][inlet][species] = uid
+
+        print(self._datasource_table)
+
         self._datasource_names.update(datasource_uuids)
         # Invert the dictionary to update the dict keyed by UUID
         uuid_keyed = {v: k for k, v in datasource_uuids.items()}

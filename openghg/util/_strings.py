@@ -12,6 +12,9 @@ def clean_string(to_clean: str) -> str:
     """
     import re
 
+    if to_clean is None:
+        return
+
     # Removes all whitespace
     cleaner = re.sub(r"\s+", "", to_clean, flags=re.UNICODE).lower()
     # Removes non-alphanumeric characters

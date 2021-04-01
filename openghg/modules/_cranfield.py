@@ -19,6 +19,7 @@ class CRANFIELD:
             dict: Dictionary of gas data
         """
         from pandas import read_csv
+        from openghg.util import compliant_species
 
         data_filepath = Path(data_filepath)
 
@@ -59,7 +60,7 @@ class CRANFIELD:
             # for sp in species:
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
-            species_metadata["species"] = sp
+            species_metadata["species"] = compliant_species(sp)
 
             # Here we don't want to match the co in co2
             # For now we'll just have 2 columns for each species

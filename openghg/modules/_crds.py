@@ -58,6 +58,7 @@ class CRDS:
         from datetime import datetime
         from pandas import RangeIndex, read_csv, NaT
         import warnings
+        from openghg.util import compliant_species
 
         # At the moment we're using the filename as the source name
         source_name = data_filepath.stem
@@ -135,7 +136,7 @@ class CRDS:
             scale = crds_data["CRDS"]["default_scales"].get(species.upper())
 
             species_metadata = metadata.copy()
-            species_metadata["species"] = species
+            species_metadata["species"] = compliant_species(species)
             species_metadata["inlet"] = inlet
             species_metadata["scale"] = scale
 

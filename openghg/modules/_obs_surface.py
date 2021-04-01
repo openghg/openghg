@@ -17,8 +17,13 @@ class ObsSurface(BaseModule):
 
         self._creation_datetime = get_datetime_now()
         self._stored = False
+
+        # We want to created a nested dictionary
+        def nested_dict():
+            return defaultdict(nested_dict)
+
         # Stores metadata about the Datasource, keyed by site
-        self._datasource_table = {}
+        self._datasource_table = nested_dict()
         # Keyed by name - allows retrieval of UUID from name
         self._datasource_names = {}
         # Keyed by UUID - allows retrieval of name by UUID
@@ -94,7 +99,7 @@ class ObsSurface(BaseModule):
         from pathlib import Path
         import sys
         from tqdm import tqdm
-        from openghg.util import load_object, hash_file
+        from openghg.util import load_object, hash_file, clean_string
         from openghg.processing import assign_data, DataTypes
 
         # Suppress numexpr thread count info info warnings
@@ -108,6 +113,15 @@ class ObsSurface(BaseModule):
         except KeyError:
             raise ValueError(f"Incorrect data type {data_type} selected.")
 
+        # Test that the passed values are valid
+        # Check validity of site, instrument, inlet etc in acrg_site_info.json
+        # Clean the strings
+        site = clean_string(site)
+        inlet = clean_string(inlet)
+        network = clean_string(network)
+        instrument = clean_string(instrument)
+
+        # Load the data processing object
         data_obj = load_object(class_name=data_type)
 
         obs = ObsSurface.load()
@@ -115,58 +129,55 @@ class ObsSurface(BaseModule):
         # Create a progress bar object using the filepaths, iterate over this below
         results = defaultdict(dict)
 
-        with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
-            for fp in filepath:
-                if data_type == "GCWERKS":
-                    try:
-                        data_filepath = Path(fp[0])
-                        precision_filepath = Path(fp[1])
-                    except ValueError:
-                        raise ValueError("For GCWERKS data both data and precision filepaths must be given.")
-                else:
-                    data_filepath = Path(fp)
-
+        # with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
+        for fp in filepath:
+            if data_type == "GCWERKS":
                 try:
-                    file_hash = hash_file(filepath=data_filepath)
-                    if file_hash in obs._file_hashes and not overwrite:
-                        raise ValueError(
-                            f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
-                        )
+                    data_filepath = Path(fp[0])
+                    precision_filepath = Path(fp[1])
+                except ValueError:
+                    raise ValueError("For GCWERKS data both data and precision filepaths must be given.")
+            else:
+                data_filepath = Path(fp)
 
-                    progress_bar.set_description(f"Processing: {data_filepath.name}")
+            # try:
+            file_hash = hash_file(filepath=data_filepath)
+            if file_hash in obs._file_hashes and not overwrite:
+                raise ValueError(
+                    f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
+                )
 
-                    if data_type == "GCWERKS":
-                        data = data_obj.read_file(
-                            data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, network=network
-                        )
-                    else:
-                        data = data_obj.read_file(data_filepath=data_filepath, site=site, network=network)
+            # progress_bar.set_description(f"Processing: {data_filepath.name}")
 
-                    # TODO - need a new way of creating the source name 
-                    source_name = data_filepath.stem
+            if data_type == "GCWERKS":
+                data = data_obj.read_file(
+                    data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, network=network
+                )
+            else:
+                data = data_obj.read_file(data_filepath=data_filepath, site=site, network=network)
 
-                    datasource_table = defaultdict(dict)
-                    # For each species check if we have a Datasource
-                    for species in data:
-                        name = "_".join([source_name, species])
-                        datasource_table[species]["uuid"] = obs._datasource_names.get(name, False)
-                        datasource_table[species]["name"] = name
+            # Extract the metadata for each species to perform a Datasource lookup
+            metadata = {species: data["metadata"] for species, data in data.items()}
 
-                    # Create Datasources, save them to the object store and get their UUIDs
-                    datasource_uuids = assign_data(gas_data=data, lookup_results=datasource_table, overwrite=overwrite)
+            lookup_results = obs.datasource_lookup(metadata=metadata)
+            
+            print("\n\n\nLookup resulkts", lookup_results)
 
-                    results["processed"][data_filepath.name] = datasource_uuids
+            # Create Datasources, save them to the object store and get their UUIDs
+            datasource_uuids = assign_data(gas_data=data, lookup_results=lookup_results, overwrite=overwrite)
 
-                    # Record the Datasources we've created / appended to
-                    obs.add_datasources(datasource_uuids)
+            results["processed"][data_filepath.name] = datasource_uuids
 
-                    # Store the hash as the key for easy searching, store the filename as well for
-                    # ease of checking by user
-                    obs._file_hashes[file_hash] = data_filepath.name
-                except Exception as e:
-                    results["error"][data_filepath.stem] = e
+            # Record the Datasources we've created / appended to
+            obs.add_datasources(datasource_uuids, metadata)
 
-                progress_bar.update(1)
+            # Store the hash as the key for easy searching, store the filename as well for
+            # ease of checking by user
+            obs._file_hashes[file_hash] = data_filepath.name
+            # except Exception as e:
+            #     results["error"][data_filepath.stem] = e
+
+            # progress_bar.update(1)
 
         # Save this object back to the object store
         obs.save()
@@ -182,15 +193,15 @@ class ObsSurface(BaseModule):
                 dict: Dictionary of datasource information
         """
         lookup_results = {}
-
-        for species, data in metadata.items():
+        for _, data in metadata.items():
             site = data["site"]
             network = data["network"]
             inlet = data["inlet"]
+            species = data["species"]
 
-            try:
-                result = self._datasource_table[site][network][inlet][species]
-            except KeyError:
+            result = self._datasource_table[site][network][inlet][species]
+
+            if not result:
                 result = False
 
             lookup_results[species] = result

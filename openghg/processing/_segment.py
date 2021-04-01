@@ -60,12 +60,18 @@ def assign_data(gas_data: Dict, lookup_results: Dict, overwrite: bool) -> Dict:
     from openghg.modules import Datasource
 
     uuids = {}
+
     # Add in copying of attributes, or add attributes to the metadata at an earlier state.
-    for species in gas_data:
-        metadata = gas_data[species]["metadata"]
-        data = gas_data[species]["data"]
-        name = lookup_results[species]["name"]
-        uuid = lookup_results[species]["uuid"]
+    for key in gas_data:
+        metadata = gas_data[key]["metadata"]
+        data = gas_data[key]["data"]
+
+        # We read this from metadata due to keying diifferences on data read between objects
+        species = metadata["species"]
+        uuid = lookup_results[species.lower()]
+
+        # TODO - Could this be done somewhere else? It doesn't feel quite right it
+        # being here
 
         # Add the read metadata to the Dataset attributes being careful 
         # not to overwrite any attributes that are already there
@@ -77,14 +83,14 @@ def assign_data(gas_data: Dict, lookup_results: Dict, overwrite: bool) -> Dict:
         if uuid:
             datasource = Datasource.load(uuid=uuid)
         else:
-            datasource = Datasource(name=name)
+            datasource = Datasource()
 
         # Add the dataframe to the datasource
         datasource.add_data(metadata=metadata, data=data, overwrite=overwrite)
         # Save Datasource to object store
         datasource.save()
 
-        uuids[name] = datasource.uuid()
+        uuids[species] = datasource.uuid()
 
     return uuids
 
