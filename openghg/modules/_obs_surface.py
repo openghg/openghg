@@ -129,59 +129,53 @@ class ObsSurface(BaseModule):
         # Create a progress bar object using the filepaths, iterate over this below
         results = defaultdict(dict)
 
-        # with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
-        for fp in filepath:
-            if data_type == "GCWERKS":
+        with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
+            for fp in filepath:
+                if data_type == "GCWERKS":
+                    try:
+                        data_filepath = Path(fp[0])
+                        precision_filepath = Path(fp[1])
+                    except ValueError:
+                        raise ValueError("For GCWERKS data both data and precision filepaths must be given.")
+                else:
+                    data_filepath = Path(fp)
+
                 try:
-                    data_filepath = Path(fp[0])
-                    precision_filepath = Path(fp[1])
-                except ValueError:
-                    raise ValueError("For GCWERKS data both data and precision filepaths must be given.")
-            else:
-                data_filepath = Path(fp)
+                    file_hash = hash_file(filepath=data_filepath)
+                    if file_hash in obs._file_hashes and not overwrite:
+                        raise ValueError(
+                            f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
+                        )
 
-            # try:
-            file_hash = hash_file(filepath=data_filepath)
-            if file_hash in obs._file_hashes and not overwrite:
-                raise ValueError(
-                    f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
-                )
+                    progress_bar.set_description(f"Processing: {data_filepath.name}")
 
-            # progress_bar.set_description(f"Processing: {data_filepath.name}")
+                    if data_type == "GCWERKS":
+                        data = data_obj.read_file(
+                            data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, network=network
+                        )
+                    else:
+                        data = data_obj.read_file(data_filepath=data_filepath, site=site, network=network)
 
-            if data_type == "GCWERKS":
-                data = data_obj.read_file(
-                    data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, network=network
-                )
-            else:
-                data = data_obj.read_file(data_filepath=data_filepath, site=site, network=network)
+                    # Extract the metadata for each set of measurements
+                    metadata = {key: data["metadata"] for key, data in data.items()}
 
-            # Extract the metadata for each set of measurements
-            metadata = {key: data["metadata"] for key, data in data.items()}
+                    lookup_results = obs.datasource_lookup(metadata=metadata)
 
-            print(metadata.keys())
+                    # Create Datasources, save them to the object store and get their UUIDs
+                    datasource_uuids = assign_data(gas_data=data, lookup_results=lookup_results, overwrite=overwrite)
 
-            lookup_results = obs.datasource_lookup(metadata=metadata)
+                    results["processed"][data_filepath.name] = datasource_uuids
 
-            print(lookup_results.keys())
+                    # Record the Datasources we've created / appended to
+                    obs.add_datasources(datasource_uuids, metadata)
 
-            # Create Datasources, save them to the object store and get their UUIDs
-            datasource_uuids = assign_data(gas_data=data, lookup_results=lookup_results, overwrite=overwrite)
+                    # Store the hash as the key for easy searching, store the filename as well for
+                    # ease of checking by user
+                    obs._file_hashes[file_hash] = data_filepath.name
+                except Exception as e:
+                    results["error"][data_filepath.stem] = e
 
-            results["processed"][data_filepath.name] = datasource_uuids
-
-            # print(metadata, "\n\n\n", datasource_uuids)
-
-            # Record the Datasources we've created / appended to
-            obs.add_datasources(datasource_uuids, metadata)
-
-            # Store the hash as the key for easy searching, store the filename as well for
-            # ease of checking by user
-            obs._file_hashes[file_hash] = data_filepath.name
-            # except Exception as e:
-            #     results["error"][data_filepath.stem] = e
-
-            # progress_bar.update(1)
+                progress_bar.update(1)
 
         # Save this object back to the object store
         obs.save()

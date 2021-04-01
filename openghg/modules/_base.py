@@ -123,8 +123,6 @@ class BaseModule:
             else:
                 self._datasource_table[site][network][inlet][species] = uid
 
-        print(self._datasource_table)
-
         self._datasource_names.update(datasource_uuids)
         # Invert the dictionary to update the dict keyed by UUID
         uuid_keyed = {v: k for k, v in datasource_uuids.items()}

@@ -24,19 +24,12 @@ def test_read_CRDS():
 
     keys = results["processed"]["bsd.picarro.1minute.248m.dat"].keys()
 
-    expected_keys = sorted(
-        [
-            "bsd.picarro.1minute.248m_ch4",
-            "bsd.picarro.1minute.248m_co",
-            "bsd.picarro.1minute.248m_co2",
-        ]
-    )
-    assert sorted(keys) == expected_keys
+    assert sorted(keys) == ['ch4', 'co', 'co2']
 
     # Load up the assigned Datasources and check they contain the correct data
     data = results["processed"]["bsd.picarro.1minute.248m.dat"]
 
-    ch4_data = Datasource.load(uuid=data["bsd.picarro.1minute.248m_ch4"]).data()
+    ch4_data = Datasource.load(uuid=data["ch4"]).data()
     ch4_data = ch4_data["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"]
 
     assert ch4_data.time[0] == Timestamp("2014-01-30T10:52:30")
@@ -45,9 +38,7 @@ def test_read_CRDS():
     assert ch4_data["ch4_variability"][-1] == 0.674
     assert ch4_data["ch4_number_of_observations"][-1] == 25.0
 
-    obs = ObsSurface.load()
-
-    assert sorted(obs._datasource_names.keys()) == expected_keys
+    # obs = ObsSurface.load()
 
 
 def test_read_GC():
