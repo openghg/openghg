@@ -6,45 +6,6 @@ from xarray import Dataset
 
 __all__ = ["get_split_frequency", "assign_footprint_data", "assign_data", "assign_emissions_data"]
 
-# def create_datasources(gas_data):
-#     """ Create or get an existing Datasource for each gas in the file
-
-#         TODO - currently this function will only take data from a single Datasource
-
-#         Args:
-#             gas_data (list): List of tuples gas name, datasource_id, Pandas.Dataframe
-#         Returns:
-#             list: List of UUIDs
-#     """
-#     from openghg.modules import Datasource
-
-#     uuids = []
-
-#     # Rework this to for the segmentation of data within the Datasource
-#     # How to reliably get existing UUIDs to be passed through from an interface or selection?
-#     # Rely on site_species for now via name lookup?
-#     # Need to allow UUID input here so we can add new data to existing Datasources easily without
-#     # relying on the naming method
-#     for species, metadata, data in gas_data:
-#         # Lookup Datasource uuid, if exists
-#         if Datasource.exists(datasource_id=datasource_id):
-#             datasource = Datasource.load(uuid=datasource_id)
-#             # TODO - add metadata in here - append to existing?
-#         else:
-#             datasource = Datasource.create(name=species)
-
-#         # Store the name and datasource_id
-#         # self._species[gas_name] = datasource_id
-#         # Add the dataframe to the datasource
-#         datasource.add_data(metadata, data)
-#         # Save Datasource to object store
-#         datasource.save()
-
-#         # Add the Datasource to the list
-#         uuids.append(datasource.uuid())
-
-#     return uuids
-
 
 def assign_data(gas_data: Dict, lookup_results: Dict, overwrite: bool) -> Dict:
     """ Assign data to a Datasource. This will either create a new Datasource 
@@ -66,9 +27,8 @@ def assign_data(gas_data: Dict, lookup_results: Dict, overwrite: bool) -> Dict:
         metadata = gas_data[key]["metadata"]
         data = gas_data[key]["data"]
 
-        # We read this from metadata due to keying diifferences on data read between objects
-        species = metadata["species"]
-        uuid = lookup_results[species.lower()]
+        # Our lookup results and gas data have the same keys
+        uuid = lookup_results[key]
 
         # TODO - Could this be done somewhere else? It doesn't feel quite right it
         # being here
@@ -90,7 +50,7 @@ def assign_data(gas_data: Dict, lookup_results: Dict, overwrite: bool) -> Dict:
         # Save Datasource to object store
         datasource.save()
 
-        uuids[species] = datasource.uuid()
+        uuids[key] = datasource.uuid()
 
     return uuids
 

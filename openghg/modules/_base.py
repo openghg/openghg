@@ -109,12 +109,12 @@ class BaseModule:
         Returns:
             None
         """
-        for species, uid in datasource_uuids.items():
-            metadata = metadata[species]
-
-            site = metadata["site"]
-            network = metadata["network"]
-            inlet = metadata["inlet"]
+        for key, uid in datasource_uuids.items():
+            md = metadata[key]
+            site = md["site"]
+            network = md["network"]
+            inlet = md["inlet"]
+            species = md["species"]
 
             result = self._datasource_table[site][network][inlet][species]
 

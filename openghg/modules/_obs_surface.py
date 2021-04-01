@@ -156,17 +156,21 @@ class ObsSurface(BaseModule):
             else:
                 data = data_obj.read_file(data_filepath=data_filepath, site=site, network=network)
 
-            # Extract the metadata for each species to perform a Datasource lookup
-            metadata = {species: data["metadata"] for species, data in data.items()}
+            # Extract the metadata for each set of measurements
+            metadata = {key: data["metadata"] for key, data in data.items()}
+
+            print(metadata.keys())
 
             lookup_results = obs.datasource_lookup(metadata=metadata)
-            
-            print("\n\n\nLookup resulkts", lookup_results)
+
+            print(lookup_results.keys())
 
             # Create Datasources, save them to the object store and get their UUIDs
             datasource_uuids = assign_data(gas_data=data, lookup_results=lookup_results, overwrite=overwrite)
 
             results["processed"][data_filepath.name] = datasource_uuids
+
+            # print(metadata, "\n\n\n", datasource_uuids)
 
             # Record the Datasources we've created / appended to
             obs.add_datasources(datasource_uuids, metadata)
@@ -193,7 +197,7 @@ class ObsSurface(BaseModule):
                 dict: Dictionary of datasource information
         """
         lookup_results = {}
-        for _, data in metadata.items():
+        for key, data in metadata.items():
             site = data["site"]
             network = data["network"]
             inlet = data["inlet"]
@@ -204,7 +208,7 @@ class ObsSurface(BaseModule):
             if not result:
                 result = False
 
-            lookup_results[species] = result
+            lookup_results[key] = result
 
         return lookup_results
 

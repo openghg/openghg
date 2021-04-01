@@ -322,8 +322,7 @@ class GCWERKS:
                 )
 
         combined_data = {}
-        
-        print(data)
+
         for spec in species:
             # Skip this species if the data is all NaNs
             if data[spec].isnull().all():
