@@ -24,7 +24,7 @@ def test_read_CRDS():
 
     keys = results["processed"]["bsd.picarro.1minute.248m.dat"].keys()
 
-    assert sorted(keys) == ['ch4', 'co', 'co2']
+    assert sorted(keys) == ["ch4", "co", "co2"]
 
     # Load up the assigned Datasources and check they contain the correct data
     data = results["processed"]["bsd.picarro.1minute.248m.dat"]
@@ -49,73 +49,69 @@ def test_read_GC():
 
     results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
 
-    return False
-
-    expected_keys = sorted(
-        [
-            "capegrim-medusa.18_C4F10_75m_4",
-            "capegrim-medusa.18_C6F14_75m_4",
-            "capegrim-medusa.18_CCl4_75m_4",
-            "capegrim-medusa.18_CF4_75m_4",
-            "capegrim-medusa.18_CFC-112_75m_4",
-            "capegrim-medusa.18_CFC-113_75m_4",
-            "capegrim-medusa.18_CFC-114_75m_4",
-            "capegrim-medusa.18_CFC-115_75m_4",
-            "capegrim-medusa.18_CFC-11_75m_4",
-            "capegrim-medusa.18_CFC-12_75m_4",
-            "capegrim-medusa.18_CFC-13_75m_4",
-            "capegrim-medusa.18_CH2Br2_75m_4",
-            "capegrim-medusa.18_CH2Cl2_75m_4",
-            "capegrim-medusa.18_CH3Br_75m_4",
-            "capegrim-medusa.18_CH3CCl3_75m_4",
-            "capegrim-medusa.18_CH3Cl_75m_4",
-            "capegrim-medusa.18_CH3I_75m_4",
-            "capegrim-medusa.18_CHBr3_75m_4",
-            "capegrim-medusa.18_CHCl3_75m_4",
-            "capegrim-medusa.18_COS_75m_4",
-            "capegrim-medusa.18_H-1211_75m_4",
-            "capegrim-medusa.18_H-1301_75m_4",
-            "capegrim-medusa.18_H-2402_75m_4",
-            "capegrim-medusa.18_HCFC-124_75m_4",
-            "capegrim-medusa.18_HCFC-132b_75m_4",
-            "capegrim-medusa.18_HCFC-133a_75m_4",
-            "capegrim-medusa.18_HCFC-141b_75m_4",
-            "capegrim-medusa.18_HCFC-142b_75m_4",
-            "capegrim-medusa.18_HCFC-22_75m_4",
-            "capegrim-medusa.18_HFC-125_75m_4",
-            "capegrim-medusa.18_HFC-134a_75m_4",
-            "capegrim-medusa.18_HFC-143a_75m_4",
-            "capegrim-medusa.18_HFC-152a_75m_4",
-            "capegrim-medusa.18_HFC-227ea_75m_4",
-            "capegrim-medusa.18_HFC-236fa_75m_4",
-            "capegrim-medusa.18_HFC-23_75m_4",
-            "capegrim-medusa.18_HFC-245fa_75m_4",
-            "capegrim-medusa.18_HFC-32_75m_4",
-            "capegrim-medusa.18_HFC-365mfc_75m_4",
-            "capegrim-medusa.18_HFC-4310mee_75m_4",
-            "capegrim-medusa.18_NF3_75m_4",
-            "capegrim-medusa.18_PCE_75m_4",
-            "capegrim-medusa.18_PFC-116_75m_4",
-            "capegrim-medusa.18_PFC-218_75m_4",
-            "capegrim-medusa.18_PFC-318_75m_4",
-            "capegrim-medusa.18_SF5CF3_75m_4",
-            "capegrim-medusa.18_SF6_75m_4",
-            "capegrim-medusa.18_SO2F2_75m_4",
-            "capegrim-medusa.18_TCE_75m_4",
-            "capegrim-medusa.18_benzene_75m_4",
-            "capegrim-medusa.18_c-propane_75m_4",
-            "capegrim-medusa.18_desflurane_75m_4",
-            "capegrim-medusa.18_ethane_75m_4",
-            "capegrim-medusa.18_ethyne_75m_4",
-            "capegrim-medusa.18_propane_75m_4",
-            "capegrim-medusa.18_toluene_75m_4",
-        ]
-    )
+    expected_keys = [
+        "benzene_75m_4",
+        "c4f10_75m_4",
+        "c6f14_75m_4",
+        "ccl4_75m_4",
+        "cf4_75m_4",
+        "cfc112_75m_4",
+        "cfc113_75m_4",
+        "cfc114_75m_4",
+        "cfc115_75m_4",
+        "cfc11_75m_4",
+        "cfc12_75m_4",
+        "cfc13_75m_4",
+        "ch2br2_75m_4",
+        "ch2cl2_75m_4",
+        "ch3br_75m_4",
+        "ch3ccl3_75m_4",
+        "ch3cl_75m_4",
+        "ch3i_75m_4",
+        "chbr3_75m_4",
+        "chcl3_75m_4",
+        "cos_75m_4",
+        "cpropane_75m_4",
+        "desflurane_75m_4",
+        "ethane_75m_4",
+        "ethyne_75m_4",
+        "h1211_75m_4",
+        "h1301_75m_4",
+        "h2402_75m_4",
+        "hcfc124_75m_4",
+        "hcfc132b_75m_4",
+        "hcfc133a_75m_4",
+        "hcfc141b_75m_4",
+        "hcfc142b_75m_4",
+        "hcfc22_75m_4",
+        "hfc125_75m_4",
+        "hfc134a_75m_4",
+        "hfc143a_75m_4",
+        "hfc152a_75m_4",
+        "hfc227ea_75m_4",
+        "hfc236fa_75m_4",
+        "hfc23_75m_4",
+        "hfc245fa_75m_4",
+        "hfc32_75m_4",
+        "hfc365mfc_75m_4",
+        "hfc4310mee_75m_4",
+        "nf3_75m_4",
+        "pce_75m_4",
+        "pfc116_75m_4",
+        "pfc218_75m_4",
+        "pfc318_75m_4",
+        "propane_75m_4",
+        "sf5cf3_75m_4",
+        "sf6_75m_4",
+        "so2f2_75m_4",
+        "tce_75m_4",
+        "toluene_75m_4",
+    ]
 
     assert sorted(list(results["processed"]["capegrim-medusa.18.C"].keys())) == expected_keys
 
     # Load in some data
-    uuid = results["processed"]["capegrim-medusa.18.C"]["capegrim-medusa.18_HFC-152a_75m_4"]
+    uuid = results["processed"]["capegrim-medusa.18.C"]["hfc152a_75m_4"]
 
     hfc152a_data = Datasource.load(uuid=uuid, shallow=False).data()
     hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:33:00+00:00"]
@@ -159,12 +155,24 @@ def test_read_GC():
         "station_long_name": "Cape Grim, Tasmania",
         "station_height_masl": 94.0,
         "instrument": "medusa",
-        "site": "CGO",
-        "network": "NA",
+        "site": "cgo",
+        "network": "agage",
         "units": "ppt",
         "scale": "SIO-05",
         "inlet": "75m_4",
     }
+
+    # # Now test that if we add more data it adds it to the same Datasource
+    # datasource_ids = [d.uuid() for d in obs.datasources()]
+
+    # uuid_one = datasource_ids[0]
+
+    # data_filepath = get_datapath(filename="capegrim-medusa.future.C", data_type="GC")
+    # precision_filepath = get_datapath(filename="capegrim-medusa.future.precisions.C", data_type="GC")
+
+    # results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
+
+    # print(results)
 
 
 def test_read_cranfield():
@@ -174,13 +182,7 @@ def test_read_cranfield():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="CRANFIELD", site="THB", network="CRANFIELD")
 
-    expected_keys = sorted(
-        [
-            "THB_hourly_means_test_ch4",
-            "THB_hourly_means_test_co2",
-            "THB_hourly_means_test_co",
-        ]
-    )
+    expected_keys = ['ch4', 'co', 'co2']
 
     assert sorted(results["processed"]["THB_hourly_means_test.csv"].keys()) == expected_keys
 

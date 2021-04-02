@@ -363,23 +363,27 @@ class GCWERKS:
                 if spec_data.empty:
                     continue
 
+                print(spec_data)
+
                 attributes = self.get_site_attributes(site=site, inlet=inlet, instrument=instrument)
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
+                # A cleaned species label
+                comp_species = compliant_species(spec)
 
                 # Rename variables so they have lowercase and alphanumeric names
                 to_rename = {}
                 for var in spec_data.variables:
                     if spec in var:
-                        new_name = var.replace(spec, compliant_species(spec))
+                        new_name = var.replace(spec, comp_species)
                         to_rename[var] = new_name
 
                 spec_data = spec_data.rename(to_rename)
 
                 # As a single species may have measurements from multiple inlets we
                 # use the species and inlet as a key
-                data_key = f"{spec}_{inlet}"
+                data_key = f"{comp_species}_{inlet}"
 
                 combined_data[data_key] = {}
                 combined_data[data_key]["metadata"] = spec_metadata
