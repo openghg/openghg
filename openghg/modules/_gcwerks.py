@@ -363,8 +363,6 @@ class GCWERKS:
                 if spec_data.empty:
                     continue
 
-                print(spec_data)
-
                 attributes = self.get_site_attributes(site=site, inlet=inlet, instrument=instrument)
 
                 # We want an xarray Dataset

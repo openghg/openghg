@@ -71,7 +71,12 @@ class THAMESBARRIER(BaseModule):
             # site_attributes["scale"] = self._tb_params["scale"]
 
             # All attributes stored in the metadata?
-            metadata = {"species": compliant_species(species), "site": site}
+            metadata = {
+                "species": compliant_species(species),
+                "site": site,
+                "inlet": clean_string(self._tb_params["inlet"]),
+                "network": "LGHG",
+            }
             metadata.update(site_attributes)
 
             gas_data[species] = {

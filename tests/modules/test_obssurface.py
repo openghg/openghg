@@ -19,7 +19,6 @@ def test_read_CRDS():
     get_local_bucket(empty=True)
 
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.dat", data_type="CRDS")
-
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
 
     keys = results["processed"]["bsd.picarro.1minute.248m.dat"].keys()
@@ -38,7 +37,31 @@ def test_read_CRDS():
     assert ch4_data["ch4_variability"][-1] == 0.674
     assert ch4_data["ch4_number_of_observations"][-1] == 25.0
 
-    # obs = ObsSurface.load()
+    obs = ObsSurface.load()
+    uuid_one = obs.datasources()[0]
+    datasource = Datasource.load(uuid=uuid_one)
+
+    data_keys = list(datasource.data().keys())
+
+    assert data_keys == ["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"]
+
+    filepath = get_datapath(filename="bsd.picarro.1minute.248m.future.dat", data_type="CRDS")
+    results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
+
+    uuid_one = obs.datasources()[0]
+    datasource = Datasource.load(uuid=uuid_one)
+    data_keys = sorted(list(datasource.data().keys()))
+
+    assert data_keys == [
+        "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00",
+        "2023-01-30-13:56:30+00:00_2023-01-30-14:20:30+00:00",
+    ]
+
+    table = obs._datasource_table
+
+    assert table["bsd"]["decc"]["248m"]["ch4"]
+    assert table["bsd"]["decc"]["248m"]["co2"]
+    assert table["bsd"]["decc"]["248m"]["co"]
 
 
 def test_read_GC():
@@ -132,7 +155,6 @@ def test_read_GC():
     assert hfc152a_data["hfc152a_integration_flag"][-1] == 0
 
     # Check we have the Datasource info saved
-
     obs = ObsSurface.load()
 
     assert sorted(obs._datasource_names.keys()) == expected_keys
@@ -163,16 +185,41 @@ def test_read_GC():
     }
 
     # # Now test that if we add more data it adds it to the same Datasource
-    # datasource_ids = [d.uuid() for d in obs.datasources()]
+    uuid_one = obs.datasources()[0]
 
-    # uuid_one = datasource_ids[0]
+    datasource = Datasource.load(uuid=uuid_one)
 
-    # data_filepath = get_datapath(filename="capegrim-medusa.future.C", data_type="GC")
-    # precision_filepath = get_datapath(filename="capegrim-medusa.future.precisions.C", data_type="GC")
+    data_one = datasource.data()
+    assert list(data_one.keys()) == ["2018-01-01-02:24:00+00:00_2018-01-31-23:33:00+00:00"]
 
-    # results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
+    data_filepath = get_datapath(filename="capegrim-medusa.future.C", data_type="GC")
+    precision_filepath = get_datapath(filename="capegrim-medusa.future.precisions.C", data_type="GC")
 
-    # print(results)
+    results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
+
+    datasource = Datasource.load(uuid=uuid_one)
+    data_one = datasource.data()
+
+    assert sorted(list(data_one.keys())) == [
+        "2018-01-01-02:24:00+00:00_2018-01-31-23:33:00+00:00",
+        "2023-01-01-02:24:00+00:00_2023-01-31-23:33:00+00:00",
+    ]
+
+    data_filepath = get_datapath(filename="trinidadhead.01.C", data_type="GC")
+    precision_filepath = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
+
+    ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="THD", network="AGAGE")
+
+    obs = ObsSurface.load()
+    table = obs._datasource_table
+
+    assert table["cgo"]["agage"]["75m_4"]["nf3"]
+    assert table["cgo"]["agage"]["75m_4"]["hfc236fa"]
+    assert table["cgo"]["agage"]["75m_4"]["h1211"]
+
+    assert table["thd"]["agage"]["any"]["cfc11"]
+    assert table["thd"]["agage"]["any"]["n2o"]
+    assert table["thd"]["agage"]["any"]["ccl4"]
 
 
 def test_read_cranfield():
@@ -182,11 +229,11 @@ def test_read_cranfield():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="CRANFIELD", site="THB", network="CRANFIELD")
 
-    expected_keys = ['ch4', 'co', 'co2']
+    expected_keys = ["ch4", "co", "co2"]
 
     assert sorted(results["processed"]["THB_hourly_means_test.csv"].keys()) == expected_keys
 
-    uuid = results["processed"]["THB_hourly_means_test.csv"]["THB_hourly_means_test_ch4"]
+    uuid = results["processed"]["THB_hourly_means_test.csv"]["ch4"]
 
     ch4_data = Datasource.load(uuid=uuid, shallow=False).data()
     ch4_data = ch4_data["2018-05-05-00:00:00+00:00_2018-05-13-16:00:00+00:00"]
@@ -200,13 +247,6 @@ def test_read_cranfield():
     assert ch4_data["ch4 variability"][0] == pytest.approx(75.50218)
     assert ch4_data["ch4 variability"][-1] == pytest.approx(6.48413)
 
-    # Check obs has stored the keys correctly
-    obs = ObsSurface.load()
-
-    assert sorted(list(obs._datasource_names.keys())) == sorted(
-        ["THB_hourly_means_test_ch4", "THB_hourly_means_test_co2", "THB_hourly_means_test_co"]
-    )
-
 
 def test_read_icos():
     get_local_bucket(empty=True)
@@ -215,9 +255,7 @@ def test_read_icos():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
 
-    assert list(results["processed"]["tta.co2.1minute.222m.min.dat"].keys())[0] == "tta.co2.1minute.222m.min_co2"
-
-    uuid = results["processed"]["tta.co2.1minute.222m.min.dat"]["tta.co2.1minute.222m.min_co2"]
+    uuid = results["processed"]["tta.co2.1minute.222m.min.dat"]["co2"]
 
     data = Datasource.load(uuid=uuid, shallow=False).data()
 
@@ -257,7 +295,7 @@ def test_read_icos():
 
     obs = ObsSurface.load()
 
-    assert list(obs._datasource_names.keys())[0] == "tta.co2.1minute.222m.min_co2"
+    assert list(obs._datasource_names.keys())[0] == "co2"
 
 
 def test_read_beaco2n():
@@ -267,7 +305,7 @@ def test_read_beaco2n():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="BEACO2N", site="CCC", network="BEACO2N")
 
-    uuid = results["processed"]["Charlton_Community_Center.csv"]["Charlton_Community_Center_co2"]
+    uuid = results["processed"]["Charlton_Community_Center.csv"]["co2"]
 
     co2_data = Datasource.load(uuid=uuid, shallow=False).data()
     co2_data = co2_data["2015-04-18-04:00:00+00:00_2015-04-18-10:00:00+00:00"]
@@ -275,10 +313,6 @@ def test_read_beaco2n():
     assert co2_data.time[0] == Timestamp("2015-04-18T04:00:00")
     assert co2_data["co2"][0] == 410.4
     assert co2_data["co2_qc"][0] == 2
-
-    obs = ObsSurface.load()
-
-    assert list(obs._datasource_names.keys())[0] == "Charlton_Community_Center_pm"
 
 
 def test_read_noaa():
@@ -288,7 +322,7 @@ def test_read_noaa():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="NOAA", site="POCN25", network="NOAA")
 
-    uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co_pocn25_surface-flask_1_ccgg_event_co"]
+    uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]
 
     co_data = Datasource.load(uuid=uuid, shallow=False).data()
 
@@ -305,10 +339,6 @@ def test_read_noaa():
     assert co_data["co_selection_flag"][0] == 0
     assert co_data["co_selection_flag"][-1] == 0
 
-    obs = ObsSurface.load()
-
-    assert list(obs._datasource_names.keys())[0] == "co_pocn25_surface-flask_1_ccgg_event_co"
-
 
 def test_read_thames_barrier():
     get_local_bucket(empty=True)
@@ -317,11 +347,11 @@ def test_read_thames_barrier():
 
     results = ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER", site="TMB", network="LGHG")
 
-    expected_keys = sorted(["thames_test_20190707_CH4", "thames_test_20190707_CO2", "thames_test_20190707_CO"])
+    expected_keys = sorted(["CH4", "CO2", "CO"])
 
     assert sorted(list(results["processed"]["thames_test_20190707.csv"].keys())) == expected_keys
 
-    uuid = results["processed"]["thames_test_20190707.csv"]["thames_test_20190707_CO2"]
+    uuid = results["processed"]["thames_test_20190707.csv"]["CO2"]
 
     data = Datasource.load(uuid=uuid, shallow=False).data()
     data = data["2019-07-01-00:39:55+00:00_2019-08-01-00:10:30+00:00"]
@@ -338,16 +368,18 @@ def test_read_thames_barrier():
     assert sorted(obs._datasource_names.keys()) == expected_keys
 
 
-@pytest.mark.skip("Re-enable this once testing of processing scripts is finished")
 def test_upload_same_file_twice_raises():
     get_local_bucket(empty=True)
 
     data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
 
-    ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+    res = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
 
-    with pytest.raises(ValueError):
-        ObsSurface.read_file(filepath=data_filepath, data_type="ICOS")
+    assert not res["error"] 
+
+    res = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+
+    assert "tta.co2.1minute.222m.min.dat" in res["error"]
 
 
 def test_delete_Datasource():

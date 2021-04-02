@@ -1,6 +1,7 @@
 from openghg.modules import BaseModule
 from pathlib import Path
 from typing import Dict, Optional, Union
+import traceback
 
 __all__ = ["ObsSurface"]
 
@@ -117,8 +118,8 @@ class ObsSurface(BaseModule):
         # Check validity of site, instrument, inlet etc in acrg_site_info.json
         # Clean the strings
         site = clean_string(site)
-        inlet = clean_string(inlet)
         network = clean_string(network)
+        inlet = clean_string(inlet)
         instrument = clean_string(instrument)
 
         # Load the data processing object
@@ -142,7 +143,7 @@ class ObsSurface(BaseModule):
 
                 try:
                     file_hash = hash_file(filepath=data_filepath)
-                    if file_hash in obs._file_hashes and not overwrite:
+                    if file_hash in obs._file_hashes and overwrite is False:
                         raise ValueError(
                             f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
                         )
@@ -172,8 +173,9 @@ class ObsSurface(BaseModule):
                     # Store the hash as the key for easy searching, store the filename as well for
                     # ease of checking by user
                     obs._file_hashes[file_hash] = data_filepath.name
-                except Exception as e:
-                    results["error"][data_filepath.stem] = e
+                except Exception:
+                    print("We got error")
+                    results["error"][data_filepath.name] = traceback.format_exc()
 
                 progress_bar.update(1)
 

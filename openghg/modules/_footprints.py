@@ -119,7 +119,7 @@ class FOOTPRINTS(BaseModule):
         # This behaviour is different to assign_data which will be changed soon
         uid = assign_footprint_data(data=fp_data, metadata=metadata, datasource_uid=datasource_uid)
 
-        fp.add_datasources(datasource_uuids={site_hash: uid})
+        fp.add_datasources(datasource_uuids={site_hash: uid}, metadata=metadata)
 
         # Record the file hash in case we see this file again
         fp._file_hashes[file_hash] = filepath.name

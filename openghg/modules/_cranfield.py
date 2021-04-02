@@ -7,7 +7,13 @@ __all__ = ["CRANFIELD"]
 class CRANFIELD:
     """ Class for processing Cranfield data """
 
-    def read_file(self, data_filepath: Union[str, Path, list], site: Optional[str] = None, network: Optional[str] = None) -> Dict:
+    def read_file(
+        self,
+        data_filepath: Union[str, Path, list],
+        site: Optional[str] = None,
+        network: Optional[str] = None,
+        inlet: Optional[str] = None,
+    ) -> Dict:
         """Creates a CRDS object holding data stored within Datasources
 
         Args:
@@ -48,6 +54,8 @@ class CRANFIELD:
         metadata["instrument"] = "CRDS"
         metadata["time_resolution"] = "1_hour"
         metadata["height"] = "10magl"
+        metadata["inlet"] = "10magl"
+        metadata["network"] = "CRANFIELD"
 
         # TODO - this feels fragile
         species = [col for col in data.columns if " " not in col]
@@ -71,7 +79,5 @@ class CRANFIELD:
             gas_data = gas_data.to_xarray()
 
             combined_data[sp] = {"metadata": species_metadata, "data": gas_data}
-
-        # Assign data
 
         return combined_data

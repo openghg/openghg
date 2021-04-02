@@ -5,22 +5,22 @@ __all__ = ["BEACO2N"]
 
 
 class BEACO2N:
-    """ Read BEACO2N data files
+    """Read BEACO2N data files"""
 
-    """
     def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, **kwargs) -> Dict:
-        """ Read BEACO2N data files
+        """Read BEACO2N data files
 
-            Args:
-                filepath: Data filepath
-                site: Site name
-            Returns:
-                dict: Dictionary of data
+        Args:
+            filepath: Data filepath
+            site: Site name
+        Returns:
+            dict: Dictionary of data
         """
         import pandas as pd
         from numpy import nan as np_nan
         from openghg.util import load_json
         from collections import defaultdict
+        from openghg.util import compliant_species
 
         datetime_columns = {"time": ["datetime"]}
         rename_cols = {"PM_ug/m3": "pm", "PM_ug/m3_QC_level": "pm_qc", "co2_ppm": "co2", "co2_ppm_QC_level": "co2_qc"}
@@ -62,12 +62,18 @@ class BEACO2N:
             m_data = data[[mt, f"{mt}_qc"]]
             m_data = m_data.dropna(axis="rows", how="any").to_xarray()
 
-            species_metadata = {"units": units[mt]}
+            species_metadata = {
+                "units": units[mt],
+                "site": site_name,
+                "species": compliant_species(mt),
+                "inlet": "NA",
+                "network": "beaco2n",
+            }
 
             gas_data[mt]["data"] = m_data
             gas_data[mt]["metadata"] = species_metadata
             gas_data[mt]["attributes"] = site_metadata
 
-        # TODO - add CF Compliant attributes? 
+        # TODO - add CF Compliant attributes?
 
         return gas_data
