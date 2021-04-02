@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.processing._segment &mdash; OpenGHG 0+untagged.1.g6072802 documentation</title>
+  <title>openghg.processing._segment &mdash; OpenGHG 0+untagged.1.g7715494 documentation</title>
   
 
   
@@ -176,45 +176,6 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_split_frequency&quot;</span><span class="p">,</span> <span class="s2">&quot;assign_footprint_data&quot;</span><span class="p">,</span> <span class="s2">&quot;assign_data&quot;</span><span class="p">,</span> <span class="s2">&quot;assign_emissions_data&quot;</span><span class="p">]</span>
 
-<span class="c1"># def create_datasources(gas_data):</span>
-<span class="c1">#     &quot;&quot;&quot; Create or get an existing Datasource for each gas in the file</span>
-
-<span class="c1">#         TODO - currently this function will only take data from a single Datasource</span>
-
-<span class="c1">#         Args:</span>
-<span class="c1">#             gas_data (list): List of tuples gas name, datasource_id, Pandas.Dataframe</span>
-<span class="c1">#         Returns:</span>
-<span class="c1">#             list: List of UUIDs</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1">#     from openghg.modules import Datasource</span>
-
-<span class="c1">#     uuids = []</span>
-
-<span class="c1">#     # Rework this to for the segmentation of data within the Datasource</span>
-<span class="c1">#     # How to reliably get existing UUIDs to be passed through from an interface or selection?</span>
-<span class="c1">#     # Rely on site_species for now via name lookup?</span>
-<span class="c1">#     # Need to allow UUID input here so we can add new data to existing Datasources easily without</span>
-<span class="c1">#     # relying on the naming method</span>
-<span class="c1">#     for species, metadata, data in gas_data:</span>
-<span class="c1">#         # Lookup Datasource uuid, if exists</span>
-<span class="c1">#         if Datasource.exists(datasource_id=datasource_id):</span>
-<span class="c1">#             datasource = Datasource.load(uuid=datasource_id)</span>
-<span class="c1">#             # TODO - add metadata in here - append to existing?</span>
-<span class="c1">#         else:</span>
-<span class="c1">#             datasource = Datasource.create(name=species)</span>
-
-<span class="c1">#         # Store the name and datasource_id</span>
-<span class="c1">#         # self._species[gas_name] = datasource_id</span>
-<span class="c1">#         # Add the dataframe to the datasource</span>
-<span class="c1">#         datasource.add_data(metadata, data)</span>
-<span class="c1">#         # Save Datasource to object store</span>
-<span class="c1">#         datasource.save()</span>
-
-<span class="c1">#         # Add the Datasource to the list</span>
-<span class="c1">#         uuids.append(datasource.uuid())</span>
-
-<span class="c1">#     return uuids</span>
-
 
 <div class="viewcode-block" id="assign_data"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.assign_data">[docs]</a><span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="n">gas_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">lookup_results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Assign data to a Datasource. This will either create a new Datasource </span>
@@ -230,12 +191,17 @@
     <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span>
 
     <span class="n">uuids</span> <span class="o">=</span> <span class="p">{}</span>
+
     <span class="c1"># Add in copying of attributes, or add attributes to the metadata at an earlier state.</span>
-    <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">gas_data</span><span class="p">:</span>
-        <span class="n">metadata</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">lookup_results</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
-        <span class="n">uuid</span> <span class="o">=</span> <span class="n">lookup_results</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">gas_data</span><span class="p">:</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Our lookup results and gas data have the same keys</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="n">lookup_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="c1"># TODO - Could this be done somewhere else? It doesn&#39;t feel quite right it</span>
+        <span class="c1"># being here</span>
 
         <span class="c1"># Add the read metadata to the Dataset attributes being careful </span>
         <span class="c1"># not to overwrite any attributes that are already there</span>
@@ -247,14 +213,14 @@
         <span class="k">if</span> <span class="n">uuid</span><span class="p">:</span>
             <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">()</span>
 
         <span class="c1"># Add the dataframe to the datasource</span>
         <span class="n">datasource</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">)</span>
         <span class="c1"># Save Datasource to object store</span>
         <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
-        <span class="n">uuids</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">()</span>
+        <span class="n">uuids</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">uuids</span></div>
 
@@ -379,7 +345,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Mar 30, 2021.
+        Last updated on Apr 02, 2021.
       </span>
 
     </p>

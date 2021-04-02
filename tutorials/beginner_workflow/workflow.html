@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Beginner workflow &mdash; OpenGHG 0+untagged.1.g6072802 documentation</title>
+  <title>Beginner workflow &mdash; OpenGHG 0+untagged.1.g7715494 documentation</title>
   
 
   
@@ -102,6 +102,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#Set-an-environment-variable-for-the-OpenGHG-object-store">Set an environment variable for the OpenGHG object store</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#The-rest-of-tutorial-requires-updating,-the-cells-below-will-not-work.">The rest of tutorial requires updating, the cells below will not work.</a></li>
 </ul>
 </li>
 </ul>
@@ -496,7 +497,7 @@ div.rendered_html tbody tr:hover {
 
 <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">ObsSurface</span>
 <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">visualise_store</span>
-<span class="kn">from</span> <span class="nn">openghg.localclient</span> <span class="kn">import</span> <span class="n">get_observations</span><span class="p">,</span> <span class="n">RankSources</span>
+<span class="kn">from</span> <span class="nn">openghg.localclient</span> <span class="kn">import</span> <span class="n">get_obs_surface</span><span class="p">,</span> <span class="n">RankSources</span>
 
 
 
@@ -525,32 +526,23 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="section" id="2.-Processing-data">
 <h3>2. Processing data<a class="headerlink" href="#2.-Processing-data" title="Permalink to this headline">¶</a></h3>
-<p>First we want to create a list of files to process, we’ll use some files from our local directory</p>
+<p>First we want to process some files from our local directory</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">decc_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;../data/DECC/*.dat&quot;</span><span class="p">)</span>
+<span></span><span class="n">decc_file</span> <span class="o">=</span> <span class="s2">&quot;../data/DECC/bsd.picarro.1minute.248m.dat&quot;</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
+<p>We can pass this filepath to <code class="docutils literal notranslate"><span class="pre">ObsSurface.read_file</span></code>. We must also tell it the type of data we want it to process, DECC data is CRDS. We also pass in the site code and the name of the network.</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">agage_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;../data/AGAGE/*.C&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<p>We can pass a list of files to <code class="docutils literal notranslate"><span class="pre">ObsSurface.read_file</span></code>. We must also tell it the type of data we want it to process, DECC data is CRDS. We also pass in the name of the network.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">decc_results</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">decc_files</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
+<span></span><span class="n">decc_results</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">decc_file</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;bsd&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -559,7 +551,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Processing: tac.picarro.1minute.100m.test.dat: 100%|██████████| 5/5 [00:00&lt;00:00,  5.47it/s]
+Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 1/1 [00:00&lt;00:00,  7.84it/s]
 </pre></div></div>
 </div>
 <p>Here <code class="docutils literal notranslate"><span class="pre">decc_results</span></code> will give us a dictionary with the UUIDs (universally unique identifiers) for each of the Datasources the data has been assigned to. This tells us that the data has been processed and stored correctly.</p>
@@ -573,7 +565,7 @@ Processing: tac.picarro.1minute.100m.test.dat: 100%|█████████�
 <h4>Note<a class="headerlink" href="#Note" title="Permalink to this headline">¶</a></h4>
 <p>When you run this notebook different UUIDs will be created for the Datasources. This is expected as each time a Datasource is created from scratch it is assigned a unique UUID.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -582,49 +574,38 @@ Processing: tac.picarro.1minute.100m.test.dat: 100%|█████████�
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 defaultdict(dict,
-            {&#39;processed&#39;: {&#39;hfd.picarro.1minute.50m.min.dat&#39;: {&#39;hfd.picarro.1minute.50m.min_ch4&#39;: &#39;cd5a12ae-a5c3-4d64-8da0-0500174227e0&#39;,
-               &#39;hfd.picarro.1minute.50m.min_co2&#39;: &#39;2b7e6f99-ebd4-455f-83b1-f822821c43c3&#39;,
-               &#39;hfd.picarro.1minute.50m.min_co&#39;: &#39;981a80ab-fb82-40f6-87b2-c1bfeec682b4&#39;},
-              &#39;tac.picarro.1minute.100m.min.dat&#39;: {&#39;tac.picarro.1minute.100m.min_ch4&#39;: &#39;ed4b36bd-6bc4-466e-b2dd-63cd6476abf7&#39;,
-               &#39;tac.picarro.1minute.100m.min_co2&#39;: &#39;b8a4041c-e46e-4615-9a36-47139d3a48e2&#39;},
-              &#39;hfd.picarro.1minute.100m.min.dat&#39;: {&#39;hfd.picarro.1minute.100m.min_ch4&#39;: &#39;752843a1-c58d-467c-8091-b1c866553051&#39;,
-               &#39;hfd.picarro.1minute.100m.min_co2&#39;: &#39;14425bbc-ade3-4ca7-8f62-eeb7b083a3ec&#39;,
-               &#39;hfd.picarro.1minute.100m.min_co&#39;: &#39;3afe0aee-cde8-41dd-a56c-132abd415afc&#39;},
-              &#39;bsd.picarro.1minute.248m.dat&#39;: {&#39;bsd.picarro.1minute.248m_ch4&#39;: &#39;12f78869-9cd2-4c9d-9c6e-e426269bc330&#39;,
-               &#39;bsd.picarro.1minute.248m_co2&#39;: &#39;7cd71794-2b64-4cbd-9443-69276c0d684d&#39;,
-               &#39;bsd.picarro.1minute.248m_co&#39;: &#39;ae8da1ba-05f9-43de-90e6-a0e4cac8c1d9&#39;},
-              &#39;tac.picarro.1minute.100m.test.dat&#39;: {&#39;tac.picarro.1minute.100m.test_ch4&#39;: &#39;b69e98e0-8c75-4754-87b9-dae66bb3a0a7&#39;,
-               &#39;tac.picarro.1minute.100m.test_co2&#39;: &#39;b68ae699-1baf-482e-9b0e-003f4e6c9e99&#39;}}})
+            {&#39;processed&#39;: {&#39;bsd.picarro.1minute.248m.dat&#39;: {&#39;ch4&#39;: &#39;98443d05-0a7d-47a3-932f-0d7feee337b7&#39;,
+               &#39;co2&#39;: &#39;0f54b797-ca6c-40e8-833c-e2ad259f121f&#39;,
+               &#39;co&#39;: &#39;603ebfe9-bff5-410a-9eeb-437be8e227f3&#39;}}})
 </pre></div></div>
 </div>
-<p>We can now process the AGAGE data. The functions that process the AGAGE data expect data to have an accompanying precisions file. For each data file we create a tuple with the data filename and the precisions filename. A simpler method of uploading these file types is planne.</p>
+<p>We can now process the AGAGE data. The functions that process the AGAGE data expect data to have an accompanying precisions file. For each data file we create a tuple with the data filename and the precisions filename. A simpler method of uploading these file types is planned.</p>
 <p>We must create a <code class="docutils literal notranslate"><span class="pre">tuple</span></code> for each pair</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">list_of_tuples</span> <span class="o">=</span> <span class="p">[(</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">precision_filepath</span><span class="p">),</span> <span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">p1</span><span class="p">),</span> <span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">p2</span><span class="p">),</span> <span class="o">...</span><span class="p">]</span>
 </pre></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">agage_tuples</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;../data/AGAGE/capegrim-medusa.18.C&#39;</span><span class="p">,</span> <span class="s1">&#39;../data/AGAGE/capegrim-medusa.18.precisions.C&#39;</span><span class="p">),</span>
-                <span class="p">(</span><span class="s1">&#39;../data/AGAGE/trinidadhead.01.C&#39;</span><span class="p">,</span> <span class="s1">&#39;../data/AGAGE/trinidadhead.01.precisions.C&#39;</span><span class="p">)]</span>
+<span></span><span class="n">agage_tuples</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;../data/AGAGE/capegrim-medusa.18.C&#39;</span><span class="p">,</span> <span class="s1">&#39;../data/AGAGE/capegrim-medusa.18.precisions.C&#39;</span><span class="p">)]</span>
 </pre></div>
 </div>
 </div>
 <p>Then we process the files as we did before the with DECC data, but this time changing the data type to the <code class="docutils literal notranslate"><span class="pre">GCWERKS</span></code> type and the network to <code class="docutils literal notranslate"><span class="pre">AGAGE</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">agage_results</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">agage_tuples</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;GCWERKS&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;AGAGE&quot;</span><span class="p">)</span>
+<span></span><span class="n">agage_results</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">agage_tuples</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;GCWERKS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;CGO&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;AGAGE&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -633,12 +614,12 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Processing: trinidadhead.01.C: 100%|██████████| 2/2 [00:02&lt;00:00,  1.36s/it]
+Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:02&lt;00:00,  2.14s/it]
 </pre></div></div>
 </div>
 <p>When viewing <code class="docutils literal notranslate"><span class="pre">agage_results</span></code> there will be a large number of Datasource UUIDs shown due to the large number of gases in each data file</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -647,76 +628,68 @@ Processing: trinidadhead.01.C: 100%|██████████| 2/2 [00:02&l
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 defaultdict(dict,
-            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;capegrim-medusa.18_NF3_75m_4&#39;: &#39;3f0c4844-1514-40f1-80fd-6286f9cefce7&#39;,
-               &#39;capegrim-medusa.18_CF4_75m_4&#39;: &#39;9328ea8b-f697-47eb-813a-47dc3b137eb5&#39;,
-               &#39;capegrim-medusa.18_PFC-116_75m_4&#39;: &#39;30ed2cbc-e6ed-4639-86b7-2ace42122c80&#39;,
-               &#39;capegrim-medusa.18_PFC-218_75m_4&#39;: &#39;d208ac85-af57-4d6b-b4ff-3c2dd06b622b&#39;,
-               &#39;capegrim-medusa.18_PFC-318_75m_4&#39;: &#39;52e98e35-0a8f-4d63-9dec-f46303d759b3&#39;,
-               &#39;capegrim-medusa.18_C4F10_75m_4&#39;: &#39;8b7005b8-90fa-4db0-94ee-47e531a854bf&#39;,
-               &#39;capegrim-medusa.18_C6F14_75m_4&#39;: &#39;7315cae2-2f6e-4d62-a03f-eaa9938b4c56&#39;,
-               &#39;capegrim-medusa.18_SF6_75m_4&#39;: &#39;581abeb2-2888-4451-8b2a-2703f1d007ed&#39;,
-               &#39;capegrim-medusa.18_SO2F2_75m_4&#39;: &#39;60e059c5-4582-4711-8d1b-5ef2ba65a082&#39;,
-               &#39;capegrim-medusa.18_SF5CF3_75m_4&#39;: &#39;6899fc78-aa79-4c76-a6dd-6b2a4b10786b&#39;,
-               &#39;capegrim-medusa.18_HFC-23_75m_4&#39;: &#39;f8f64e4d-38ab-457e-97ec-57fe6ee0d174&#39;,
-               &#39;capegrim-medusa.18_HFC-32_75m_4&#39;: &#39;5c109fbe-1dbd-492b-9b56-901d2c082214&#39;,
-               &#39;capegrim-medusa.18_HFC-125_75m_4&#39;: &#39;4419f1bc-3b5c-4dfa-9e55-b77393d2bd05&#39;,
-               &#39;capegrim-medusa.18_HFC-134a_75m_4&#39;: &#39;09a701af-094b-4d83-9fea-344dedff38bd&#39;,
-               &#39;capegrim-medusa.18_HFC-143a_75m_4&#39;: &#39;179bff75-79ce-45f7-99a1-23f31ceea6b0&#39;,
-               &#39;capegrim-medusa.18_HFC-152a_75m_4&#39;: &#39;c22f64db-ab99-4400-baf2-15df5c1773d3&#39;,
-               &#39;capegrim-medusa.18_HFC-227ea_75m_4&#39;: &#39;a80ecad6-ccf8-4735-b8b8-df5e35dd43bc&#39;,
-               &#39;capegrim-medusa.18_HFC-236fa_75m_4&#39;: &#39;7faf8e6b-ba34-497e-bd12-6ca9614f91f4&#39;,
-               &#39;capegrim-medusa.18_HFC-245fa_75m_4&#39;: &#39;dfb2f635-8d45-4ef6-8146-e087001dc408&#39;,
-               &#39;capegrim-medusa.18_HFC-365mfc_75m_4&#39;: &#39;452b9341-29bb-4678-b786-c1af8d537bba&#39;,
-               &#39;capegrim-medusa.18_HFC-4310mee_75m_4&#39;: &#39;50d0cc22-253e-4e60-9af3-4a3f5b20f498&#39;,
-               &#39;capegrim-medusa.18_HCFC-22_75m_4&#39;: &#39;d93b7b22-c225-4204-9ab1-78f51ee6bd23&#39;,
-               &#39;capegrim-medusa.18_HCFC-124_75m_4&#39;: &#39;83578066-51de-4945-8867-d0f0adabda37&#39;,
-               &#39;capegrim-medusa.18_HCFC-132b_75m_4&#39;: &#39;0dc00491-9086-4044-abd5-dabe27dbbf34&#39;,
-               &#39;capegrim-medusa.18_HCFC-133a_75m_4&#39;: &#39;542ebf22-636b-4a60-84cc-36c1f3557abd&#39;,
-               &#39;capegrim-medusa.18_HCFC-141b_75m_4&#39;: &#39;d4654d2c-4f3d-4e4e-8610-ccfd16bccd9b&#39;,
-               &#39;capegrim-medusa.18_HCFC-142b_75m_4&#39;: &#39;36ea6da3-16b3-4b36-8405-66542e1ccf29&#39;,
-               &#39;capegrim-medusa.18_CFC-11_75m_4&#39;: &#39;0e2417da-ba03-4fcd-93fd-991e3d7a392b&#39;,
-               &#39;capegrim-medusa.18_CFC-12_75m_4&#39;: &#39;4c6c1943-30fe-4c24-aaf2-38a208b30d4a&#39;,
-               &#39;capegrim-medusa.18_CFC-13_75m_4&#39;: &#39;d692b28e-5157-4739-a0da-ee3745ed3da0&#39;,
-               &#39;capegrim-medusa.18_CFC-112_75m_4&#39;: &#39;e0a19425-855c-413f-a127-670f0c9ea7fd&#39;,
-               &#39;capegrim-medusa.18_CFC-113_75m_4&#39;: &#39;a52a0fce-fe6e-4530-84b4-e8e2890ee990&#39;,
-               &#39;capegrim-medusa.18_CFC-114_75m_4&#39;: &#39;fe1f9bb3-5991-4c25-a5a0-6fc6625d24b5&#39;,
-               &#39;capegrim-medusa.18_CFC-115_75m_4&#39;: &#39;0163539c-7b03-4215-b6c1-467e4412bc93&#39;,
-               &#39;capegrim-medusa.18_H-1211_75m_4&#39;: &#39;85f5c39c-35cf-4712-9273-b84fd1d97f44&#39;,
-               &#39;capegrim-medusa.18_H-1301_75m_4&#39;: &#39;eb31ea0e-e778-4457-87aa-8bcecdf7bf71&#39;,
-               &#39;capegrim-medusa.18_H-2402_75m_4&#39;: &#39;bc83646b-c6dc-4c34-83a5-65369721f426&#39;,
-               &#39;capegrim-medusa.18_CH3Cl_75m_4&#39;: &#39;bdacb2d5-6840-4354-a46b-ecb4282a9e86&#39;,
-               &#39;capegrim-medusa.18_CH3Br_75m_4&#39;: &#39;990609e1-d0ca-4158-817d-690c5e44f9d5&#39;,
-               &#39;capegrim-medusa.18_CH3I_75m_4&#39;: &#39;01372873-e70d-4c66-8477-ca7a243166b5&#39;,
-               &#39;capegrim-medusa.18_CH2Cl2_75m_4&#39;: &#39;605a3766-a629-4acf-a6b9-e49813a62a8c&#39;,
-               &#39;capegrim-medusa.18_CHCl3_75m_4&#39;: &#39;0d1b2e4b-967e-4de1-9002-f9a258fec973&#39;,
-               &#39;capegrim-medusa.18_CCl4_75m_4&#39;: &#39;bfe83c5a-1428-400c-8491-984d658ebb81&#39;,
-               &#39;capegrim-medusa.18_CH2Br2_75m_4&#39;: &#39;15dd56c4-5d77-4eac-8fef-d715bc13a102&#39;,
-               &#39;capegrim-medusa.18_CHBr3_75m_4&#39;: &#39;43cbcdfa-ce19-4af0-b93f-a167da52470e&#39;,
-               &#39;capegrim-medusa.18_CH3CCl3_75m_4&#39;: &#39;f53152ab-e3b8-4fea-9903-be6f58f42911&#39;,
-               &#39;capegrim-medusa.18_TCE_75m_4&#39;: &#39;4b2299d3-2a47-4e4e-af3a-aace8a0bd647&#39;,
-               &#39;capegrim-medusa.18_PCE_75m_4&#39;: &#39;aa4e042d-f1fb-49e2-924a-9972f92c5426&#39;,
-               &#39;capegrim-medusa.18_ethyne_75m_4&#39;: &#39;b332710a-a120-4c9c-933a-f71caddb93f2&#39;,
-               &#39;capegrim-medusa.18_ethane_75m_4&#39;: &#39;df45a4a4-f816-4a5b-b6ff-4ace4af4001c&#39;,
-               &#39;capegrim-medusa.18_propane_75m_4&#39;: &#39;af588d57-1a6b-478a-8221-6a7581e32856&#39;,
-               &#39;capegrim-medusa.18_c-propane_75m_4&#39;: &#39;28497623-45c2-41e3-8aa0-ac2584bb9a77&#39;,
-               &#39;capegrim-medusa.18_benzene_75m_4&#39;: &#39;6355070c-ca9a-49f4-8758-9a9746c026db&#39;,
-               &#39;capegrim-medusa.18_toluene_75m_4&#39;: &#39;84e161db-3468-4dff-b38d-2ed601f7bfb5&#39;,
-               &#39;capegrim-medusa.18_COS_75m_4&#39;: &#39;cda90617-642d-4bbe-810d-5e6d8f7809f4&#39;,
-               &#39;capegrim-medusa.18_desflurane_75m_4&#39;: &#39;0a559fe2-cb06-4c13-87aa-69c123e3c1ff&#39;},
-              &#39;trinidadhead.01.C&#39;: {&#39;trinidadhead.01_CH4_any&#39;: &#39;0d2d7ead-536f-4578-9a1a-04c14fa632f7&#39;,
-               &#39;trinidadhead.01_CFC-12_any&#39;: &#39;1a62dfe1-dd21-457d-af7d-44921625466a&#39;,
-               &#39;trinidadhead.01_N2O_any&#39;: &#39;bce39950-6492-4d7e-b5b6-85e377884227&#39;,
-               &#39;trinidadhead.01_CFC-11_any&#39;: &#39;2208fb9e-1e9a-478c-9c92-8174ce8b4af2&#39;,
-               &#39;trinidadhead.01_CFC-113_any&#39;: &#39;b5b0bfd0-4802-4b15-a9c6-3843dea06eb9&#39;,
-               &#39;trinidadhead.01_CHCl3_any&#39;: &#39;4a746842-5c11-4b6b-8496-95b5be2563a9&#39;,
-               &#39;trinidadhead.01_CH3CCl3_any&#39;: &#39;cea3ec3d-3cae-4977-b5bf-c018093ba925&#39;,
-               &#39;trinidadhead.01_CCl4_any&#39;: &#39;2c63ecfc-483a-40e0-b3e4-785cde43473b&#39;}}})
+            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;nf3_75m_4&#39;: &#39;bb44b92e-bfc6-47bd-a5e6-65ec2153c38e&#39;,
+               &#39;cf4_75m_4&#39;: &#39;e6e00c29-eee0-4ade-8978-2a871c73ba90&#39;,
+               &#39;pfc116_75m_4&#39;: &#39;b7768d73-561d-47fe-b1ff-adcbe1bdc17f&#39;,
+               &#39;pfc218_75m_4&#39;: &#39;41f0dbbb-d76b-4f3e-8590-93bc32b05102&#39;,
+               &#39;pfc318_75m_4&#39;: &#39;08ff43e5-8bf0-4fa2-8502-1343be55169a&#39;,
+               &#39;c4f10_75m_4&#39;: &#39;b7c95576-0086-4c34-8aaa-e58ba32fe541&#39;,
+               &#39;c6f14_75m_4&#39;: &#39;89687a55-1664-41c0-8bc3-7c2f49fd7716&#39;,
+               &#39;sf6_75m_4&#39;: &#39;02f8bbe5-7985-45ea-92ea-24f9db1911fc&#39;,
+               &#39;so2f2_75m_4&#39;: &#39;bb050463-978a-4908-be15-13c378aab27e&#39;,
+               &#39;sf5cf3_75m_4&#39;: &#39;e232ce92-33a2-4eac-9144-c8fe75624d8d&#39;,
+               &#39;hfc23_75m_4&#39;: &#39;e062eb3a-728c-4b94-bb4d-679c3e0e3d5d&#39;,
+               &#39;hfc32_75m_4&#39;: &#39;cb3cd5c6-978d-4d0e-a873-bd4845e858f3&#39;,
+               &#39;hfc125_75m_4&#39;: &#39;46dceb96-6bde-4cda-87da-70ec64fa75d8&#39;,
+               &#39;hfc134a_75m_4&#39;: &#39;79d6804d-544e-429d-9d7d-96aa2610bfbd&#39;,
+               &#39;hfc143a_75m_4&#39;: &#39;4c6e7f30-48ab-44bd-a269-ff4ac70cfb20&#39;,
+               &#39;hfc152a_75m_4&#39;: &#39;3a0cea35-d333-4b46-8401-ee0ec2315995&#39;,
+               &#39;hfc227ea_75m_4&#39;: &#39;5590395e-eade-4980-8b69-db8984dd056f&#39;,
+               &#39;hfc236fa_75m_4&#39;: &#39;55f7755f-e57d-4d9e-9fb5-b37065e5e06e&#39;,
+               &#39;hfc245fa_75m_4&#39;: &#39;f41d0190-bc12-461d-8140-4047b0337549&#39;,
+               &#39;hfc365mfc_75m_4&#39;: &#39;5d06db66-c0f4-495a-8e0b-66b247568546&#39;,
+               &#39;hfc4310mee_75m_4&#39;: &#39;241c062c-2f9f-4ea4-b46b-12ffffcfe8b9&#39;,
+               &#39;hcfc22_75m_4&#39;: &#39;26852c47-92b3-46dc-8747-32fb7bb87700&#39;,
+               &#39;hcfc124_75m_4&#39;: &#39;59ecbbc9-9820-474a-ac26-d88e3b2381ed&#39;,
+               &#39;hcfc132b_75m_4&#39;: &#39;ba772e8e-7d7a-4833-8353-c7e751b259f0&#39;,
+               &#39;hcfc133a_75m_4&#39;: &#39;59870fee-0c1c-4288-9cd1-6322904387cf&#39;,
+               &#39;hcfc141b_75m_4&#39;: &#39;40ecfcd4-7144-4fd5-9152-42d5c1ccd3fc&#39;,
+               &#39;hcfc142b_75m_4&#39;: &#39;ac26d521-5a53-4464-84c2-96d260a51a2c&#39;,
+               &#39;cfc11_75m_4&#39;: &#39;822d4cf0-3795-4c2b-b23b-a19230280e8e&#39;,
+               &#39;cfc12_75m_4&#39;: &#39;b4f072dc-e55a-4314-8cbc-c0daa8a7eeaa&#39;,
+               &#39;cfc13_75m_4&#39;: &#39;17ab9fff-5bcf-4525-9b5c-3792910c3152&#39;,
+               &#39;cfc112_75m_4&#39;: &#39;a8f1e7bf-1c62-4efc-a27f-90063b5efde8&#39;,
+               &#39;cfc113_75m_4&#39;: &#39;279729e3-75ea-4986-9fb2-17806c4efcec&#39;,
+               &#39;cfc114_75m_4&#39;: &#39;de7f3e58-789f-40fa-9d7e-7ebc7f71587d&#39;,
+               &#39;cfc115_75m_4&#39;: &#39;a113ec11-4481-4480-ae3c-7e48490c8d57&#39;,
+               &#39;h1211_75m_4&#39;: &#39;5a8c67f1-281e-486b-96be-bf424c37c7cd&#39;,
+               &#39;h1301_75m_4&#39;: &#39;410e091f-d104-4b0c-9f63-4d169023895d&#39;,
+               &#39;h2402_75m_4&#39;: &#39;183d1479-3402-4b65-8ce6-2f5263482582&#39;,
+               &#39;ch3cl_75m_4&#39;: &#39;5440fb45-e89f-4c46-9144-775fe19f9a83&#39;,
+               &#39;ch3br_75m_4&#39;: &#39;510adfd6-a253-4ef5-a084-1b5ab20afb90&#39;,
+               &#39;ch3i_75m_4&#39;: &#39;77a247bf-5e6f-4535-b811-0d0fbbc01796&#39;,
+               &#39;ch2cl2_75m_4&#39;: &#39;3cecbb9c-a9c7-4167-b5e6-cfbd16b8e5f0&#39;,
+               &#39;chcl3_75m_4&#39;: &#39;a618bb09-80a9-4104-8f56-9e163b2254be&#39;,
+               &#39;ccl4_75m_4&#39;: &#39;45ff3e5e-5c5b-4ad2-bc9f-1ab7d20786a5&#39;,
+               &#39;ch2br2_75m_4&#39;: &#39;7be44db4-9f7b-498b-980b-83f9bb8dda0c&#39;,
+               &#39;chbr3_75m_4&#39;: &#39;68dfe840-c8f0-4102-a79a-97b678e0cd45&#39;,
+               &#39;ch3ccl3_75m_4&#39;: &#39;6dbdab5c-a7a4-4cff-8c33-a25e2307fa73&#39;,
+               &#39;tce_75m_4&#39;: &#39;849ad849-c26a-46dd-844c-0dfbb27071eb&#39;,
+               &#39;pce_75m_4&#39;: &#39;8d86d04d-d24b-4321-a349-6af1fec0de9a&#39;,
+               &#39;ethyne_75m_4&#39;: &#39;f26fc3a4-e1a0-495b-b4d5-3aac2939966c&#39;,
+               &#39;ethane_75m_4&#39;: &#39;d8dd389c-1eed-48e7-be81-eaadf2e46c18&#39;,
+               &#39;propane_75m_4&#39;: &#39;de407302-307d-47a2-b5e3-99f8a48deb9c&#39;,
+               &#39;cpropane_75m_4&#39;: &#39;a9d28303-afcc-40c9-ab54-9eb0a83d403a&#39;,
+               &#39;benzene_75m_4&#39;: &#39;192aeb7c-0cad-43e6-8d7f-df697f1787ea&#39;,
+               &#39;toluene_75m_4&#39;: &#39;7774c79e-2c1c-4ad2-a112-178c9dd83883&#39;,
+               &#39;cos_75m_4&#39;: &#39;b699666b-898e-454b-a786-feca491a0a70&#39;,
+               &#39;desflurane_75m_4&#39;: &#39;14d3ddfb-4d15-4bd3-b9ee-a91c828e5b37&#39;}}})
 </pre></div></div>
 </div>
 </div>
@@ -729,7 +702,7 @@ defaultdict(dict,
 <h4>Note<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
 <p>The object store visualisation created by this function is commented out here and won’t be visible in the documentation but can be uncommented and run when you use the notebook version.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -742,19 +715,19 @@ defaultdict(dict,
 </div>
 <div class="section" id="4.-Retrieving-data">
 <h3>4. Retrieving data<a class="headerlink" href="#4.-Retrieving-data" title="Permalink to this headline">¶</a></h3>
-<p>To retrieve data from the object store we can use the <code class="docutils literal notranslate"><span class="pre">get_observations</span></code> function from the <code class="docutils literal notranslate"><span class="pre">localclient</span></code> submodule. This allows us to retrieve and view the data stored.</p>
+<p>To retrieve data from the object store we can use the <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code> function from the <code class="docutils literal notranslate"><span class="pre">localclient</span></code> submodule. This allows us to retrieve and view the data stored.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">data</span> <span class="o">=</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;hfd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;AGAGE&quot;</span><span class="p">)</span>
+<span></span><span class="n">data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;bsd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;AGAGE&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p>If we view data we expect two <code class="docutils literal notranslate"><span class="pre">xarray.Dataset</span></code> objects to have been returned in in a <code class="docutils literal notranslate"><span class="pre">list</span></code></p>
+<p>If we view data we expect an <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object to have been returned</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -763,57 +736,38 @@ defaultdict(dict,
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[ObsData(data=&lt;xarray.Dataset&gt;
- Dimensions:                    (time: 35)
- Coordinates:
-   * time                       (time) datetime64[ns] 2013-11-23T12:28:30 ... ...
- Data variables:
-     mf                         (time) float64 181.7 190.6 242.6 ... 86.76 129.7
-     mf_variability             (time) float64 5.158 4.641 3.602 ... 4.666 4.111
-     mf_number_of_observations  (time) float64 19.0 19.0 19.0 ... 12.0 12.0 12.0
- Attributes: (12/22)
-     data_owner:           Simon O&#39;Doherty
-     data_owner_email:     s.odoherty@bristol.ac.uk
-     inlet_height_magl:    50m
-     comment:              Cavity ring-down measurements. Output from GCWerks
-     Conditions of use:    Ensure that you contact the data owner at the outse...
-     Source:               In situ measurements of air
-     ...                   ...
-     time_resolution:      1_minute
-     inlet:                50m
-     port:                 9
-     type:                 air
-     network:              DECC
-     scale:                WMO-X2014A, metadata={&#39;data_owner&#39;: &#34;Simon O&#39;Doherty&#34;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;inlet_height_magl&#39;: &#39;50m&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;Conditions of use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;Source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;File created&#39;: &#39;2021-03-30 09:50:40.166470+00:00&#39;, &#39;Processed by&#39;: &#39;OpenGHG_Cloud&#39;, &#39;species&#39;: &#39;co&#39;, &#39;station_longitude&#39;: 0.23048, &#39;station_latitude&#39;: 50.97675, &#39;station_long_name&#39;: &#39;Heathfield, UK&#39;, &#39;station_height_masl&#39;: 150.0, &#39;site&#39;: &#39;hfd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;time_resolution&#39;: &#39;1_minute&#39;, &#39;inlet&#39;: &#39;50m&#39;, &#39;port&#39;: &#39;9&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;DECC&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;})]
+ObsData(data=&lt;xarray.Dataset&gt;
+Dimensions:                    (time: 105)
+Coordinates:
+  * time                       (time) datetime64[ns] 2014-01-30T10:52:30 ... ...
+Data variables:
+    mf                         (time) float64 204.6 200.8 201.5 ... 196.9 196.3
+    mf_variability             (time) float64 6.232 5.934 5.176 ... 6.031 6.879
+    mf_number_of_observations  (time) float64 26.0 26.0 25.0 ... 26.0 26.0 25.0
+Attributes: (12/22)
+    data_owner:           Simon O&#39;Doherty
+    data_owner_email:     s.odoherty@bristol.ac.uk
+    inlet_height_magl:    248m
+    comment:              Cavity ring-down measurements. Output from GCWerks
+    Conditions of use:    Ensure that you contact the data owner at the outse...
+    Source:               In situ measurements of air
+    ...                   ...
+    time_resolution:      1_minute
+    inlet:                248m
+    port:                 8
+    type:                 air
+    network:              decc
+    scale:                WMO-X2014A, metadata={&#39;data_owner&#39;: &#34;Simon O&#39;Doherty&#34;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;inlet_height_magl&#39;: &#39;248m&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;Conditions of use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;Source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;File created&#39;: &#39;2021-04-02 19:02:03.908340+00:00&#39;, &#39;Processed by&#39;: &#39;OpenGHG_Cloud&#39;, &#39;species&#39;: &#39;co&#39;, &#39;station_longitude&#39;: -1.15033, &#39;station_latitude&#39;: 54.35858, &#39;station_long_name&#39;: &#39;Bilsdale, UK&#39;, &#39;station_height_masl&#39;: 380.0, &#39;site&#39;: &#39;bsd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;time_resolution&#39;: &#39;1_minute&#39;, &#39;inlet&#39;: &#39;248m&#39;, &#39;port&#39;: &#39;8&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;})
 </pre></div></div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-1
-</pre></div></div>
-</div>
-<p>We get two datasets for CO data from Tacolneston as there are two inlet measurement heights for this species at this site. We can quickly visualise the data we have stored using the plotting capabilities in <code class="docutils literal notranslate"><span class="pre">xarray</span></code>.</p>
 <p>First we tell <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> that we are plotting inside a Jupyter notebook, this ensures a plot with controls is created.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -826,15 +780,16 @@ defaultdict(dict,
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
+INFO:matplotlib.font_manager:Failed to extract font properties from /usr/share/fonts/truetype/noto/NotoColorEmoji.ttf: In FT2Font: Can not load face.  Unknown file format.
 INFO:matplotlib.font_manager:generated new fontManager
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">example_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+<span></span><span class="n">example_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span>
 <span class="n">mol_frac</span> <span class="o">=</span> <span class="n">example_data</span><span class="o">.</span><span class="n">mf</span>
 <span class="n">mol_frac</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
@@ -1826,15 +1781,15 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='aed8b1b2-cc0f-4994-92a5-14183c57c3a8'></div></div>
+<div id='fff2eae5-3d86-4c84-ac42-c81d0314b3df'></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f95daa79fd0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7fd25378b050&gt;]
 </pre></div></div>
 </div>
 </div>
@@ -1842,50 +1797,21 @@ if (IPython.notebook.kernel !== null) {
 <h3>5. Ranking data<a class="headerlink" href="#5.-Ranking-data" title="Permalink to this headline">¶</a></h3>
 <p>The dates that the data from Heathfield retrieved above overlap. If we want to easily retrieve the highest quality data from Heathfield over a range of dates we don’t want to have to repeatedly check which was the correct inlet/instrument for a given daterange. This problem is solved using ranking.</p>
 <p>A given inlet on a specific instrument at a site can be given a rank for a daterange. To do this we use the <code class="docutils literal notranslate"><span class="pre">RankSources</span></code> class from the <code class="docutils literal notranslate"><span class="pre">localclient</span></code> submodule.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</div>
+</div>
+</div>
+<div class="section" id="The-rest-of-tutorial-requires-updating,-the-cells-below-will-not-work.">
+<h1>The rest of tutorial requires updating, the cells below will not work.<a class="headerlink" href="#The-rest-of-tutorial-requires-updating,-the-cells-below-will-not-work." title="Permalink to this headline">¶</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">r</span> <span class="o">=</span> <span class="n">RankSources</span><span class="p">()</span>
+<span></span><span class="c1">#r = RankSources()</span>
 
-<span class="n">r</span><span class="o">.</span><span class="n">get_sources</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;hfd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">)</span>
+<span class="c1">#r.get_sources(site=&quot;hfd&quot;, species=&quot;co&quot;)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-{&#39;co_hfd_50m_picarro&#39;: {&#39;rank&#39;: 0,
-  &#39;data_range&#39;: &#39;2013-11-23T12:28:30_2020-06-24T09:41:30&#39;,
-  &#39;uuid&#39;: &#39;981a80ab-fb82-40f6-87b2-c1bfeec682b4&#39;,
-  &#39;metadata&#39;: {&#39;site&#39;: &#39;hfd&#39;,
-   &#39;instrument&#39;: &#39;picarro&#39;,
-   &#39;time_resolution&#39;: &#39;1_minute&#39;,
-   &#39;inlet&#39;: &#39;50m&#39;,
-   &#39;port&#39;: &#39;9&#39;,
-   &#39;type&#39;: &#39;air&#39;,
-   &#39;network&#39;: &#39;decc&#39;,
-   &#39;species&#39;: &#39;co&#39;,
-   &#39;scale&#39;: &#39;wmo-x2014a&#39;,
-   &#39;data_type&#39;: &#39;timeseries&#39;}},
- &#39;co_hfd_100m_picarro&#39;: {&#39;rank&#39;: 0,
-  &#39;data_range&#39;: &#39;2013-12-04T14:02:30_2019-05-21T15:46:30&#39;,
-  &#39;uuid&#39;: &#39;3afe0aee-cde8-41dd-a56c-132abd415afc&#39;,
-  &#39;metadata&#39;: {&#39;site&#39;: &#39;hfd&#39;,
-   &#39;instrument&#39;: &#39;picarro&#39;,
-   &#39;time_resolution&#39;: &#39;1_minute&#39;,
-   &#39;inlet&#39;: &#39;100m&#39;,
-   &#39;port&#39;: &#39;10&#39;,
-   &#39;type&#39;: &#39;air&#39;,
-   &#39;network&#39;: &#39;decc&#39;,
-   &#39;species&#39;: &#39;co&#39;,
-   &#39;scale&#39;: &#39;wmo-x2014a&#39;,
-   &#39;data_type&#39;: &#39;timeseries&#39;}}}
-</pre></div></div>
 </div>
 <p>The returned dictionary gives us two keys, one for each inlet height. To rank a source we use the <code class="docutils literal notranslate"><span class="pre">set_rank</span></code> method which expects two arguments: <code class="docutils literal notranslate"><span class="pre">rank_key</span></code> which is the key given to each source in the <code class="docutils literal notranslate"><span class="pre">dict</span></code> above and <code class="docutils literal notranslate"><span class="pre">rank_data</span></code> a dictionary of the form</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rank_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">co2_hfd_50m_picarro</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">[</span><span class="n">daterange_1</span><span class="p">],</span> <span class="mi">2</span><span class="p">:</span> <span class="p">[</span><span class="n">daterange_2</span><span class="p">]}}</span>
@@ -1893,96 +1819,52 @@ if (IPython.notebook.kernel !== null) {
 </div>
 <p>We can create this dictionary using a helper method of <code class="docutils literal notranslate"><span class="pre">RankSources</span></code> called <code class="docutils literal notranslate"><span class="pre">create_daterange</span></code> as shown below.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">daterange_100m</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">create_daterange</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s2">&quot;2013-11-01&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;2016-01-01&quot;</span><span class="p">)</span>
+<span></span><span class="c1">#daterange_100m = r.create_daterange(start=&quot;2013-11-01&quot;, end=&quot;2016-01-01&quot;)</span>
 </pre></div>
 </div>
 </div>
 <p>This creates a daterange string that will be understood by <code class="docutils literal notranslate"><span class="pre">openghg</span></code>. We can then place this in a list to create our <code class="docutils literal notranslate"><span class="pre">rank_data</span></code> dictionary.</p>
 <div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1">#rank_data = {&quot;co_hfd_100m_picarro&quot;: {&quot;1&quot;: [daterange_100m]}}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1">#rank_data</span>
+</pre></div>
+</div>
+</div>
+<p>Now we can set the rank of the network using <code class="docutils literal notranslate"><span class="pre">set_rank</span></code></p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rank_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;co_hfd_100m_picarro&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">daterange_100m</span><span class="p">]}}</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rank_data</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-{&#39;co_hfd_100m_picarro&#39;: {&#39;1&#39;: [&#39;2013-11-01T00:00:00_2016-01-01T00:00:00&#39;]}}
-</pre></div></div>
-</div>
-<p>Now we can set the rank of the network using <code class="docutils literal notranslate"><span class="pre">set_rank</span></code></p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">r</span><span class="o">.</span><span class="n">set_rank</span><span class="p">(</span><span class="n">rank_key</span><span class="o">=</span><span class="s2">&quot;co_hfd_100m_picarro&quot;</span><span class="p">,</span> <span class="n">rank_data</span><span class="o">=</span><span class="n">rank_data</span><span class="p">)</span>
+<span></span><span class="c1">#r.set_rank(rank_key=&quot;co_hfd_100m_picarro&quot;, rank_data=rank_data)</span>
 </pre></div>
 </div>
 </div>
 <p>We can now check the rank for this inlet again to check it’s been set correctly</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">r</span><span class="o">.</span><span class="n">get_sources</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;hfd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">)</span>
+<span></span><span class="c1">#r.get_sources(site=&quot;hfd&quot;, species=&quot;co&quot;)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-{&#39;co_hfd_50m_picarro&#39;: {&#39;rank&#39;: 0,
-  &#39;data_range&#39;: &#39;2013-11-23T12:28:30_2020-06-24T09:41:30&#39;,
-  &#39;uuid&#39;: &#39;981a80ab-fb82-40f6-87b2-c1bfeec682b4&#39;,
-  &#39;metadata&#39;: {&#39;site&#39;: &#39;hfd&#39;,
-   &#39;instrument&#39;: &#39;picarro&#39;,
-   &#39;time_resolution&#39;: &#39;1_minute&#39;,
-   &#39;inlet&#39;: &#39;50m&#39;,
-   &#39;port&#39;: &#39;9&#39;,
-   &#39;type&#39;: &#39;air&#39;,
-   &#39;network&#39;: &#39;decc&#39;,
-   &#39;species&#39;: &#39;co&#39;,
-   &#39;scale&#39;: &#39;wmo-x2014a&#39;,
-   &#39;data_type&#39;: &#39;timeseries&#39;}},
- &#39;co_hfd_100m_picarro&#39;: {&#39;rank&#39;: defaultdict(list,
-              {&#39;1&#39;: [&#39;2013-11-01T00:00:00_2016-01-01T00:00:00&#39;]}),
-  &#39;data_range&#39;: &#39;2013-12-04T14:02:30_2019-05-21T15:46:30&#39;,
-  &#39;uuid&#39;: &#39;3afe0aee-cde8-41dd-a56c-132abd415afc&#39;,
-  &#39;metadata&#39;: {&#39;site&#39;: &#39;hfd&#39;,
-   &#39;instrument&#39;: &#39;picarro&#39;,
-   &#39;time_resolution&#39;: &#39;1_minute&#39;,
-   &#39;inlet&#39;: &#39;100m&#39;,
-   &#39;port&#39;: &#39;10&#39;,
-   &#39;type&#39;: &#39;air&#39;,
-   &#39;network&#39;: &#39;decc&#39;,
-   &#39;species&#39;: &#39;co&#39;,
-   &#39;scale&#39;: &#39;wmo-x2014a&#39;,
-   &#39;data_type&#39;: &#39;timeseries&#39;}}}
-</pre></div></div>
 </div>
 <p>We can now see</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;co_hfd_100m_picarro&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;rank&#39;</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;2013-11-01T00:00:00_2016-01-01T00:00:00&#39;</span><span class="p">]})</span>
@@ -1991,113 +1873,48 @@ if (IPython.notebook.kernel !== null) {
 <p>Which tells us the rank was set correctly over the daterange that we specified. We can now search for data and we’ll automatically get the highest ranked data.</p>
 <p>Let’s search for CO2 data at Heathfield between 2014 - 2015, dates covered by both inlets.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">updated_data</span> <span class="o">=</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;hfd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;AGAGE&quot;</span><span class="p">)</span>
+<span></span><span class="c1">#updated_data = get_obs_surface(site=&quot;hfd&quot;, species=&quot;co&quot;, network=&quot;AGAGE&quot;)</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">updated_data</span>
+<span></span><span class="c1">#updated_data</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-[ObsData(data=&lt;xarray.Dataset&gt;
- Dimensions:                    (time: 15)
- Coordinates:
-   * time                       (time) datetime64[ns] 2013-12-04T14:02:30 ... ...
- Data variables:
-     mf                         (time) float64 214.3 216.2 147.0 ... 158.0 129.8
-     mf_variability             (time) float64 4.081 3.634 3.887 ... 4.813 4.796
-     mf_number_of_observations  (time) float64 19.0 19.0 19.0 ... 19.0 19.0 19.0
- Attributes: (12/22)
-     data_owner:           Simon O&#39;Doherty
-     data_owner_email:     s.odoherty@bristol.ac.uk
-     inlet_height_magl:    100m
-     comment:              Cavity ring-down measurements. Output from GCWerks
-     Conditions of use:    Ensure that you contact the data owner at the outse...
-     Source:               In situ measurements of air
-     ...                   ...
-     time_resolution:      1_minute
-     inlet:                100m
-     port:                 10
-     type:                 air
-     network:              DECC
-     scale:                WMO-X2014A, metadata={&#39;data_owner&#39;: &#34;Simon O&#39;Doherty&#34;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;inlet_height_magl&#39;: &#39;100m&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;Conditions of use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;Source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;File created&#39;: &#39;2021-03-30 09:50:40.469384+00:00&#39;, &#39;Processed by&#39;: &#39;OpenGHG_Cloud&#39;, &#39;species&#39;: &#39;co&#39;, &#39;station_longitude&#39;: 0.23048, &#39;station_latitude&#39;: 50.97675, &#39;station_long_name&#39;: &#39;Heathfield, UK&#39;, &#39;station_height_masl&#39;: 150.0, &#39;site&#39;: &#39;hfd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;time_resolution&#39;: &#39;1_minute&#39;, &#39;inlet&#39;: &#39;100m&#39;, &#39;port&#39;: &#39;10&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;DECC&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;})]
-</pre></div></div>
 </div>
 <p>Now we get the highest ranked data returned to us without the need to specify an inlet height or instrument.</p>
 <p>If we know that we want data from the 50m inlet we can still specify this in the search and get that data</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fiftym_data</span> <span class="o">=</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;hfd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;AGAGE&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;50m&quot;</span><span class="p">)</span>
+<span></span><span class="c1">#fiftym_data = get_obs_surface(site=&quot;hfd&quot;, species=&quot;co&quot;, network=&quot;AGAGE&quot;, inlet=&quot;50m&quot;)</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fiftym_data</span>
+<span></span><span class="c1">#fiftym_data</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-[ObsData(data=&lt;xarray.Dataset&gt;
- Dimensions:                    (time: 35)
- Coordinates:
-   * time                       (time) datetime64[ns] 2013-11-23T12:28:30 ... ...
- Data variables:
-     mf                         (time) float64 181.7 190.6 242.6 ... 86.76 129.7
-     mf_variability             (time) float64 5.158 4.641 3.602 ... 4.666 4.111
-     mf_number_of_observations  (time) float64 19.0 19.0 19.0 ... 12.0 12.0 12.0
- Attributes: (12/22)
-     data_owner:           Simon O&#39;Doherty
-     data_owner_email:     s.odoherty@bristol.ac.uk
-     inlet_height_magl:    50m
-     comment:              Cavity ring-down measurements. Output from GCWerks
-     Conditions of use:    Ensure that you contact the data owner at the outse...
-     Source:               In situ measurements of air
-     ...                   ...
-     time_resolution:      1_minute
-     inlet:                50m
-     port:                 9
-     type:                 air
-     network:              DECC
-     scale:                WMO-X2014A, metadata={&#39;data_owner&#39;: &#34;Simon O&#39;Doherty&#34;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;inlet_height_magl&#39;: &#39;50m&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;Conditions of use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;Source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;File created&#39;: &#39;2021-03-30 09:50:40.166470+00:00&#39;, &#39;Processed by&#39;: &#39;OpenGHG_Cloud&#39;, &#39;species&#39;: &#39;co&#39;, &#39;station_longitude&#39;: 0.23048, &#39;station_latitude&#39;: 50.97675, &#39;station_long_name&#39;: &#39;Heathfield, UK&#39;, &#39;station_height_masl&#39;: 150.0, &#39;site&#39;: &#39;hfd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;time_resolution&#39;: &#39;1_minute&#39;, &#39;inlet&#39;: &#39;50m&#39;, &#39;port&#39;: &#39;9&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;DECC&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;})]
-</pre></div></div>
-</div>
-</div>
-<div class="section" id="6.-Viewing-ranked-data">
-<h3>6. Viewing ranked data<a class="headerlink" href="#6.-Viewing-ranked-data" title="Permalink to this headline">¶</a></h3>
 <p>We can also view the ranks we have given to data with a similar layout to the object store visualisation we created earlier.</p>
 <p>To do this we use the <code class="docutils literal notranslate"><span class="pre">visualise_rankings</span></code> method of of the <code class="docutils literal notranslate"><span class="pre">RankSources</span></code> class. In this figure we’ll only see Datasources that contain ranked data. Hover over the nodes for further information.</p>
-<div class="section" id="id2">
-<h4>Note<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
 <p>The rankings visualisation created by this function is commented out here and won’t be visible in the documentation but can be uncommented and run when you use the notebook version.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2105,13 +1922,9 @@ if (IPython.notebook.kernel !== null) {
 </pre></div>
 </div>
 </div>
-</div>
-</div>
-<div class="section" id="7.-Cleanup">
-<h3>7. Cleanup<a class="headerlink" href="#7.-Cleanup" title="Permalink to this headline">¶</a></h3>
 <p>If you used the <code class="docutils literal notranslate"><span class="pre">tmp_dir</span></code> as a location for your object store at the start of the tutorial you can run the cell below to remove any files that were created.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2119,12 +1932,7 @@ if (IPython.notebook.kernel !== null) {
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="7.-What’s-next?">
-<h3>7. What’s next?<a class="headerlink" href="#7.-What’s-next?" title="Permalink to this headline">¶</a></h3>
 <p>Further tutorials will be added soon. If you want to explore the internal workings of OpenGHG please checkout the Developer API documentation, if you would like contribute to the project we welcome pull requests to both the code and the documentation. For help and guidance on contributing check our contributing page.</p>
-</div>
-</div>
 </div>
 
 
@@ -2143,7 +1951,7 @@ if (IPython.notebook.kernel !== null) {
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Mar 30, 2021.
+        Last updated on Apr 02, 2021.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._noaa &mdash; OpenGHG 0+untagged.1.g6072802 documentation</title>
+  <title>openghg.modules._noaa &mdash; OpenGHG 0+untagged.1.g7715494 documentation</title>
   
 
   
@@ -239,7 +239,7 @@
 <span class="sd">            Returns:</span>
 <span class="sd">                dict: Dictionary containing attributes, data and metadata keys</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">read_header</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">compliant_string</span><span class="p">,</span> <span class="n">read_header</span>
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">Timestamp</span>
 
         <span class="n">header</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
@@ -343,10 +343,11 @@
         <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noaa_params</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">][</span><span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
 
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">compliant_string</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;measurement_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement_type</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
 
         <span class="n">combined_data</span><span class="p">[</span><span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
@@ -368,7 +369,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Mar 30, 2021.
+        Last updated on Apr 02, 2021.
       </span>
 
     </p>
