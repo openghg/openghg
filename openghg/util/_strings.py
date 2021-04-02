@@ -12,9 +12,15 @@ def clean_string(to_clean: str) -> str:
     """
     import re
 
-    # Removes all whitespace
-    cleaner = re.sub(r"\s+", "", to_clean, flags=re.UNICODE).lower()
-    # Removes non-alphanumeric characters
-    cleanest = re.sub(r"\W+", "", cleaner)
+    if to_clean is None:
+        return
+
+    try:
+        # Removes all whitespace
+        cleaner = re.sub(r"\s+", "", to_clean, flags=re.UNICODE).lower()
+        # Removes non-alphanumeric characters
+        cleanest = re.sub(r"\W+", "", cleaner)
+    except TypeError:
+        return to_clean
 
     return cleanest

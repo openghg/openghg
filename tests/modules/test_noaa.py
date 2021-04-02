@@ -35,7 +35,7 @@ def test_read_file_site_filename_read():
 
     metadata = data["ch4"]["metadata"]
 
-    expected_metadata = {"species": "ch4", "site": "SCSN06", "measurement_type": "flask", "network": "NOAA"}
+    expected_metadata = {"species": "ch4", "site": "SCSN06", "measurement_type": "flask", "network": "NOAA", "inlet": "NA"}
 
     assert metadata == expected_metadata
 
@@ -47,7 +47,7 @@ def test_read_file_site_filename_read():
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
-        'Processed by': 'OpenGHG_Cloud',
+        "Processed by": "OpenGHG_Cloud",
         "species": "ch4",
         "Calibration_scale": "unknown",
         "station_longitude": 107.0,
@@ -68,7 +68,13 @@ def test_read_file():
 
     data = noaa.read_file(data_filepath=filepath, species="CO")
 
-    assert data["co"]["metadata"] == {"species": "co", "site": "POC", "measurement_type": "flask", "network": "NOAA"}
+    assert data["co"]["metadata"] == {
+        "species": "co",
+        "site": "POC",
+        "measurement_type": "flask",
+        "network": "NOAA",
+        "inlet": "NA",
+    }
 
     co_data = data["co"]["data"]
 
@@ -92,7 +98,7 @@ def test_read_file():
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
-        'Processed by': 'OpenGHG_Cloud',
+        "Processed by": "OpenGHG_Cloud",
         "species": "co",
         "Calibration_scale": "unknown",
         "station_long_name": "Pacific Ocean",
@@ -103,6 +109,7 @@ def test_read_file():
 
     assert attrs == expected_attrs
 
+
 def test_read_incorrect_site_raises():
     noaa = NOAA()
 
@@ -110,6 +117,7 @@ def test_read_incorrect_site_raises():
 
     with pytest.raises(ValueError):
         data = noaa.read_file(data_filepath=filepath)
+
 
 def test_incorrect_species_passed_raises():
     noaa = NOAA()
@@ -131,7 +139,7 @@ def test_read_data():
     metadata = data["co"]["metadata"]
     attributes = data["co"]["attributes"]
 
-    expected_metadata = {"species": "co", "site": "POC", "measurement_type": "flask", "network": "NOAA"}
+    expected_metadata = {"species": "co", "site": "POC", "measurement_type": "flask", "network": "NOAA", "inlet": "NA"}
 
     expected_attrs = {
         "data_owner": "Ed Dlugokencky, Gabrielle Petron (CO)",

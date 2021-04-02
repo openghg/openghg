@@ -3,7 +3,18 @@
 """
 from typing import Dict
 
-__all__ = ["create_uuid", "unanimous", "load_object", "get_datapath", "read_header", "load_json", "valid_site", "is_number", "to_lowercase"]
+__all__ = [
+    "create_uuid",
+    "unanimous",
+    "load_object",
+    "get_datapath",
+    "read_header",
+    "load_json",
+    "valid_site",
+    "is_number",
+    "to_lowercase",
+    "to_defaultdict",
+]
 
 
 def create_uuid():
@@ -167,3 +178,24 @@ def to_lowercase(d: Dict) -> Dict:
         return d.lower()
     else:
         return d
+
+
+def to_defaultdict(to_parse: Dict) -> Dict:
+    """Create a defaultdict from a dictionary
+
+    Args:
+        to_parse: Dictionary to parse
+    Returns:
+        collections.defaultdict: Nested defaultdict
+    """
+    from collections import defaultdict
+
+    def nested_dict():
+        return defaultdict(nested_dict)
+
+    def recurse_convert(d):
+        if not isinstance(d, dict):
+            return d
+        return defaultdict(nested_dict, {k: recurse_convert(v) for k, v in d.items()})
+
+    return recurse_convert(to_parse)

@@ -17,13 +17,12 @@ class Datasource:
     _datavalues_root = "values"
     _data_root = "data"
 
-    def __init__(self, name: Optional[str] = None):
+    def __init__(self):
         from Acquire.ObjectStore import get_datetime_now
         from collections import defaultdict
         from uuid import uuid4
 
         self._uuid = str(uuid4())
-        self._name = name
         self._creation_datetime = get_datetime_now()
         self._metadata = {}
         # Dictionary keyed by daterange of data in each Dataset
@@ -344,7 +343,6 @@ class Datasource:
 
         data = {}
         data["UUID"] = self._uuid
-        data["name"] = self._name
         data["creation_datetime"] = datetime_to_string(self._creation_datetime)
         data["metadata"] = self._metadata
         data["stored"] = self._stored
@@ -499,7 +497,6 @@ class Datasource:
 
         d = Datasource()
         d._uuid = data["UUID"]
-        d._name = data["name"]
         d._creation_datetime = string_to_datetime(data["creation_datetime"])
         d._metadata = data["metadata"]
         d._stored = data["stored"]

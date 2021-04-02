@@ -7,7 +7,13 @@ __all__ = ["CRANFIELD"]
 class CRANFIELD:
     """ Class for processing Cranfield data """
 
-    def read_file(self, data_filepath: Union[str, Path, list], site: Optional[str] = None, network: Optional[str] = None) -> Dict:
+    def read_file(
+        self,
+        data_filepath: Union[str, Path, list],
+        site: Optional[str] = None,
+        network: Optional[str] = None,
+        inlet: Optional[str] = None,
+    ) -> Dict:
         """Creates a CRDS object holding data stored within Datasources
 
         Args:
@@ -19,6 +25,7 @@ class CRANFIELD:
             dict: Dictionary of gas data
         """
         from pandas import read_csv
+        from openghg.util import compliant_string
 
         data_filepath = Path(data_filepath)
 
@@ -47,6 +54,8 @@ class CRANFIELD:
         metadata["instrument"] = "CRDS"
         metadata["time_resolution"] = "1_hour"
         metadata["height"] = "10magl"
+        metadata["inlet"] = "10magl"
+        metadata["network"] = "CRANFIELD"
 
         # TODO - this feels fragile
         species = [col for col in data.columns if " " not in col]
@@ -59,7 +68,7 @@ class CRANFIELD:
             # for sp in species:
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
-            species_metadata["species"] = sp
+            species_metadata["species"] = compliant_string(sp)
 
             # Here we don't want to match the co in co2
             # For now we'll just have 2 columns for each species
@@ -70,7 +79,5 @@ class CRANFIELD:
             gas_data = gas_data.to_xarray()
 
             combined_data[sp] = {"metadata": species_metadata, "data": gas_data}
-
-        # Assign data
 
         return combined_data

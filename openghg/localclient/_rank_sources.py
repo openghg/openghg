@@ -9,6 +9,9 @@ __all__ = ["RankSources"]
 
 
 class RankSources:
+    def __init__(self):
+        raise NotImplementedError()
+
     def get_sources(self, site, species=None):
         """ Get the datasources for this site and species to allow a ranking to be set
 
