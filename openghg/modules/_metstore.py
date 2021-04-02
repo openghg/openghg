@@ -17,9 +17,16 @@ class METStore(BaseModule):
 
     def __init__(self):
         from Acquire.ObjectStore import get_datetime_now
+        from collections import defaultdict
 
         self._creation_datetime = get_datetime_now()
         self._stored = False
+
+        # We want to created a nested dictionary
+        def nested_dict():
+            return defaultdict(nested_dict)
+
+        self._datasource_table = nested_dict()
         # Keyed by name - allows retrieval of UUID from name
         self._datasource_names = {}  
         # Keyed by UUID - allows retrieval of name by UUID
@@ -40,6 +47,7 @@ class METStore(BaseModule):
         data = {}
         data["creation_datetime"] = datetime_to_string(self._creation_datetime)
         data["stored"] = self._stored
+        data["datasource_table"] = self._datasource_table
         data["datasource_uuids"] = self._datasource_uuids
         data["datasource_names"] = self._datasource_names
         data["file_hashes"] = self._hashes

@@ -4,69 +4,21 @@ from pandas import Timestamp
 from dataclasses import dataclass
 from openghg.dataobjects import ObsData
 
-__all__ = ["get_observations", "get_single_site", "scale_convert"]
+__all__ = ["get_obs_surface", "scale_convert"]
 
 
-def get_observations(
+def get_obs_surface(
     site: str,
     species: str,
+    inlet: str,
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
-    inlet: Optional[str] = None,
     average: Optional[str] = None,
     network: Optional[str] = None,
     instrument: Optional[str] = None,
     calibration_scale: Optional[str] = None,
     keep_missing: Optional[bool] = False,
-) -> List[ObsData]:
-    """This is the equivalent of the get_obs function from the ACRG repository.
-
-    Usage and return values are the same whilst implementation may differ.
-
-    Args:
-        site: Site of interest e.g. MHD for the Mace Head site.
-        species: Species identifier e.g. ch4 for methane.
-        start_date: Output start date in a format that Pandas can interpret
-        end_date: Output end date in a format that Pandas can interpret
-        inlet: Inlet label
-        average: Averaging period for each dataset. Each value should be a string of
-        the form e.g. "2H", "30min" (should match pandas offset aliases format).
-        keep_missing: Keep missing data points or drop them.
-        network: Network for the site/instrument (must match number of sites).
-        instrument: Specific instrument for the site (must match number of sites).
-        calibration_scale: Convert to this calibration scale
-    Returns:
-        list: List of ObsData objects
-    """
-    # If we want to replicate the functionality of being able to search for multiple species/sites/inlets etc
-    # I think the cleanest way would be to take a list of dictionaries of search values for get_single_site
-    # TODO - RT have a look at this - GJ 2021-03-09
-    return get_single_site(
-        site=site,
-        species=species,
-        start_date=start_date,
-        end_date=end_date,
-        inlet=inlet,
-        average=average,
-        network=network,
-        instrument=instrument,
-        calibration_scale=calibration_scale,
-        keep_missing=keep_missing,
-    )
-
-
-def get_single_site(
-    site: str,
-    species: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    inlet: Optional[str] = None,
-    average: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
-    calibration_scale: Optional[str] = None,
-    keep_missing: Optional[bool] = False,
-) -> List[ObsData]:
+) -> ObsData:
     """Get measurements from one site as a list of ObsData types.
 
     If there are multiple instruments and inlets at a particular site,
@@ -92,8 +44,8 @@ def get_single_site(
     from pandas import Timestamp, Timedelta
     import numpy as np
     from xarray import concat as xr_concat
-    from openghg.processing import search, recombine_multisite
-    from openghg.util import load_json, timestamp_tzaware
+    from openghg.processing import search, recombine_datasets
+    from openghg.util import compliant_string, load_json, timestamp_tzaware
 
     site_info = load_json(filename="acrg_site_info.json")
     site = site.upper()
@@ -102,151 +54,157 @@ def get_single_site(
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
     # Find the correct synonym for the passed species
-    species = synonyms(species).lower()
+    species = compliant_string(synonyms(species))
 
     # Get the observation data
     obs_results = search(
-        locations=site, inlet=inlet, start_date=start_date, end_date=end_date, species=species, instrument=instrument
+        site=site,
+        species=species,
+        inlet=inlet,
+        start_date=start_date,
+        end_date=end_date,
+        instrument=instrument,
+        find_all=True,
     )
+
+    # if len(obs_results) > 1:
+    #     raise ValueError("More than one search result found for the passed argument. Please be more specific with your search terms.")
 
     # TODO - what if we want to return observations from multiple heights?
     try:
         site_key = list(obs_results.keys())[0]
     except IndexError:
-        raise ValueError(f"Unable to find any measurement data for {site} at a height of {height} in the {network} network.")
+        raise ValueError(f"Unable to find any measurement data for {site}")
     
     # TODO - update Search to return a SearchResult object that makes it easier to retrieve data
     # GJ 2021-03-09
     # This is clunky
-    to_retrieve = {site: obs_results[site_key]["keys"]}
-    retrieved_data = recombine_multisite(keys=to_retrieve, sort=True)
+    to_retrieve = obs_results[site_key]["keys"]
+    data = recombine_datasets(keys=to_retrieve, sort=True)
 
-    obs_files = []
+    try:
+        start_date = timestamp_tzaware(data.time[0].values)
+        end_date = timestamp_tzaware(data.time[-1].values)
+    except AttributeError:
+        raise AttributeError("This dataset does not have a time attribute, unable to read date range")
 
-    for key in retrieved_data:
-        data = retrieved_data[key]
+    if average is not None:
+        # GJ - 2021-03-09
+        # TODO - check by RT
 
-        try:
-            start_date = timestamp_tzaware(data.time[0].values)
-            end_date = timestamp_tzaware(data.time[-1].values)
-        except AttributeError:
-            raise AttributeError("This dataset does not have a time attribute, unable to read date range")
+        # # Average the Dataset over a given period
+        # if keep_missing is True:
+        #     # Create a dataset with one element and NaNs to prepend or append
+        #     ds_single_element = data[{"time": 0}]
 
-        if average is not None:
-            # GJ - 2021-03-09
-            # TODO - check by RT
+        #     for v in ds_single_element.variables:
+        #         if v != "time":
+        #             ds_single_element[v].values = np.nan
 
-            # # Average the Dataset over a given period
-            # if keep_missing is True:
-            #     # Create a dataset with one element and NaNs to prepend or append
-            #     ds_single_element = data[{"time": 0}]
+        #     ds_concat = []
 
-            #     for v in ds_single_element.variables:
-            #         if v != "time":
-            #             ds_single_element[v].values = np.nan
+        #     # Pad with an empty entry at the start date
+        #     if timestamp_tzaware(data.time.min()) > start_date:
+        #         ds_single_element_start = ds_single_element.copy()
+        #         ds_single_element_start.time.values = Timestamp(start_date)
+        #         ds_concat.append(ds_single_element_start)
 
-            #     ds_concat = []
+        #     ds_concat.append(data)
 
-            #     # Pad with an empty entry at the start date
-            #     if timestamp_tzaware(data.time.min()) > start_date:
-            #         ds_single_element_start = ds_single_element.copy()
-            #         ds_single_element_start.time.values = Timestamp(start_date)
-            #         ds_concat.append(ds_single_element_start)
+        #     # Pad with an empty entry at the end date
+        #     if data.time.max() < Timestamp(end_date):
+        #         ds_single_element_end = ds_single_element.copy()
+        #         ds_single_element_end.time.values = Timestamp(end_date) - Timedelta("1ns")
+        #         ds_concat.append(ds_single_element_end)
 
-            #     ds_concat.append(data)
+        #     data = xr_concat(ds_concat, dim="time")
 
-            #     # Pad with an empty entry at the end date
-            #     if data.time.max() < Timestamp(end_date):
-            #         ds_single_element_end = ds_single_element.copy()
-            #         ds_single_element_end.time.values = Timestamp(end_date) - Timedelta("1ns")
-            #         ds_concat.append(ds_single_element_end)
+        #     # Now sort to get everything in the right order
+        #     data = data.sortby("time")
 
-            #     data = xr_concat(ds_concat, dim="time")
+        # First do a mean resample on all variables
+        ds_resampled = data.resample(time=average, keep_attrs=True).mean(skipna=False)
+        # keep_attrs doesn't seem to work for some reason, so manually copy
+        ds_resampled.attrs = data.attrs.copy()
 
-            #     # Now sort to get everything in the right order
-            #     data = data.sortby("time")
-
-            # First do a mean resample on all variables
-            ds_resampled = data.resample(time=average, keep_attrs=True).mean(skipna=False)
-            # keep_attrs doesn't seem to work for some reason, so manually copy
-            ds_resampled.attrs = data.attrs.copy()
-
-            # For some variables, need a different type of resampling
-            for var in data.variables:
-                if "repeatability" in var:
-                    ds_resampled[var] = (
-                        np.sqrt((data[var] ** 2).resample(time=average).sum()) / data[var].resample(time=average).count()
-                    )
-
-                # Copy over some attributes
-                if "long_name" in data[var].attrs:
-                    ds_resampled[var].attrs["long_name"] = data[var].attrs["long_name"]
-
-                if "units" in data[var].attrs:
-                    ds_resampled[var].attrs["units"] = data[var].attrs["units"]
-
-            # Create a new variability variable, containing the standard deviation within the resampling period
-            ds_resampled[f"{species}_variability"] = data[species].resample(time = average, keep_attrs = True).std(skipna=False)
-            # If there are any periods where only one measurement was resampled, just use the median variability
-            ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.] = \
-                                                                ds_resampled[f"{species}_variability"].median()
-            # Create attributes for variability variable
-            ds_resampled[f"{species}_variability"].attrs["long_name"] = f"{data[species].attrs['long_name']}_variability"
-            ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
-
-            # Resampling may introduce NaNs, so remove, if not keep_missing
-            if keep_missing is False:
-                ds_resampled = ds_resampled.dropna(dim="time")
-
-            data = ds_resampled
-
-        # Rename variables
-        rename = {}
-
+        # For some variables, need a different type of resampling
         for var in data.variables:
-            if var.lower() == species.lower():
-                rename[var] = "mf"
             if "repeatability" in var:
-                rename[var] = "mf_repeatability"
-            if "variability" in var:
-                rename[var] = "mf_variability"
-            if "number_of_observations" in var:
-                rename[var] = "mf_number_of_observations"
-            if "status_flag" in var:
-                rename[var] = "status_flag"
-            if "integration_flag" in var:
-                rename[var] = "integration_flag"
+                ds_resampled[var] = (
+                    np.sqrt((data[var] ** 2).resample(time=average).sum()) / data[var].resample(time=average).count()
+                )
 
-        data = data.rename_vars(rename)
+            # Copy over some attributes
+            if "long_name" in data[var].attrs:
+                ds_resampled[var].attrs["long_name"] = data[var].attrs["long_name"]
 
-        data.attrs["species"] = species
-        if "Calibration_scale" in data.attrs:
-            data.attrs["scale"] = data.attrs.pop("Calibration_scale")
+            if "units" in data[var].attrs:
+                ds_resampled[var].attrs["units"] = data[var].attrs["units"]
 
-        if calibration_scale is not None:
-            data = scale_convert(data, species, calibration_scale)
+        # Create a new variability variable, containing the standard deviation within the resampling period
+        ds_resampled[f"{species}_variability"] = data[species].resample(time=average, keep_attrs=True).std(skipna=False)
+        # If there are any periods where only one measurement was resampled, just use the median variability
+        ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
+            f"{species}_variability"
+        ].median()
+        # Create attributes for variability variable
+        ds_resampled[f"{species}_variability"].attrs["long_name"] = f"{data[species].attrs['long_name']}_variability"
+        ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
 
-        metadata = data.attrs
-        obs_data = ObsData(data=data, metadata=data.attrs)
+        # Resampling may introduce NaNs, so remove, if not keep_missing
+        if keep_missing is False:
+            ds_resampled = ds_resampled.dropna(dim="time")
 
-        obs_files.append(obs_data)
+        data = ds_resampled
 
-    # Now check if the units match for each of the observation Datasets
-    units = set((f.data.mf.attrs["units"] for f in obs_files))
-    scales = set((f.data.attrs["scale"] for f in obs_files))
 
-    if len(units) > 1:
-        raise ValueError(
-            f"Units do not match for these observation Datasets {[(f.mf.attrs['station_long_name'],f.attrs['units']) for f in obs_files]}"
-        )
+    # Rename variables
+    rename = {}
 
-    if len(scales) > 1:
-        print(
-            f"Scales do not match for these observation Datasets {[(f.mf.attrs['station_long_name'],f.attrs['units']) for f in obs_files]}"
-        )
-        print("Suggestion: set calibration_scale to convert scales")
+    for var in data.variables:
+        if var.lower() == species.lower():
+            rename[var] = "mf"
+        if "repeatability" in var:
+            rename[var] = "mf_repeatability"
+        if "variability" in var:
+            rename[var] = "mf_variability"
+        if "number_of_observations" in var:
+            rename[var] = "mf_number_of_observations"
+        if "status_flag" in var:
+            rename[var] = "status_flag"
+        if "integration_flag" in var:
+            rename[var] = "integration_flag"
 
-    return obs_files
+    data = data.rename_vars(rename)
+
+    data.attrs["species"] = species
+    
+    if "Calibration_scale" in data.attrs:
+        data.attrs["scale"] = data.attrs.pop("Calibration_scale")
+
+    if calibration_scale is not None:
+        data = scale_convert(data, species, calibration_scale)
+
+    metadata = data.attrs
+    obs_data = ObsData(data=data, metadata=data.attrs)
+
+    # It doesn't make sense to do this now as we've only got a single Dataset
+    # # Now check if the units match for each of the observation Datasets
+    # units = set((f.data.mf.attrs["units"] for f in obs_files))
+    # scales = set((f.data.attrs["scale"] for f in obs_files))
+
+    # if len(units) > 1:
+    #     raise ValueError(
+    #         f"Units do not match for these observation Datasets {[(f.mf.attrs['station_long_name'],f.attrs['units']) for f in obs_files]}"
+    #     )
+
+    # if len(scales) > 1:
+    #     print(
+    #         f"Scales do not match for these observation Datasets {[(f.mf.attrs['station_long_name'],f.attrs['units']) for f in obs_files]}"
+    #     )
+    #     print("Suggestion: set calibration_scale to convert scales")
+
+    return obs_data
 
 
 def synonyms(species: str) -> str:

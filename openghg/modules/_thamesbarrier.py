@@ -31,7 +31,7 @@ class THAMESBARRIER(BaseModule):
         """
         from openghg.processing import assign_attributes
         from pandas import read_csv as pd_read_csv
-        from openghg.util import clean_string
+        from openghg.util import clean_string, compliant_string
 
         data_filepath = Path(data_filepath)
 
@@ -71,7 +71,12 @@ class THAMESBARRIER(BaseModule):
             # site_attributes["scale"] = self._tb_params["scale"]
 
             # All attributes stored in the metadata?
-            metadata = {"species": species, "site": site}
+            metadata = {
+                "species": compliant_string(species),
+                "site": site,
+                "inlet": clean_string(self._tb_params["inlet"]),
+                "network": "LGHG",
+            }
             metadata.update(site_attributes)
 
             gas_data[species] = {
