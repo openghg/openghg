@@ -55,7 +55,7 @@ class ICOS:
             dict: Dictionary containing attributes, data and metadata keys
         """
         from pandas import read_csv, Timestamp
-        from openghg.util import read_header, compliant_species
+        from openghg.util import read_header, compliant_string
 
         # metadata = read_metadata(filepath=data_filepath, data=data, data_type="ICOS")
         header = read_header(filepath=data_filepath)
@@ -137,7 +137,7 @@ class ICOS:
 
         metadata = {
             "site": site,
-            "species": compliant_species(species),
+            "species": compliant_string(species),
             "inlet": inlet_height,
             "time_resolution": time_resolution,
             "network": "ICOS",

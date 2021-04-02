@@ -20,7 +20,7 @@ class BEACO2N:
         from numpy import nan as np_nan
         from openghg.util import load_json
         from collections import defaultdict
-        from openghg.util import compliant_species
+        from openghg.util import compliant_string
 
         datetime_columns = {"time": ["datetime"]}
         rename_cols = {"PM_ug/m3": "pm", "PM_ug/m3_QC_level": "pm_qc", "co2_ppm": "co2", "co2_ppm_QC_level": "co2_qc"}
@@ -65,7 +65,7 @@ class BEACO2N:
             species_metadata = {
                 "units": units[mt],
                 "site": site_name,
-                "species": compliant_species(mt),
+                "species": compliant_string(mt),
                 "inlet": "NA",
                 "network": "beaco2n",
             }

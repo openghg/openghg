@@ -3,29 +3,35 @@ import pytest
 
 from openghg.modules import ObsSurface
 from openghg.processing import search
+from openghg.objectstore import get_local_bucket
 from openghg.util import timestamp_tzaware
+from pathlib import Path
 
 
-@pytest.fixture(scope="session")
-def gc_read():
-    data_file = "capegrim-medusa.18.C"
-    prec_file = "capegrim-medusa.18.precisions.C"
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/GC"
-    data_filepath = os.path.join(dir_path, test_data, data_file)
-    prec_filepath = os.path.join(dir_path, test_data, prec_file)
-
-    ObsSurface.read_file(filepath=(data_filepath, prec_filepath), data_type="GCWERKS", network="AGAGE")
+def get_datapath(filename, data_type):
+    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 
-@pytest.fixture(scope="session")
-def crds_read():
-    test_data = "../data/search_data"
-    folder_path = os.path.join(os.path.dirname(__file__), test_data)
-    ObsSurface.read_folder(folder_path=folder_path, data_type="CRDS", network="DECC", extension="dat")
+@pytest.fixture(scope="session", autouse=True)
+def data_read():
+    get_local_bucket(empty=True)
+    network = "DECC"
+    bsd_path = get_datapath(filename="bsd.picarro.1minute.248m.dat", data_type="CRDS")
+    ObsSurface.read_file(filepath=bsd_path, data_type="CRDS", site="bsd", network=network, inlet="248m")
+    hfd_path = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
+    ObsSurface.read_file(filepath=hfd_path, data_type="CRDS", site="hfd", network=network, inlet="100m")
+    hfd_path = get_datapath(filename="hfd.picarro.1minute.50m.min.dat", data_type="CRDS")
+    ObsSurface.read_file(filepath=hfd_path, data_type="CRDS", site="hfd", network=network, inlet="50m")
+    tac_path = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
+    ObsSurface.read_file(filepath=tac_path, data_type="CRDS", site="tac", network=network, inlet="100m")
+
+    data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
+    prec_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
+
+    ObsSurface.read_file(filepath=(data_filepath, prec_filepath), site="CGO", data_type="GCWERKS", network="AGAGE")
 
 
-def test_keyword_search(crds_read):
+def test_keyword_search():
     results = search(species="co2", site=["bsd"], inlet="248m")
 
     key = next(iter(results))
@@ -48,7 +54,7 @@ def test_keyword_search(crds_read):
     assert metadata == expected_metadata
 
 
-def test_search_gc(gc_read):
+def test_search_gc():
     results = search(species=["NF3"], site="CGO")
 
     key = next(iter(results))
@@ -69,7 +75,7 @@ def test_search_gc(gc_read):
     assert metadata == expected_metadata
 
 
-def test_location_search(crds_read):
+def test_location_search():
     # TODO - I feel this test could be improved
     species = ["co2", "ch4"]
     locations = ["hfd", "tac", "bsd"]
@@ -79,12 +85,12 @@ def test_location_search(crds_read):
     assert len(results) == 8
 
     expected_results = [
-        ("bsd", "ch4", "108m"),
         ("bsd", "ch4", "248m"),
-        ("bsd", "co2", "108m"),
         ("bsd", "co2", "248m"),
         ("hfd", "ch4", "100m"),
+        ("hfd", "ch4", "50m"),
         ("hfd", "co2", "100m"),
+        ("hfd", "co2", "50m"),
         ("tac", "ch4", "100m"),
         ("tac", "co2", "100m"),
     ]
@@ -100,7 +106,7 @@ def test_location_search(crds_read):
     assert expected_results == found_results
 
 
-def test_search_datetimes(crds_read):
+def test_search_datetimes():
     species = ["co2"]
     locations = ["bsd"]
 
@@ -110,7 +116,7 @@ def test_search_datetimes(crds_read):
     results = search(
         species=species,
         site=locations,
-        inlet="108m",
+        inlet="248m",
         start_date=start,
         end_date=end,
     )
@@ -121,8 +127,8 @@ def test_search_datetimes(crds_read):
         "site": "bsd",
         "instrument": "picarro",
         "time_resolution": "1_minute",
-        "inlet": "108m",
-        "port": "9",
+        "inlet": "248m",
+        "port": "8",
         "type": "air",
         "network": "decc",
         "species": "co2",
@@ -141,7 +147,7 @@ def test_search_datetimes(crds_read):
     results = search(
         species=species,
         site=locations,
-        inlet="108m",
+        inlet="248m",
         start_date=start,
         end_date=end,
     )
@@ -149,10 +155,10 @@ def test_search_datetimes(crds_read):
     assert len(results[key]["keys"]) == 2
 
 
-def test_search_find_any(crds_read):
+def test_search_find_any():
     species = ["co2"]
     sites = ["bsd"]
-    inlet = "108m"
+    inlet = "248m"
     instrument = "picarro"
 
     start = timestamp_tzaware("2014-1-1")
@@ -163,12 +169,17 @@ def test_search_find_any(crds_read):
     )
 
     expected_results = [
-        ("bsd", "ch4", "108m", "picarro"),
         ("bsd", "ch4", "248m", "picarro"),
-        ("bsd", "co", "108m", "picarro"),
         ("bsd", "co", "248m", "picarro"),
-        ("bsd", "co2", "108m", "picarro"),
         ("bsd", "co2", "248m", "picarro"),
+        ("hfd", "ch4", "100m", "picarro"),
+        ("hfd", "ch4", "50m", "picarro"),
+        ("hfd", "co", "100m", "picarro"),
+        ("hfd", "co", "50m", "picarro"),
+        ("hfd", "co2", "100m", "picarro"),
+        ("hfd", "co2", "50m", "picarro"),
+        ("tac", "ch4", "100m", "picarro"),
+        ("tac", "co2", "100m", "picarro"),
     ]
 
     found_results = []
@@ -201,11 +212,11 @@ def test_search_find_any(crds_read):
 
     found_results.sort()
 
-    assert found_results == [('bsd', 'co2', '108m', 'picarro')]
+    assert found_results == [("bsd", "co2", "248m", "picarro")]
 
 
 @pytest.mark.skip(reason="Needs update for new keyword arg search")
-def test_search_instrument_no_inlet(crds_read):
+def test_search_instrument_no_inlet():
     locations = "bsd"
     species = "n2o"
     instrument = "picarro5310"
@@ -249,7 +260,7 @@ def test_search_instrument_no_inlet(crds_read):
     assert results["n2o_bsd_248m_picarro5310"]["metadata"] == metadata_248m
 
 
-def test_search_incorrect_inlet_site_finds_nothing(crds_read):
+def test_search_incorrect_inlet_site_finds_nothing():
     locations = "hfd"
     inlet = "3695m"
     species = "CH4"

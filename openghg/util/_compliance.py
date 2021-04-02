@@ -2,10 +2,10 @@
 Functions to easily ensure variables at different stages of the 
 """
 
-__all__ = ["compliant_species"]
+__all__ = ["compliant_string"]
 
 
-def compliant_species(species_str: str) -> str:
+def compliant_string(species_str: str) -> str:
     """Create an OpenGHG (and CF) compliant species label
 
     Args:

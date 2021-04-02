@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
-import xarray
+import xarray as xr
 
 from openghg.modules import CRDS, Datasource
 from openghg.objectstore import get_local_bucket, get_object_names
@@ -67,12 +67,15 @@ def test_add_data(data):
     assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(26.0)
 
     d.add_data(metadata=metadata, data=ch4_data)
+    d.save()
+    bucket = get_local_bucket()
 
-    date_key = "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
+    data_chunks = [Datasource.load_dataset(bucket=bucket, key=k) for k in d.data_keys()]
 
-    assert d._data[date_key]["ch4"].equals(ch4_data["ch4"])
-    assert d._data[date_key]["ch4_variability"].equals(ch4_data["ch4_variability"])
-    assert d._data[date_key]["ch4_number_of_observations"].equals(ch4_data["ch4_number_of_observations"])
+    # Now read it out and make sure it's what we expect
+    combined = xr.concat(data_chunks, dim="time")
+
+    assert combined.equals(ch4_data)
 
     datasource_metadata = d.metadata()
 
@@ -170,7 +173,7 @@ def test_save_footprint():
     filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
     filepath = os.path.join(dir_path, test_data, filename)
 
-    data = xarray.open_dataset(filepath)
+    data = xr.open_dataset(filepath)
 
     datasource = Datasource()
     datasource.add_footprint_data(data=data, metadata=metadata)
@@ -286,7 +289,7 @@ def test_update_daterange_replacement(data):
     d.add_data(metadata=metadata, data=ch4_data)
 
     assert d._start_date == pd.Timestamp("2014-01-30 10:52:30+00:00")
-    assert d._end_date == pd.Timestamp("2014-01-30 14:20:30+00:00")
+    assert d._end_date == pd.Timestamp("2018-01-30 14:20:30+00:00")
 
     ch4_short = ch4_data.head(40)
 
@@ -304,7 +307,7 @@ def test_load_dataset():
     test_data = "../data/emissions"
     filepath = os.path.join(dir_path, test_data, filename)
 
-    ds = xarray.load_dataset(filepath)
+    ds = xr.load_dataset(filepath)
 
     metadata = {"some": "metadata"}
 

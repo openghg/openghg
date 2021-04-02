@@ -174,7 +174,6 @@ class ObsSurface(BaseModule):
                     # ease of checking by user
                     obs._file_hashes[file_hash] = data_filepath.name
                 except Exception:
-                    print("We got error")
                     results["error"][data_filepath.name] = traceback.format_exc()
 
                 progress_bar.update(1)
@@ -219,46 +218,6 @@ class ObsSurface(BaseModule):
 
         """
         raise NotImplementedError()
-
-
-
-
-
-
-    @staticmethod
-    def read_folder(folder_path: Union[str, Path], data_type: str, network: str, extension: Optional[str] = "dat") -> Dict:
-        """Find files with the given extension (by default dat) in the passed folder
-
-        Args:
-            folder_path: Path of folder
-            data_type: Data type
-            extension: File extension
-        Returns:
-            dict: Dictionary of the Datasources created for each file
-        """
-        from pathlib import Path
-
-        if extension.startswith("."):
-            extension = extension.strip(".")
-
-        filepaths = [f.resolve() for f in Path(folder_path).glob(f"**/*.{extension}")]
-
-        if not filepaths:
-            raise FileNotFoundError("No data files found")
-
-        return ObsSurface.read_file(filepath=filepaths, data_type=data_type, network=network)
-
-    # def store_datasource_ids():
-    #     """This function is the partner of datasource_lookup. If datasource_lookup
-    #     doesn't find any Datasources for the passed data we create them
-    #     and this function stores them for lookup at the next occasion.
-
-    #     Args:
-    #         ?
-    #     Returns:
-    #         None
-
-    #     """
 
     def delete(self, uuid: str) -> None:
         """Delete a Datasource with the given UUID

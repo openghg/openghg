@@ -193,4 +193,9 @@ def to_defaultdict(to_parse: Dict) -> Dict:
     def nested_dict():
         return defaultdict(nested_dict)
 
-    return defaultdict(nested_dict, to_parse)
+    def recurse_convert(d):
+        if not isinstance(d, dict):
+            return d
+        return defaultdict(nested_dict, {k: recurse_convert(v) for k, v in d.items()})
+
+    return recurse_convert(to_parse)

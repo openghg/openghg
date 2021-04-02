@@ -33,9 +33,8 @@ def search(**kwargs) -> Dict:
         dict: List of keys of Datasources matching the search parameters
     """
     from collections import defaultdict
-    from json import load
     from openghg.modules import Datasource, ObsSurface
-    from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, get_datapath
+    from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, clean_string
 
     # if species is not None and not isinstance(species, list):
     # if not isinstance(species, list):
@@ -60,7 +59,6 @@ def search(**kwargs) -> Dict:
     #     d = load(f)
     #     site_codes = d["name_code"]
 
-
     # updated_sites = []
     # # Check locations, if they're longer than three letters do a lookup
     # for loc in site:
@@ -82,7 +80,7 @@ def search(**kwargs) -> Dict:
     if start_date is None:
         start_date = timestamp_epoch()
     else:
-        start_date = timestamp_tzaware(start_date)    
+        start_date = timestamp_tzaware(start_date)
 
     if end_date is None:
         end_date = timestamp_now()
@@ -93,7 +91,7 @@ def search(**kwargs) -> Dict:
     kwargs["end_date"] = end_date
 
     # As we might have kwargs that are None we want to get rid of those
-    search_kwargs = {k: v for k, v in kwargs.items() if v is not None}
+    search_kwargs = {k: clean_string(v) for k, v in kwargs.items() if v is not None}
 
     # Here we want to load in the ObsSurface module for now
     obs = ObsSurface.load()
@@ -111,9 +109,8 @@ def search(**kwargs) -> Dict:
             matching_sources[uid]["metadata"] = datasource.metadata()
 
     return matching_sources
-    # Now we have the sources we want to process them so we can extract 
+    # Now we have the sources we want to process them so we can extract
     # some metadata and return their keys
-
 
     # First we find the Datasources from locations we want to narrow down our search
     # location_sources = defaultdict(list)

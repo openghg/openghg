@@ -45,7 +45,7 @@ def get_obs_surface(
     import numpy as np
     from xarray import concat as xr_concat
     from openghg.processing import search, recombine_datasets
-    from openghg.util import compliant_species, load_json, timestamp_tzaware
+    from openghg.util import compliant_string, load_json, timestamp_tzaware
 
     site_info = load_json(filename="acrg_site_info.json")
     site = site.upper()
@@ -54,7 +54,7 @@ def get_obs_surface(
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
     # Find the correct synonym for the passed species
-    species = synonyms(species).lower()
+    species = compliant_string(synonyms(species))
 
     # Get the observation data
     obs_results = search(
@@ -81,12 +81,6 @@ def get_obs_surface(
     # This is clunky
     to_retrieve = obs_results[site_key]["keys"]
     data = recombine_datasets(keys=to_retrieve, sort=True)
-
-    # TODO - GJ - 2021-03-30
-    # Need to make sure the species are stored as compliant species labels
-    # in the Datasource metadata, this works around the lack of compliant strings
-    # for the search function above.
-    species = compliant_species(species)
 
     try:
         start_date = timestamp_tzaware(data.time[0].values)
@@ -163,6 +157,7 @@ def get_obs_surface(
 
         data = ds_resampled
 
+
     # Rename variables
     rename = {}
 
@@ -180,10 +175,10 @@ def get_obs_surface(
         if "integration_flag" in var:
             rename[var] = "integration_flag"
 
-
     data = data.rename_vars(rename)
 
     data.attrs["species"] = species
+    
     if "Calibration_scale" in data.attrs:
         data.attrs["scale"] = data.attrs.pop("Calibration_scale")
 

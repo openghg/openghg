@@ -220,13 +220,7 @@ class BaseModule:
         Returns:
             None
         """
+        self._datasource_table.clear()
         self._datasource_uuids.clear()
         self._datasource_names.clear()
         self._file_hashes.clear()
-
-    def datasource_lookup(self: T, datasource_table) -> Dict:
-        """Lookup the Datasources to store the associated data with
-
-
-        
-        """

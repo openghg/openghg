@@ -43,7 +43,7 @@ def test_read_CRDS():
 
     data_keys = list(datasource.data().keys())
 
-    assert data_keys == ["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"]
+    assert data_keys == ['2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00', '2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00']
 
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.future.dat", data_type="CRDS")
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
@@ -54,6 +54,7 @@ def test_read_CRDS():
 
     assert data_keys == [
         "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00",
+        '2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00',
         "2023-01-30-13:56:30+00:00_2023-01-30-14:20:30+00:00",
     ]
 

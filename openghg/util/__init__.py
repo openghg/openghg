@@ -18,7 +18,7 @@ from ._util import (
 from ._hashing import hash_string, hash_file
 from ._strings import clean_string
 
-from ._compliance import compliant_species
+from ._compliance import compliant_string
 
 from ._time import (
     timestamp_tzaware,

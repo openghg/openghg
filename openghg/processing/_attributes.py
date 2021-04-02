@@ -94,7 +94,7 @@ def get_attributes(
             (e.g. ["1900-01-01", "2010-01-01"])
     """
     from pandas import Timestamp as pd_Timestamp
-    from openghg.util import compliant_species, load_json
+    from openghg.util import compliant_string, load_json
 
     # from numpy import unique as np_unique
 
@@ -129,7 +129,7 @@ def get_attributes(
         try:
             species_label = species_translator[species_upper]["chem"]
         except KeyError:
-            species_label = compliant_species(species_lower)
+            species_label = compliant_string(species_lower)
 
         species_rename[var] = var.replace(species_lower, species_label)
 

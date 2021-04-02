@@ -20,8 +20,8 @@ def read_data():
     cgo_data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     cgo_prec = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    ObsSurface.read_file(filepath=hfd_filepath, data_type="CRDS")
-    ObsSurface.read_file(filepath=(cgo_data, cgo_prec), data_type="GCWERKS")
+    ObsSurface.read_file(filepath=hfd_filepath, data_type="CRDS", site="hfd", network="DECC")
+    ObsSurface.read_file(filepath=(cgo_data, cgo_prec), data_type="GCWERKS", site="CGO", network="AGAGE", instrument="medusa")
 
 
 def test_get_observations_few_args():
@@ -59,6 +59,7 @@ def test_get_observations_few_args():
         "port": "10",
         "type": "air",
         "scale": "WMO-X2007",
+        "network": "decc",
     }
 
     assert data.attrs == expected_attrs
@@ -121,8 +122,8 @@ def test_gcwerks_retrieval():
         "station_long_name": "Cape Grim, Tasmania",
         "station_height_masl": 94.0,
         "instrument": "medusa",
-        "site": "CGO",
-        "network": "NA",
+        "site": "cgo",
+        "network": "agage",
         "units": "ppt",
         "scale": "SIO-05",
         "inlet": "75m_4",
