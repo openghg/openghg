@@ -61,7 +61,7 @@
     "\n",
     "from openghg.modules import ObsSurface\n",
     "from openghg.objectstore import visualise_store\n",
-    "from openghg.localclient import get_obs_surface, RankSources\n",
+    "from openghg.localclient import get_observations, RankSources\n",
     "\n",
     "\n",
     "\n",
@@ -106,7 +106,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "First we want to process some files from our local directory"
+    "First we want to create a list of files to process, we'll use some files from our local directory"
    ]
   },
   {
@@ -115,14 +115,23 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "decc_file = \"../data/DECC/bsd.picarro.1minute.248m.dat\""
+    "decc_files = glob.glob(\"../data/DECC/*.dat\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "agage_files = glob.glob(\"../data/AGAGE/*.C\")"
    ]
   },
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "We can pass this filepath to `ObsSurface.read_file`. We must also tell it the type of data we want it to process, DECC data is CRDS. We also pass in the site code and the name of the network."
+    "We can pass a list of files to `ObsSurface.read_file`. We must also tell it the type of data we want it to process, DECC data is CRDS. We also pass in the name of the network."
    ]
   },
   {
@@ -131,7 +140,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "decc_results = ObsSurface.read_file(filepath=decc_file, data_type=\"CRDS\", site=\"bsd\", network=\"DECC\")"
+    "decc_results = ObsSurface.read_file(filepath=decc_files, data_type=\"CRDS\", network=\"DECC\")"
    ]
   },
   {
@@ -182,7 +191,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "We can now process the AGAGE data. The functions that process the AGAGE data expect data to have an accompanying precisions file. For each data file we create a tuple with the data filename and the precisions filename. A simpler method of uploading these file types is planned."
+    "We can now process the AGAGE data. The functions that process the AGAGE data expect data to have an accompanying precisions file. For each data file we create a tuple with the data filename and the precisions filename. A simpler method of uploading these file types is planne."
    ]
   },
   {
@@ -202,7 +211,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "agage_tuples = [('../data/AGAGE/capegrim-medusa.18.C', '../data/AGAGE/capegrim-medusa.18.precisions.C')]"
+    "agage_tuples = [('../data/AGAGE/capegrim-medusa.18.C', '../data/AGAGE/capegrim-medusa.18.precisions.C'), \n",
+    "                ('../data/AGAGE/trinidadhead.01.C', '../data/AGAGE/trinidadhead.01.precisions.C')]"
    ]
   },
   {
@@ -218,7 +228,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "agage_results = ObsSurface.read_file(filepath=agage_tuples, data_type=\"GCWERKS\", site=\"CGO\", network=\"AGAGE\")"
+    "agage_results = ObsSurface.read_file(filepath=agage_tuples, data_type=\"GCWERKS\", network=\"AGAGE\")"
    ]
   },
   {
@@ -289,7 +299,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "To retrieve data from the object store we can use the `get_obs_surface` function from the `localclient` submodule. This allows us to retrieve and view the data stored."
+    "To retrieve data from the object store we can use the `get_observations` function from the `localclient` submodule. This allows us to retrieve and view the data stored."
    ]
   },
   {
@@ -298,14 +308,14 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "data = get_obs_surface(site=\"bsd\", species=\"co\", network=\"AGAGE\")"
+    "data = get_observations(site=\"hfd\", species=\"co\", network=\"AGAGE\")"
    ]
   },
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "If we view data we expect an `ObsData` object to have been returned"
+    "If we view data we expect two `xarray.Dataset` objects to have been returned in in a `list`"
    ]
   },
   {
@@ -315,6 +325,22 @@
    "outputs": [],
    "source": [
     "data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "len(data)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We get two datasets for CO data from Tacolneston as there are two inlet measurement heights for this species at this site. We can quickly visualise the data we have stored using the plotting capabilities in `xarray`."
    ]
   },
   {
@@ -339,7 +365,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "example_data = data.data\n",
+    "example_data = data[0].data\n",
     "mol_frac = example_data.mf\n",
     "mol_frac.plot()"
    ]
@@ -361,21 +387,14 @@
    ]
   },
   {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "# The rest of tutorial requires updating, the cells below will not work."
-   ]
-  },
-  {
    "cell_type": "code",
    "execution_count": null,
    "metadata": {},
    "outputs": [],
    "source": [
-    "#r = RankSources()\n",
+    "r = RankSources()\n",
     "\n",
-    "#r.get_sources(site=\"hfd\", species=\"co\")"
+    "r.get_sources(site=\"hfd\", species=\"co\")"
    ]
   },
   {
@@ -397,7 +416,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "#daterange_100m = r.create_daterange(start=\"2013-11-01\", end=\"2016-01-01\")   "
+    "daterange_100m = r.create_daterange(start=\"2013-11-01\", end=\"2016-01-01\")   "
    ]
   },
   {
@@ -413,7 +432,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "#rank_data = {\"co_hfd_100m_picarro\": {\"1\": [daterange_100m]}}"
+    "rank_data = {\"co_hfd_100m_picarro\": {\"1\": [daterange_100m]}}"
    ]
   },
   {
@@ -422,7 +441,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "#rank_data"
+    "rank_data"
    ]
   },
   {
@@ -438,7 +457,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "#r.set_rank(rank_key=\"co_hfd_100m_picarro\", rank_data=rank_data)"
+    "r.set_rank(rank_key=\"co_hfd_100m_picarro\", rank_data=rank_data)"
    ]
   },
   {
@@ -454,7 +473,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "#r.get_sources(site=\"hfd\", species=\"co\")"
+    "r.get_sources(site=\"hfd\", species=\"co\")"
    ]
   },
   {
@@ -483,7 +502,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "#updated_data = get_obs_surface(site=\"hfd\", species=\"co\", network=\"AGAGE\")"
+    "updated_data = get_observations(site=\"hfd\", species=\"co\", network=\"AGAGE\")"
    ]
   },
   {
@@ -492,7 +511,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "#updated_data"
+    "updated_data"
    ]
   },
   {
@@ -510,7 +529,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "#fiftym_data = get_obs_surface(site=\"hfd\", species=\"co\", network=\"AGAGE\", inlet=\"50m\")"
+    "fiftym_data = get_observations(site=\"hfd\", species=\"co\", network=\"AGAGE\", inlet=\"50m\")"
    ]
   },
   {
@@ -519,7 +538,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "#fiftym_data"
+    "fiftym_data"
    ]
   },
   {

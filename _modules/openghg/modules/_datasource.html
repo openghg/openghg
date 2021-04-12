@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.1.g3b95144 documentation</title>
+  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.1.gdcc42ec documentation</title>
   
 
   
@@ -187,12 +187,12 @@
     <span class="n">_datavalues_root</span> <span class="o">=</span> <span class="s2">&quot;values&quot;</span>
     <span class="n">_data_root</span> <span class="o">=</span> <span class="s2">&quot;data&quot;</span>
 
-<div class="viewcode-block" id="Datasource.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">get_datetime_now</span>
+<div class="viewcode-block" id="Datasource.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">create_uuid</span><span class="p">,</span> <span class="n">get_datetime_now</span>
         <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-        <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid4</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span> <span class="o">=</span> <span class="n">create_uuid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_creation_datetime</span> <span class="o">=</span> <span class="n">get_datetime_now</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># Dictionary keyed by daterange of data in each Dataset</span>
@@ -513,6 +513,7 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">data</span><span class="p">[</span><span class="s2">&quot;UUID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
         <span class="n">data</span><span class="p">[</span><span class="s2">&quot;creation_datetime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime_to_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_creation_datetime</span><span class="p">)</span>
         <span class="n">data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span>
         <span class="n">data</span><span class="p">[</span><span class="s2">&quot;stored&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stored</span>
@@ -667,6 +668,7 @@
 
         <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">()</span>
         <span class="n">d</span><span class="o">.</span><span class="n">_uuid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;UUID&quot;</span><span class="p">]</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
         <span class="n">d</span><span class="o">.</span><span class="n">_creation_datetime</span> <span class="o">=</span> <span class="n">string_to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;creation_datetime&quot;</span><span class="p">])</span>
         <span class="n">d</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
         <span class="n">d</span><span class="o">.</span><span class="n">_stored</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;stored&quot;</span><span class="p">]</span>
@@ -837,7 +839,7 @@
         <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">daterange</span><span class="p">()</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">datetime_to_string</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">datetime_to_string</span><span class="p">(</span><span class="n">end</span><span class="p">)])</span></div>
 
-<div class="viewcode-block" id="Datasource.search_metadata_old"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.search_metadata_old">[docs]</a>    <span class="k">def</span> <span class="nf">search_metadata_old</span><span class="p">(</span>
+<div class="viewcode-block" id="Datasource.search_metadata"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.search_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">search_metadata</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">search_terms</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
         <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -852,9 +854,6 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if found else False</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
-        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;This function will be removed in a future release&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_daterange</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">):</span>
                 <span class="k">return</span> <span class="kc">False</span>
@@ -882,56 +881,6 @@
         <span class="c1"># Otherwise there should be at least a True in results</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
-
-<div class="viewcode-block" id="Datasource.search_metadata"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.search_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">search_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">find_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Search the metadata for any available keyword</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            find_all: If True all arguments must be matched</span>
-<span class="sd">        Keyword Arguments:</span>
-<span class="sd">            Keyword arguments passed will be checked against the metadata of the Datasource</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            bool: True if some/all parameters matched</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">start_date</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;start_date&quot;</span><span class="p">)</span>
-        <span class="n">end_date</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;end_date&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_daterange</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="c1"># Now we&#39;ve checked the dates we can remove them as it&#39;s unlikely a comparison below</span>
-        <span class="c1"># will match the dates exactly</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span>
-            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">pass</span>
-
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># Here we want to check if it&#39;s a list and if so iterate over it</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-                    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-                        <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">==</span> <span class="n">val</span><span class="p">:</span>
-                            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
-                        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">pass</span>
-
-        <span class="c1"># If we want all the terms to match these should be the same length</span>
-        <span class="k">if</span> <span class="n">find_all</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="Datasource.in_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.in_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">in_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">],</span> <span class="n">end_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Check if the data contained within this Datasource overlaps with the</span>
@@ -962,6 +911,11 @@
 <span class="sd">        Return:</span>
 <span class="sd">            list: List of keys to data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">timestamp_tzaware</span>
+
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+
         <span class="n">data_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span><span class="p">[</span><span class="s2">&quot;latest&quot;</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_date_compare</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">data_keys</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span></div>
@@ -1287,7 +1241,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 02, 2021.
+        Last updated on Apr 12, 2021.
       </span>
 
     </p>

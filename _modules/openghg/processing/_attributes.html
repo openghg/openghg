@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.processing._attributes &mdash; OpenGHG 0+untagged.1.g3b95144 documentation</title>
+  <title>openghg.processing._attributes &mdash; OpenGHG 0+untagged.1.gdcc42ec documentation</title>
   
 
   
@@ -263,8 +263,9 @@
 <span class="sd">            If you only want an end date, just put a very early start date</span>
 <span class="sd">            (e.g. [&quot;1900-01-01&quot;, &quot;2010-01-01&quot;])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">json</span>
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span> <span class="k">as</span> <span class="n">pd_Timestamp</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">compliant_string</span><span class="p">,</span> <span class="n">load_json</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_datapath</span>
 
     <span class="c1"># from numpy import unique as np_unique</span>
 
@@ -277,13 +278,20 @@
     <span class="n">to_underscores</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="n">var</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">}</span>
     <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">to_underscores</span><span class="p">)</span>
 
-    <span class="n">species_attrs</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;species_attributes.json&quot;</span><span class="p">)</span>
-    <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
+    <span class="n">species_attrs_filepath</span> <span class="o">=</span> <span class="n">get_datapath</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;species_attributes.json&quot;</span><span class="p">)</span>
 
-    <span class="n">species_translator</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;species_translation&quot;</span><span class="p">]</span>
-    <span class="n">unit_species</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;unit_species&quot;</span><span class="p">]</span>
-    <span class="n">unit_species_long</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;unit_species_long&quot;</span><span class="p">]</span>
-    <span class="n">unit_interpret</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;unit_interpret&quot;</span><span class="p">]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">species_attrs_filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">species_attrs</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">get_datapath</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="n">species_translator</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;species_translation&quot;</span><span class="p">]</span>
+    <span class="n">unit_species</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;unit_species&quot;</span><span class="p">]</span>
+    <span class="n">unit_species_long</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;unit_species_long&quot;</span><span class="p">]</span>
+    <span class="n">unit_interpret</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;unit_interpret&quot;</span><span class="p">]</span>
 
     <span class="n">species_upper</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
     <span class="n">species_lower</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -296,10 +304,10 @@
 
     <span class="n">species_rename</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">matched_keys</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">species_upper</span> <span class="ow">in</span> <span class="n">species_translator</span><span class="p">:</span>
             <span class="n">species_label</span> <span class="o">=</span> <span class="n">species_translator</span><span class="p">[</span><span class="n">species_upper</span><span class="p">][</span><span class="s2">&quot;chem&quot;</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="n">species_label</span> <span class="o">=</span> <span class="n">compliant_string</span><span class="p">(</span><span class="n">species_lower</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">species_label</span> <span class="o">=</span> <span class="n">species_lower</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 
         <span class="n">species_rename</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">species_lower</span><span class="p">,</span> <span class="n">species_label</span><span class="p">)</span>
 
@@ -508,7 +516,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 02, 2021.
+        Last updated on Apr 12, 2021.
       </span>
 
     </p>

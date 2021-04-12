@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.processing._recombination &mdash; OpenGHG 0+untagged.1.g3b95144 documentation</title>
+  <title>openghg.processing._recombination &mdash; OpenGHG 0+untagged.1.gdcc42ec documentation</title>
   
 
   
@@ -194,12 +194,12 @@
     <span class="k">return</span> <span class="n">result</span>
 
 
-<div class="viewcode-block" id="recombine_datasets"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.recombine_datasets">[docs]</a><span class="k">def</span> <span class="nf">recombine_datasets</span><span class="p">(</span><span class="n">keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+<div class="viewcode-block" id="recombine_datasets"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.recombine_datasets">[docs]</a><span class="k">def</span> <span class="nf">recombine_datasets</span><span class="p">(</span><span class="n">data_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Combines datasets stored separately in the object store</span>
 <span class="sd">    into a single datasets</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        keys: List of object store keys</span>
+<span class="sd">        data_keys: List of object store keys</span>
 <span class="sd">        term</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        xarray.Dataset: Combined Dataset</span>
@@ -208,12 +208,12 @@
     <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span>
     <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_bucket</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">keys</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data_keys</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No data keys passed.&quot;</span><span class="p">)</span>
 
     <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">()</span>
 
-    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">Datasource</span><span class="o">.</span><span class="n">load_dataset</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">Datasource</span><span class="o">.</span><span class="n">load_dataset</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">data_keys</span><span class="p">]</span>
 
     <span class="n">combined</span> <span class="o">=</span> <span class="n">xr_concat</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
 
@@ -246,7 +246,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 02, 2021.
+        Last updated on Apr 12, 2021.
       </span>
 
     </p>

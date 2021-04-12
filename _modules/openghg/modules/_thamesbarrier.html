@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._thamesbarrier &mdash; OpenGHG 0+untagged.1.g3b95144 documentation</title>
+  <title>openghg.modules._thamesbarrier &mdash; OpenGHG 0+untagged.1.gdcc42ec documentation</title>
   
 
   
@@ -201,7 +201,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.processing</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span> <span class="k">as</span> <span class="n">pd_read_csv</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">compliant_string</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span>
 
         <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
 
@@ -241,12 +241,7 @@
             <span class="c1"># site_attributes[&quot;scale&quot;] = self._tb_params[&quot;scale&quot;]</span>
 
             <span class="c1"># All attributes stored in the metadata?</span>
-            <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">compliant_string</span><span class="p">(</span><span class="n">species</span><span class="p">),</span>
-                <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
-                <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">clean_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tb_params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]),</span>
-                <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;LGHG&quot;</span><span class="p">,</span>
-            <span class="p">}</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">}</span>
             <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">site_attributes</span><span class="p">)</span>
 
             <span class="n">gas_data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
@@ -271,7 +266,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 02, 2021.
+        Last updated on Apr 12, 2021.
       </span>
 
     </p>
