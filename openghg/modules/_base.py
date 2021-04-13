@@ -22,6 +22,8 @@ class BaseModule:
 
         # Stores metadata about the Datasource, keyed by site
         self._datasource_table = nested_dict()
+        # Keyed by Datasource UUID
+        self._datasource_uuids = {}
         # Hashes of previously uploaded files
         self._file_hashes = {}
         # Keyed by UUID
@@ -73,7 +75,6 @@ class BaseModule:
         c = cls()
         c._creation_datetime = string_to_datetime(data["creation_datetime"])
         c._datasource_uuids = data["datasource_uuids"]
-        c._datasource_names = data["datasource_names"]
         c._file_hashes = data["file_hashes"]
         c._datasource_table = to_defaultdict(data["datasource_table"])
 
@@ -85,6 +86,25 @@ class BaseModule:
         c._stored = False
 
         return c
+
+    def to_data(self) -> Dict:
+        """Return a JSON-serialisable dictionary of object
+        for storage in object store
+
+        Returns:
+            dict: Dictionary version of object
+        """
+        from Acquire.ObjectStore import datetime_to_string
+
+        data = {}
+        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
+        data["stored"] = self._stored
+        data["datasource_table"] = self._datasource_table
+        data["datasource_uuids"] = self._datasource_uuids
+        data["file_hashes"] = self._file_hashes
+        data["rank_data"] = self._rank_data
+
+        return data
 
     @classmethod
     def load(cls: Type[T], bucket: Optional[str] = None) -> T:
@@ -140,11 +160,7 @@ class BaseModule:
                 raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
             else:
                 self._datasource_table[site][network][inlet][species] = uid
-
-        self._datasource_names.update(datasource_uuids)
-        # Invert the dictionary to update the dict keyed by UUID
-        uuid_keyed = {v: k for k, v in datasource_uuids.items()}
-        self._datasource_uuids.update(uuid_keyed)
+                self._datasource_uuids[uid] = key
 
     def datasources(self: T) -> List[str]:
         """Return the list of Datasources UUIDs associated with this object
@@ -153,18 +169,6 @@ class BaseModule:
             list: List of Datasource UUIDs
         """
         return list(self._datasource_uuids.keys())
-
-    def datasource_names(self: T) -> Dict:
-        """Return the names of the datasources
-
-        Returns:
-            dict: Dictionary of Datasource names
-        """
-        import warnings
-
-        warnings.warn("This may be removed in a future release", category=DeprecationWarning)
-
-        return self._datasource_names
 
     def remove_datasource(self: T, uuid: str) -> None:
         """Remove the Datasource with the given uuid from the list
@@ -240,5 +244,4 @@ class BaseModule:
         """
         self._datasource_table.clear()
         self._datasource_uuids.clear()
-        self._datasource_names.clear()
         self._file_hashes.clear()

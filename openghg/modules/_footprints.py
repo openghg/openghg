@@ -12,9 +12,6 @@ class FOOTPRINTS(BaseModule):
     _root = "Footprints"
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
 
-    def __init__(self):
-        super().__init__()
-
     @staticmethod
     def read_file(
         filepath: Union[str, Path],
@@ -116,25 +113,6 @@ class FOOTPRINTS(BaseModule):
         fp.save()
 
         return {str(filepath.name): uid}
-
-    def to_data(self) -> Dict:
-        """ Return a JSON-serialisable dictionary of object
-        for storage in object store
-
-        Returns:
-            dict: Dictionary version of object
-        """
-        from Acquire.ObjectStore import datetime_to_string
-
-        data = {}
-        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_uuids"] = self._datasource_uuids
-        data["datasource_names"] = self._datasource_names
-        data["file_hashes"] = self._file_hashes
-        data["rank_data"] = self._rank_data
-
-        return data
 
     def save(self) -> None:
         """ Save the object to the object store

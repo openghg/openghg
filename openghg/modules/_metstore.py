@@ -15,28 +15,6 @@ class METStore(BaseModule):
     _root = "METStore"
     _uuid = "9fcabd0c-9b68-4ab4-a116-bc30a4472d67"
 
-    def __init__(self):
-        super().__init__()
-
-    def to_data(self) -> Dict:
-        """Return a JSON-serialisable dictionary of object
-        for storage in object store
-
-        Returns:
-            dict: Dictionary version of object
-        """
-        from Acquire.ObjectStore import datetime_to_string
-
-        data = {}
-        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_table"] = self._datasource_table
-        data["datasource_uuids"] = self._datasource_uuids
-        data["datasource_names"] = self._datasource_names
-        data["file_hashes"] = self._hashes
-
-        return data
-
     def save(self, bucket: Optional[Dict] = None) -> None:
         """Save the object to the object store
 
