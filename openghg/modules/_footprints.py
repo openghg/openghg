@@ -13,18 +13,22 @@ class FOOTPRINTS(BaseModule):
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
 
     def __init__(self):
-        from openghg.util import timestamp_now
+        from Acquire.ObjectStore import get_datetime_now
+        from collections import defaultdict
 
-        self._creation_datetime = timestamp_now()
+        self._creation_datetime = get_datetime_now()
         self._stored = False
-        # How we identify a
-        self._datasource_uuids = {}
-        # TODO - remove this - currently here for compatibility with other 
-        # storage objects
-        self._datasource_names = {}
+
+        # We want to created a nested dictionary
+        def nested_dict():
+            return defaultdict(nested_dict)
+
+        # Stores metadata about the Datasource, keyed by site
+        self._datasource_table = nested_dict()
         # Hashes of previously uploaded files
         self._file_hashes = {}
-        self._rank_data = {}
+        # Keyed by UUID
+        self._rank_data = defaultdict(dict)
 
     @staticmethod
     def read_file(
