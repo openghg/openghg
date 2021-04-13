@@ -13,18 +13,7 @@ class FOOTPRINTS(BaseModule):
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
 
     def __init__(self):
-        from openghg.util import timestamp_now
-
-        self._creation_datetime = timestamp_now()
-        self._stored = False
-        # How we identify a
-        self._datasource_uuids = {}
-        # TODO - remove this - currently here for compatibility with other 
-        # storage objects
-        self._datasource_names = {}
-        # Hashes of previously uploaded files
-        self._file_hashes = {}
-        self._rank_data = {}
+        super().__init__()
 
     @staticmethod
     def read_file(

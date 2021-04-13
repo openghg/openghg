@@ -9,6 +9,24 @@ T = TypeVar("T", bound="BaseModule")
 
 
 class BaseModule:
+    def __init__(self):
+        from openghg.util import timestamp_now
+        from collections import defaultdict
+
+        self._creation_datetime = timestamp_now()
+        self._stored = False
+
+        # We want to created a nested dictionary
+        def nested_dict():
+            return defaultdict(nested_dict)
+
+        # Stores metadata about the Datasource, keyed by site
+        self._datasource_table = nested_dict()
+        # Hashes of previously uploaded files
+        self._file_hashes = {}
+        # Keyed by UUID
+        self._rank_data = defaultdict(dict)
+
     def is_null(self):
         return not self.datasources
 

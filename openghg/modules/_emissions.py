@@ -12,19 +12,7 @@ class Emissions(BaseModule):
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
 
     def __init__(self):
-        from openghg.util import timestamp_now
-        from collections import defaultdict
-
-        self._creation_datetime = timestamp_now()
-        self._stored = False
-        # Keyed by name - allows retrieval of UUID from name
-        self._datasource_names = {}
-        # Keyed by UUID - allows retrieval of name by UUID
-        self._datasource_uuids = {}
-        # Hashes of previously uploaded files
-        self._file_hashes = {}
-        # Keyed by UUID
-        self._rank_data = defaultdict(dict)
+        super().__init__()
 
     def to_data(self) -> Dict:
         """Return a JSON-serialisable dictionary of object
