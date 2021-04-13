@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.1.gdcc42ec documentation</title>
+  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.1.g007bb45 documentation</title>
   
 
   
@@ -214,6 +214,7 @@
         <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">string_to_datetime</span>
         <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_bucket</span>
         <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">to_defaultdict</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to create object with empty dictionary&quot;</span><span class="p">)</span>
@@ -226,9 +227,10 @@
         <span class="n">c</span><span class="o">.</span><span class="n">_datasource_uuids</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_uuids&quot;</span><span class="p">]</span>
         <span class="n">c</span><span class="o">.</span><span class="n">_datasource_names</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_names&quot;</span><span class="p">]</span>
         <span class="n">c</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;file_hashes&quot;</span><span class="p">]</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">_datasource_table</span> <span class="o">=</span> <span class="n">to_defaultdict</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_table&quot;</span><span class="p">])</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">_rank_data</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;rank_data&quot;</span><span class="p">])</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">_rank_data</span> <span class="o">=</span> <span class="n">to_defaultdict</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;rank_data&quot;</span><span class="p">])</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="n">c</span><span class="o">.</span><span class="n">_rank_data</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
 
@@ -268,14 +270,29 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_uuid</span></div>
 
-<div class="viewcode-block" id="BaseModule.add_datasources"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.add_datasources">[docs]</a>    <span class="k">def</span> <span class="nf">add_datasources</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">datasource_uuids</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="BaseModule.add_datasources"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.add_datasources">[docs]</a>    <span class="k">def</span> <span class="nf">add_datasources</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">datasource_uuids</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Add the passed list of Datasources to the current list</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            datasource_uuids: Dict of Datasource UUIDs</span>
+<span class="sd">            datasource_uuids: Datasource UUIDs</span>
+<span class="sd">            metadata: Metadata for each species</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">uid</span> <span class="ow">in</span> <span class="n">datasource_uuids</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">md</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">site</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
+            <span class="n">network</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span>
+            <span class="n">inlet</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+            <span class="n">species</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="n">species</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">result</span> <span class="o">!=</span> <span class="n">uid</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mismatch between assigned uuid and stored Datasource uuid.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="n">uid</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_names</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">datasource_uuids</span><span class="p">)</span>
         <span class="c1"># Invert the dictionary to update the dict keyed by UUID</span>
         <span class="n">uuid_keyed</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">datasource_uuids</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
@@ -373,6 +390,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_names</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div></div>
@@ -389,7 +407,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 12, 2021.
+        Last updated on Apr 13, 2021.
       </span>
 
     </p>

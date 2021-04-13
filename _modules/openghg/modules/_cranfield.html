@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._cranfield &mdash; OpenGHG 0+untagged.1.gdcc42ec documentation</title>
+  <title>openghg.modules._cranfield &mdash; OpenGHG 0+untagged.1.g007bb45 documentation</title>
   
 
   
@@ -177,7 +177,13 @@
 <div class="viewcode-block" id="CRANFIELD"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRANFIELD">[docs]</a><span class="k">class</span> <span class="nc">CRANFIELD</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Class for processing Cranfield data &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="CRANFIELD.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRANFIELD.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span> <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="CRANFIELD.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRANFIELD.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
+        <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a CRDS object holding data stored within Datasources</span>
 
 <span class="sd">        Args:</span>
@@ -189,6 +195,7 @@
 <span class="sd">            dict: Dictionary of gas data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">compliant_string</span>
 
         <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
 
@@ -217,6 +224,8 @@
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;CRDS&quot;</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1_hour&quot;</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;10magl&quot;</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;10magl&quot;</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;CRANFIELD&quot;</span>
 
         <span class="c1"># TODO - this feels fragile</span>
         <span class="n">species</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="s2">&quot; &quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">col</span><span class="p">]</span>
@@ -229,7 +238,7 @@
             <span class="c1"># for sp in species:</span>
             <span class="c1"># Create a copy of the metadata dict</span>
             <span class="n">species_metadata</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="n">species_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sp</span>
+            <span class="n">species_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">compliant_string</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>
 
             <span class="c1"># Here we don&#39;t want to match the co in co2</span>
             <span class="c1"># For now we&#39;ll just have 2 columns for each species</span>
@@ -240,8 +249,6 @@
             <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
 
             <span class="n">combined_data</span><span class="p">[</span><span class="n">sp</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">species_metadata</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">gas_data</span><span class="p">}</span>
-
-        <span class="c1"># Assign data</span>
 
         <span class="k">return</span> <span class="n">combined_data</span></div></div>
 </pre></div>
@@ -257,7 +264,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 12, 2021.
+        Last updated on Apr 13, 2021.
       </span>
 
     </p>

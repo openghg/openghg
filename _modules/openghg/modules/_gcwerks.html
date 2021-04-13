@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._gcwerks &mdash; OpenGHG 0+untagged.1.gdcc42ec documentation</title>
+  <title>openghg.modules._gcwerks &mdash; OpenGHG 0+untagged.1.g007bb45 documentation</title>
   
 
   
@@ -446,7 +446,7 @@
         <span class="k">return</span> <span class="n">precision</span><span class="p">,</span> <span class="n">precision_species</span></div>
 
 <div class="viewcode-block" id="GCWERKS.split_species"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.split_species">[docs]</a>    <span class="k">def</span> <span class="nf">split_species</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="n">Dict</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="n">Dict</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Splits the species into separate dataframe into sections to be stored within individual Datasources</span>
 
@@ -462,6 +462,7 @@
 <span class="sd">                dict: Dataframe of gas data and metadata</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">fnmatch</span> <span class="kn">import</span> <span class="n">fnmatch</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">compliant_string</span>
 
         <span class="c1"># Read inlets from the parameters dictionary</span>
         <span class="n">expected_inlets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inlets</span><span class="p">(</span><span class="n">site_code</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
@@ -500,7 +501,7 @@
             <span class="c1"># Create a copy of metadata for local modification</span>
             <span class="n">spec_metadata</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-            <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spec</span>
+            <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">compliant_string</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
             <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span>
             <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span>
 
@@ -536,10 +537,21 @@
 
                 <span class="c1"># We want an xarray Dataset</span>
                 <span class="n">spec_data</span> <span class="o">=</span> <span class="n">spec_data</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
+                <span class="c1"># A cleaned species label</span>
+                <span class="n">comp_species</span> <span class="o">=</span> <span class="n">compliant_string</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+
+                <span class="c1"># Rename variables so they have lowercase and alphanumeric names</span>
+                <span class="n">to_rename</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">spec_data</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
+                        <span class="n">new_name</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">comp_species</span><span class="p">)</span>
+                        <span class="n">to_rename</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_name</span>
+
+                <span class="n">spec_data</span> <span class="o">=</span> <span class="n">spec_data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">to_rename</span><span class="p">)</span>
 
                 <span class="c1"># As a single species may have measurements from multiple inlets we</span>
                 <span class="c1"># use the species and inlet as a key</span>
-                <span class="n">data_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">spec</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">data_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">comp_species</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span>
 
                 <span class="n">combined_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="n">combined_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spec_metadata</span>
@@ -574,7 +586,7 @@
 <span class="sd">            Returns:</span>
 <span class="sd">                list: List of inlets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="n">site_code</span><span class="p">][</span><span class="s2">&quot;inlets&quot;</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="n">site_code</span><span class="o">.</span><span class="n">upper</span><span class="p">()][</span><span class="s2">&quot;inlets&quot;</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="GCWERKS.get_site_code"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_site_code">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Get the site code</span>
@@ -623,7 +635,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 12, 2021.
+        Last updated on Apr 13, 2021.
       </span>
 
     </p>
