@@ -158,7 +158,7 @@ def test_read_GC():
     # Check we have the Datasource info saved
     obs = ObsSurface.load()
 
-    assert sorted(obs._datasource_names.keys()) == expected_keys
+    assert sorted(obs._datasource_uuids.values()) == expected_keys
 
     del hfc152a_data.attrs["File created"]
 
@@ -296,7 +296,7 @@ def test_read_icos():
 
     obs = ObsSurface.load()
 
-    assert list(obs._datasource_names.keys())[0] == "co2"
+    assert list(obs._datasource_uuids.values())[0] == "co2"
 
 
 def test_read_beaco2n():
@@ -366,7 +366,7 @@ def test_read_thames_barrier():
 
     obs = ObsSurface.load()
 
-    assert sorted(obs._datasource_names.keys()) == expected_keys
+    assert sorted(obs._datasource_uuids.values()) == expected_keys
 
 
 def test_upload_same_file_twice_raises():

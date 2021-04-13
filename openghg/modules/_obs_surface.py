@@ -12,47 +12,9 @@ class ObsSurface(BaseModule):
     _root = "ObsSurface"
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
 
-    def __init__(self):
-        from Acquire.ObjectStore import get_datetime_now
-        from collections import defaultdict
-
-        self._creation_datetime = get_datetime_now()
-        self._stored = False
-
-        # We want to created a nested dictionary
-        def nested_dict():
-            return defaultdict(nested_dict)
-
-        # Stores metadata about the Datasource, keyed by site
-        self._datasource_table = nested_dict()
-        # Keyed by name - allows retrieval of UUID from name
-        self._datasource_names = {}
-        # Keyed by UUID - allows retrieval of name by UUID
-        self._datasource_uuids = {}
-        # Hashes of previously uploaded files
-        self._file_hashes = {}
-        # Keyed by UUID
-        self._rank_data = defaultdict(dict)
-
-    def to_data(self) -> Dict:
-        """Return a JSON-serialisable dictionary of object
-        for storage in object store
-
-        Returns:
-            dict: Dictionary version of object
-        """
-        from Acquire.ObjectStore import datetime_to_string
-
-        data = {}
-        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_table"] = self._datasource_table
-        data["datasource_uuids"] = self._datasource_uuids
-        data["datasource_names"] = self._datasource_names
-        data["file_hashes"] = self._file_hashes
-        data["rank_data"] = self._rank_data
-
-        return data
+    # We don't currently need to add anything here
+    # def __init__(self):
+    #     super().__init__()
 
     def save(self, bucket: Optional[Dict] = None) -> None:
         """Save the object to the object store
@@ -250,8 +212,4 @@ class ObsSurface(BaseModule):
         key = f"{Datasource._datasource_root}/uuid/{uuid}"
         delete_object(bucket=bucket, key=key)
 
-        # First remove from our dictionary of Datasources
-        name = self._datasource_uuids[uuid]
-
-        del self._datasource_names[name]
         del self._datasource_uuids[uuid]
