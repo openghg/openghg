@@ -24,12 +24,12 @@ def recombine_multisite(keys: Dict, sort: Optional[bool] = True) -> Dict:
     return result
 
 
-def recombine_datasets(data_keys: List[str], sort: Optional[bool] = True) -> Dataset:
+def recombine_datasets(keys: List[str], sort: Optional[bool] = True) -> Dataset:
     """Combines datasets stored separately in the object store
     into a single datasets
 
     Args:
-        data_keys: List of object store keys
+        keys: List of object store keys
         term
     Returns:
         xarray.Dataset: Combined Dataset
@@ -38,12 +38,12 @@ def recombine_datasets(data_keys: List[str], sort: Optional[bool] = True) -> Dat
     from openghg.modules import Datasource
     from openghg.objectstore import get_bucket
 
-    if not data_keys:
+    if not keys:
         raise ValueError("No data keys passed.")
 
     bucket = get_bucket()
 
-    data = [Datasource.load_dataset(bucket=bucket, key=k) for k in data_keys]
+    data = [Datasource.load_dataset(bucket=bucket, key=k) for k in keys]
 
     combined = xr_concat(data, dim="time")
 

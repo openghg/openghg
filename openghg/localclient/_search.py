@@ -9,6 +9,9 @@ class Search:
     """ Used to search and download data from the object store
 
     """
+    def __init__(self):
+        raise NotImplementedError()
+
     def search(
         self,
         species,

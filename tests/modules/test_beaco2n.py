@@ -20,6 +20,9 @@ def test_read_file():
     pm_metadata = result["pm"]["metadata"]
     co2_metadata = result["co2"]["metadata"]
 
+    pm_metadata = result["pm"]["metadata"]
+    co2_metadata = result["co2"]["metadata"]
+
     pm_attrs = result["pm"]["attributes"]
     co2_attrs = result["co2"]["attributes"]
     pm_data.time[0] == Timestamp("2015-04-18T04:00:00")
@@ -29,8 +32,8 @@ def test_read_file():
     co2_data["co2"][0] == 410.4
     co2_data["co2_qc"][0] == 2
 
-    assert pm_metadata == {"units": "ug/m3"}
-    assert co2_metadata == {"units": "ppm"}
+    assert pm_metadata == {'units': 'ug/m3', 'site': 'CHARLTONCOMMUNITYCENTER', 'species': 'pm', 'inlet': 'NA', 'network': 'beaco2n'}
+    assert co2_metadata == {'units': 'ppm', 'site': 'CHARLTONCOMMUNITYCENTER', 'species': 'co2', 'inlet': 'NA', 'network': 'beaco2n'}
 
     assert pm_attrs == {
         "deployed": "2017-01-24",

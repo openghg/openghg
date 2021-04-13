@@ -51,6 +51,7 @@ class NPL(BaseModule):
         """
         from pandas import read_csv, NaT
         from datetime import datetime
+        from openghg.util import compliant_string
 
         def parser(date):
             try:
@@ -83,7 +84,7 @@ class NPL(BaseModule):
             site_attributes["inlet_height_magl"] = self._params["inlet"]
             site_attributes["instrument"] = self._params["instrument"]
 
-            metadata = {"species": species}
+            metadata = {"species": compliant_string(species)}
             # TODO - add in better metadata reading
             combined_data[species] = {
                 "metadata": metadata,

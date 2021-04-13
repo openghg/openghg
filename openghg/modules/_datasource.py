@@ -17,12 +17,12 @@ class Datasource:
     _datavalues_root = "values"
     _data_root = "data"
 
-    def __init__(self, name: Optional[str] = None):
-        from Acquire.ObjectStore import create_uuid, get_datetime_now
+    def __init__(self):
+        from Acquire.ObjectStore import get_datetime_now
         from collections import defaultdict
+        from uuid import uuid4
 
-        self._uuid = create_uuid()
-        self._name = name
+        self._uuid = str(uuid4())
         self._creation_datetime = get_datetime_now()
         self._metadata = {}
         # Dictionary keyed by daterange of data in each Dataset
@@ -343,7 +343,6 @@ class Datasource:
 
         data = {}
         data["UUID"] = self._uuid
-        data["name"] = self._name
         data["creation_datetime"] = datetime_to_string(self._creation_datetime)
         data["metadata"] = self._metadata
         data["stored"] = self._stored
@@ -498,7 +497,6 @@ class Datasource:
 
         d = Datasource()
         d._uuid = data["UUID"]
-        d._name = data["name"]
         d._creation_datetime = string_to_datetime(data["creation_datetime"])
         d._metadata = data["metadata"]
         d._stored = data["stored"]
@@ -669,7 +667,7 @@ class Datasource:
         start, end = self.daterange()
         return "".join([datetime_to_string(start), "_", datetime_to_string(end)])
 
-    def search_metadata(
+    def search_metadata_old(
         self,
         search_terms: Union[str, List[str]],
         start_date: Optional[Timestamp] = None,
@@ -684,6 +682,9 @@ class Datasource:
         Returns:
             bool: True if found else False
         """
+        from warnings import warn
+        warn("This function will be removed in a future release", DeprecationWarning)
+
         if start_date is not None and end_date is not None:
             if not self.in_daterange(start_date=start_date, end_date=end_date):
                 return False
@@ -711,6 +712,56 @@ class Datasource:
         # Otherwise there should be at least a True in results
         else:
             return len(results) > 0
+
+    def search_metadata(self, find_all: Optional[bool] = True, **kwargs) -> bool:
+        """Search the metadata for any available keyword
+
+        Args:
+            find_all: If True all arguments must be matched
+        Keyword Arguments:
+            Keyword arguments passed will be checked against the metadata of the Datasource
+        Returns:
+            bool: True if some/all parameters matched
+        """
+        start_date = kwargs.get("start_date")
+        end_date = kwargs.get("end_date")
+
+        if start_date is not None and end_date is not None:
+            if not self.in_daterange(start_date=start_date, end_date=end_date):
+                return False
+
+        # Now we've checked the dates we can remove them as it's unlikely a comparison below
+        # will match the dates exactly
+        try:
+            del kwargs["start_date"]
+            del kwargs["end_date"]
+        except KeyError:
+            pass
+
+        results = []
+        for key, value in kwargs.items():
+            try:
+                # Here we want to check if it's a list and if so iterate over it
+                if isinstance(value, (list, tuple)):
+                    for val in value:
+                        val = str(val).lower()
+                        if self._metadata[key.lower()] == val:
+                            results.append(val)
+                else:
+                    value = str(value).lower()
+                    if self._metadata[key.lower()] == value:
+                        results.append(value)
+            except KeyError:
+                pass
+
+        # If we want all the terms to match these should be the same length
+        if find_all and not len(kwargs.keys()) == len(results):
+            return False
+
+        if results:
+            return True
+        else:
+            return False
 
     def in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> bool:
         """Check if the data contained within this Datasource overlaps with the
@@ -741,11 +792,6 @@ class Datasource:
         Return:
             list: List of keys to data
         """
-        from openghg.util import timestamp_tzaware
-
-        start_date = timestamp_tzaware(start_date)
-        end_date = timestamp_tzaware(end_date)
-
         data_keys = self._data_keys["latest"]["keys"]
 
         return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)

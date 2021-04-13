@@ -93,9 +93,8 @@ def get_attributes(
             If you only want an end date, just put a very early start date
             (e.g. ["1900-01-01", "2010-01-01"])
     """
-    import json
     from pandas import Timestamp as pd_Timestamp
-    from openghg.util import get_datapath
+    from openghg.util import compliant_string, load_json
 
     # from numpy import unique as np_unique
 
@@ -108,20 +107,13 @@ def get_attributes(
     to_underscores = {var: var.lower().replace(" ", "_") for var in ds.variables}
     ds = ds.rename(to_underscores)
 
-    species_attrs_filepath = get_datapath(filename="species_attributes.json")
+    species_attrs = load_json(filename="species_attributes.json")
+    attributes_data = load_json("attributes.json")
 
-    with open(species_attrs_filepath, "r") as f:
-        species_attrs = json.load(f)
-
-    data_path = get_datapath(filename="attributes.json")
-
-    with open(data_path, "r") as f:
-        data = json.load(f)
-
-    species_translator = data["species_translation"]
-    unit_species = data["unit_species"]
-    unit_species_long = data["unit_species_long"]
-    unit_interpret = data["unit_interpret"]
+    species_translator = attributes_data["species_translation"]
+    unit_species = attributes_data["unit_species"]
+    unit_species_long = attributes_data["unit_species_long"]
+    unit_interpret = attributes_data["unit_interpret"]
 
     species_upper = species.upper()
     species_lower = species.lower()
@@ -134,10 +126,10 @@ def get_attributes(
 
     species_rename = {}
     for var in matched_keys:
-        if species_upper in species_translator:
+        try:
             species_label = species_translator[species_upper]["chem"]
-        else:
-            species_label = species_lower.replace("-", "")
+        except KeyError:
+            species_label = compliant_string(species_lower)
 
         species_rename[var] = var.replace(species_lower, species_label)
 

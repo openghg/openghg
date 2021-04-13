@@ -1,6 +1,7 @@
 from openghg.modules import BaseModule
 from pathlib import Path
 from typing import Dict, Optional, Union
+import traceback
 
 __all__ = ["ObsSurface"]
 
@@ -17,6 +18,13 @@ class ObsSurface(BaseModule):
 
         self._creation_datetime = get_datetime_now()
         self._stored = False
+
+        # We want to created a nested dictionary
+        def nested_dict():
+            return defaultdict(nested_dict)
+
+        # Stores metadata about the Datasource, keyed by site
+        self._datasource_table = nested_dict()
         # Keyed by name - allows retrieval of UUID from name
         self._datasource_names = {}
         # Keyed by UUID - allows retrieval of name by UUID
@@ -27,7 +35,7 @@ class ObsSurface(BaseModule):
         self._rank_data = defaultdict(dict)
 
     def to_data(self) -> Dict:
-        """ Return a JSON-serialisable dictionary of object
+        """Return a JSON-serialisable dictionary of object
         for storage in object store
 
         Returns:
@@ -38,6 +46,7 @@ class ObsSurface(BaseModule):
         data = {}
         data["creation_datetime"] = datetime_to_string(self._creation_datetime)
         data["stored"] = self._stored
+        data["datasource_table"] = self._datasource_table
         data["datasource_uuids"] = self._datasource_uuids
         data["datasource_names"] = self._datasource_names
         data["file_hashes"] = self._file_hashes
@@ -46,7 +55,7 @@ class ObsSurface(BaseModule):
         return data
 
     def save(self, bucket: Optional[Dict] = None) -> None:
-        """ Save the object to the object store
+        """Save the object to the object store
 
         Args:
             bucket: Bucket for data
@@ -67,12 +76,13 @@ class ObsSurface(BaseModule):
     def read_file(
         filepath: Union[str, Path, list],
         data_type: str,
-        site: Optional[str] = None,
-        network: Optional[str] = None,
+        site: str,
+        network: str,
+        inlet: Optional[str] = None,
         instrument: Optional[str] = None,
         overwrite: Optional[bool] = False,
     ) -> Dict:
-        """ Process files and store in the object store. This function
+        """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
             to handle each data type.
 
@@ -90,7 +100,7 @@ class ObsSurface(BaseModule):
         from pathlib import Path
         import sys
         from tqdm import tqdm
-        from openghg.util import load_object, hash_file
+        from openghg.util import load_object, hash_file, clean_string
         from openghg.processing import assign_data, DataTypes
 
         # Suppress numexpr thread count info info warnings
@@ -104,6 +114,15 @@ class ObsSurface(BaseModule):
         except KeyError:
             raise ValueError(f"Incorrect data type {data_type} selected.")
 
+        # Test that the passed values are valid
+        # Check validity of site, instrument, inlet etc in acrg_site_info.json
+        # Clean the strings
+        site = clean_string(site)
+        network = clean_string(network)
+        inlet = clean_string(inlet)
+        instrument = clean_string(instrument)
+
+        # Load the data processing object
         data_obj = load_object(class_name=data_type)
 
         obs = ObsSurface.load()
@@ -124,8 +143,10 @@ class ObsSurface(BaseModule):
 
                 try:
                     file_hash = hash_file(filepath=data_filepath)
-                    if file_hash in obs._file_hashes and not overwrite:
-                        raise ValueError(f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}.")
+                    if file_hash in obs._file_hashes and overwrite is False:
+                        raise ValueError(
+                            f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
+                        )
 
                     progress_bar.set_description(f"Processing: {data_filepath.name}")
 
@@ -136,29 +157,24 @@ class ObsSurface(BaseModule):
                     else:
                         data = data_obj.read_file(data_filepath=data_filepath, site=site, network=network)
 
-                    # TODO - need a new way of creating the source name
-                    source_name = data_filepath.stem
+                    # Extract the metadata for each set of measurements
+                    metadata = {key: data["metadata"] for key, data in data.items()}
 
-                    datasource_table = defaultdict(dict)
-                    # For each species check if we have a Datasource
-                    for species in data:
-                        name = "_".join([source_name, species])
-                        datasource_table[species]["uuid"] = obs._datasource_names.get(name, False)
-                        datasource_table[species]["name"] = name
+                    lookup_results = obs.datasource_lookup(metadata=metadata)
 
                     # Create Datasources, save them to the object store and get their UUIDs
-                    datasource_uuids = assign_data(gas_data=data, lookup_results=datasource_table, overwrite=overwrite)
+                    datasource_uuids = assign_data(gas_data=data, lookup_results=lookup_results, overwrite=overwrite)
 
                     results["processed"][data_filepath.name] = datasource_uuids
 
                     # Record the Datasources we've created / appended to
-                    obs.add_datasources(datasource_uuids)
+                    obs.add_datasources(datasource_uuids, metadata)
 
                     # Store the hash as the key for easy searching, store the filename as well for
                     # ease of checking by user
                     obs._file_hashes[file_hash] = data_filepath.name
-                except Exception as e:
-                    results["error"][data_filepath.stem] = e
+                except Exception:
+                    results["error"][data_filepath.name] = traceback.format_exc()
 
                 progress_bar.update(1)
 
@@ -167,28 +183,41 @@ class ObsSurface(BaseModule):
 
         return results
 
-    @staticmethod
-    def read_folder(folder_path: Union[str, Path], data_type: str, network: str, extension: Optional[str] = "dat") -> Dict:
-        """Find files with the given extension (by default dat) in the passed folder
+    def datasource_lookup(self, metadata: Dict) -> Dict:
+        """ Find the Datasource we should assign the data to
 
-        Args:
-            folder_path: Path of folder
-            data_type: Data type
-            extension: File extension
-        Returns:
-            dict: Dictionary of the Datasources created for each file
+            Args:
+                metadata: Dictionary of metadata returned from the data_obj.read_file function
+            Returns:
+                dict: Dictionary of datasource information
         """
-        from pathlib import Path
+        lookup_results = {}
+        for key, data in metadata.items():
+            site = data["site"]
+            network = data["network"]
+            inlet = data["inlet"]
+            species = data["species"]
 
-        if extension.startswith("."):
-            extension = extension.strip(".")
+            result = self._datasource_table[site][network][inlet][species]
 
-        filepaths = [f.resolve() for f in Path(folder_path).glob(f"**/*.{extension}")]
+            if not result:
+                result = False
 
-        if not filepaths:
-            raise FileNotFoundError("No data files found")
+            lookup_results[key] = result
 
-        return ObsSurface.read_file(filepath=filepaths, data_type=data_type, network=network)
+        return lookup_results
+
+    def save_datsource_info(self, datasource_data: Dict) -> None:
+        """ Save the datasource information to 
+
+            Args:
+                datasource_data: Dictionary of datasource data to add
+                to the Datasource table
+            Returns:
+                None
+
+        """
+        raise NotImplementedError()
 
     def delete(self, uuid: str) -> None:
         """Delete a Datasource with the given UUID

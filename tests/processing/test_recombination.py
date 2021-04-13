@@ -34,20 +34,22 @@ def test_recombination_CRDS():
 
     crds = CRDS()
 
-    ObsSurface.read_file(filepath, data_type="CRDS")
+    ObsSurface.read_file(filepath, data_type="CRDS", site="hfd", network="DECC")
 
     gas_data = crds.read_data(data_filepath=filepath, site="HFD", network="AGAGE")
 
     ch4_data_read = gas_data["ch4"]["data"]
 
     gas_name = "ch4"
-    location = "hfd"
+    site = "hfd"
 
-    keys = search(species=gas_name, locations=location)
+    result = search(species=gas_name, site=site)
 
-    to_download = keys["ch4_hfd_100m_picarro"]["keys"]
+    uid = next(iter(result))
 
-    ch4_data_recombined = recombine_datasets(data_keys=to_download)
+    keys = result[uid]["keys"]
+
+    ch4_data_recombined = recombine_datasets(keys=keys)
 
     ch4_data_recombined.attrs = {}
 
@@ -63,20 +65,21 @@ def test_recombination_GC():
     data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     precision = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    ObsSurface.read_file((data, precision), data_type="GCWERKS")
+    ObsSurface.read_file((data, precision), data_type="GCWERKS", site="cgo", network="agage")
 
     data = gc.read_data(data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa", network="AGAGE")
 
     toluene_data = data["toluene_75m_4"]["data"]
 
     gas_name = "toluene"
-    location = "CGO"
+    site = "CGO"
 
-    keys = search(species=gas_name, locations=location)
+    results = search(species=gas_name, site=site)
 
-    to_download = keys["toluene_cgo_75m_4_medusa"]["keys"]
+    uid = next(iter(results))
+    keys = results[uid]["keys"]
 
-    toluene_data_recombined = recombine_datasets(data_keys=to_download)
+    toluene_data_recombined = recombine_datasets(keys=keys)
 
     toluene_data.attrs = {}
     toluene_data_recombined.attrs = {}
