@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.1.g9c85e0d documentation</title>
+  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.1.g83e3fcb documentation</title>
   
 
   
@@ -179,6 +179,26 @@
 
 
 <div class="viewcode-block" id="BaseModule"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule">[docs]</a><span class="k">class</span> <span class="nc">BaseModule</span><span class="p">:</span>
+<div class="viewcode-block" id="BaseModule.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">timestamp_now</span>
+        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_creation_datetime</span> <span class="o">=</span> <span class="n">timestamp_now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stored</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># We want to created a nested dictionary</span>
+        <span class="k">def</span> <span class="nf">nested_dict</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">nested_dict</span><span class="p">)</span>
+
+        <span class="c1"># Stores metadata about the Datasource, keyed by site</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">()</span>
+        <span class="c1"># Keyed by Datasource UUID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Hashes of previously uploaded files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Keyed by UUID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">is_null</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasources</span>
 
@@ -225,7 +245,6 @@
         <span class="n">c</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
         <span class="n">c</span><span class="o">.</span><span class="n">_creation_datetime</span> <span class="o">=</span> <span class="n">string_to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;creation_datetime&quot;</span><span class="p">])</span>
         <span class="n">c</span><span class="o">.</span><span class="n">_datasource_uuids</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_uuids&quot;</span><span class="p">]</span>
-        <span class="n">c</span><span class="o">.</span><span class="n">_datasource_names</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_names&quot;</span><span class="p">]</span>
         <span class="n">c</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;file_hashes&quot;</span><span class="p">]</span>
         <span class="n">c</span><span class="o">.</span><span class="n">_datasource_table</span> <span class="o">=</span> <span class="n">to_defaultdict</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_table&quot;</span><span class="p">])</span>
 
@@ -237,6 +256,25 @@
         <span class="n">c</span><span class="o">.</span><span class="n">_stored</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">return</span> <span class="n">c</span></div>
+
+<div class="viewcode-block" id="BaseModule.to_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.to_data">[docs]</a>    <span class="k">def</span> <span class="nf">to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return a JSON-serialisable dictionary of object</span>
+<span class="sd">        for storage in object store</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary version of object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">datetime_to_string</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;creation_datetime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime_to_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_creation_datetime</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;stored&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stored</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_table&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_uuids&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;file_hashes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;rank_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="BaseModule.load"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.load">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
@@ -292,11 +330,7 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mismatch between assigned uuid and stored Datasource uuid.&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="n">uid</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_names</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">datasource_uuids</span><span class="p">)</span>
-        <span class="c1"># Invert the dictionary to update the dict keyed by UUID</span>
-        <span class="n">uuid_keyed</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">datasource_uuids</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">uuid_keyed</span><span class="p">)</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span></div>
 
 <div class="viewcode-block" id="BaseModule.datasources"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.datasources">[docs]</a>    <span class="k">def</span> <span class="nf">datasources</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Return the list of Datasources UUIDs associated with this object</span>
@@ -305,18 +339,6 @@
 <span class="sd">            list: List of Datasource UUIDs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
-
-<div class="viewcode-block" id="BaseModule.datasource_names"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.datasource_names">[docs]</a>    <span class="k">def</span> <span class="nf">datasource_names</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return the names of the datasources</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            dict: Dictionary of Datasource names</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">warnings</span>
-
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;This may be removed in a future release&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_names</span></div>
 
 <div class="viewcode-block" id="BaseModule.remove_datasource"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.remove_datasource">[docs]</a>    <span class="k">def</span> <span class="nf">remove_datasource</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Remove the Datasource with the given uuid from the list</span>
@@ -392,7 +414,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_names</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div></div>
 </pre></div>
 

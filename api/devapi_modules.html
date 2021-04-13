@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Development API modules &mdash; OpenGHG 0+untagged.1.g9c85e0d documentation</title>
+  <title>Development API modules &mdash; OpenGHG 0+untagged.1.g83e3fcb documentation</title>
   
 
   
@@ -795,6 +795,12 @@ the processed data has been assigned to</p>
 <dt id="openghg.modules.BaseModule">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">openghg.modules.</span></code><code class="sig-name descname"><span class="pre">BaseModule</span></code><a class="reference internal" href="../_modules/openghg/modules/_base.html#BaseModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.BaseModule" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
+<dt id="openghg.modules.BaseModule.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/modules/_base.html#BaseModule.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.BaseModule.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="openghg.modules.BaseModule.add_datasources">
 <code class="sig-name descname"><span class="pre">add_datasources</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_uuids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_base.html#BaseModule.add_datasources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.BaseModule.add_datasources" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add the passed list of Datasources to the current list</p>
@@ -818,20 +824,6 @@ the processed data has been assigned to</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="openghg.modules.BaseModule.datasource_names">
-<code class="sig-name descname"><span class="pre">datasource_names</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_base.html#BaseModule.datasource_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.BaseModule.datasource_names" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the names of the datasources</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Dictionary of Datasource names</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -939,6 +931,21 @@ daterange stored for that rank.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="openghg.modules.BaseModule.to_data">
+<code class="sig-name descname"><span class="pre">to_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_base.html#BaseModule.to_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.BaseModule.to_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a JSON-serialisable dictionary of object
+for storage in object store</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dictionary version of object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>

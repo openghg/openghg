@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._obs_surface &mdash; OpenGHG 0+untagged.1.g9c85e0d documentation</title>
+  <title>openghg.modules._obs_surface &mdash; OpenGHG 0+untagged.1.g83e3fcb documentation</title>
   
 
   
@@ -182,47 +182,9 @@
     <span class="n">_root</span> <span class="o">=</span> <span class="s2">&quot;ObsSurface&quot;</span>
     <span class="n">_uuid</span> <span class="o">=</span> <span class="s2">&quot;da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1&quot;</span>
 
-<div class="viewcode-block" id="ObsSurface.__init__"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">get_datetime_now</span>
-        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_creation_datetime</span> <span class="o">=</span> <span class="n">get_datetime_now</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_stored</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="c1"># We want to created a nested dictionary</span>
-        <span class="k">def</span> <span class="nf">nested_dict</span><span class="p">():</span>
-            <span class="k">return</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">nested_dict</span><span class="p">)</span>
-
-        <span class="c1"># Stores metadata about the Datasource, keyed by site</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">()</span>
-        <span class="c1"># Keyed by name - allows retrieval of UUID from name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_names</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="c1"># Keyed by UUID - allows retrieval of name by UUID</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="c1"># Hashes of previously uploaded files</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="c1"># Keyed by UUID</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="ObsSurface.to_data"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.to_data">[docs]</a>    <span class="k">def</span> <span class="nf">to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return a JSON-serialisable dictionary of object</span>
-<span class="sd">        for storage in object store</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            dict: Dictionary version of object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">datetime_to_string</span>
-
-        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;creation_datetime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime_to_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_creation_datetime</span><span class="p">)</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;stored&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stored</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_table&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_uuids&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_names</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;file_hashes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span>
-        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;rank_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span>
-
-        <span class="k">return</span> <span class="n">data</span></div>
+    <span class="c1"># We don&#39;t currently need to add anything here</span>
+    <span class="c1"># def __init__(self):</span>
+    <span class="c1">#     super().__init__()</span>
 
 <div class="viewcode-block" id="ObsSurface.save"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Save the object to the object store</span>
@@ -420,10 +382,6 @@
         <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Datasource</span><span class="o">.</span><span class="n">_datasource_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">delete_object</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
 
-        <span class="c1"># First remove from our dictionary of Datasources</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
-
-        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_names</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span></div></div>
 </pre></div>
 
