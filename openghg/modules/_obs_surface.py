@@ -40,8 +40,10 @@ class ObsSurface(BaseModule):
         data_type: str,
         site: str,
         network: str,
-        inlet: Optional[str] = None,
+        inlet: str,
         instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+        measurement_type: Optional[str] = "insitu",
         overwrite: Optional[bool] = False,
     ) -> Dict:
         """Process files and store in the object store. This function
@@ -53,6 +55,10 @@ class ObsSurface(BaseModule):
             data_type: Data type, for example CRDS, GCWERKS, ICOS
             site: Site code/name
             network: Network name
+            inlet: Inlet height
+            instrument: Instrument name
+            sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period)
+            measurement_type: Type of measurement e.g. insitu, flask
             overwrite: Overwrite previously uploaded data
         Returns:
             dict: Dictionary of Datasource UUIDs
@@ -83,6 +89,7 @@ class ObsSurface(BaseModule):
         network = clean_string(network)
         inlet = clean_string(inlet)
         instrument = clean_string(instrument)
+        sampling_period = clean_string(sampling_period)
 
         # Load the data processing object
         data_obj = load_object(class_name=data_type)
@@ -114,12 +121,27 @@ class ObsSurface(BaseModule):
 
                     if data_type == "GCWERKS":
                         data = data_obj.read_file(
-                            data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, network=network
+                            data_filepath=data_filepath,
+                            precision_filepath=precision_filepath,
+                            site=site,
+                            network=network,
+                            inlet=inlet,
+                            instrument=instrument,
+                            sampling_period=sampling_period,
+                            measurement_type=measurement_type
                         )
                     else:
-                        data = data_obj.read_file(data_filepath=data_filepath, site=site, network=network)
+                        data = data_obj.read_file(
+                            data_filepath=data_filepath,
+                            site=site,
+                            network=network,
+                            inlet=inlet,
+                            instrument=instrument,
+                            sampling_period=sampling_period,
+                            measurement_type=measurement_type
+                        )
 
-                    # Extract the metadata for each set of measurements
+                    # Extract the metadata for each set of measurements to perform a Datasource lookup
                     metadata = {key: data["metadata"] for key, data in data.items()}
 
                     lookup_results = obs.datasource_lookup(metadata=metadata)
@@ -146,12 +168,12 @@ class ObsSurface(BaseModule):
         return results
 
     def datasource_lookup(self, metadata: Dict) -> Dict:
-        """ Find the Datasource we should assign the data to
+        """Find the Datasource we should assign the data to
 
-            Args:
-                metadata: Dictionary of metadata returned from the data_obj.read_file function
-            Returns:
-                dict: Dictionary of datasource information
+        Args:
+            metadata: Dictionary of metadata returned from the data_obj.read_file function
+        Returns:
+            dict: Dictionary of datasource information
         """
         lookup_results = {}
         for key, data in metadata.items():
@@ -170,13 +192,13 @@ class ObsSurface(BaseModule):
         return lookup_results
 
     def save_datsource_info(self, datasource_data: Dict) -> None:
-        """ Save the datasource information to 
+        """Save the datasource information to
 
-            Args:
-                datasource_data: Dictionary of datasource data to add
-                to the Datasource table
-            Returns:
-                None
+        Args:
+            datasource_data: Dictionary of datasource data to add
+            to the Datasource table
+        Returns:
+            None
 
         """
         raise NotImplementedError()

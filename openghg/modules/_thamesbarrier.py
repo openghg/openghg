@@ -19,7 +19,16 @@ class THAMESBARRIER(BaseModule):
         data = load_json(filename="attributes.json")
         self._tb_params = data["TMB"]
 
-    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, network: Optional[str] = None) -> Dict:
+    def read_file(
+        self,
+        data_filepath: Union[str, Path],
+        site: Optional[str] = "TMB",
+        network: Optional[str] = "LGHG",
+        inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+        measurement_type: Optional[str] = None,
+    ) -> Dict:
         """Reads THAMESBARRIER data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 
@@ -34,8 +43,6 @@ class THAMESBARRIER(BaseModule):
         from openghg.util import clean_string, compliant_string
 
         data_filepath = Path(data_filepath)
-
-        site = "TMB"
 
         data = pd_read_csv(data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0)
         # Drop NaNs from the data

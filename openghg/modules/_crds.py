@@ -18,7 +18,16 @@ class CRDS:
         data = load_json(filename="process_gcwerks_parameters.json")
         self._crds_params = data["CRDS"]
 
-    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, network: Optional[str] = None) -> Dict:
+    def read_file(
+        self,
+        data_filepath: Union[str, Path],
+        site: Optional[str] = None,
+        network: Optional[str] = None,
+        inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+        measurement_type: Optional[str] = None,
+    ) -> Dict:
         """Creates a CRDS object holding data stored within Datasources
 
         Args:
@@ -81,7 +90,13 @@ class CRDS:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             data = read_csv(
-                data_filepath, header=None, skiprows=1, sep=r"\s+", index_col=["0_1"], parse_dates=[[0, 1]], date_parser=parse_date
+                data_filepath,
+                header=None,
+                skiprows=1,
+                sep=r"\s+",
+                index_col=["0_1"],
+                parse_dates=[[0, 1]],
+                date_parser=parse_date,
             )
 
         data.index.name = "time"
@@ -149,7 +164,7 @@ class CRDS:
         return combined_data
 
     def read_metadata(self, filepath: Path, data: DataFrame) -> Dict:
-        """ Parse CRDS files and create a metadata dict
+        """Parse CRDS files and create a metadata dict
 
         Args:
             filepath: Data filepath

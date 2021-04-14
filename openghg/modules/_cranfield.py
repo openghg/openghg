@@ -9,10 +9,13 @@ class CRANFIELD:
 
     def read_file(
         self,
-        data_filepath: Union[str, Path, list],
+        data_filepath: Union[str, Path],
         site: Optional[str] = None,
         network: Optional[str] = None,
         inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+        measurement_type: Optional[str] = None,
     ) -> Dict:
         """Creates a CRDS object holding data stored within Datasources
 

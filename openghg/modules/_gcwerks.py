@@ -6,9 +6,8 @@ __all__ = ["GCWERKS"]
 
 
 class GCWERKS:
-    """ Class for processing GCWERKS data
+    """Class for processing GCWERKS data"""
 
-    """
     def __init__(self):
         from openghg.util import load_json
 
@@ -19,19 +18,21 @@ class GCWERKS:
         # Site codes for inlet readings
         self._site_codes = load_json(filename="site_codes.json")
 
-    def find_files(self, data_path: Union[str, Path], skip_str: Optional[Union[str, List[str]]] = "sf6") -> List[Tuple[Path, Path]]:
-        """ A helper file to find GCWERKS data and precisions file in a given folder. 
-            It searches for .C files of the format macehead.19.C, looks for a precisions file
-            named macehead.19.precions.C and if it exists creates a tuple for these files.
+    def find_files(
+        self, data_path: Union[str, Path], skip_str: Optional[Union[str, List[str]]] = "sf6"
+    ) -> List[Tuple[Path, Path]]:
+        """A helper file to find GCWERKS data and precisions file in a given folder.
+        It searches for .C files of the format macehead.19.C, looks for a precisions file
+        named macehead.19.precions.C and if it exists creates a tuple for these files.
 
-            Please note the limited scope of this function, it will only work with
-            files that are named in the correct pattern.
+        Please note the limited scope of this function, it will only work with
+        files that are named in the correct pattern.
 
-            Args:
-                data_path: Folder path to search
-                skip_str: String or list of strings, if found in filename these files are skipped
-            Returns:
-                list: List of tuples
+        Args:
+            data_path: Folder path to search
+            skip_str: String or list of strings, if found in filename these files are skipped
+        Returns:
+            list: List of tuples
         """
         import re
         from pathlib import Path
@@ -68,19 +69,21 @@ class GCWERKS:
         data_filepath: Union[str, Path],
         precision_filepath: Union[str, Path],
         site: Optional[str] = None,
-        instrument: Optional[str] = None,
         network: Optional[str] = None,
+        inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
     ) -> Dict:
-        """ Reads a GC data file by creating a GC object and associated datasources
+        """Reads a GC data file by creating a GC object and associated datasources
 
-            Args:
-                data_filepath: Path of data file
-                precision_filepath: Path of precision file
-                site: Three letter code or name for site
-                instrument: Instrument name
-                network: Network name
-            Returns:
-                dict: Dictionary of source_name : UUIDs
+        Args:
+            data_filepath: Path of data file
+            precision_filepath: Path of precision file
+            site: Three letter code or name for site
+            instrument: Instrument name
+            network: Network name
+        Returns:
+            dict: Dictionary of source_name : UUIDs
         """
         from pathlib import Path
         from openghg.processing import assign_attributes
@@ -124,13 +127,13 @@ class GCWERKS:
         return gas_data
 
     def instrument_translator(self, instrument: str) -> str:
-        """ Ensure we have the correct instrument or translate an instrument
-            suffix to an instrument name.
+        """Ensure we have the correct instrument or translate an instrument
+        suffix to an instrument name.
 
-            Args:
-                instrument_suffix: Instrument suffix such as md
-            Returns:
-                str: Instrument name
+        Args:
+            instrument_suffix: Instrument suffix such as md
+        Returns:
+            str: Instrument name
         """
         try:
             instrument = self._gc_params["suffix_to_instrument"][instrument]
@@ -143,16 +146,16 @@ class GCWERKS:
         return instrument
 
     def read_data(self, data_filepath: Path, precision_filepath: Path, site: str, instrument: str, network: str) -> Dict:
-        """ Read data from the data and precision files
+        """Read data from the data and precision files
 
-            Args:
-                data_filepath: Path of data file
-                precision_filepath: Path of precision file
-                site: Name of site
-                instrument: Instrument name
-                network: Network name
-            Returns:
-                dict: Dictionary of gas data keyed by species
+        Args:
+            data_filepath: Path of data file
+            precision_filepath: Path of precision file
+            site: Name of site
+            instrument: Instrument name
+            network: Network name
+        Returns:
+            dict: Dictionary of gas data keyed by species
         """
         from datetime import datetime
         from pandas import read_csv
@@ -239,19 +242,25 @@ class GCWERKS:
         data.index.name = "time"
 
         gas_data = self.split_species(
-            data=data, site=site, species=species, instrument=instrument, metadata=metadata, units=units, scale=scale,
+            data=data,
+            site=site,
+            species=species,
+            instrument=instrument,
+            metadata=metadata,
+            units=units,
+            scale=scale,
         )
 
         return gas_data
 
     def read_precision(self, filepath: Path) -> Tuple[DataFrame, List]:
-        """ Read GC precision file
+        """Read GC precision file
 
-            Args:
-                filepath: Path of precision file
-            Returns:
-                tuple (Pandas.DataFrame, list): Precision DataFrame and list of species in
-                precision data
+        Args:
+            filepath: Path of precision file
+        Returns:
+            tuple (Pandas.DataFrame, list): Precision DataFrame and list of species in
+            precision data
         """
         from pandas import read_csv
         from datetime import datetime
@@ -266,7 +275,13 @@ class GCWERKS:
         precision_species = precision_header.values[0][1:].tolist()
 
         precision = read_csv(
-            filepath, skiprows=5, header=None, sep=r"\s+", index_col=0, parse_dates=[0], date_parser=prec_date_parser,
+            filepath,
+            skiprows=5,
+            header=None,
+            sep=r"\s+",
+            index_col=0,
+            parse_dates=[0],
+            date_parser=prec_date_parser,
         )
 
         precision.index.name = "Datetime"
@@ -278,18 +293,18 @@ class GCWERKS:
     def split_species(
         self, data: DataFrame, site: str, instrument: str, species: List, metadata: Dict, units: Dict, scale: Dict
     ) -> Dict:
-        """ Splits the species into separate dataframe into sections to be stored within individual Datasources
+        """Splits the species into separate dataframe into sections to be stored within individual Datasources
 
-            Args:
-                data: DataFrame of raw data
-                site: Name of site from which this data originates
-                instrument: Name of instrument
-                species: List of species contained in data
-                metadata: Dictionary of metadata
-                units: Dictionary of units for each species
-                scale: Dictionary of scales for each species
-            Returns:
-                dict: Dataframe of gas data and metadata
+        Args:
+            data: DataFrame of raw data
+            site: Name of site from which this data originates
+            instrument: Name of instrument
+            species: List of species contained in data
+            metadata: Dictionary of metadata
+            units: Dictionary of units for each species
+            scale: Dictionary of scales for each species
+        Returns:
+            dict: Dataframe of gas data and metadata
         """
         from fnmatch import fnmatch
         from openghg.util import compliant_string
@@ -391,13 +406,13 @@ class GCWERKS:
         return combined_data
 
     def get_precision(self, instrument: str) -> int:
-        """ Process the suffix from the filename to get the correct instrument name
-            then retrieve the precision of that instrument.
+        """Process the suffix from the filename to get the correct instrument name
+        then retrieve the precision of that instrument.
 
-            Args:
-                instrument (str): Instrument name
-            Returns:
-                int: Precision of instrument in seconds
+        Args:
+            instrument (str): Instrument name
+        Returns:
+            int: Precision of instrument in seconds
         """
         try:
             sampling_period = self._gc_params["sampling_period"][instrument]
@@ -409,22 +424,22 @@ class GCWERKS:
         return sampling_period
 
     def get_inlets(self, site_code: str) -> List:
-        """ Get the inlets used at this site
+        """Get the inlets used at this site
 
-            Args:
-                site (str): Site of datasources
-            Returns:
-                list: List of inlets
+        Args:
+            site (str): Site of datasources
+        Returns:
+            list: List of inlets
         """
         return self._gc_params[site_code.upper()]["inlets"]
 
     def get_site_code(self, site: str) -> str:
-        """ Get the site code
+        """Get the site code
 
-            Args:
-                site (str): Name of site
-            Returns:
-                str: Site code
+        Args:
+            site (str): Name of site
+        Returns:
+            str: Site code
         """
         try:
             site_code = self._site_codes["name_code"][site.lower()]
@@ -434,13 +449,13 @@ class GCWERKS:
         return site_code
 
     def get_site_attributes(self, site: str, inlet: str, instrument: str) -> Dict:
-        """ Gets the site specific attributes for writing to Datsets
+        """Gets the site specific attributes for writing to Datsets
 
-            Args:
-                site (str): Site name
-                inlet (str): Inlet (example: 108m)
-            Returns:
-                dict: Dictionary of attributes
+        Args:
+            site (str): Site name
+            inlet (str): Inlet (example: 108m)
+        Returns:
+            dict: Dictionary of attributes
         """
         attributes = self._gc_params[site.upper()]["global_attributes"]
 

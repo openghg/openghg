@@ -6,9 +6,7 @@ __all__ = ["NOAA"]
 
 
 class NOAA(BaseModule):
-    """ Class for processing NOAA data
-
-    """
+    """Class for processing NOAA data"""
 
     def __init__(self):
         from openghg.util import load_json
@@ -21,19 +19,82 @@ class NOAA(BaseModule):
     def read_file(
         self,
         data_filepath: Union[str, Path],
-        species: Optional[str] = None,
-        site: Optional[str] = None,
-        network: Optional[str] = None,
-    ) -> Dict:
-        """ Reads NOAA data files and returns the UUIDS of the Datasources
-            the processed data has been assigned to
+        site: str,
+        network: str,
+        inlet: str,
+        measurement_type: str,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+    ):
+        from pathlib import Path
 
-            Args:
-                data_filepath: Path of file to load
-                species: Species name
-                site: Site name
-            Returns:
-                list: UUIDs of Datasources data has been assigned to
+        if Path(data_filepath).suffix == ".nc":
+            return self.read_obspack(
+                data_filepath=data_filepath,
+                site=site,
+                inlet=inlet,
+                measurement_type=measurement_type,
+                instrument=instrument,
+                sampling_period=sampling_period,
+            )
+        else:
+            return self.read_raw_file(
+                data_filepath=data_filepath,
+                site=site,
+                inlet=inlet,
+                measurement_type=measurement_type,
+                instrument=instrument,
+                sampling_period=sampling_period,
+            )
+
+    def read_obspack(
+        data_filepath: Union[str, Path],
+        site: str,
+        inlet: str,
+        measurement_type: str,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+    ):
+        """Read NOAA ObsPack NetCDF files
+
+        Args:
+            data_filepath: Path to file
+            site: Site code
+            species: Species
+            site: Three letter site code
+            measurement_type: One of flask, insity or pfp
+        Returns:
+            dict: Dictionary of results
+        """
+        import xarray as xr
+
+        valid_types = ("flask", "insitu", "pfp")
+
+        if measurement_type not in valid_types:
+            raise ValueError(f"measurement_type must be one of {valid_types}")
+
+        ds = xr.open_dataset(data_filepath)
+
+        # Convert 
+
+    def read_raw_file(
+        self,
+        data_filepath: Union[str, Path],
+        site: str,
+        inlet: str,
+        measurement_type: str,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+    ) -> Dict:
+        """Reads NOAA data files and returns the UUIDS of the Datasources
+        the processed data has been assigned to
+
+        Args:
+            data_filepath: Path of file to load
+            species: Species name
+            site: Site name
+        Returns:
+            list: UUIDs of Datasources data has been assigned to
         """
         from openghg.processing import assign_attributes
         from pathlib import Path
@@ -41,33 +102,29 @@ class NOAA(BaseModule):
         data_filepath = Path(data_filepath)
         filename = data_filepath.name
 
-        if species is None:
-            species = filename.split("_")[0].lower()
+        species = filename.split("_")[0].lower()
 
         source_name = data_filepath.stem
         source_name = source_name.split("-")[0]
 
-        gas_data = self.read_data(data_filepath=data_filepath, species=species)
-
-        if site is None:
-            site = gas_data[species.lower()]["metadata"]["site"]
+        gas_data = self.read_raw_data(data_filepath=data_filepath, species=species)
 
         gas_data = assign_attributes(data=gas_data, site=site, network="NOAA")
 
         return gas_data
 
-    def read_data(self, data_filepath: Path, species: str, measurement_type: Optional[str] = "flask") -> Dict:
-        """ Separates the gases stored in the dataframe in
-            separate dataframes and returns a dictionary of gases
-            with an assigned UUID as gas:UUID and a list of the processed
-            dataframes
+    def read_raw_data(self, data_filepath: Path, species: str, measurement_type: Optional[str] = "flask") -> Dict:
+        """Separates the gases stored in the dataframe in
+        separate dataframes and returns a dictionary of gases
+        with an assigned UUID as gas:UUID and a list of the processed
+        dataframes
 
-            Args:
-                data_filepath: Path of datafile
-                species: Species string such as CH4, CO
-                measurement_type: Type of measurements e.g. flask
-            Returns:
-                dict: Dictionary containing attributes, data and metadata keys
+        Args:
+            data_filepath: Path of datafile
+            species: Species string such as CH4, CO
+            measurement_type: Type of measurements e.g. flask
+        Returns:
+            dict: Dictionary containing attributes, data and metadata keys
         """
         from openghg.util import compliant_string, read_header
         from pandas import read_csv, Timestamp
@@ -128,7 +185,9 @@ class NOAA(BaseModule):
 
             passed_species = species.lower()
             if data_species != passed_species:
-                raise ValueError(f"Mismatch between passed species ({passed_species}) and species read from data ({data_species})")
+                raise ValueError(
+                    f"Mismatch between passed species ({passed_species}) and species read from data ({data_species})"
+                )
 
         species = species.upper()
 
