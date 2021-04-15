@@ -20,15 +20,30 @@ class NOAA(BaseModule):
         self,
         data_filepath: Union[str, Path],
         site: str,
-        network: str,
         inlet: str,
         measurement_type: str,
+        network: Optional[str] = "NOAA",
         instrument: Optional[str] = None,
         sampling_period: Optional[str] = None,
-    ):
-        from pathlib import Path
+    ) -> Dict:
+        """Read NOAA data from raw text file or ObsPack NetCDF
 
-        if Path(data_filepath).suffix == ".nc":
+        Args:
+            data_filepath: Data filepath
+            site: Three letter site code
+            inlet: Inlet height, if no height use measurement type e.g. flask
+            measurement_type: One of ("flask", "insitu", "pfp")
+            network: Network, defaults to NOAA
+            instrument: Instrument name
+            sampling_period: Sampling period
+        Returns:
+            dict: Dictionary of data and metadata
+        """
+        from pathlib import Path
+        
+        file_extension = Path(data_filepath).suffix
+
+        if file_extension == ".nc":
             return self.read_obspack(
                 data_filepath=data_filepath,
                 site=site,
@@ -48,6 +63,7 @@ class NOAA(BaseModule):
             )
 
     def read_obspack(
+        self,
         data_filepath: Union[str, Path],
         site: str,
         inlet: str,
@@ -59,23 +75,68 @@ class NOAA(BaseModule):
 
         Args:
             data_filepath: Path to file
-            site: Site code
-            species: Species
             site: Three letter site code
+            inlet: Inlet height, if no height use measurement type e.g. flask
             measurement_type: One of flask, insity or pfp
+            instrument: Instrument name
+            sampling_period: Sampling period
         Returns:
             dict: Dictionary of results
         """
         import xarray as xr
+        from openghg.util import clean_string
+        # from numpy import array as np_array
+
+        # from openghg.processing import assign_attributes
 
         valid_types = ("flask", "insitu", "pfp")
 
         if measurement_type not in valid_types:
             raise ValueError(f"measurement_type must be one of {valid_types}")
 
-        ds = xr.open_dataset(data_filepath)
+        obspack_ds = xr.open_dataset(data_filepath)
+        orig_attrs = obspack_ds.attrs
 
-        # Convert 
+        # TODO - the simplest way of getting a clean Dataset in the form we want
+        # seems to be to go to a pandas Dataframe and back, open to suggestions on this.
+        # GJ - 2021-04-15
+        df = obspack_ds.to_dataframe()
+        df = df.set_index(df["time"])
+        df = df[~df.index.duplicated(keep='first')]
+        df = df[["value", "value_unc", "nvalue", "value_std_dev"]]
+
+        if not df.index.is_monotonic_increasing:
+            df = df.sort_index()
+
+        processed_ds = df.to_xarray()
+        # TODO - need to choose which keys we want to keep
+        # GJ - 2021-04-15
+        processed_ds.attrs = orig_attrs
+
+        species = clean_string(obspack_ds.attrs["dataset_parameter"])
+        network = "NOAA"
+
+        metadata = {}
+        metadata["site"] = site
+        metadata["inlet"] = inlet
+        metadata["network"] = network
+        metadata["measurement_type"] = measurement_type
+        metadata["species"] = species
+
+        if instrument is not None:
+            metadata["instrument"] = instrument
+
+        if sampling_period is not None:
+            metadata["sampling_period"] = sampling_period
+
+        data = {}
+        data[species] = {"data": processed_ds, "metadata": metadata}
+
+        # TODO - how do we want to handle the CF compliance for the ObsPack files?
+        # GJ - 2021-04-14
+        # data = assign_attributes(data=data, site=site, network=network)
+
+        return data
 
     def read_raw_file(
         self,
@@ -86,8 +147,8 @@ class NOAA(BaseModule):
         instrument: Optional[str] = None,
         sampling_period: Optional[str] = None,
     ) -> Dict:
-        """Reads NOAA data files and returns the UUIDS of the Datasources
-        the processed data has been assigned to
+        """Reads NOAA data files and returns a dictionary of processed
+        data and metadata.
 
         Args:
             data_filepath: Path of file to load
@@ -107,13 +168,15 @@ class NOAA(BaseModule):
         source_name = data_filepath.stem
         source_name = source_name.split("-")[0]
 
-        gas_data = self.read_raw_data(data_filepath=data_filepath, species=species)
+        gas_data = self.read_raw_data(
+            data_filepath=data_filepath, inlet=inlet, species=species, measurement_type=measurement_type
+        )
 
         gas_data = assign_attributes(data=gas_data, site=site, network="NOAA")
 
         return gas_data
 
-    def read_raw_data(self, data_filepath: Path, species: str, measurement_type: Optional[str] = "flask") -> Dict:
+    def read_raw_data(self, data_filepath: Path, species: str, inlet: str, measurement_type: Optional[str] = "flask") -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -224,7 +287,6 @@ class NOAA(BaseModule):
         }
 
         data = data.rename(columns=rename_dict, inplace=False)
-
         data = data.to_xarray()
 
         site_attributes = self._noaa_params["global_attributes"]
@@ -236,7 +298,7 @@ class NOAA(BaseModule):
         metadata["site"] = site
         metadata["measurement_type"] = measurement_type
         metadata["network"] = "NOAA"
-        metadata["inlet"] = "NA"
+        metadata["inlet"] = inlet
 
         combined_data[species.lower()] = {
             "metadata": metadata,
