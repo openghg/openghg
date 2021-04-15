@@ -18,6 +18,23 @@ mpl_logger.setLevel(logging.WARNING)
 def get_datapath(filename, data_type):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
+def test_read_obspack():
+    noaa = NOAA()
+
+    filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
+
+    data = noaa.read_file(data_filepath=filepath, site="esp", inlet="flask", measurement_type="flask", network="NOAA")
+
+    ch4_data = data["ch4"]["data"]
+
+    assert ch4_data.time[0] == Timestamp("1993-06-17T00:12:30")
+    assert ch4_data.time[-1] == Timestamp("2002-01-12T12:00:00")
+    assert ch4_data["value"][0] == pytest.approx(1.76763e-06)
+    assert ch4_data["value"][-1] == pytest.approx(1.848995e-06)
+    assert ch4_data["nvalue"][0] == 2.0
+    assert ch4_data["nvalue"][-1] == 2.0
+    assert ch4_data["value_std_dev"][0] == pytest.approx(1.668772e-09)
+    assert ch4_data["value_std_dev"][-1] == pytest.approx(1.5202796e-09)
 
 def test_read_file_site_filename_read():
     noaa = NOAA()

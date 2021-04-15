@@ -40,7 +40,7 @@ class NOAA(BaseModule):
             dict: Dictionary of data and metadata
         """
         from pathlib import Path
-        
+
         file_extension = Path(data_filepath).suffix
 
         if file_extension == ".nc":
@@ -85,6 +85,7 @@ class NOAA(BaseModule):
         """
         import xarray as xr
         from openghg.util import clean_string
+
         # from numpy import array as np_array
 
         # from openghg.processing import assign_attributes
@@ -102,8 +103,17 @@ class NOAA(BaseModule):
         # GJ - 2021-04-15
         df = obspack_ds.to_dataframe()
         df = df.set_index(df["time"])
-        df = df[~df.index.duplicated(keep='first')]
-        df = df[["value", "value_unc", "nvalue", "value_std_dev"]]
+        df = df[~df.index.duplicated(keep="first")]
+
+        wanted = ["value", "value_unc", "nvalue", "value_std_dev"]
+        to_extract = [x for x in wanted if x in df]
+
+        if not to_extract:
+            raise ValueError(
+                f"No valid data columns found in converted DataFrame. We expect the following data variables in the passed NetCDF: {wanted}"
+            )
+
+        df = df[to_extract]
 
         if not df.index.is_monotonic_increasing:
             df = df.sort_index()

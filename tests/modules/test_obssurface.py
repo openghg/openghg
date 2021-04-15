@@ -6,6 +6,11 @@ from openghg.modules import Datasource, ObsSurface
 from openghg.objectstore import get_local_bucket, exists
 
 
+@pytest.fixture(scope="session")
+def clear_store():
+    get_local_bucket(empty=True)
+
+
 def get_datapath(filename, data_type):
     """Get the path of a file in the tests directory
 
@@ -16,10 +21,8 @@ def get_datapath(filename, data_type):
 
 
 def test_read_CRDS():
-    get_local_bucket(empty=True)
-
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.dat", data_type="CRDS")
-    results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
+    results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC", overwrite=True)
 
     keys = results["processed"]["bsd.picarro.1minute.248m.dat"].keys()
 
@@ -66,12 +69,10 @@ def test_read_CRDS():
 
 
 def test_read_GC():
-    get_local_bucket(empty=True)
-
     data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     precision_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
+    results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE", overwrite=True)
 
     expected_keys = [
         "benzene_75m_4",
@@ -224,11 +225,9 @@ def test_read_GC():
 
 
 def test_read_cranfield():
-    get_local_bucket(empty=True)
-
     data_filepath = get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="CRANFIELD", site="THB", network="CRANFIELD")
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="CRANFIELD", site="THB", network="CRANFIELD", overwrite=True)
 
     expected_keys = ["ch4", "co", "co2"]
 
@@ -250,11 +249,9 @@ def test_read_cranfield():
 
 
 def test_read_icos():
-    get_local_bucket(empty=True)
-
     data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS", overwrite=True)
 
     uuid = results["processed"]["tta.co2.1minute.222m.min.dat"]["co2"]
 
@@ -300,11 +297,9 @@ def test_read_icos():
 
 
 def test_read_beaco2n():
-    get_local_bucket(empty=True)
-
     data_filepath = get_datapath(filename="Charlton_Community_Center.csv", data_type="BEACO2N")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="BEACO2N", site="CCC", network="BEACO2N")
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="BEACO2N", site="CCC", network="BEACO2N", overwrite=True)
 
     uuid = results["processed"]["Charlton_Community_Center.csv"]["co2"]
 
@@ -316,12 +311,10 @@ def test_read_beaco2n():
     assert co2_data["co2_qc"][0] == 2
 
 
-def test_read_noaa():
-    get_local_bucket(empty=True)
-
+def test_read_noaa_raw():
     data_filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="NOAA", site="POCN25", network="NOAA")
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="NOAA", site="POCN25", network="NOAA", overwrite=True)
 
     uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]
 
@@ -339,6 +332,25 @@ def test_read_noaa():
 
     assert co_data["co_selection_flag"][0] == 0
     assert co_data["co_selection_flag"][-1] == 0
+
+
+def test_read_noaa_obspack():
+    data_filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
+
+    results = ObsSurface.read_file(filepath=data_filepath, inlet="flask", data_type="NOAA", site="esp", network="NOAA", overwrite=True)
+
+    uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]
+
+    ch4_data = Datasource.load(uuid=uuid, shallow=False).data()
+
+    data = ch4_data["1998-09-08-22:10:00+00:00_1998-09-08-22:10:00+00:00"]
+
+    assert len(ch4_data) == 34
+
+    assert data.time[0] == Timestamp("1998-09-08T22:10:00")
+    assert data["value"][0] == pytest.approx(1.84641e-06)
+    assert data["nvalue"][0] == 2.0
+    assert data["value_std_dev"][0] == pytest.approx(8.34386e-10)
 
 
 def test_read_thames_barrier():

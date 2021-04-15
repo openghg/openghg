@@ -20,8 +20,8 @@ def read_data():
     cgo_data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     cgo_prec = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    ObsSurface.read_file(filepath=hfd_filepath, data_type="CRDS", site="hfd", network="DECC")
-    ObsSurface.read_file(filepath=(cgo_data, cgo_prec), data_type="GCWERKS", site="CGO", network="AGAGE", instrument="medusa")
+    ObsSurface.read_file(filepath=hfd_filepath, data_type="CRDS", site="hfd", network="DECC", inlet="100m")
+    ObsSurface.read_file(filepath=(cgo_data, cgo_prec), data_type="GCWERKS", site="CGO", network="AGAGE", instrument="medusa", inlet="75m")
 
 
 def test_get_observations_few_args():
@@ -101,6 +101,8 @@ def test_get_observations_datetime_selection():
 
 def test_gcwerks_retrieval():
     results = get_obs_surface(site="CGO", species="cfc11")
+
+    print(results)
 
     data = results.data
     metadata = results.metadata

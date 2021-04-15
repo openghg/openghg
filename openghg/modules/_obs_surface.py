@@ -55,7 +55,8 @@ class ObsSurface(BaseModule):
             data_type: Data type, for example CRDS, GCWERKS, ICOS
             site: Site code/name
             network: Network name
-            inlet: Inlet height
+            inlet: Inlet height. If processing multiple files pass None, OpenGHG will attempt to
+            read inlets from data.
             instrument: Instrument name
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period)
             measurement_type: Type of measurement e.g. insitu, flask
@@ -180,6 +181,12 @@ class ObsSurface(BaseModule):
             site = data["site"]
             network = data["network"]
             inlet = data["inlet"]
+
+            # TODO - remove this once further checks for inlet processing
+            # are in place
+            if inlet is None:
+                raise ValueError("No valid inlet height.")
+
             species = data["species"]
 
             result = self._datasource_table[site][network][inlet][species]
