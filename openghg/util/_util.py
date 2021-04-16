@@ -88,8 +88,8 @@ def get_datapath(filename, directory=None):
 
 
 def load_json(filename):
-    """Returns a dictionary deserialised from JSON. This function only works
-        for JSON files in the openghg/data directory.
+    """Returns a dictionary deserialised from JSON. This function only 
+    works for JSON files in the openghg/data directory.
 
     Args:
         filename (str): Name of JSON file
