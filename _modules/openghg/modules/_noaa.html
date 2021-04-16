@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._noaa &mdash; OpenGHG 0+untagged.1.g3716fd7 documentation</title>
+  <title>openghg.modules._noaa &mdash; OpenGHG 0+untagged.1.gc37e50c documentation</title>
   
 
   
@@ -176,9 +176,7 @@
 
 
 <div class="viewcode-block" id="NOAA"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA">[docs]</a><span class="k">class</span> <span class="nc">NOAA</span><span class="p">(</span><span class="n">BaseModule</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Class for processing NOAA data</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Class for processing NOAA data&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="NOAA.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
@@ -191,19 +189,156 @@
 <div class="viewcode-block" id="NOAA.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
-        <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Reads NOAA data files and returns the UUIDS of the Datasources</span>
-<span class="sd">            the processed data has been assigned to</span>
+        <span class="sd">&quot;&quot;&quot;Read NOAA data from raw text file or ObsPack NetCDF</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                data_filepath: Path of file to load</span>
-<span class="sd">                species: Species name</span>
-<span class="sd">                site: Site name</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                list: UUIDs of Datasources data has been assigned to</span>
+<span class="sd">        Args:</span>
+<span class="sd">            data_filepath: Data filepath</span>
+<span class="sd">            site: Three letter site code</span>
+<span class="sd">            inlet: Inlet height, if no height use measurement type e.g. flask</span>
+<span class="sd">            measurement_type: One of (&quot;flask&quot;, &quot;insitu&quot;, &quot;pfp&quot;)</span>
+<span class="sd">            network: Network, defaults to NOAA</span>
+<span class="sd">            instrument: Instrument name</span>
+<span class="sd">            sampling_period: Sampling period</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of data and metadata</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+        <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Inlet must be given for NOAA data processing. If flask data pass flask as inlet.&quot;</span><span class="p">)</span>
+
+        <span class="n">file_extension</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span>
+
+        <span class="k">if</span> <span class="n">file_extension</span> <span class="o">==</span> <span class="s2">&quot;.nc&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_obspack</span><span class="p">(</span>
+                <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+                <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
+                <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+                <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_file</span><span class="p">(</span>
+                <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+                <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
+                <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+                <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="NOAA.read_obspack"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.read_obspack">[docs]</a>    <span class="k">def</span> <span class="nf">read_obspack</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read NOAA ObsPack NetCDF files</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_filepath: Path to file</span>
+<span class="sd">            site: Three letter site code</span>
+<span class="sd">            inlet: Inlet height, if no height use measurement type e.g. flask</span>
+<span class="sd">            measurement_type: One of flask, insity or pfp</span>
+<span class="sd">            instrument: Instrument name</span>
+<span class="sd">            sampling_period: Sampling period</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of results</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span>
+
+        <span class="c1"># from numpy import array as np_array</span>
+
+        <span class="c1"># from openghg.processing import assign_attributes</span>
+
+        <span class="n">valid_types</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;flask&quot;</span><span class="p">,</span> <span class="s2">&quot;insitu&quot;</span><span class="p">,</span> <span class="s2">&quot;pfp&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">measurement_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;measurement_type must be one of </span><span class="si">{</span><span class="n">valid_types</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">obspack_ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
+        <span class="n">orig_attrs</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span>
+
+        <span class="c1"># TODO - the simplest way of getting a clean Dataset in the form we want</span>
+        <span class="c1"># seems to be to go to a pandas Dataframe and back, open to suggestions on this.</span>
+        <span class="c1"># GJ - 2021-04-15</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)]</span>
+
+        <span class="n">wanted</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;value_unc&quot;</span><span class="p">,</span> <span class="s2">&quot;nvalue&quot;</span><span class="p">,</span> <span class="s2">&quot;value_std_dev&quot;</span><span class="p">]</span>
+        <span class="n">to_extract</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">wanted</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">df</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">to_extract</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No valid data columns found in converted DataFrame. We expect the following data variables in the passed NetCDF: </span><span class="si">{</span><span class="n">wanted</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">to_extract</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">is_monotonic_increasing</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+
+        <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
+        <span class="c1"># TODO - need to choose which keys we want to keep</span>
+        <span class="c1"># GJ - 2021-04-15</span>
+        <span class="n">processed_ds</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">orig_attrs</span>
+
+        <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;dataset_parameter&quot;</span><span class="p">])</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;measurement_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement_type</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
+
+        <span class="k">if</span> <span class="n">instrument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
+
+        <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampling_period</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">processed_ds</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">}</span>
+
+        <span class="c1"># TODO - how do we want to handle the CF compliance for the ObsPack files?</span>
+        <span class="c1"># GJ - 2021-04-14</span>
+        <span class="c1"># data = assign_attributes(data=data, site=site, network=network)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="NOAA.read_raw_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.read_raw_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_raw_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reads NOAA data files and returns a dictionary of processed</span>
+<span class="sd">        data and metadata.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_filepath: Path of file to load</span>
+<span class="sd">            species: Species name</span>
+<span class="sd">            site: Site name</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: UUIDs of Datasources data has been assigned to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.processing</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
         <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
@@ -211,33 +346,31 @@
         <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span>
 
-        <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">species</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
         <span class="n">source_name</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span>
         <span class="n">source_name</span> <span class="o">=</span> <span class="n">source_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">site</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()][</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span>
+            <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span>
+        <span class="p">)</span>
 
         <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;NOAA&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">gas_data</span></div>
 
-<div class="viewcode-block" id="NOAA.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;flask&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Separates the gases stored in the dataframe in</span>
-<span class="sd">            separate dataframes and returns a dictionary of gases</span>
-<span class="sd">            with an assigned UUID as gas:UUID and a list of the processed</span>
-<span class="sd">            dataframes</span>
+<div class="viewcode-block" id="NOAA.read_raw_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.read_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;flask&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Separates the gases stored in the dataframe in</span>
+<span class="sd">        separate dataframes and returns a dictionary of gases</span>
+<span class="sd">        with an assigned UUID as gas:UUID and a list of the processed</span>
+<span class="sd">        dataframes</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                data_filepath: Path of datafile</span>
-<span class="sd">                species: Species string such as CH4, CO</span>
-<span class="sd">                measurement_type: Type of measurements e.g. flask</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                dict: Dictionary containing attributes, data and metadata keys</span>
+<span class="sd">        Args:</span>
+<span class="sd">            data_filepath: Path of datafile</span>
+<span class="sd">            species: Species string such as CH4, CO</span>
+<span class="sd">            measurement_type: Type of measurements e.g. flask</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary containing attributes, data and metadata keys</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">compliant_string</span><span class="p">,</span> <span class="n">read_header</span>
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">Timestamp</span>
@@ -298,7 +431,9 @@
 
             <span class="n">passed_species</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">data_species</span> <span class="o">!=</span> <span class="n">passed_species</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mismatch between passed species (</span><span class="si">{</span><span class="n">passed_species</span><span class="si">}</span><span class="s2">) and species read from data (</span><span class="si">{</span><span class="n">data_species</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Mismatch between passed species (</span><span class="si">{</span><span class="n">passed_species</span><span class="si">}</span><span class="s2">) and species read from data (</span><span class="si">{</span><span class="n">data_species</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="p">)</span>
 
         <span class="n">species</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
@@ -335,7 +470,6 @@
         <span class="p">}</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_dict</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
 
         <span class="n">site_attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noaa_params</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
@@ -347,7 +481,7 @@
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;measurement_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement_type</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
 
         <span class="n">combined_data</span><span class="p">[</span><span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
@@ -369,7 +503,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 13, 2021.
+        Last updated on Apr 16, 2021.
       </span>
 
     </p>
