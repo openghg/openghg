@@ -138,14 +138,7 @@ def valid_site(site):
     """
     site_data = load_json("acrg_site_info.json")
 
-    site = site.upper()
-
-    if site not in site_data:
-        site = site.lower()
-        site_name_code = load_json("site_codes.json")
-        return site in site_name_code["name_code"]
-
-    return True
+    return site.upper() in site_data
 
 
 def is_number(s):

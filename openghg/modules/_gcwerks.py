@@ -68,8 +68,8 @@ class GCWERKS:
         self,
         data_filepath: Union[str, Path],
         precision_filepath: Union[str, Path],
-        site: Optional[str] = None,
-        network: Optional[str] = None,
+        site: str,
+        network: str,
         inlet: Optional[str] = None,
         instrument: Optional[str] = None,
         sampling_period: Optional[str] = None,
@@ -88,19 +88,13 @@ class GCWERKS:
         """
         from pathlib import Path
         from openghg.processing import assign_attributes
-        from openghg.util import is_number
+        from openghg.util import is_number, valid_site
         import re
 
         data_filepath = Path(data_filepath)
 
-        if site is None:
-            # Read from the filename
-            site_name = re.findall(r"[\w']+", data_filepath.stem)[0]
-            site = self.get_site_code(site_name)
-
-        # We need to have the 3 character site code here
-        if len(site) != 3:
-            site = self.get_site_code(site)
+        if not valid_site(site):
+            raise ValueError(f"Invalid site {site} passed.")
 
         # Try and find the instrument name in the filename
         if instrument is None:

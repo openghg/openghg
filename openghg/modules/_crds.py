@@ -55,16 +55,16 @@ class CRDS:
 
         # Do some sanity checks to see if we've got different data passed in to that read from
         # the file
-        fname_site = clean_string(split_fname[0])
-        fname_inlet = clean_string(split_fname[3])
+        site_fname = clean_string(split_fname[0])
+        inlet_fname = clean_string(split_fname[3])
 
-        if fname_site != site:
+        if site_fname != site:
             raise ValueError("Site mismatch between passed site code and that read from filename.")
 
-        if "m" not in fname_inlet:
+        if "m" not in inlet_fname:
             raise ValueError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
 
-        if inlet is not None and fname_inlet != inlet:
+        if inlet is not None and inlet_fname != inlet:
             raise ValueError("Inlet mismatch between passed inlet and that read from filename.")
 
         if sampling_period is not None:
