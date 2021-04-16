@@ -102,8 +102,6 @@ def test_get_observations_datetime_selection():
 def test_gcwerks_retrieval():
     results = get_obs_surface(site="CGO", species="cfc11")
 
-    print(results)
-
     data = results.data
     metadata = results.metadata
 

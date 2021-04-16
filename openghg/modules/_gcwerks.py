@@ -73,6 +73,7 @@ class GCWERKS:
         inlet: Optional[str] = None,
         instrument: Optional[str] = None,
         sampling_period: Optional[str] = None,
+        measurement_type: Optional[str] = None,
     ) -> Dict:
         """Reads a GC data file by creating a GC object and associated datasources
 

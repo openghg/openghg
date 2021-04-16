@@ -21,8 +21,10 @@ def get_datapath(filename, data_type):
 
 
 def test_read_CRDS():
+    get_local_bucket(empty=True)
+
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.dat", data_type="CRDS")
-    results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC", overwrite=True)
+    results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
 
     keys = results["processed"]["bsd.picarro.1minute.248m.dat"].keys()
 
@@ -69,10 +71,12 @@ def test_read_CRDS():
 
 
 def test_read_GC():
+    get_local_bucket(empty=True)
+
     data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     precision_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE", overwrite=True)
+    results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
 
     expected_keys = [
         "benzene_75m_4",
@@ -225,9 +229,11 @@ def test_read_GC():
 
 
 def test_read_cranfield():
+    get_local_bucket(empty=True)
+
     data_filepath = get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="CRANFIELD", site="THB", network="CRANFIELD", overwrite=True)
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="CRANFIELD", site="THB", network="CRANFIELD")
 
     expected_keys = ["ch4", "co", "co2"]
 
@@ -249,9 +255,11 @@ def test_read_cranfield():
 
 
 def test_read_icos():
+    get_local_bucket(empty=True)
+
     data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS", overwrite=True)
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
 
     uuid = results["processed"]["tta.co2.1minute.222m.min.dat"]["co2"]
 
@@ -293,7 +301,7 @@ def test_read_icos():
 
     obs = ObsSurface.load()
 
-    assert list(obs._datasource_uuids.values())[0] == "co2"
+    assert obs._datasource_uuids[uuid] == "co2"
 
 
 def test_read_beaco2n():
@@ -312,9 +320,11 @@ def test_read_beaco2n():
 
 
 def test_read_noaa_raw():
+    get_local_bucket(empty=True)
+
     data_filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="NOAA", site="POCN25", network="NOAA", overwrite=True)
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="NOAA", site="POCN25", network="NOAA", inlet="flask")
 
     uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]
 

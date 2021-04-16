@@ -40,7 +40,7 @@ class ObsSurface(BaseModule):
         data_type: str,
         site: str,
         network: str,
-        inlet: str,
+        inlet: Optional[str] = None,
         instrument: Optional[str] = None,
         sampling_period: Optional[str] = None,
         measurement_type: Optional[str] = "insitu",

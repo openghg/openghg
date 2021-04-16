@@ -41,6 +41,9 @@ class NOAA(BaseModule):
         """
         from pathlib import Path
 
+        if inlet is None:
+            raise ValueError("Inlet must be given for NOAA data processing. If flask data pass flask as inlet.")
+
         file_extension = Path(data_filepath).suffix
 
         if file_extension == ".nc":

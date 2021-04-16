@@ -18,6 +18,7 @@ mpl_logger.setLevel(logging.WARNING)
 def get_datapath(filename, data_type):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
+
 def test_read_obspack():
     noaa = NOAA()
 
@@ -36,12 +37,13 @@ def test_read_obspack():
     assert ch4_data["value_std_dev"][0] == pytest.approx(1.668772e-09)
     assert ch4_data["value_std_dev"][-1] == pytest.approx(1.5202796e-09)
 
+
 def test_read_file_site_filename_read():
     noaa = NOAA()
 
     filepath = get_datapath(filename="ch4_scsn06_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
-    data = noaa.read_file(data_filepath=filepath)
+    data = noaa.read_file(data_filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask")
 
     ch4_data = data["ch4"]["data"]
 
@@ -52,7 +54,7 @@ def test_read_file_site_filename_read():
 
     metadata = data["ch4"]["metadata"]
 
-    expected_metadata = {"species": "ch4", "site": "SCSN06", "measurement_type": "flask", "network": "NOAA", "inlet": "NA"}
+    expected_metadata = {"species": "ch4", "site": "SCSN06", "measurement_type": "flask", "network": "NOAA", "inlet": "flask"}
 
     assert metadata == expected_metadata
 
@@ -78,19 +80,19 @@ def test_read_file_site_filename_read():
     assert ch4_data.attrs == expected_attrs
 
 
-def test_read_file():
+def test_read_raw_file():
     noaa = NOAA()
 
     filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
-    data = noaa.read_file(data_filepath=filepath, species="CO")
+    data = noaa.read_file(data_filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask")
 
     assert data["co"]["metadata"] == {
         "species": "co",
         "site": "POC",
         "measurement_type": "flask",
         "network": "NOAA",
-        "inlet": "NA",
+        "inlet": "flask",
     }
 
     co_data = data["co"]["data"]
@@ -118,8 +120,10 @@ def test_read_file():
         "Processed by": "OpenGHG_Cloud",
         "species": "co",
         "Calibration_scale": "unknown",
-        "station_long_name": "Pacific Ocean",
-        "station_height_masl": 0.0,
+        "station_longitude": -139.0,
+        "station_latitude": 25.0,
+        "station_long_name": "Pacific Ocean (25 N), N/A",
+        "station_height_masl": 10.0,
     }
 
     del attrs["File created"]
@@ -133,42 +137,4 @@ def test_read_incorrect_site_raises():
     filepath = get_datapath(filename="ch4_UNKOWN_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
     with pytest.raises(ValueError):
-        data = noaa.read_file(data_filepath=filepath)
-
-
-def test_incorrect_species_passed_raises():
-    noaa = NOAA()
-
-    filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
-
-    with pytest.raises(ValueError):
-        data = noaa.read_file(data_filepath=filepath, species="CH4")
-
-
-def test_read_data():
-    noaa = NOAA()
-
-    filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
-
-    data = noaa.read_data(data_filepath=filepath, species="CO")
-
-    co_data = data["co"]["data"]
-    metadata = data["co"]["metadata"]
-    attributes = data["co"]["attributes"]
-
-    expected_metadata = {"species": "co", "site": "POC", "measurement_type": "flask", "network": "NOAA", "inlet": "NA"}
-
-    expected_attrs = {
-        "data_owner": "Ed Dlugokencky, Gabrielle Petron (CO)",
-        "data_owner_email": "ed.dlugokencky@noaa.gov, gabrielle.petron@noaa.gov",
-        "inlet_height_magl": "NA",
-        "instrument": "GC-HgO-VUV",
-    }
-
-    assert co_data["CO"][0] == 94.9
-    assert co_data["CO"][-1] == 73.16
-    assert co_data.time[0] == Timestamp("1990-06-29T05:00:00.000000000")
-    assert co_data.time[-1] == Timestamp("2017-07-15T04:15:00.000000000")
-
-    assert metadata == expected_metadata
-    assert attributes == expected_attrs
+        data = noaa.read_file(data_filepath=filepath, site="NotASite", inlet="flask", measurement_type="flask")
