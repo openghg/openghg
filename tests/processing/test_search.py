@@ -28,7 +28,7 @@ def data_read():
     data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     prec_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    ObsSurface.read_file(filepath=(data_filepath, prec_filepath), site="CGO", data_type="GCWERKS", network="AGAGE")
+    ObsSurface.read_file(filepath=(data_filepath, prec_filepath), site="CGO", data_type="GCWERKS", network="AGAGE", inlet=None)
 
 
 def test_keyword_search():

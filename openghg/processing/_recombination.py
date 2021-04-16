@@ -45,6 +45,10 @@ def recombine_datasets(keys: List[str], sort: Optional[bool] = True) -> Dataset:
 
     data = [Datasource.load_dataset(bucket=bucket, key=k) for k in keys]
 
+    # print(data)
+
+    # return False
+
     combined = xr_concat(data, dim="time")
 
     if sort:

@@ -6,6 +6,11 @@ from openghg.modules import Datasource, ObsSurface
 from openghg.objectstore import get_local_bucket, exists
 
 
+@pytest.fixture(scope="session")
+def clear_store():
+    get_local_bucket(empty=True)
+
+
 def get_datapath(filename, data_type):
     """Get the path of a file in the tests directory
 
@@ -296,15 +301,13 @@ def test_read_icos():
 
     obs = ObsSurface.load()
 
-    assert list(obs._datasource_uuids.values())[0] == "co2"
+    assert obs._datasource_uuids[uuid] == "co2"
 
 
 def test_read_beaco2n():
-    get_local_bucket(empty=True)
-
     data_filepath = get_datapath(filename="Charlton_Community_Center.csv", data_type="BEACO2N")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="BEACO2N", site="CCC", network="BEACO2N")
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="BEACO2N", site="CCC", network="BEACO2N", overwrite=True)
 
     uuid = results["processed"]["Charlton_Community_Center.csv"]["co2"]
 
@@ -316,12 +319,12 @@ def test_read_beaco2n():
     assert co2_data["co2_qc"][0] == 2
 
 
-def test_read_noaa():
+def test_read_noaa_raw():
     get_local_bucket(empty=True)
 
     data_filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="NOAA", site="POCN25", network="NOAA")
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="NOAA", site="POCN25", network="NOAA", inlet="flask")
 
     uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]
 
@@ -339,6 +342,25 @@ def test_read_noaa():
 
     assert co_data["co_selection_flag"][0] == 0
     assert co_data["co_selection_flag"][-1] == 0
+
+
+def test_read_noaa_obspack():
+    data_filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
+
+    results = ObsSurface.read_file(filepath=data_filepath, inlet="flask", data_type="NOAA", site="esp", network="NOAA", overwrite=True)
+
+    uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]
+
+    ch4_data = Datasource.load(uuid=uuid, shallow=False).data()
+
+    data = ch4_data["1998-09-08-22:10:00+00:00_1998-09-08-22:10:00+00:00"]
+
+    assert len(ch4_data) == 34
+
+    assert data.time[0] == Timestamp("1998-09-08T22:10:00")
+    assert data["value"][0] == pytest.approx(1.84641e-06)
+    assert data["nvalue"][0] == 2.0
+    assert data["value_std_dev"][0] == pytest.approx(8.34386e-10)
 
 
 def test_read_thames_barrier():

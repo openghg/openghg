@@ -7,7 +7,16 @@ __all__ = ["BEACO2N"]
 class BEACO2N:
     """Read BEACO2N data files"""
 
-    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, **kwargs) -> Dict:
+    def read_file(
+        self,
+        data_filepath: Union[str, Path],
+        site: Optional[str] = None,
+        network: Optional[str] = None,
+        inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+        measurement_type: Optional[str] = None,
+    ) -> Dict:
         """Read BEACO2N data files
 
         Args:
