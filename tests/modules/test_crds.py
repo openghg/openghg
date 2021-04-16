@@ -33,7 +33,7 @@ def test_read_file():
 
     crds = CRDS()
 
-    gas_data = crds.read_file(data_filepath=hfd_filepath)
+    gas_data = crds.read_file(data_filepath=hfd_filepath, site="hfd", network="DECC")
 
     ch4_data = gas_data["ch4"]["data"]
     co2_data = gas_data["co2"]["data"]

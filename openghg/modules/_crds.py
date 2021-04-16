@@ -21,8 +21,8 @@ class CRDS:
     def read_file(
         self,
         data_filepath: Union[str, Path],
-        site: Optional[str] = None,
-        network: Optional[str] = None,
+        site: str,
+        network: str,
         inlet: Optional[str] = None,
         instrument: Optional[str] = None,
         sampling_period: Optional[str] = None,
@@ -46,27 +46,31 @@ class CRDS:
         from pathlib import Path
         import warnings
         from openghg.processing import assign_attributes
-        from openghg.util import compliant_string
+        from openghg.util import clean_string
 
         if not isinstance(data_filepath, Path):
             data_filepath = Path(data_filepath)
 
-        if not site:
-            site = data_filepath.stem.split(".")[0]
+        split_fname = data_filepath.stem.split(".")
+
+        # Do some sanity checks to see if we've got different data passed in to that read from
+        # the file
+        fname_site = clean_string(split_fname[0])
+        fname_inlet = clean_string(split_fname[3])
+
+        if fname_site != site:
+            raise ValueError("Site mismatch between passed site code and that read from filename.")
+
+        if "m" not in fname_inlet:
+            raise ValueError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
+
+        if inlet is not None and fname_inlet != inlet:
+            raise ValueError("Inlet mismatch between passed inlet and that read from filename.")
 
         if sampling_period is not None:
             samp_period = sampling_period
         else:
             samp_period = self._sampling_period
-
-        # At the moment we're using the filename as the source name
-        source_name = data_filepath.stem
-        # -1 here as we've already removed the file extension
-        # As we're not processing a list of datafiles here we'll only have one inlet
-        inlet = source_name.split(".")[3]
-
-        if "m" not in inlet.lower():
-            raise ValueError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
 
         # Function to parse the datetime format found in the datafile
         def parse_date(date):
@@ -103,9 +107,6 @@ class CRDS:
 
         metadata = self.read_metadata(filepath=data_filepath, data=data)
 
-        if network is not None:
-            metadata["network"] = network
-
         # Read the scale from JSON
         crds_data = load_json(filename="process_gcwerks_parameters.json")
 
@@ -141,7 +142,7 @@ class CRDS:
             scale = crds_data["CRDS"]["default_scales"].get(species.upper())
 
             species_metadata = metadata.copy()
-            species_metadata["species"] = compliant_string(species)
+            species_metadata["species"] = clean_string(species)
             species_metadata["inlet"] = inlet
             species_metadata["scale"] = scale
 
@@ -155,22 +156,6 @@ class CRDS:
         gas_data = assign_attributes(data=combined_data, site=site, sampling_period=samp_period)
 
         return gas_data
-
-    def read_data(self, data_filepath: Path, site: str, network: str) -> Dict:
-        """Separates the gases stored in the dataframe in
-        separate dataframes and returns a dictionary of gases
-        with an assigned UUID as gas:UUID and a list of the processed
-        dataframes
-
-        Args:
-            data_filepath (pathlib.Path): Path of datafile
-        Returns:
-            dict: Dictionary containing metadata, data and attributes keys
-        """
-
-        
-
-        return combined_data
 
     def read_metadata(self, filepath: Path, data: DataFrame) -> Dict:
         """Parse CRDS files and create a metadata dict
@@ -236,7 +221,7 @@ class CRDS:
         except KeyError:
             raise ValueError(f"Unable to read attributes for site: {site}")
 
-        attributes["inlet_height_magl"] = inlet.split("_")[0]
+        attributes["inlet_height_magl"] = inlet
         attributes["comment"] = self._crds_params["comment"]
 
         return attributes
