@@ -41,8 +41,12 @@ class CRDS:
         Returns:
             dict: Dictionary of gas data
         """
+        from datetime import datetime
+        from pandas import RangeIndex, read_csv, NaT
         from pathlib import Path
+        import warnings
         from openghg.processing import assign_attributes
+        from openghg.util import compliant_string
 
         if not isinstance(data_filepath, Path):
             data_filepath = Path(data_filepath)
@@ -54,29 +58,6 @@ class CRDS:
             samp_period = sampling_period
         else:
             samp_period = self._sampling_period
-
-        # Process the data into separate Datasets
-        gas_data = self.read_data(data_filepath=data_filepath, site=site, network=network)
-        # Ensure the data is CF compliant
-        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=samp_period)
-
-        return gas_data
-
-    def read_data(self, data_filepath: Path, site: str, network: str) -> Dict:
-        """Separates the gases stored in the dataframe in
-        separate dataframes and returns a dictionary of gases
-        with an assigned UUID as gas:UUID and a list of the processed
-        dataframes
-
-        Args:
-            data_filepath (pathlib.Path): Path of datafile
-        Returns:
-            dict: Dictionary containing metadata, data and attributes keys
-        """
-        from datetime import datetime
-        from pandas import RangeIndex, read_csv, NaT
-        import warnings
-        from openghg.util import compliant_string
 
         # At the moment we're using the filename as the source name
         source_name = data_filepath.stem
@@ -169,6 +150,25 @@ class CRDS:
                 "data": gas_data,
                 "attributes": site_attributes,
             }
+
+        # Ensure the data is CF compliant
+        gas_data = assign_attributes(data=combined_data, site=site, sampling_period=samp_period)
+
+        return gas_data
+
+    def read_data(self, data_filepath: Path, site: str, network: str) -> Dict:
+        """Separates the gases stored in the dataframe in
+        separate dataframes and returns a dictionary of gases
+        with an assigned UUID as gas:UUID and a list of the processed
+        dataframes
+
+        Args:
+            data_filepath (pathlib.Path): Path of datafile
+        Returns:
+            dict: Dictionary containing metadata, data and attributes keys
+        """
+
+        
 
         return combined_data
 
