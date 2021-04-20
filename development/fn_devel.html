@@ -4,10 +4,11 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Fn Development &mdash; OpenGHG 0+untagged.1.g66ead7f documentation</title>
+  <title>Fn Development &mdash; OpenGHG 0+untagged.1.g24f4552 documentation</title>
   
 
   
@@ -220,17 +221,17 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="fn-development">
+<section id="fn-development">
 <h1>Fn Development<a class="headerlink" href="#fn-development" title="Permalink to this headline">¶</a></h1>
 <p>Fn is an open-source framework for creating a Functions-as-a-Service (FaaS) compute platform. In real terms this means
 we make a HTTP POST call to our Fn server, ask it to call a function which then returns a result.</p>
-<div class="section" id="getting-setup">
+<section id="getting-setup">
 <h2>Getting setup<a class="headerlink" href="#getting-setup" title="Permalink to this headline">¶</a></h2>
 <p>To run through this tutorial you must have both Docker and Fn.</p>
 <p>For Docker installation instructions please visit <a class="reference external" href="https://docs.docker.com/get-docker/">the Docker installation instruction</a>.</p>
 <p>To install Fn follow the instructions for your operating system given on <a class="reference external" href="https://github.com/fnproject/fn">their GitHub repo</a>.</p>
-</div>
-<div class="section" id="starting-fn">
+</section>
+<section id="starting-fn">
 <h2>Starting Fn<a class="headerlink" href="#starting-fn" title="Permalink to this headline">¶</a></h2>
 <p>As we’ll be developing functions locally we’ll want to start up an instance of <code class="docutils literal notranslate"><span class="pre">Fn</span></code> to allow us to run (invoke) the functions
 we build. During development setting the log level of <code class="docutils literal notranslate"><span class="pre">Fn</span></code> to <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code> is highly recommended. This pipes errors that may occur
@@ -244,8 +245,8 @@ within the containers to the terminal. Without setting the log level the only er
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn start
 </pre></div>
 </div>
-</div>
-<div class="section" id="first-function">
+</section>
+<section id="first-function">
 <h2>First function<a class="headerlink" href="#first-function" title="Permalink to this headline">¶</a></h2>
 <p>To call functions within OpenGHG we use a routing function with Fn. This function (link to route.py) routes calls made to
 our Fn triggers (more on triggers later). To setup a function we first need to create an app. To do this we use</p>
@@ -261,7 +262,7 @@ func.py  func.yaml  requirements.txt
 </div>
 <p>Here <code class="docutils literal notranslate"><span class="pre">func.py</span></code> is the function we’re going to call, <code class="docutils literal notranslate"><span class="pre">func.yaml</span></code> tells Fn how to setup and run the function and <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>
 contains the Python requirements and is used when a Docker image is built for the function.</p>
-<div class="section" id="function-code">
+<section id="function-code">
 <h3>Function code<a class="headerlink" href="#function-code" title="Permalink to this headline">¶</a></h3>
 <p>First we’ll modify <code class="docutils literal notranslate"><span class="pre">func.py</span></code> to contain a simple response to being called. Paste the following into <code class="docutils literal notranslate"><span class="pre">func.py</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">io</span>
@@ -280,8 +281,8 @@ contains the Python requirements and is used when a Docker image is built for th
     <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">response_data</span><span class="o">=</span><span class="n">return_str</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="function-parameters">
+</section>
+<section id="function-parameters">
 <h3>Function parameters<a class="headerlink" href="#function-parameters" title="Permalink to this headline">¶</a></h3>
 <p>Next we’ll modify <code class="docutils literal notranslate"><span class="pre">func.yaml</span></code> to contain</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">schema_version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">20180708</span>
@@ -300,8 +301,8 @@ As each function needs to be part of an app we create an app called <code class=
 </pre></div>
 </div>
 <p>We’re now ready to deploy our function and call it.</p>
-</div>
-<div class="section" id="deployment">
+</section>
+<section id="deployment">
 <h3>Deployment<a class="headerlink" href="#deployment" title="Permalink to this headline">¶</a></h3>
 <p>To deploy the app we can run</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn --verbose deploy --local
@@ -317,8 +318,8 @@ Successfully created <span class="k">function</span>: openghg_fn with openghg_fn
 </pre></div>
 </div>
 <p>Don’t worry if some values are slightly different here.</p>
-</div>
-<div class="section" id="call">
+</section>
+<section id="call">
 <h3>Call<a class="headerlink" href="#call" title="Permalink to this headline">¶</a></h3>
 <p>You should then be able to invoke / call the function using</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer openghg_fn<span class="o">]</span>$ fn invoke openghg openghg_fn
@@ -349,9 +350,9 @@ call the function like so</p>
 <span class="o">{</span><span class="s2">&quot;message&quot;</span>: <span class="s2">&quot;Hello from OpenGHG&quot;</span><span class="o">}</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="dockerise">
+</section>
+</section>
+<section id="dockerise">
 <h2>Dockerise<a class="headerlink" href="#dockerise" title="Permalink to this headline">¶</a></h2>
 <p>As our functions will be more complex than the example given above we need to create our own custom Docker image.
 To create our own Docker image for the function we’ve created above create a <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> in the <code class="docutils literal notranslate"><span class="pre">openghg_fn</span></code> folder
@@ -399,15 +400,15 @@ trigger/invoke/call are all used interchangeably here.</p>
 </pre></div>
 </div>
 <p>Now we have an understanding of how Fn works and how to create functions and call them we will cover the functions available in OpenGHG.</p>
-</div>
-<div class="section" id="openghg-functions">
+</section>
+<section id="openghg-functions">
 <h2>OpenGHG functions<a class="headerlink" href="#openghg-functions" title="Permalink to this headline">¶</a></h2>
 <p>With OpenGHG we use a single routing function to route calls to a number of separate functions. This routing function can be found
 in <code class="docutils literal notranslate"><span class="pre">services/route.py</span></code>. To use this routing function we first need to setup a Docker container within which we can perform the
 computation and return the data to the caller. As OpenGHG requires a number of packages we use a two step build process.
 First we create a base image, called <code class="docutils literal notranslate"><span class="pre">openghg-base</span></code> which contains all the requirements for OpenGHG. We then use this base image
 to create a second image, called <code class="docutils literal notranslate"><span class="pre">openghg-complete</span></code>, into which we copy our OpenGHG library code and services/function code.</p>
-<div class="section" id="base-image">
+<section id="base-image">
 <h3>Base image<a class="headerlink" href="#base-image" title="Permalink to this headline">¶</a></h3>
 <p>First we’ll look at the base image which can be found in <code class="docutils literal notranslate"><span class="pre">docker/base_image</span></code>. This folder contains a Python script
 that makes building the image easier and a Dockerfile.</p>
@@ -438,8 +439,8 @@ with a fresh image and copy only the contents of <code class="docutils literal n
 </div>
 <p>This will build a Docker image with the tag <code class="docutils literal notranslate"><span class="pre">openghg/openghg-base:latest</span></code>. To see the available options when building the image
 run the command above with <code class="docutils literal notranslate"><span class="pre">-h</span></code>.</p>
-</div>
-<div class="section" id="complete-image">
+</section>
+<section id="complete-image">
 <h3>Complete image<a class="headerlink" href="#complete-image" title="Permalink to this headline">¶</a></h3>
 <p>Now we’ve built the base image we can build the complete image containing the OpenGHG library and services code. The files to build this image
 can be found in <code class="docutils literal notranslate"><span class="pre">docker/</span></code>. It contains <code class="docutils literal notranslate"><span class="pre">func.yaml</span></code> which tells Fn how to run our function. The <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> (shown below) uses
@@ -505,13 +506,13 @@ functions to Fn run</p>
 </div>
 <p><strong>Note</strong> - if you’ve made changes to either <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> or <code class="docutils literal notranslate"><span class="pre">requirements-server.txt</span></code> you’ll need to do a rebuild of the base
 image. This ensures all dependencies are installed in the base image.</p>
-</div>
-</div>
-<div class="section" id="calling-from-openghg">
+</section>
+</section>
+<section id="calling-from-openghg">
 <h2>Calling from OpenGHG<a class="headerlink" href="#calling-from-openghg" title="Permalink to this headline">¶</a></h2>
 <p>For information on how we’ve setup calling functions from OpenGHG please see the <a class="reference internal" href="fn_usage.html"><span class="doc">Fn usage</span></a> section of the documentation.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
