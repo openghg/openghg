@@ -4,11 +4,10 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Packaging releases &mdash; OpenGHG 0+untagged.1.gcd0ad45 documentation</title>
+  <title>Packaging releases &mdash; OpenGHG 0+untagged.1.gee4c275 documentation</title>
   
 
   
@@ -192,7 +191,7 @@
     text-align: unset;
 }
 </style>
-<section id="packaging-releases">
+<div class="section" id="packaging-releases">
 <h1>Packaging releases<a class="headerlink" href="#packaging-releases" title="Permalink to this headline">¶</a></h1>
 <p>Pack and Doc is now fully tested and deployed using GitHub actions.
 The development process should be;</p>
@@ -210,15 +209,15 @@ request can be merged into <code class="docutils literal notranslate"><span clas
 <p>The result of this is that “devel” should contain the fully-working and
 tested, and most up-to-date version of <code class="docutils literal notranslate"><span class="pre">pack</span> <span class="pre">and</span> <span class="pre">doc</span></code>. However, this
 version should not be used for production runs.</p>
-<section id="defining-a-release">
+<div class="section" id="defining-a-release">
 <h2>Defining a release<a class="headerlink" href="#defining-a-release" title="Permalink to this headline">¶</a></h2>
 <p>We will release <code class="docutils literal notranslate"><span class="pre">pack</span> <span class="pre">and</span> <span class="pre">doc</span></code> regularly. Releases aim to be backwards
 compatible and capable of being used for production runs, at least for
 the functionality that is fully described in the tutorial.</p>
 <p>We use <a class="reference external" href="https://semver.org">semantic versioning</a> and take care
 not to cause breaking changes in the public API.</p>
-</section>
-<section id="creating-a-release">
+</div>
+<div class="section" id="creating-a-release">
 <h2>Creating a release<a class="headerlink" href="#creating-a-release" title="Permalink to this headline">¶</a></h2>
 <p>To create a release first checkout the “main” branch.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout main
@@ -248,8 +247,8 @@ release and updated, e.g.</p>
 <p>This will trigger a CI/CD run which will build and test everything on
 Windows, Mac and Linux for Python 3.7 and 3.8. Everything should work,
 as “devel” should have been in a release-ready state.</p>
-</section>
-<section id="testing-the-packages">
+</div>
+<div class="section" id="testing-the-packages">
 <h2>Testing the packages<a class="headerlink" href="#testing-the-packages" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://github.com/metawards/MetaWards/actions">GitHub actions</a> will
 produce the source and binary wheels for <code class="docutils literal notranslate"><span class="pre">metawards</span></code> on all supported
@@ -282,8 +281,8 @@ pytest tests
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rm dist/*
 </pre></div>
 </div>
-</section>
-<section id="tagging-a-new-release">
+</div>
+<div class="section" id="tagging-a-new-release">
 <h2>Tagging a new release<a class="headerlink" href="#tagging-a-new-release" title="Permalink to this headline">¶</a></h2>
 <p>Now that you are happy that the release is ready, you can tag the new
 version. Do this using the <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">tag</span></code> command, e.g.</p>
@@ -306,8 +305,8 @@ that is included in the package to tag versions.</p>
 <p>This will also trigger a full CI/CD to test and build the new version.
 Again, it should work as this tag was taken from your fully-tested
 “main” branch.</p>
-</section>
-<section id="uploading-packages-to-pypi">
+</div>
+<div class="section" id="uploading-packages-to-pypi">
 <h2>Uploading packages to pypi<a class="headerlink" href="#uploading-packages-to-pypi" title="Permalink to this headline">¶</a></h2>
 <p>While you are waiting for the CI/CD GitHub Actions to complete, make sure
 that your version of twine is fully up to date;</p>
@@ -340,8 +339,8 @@ permission to upload code to this project. Currently only
 the release manager has permission. If you would like
 join the release management team then please get in touch.</p>
 </div>
-</section>
-<section id="testing-the-final-release">
+</div>
+<div class="section" id="testing-the-final-release">
 <h2>Testing the final release<a class="headerlink" href="#testing-the-final-release" title="Permalink to this headline">¶</a></h2>
 <p>Finally(!) test the release on a range of different machines by logging
 in and typing;</p>
@@ -354,8 +353,8 @@ in and typing;</p>
 </div>
 <p>Play with the code, run the tests and run some examples. Everything should
 work as you have performed lots of prior testing to get to this stage.</p>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
