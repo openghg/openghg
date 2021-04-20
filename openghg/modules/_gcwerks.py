@@ -319,11 +319,12 @@ class GCWERKS:
                 )
 
             # For now just add air to the expected inlets
-            expected_inlets.append("air")
+            expected_inlets["air"] = "air"
 
-            matching_inlets = [
-                data_inlet for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)
-            ]
+            # Make a mapping of the inlet we have in the data to the one we want to use
+            matching_inlets = {
+                data_inlet: expected_inlets[inlet] for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)
+            }
 
             if not matching_inlets:
                 raise ValueError(
@@ -345,8 +346,9 @@ class GCWERKS:
             spec_metadata["units"] = units[spec]
             spec_metadata["scale"] = scale[spec]
 
-            for inlet in matching_inlets:
-                spec_metadata["inlet"] = inlet
+            # Here inlet is the inlet in the data and inlet_label is the label we want to use as metadata
+            for inlet, inlet_label in matching_inlets.values():
+                spec_metadata["inlet"] = inlet_label
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
                     spec_data = data[[spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]]
@@ -405,7 +407,7 @@ class GCWERKS:
         then retrieve the precision of that instrument.
 
         Args:
-            instrument (str): Instrument name
+            instrument: Instrument name
         Returns:
             int: Precision of instrument in seconds
         """
@@ -418,21 +420,32 @@ class GCWERKS:
 
         return sampling_period
 
-    def get_inlets(self, site_code: str) -> List:
-        """Get the inlets used at this site
+    def get_inlets(self, site_code: str) -> Dict:
+        """Get the inlets we expect to be at this site and create a
+        mapping dictionary so we get consistent labelling.
 
         Args:
-            site (str): Site of datasources
+            site: Site code
         Returns:
-            list: List of inlets
+            dict: Mapping dictionary of inlet and required inlet label
         """
-        return self._gc_params[site_code.upper()]["inlets"]
+        site = site_code.upper()
+        # Create a mapping of inlet to match to the inlet label
+        inlets = self._gc_params[site]["inlets"]
+        try:
+            inlet_labels = self._gc_params[site]["inlet_label"]
+        except KeyError:
+            inlet_labels = inlets
+
+        mapping_dict = {k: v for k, v in zip(inlets, inlet_labels)}
+
+        return mapping_dict
 
     def get_site_code(self, site: str) -> str:
         """Get the site code
 
         Args:
-            site (str): Name of site
+            site: Name of site
         Returns:
             str: Site code
         """
@@ -447,8 +460,8 @@ class GCWERKS:
         """Gets the site specific attributes for writing to Datsets
 
         Args:
-            site (str): Site name
-            inlet (str): Inlet (example: 108m)
+            site: Site code
+            inlet: Inlet (example: 108m)
         Returns:
             dict: Dictionary of attributes
         """
