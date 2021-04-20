@@ -18,7 +18,14 @@ class BTT(BaseModule):
         self._params = data["BTT"]
 
     def read_file(
-        self, data_filepath: Union[str, Path], site: Optional[str] = "BTT", network: Optional[str] = "LGHG"
+        self,
+        data_filepath: Union[str, Path],
+        site: Optional[str] = "BTT",
+        network: Optional[str] = "LGHG",
+        inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+        measurement_type: Optional[str] = None,
     ) -> Dict:
         """Reads NPL data files and returns the UUIDS of the Datasources
         the processed data has been assigned to

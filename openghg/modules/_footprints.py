@@ -12,24 +12,6 @@ class FOOTPRINTS(BaseModule):
     _root = "Footprints"
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
 
-    def __init__(self):
-        from Acquire.ObjectStore import get_datetime_now
-        from collections import defaultdict
-
-        self._creation_datetime = get_datetime_now()
-        self._stored = False
-
-        # We want to created a nested dictionary
-        def nested_dict():
-            return defaultdict(nested_dict)
-
-        # Stores metadata about the Datasource, keyed by site
-        self._datasource_table = nested_dict()
-        # Hashes of previously uploaded files
-        self._file_hashes = {}
-        # Keyed by UUID
-        self._rank_data = defaultdict(dict)
-
     @staticmethod
     def read_file(
         filepath: Union[str, Path],
@@ -131,25 +113,6 @@ class FOOTPRINTS(BaseModule):
         fp.save()
 
         return {str(filepath.name): uid}
-
-    def to_data(self) -> Dict:
-        """ Return a JSON-serialisable dictionary of object
-        for storage in object store
-
-        Returns:
-            dict: Dictionary version of object
-        """
-        from Acquire.ObjectStore import datetime_to_string
-
-        data = {}
-        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_uuids"] = self._datasource_uuids
-        data["datasource_names"] = self._datasource_names
-        data["file_hashes"] = self._file_hashes
-        data["rank_data"] = self._rank_data
-
-        return data
 
     def save(self) -> None:
         """ Save the object to the object store

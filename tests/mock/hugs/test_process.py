@@ -146,8 +146,6 @@ def test_process_CRDS(authenticated_user, tempdir):
 
     results = response["results"]["bsd.picarro.1minute.248m.dat"]
 
-    return False
-
     assert sorted(results.keys()) == expected_keys
 
 

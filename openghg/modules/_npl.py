@@ -17,7 +17,16 @@ class NPL(BaseModule):
         data = load_json(filename="attributes.json")
         self._params = data["NPL"]
 
-    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = "NPL", network: Optional[str] = "LGHG") -> Dict:
+    def read_file(
+        self,
+        data_filepath: Union[str, Path],
+        site: Optional[str] = "NPL",
+        network: Optional[str] = "LGHG",
+        inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+        measurement_type: Optional[str] = None,
+    ) -> Dict:
         """Reads NPL data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 

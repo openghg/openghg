@@ -15,45 +15,6 @@ class METStore(BaseModule):
     _root = "METStore"
     _uuid = "9fcabd0c-9b68-4ab4-a116-bc30a4472d67"
 
-    def __init__(self):
-        from Acquire.ObjectStore import get_datetime_now
-        from collections import defaultdict
-
-        self._creation_datetime = get_datetime_now()
-        self._stored = False
-
-        # We want to created a nested dictionary
-        def nested_dict():
-            return defaultdict(nested_dict)
-
-        self._datasource_table = nested_dict()
-        # Keyed by name - allows retrieval of UUID from name
-        self._datasource_names = {}  
-        # Keyed by UUID - allows retrieval of name by UUID
-        self._datasource_uuids = {}
-        # Hashes of retrieved data to ensure we aren't overwriting / duplicating
-        # already stored data. Keyed by hash
-        self._hashes = {}
-
-    def to_data(self) -> Dict:
-        """Return a JSON-serialisable dictionary of object
-        for storage in object store
-
-        Returns:
-            dict: Dictionary version of object
-        """
-        from Acquire.ObjectStore import datetime_to_string
-
-        data = {}
-        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_table"] = self._datasource_table
-        data["datasource_uuids"] = self._datasource_uuids
-        data["datasource_names"] = self._datasource_names
-        data["file_hashes"] = self._hashes
-
-        return data
-
     def save(self, bucket: Optional[Dict] = None) -> None:
         """Save the object to the object store
 

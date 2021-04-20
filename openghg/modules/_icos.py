@@ -11,7 +11,16 @@ class ICOS:
         # Sampling period of ICOS data in seconds
         self._sampling_period = "NA"
 
-    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, network: Optional[str] = None) -> Dict:
+    def read_file(
+        self,
+        data_filepath: Union[str, Path],
+        site: Optional[str] = None,
+        network: Optional[str] = None,
+        inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+        measurement_type: Optional[str] = None,
+    ) -> Dict:
         """Reads ICOS data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 
