@@ -68,8 +68,8 @@ class GCWERKS:
         self,
         data_filepath: Union[str, Path],
         precision_filepath: Union[str, Path],
-        site: Optional[str] = None,
-        network: Optional[str] = None,
+        site: str,
+        network: str,
         inlet: Optional[str] = None,
         instrument: Optional[str] = None,
         sampling_period: Optional[str] = None,
@@ -88,19 +88,13 @@ class GCWERKS:
         """
         from pathlib import Path
         from openghg.processing import assign_attributes
-        from openghg.util import is_number
+        from openghg.util import is_number, valid_site
         import re
 
         data_filepath = Path(data_filepath)
 
-        if site is None:
-            # Read from the filename
-            site_name = re.findall(r"[\w']+", data_filepath.stem)[0]
-            site = self.get_site_code(site_name)
-
-        # We need to have the 3 character site code here
-        if len(site) != 3:
-            site = self.get_site_code(site)
+        if not valid_site(site):
+            raise ValueError(f"Invalid site {site} passed.")
 
         # Try and find the instrument name in the filename
         if instrument is None:
@@ -313,7 +307,7 @@ class GCWERKS:
         # Read inlets from the parameters dictionary
         expected_inlets = self.get_inlets(site_code=site)
 
-        if len(expected_inlets) == 1 and expected_inlets[0] == "any":
+        if len(expected_inlets) == 1 and next(iter(expected_inlets)) == "any":
             matching_inlets = expected_inlets
         else:
             # Get the inlets in the dataframe
@@ -325,11 +319,12 @@ class GCWERKS:
                 )
 
             # For now just add air to the expected inlets
-            expected_inlets.append("air")
+            expected_inlets["air"] = "air"
 
-            matching_inlets = [
-                data_inlet for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)
-            ]
+            # Make a mapping of the inlet we have in the data to the one we want to use
+            matching_inlets = {
+                data_inlet: expected_inlets[inlet] for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)
+            }
 
             if not matching_inlets:
                 raise ValueError(
@@ -351,8 +346,9 @@ class GCWERKS:
             spec_metadata["units"] = units[spec]
             spec_metadata["scale"] = scale[spec]
 
-            for inlet in matching_inlets:
-                spec_metadata["inlet"] = inlet
+            # Here inlet is the inlet in the data and inlet_label is the label we want to use as metadata
+            for inlet, inlet_label in matching_inlets.items():
+                spec_metadata["inlet"] = inlet_label
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
                     spec_data = data[[spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]]
@@ -375,11 +371,14 @@ class GCWERKS:
 
                     spec_data = spec_data.dropna(axis="index", how="any")
 
+                # Now we drop the inlet column
+                spec_data = spec_data.drop("Inlet", axis="columns")
+
                 # Check that the Dataframe has something in it
                 if spec_data.empty:
                     continue
 
-                attributes = self.get_site_attributes(site=site, inlet=inlet, instrument=instrument)
+                attributes = self.get_site_attributes(site=site, inlet=inlet_label, instrument=instrument)
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
@@ -397,7 +396,7 @@ class GCWERKS:
 
                 # As a single species may have measurements from multiple inlets we
                 # use the species and inlet as a key
-                data_key = f"{comp_species}_{inlet}"
+                data_key = f"{comp_species}_{inlet_label}"
 
                 combined_data[data_key] = {}
                 combined_data[data_key]["metadata"] = spec_metadata
@@ -411,7 +410,7 @@ class GCWERKS:
         then retrieve the precision of that instrument.
 
         Args:
-            instrument (str): Instrument name
+            instrument: Instrument name
         Returns:
             int: Precision of instrument in seconds
         """
@@ -424,21 +423,32 @@ class GCWERKS:
 
         return sampling_period
 
-    def get_inlets(self, site_code: str) -> List:
-        """Get the inlets used at this site
+    def get_inlets(self, site_code: str) -> Dict:
+        """Get the inlets we expect to be at this site and create a
+        mapping dictionary so we get consistent labelling.
 
         Args:
-            site (str): Site of datasources
+            site: Site code
         Returns:
-            list: List of inlets
+            dict: Mapping dictionary of inlet and required inlet label
         """
-        return self._gc_params[site_code.upper()]["inlets"]
+        site = site_code.upper()
+        # Create a mapping of inlet to match to the inlet label
+        inlets = self._gc_params[site]["inlets"]
+        try:
+            inlet_labels = self._gc_params[site]["inlet_label"]
+        except KeyError:
+            inlet_labels = inlets
+
+        mapping_dict = {k: v for k, v in zip(inlets, inlet_labels)}
+
+        return mapping_dict
 
     def get_site_code(self, site: str) -> str:
         """Get the site code
 
         Args:
-            site (str): Name of site
+            site: Name of site
         Returns:
             str: Site code
         """
@@ -453,8 +463,8 @@ class GCWERKS:
         """Gets the site specific attributes for writing to Datsets
 
         Args:
-            site (str): Site name
-            inlet (str): Inlet (example: 108m)
+            site: Site code
+            inlet: Inlet label (example: 108m)
         Returns:
             dict: Dictionary of attributes
         """
