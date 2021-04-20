@@ -4,10 +4,11 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Development &mdash; OpenGHG 0+untagged.1.g115e4bd documentation</title>
+  <title>Development &mdash; OpenGHG 0+untagged.1.gcd0ad45 documentation</title>
   
 
   
@@ -219,14 +220,14 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="development">
+<section id="development">
 <h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
 <p>The source code for OpenGHG is available on <a class="reference external" href="https://github.com/openghg/openghg">GitHub</a>.</p>
-<div class="section" id="setting-up-your-computer">
+<section id="setting-up-your-computer">
 <h2>Setting up your computer<a class="headerlink" href="#setting-up-your-computer" title="Permalink to this headline">¶</a></h2>
 <p>OpenGHG requires Python &gt;= 3.7, so please install this before continuing
 further.</p>
-<div class="section" id="virtual-environment">
+<section id="virtual-environment">
 <h3>Virtual environment<a class="headerlink" href="#virtual-environment" title="Permalink to this headline">¶</a></h3>
 <p>It is recommended that you develop OpenGHG in a Python
 <a class="reference external" href="https://docs.python.org/3/tutorial/venv.html">virtual environment</a>.
@@ -249,8 +250,8 @@ deactivate the environment and return to your system Python using;</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>deactivate
 </pre></div>
 </div>
-</div>
-<div class="section" id="clone-openghg">
+</section>
+<section id="clone-openghg">
 <h3>Clone OpenGHG<a class="headerlink" href="#clone-openghg" title="Permalink to this headline">¶</a></h3>
 <p>As OpenGHG is currently in its very early stages and is not yet available on <code class="docutils literal notranslate"><span class="pre">pip</span></code> we need
 clone the OpenGHG repository and then move into it and install the required dependencies.</p>
@@ -261,16 +262,16 @@ pip install -r requirements-dev.txt
 </pre></div>
 </div>
 <p>OpenGHG should now be installed within your virtual environment.</p>
-</div>
-<div class="section" id="run-tests">
+</section>
+<section id="run-tests">
 <h3>Run tests<a class="headerlink" href="#run-tests" title="Permalink to this headline">¶</a></h3>
 <p>To ensure everything is working on your system running the tests is a good idea. To do this run</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest -v tests
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="coding-style">
+</section>
+</section>
+<section id="coding-style">
 <h2>Coding Style<a class="headerlink" href="#coding-style" title="Permalink to this headline">¶</a></h2>
 <p>OpenGHG is written in Python 3 (&gt;= 3.7). We aim as much as possible to follow a
 <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">PEP8</a> python coding style and
@@ -279,7 +280,7 @@ recommend that use a linter such as <a class="reference external" href="https://
 systems and machines - some of which don’t have any graphic libraries,
 so please be careful when adding a dependency.</p>
 <p>With this in mind, we use the following coding conventions:</p>
-<div class="section" id="naming">
+<section id="naming">
 <h3>Naming<a class="headerlink" href="#naming" title="Permalink to this headline">¶</a></h3>
 <p>We follow a Python style naming convention.</p>
 <ul class="simple">
@@ -293,8 +294,8 @@ so please be careful when adding a dependency.</p>
 <p>Functions or variables that are private should be named with a leading
 underscore. This prevents them from being prominantly visible in Python’s
 help and tab completion.</p>
-</div>
-<div class="section" id="modules">
+</section>
+<section id="modules">
 <h3>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h3>
 <p>OpenGHG consists of the main module, e.g. <code class="docutils literal notranslate"><span class="pre">openghg</span></code>, plus
 a <code class="docutils literal notranslate"><span class="pre">openghg.submodule</span></code> module.</p>
@@ -326,8 +327,8 @@ exposed names. This greatly improves the clarity of the package, allowing
 a new user to quickly determine the available functionality. Any user wishing
 expose further implementation detail can, of course, type an underscore to
 show the hidden names when searching.</p>
-</div>
-<div class="section" id="type-hinting">
+</section>
+<section id="type-hinting">
 <h3>Type hinting<a class="headerlink" href="#type-hinting" title="Permalink to this headline">¶</a></h3>
 <p>Throughout the OpenGHG project we use type hinting which allows us to declare the type of the objects
 that are going to be passed to and returned from functions. This helps improve user understanding of the code
@@ -357,11 +358,11 @@ catch bugs.</p>
     <span class="c1"># some excellent code</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="workflow">
+</section>
+</section>
+<section id="workflow">
 <h2>Workflow<a class="headerlink" href="#workflow" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="feature-branches">
+<section id="feature-branches">
 <h3>Feature branches<a class="headerlink" href="#feature-branches" title="Permalink to this headline">¶</a></h3>
 <p>First make sure that you are on the development branch of OpenGHG:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout devel
@@ -372,9 +373,9 @@ catch bugs.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout -b feature-process
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="testing">
+</section>
+</section>
+<section id="testing">
 <h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
 <p>When working on your feature it is important to write tests to ensure that it
 does what is expected and doesn’t break any existing functionality. All code added to the
@@ -399,7 +400,7 @@ or end with <em>test</em>, e.g.:</p>
 </pre></div>
 </div>
 <p>We use the convention of <code class="docutils literal notranslate"><span class="pre">test_*</span></code> when naming files and functions.</p>
-<div class="section" id="running-tests">
+<section id="running-tests">
 <h3>Running tests<a class="headerlink" href="#running-tests" title="Permalink to this headline">¶</a></h3>
 <p>To run the full test suite, simply type:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest tests
@@ -412,17 +413,17 @@ or end with <em>test</em>, e.g.:</p>
 </div>
 <p>For more information on the capabilties of <code class="docutils literal notranslate"><span class="pre">pytest</span></code> please see the
 <a class="reference external" href="https://docs.pytest.org/en/stable/contents.html">pytest documentation</a>.</p>
-</div>
-<div class="section" id="continuous-integration-and-delivery">
+</section>
+<section id="continuous-integration-and-delivery">
 <h3>Continuous integration and delivery<a class="headerlink" href="#continuous-integration-and-delivery" title="Permalink to this headline">¶</a></h3>
 <p>We use GitHub Actions to run a full continuous integration (CI)
 on all pull requests to devel and
 master, and all pushes to devel and master. We will not merge a pull
 request until all tests pass. We only accept pull requests to devel.
 We only allow pull requests from devel to master. In addition to CI,</p>
-</div>
-</div>
-<div class="section" id="documentation">
+</section>
+</section>
+<section id="documentation">
 <h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
 <p>OpenGHG is fully documented using a combination of hand-written files
 (in the <code class="docutils literal notranslate"><span class="pre">doc</span></code> folder) and auto-generated api documentation created from
@@ -449,8 +450,8 @@ This allows the library to be used easily without the need for reinstallation af
 </pre></div>
 </div>
 <p>When finished, point your browser to <code class="docutils literal notranslate"><span class="pre">build/html/index.html</span></code>.</p>
-</div>
-<div class="section" id="committing">
+</section>
+<section id="committing">
 <h2>Committing<a class="headerlink" href="#committing" title="Permalink to this headline">¶</a></h2>
 <p>If you create new tests, please make sure that they pass locally before
 commiting. When happy, commit your changes, e.g.</p>
@@ -479,8 +480,8 @@ git push fork feature
 changes can be merged back into the development branch.
 For information, see the documentation
 <a class="reference external" href="https://help.github.com/articles/about-pull-requests">here</a>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
