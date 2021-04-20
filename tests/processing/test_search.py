@@ -67,7 +67,7 @@ def test_search_gc():
         "species": "nf3",
         "units": "ppt",
         "scale": "sio-12",
-        "inlet": "75m_4",
+        "inlet": "70m",
         "data_type": "timeseries",
         "network": "agage",
     }

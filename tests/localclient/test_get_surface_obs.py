@@ -110,7 +110,7 @@ def test_gcwerks_retrieval():
     expected_metadata = {
         "data_owner": "Paul Krummel",
         "data_owner_email": "paul.krummel@csiro.au",
-        "inlet_height_magl": "75m_4",
+        "inlet_height_magl": "70m",
         "comment": "Medusa measurements. Output from GCWerks. See Miller et al. (2008).",
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
@@ -126,7 +126,7 @@ def test_gcwerks_retrieval():
         "network": "agage",
         "units": "ppt",
         "scale": "SIO-05",
-        "inlet": "75m_4",
+        "inlet": "70m",
     }
 
     assert metadata == expected_metadata
