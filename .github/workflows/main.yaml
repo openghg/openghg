@@ -66,6 +66,7 @@ jobs:
     - name: Upload coverage to Codecov
       run: |
         bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+      if: matrix.python-version == 3.8 && matrix.operating-system == 'ubuntu-latest'
     - name: Install pandoc and build the documentation
       run: |
         sudo apt-get install -yq pandoc
