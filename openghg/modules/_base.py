@@ -138,30 +138,6 @@ class BaseModule:
         """
         return cls._uuid
 
-    def add_datasources(self: T, datasource_uuids: Dict, metadata: Dict) -> None:
-        """Add the passed list of Datasources to the current list
-
-        Args:
-            datasource_uuids: Datasource UUIDs
-            metadata: Metadata for each species
-        Returns:
-            None
-        """
-        for key, uid in datasource_uuids.items():
-            md = metadata[key]
-            site = md["site"]
-            network = md["network"]
-            inlet = md["inlet"]
-            species = md["species"]
-
-            result = self._datasource_table[site][network][inlet][species]
-
-            if result and result != uid:
-                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
-            else:
-                self._datasource_table[site][network][inlet][species] = uid
-                self._datasource_uuids[uid] = key
-
     def datasources(self: T) -> List[str]:
         """Return the list of Datasources UUIDs associated with this object
 

@@ -34,7 +34,7 @@ def search(**kwargs) -> Dict:
     """
     from collections import defaultdict
     from openghg.modules import Datasource, ObsSurface
-    from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, clean_string
+    from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, to_lowercase
 
     # if species is not None and not isinstance(species, list):
     # if not isinstance(species, list):
@@ -91,7 +91,7 @@ def search(**kwargs) -> Dict:
     kwargs["end_date"] = end_date
 
     # As we might have kwargs that are None we want to get rid of those
-    search_kwargs = {k: clean_string(v) for k, v in kwargs.items() if v is not None}
+    search_kwargs = {k: to_lowercase(v) for k, v in kwargs.items() if v is not None}
 
     # Here we want to load in the ObsSurface module for now
     obs = ObsSurface.load()

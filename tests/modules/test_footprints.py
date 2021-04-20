@@ -1,8 +1,8 @@
 from pathlib import Path
 import pytest
 
-from openghg.modules import FOOTPRINTS
-from openghg.processing import search_footprints, recombine_datasets
+from openghg.modules import Datasource, FOOTPRINTS
+from openghg.processing import search, recombine_datasets
 from openghg.objectstore import get_local_bucket
 
 
@@ -10,9 +10,8 @@ def get_datapath(filename):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/footprints/{filename}")
 
 
-@pytest.mark.skip(reason="Footprint object needs to be updated with new datasource table")
 def test_read_footprint():
-    _ = get_local_bucket(empty=True)
+    get_local_bucket(empty=True)
 
     datapath = get_datapath("footprint_test.nc")
     model_params = {"simulation_params": "123"}
@@ -28,7 +27,11 @@ def test_read_footprint():
     FOOTPRINTS.read_file(filepath=datapath, site=site, network=network, height=height, domain=domain, model_params=model_params)
 
     # Get the footprint data
-    footprint_results = search_footprints(sites=site, domains=domain, inlet=height, start_date=start_date, end_date=end_date)
+    footprint_results = search(site=site, domain=domain, data_type="footprint")
+
+    print(footprint_results)
+
+    return False
 
     fp_site_key = list(footprint_results.keys())[0]
 
@@ -119,7 +122,6 @@ def test_read_footprint():
     footprint_data["fp_high"].min().values == 0.0
     footprint_data["pressure"].min().values == 1011.92
 
-@pytest.mark.skip(reason="Footprint object needs to be updated with new datasource table")
 def test_read_same_footprint_twice_raises():
     datapath = get_datapath("footprint_test.nc")
     model_params = {"simulation_params": "123"}
