@@ -33,7 +33,7 @@ jobs:
         brew install c-blosc hdf5
     - name: Install openghg
       run: |
-        python -m pip install --upgrade pip==20.2.4 wheel
+        pip install --upgrade pip==20.2.4 wheel
         pip install -r requirements-dev.txt
         pip install .
     - name: 'Clone Acquire for services folder required for tests'
