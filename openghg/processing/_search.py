@@ -33,7 +33,7 @@ def search(**kwargs) -> Dict:
         dict: List of keys of Datasources matching the search parameters
     """
     from collections import defaultdict
-    from openghg.modules import Datasource, ObsSurface
+    from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions
     from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, to_lowercase
 
     # if species is not None and not isinstance(species, list):
@@ -93,9 +93,17 @@ def search(**kwargs) -> Dict:
     # As we might have kwargs that are None we want to get rid of those
     search_kwargs = {k: to_lowercase(v) for k, v in kwargs.items() if v is not None}
 
+    data_type = search_kwargs.get("data_type", "timeseries")
+
     # Here we want to load in the ObsSurface module for now
-    obs = ObsSurface.load()
-    datasource_uuids = obs.datasources()
+    if data_type == "timeseries":
+        obj = ObsSurface.load()
+    elif data_type == "footprint":
+        obj = FOOTPRINTS.load()
+    elif data_type == "emissions":
+        obj = Emissions.load()
+
+    datasource_uuids = obj.datasources()
 
     # Shallow load the Datasources so we can search their metadata
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)

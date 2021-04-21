@@ -16,10 +16,11 @@ class FOOTPRINTS(BaseModule):
     def read_file(
         filepath: Union[str, Path],
         site: str,
-        network: str,
         height: str,
         domain: str,
+        model: str,
         model_params: Dict,
+        network: Optional[str] = None,
         retrieve_met: Optional[bool] = False,
         overwrite: Optional[bool] = False,
         high_res: Optional[bool] = False
@@ -65,9 +66,12 @@ class FOOTPRINTS(BaseModule):
 
         metadata["data_type"] = "footprint"
         metadata["site"] = site
-        metadata["network"] = network
         metadata["height"] = height
         metadata["domain"] = domain
+        metadata["model"] = model
+
+        if network is not None:
+            metadata["network"] = network
 
         metadata["start_date"] = str(timestamp_tzaware(fp_data.time[0].values))
         metadata["end_date"] = str(timestamp_tzaware(fp_data.time[-1].values))
@@ -137,11 +141,11 @@ class FOOTPRINTS(BaseModule):
 
         for key, data in metadata.items():
             site = data["site"]
-            network = data["network"]
+            model = data["model"]
             height = data["height"]
             domain = data["domain"]
 
-            result = self._datasource_table[site][domain][network][height]
+            result = self._datasource_table[site][domain][model][height]
 
             if not result:
                 result = False

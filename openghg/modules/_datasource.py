@@ -135,11 +135,11 @@ class Datasource:
         self.add_metadata(metadata=metadata)
 
         if data_type == "timeseries":
-            return self.add_timeseries_data(data=data, overwrite=overwrite)
+            return self.add_timeseries_data(data=data)
         elif data_type == "footprint":
-            return self.add_footprint_data(data=data, overwrite=overwrite)
+            return self.add_footprint_data(data=data)
         elif data_type == "emissions":
-            return self.add_emissions_data(data=data, overwrite=overwrite)
+            return self.add_emissions_data(data=data)
         elif data_type == "met":
             raise NotImplementedError()
 
@@ -220,7 +220,7 @@ class Datasource:
         """
         self.add_field_data(data=data, data_type="emissions")
 
-    def add_footprint_data(self, data: Dataset, overwrite: bool) -> None:
+    def add_footprint_data(self, data: Dataset) -> None:
         """Add footprint data to this Datasource
 
         Args:

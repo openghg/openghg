@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 
-from openghg.modules import Datasource, FOOTPRINTS
+from openghg.modules import FOOTPRINTS
 from openghg.processing import search, recombine_datasets
 from openghg.objectstore import get_local_bucket
 
@@ -20,23 +20,19 @@ def test_read_footprint():
     network = "LGHG"
     height = "10m"
     domain = "EUROPE"
+    model = "test_model"
 
-    start_date = "2010-01-01"
-    end_date = "2022-01-01"
-
-    FOOTPRINTS.read_file(filepath=datapath, site=site, network=network, height=height, domain=domain, model_params=model_params)
+    FOOTPRINTS.read_file(
+        filepath=datapath, site=site, model=model, network=network, height=height, domain=domain, model_params=model_params
+    )
 
     # Get the footprint data
     footprint_results = search(site=site, domain=domain, data_type="footprint")
 
-    print(footprint_results)
-
-    return False
-
     fp_site_key = list(footprint_results.keys())[0]
 
     footprint_keys = footprint_results[fp_site_key]["keys"]
-    footprint_data = recombine_datasets(data_keys=footprint_keys, sort=False)
+    footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
 
     assert list(footprint_data.coords.keys()) == ["time", "lon", "lat", "lev", "height", "lat_high", "lon_high"]
     assert list(footprint_data.dims) == ["height", "index", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
@@ -67,31 +63,28 @@ def test_read_footprint():
         ]
     ).all()
 
-    assert (
-        footprint_data.attrs["variables"]
-        == [
-            "fp",
-            "temperature",
-            "pressure",
-            "wind_speed",
-            "wind_direction",
-            "PBLH",
-            "release_lon",
-            "release_lat",
-            "particle_locations_n",
-            "particle_locations_e",
-            "particle_locations_s",
-            "particle_locations_w",
-            "mean_age_particles_n",
-            "mean_age_particles_e",
-            "mean_age_particles_s",
-            "mean_age_particles_w",
-            "fp_low",
-            "fp_high",
-            "index_lons",
-            "index_lats",
-        ]
-    )
+    assert footprint_data.attrs["variables"] == [
+        "fp",
+        "temperature",
+        "pressure",
+        "wind_speed",
+        "wind_direction",
+        "PBLH",
+        "release_lon",
+        "release_lat",
+        "particle_locations_n",
+        "particle_locations_e",
+        "particle_locations_s",
+        "particle_locations_w",
+        "mean_age_particles_n",
+        "mean_age_particles_e",
+        "mean_age_particles_s",
+        "mean_age_particles_w",
+        "fp_low",
+        "fp_high",
+        "index_lons",
+        "index_lats",
+    ]
 
     del footprint_data.attrs["processed"]
     del footprint_data.attrs["heights"]
@@ -100,10 +93,11 @@ def test_read_footprint():
     expected_attrs = {
         "author": "OpenGHG Cloud",
         "data_type": "footprint",
-        "site": "TMB",
-        "network": "LGHG",
+        "site": "tmb",
+        "network": "lghg",
         "height": "10m",
-        "domain": "EUROPE",
+        "model": "test_model",
+        "domain": "europe",
         "start_date": "2020-08-01 00:00:00+00:00",
         "end_date": "2020-08-01 00:00:00+00:00",
         "max_longitude": 39.38,
@@ -122,9 +116,18 @@ def test_read_footprint():
     footprint_data["fp_high"].min().values == 0.0
     footprint_data["pressure"].min().values == 1011.92
 
+
 def test_read_same_footprint_twice_raises():
     datapath = get_datapath("footprint_test.nc")
     model_params = {"simulation_params": "123"}
 
     with pytest.raises(ValueError):
-        FOOTPRINTS.read_file(filepath=datapath, site="TMB", network="LGHG", domain="EUROPE", height="10magl", model_params=model_params)
+        FOOTPRINTS.read_file(
+            filepath=datapath,
+            site="TMB",
+            model="test_model",
+            network="LGHG",
+            domain="EUROPE",
+            height="10magl",
+            model_params=model_params,
+        )
