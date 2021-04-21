@@ -23,7 +23,7 @@ class FOOTPRINTS(BaseModule):
         network: Optional[str] = None,
         retrieve_met: Optional[bool] = False,
         overwrite: Optional[bool] = False,
-        high_res: Optional[bool] = False
+        high_res: Optional[bool] = False,
     ) -> Dict:
         """Reads footprint data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -115,7 +115,10 @@ class FOOTPRINTS(BaseModule):
 
         lookup_results = fp.datasource_lookup(metadata=keyed_metadata)
 
-        datasource_uuids = assign_data(data_dict=footprint_data, lookup_results=lookup_results, overwrite=overwrite, data_type="footprint")
+        data_type = "footprint"
+        datasource_uuids = assign_data(
+            data_dict=footprint_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type
+        )
 
         fp.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
 
@@ -126,6 +129,33 @@ class FOOTPRINTS(BaseModule):
 
         return datasource_uuids
 
+    def uuid_lookup(self, site: str, domain: str, model: str, height: str) -> Union[str, Dict]:
+        """Perform a lookup for the UUID of a Datasource
+
+        Args:
+            site: Site code
+            domain: Domain
+            model: Model name
+            height: Height
+        Returns:
+            str or dict: UUID or empty dict if no entry
+        """
+        return self._datasource_table[site][domain][model][height]
+
+    def set_uuid(self, site: str, domain: str, model: str, height: str, uuid: str) -> None:
+        """Record a UUID of a Datasource in the datasource table
+
+        Args:
+            site: Site code
+            domain: Domain
+            model: Model name
+            height: Height
+            uuid: UUID of Datasource
+        Returns:
+            None
+        """
+        self._datasource_table[site][domain][model][height] = uuid
+
     def datasource_lookup(self, metadata: Dict) -> Dict:
         """Find the Datasource we should assign the data to
 
@@ -134,7 +164,7 @@ class FOOTPRINTS(BaseModule):
         Returns:
             dict: Dictionary of datasource information
         """
-        # TODO - I'll leave this as a function for now as the way we read footprints may 
+        # TODO - I'll leave this as a function for now as the way we read footprints may
         # change in the near future
         # GJ - 2021-04-20
         lookup_results = {}
@@ -145,7 +175,7 @@ class FOOTPRINTS(BaseModule):
             height = data["height"]
             domain = data["domain"]
 
-            result = self._datasource_table[site][domain][model][height]
+            result = self.uuid_lookup(site=site, domain=domain, model=model, height=height)
 
             if not result:
                 result = False
@@ -166,20 +196,20 @@ class FOOTPRINTS(BaseModule):
         for key, uid in datasource_uuids.items():
             md = metadata[key]
             site = md["site"]
-            network = md["network"]
+            model = md["model"]
             height = md["height"]
             domain = md["domain"]
 
-            result = self._datasource_table[site][domain][network][height]
+            result = self.uuid_lookup(site=site, domain=domain, model=model, height=height)
 
             if result and result != uid:
                 raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
             else:
-                self._datasource_table[site][domain][network][height] = uid
+                self.set_uuid(site=site, domain=domain, model=model, height=height, uuid=uid)
                 self._datasource_uuids[uid] = key
 
     def save(self) -> None:
-        """ Save the object to the object store
+        """Save the object to the object store
 
         Returns:
             None
@@ -193,16 +223,16 @@ class FOOTPRINTS(BaseModule):
         self._stored = True
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
-    def search(self, site: str, network: str, start_date: Optional[Union[str, Timestamp]], end_date: Optional[Union[str, Timestamp]]):
-        """ Search for a footprint from a specific site and network, return a dictionary of data
-            so the user can choose
+    def search(
+        self, site: str, network: str, start_date: Optional[Union[str, Timestamp]], end_date: Optional[Union[str, Timestamp]]
+    ):
+        """Search for a footprint from a specific site and network, return a dictionary of data
+        so the user can choose
         """
         raise NotImplementedError()
 
     def retrieve(self, uuid, dates):
-        """
-
-        """
+        """"""
         raise NotImplementedError()
 
     def _get_metdata():

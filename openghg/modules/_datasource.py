@@ -209,7 +209,7 @@ class Datasource:
         metadata = to_lowercase(metadata)
         self._metadata.update(metadata)
 
-    def add_emissions_data(self, data: Dataset, metadata: Dict) -> None:
+    def add_emissions_data(self, data: Dataset) -> None:
         """Add flux data to this Datasource
 
         Args:
