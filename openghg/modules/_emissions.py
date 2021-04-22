@@ -119,7 +119,7 @@ class Emissions(BaseModule):
         data_type = "emissions"
         datasource_uuids = assign_data(data_dict=emissions_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type)
 
-        em_store.add_datasources(datasource_uuids=datasource_uuids)
+        em_store.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
@@ -128,7 +128,7 @@ class Emissions(BaseModule):
 
         return datasource_uuids
 
-    def uuid_lookup(self, species: str, source: str, domain: str, date: str) -> Union[str, Dict]:
+    def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, Dict]:
         """Perform a lookup for the UUID of a Datasource
 
         Args:
@@ -174,7 +174,7 @@ class Emissions(BaseModule):
             domain = data["domain"]
             date = data["date"]
 
-            result = self.uuid_lookup(species=species, source=source, domain=domain, date=date)
+            result = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
 
             if not result:
                 result = False
@@ -199,7 +199,7 @@ class Emissions(BaseModule):
             domain = md["domain"]
             date = md["date"]
 
-            result = self.uuid_lookup(species=species, source=source, domain=domain, date=date)
+            result = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
 
             if result and result != uid:
                 raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")

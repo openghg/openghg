@@ -129,7 +129,7 @@ class FOOTPRINTS(BaseModule):
 
         return datasource_uuids
 
-    def uuid_lookup(self, site: str, domain: str, model: str, height: str) -> Union[str, Dict]:
+    def lookup_uuid(self, site: str, domain: str, model: str, height: str) -> Union[str, Dict]:
         """Perform a lookup for the UUID of a Datasource
 
         Args:
@@ -175,7 +175,7 @@ class FOOTPRINTS(BaseModule):
             height = data["height"]
             domain = data["domain"]
 
-            result = self.uuid_lookup(site=site, domain=domain, model=model, height=height)
+            result = self.lookup_uuid(site=site, domain=domain, model=model, height=height)
 
             if not result:
                 result = False
@@ -200,7 +200,7 @@ class FOOTPRINTS(BaseModule):
             height = md["height"]
             domain = md["domain"]
 
-            result = self.uuid_lookup(site=site, domain=domain, model=model, height=height)
+            result = self.lookup_uuid(site=site, domain=domain, model=model, height=height)
 
             if result and result != uid:
                 raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
