@@ -4,11 +4,10 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>processing API Detail &mdash; OpenGHG 0+untagged.1.g5e35f45 documentation</title>
+  <title>processing API Detail &mdash; OpenGHG 0+untagged.1.g8ac9b16 documentation</title>
   
 
   
@@ -192,7 +191,7 @@
     text-align: unset;
 }
 </style>
-<section id="processing-api-detail">
+<div class="section" id="processing-api-detail">
 <h1>processing API Detail<a class="headerlink" href="#processing-api-detail" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt id="openghg.processing.assign_attributes">
@@ -357,12 +356,12 @@ into a single datasets</p>
 
 <dl class="py function">
 <dt id="openghg.processing.assign_data">
-<code class="sig-prename descclassname"><span class="pre">openghg.processing.</span></code><code class="sig-name descname"><span class="pre">assign_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gas_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup_results</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/processing/_segment.html#assign_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.processing.assign_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">openghg.processing.</span></code><code class="sig-name descname"><span class="pre">assign_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup_results</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'timeseries'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/processing/_segment.html#assign_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.processing.assign_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign data to a Datasource. This will either create a new Datasource
 Create or get an existing Datasource for each gas in the file</p>
 <blockquote>
 <div><dl class="simple">
-<dt>Args:</dt><dd><p>gas_data: Dictionary containing data and metadata for species
+<dt>Args:</dt><dd><p>data_dict: Dictionary containing data and metadata for species
 lookup_results: Dictionary of lookup results]
 overwrite: If True overwrite current data stored</p>
 </dd>
@@ -372,7 +371,7 @@ overwrite: If True overwrite current data stored</p>
 </div></blockquote>
 </dd></dl>
 
-</section>
+</div>
 
 
            </div>
@@ -386,7 +385,7 @@ overwrite: If True overwrite current data stored</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 20, 2021.
+        Last updated on Apr 22, 2021.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.processing._segment &mdash; OpenGHG 0+untagged.1.g5e35f45 documentation</title>
+  <title>openghg.processing._segment &mdash; OpenGHG 0+untagged.1.g8ac9b16 documentation</title>
   
 
   
@@ -171,18 +171,17 @@
 <span></span><span class="sd">&quot;&quot;&quot; Segment the data into Datasources</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_split_frequency&quot;</span><span class="p">,</span> <span class="s2">&quot;assign_footprint_data&quot;</span><span class="p">,</span> <span class="s2">&quot;assign_data&quot;</span><span class="p">,</span> <span class="s2">&quot;assign_emissions_data&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_split_frequency&quot;</span><span class="p">,</span> <span class="s2">&quot;assign_data&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="assign_data"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.assign_data">[docs]</a><span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="n">gas_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">lookup_results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Assign data to a Datasource. This will either create a new Datasource </span>
+<div class="viewcode-block" id="assign_data"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.assign_data">[docs]</a><span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span><span class="n">data_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">lookup_results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Assign data to a Datasource. This will either create a new Datasource</span>
 <span class="sd">    Create or get an existing Datasource for each gas in the file</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            gas_data: Dictionary containing data and metadata for species</span>
+<span class="sd">            data_dict: Dictionary containing data and metadata for species</span>
 <span class="sd">            lookup_results: Dictionary of lookup results]</span>
 <span class="sd">            overwrite: If True overwrite current data stored</span>
 <span class="sd">        Returns:</span>
@@ -192,10 +191,9 @@
 
     <span class="n">uuids</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="c1"># Add in copying of attributes, or add attributes to the metadata at an earlier state.</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">gas_data</span><span class="p">:</span>
-        <span class="n">metadata</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">:</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
 
         <span class="c1"># Our lookup results and gas data have the same keys</span>
         <span class="n">uuid</span> <span class="o">=</span> <span class="n">lookup_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -203,7 +201,7 @@
         <span class="c1"># TODO - Could this be done somewhere else? It doesn&#39;t feel quite right it</span>
         <span class="c1"># being here</span>
 
-        <span class="c1"># Add the read metadata to the Dataset attributes being careful </span>
+        <span class="c1"># Add the read metadata to the Dataset attributes being careful</span>
         <span class="c1"># not to overwrite any attributes that are already there</span>
         <span class="n">to_add</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">}</span>
         <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
@@ -216,7 +214,7 @@
             <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">()</span>
 
         <span class="c1"># Add the dataframe to the datasource</span>
-        <span class="n">datasource</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">)</span>
+        <span class="n">datasource</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
         <span class="c1"># Save Datasource to object store</span>
         <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
@@ -225,73 +223,92 @@
     <span class="k">return</span> <span class="n">uuids</span></div>
 
 
-<span class="k">def</span> <span class="nf">assign_footprint_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">datasource_uid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Create Datasources for the passed footprint data</span>
+<span class="c1"># def assign_footprint_data(footprint_data: Dict, lookup_results: Dict, overwrite: bool) -&gt; Dict:</span>
+<span class="c1">#     &quot;&quot;&quot; Create Datasources for the passed footprint data</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            data: xarray Dataset of footprint data</span>
-<span class="sd">            metadata: Associated metadata</span>
-<span class="sd">            datasource_uid: The UUID of the datasource if we&#39;ve processed footprint data from this</span>
-<span class="sd">            source before, otherwise False</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            str: UUID of Datasource</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span>
+<span class="c1">#         Args:</span>
+<span class="c1">#             data: xarray Dataset of footprint data</span>
+<span class="c1">#             metadata: Associated metadata</span>
+<span class="c1">#             datasource_uid: The UUID of the datasource if we&#39;ve processed footprint data from this</span>
+<span class="c1">#             source before, otherwise False</span>
+<span class="c1">#         Returns:</span>
+<span class="c1">#             dict: Dictionary containing Datasource UUIDs</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from openghg.modules import Datasource</span>
 
-    <span class="k">if</span> <span class="n">datasource_uid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">datasource_uid</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">()</span>
+<span class="c1">#     uuids = {}</span>
 
-    <span class="c1"># Add the read metadata to the Dataset attributes being careful </span>
-    <span class="c1"># not to overwrite any attributes that are already there</span>
-    <span class="n">to_add</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">}</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
+<span class="c1">#     # Add in copying of attributes, or add attributes to the metadata at an earlier state.</span>
+<span class="c1">#     for key in footprint_data:</span>
+<span class="c1">#         metadata = footprint_data[key][&quot;metadata&quot;]</span>
+<span class="c1">#         data = footprint_data[key][&quot;data&quot;]</span>
 
-    <span class="n">datasource</span><span class="o">.</span><span class="n">add_footprint_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
-    <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="c1">#         # Our lookup results and gas data have the same keys</span>
+<span class="c1">#         uuid = lookup_results[key]</span>
 
-    <span class="k">return</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">()</span>
+<span class="c1">#         # TODO - Could this be done somewhere else? It doesn&#39;t feel quite right it</span>
+<span class="c1">#         # being here</span>
 
+<span class="c1">#         # Add the read metadata to the Dataset attributes being careful</span>
+<span class="c1">#         # not to overwrite any attributes that are already there</span>
+<span class="c1">#         to_add = {k: v for k, v in metadata.items() if k not in data.attrs}</span>
+<span class="c1">#         data.attrs.update(to_add)</span>
 
-<span class="k">def</span> <span class="nf">assign_emissions_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">datasource_uid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Create Datasources for the passed flux data</span>
+<span class="c1">#         # If we have a UUID for this Datasource load the existing object</span>
+<span class="c1">#         # from the object store</span>
+<span class="c1">#         if uuid:</span>
+<span class="c1">#             datasource = Datasource.load(uuid=uuid)</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             datasource = Datasource()</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            data: xarray Dataset of footprint data</span>
-<span class="sd">            metadata: Associated metadata</span>
-<span class="sd">            datasource_uid: The UUID of the datasource if we&#39;ve processed flux data from this</span>
-<span class="sd">            source before, otherwise False</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            str: UUID of Datasource</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span>
+<span class="c1">#         # TODO - can we just ad</span>
+<span class="c1">#         # Add the dataframe to the datasource</span>
+<span class="c1">#         datasource.add_footprint_data(data=data, metadata=metadata, overwrite=overwrite)</span>
+<span class="c1">#         # Save Datasource to object store</span>
+<span class="c1">#         datasource.save()</span>
 
-    <span class="k">if</span> <span class="n">datasource_uid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">datasource_uid</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">()</span>
+<span class="c1">#         uuids[key] = datasource.uuid()</span>
 
-    <span class="c1"># Add the read metadata to the Dataset attributes being careful </span>
-    <span class="c1"># not to overwrite any attributes that are already there</span>
-    <span class="n">to_add</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">}</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
+<span class="c1">#     return uuids</span>
 
-    <span class="n">datasource</span><span class="o">.</span><span class="n">add_emissions_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
-    <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="c1"># def assign_emissions_data(data: Dataset, metadata: Dict, datasource_uid: Union[str, bool]) -&gt; str:</span>
+<span class="c1">#     &quot;&quot;&quot; Create Datasources for the passed flux data</span>
 
-    <span class="k">return</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">()</span>
+<span class="c1">#         Args:</span>
+<span class="c1">#             data: xarray Dataset of footprint data</span>
+<span class="c1">#             metadata: Associated metadata</span>
+<span class="c1">#             datasource_uid: The UUID of the datasource if we&#39;ve processed flux data from this</span>
+<span class="c1">#             source before, otherwise False</span>
+<span class="c1">#         Returns:</span>
+<span class="c1">#             str: UUID of Datasource</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from openghg.modules import Datasource</span>
+
+<span class="c1">#     if datasource_uid is not False:</span>
+<span class="c1">#         datasource = Datasource.load(uuid=datasource_uid)</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         datasource = Datasource()</span>
+
+<span class="c1">#     # Add the read metadata to the Dataset attributes being careful</span>
+<span class="c1">#     # not to overwrite any attributes that are already there</span>
+<span class="c1">#     to_add = {k: v for k, v in metadata.items() if k not in data.attrs}</span>
+<span class="c1">#     data.attrs.update(to_add)</span>
+
+<span class="c1">#     datasource.add_emissions_data(data=data, metadata=metadata)</span>
+<span class="c1">#     datasource.save()</span>
+
+<span class="c1">#     return datasource.uuid()</span>
 
 
 <span class="k">def</span> <span class="nf">get_split_frequency</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Analyses raw data for size and sets a frequency to split the data</span>
-<span class="sd">        depending on how big the resulting dataframe will be</span>
+    <span class="sd">&quot;&quot;&quot;Analyses raw data for size and sets a frequency to split the data</span>
+<span class="sd">    depending on how big the resulting dataframe will be</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            data (Pandas.Dataframe): Raw data in dataframe</span>
-<span class="sd">            Note: DataFrame must have a Datetime index</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            str: String selecting frequency for data splitting by Groupby</span>
+<span class="sd">    Args:</span>
+<span class="sd">        data (Pandas.Dataframe): Raw data in dataframe</span>
+<span class="sd">        Note: DataFrame must have a Datetime index</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: String selecting frequency for data splitting by Groupby</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">data_size</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="c1"># If the data is larger than this it will be split into</span>
@@ -327,9 +344,7 @@
     <span class="k">elif</span> <span class="n">data_size</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_years</span> <span class="o">*</span> <span class="n">n_months</span> <span class="o">*</span> <span class="n">n_weeks</span> <span class="o">*</span> <span class="n">n_days</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">segment_size</span><span class="p">:</span>
         <span class="n">freq</span> <span class="o">=</span> <span class="s2">&quot;D&quot;</span>
         <span class="k">return</span> <span class="n">freq</span>
-    <span class="k">elif</span> <span class="p">(</span>
-        <span class="n">data_size</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_years</span> <span class="o">*</span> <span class="n">n_months</span> <span class="o">*</span> <span class="n">n_weeks</span> <span class="o">*</span> <span class="n">n_days</span> <span class="o">*</span> <span class="n">n_hours</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">segment_size</span>
-    <span class="p">):</span>
+    <span class="k">elif</span> <span class="n">data_size</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_years</span> <span class="o">*</span> <span class="n">n_months</span> <span class="o">*</span> <span class="n">n_weeks</span> <span class="o">*</span> <span class="n">n_days</span> <span class="o">*</span> <span class="n">n_hours</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">segment_size</span><span class="p">:</span>
         <span class="n">freq</span> <span class="o">=</span> <span class="s2">&quot;H&quot;</span>
         <span class="k">return</span> <span class="n">freq</span>
 </pre></div>
@@ -345,7 +360,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 20, 2021.
+        Last updated on Apr 22, 2021.
       </span>
 
     </p>

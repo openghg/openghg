@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.processing._search &mdash; OpenGHG 0+untagged.1.g5e35f45 documentation</title>
+  <title>openghg.processing._search &mdash; OpenGHG 0+untagged.1.g8ac9b16 documentation</title>
   
 
   
@@ -172,10 +172,9 @@
 <span class="sd">    the object store</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;search&quot;</span><span class="p">,</span> <span class="s2">&quot;search_footprints&quot;</span><span class="p">,</span> <span class="s2">&quot;search_emissions&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;search&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="search"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.search">[docs]</a><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
@@ -203,7 +202,7 @@
 <span class="sd">        dict: List of keys of Datasources matching the search parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span><span class="p">,</span> <span class="n">ObsSurface</span>
+    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span><span class="p">,</span> <span class="n">ObsSurface</span><span class="p">,</span> <span class="n">FOOTPRINTS</span><span class="p">,</span> <span class="n">Emissions</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">timestamp_now</span><span class="p">,</span> <span class="n">timestamp_epoch</span><span class="p">,</span> <span class="n">timestamp_tzaware</span><span class="p">,</span> <span class="n">clean_string</span>
 
     <span class="c1"># if species is not None and not isinstance(species, list):</span>
@@ -263,9 +262,21 @@
     <span class="c1"># As we might have kwargs that are None we want to get rid of those</span>
     <span class="n">search_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
 
+    <span class="n">data_type</span> <span class="o">=</span> <span class="n">search_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data_type&quot;</span><span class="p">,</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">)</span>
+
+    <span class="n">valid_data_types</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="s2">&quot;footprint&quot;</span><span class="p">,</span> <span class="s2">&quot;emissions&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">data_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_data_types</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> is not a valid data type, please select one of </span><span class="si">{</span><span class="n">valid_data_types</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="c1"># Here we want to load in the ObsSurface module for now</span>
-    <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-    <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">datasources</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;footprint&quot;</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">FOOTPRINTS</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;emissions&quot;</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">Emissions</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+    <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">datasources</span><span class="p">()</span>
 
     <span class="c1"># Shallow load the Datasources so we can search their metadata</span>
     <span class="n">datasources</span> <span class="o">=</span> <span class="p">(</span><span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">datasource_uuids</span><span class="p">)</span>
@@ -391,114 +402,114 @@
     <span class="c1"># return results</span>
 
 
-<span class="k">def</span> <span class="nf">search_footprints</span><span class="p">(</span>
-    <span class="n">sites</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">domains</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="n">Timestamp</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Search for footprints for the given locations and inlet height.</span>
+<span class="c1"># def search_footprints(</span>
+<span class="c1">#     sites: Union[str, List[str]], domains: Union[str, List[str]], inlet: str, start_date: Timestamp, end_date: Timestamp</span>
+<span class="c1"># ) -&gt; Dict:</span>
+<span class="c1">#     &quot;&quot;&quot;Search for footprints for the given locations and inlet height.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        locations: Location name or list of names</span>
-<span class="sd">        inlet: Inlet height</span>
-<span class="sd">        start_date: Start date</span>
-<span class="sd">        end_date: End date</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        dict: Dictionary of keys keyed by location</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span><span class="p">,</span> <span class="n">FOOTPRINTS</span>
+<span class="c1">#     Args:</span>
+<span class="c1">#         locations: Location name or list of names</span>
+<span class="c1">#         inlet: Inlet height</span>
+<span class="c1">#         start_date: Start date</span>
+<span class="c1">#         end_date: End date</span>
+<span class="c1">#     Returns:</span>
+<span class="c1">#         dict: Dictionary of keys keyed by location</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from collections import defaultdict</span>
+<span class="c1">#     from openghg.modules import Datasource, FOOTPRINTS</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sites</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="n">sites</span> <span class="o">=</span> <span class="p">[</span><span class="n">sites</span><span class="p">]</span>
+<span class="c1">#     if not isinstance(sites, list):</span>
+<span class="c1">#         sites = [sites]</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">domains</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="n">domains</span> <span class="o">=</span> <span class="p">[</span><span class="n">domains</span><span class="p">]</span>
+<span class="c1">#     if not isinstance(domains, list):</span>
+<span class="c1">#         domains = [domains]</span>
 
-    <span class="n">footprints</span> <span class="o">=</span> <span class="n">FOOTPRINTS</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-    <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">footprints</span><span class="o">.</span><span class="n">datasources</span><span class="p">()</span>
-    <span class="n">datasources</span> <span class="o">=</span> <span class="p">(</span><span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">datasource_uuids</span><span class="p">)</span>
+<span class="c1">#     footprints = FOOTPRINTS.load()</span>
+<span class="c1">#     datasource_uuids = footprints.datasources()</span>
+<span class="c1">#     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)</span>
 
-    <span class="n">keys</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
-    <span class="c1"># If we have locations to search</span>
-    <span class="c1"># for sites in sites:</span>
-    <span class="k">for</span> <span class="n">datasource</span> <span class="ow">in</span> <span class="n">datasources</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">:</span>
-            <span class="c1"># TODO - should we iterate over the domains? Will there be the same site in multiple footprint domains?</span>
-            <span class="n">search_terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">inlet</span><span class="p">,</span> <span class="n">site</span><span class="p">]</span> <span class="o">+</span> <span class="n">domains</span>
-            <span class="k">if</span> <span class="n">datasource</span><span class="o">.</span><span class="n">search_metadata</span><span class="p">(</span><span class="n">search_terms</span><span class="o">=</span><span class="n">search_terms</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">):</span>
-                <span class="c1"># Get the data keys for the data in the matching daterange</span>
-                <span class="n">in_date</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">keys_in_daterange</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
-                <span class="n">keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_date</span>
-                <span class="n">keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span>
+<span class="c1">#     keys = defaultdict(dict)</span>
+<span class="c1">#     # If we have locations to search</span>
+<span class="c1">#     # for sites in sites:</span>
+<span class="c1">#     for datasource in datasources:</span>
+<span class="c1">#         for site in sites:</span>
+<span class="c1">#             # TODO - should we iterate over the domains? Will there be the same site in multiple footprint domains?</span>
+<span class="c1">#             search_terms = [inlet, site] + domains</span>
+<span class="c1">#             if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):</span>
+<span class="c1">#                 # Get the data keys for the data in the matching daterange</span>
+<span class="c1">#                 in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)</span>
+<span class="c1">#                 keys[site][&quot;keys&quot;] = in_date</span>
+<span class="c1">#                 keys[site][&quot;metadata&quot;] = datasource.metadata()</span>
 
-    <span class="k">return</span> <span class="n">keys</span>
+<span class="c1">#     return keys</span>
 
 
-<span class="k">def</span> <span class="nf">search_emissions</span><span class="p">(</span>
-    <span class="n">species</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
-    <span class="n">sources</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
-    <span class="n">domains</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
-    <span class="n">high_time_res</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Search for emissions for the given locations and inlet height.</span>
+<span class="c1"># def search_emissions(</span>
+<span class="c1">#     species: Union[str, List[str]],</span>
+<span class="c1">#     sources: Union[str, List[str]],</span>
+<span class="c1">#     domains: Union[str, List[str]],</span>
+<span class="c1">#     high_time_res: Optional[bool] = False,</span>
+<span class="c1">#     start_date: Optional[Union[str, Timestamp]] = None,</span>
+<span class="c1">#     end_date: Optional[Union[str, Timestamp]] = None,</span>
+<span class="c1"># ) -&gt; Dict:</span>
+<span class="c1">#     &quot;&quot;&quot;Search for emissions for the given locations and inlet height.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        locations: Location name or list of names</span>
-<span class="sd">        inlet: Inlet height</span>
-<span class="sd">        start_date: Start date</span>
-<span class="sd">        end_date: End date</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        dict: Dictionary of keys keyed by location</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span><span class="p">,</span> <span class="n">Emissions</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">timestamp_epoch</span><span class="p">,</span> <span class="n">timestamp_now</span><span class="p">,</span> <span class="n">timestamp_tzaware</span>
+<span class="c1">#     Args:</span>
+<span class="c1">#         locations: Location name or list of names</span>
+<span class="c1">#         inlet: Inlet height</span>
+<span class="c1">#         start_date: Start date</span>
+<span class="c1">#         end_date: End date</span>
+<span class="c1">#     Returns:</span>
+<span class="c1">#         dict: Dictionary of keys keyed by location</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from collections import defaultdict</span>
+<span class="c1">#     from openghg.modules import Datasource, Emissions</span>
+<span class="c1">#     from openghg.util import timestamp_epoch, timestamp_now, timestamp_tzaware</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="n">species</span> <span class="o">=</span> <span class="p">[</span><span class="n">species</span><span class="p">]</span>
+<span class="c1">#     if not isinstance(species, list):</span>
+<span class="c1">#         species = [species]</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">domains</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="n">domains</span> <span class="o">=</span> <span class="p">[</span><span class="n">domains</span><span class="p">]</span>
+<span class="c1">#     if not isinstance(domains, list):</span>
+<span class="c1">#         domains = [domains]</span>
 
-    <span class="k">if</span> <span class="n">sources</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="n">sources</span> <span class="o">=</span> <span class="p">[</span><span class="n">sources</span><span class="p">]</span>
+<span class="c1">#     if sources is not None and not isinstance(sources, list):</span>
+<span class="c1">#         sources = [sources]</span>
 
-    <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_epoch</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+<span class="c1">#     if start_date is None:</span>
+<span class="c1">#         start_date = timestamp_epoch()</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         start_date = timestamp_tzaware(start_date)</span>
 
-    <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_now</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+<span class="c1">#     if end_date is None:</span>
+<span class="c1">#         end_date = timestamp_now()</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         end_date = timestamp_tzaware(end_date)</span>
 
-    <span class="n">emissions</span> <span class="o">=</span> <span class="n">Emissions</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-    <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">emissions</span><span class="o">.</span><span class="n">datasources</span><span class="p">()</span>
-    <span class="n">datasources</span> <span class="o">=</span> <span class="p">(</span><span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">datasource_uuids</span><span class="p">)</span>
+<span class="c1">#     emissions = Emissions.load()</span>
+<span class="c1">#     datasource_uuids = emissions.datasources()</span>
+<span class="c1">#     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)</span>
 
-    <span class="n">gen_search_terms</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="n">sources</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">gen_search_terms</span> <span class="o">+=</span> <span class="n">sources</span>
-    <span class="k">if</span> <span class="n">high_time_res</span><span class="p">:</span>
-        <span class="n">gen_search_terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;high_time_resolution&quot;</span><span class="p">)</span>
+<span class="c1">#     gen_search_terms = []</span>
+<span class="c1">#     if sources is not None:</span>
+<span class="c1">#         gen_search_terms += sources</span>
+<span class="c1">#     if high_time_res:</span>
+<span class="c1">#         gen_search_terms.append(&quot;high_time_resolution&quot;)</span>
 
-    <span class="n">keys</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
-    <span class="c1"># If we have locations to search</span>
-    <span class="c1"># for sites in sites:</span>
-    <span class="k">for</span> <span class="n">datasource</span> <span class="ow">in</span> <span class="n">datasources</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">species</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">domains</span><span class="p">:</span>
-                <span class="n">search_terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span><span class="p">,</span> <span class="n">domain</span><span class="p">]</span> <span class="o">+</span> <span class="n">gen_search_terms</span>
-                <span class="k">if</span> <span class="n">datasource</span><span class="o">.</span><span class="n">search_metadata</span><span class="p">(</span><span class="n">search_terms</span><span class="o">=</span><span class="n">search_terms</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">):</span>
-                    <span class="c1"># Get the data keys for the data in the matching daterange</span>
-                    <span class="n">in_date</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">keys_in_daterange</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
-                    <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">search_terms</span><span class="p">)</span>
-                    <span class="n">keys</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">in_date</span>
-                    <span class="n">keys</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span>
+<span class="c1">#     keys = defaultdict(dict)</span>
+<span class="c1">#     # If we have locations to search</span>
+<span class="c1">#     # for sites in sites:</span>
+<span class="c1">#     for datasource in datasources:</span>
+<span class="c1">#         for sp in species:</span>
+<span class="c1">#             for domain in domains:</span>
+<span class="c1">#                 search_terms = [sp, domain] + gen_search_terms</span>
+<span class="c1">#                 if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):</span>
+<span class="c1">#                     # Get the data keys for the data in the matching daterange</span>
+<span class="c1">#                     in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)</span>
+<span class="c1">#                     key = &quot;_&quot;.join(search_terms)</span>
+<span class="c1">#                     keys[key][&quot;keys&quot;] = in_date</span>
+<span class="c1">#                     keys[key][&quot;metadata&quot;] = datasource.metadata()</span>
 
-    <span class="k">return</span> <span class="n">keys</span>
+<span class="c1">#     return keys</span>
 
 
 <span class="k">def</span> <span class="nf">_strip_dates_keys</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
@@ -535,7 +546,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 20, 2021.
+        Last updated on Apr 22, 2021.
       </span>
 
     </p>
