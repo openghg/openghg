@@ -112,7 +112,7 @@ class FOOTPRINTS(BaseModule):
 
         # This might seem longwinded now but will help when we want to read
         # more than one footprint at a time
-        key = "_".join((site, network, height, domain))
+        key = "_".join((site, domain, model, height))
 
         footprint_data = defaultdict(dict)
         footprint_data[key]["data"] = fp_data

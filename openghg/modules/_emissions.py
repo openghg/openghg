@@ -36,7 +36,7 @@ class Emissions(BaseModule):
         source: str,
         domain: str,
         date: str,
-        high_time_resolution: bool,
+        high_time_resolution: Optional[bool] = False,
         period: Optional[str] = None,
         overwrite: Optional[bool] = False,
     ):
