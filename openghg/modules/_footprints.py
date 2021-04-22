@@ -16,13 +16,16 @@ class FOOTPRINTS(BaseModule):
     def read_file(
         filepath: Union[str, Path],
         site: str,
-        network: str,
         height: str,
         domain: str,
-        model_params: Dict,
+        model: str,
+        metmodel: Optional[str] = None,
+        species: Optional[str] = None,
+        network: Optional[str] = None,
         retrieve_met: Optional[bool] = False,
         overwrite: Optional[bool] = False,
-        high_res: Optional[bool] = False
+        high_res: Optional[bool] = False,
+        # model_params: Optional[Dict] = None,
     ) -> Dict:
         """Reads footprint data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -39,10 +42,15 @@ class FOOTPRINTS(BaseModule):
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
-        # from openghg.processing import assign_attributes
+        from collections import defaultdict
         from xarray import open_dataset
-        from openghg.util import hash_file, timestamp_tzaware, timestamp_now
-        from openghg.processing import assign_footprint_data
+        from openghg.util import hash_file, timestamp_tzaware, timestamp_now, clean_string
+        from openghg.processing import assign_data
+
+        site = clean_string(site)
+        network = clean_string(network)
+        height = clean_string(height)
+        domain = clean_string(domain)
 
         fp = FOOTPRINTS.load()
 
@@ -59,9 +67,18 @@ class FOOTPRINTS(BaseModule):
 
         metadata["data_type"] = "footprint"
         metadata["site"] = site
-        metadata["network"] = network
         metadata["height"] = height
         metadata["domain"] = domain
+        metadata["model"] = model
+
+        if species is not None:
+            metadata["species"] = clean_string(species)
+
+        if network is not None:
+            metadata["network"] = clean_string(network)
+
+        if metmodel is not None:
+            metadata["metmodel"] = clean_string(metmodel)
 
         metadata["start_date"] = str(timestamp_tzaware(fp_data.time[0].values))
         metadata["end_date"] = str(timestamp_tzaware(fp_data.time[-1].values))
@@ -87,35 +104,120 @@ class FOOTPRINTS(BaseModule):
         # Do we also need to save all the variables we have available in this footprint?
         metadata["variables"] = list(fp_data.keys())
 
-        # metadata["model_parameters"] = model_params
+        # if model_params is not None:
+        #     metadata["model_parameters"] = model_params
 
         # Set the attributes of this Dataset
         fp_data.attrs = {"author": "OpenGHG Cloud", "processed": str(timestamp_now())}
 
-        # Check if we've seen data from this site before
-        site_hash = fp._get_site_hash(site=site, network=network, height=height)
+        # This might seem longwinded now but will help when we want to read
+        # more than one footprint at a time
+        key = "_".join((site, network, height, domain))
 
-        if site_hash in fp._datasource_uuids:
-            datasource_uid = fp._datasource_uuids[site_hash]
-        else:
-            datasource_uid = False
+        footprint_data = defaultdict(dict)
+        footprint_data[key]["data"] = fp_data
+        footprint_data[key]["metadata"] = metadata
 
-        # Then we want to assign the data
-        # This only returns the UID string, not a dictionary including the name
-        # This behaviour is different to assign_data which will be changed soon
-        uid = assign_footprint_data(data=fp_data, metadata=metadata, datasource_uid=datasource_uid)
+        # This will be removed when we process multiple files
+        keyed_metadata = {key: metadata}
 
-        fp.add_datasources(datasource_uuids={site_hash: uid}, metadata=metadata)
+        lookup_results = fp.datasource_lookup(metadata=keyed_metadata)
+
+        data_type = "footprint"
+        datasource_uuids = assign_data(
+            data_dict=footprint_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type
+        )
+
+        fp.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
 
         # Record the file hash in case we see this file again
         fp._file_hashes[file_hash] = filepath.name
 
         fp.save()
 
-        return {str(filepath.name): uid}
+        return datasource_uuids
+
+    def lookup_uuid(self, site: str, domain: str, model: str, height: str) -> Union[str, Dict]:
+        """Perform a lookup for the UUID of a Datasource
+
+        Args:
+            site: Site code
+            domain: Domain
+            model: Model name
+            height: Height
+        Returns:
+            str or dict: UUID or empty dict if no entry
+        """
+        return self._datasource_table[site][domain][model][height]
+
+    def set_uuid(self, site: str, domain: str, model: str, height: str, uuid: str) -> None:
+        """Record a UUID of a Datasource in the datasource table
+
+        Args:
+            site: Site code
+            domain: Domain
+            model: Model name
+            height: Height
+            uuid: UUID of Datasource
+        Returns:
+            None
+        """
+        self._datasource_table[site][domain][model][height] = uuid
+
+    def datasource_lookup(self, metadata: Dict) -> Dict:
+        """Find the Datasource we should assign the data to
+
+        Args:
+            metadata: Dictionary of metadata
+        Returns:
+            dict: Dictionary of datasource information
+        """
+        # TODO - I'll leave this as a function for now as the way we read footprints may
+        # change in the near future
+        # GJ - 2021-04-20
+        lookup_results = {}
+
+        for key, data in metadata.items():
+            site = data["site"]
+            model = data["model"]
+            height = data["height"]
+            domain = data["domain"]
+
+            result = self.lookup_uuid(site=site, domain=domain, model=model, height=height)
+
+            if not result:
+                result = False
+
+            lookup_results[key] = result
+
+        return lookup_results
+
+    def add_datasources(self, datasource_uuids: Dict, metadata: Dict) -> None:
+        """Add the passed list of Datasources to the current list
+
+        Args:
+            datasource_uuids: Datasource UUIDs
+            metadata: Metadata for each species
+        Returns:
+            None
+        """
+        for key, uid in datasource_uuids.items():
+            md = metadata[key]
+            site = md["site"]
+            model = md["model"]
+            height = md["height"]
+            domain = md["domain"]
+
+            result = self.lookup_uuid(site=site, domain=domain, model=model, height=height)
+
+            if result and result != uid:
+                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
+            else:
+                self.set_uuid(site=site, domain=domain, model=model, height=height, uuid=uid)
+                self._datasource_uuids[uid] = key
 
     def save(self) -> None:
-        """ Save the object to the object store
+        """Save the object to the object store
 
         Returns:
             None
@@ -129,43 +231,18 @@ class FOOTPRINTS(BaseModule):
         self._stored = True
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
-    def search(self, site: str, network: str, start_date: Optional[Union[str, Timestamp]], end_date: Optional[Union[str, Timestamp]]):
-        """ Search for a footprint from a specific site and network, return a dictionary of data
-            so the user can choose
+    def search(
+        self, site: str, network: str, start_date: Optional[Union[str, Timestamp]], end_date: Optional[Union[str, Timestamp]]
+    ):
+        """Search for a footprint from a specific site and network, return a dictionary of data
+        so the user can choose
         """
         raise NotImplementedError()
 
     def retrieve(self, uuid, dates):
-        """
-
-        """
+        """"""
         raise NotImplementedError()
 
     def _get_metdata():
         """This retrieves the metadata for this footprint"""
         raise NotImplementedError()
-
-    def _get_site_hash(self, site, network, height):
-        from openghg.util import hash_string
-        import re
-
-        # Extract only the number from the height
-        try:
-            height = re.findall(r"\d+(?:\.\d+)?", height)[0]
-        except IndexError:
-            raise ValueError("Cannot read height string, please check it contains the correct value.")
-
-        terms = [site, network, height]
-        safer_terms = []
-        for term in terms:
-            # Make sure we don't have any spaces and it's lowercase
-            safer = re.sub(r"\s+", "", term, flags=re.UNICODE).lower()
-            # Make sure we only have alphanumeric values
-            if re.match(r"^\w+$", safer) is None:
-                raise ValueError("Please ensure site, network and height arguments only contain alphanumeric values.")
-
-            safer_terms.append(safer)
-
-        combined_str = "_".join(safer_terms)
-
-        return hash_string(to_hash=combined_str)
