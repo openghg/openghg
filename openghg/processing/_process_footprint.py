@@ -4,7 +4,8 @@ footprints_data_merge
 """
 from pandas import Timestamp
 from xarray import Dataset
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
+from openghg.dataobjects import FootprintData
 
 __all__ = ["single_site_footprint", "footprints_data_merge"]
 
@@ -80,7 +81,7 @@ def single_site_footprint(
 
     # Get the footprint data
     footprint_results = search(
-        site=footprint_site, domain=domain, inlet=height, start_date=start_date, end_date=end_date, data_type="footprint"
+        site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
     )
 
     try:
@@ -89,7 +90,7 @@ def single_site_footprint(
         raise ValueError(f"Unable to find any footprint data for {site} at a height of {height} in the {network} network.")
 
     footprint_keys = footprint_results[fp_site_key]["keys"]
-    footprint_data = recombine_datasets(data_keys=footprint_keys, sort=False)
+    footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
 
     # Align the two Datasets
     aligned_obs, aligned_footprint = align_datasets(
@@ -126,8 +127,8 @@ def footprints_data_merge(
     load_bc: Optional[bool] = True,
     calc_timeseries: Optional[bool] = True,
     calc_bc: Optional[bool] = True,
-    high_time_res: Optional[bool] = False,
-):
+    time_resolution: Optional[str] = "standard",
+) -> FootprintData:
     """
     TODO - Should this be renamed?
 
@@ -136,8 +137,6 @@ def footprints_data_merge(
     Returns:
         dict: Dictionary footprint data objects
     """
-    from openghg.dataobjects import FootprintData
-
     # First get the site data
     combined_dataset = single_site_footprint(
         site=site,
@@ -157,12 +156,22 @@ def footprints_data_merge(
     flux_dict = {}
     if load_flux:
         flux_dict["standard"] = get_flux(
-            species=species, domain=domain, sources=flux_sources, high_time_res=False, start_date=start_date, end_date=end_date
+            species=species,
+            domain=domain,
+            sources=flux_sources,
+            time_resolution=time_resolution,
+            start_date=start_date,
+            end_date=end_date,
         )
 
-        if high_time_res:
+        if time_resolution == "high":
             flux_dict["high_time_res"] = get_flux(
-                species=species, domain=domain, sources=flux_sources, high_time_res=True, start_date=start_date, end_date=end_date
+                species=species,
+                domain=domain,
+                sources=flux_sources,
+                time_resolution=time_resolution,
+                start_date=start_date,
+                end_date=end_date,
             )
 
     return FootprintData(
@@ -328,22 +337,24 @@ def get_flux(
     domain: Union[str, List[str]],
     start_date: Optional[Timestamp] = None,
     end_date: Optional[Timestamp] = None,
-    high_time_res: Optional[bool] = False,
-) -> Dict:
+    time_resolution: Optional[str] = "standard",
+) -> Dataset:
     """
     The flux function reads in all flux files for the domain and species as an xarray Dataset.
     Note that at present ALL flux data is read in per species per domain or by emissions name.
     To be consistent with the footprints, fluxes should be in mol/m2/s.
 
     Args:
-        domain: Domain name. The flux files should be sub-categorised by the domain.
-        species: Species name. All species names are defined acrg_species_info.json.
+        species: Species name
+        sources: Source name
+        domain: Domain e.g. EUROPE
         start_date: Start date
         end_date: End date
+        time_resolution: One of ["standard", "high"]
     Returns:
-        xarray.Dataset : combined dataset of all matching flux files
+        xarray.Dataset: combined dataset of all matching flux files
     """
-    from openghg.processing import search_emissions, recombine_datasets
+    from openghg.processing import search, recombine_datasets
     from openghg.util import timestamp_epoch, timestamp_now
 
     if start_date is None:
@@ -351,8 +362,14 @@ def get_flux(
     if end_date is None:
         end_date = timestamp_now()
 
-    results = search_emissions(
-        species=species, sources=sources, domains=domain, high_time_res=high_time_res, start_date=start_date, end_date=end_date
+    results = search(
+        species=species,
+        source=sources,
+        domain=domain,
+        time_resolution=time_resolution,
+        start_date=start_date,
+        end_date=end_date,
+        data_type="emissions",
     )
 
     # TODO - more than one emissions file
@@ -362,7 +379,7 @@ def get_flux(
         raise ValueError(f"Unable to find any footprint data for {domain} for {species}.")
 
     data_keys = results[em_key]["keys"]
-    em_ds = recombine_datasets(data_keys=data_keys, sort=False)
+    em_ds = recombine_datasets(keys=data_keys, sort=False)
 
     # Check for level coordinate. If one level, assume surface and drop
     if "lev" in em_ds.coords:

@@ -101,7 +101,7 @@ class Emissions(BaseModule):
         metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
         metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
 
-        metadata["time_resolution"] = "high_resolution" if high_time_resolution else "standard_resolution"
+        metadata["time_resolution"] = "high" if high_time_resolution else "standard"
 
         if period is not None:
             metadata["time_period"] = period

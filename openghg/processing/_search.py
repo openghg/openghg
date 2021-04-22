@@ -2,10 +2,9 @@
     the object store
 
 """
-from pandas import Timestamp
-from typing import Dict, List, Optional, Union
+from typing import Dict
 
-__all__ = ["search", "search_footprints", "search_emissions"]
+__all__ = ["search"]
 
 
 def search(**kwargs) -> Dict:
@@ -94,6 +93,10 @@ def search(**kwargs) -> Dict:
     search_kwargs = {k: clean_string(v) for k, v in kwargs.items() if v is not None}
 
     data_type = search_kwargs.get("data_type", "timeseries")
+
+    valid_data_types = ("timeseries", "footprint", "emissions")
+    if data_type not in valid_data_types:
+        raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
 
     # Here we want to load in the ObsSurface module for now
     if data_type == "timeseries":
@@ -229,114 +232,114 @@ def search(**kwargs) -> Dict:
     # return results
 
 
-def search_footprints(
-    sites: Union[str, List[str]], domains: Union[str, List[str]], inlet: str, start_date: Timestamp, end_date: Timestamp
-) -> Dict:
-    """Search for footprints for the given locations and inlet height.
+# def search_footprints(
+#     sites: Union[str, List[str]], domains: Union[str, List[str]], inlet: str, start_date: Timestamp, end_date: Timestamp
+# ) -> Dict:
+#     """Search for footprints for the given locations and inlet height.
 
-    Args:
-        locations: Location name or list of names
-        inlet: Inlet height
-        start_date: Start date
-        end_date: End date
-    Returns:
-        dict: Dictionary of keys keyed by location
-    """
-    from collections import defaultdict
-    from openghg.modules import Datasource, FOOTPRINTS
+#     Args:
+#         locations: Location name or list of names
+#         inlet: Inlet height
+#         start_date: Start date
+#         end_date: End date
+#     Returns:
+#         dict: Dictionary of keys keyed by location
+#     """
+#     from collections import defaultdict
+#     from openghg.modules import Datasource, FOOTPRINTS
 
-    if not isinstance(sites, list):
-        sites = [sites]
+#     if not isinstance(sites, list):
+#         sites = [sites]
 
-    if not isinstance(domains, list):
-        domains = [domains]
+#     if not isinstance(domains, list):
+#         domains = [domains]
 
-    footprints = FOOTPRINTS.load()
-    datasource_uuids = footprints.datasources()
-    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+#     footprints = FOOTPRINTS.load()
+#     datasource_uuids = footprints.datasources()
+#     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
-    keys = defaultdict(dict)
-    # If we have locations to search
-    # for sites in sites:
-    for datasource in datasources:
-        for site in sites:
-            # TODO - should we iterate over the domains? Will there be the same site in multiple footprint domains?
-            search_terms = [inlet, site] + domains
-            if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):
-                # Get the data keys for the data in the matching daterange
-                in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-                keys[site]["keys"] = in_date
-                keys[site]["metadata"] = datasource.metadata()
+#     keys = defaultdict(dict)
+#     # If we have locations to search
+#     # for sites in sites:
+#     for datasource in datasources:
+#         for site in sites:
+#             # TODO - should we iterate over the domains? Will there be the same site in multiple footprint domains?
+#             search_terms = [inlet, site] + domains
+#             if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):
+#                 # Get the data keys for the data in the matching daterange
+#                 in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+#                 keys[site]["keys"] = in_date
+#                 keys[site]["metadata"] = datasource.metadata()
 
-    return keys
+#     return keys
 
 
-def search_emissions(
-    species: Union[str, List[str]],
-    sources: Union[str, List[str]],
-    domains: Union[str, List[str]],
-    high_time_res: Optional[bool] = False,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-) -> Dict:
-    """Search for emissions for the given locations and inlet height.
+# def search_emissions(
+#     species: Union[str, List[str]],
+#     sources: Union[str, List[str]],
+#     domains: Union[str, List[str]],
+#     high_time_res: Optional[bool] = False,
+#     start_date: Optional[Union[str, Timestamp]] = None,
+#     end_date: Optional[Union[str, Timestamp]] = None,
+# ) -> Dict:
+#     """Search for emissions for the given locations and inlet height.
 
-    Args:
-        locations: Location name or list of names
-        inlet: Inlet height
-        start_date: Start date
-        end_date: End date
-    Returns:
-        dict: Dictionary of keys keyed by location
-    """
-    from collections import defaultdict
-    from openghg.modules import Datasource, Emissions
-    from openghg.util import timestamp_epoch, timestamp_now, timestamp_tzaware
+#     Args:
+#         locations: Location name or list of names
+#         inlet: Inlet height
+#         start_date: Start date
+#         end_date: End date
+#     Returns:
+#         dict: Dictionary of keys keyed by location
+#     """
+#     from collections import defaultdict
+#     from openghg.modules import Datasource, Emissions
+#     from openghg.util import timestamp_epoch, timestamp_now, timestamp_tzaware
 
-    if not isinstance(species, list):
-        species = [species]
+#     if not isinstance(species, list):
+#         species = [species]
 
-    if not isinstance(domains, list):
-        domains = [domains]
+#     if not isinstance(domains, list):
+#         domains = [domains]
 
-    if sources is not None and not isinstance(sources, list):
-        sources = [sources]
+#     if sources is not None and not isinstance(sources, list):
+#         sources = [sources]
 
-    if start_date is None:
-        start_date = timestamp_epoch()
-    else:
-        start_date = timestamp_tzaware(start_date)
+#     if start_date is None:
+#         start_date = timestamp_epoch()
+#     else:
+#         start_date = timestamp_tzaware(start_date)
 
-    if end_date is None:
-        end_date = timestamp_now()
-    else:
-        end_date = timestamp_tzaware(end_date)
+#     if end_date is None:
+#         end_date = timestamp_now()
+#     else:
+#         end_date = timestamp_tzaware(end_date)
 
-    emissions = Emissions.load()
-    datasource_uuids = emissions.datasources()
-    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+#     emissions = Emissions.load()
+#     datasource_uuids = emissions.datasources()
+#     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
-    gen_search_terms = []
-    if sources is not None:
-        gen_search_terms += sources
-    if high_time_res:
-        gen_search_terms.append("high_time_resolution")
+#     gen_search_terms = []
+#     if sources is not None:
+#         gen_search_terms += sources
+#     if high_time_res:
+#         gen_search_terms.append("high_time_resolution")
 
-    keys = defaultdict(dict)
-    # If we have locations to search
-    # for sites in sites:
-    for datasource in datasources:
-        for sp in species:
-            for domain in domains:
-                search_terms = [sp, domain] + gen_search_terms
-                if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):
-                    # Get the data keys for the data in the matching daterange
-                    in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-                    key = "_".join(search_terms)
-                    keys[key]["keys"] = in_date
-                    keys[key]["metadata"] = datasource.metadata()
+#     keys = defaultdict(dict)
+#     # If we have locations to search
+#     # for sites in sites:
+#     for datasource in datasources:
+#         for sp in species:
+#             for domain in domains:
+#                 search_terms = [sp, domain] + gen_search_terms
+#                 if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):
+#                     # Get the data keys for the data in the matching daterange
+#                     in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+#                     key = "_".join(search_terms)
+#                     keys[key]["keys"] = in_date
+#                     keys[key]["metadata"] = datasource.metadata()
 
-    return keys
+#     return keys
 
 
 def _strip_dates_keys(keys):

@@ -58,7 +58,7 @@ def test_read_file():
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
-        "time_resolution": "standard_resolution",
+        "time_resolution": "standard",
         "data_type": "emissions",
     }
 
