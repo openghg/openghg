@@ -4,10 +4,11 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Development API modules &mdash; OpenGHG 0+untagged.1.g8ac9b16 documentation</title>
+  <title>Development API modules &mdash; OpenGHG 0+untagged.1.g5459064 documentation</title>
   
 
   
@@ -191,9 +192,9 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="development-api-modules">
+<section id="development-api-modules">
 <h1>Development API modules<a class="headerlink" href="#development-api-modules" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="cranfield">
+<section id="cranfield">
 <h2>CRANFIELD<a class="headerlink" href="#cranfield" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="openghg.modules.CRANFIELD">
@@ -223,8 +224,8 @@
 
 </dd></dl>
 
-</div>
-<div class="section" id="crds">
+</section>
+<section id="crds">
 <h2>CRDS<a class="headerlink" href="#crds" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="openghg.modules.CRDS">
@@ -338,8 +339,8 @@ dataframes</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="eurocom">
+</section>
+<section id="eurocom">
 <h2>EUROCOM<a class="headerlink" href="#eurocom" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="openghg.modules.EUROCOM">
@@ -413,8 +414,8 @@ the processed data has been assigned to</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="gcwerks">
+</section>
+<section id="gcwerks">
 <h2>GCWERKS<a class="headerlink" href="#gcwerks" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="openghg.modules.GCWERKS">
@@ -632,8 +633,8 @@ precision data</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="icos">
+</section>
+<section id="icos">
 <h2>ICOS<a class="headerlink" href="#icos" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="openghg.modules.ICOS">
@@ -692,8 +693,8 @@ the processed data has been assigned to</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="noaa">
+</section>
+<section id="noaa">
 <h2>NOAA<a class="headerlink" href="#noaa" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="openghg.modules.NOAA">
@@ -802,8 +803,8 @@ data and metadata.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="thamesbarrier">
+</section>
+<section id="thamesbarrier">
 <h2>THAMESBARRIER<a class="headerlink" href="#thamesbarrier" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="openghg.modules.THAMESBARRIER">
@@ -838,8 +839,8 @@ the processed data has been assigned to</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="basemodule">
+</section>
+<section id="basemodule">
 <h2>BaseModule<a class="headerlink" href="#basemodule" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="openghg.modules.BaseModule">
@@ -848,6 +849,23 @@ the processed data has been assigned to</p>
 <dt id="openghg.modules.BaseModule.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/modules/_base.html#BaseModule.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.BaseModule.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="openghg.modules.BaseModule.add_datasources">
+<code class="sig-name descname"><span class="pre">add_datasources</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_uuids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_base.html#BaseModule.add_datasources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.BaseModule.add_datasources" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the passed list of Datasources to the current list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datasource_uuids</strong> – Datasource UUIDs</p></li>
+<li><p><strong>metadata</strong> – Metadata for each species</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -999,8 +1017,8 @@ for storage in object store</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="datasource">
+</section>
+<section id="datasource">
 <h2>Datasource<a class="headerlink" href="#datasource" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="openghg.modules.Datasource">
@@ -1020,15 +1038,15 @@ at a certain height on a specific instrument</p>
 
 <dl class="py method">
 <dt id="openghg.modules.Datasource.add_data">
-<code class="sig-name descname"><span class="pre">add_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'timeseries'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add data to this Datasource and segment the data by size.
 The data is stored as a tuple of the data and the daterange it covers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>metadata</strong> – Metadata on the data for this Datasource</p></li>
-<li><p><strong>data</strong> – xarray.Dataset</p></li>
-<li><p><strong>data_type</strong> – Type of data, one of [“timeseries”, “emissions”, “met”, “footprint”].</p></li>
+<li><p><strong>data</strong> – Data</p></li>
+<li><p><strong>data_type</strong> – Placeholder for combination of this fn with add_footprint_data in the future</p></li>
 <li><p><strong>overwrite</strong> – Overwrite existing data</p></li>
 </ul>
 </dd>
@@ -1059,7 +1077,7 @@ The data is stored as a tuple of the data and the daterange it covers.</p>
 
 <dl class="py method">
 <dt id="openghg.modules.Datasource.add_emissions_data">
-<code class="sig-name descname"><span class="pre">add_emissions_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_emissions_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_emissions_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add_emissions_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_emissions_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_emissions_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add flux data to this Datasource</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1076,7 +1094,7 @@ The data is stored as a tuple of the data and the daterange it covers.</p>
 
 <dl class="py method">
 <dt id="openghg.modules.Datasource.add_field_data">
-<code class="sig-name descname"><span class="pre">add_field_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_field_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_field_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add_field_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_field_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_field_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add footprint data to this Datasource</p>
 <p>TODO - unsure if add_field_data is the best name for this function
 Could add a more general function that allows toggle of chunking</p>
@@ -1096,7 +1114,7 @@ Could add a more general function that allows toggle of chunking</p>
 
 <dl class="py method">
 <dt id="openghg.modules.Datasource.add_footprint_data">
-<code class="sig-name descname"><span class="pre">add_footprint_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_footprint_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_footprint_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add_footprint_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_footprint_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_footprint_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add footprint data to this Datasource</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1136,20 +1154,6 @@ This will overwrite any previous entry stored at that key.</p>
 <li><p><strong>key</strong> – Key for dictionary</p></li>
 <li><p><strong>value</strong> – Value for dictionary</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="openghg.modules.Datasource.add_timeseries_data">
-<code class="sig-name descname"><span class="pre">add_timeseries_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_timeseries_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_timeseries_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add timeseries data to this Datasource</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – An xarray.Dataset</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>None</p>
@@ -1821,8 +1825,8 @@ this Datasource</p>
 
 <div class="toctree-wrapper compound">
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
