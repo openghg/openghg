@@ -14,7 +14,7 @@ def test_read_footprint():
     get_local_bucket(empty=True)
 
     datapath = get_datapath("footprint_test.nc")
-    model_params = {"simulation_params": "123"}
+    # model_params = {"simulation_params": "123"}
 
     site = "TMB"
     network = "LGHG"
@@ -22,9 +22,7 @@ def test_read_footprint():
     domain = "EUROPE"
     model = "test_model"
 
-    FOOTPRINTS.read_file(
-        filepath=datapath, site=site, model=model, network=network, height=height, domain=domain, model_params=model_params
-    )
+    FOOTPRINTS.read_file(filepath=datapath, site=site, model=model, network=network, height=height, domain=domain)
 
     # Get the footprint data
     footprint_results = search(site=site, domain=domain, data_type="footprint")
@@ -119,7 +117,6 @@ def test_read_footprint():
 
 def test_read_same_footprint_twice_raises():
     datapath = get_datapath("footprint_test.nc")
-    model_params = {"simulation_params": "123"}
 
     with pytest.raises(ValueError):
         FOOTPRINTS.read_file(
@@ -129,5 +126,72 @@ def test_read_same_footprint_twice_raises():
             network="LGHG",
             domain="EUROPE",
             height="10magl",
-            model_params=model_params,
         )
+
+
+def test_set_lookup_uuids():
+    f = FOOTPRINTS()
+
+    fake_uuid = "123456789"
+
+    site = "test_site"
+    domain = "test_domain"
+    model = "test_model"
+    height = "test_height"
+
+    f.set_uuid(site=site, domain=domain, model=model, height=height, uuid=fake_uuid)
+
+    found_uid = f.lookup_uuid(site=site, domain=domain, model=model, height=height)
+
+    assert f._datasource_table[site][domain][model][height] == found_uid == fake_uuid
+
+
+def test_datasource_add_lookup():
+    f = FOOTPRINTS()
+
+    fake_datasource = {"tmb_lghg_10m_europe": "mock-uuid-123456"}
+
+    fake_metadata = {
+        "tmb_lghg_10m_europe": {
+            "data_type": "footprint",
+            "site": "tmb",
+            "height": "10m",
+            "domain": "europe",
+            "model": "test_model",
+            "network": "lghg",
+        }
+    }
+
+    f.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
+
+    assert f.datasources() == ["mock-uuid-123456"]
+
+    lookup = f.datasource_lookup(fake_metadata)
+
+    assert lookup == fake_datasource
+
+
+def test_wrong_uuid_raises():
+    f = FOOTPRINTS()
+
+    fake_datasource = {"tmb_lghg_10m_europe": "mock-uuid-123456"}
+
+    fake_metadata = {
+        "tmb_lghg_10m_europe": {
+            "data_type": "footprint",
+            "site": "tmb",
+            "height": "10m",
+            "domain": "europe",
+            "model": "test_model",
+            "network": "lghg",
+        }
+    }
+
+    f.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
+
+    assert f.datasources() == ["mock-uuid-123456"]
+
+    changed_datasource = {"tmb_lghg_10m_europe": "mock-uuid-8888888"}
+
+    with pytest.raises(ValueError):
+        f.add_datasources(datasource_uuids=changed_datasource, metadata=fake_metadata)

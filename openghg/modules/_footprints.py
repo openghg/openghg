@@ -19,11 +19,13 @@ class FOOTPRINTS(BaseModule):
         height: str,
         domain: str,
         model: str,
-        model_params: Dict,
+        metmodel: Optional[str] = None,
+        species: Optional[str] = None,
         network: Optional[str] = None,
         retrieve_met: Optional[bool] = False,
         overwrite: Optional[bool] = False,
         high_res: Optional[bool] = False,
+        # model_params: Optional[Dict] = None,
     ) -> Dict:
         """Reads footprint data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -40,7 +42,6 @@ class FOOTPRINTS(BaseModule):
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
-        # from openghg.processing import assign_attributes
         from collections import defaultdict
         from xarray import open_dataset
         from openghg.util import hash_file, timestamp_tzaware, timestamp_now, clean_string
@@ -70,8 +71,14 @@ class FOOTPRINTS(BaseModule):
         metadata["domain"] = domain
         metadata["model"] = model
 
+        if species is not None:
+            metadata["species"] = clean_string(species)
+
         if network is not None:
-            metadata["network"] = network
+            metadata["network"] = clean_string(network)
+
+        if metmodel is not None:
+            metadata["metmodel"] = clean_string(metmodel)
 
         metadata["start_date"] = str(timestamp_tzaware(fp_data.time[0].values))
         metadata["end_date"] = str(timestamp_tzaware(fp_data.time[-1].values))
@@ -97,7 +104,8 @@ class FOOTPRINTS(BaseModule):
         # Do we also need to save all the variables we have available in this footprint?
         metadata["variables"] = list(fp_data.keys())
 
-        # metadata["model_parameters"] = model_params
+        # if model_params is not None:
+        #     metadata["model_parameters"] = model_params
 
         # Set the attributes of this Dataset
         fp_data.attrs = {"author": "OpenGHG Cloud", "processed": str(timestamp_now())}
