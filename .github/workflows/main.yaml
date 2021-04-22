@@ -42,9 +42,13 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-cache
-    - name: Install openghg
+    - name: Lint with flake8
       run: |
         python -m pip install --upgrade pip==20.2.4 wheel
+        pip install flake8
+        flake8 openghg/ --count --statistics
+    - name: Install openghg
+      run: |
         pip install -r requirements-dev.txt
         pip install .
     - name: 'Clone Acquire for services folder required for tests'
@@ -52,9 +56,6 @@ jobs:
         git clone -b testStore https://github.com/gareth-j/acquire.git ../acquire
         pip install -r ../acquire/requirements.txt
         pip install oci retry
-    - name: Lint with flake8
-      run: |
-        flake8 openghg/ --count --statistics
     - name: Create mock cdsapi config file
       run: |
         echo $'url: https://www.openghg.org\nkey: 00000:f5690ad7-test-test-test-6fb0573991ca\n' > ~/.cdsapirc
