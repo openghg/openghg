@@ -43,7 +43,7 @@ def single_site_footprint(
     Returns:
         xarray.Dataset
     """
-    from openghg.processing import get_observations, recombine_datasets, search_footprints
+    from openghg.processing import get_obs_surface, recombine_datasets, search
     from openghg.util import timestamp_tzaware
 
     start_date = timestamp_tzaware(start_date)
@@ -58,19 +58,12 @@ def single_site_footprint(
     tolerance = None
     platform = None
 
-    # Here we want to use get_observations
-    obs_results = get_observations(
+    # Here we want to use get_obs_surface
+    obs_results = get_obs_surface(
         site=site, inlet=height, start_date=start_date, end_date=end_date, species=species, instrument=instrument
     )
 
-    if len(obs_results) > 1:
-        raise ValueError("More than one ObsData object returned. Unable to continue.")
-
-    try:
-        obs_data = obs_results[0].data
-        # TODO - remove this once further checks are in place within get_obs and here to combine the returned data - GJ - 2021-03-10
-    except IndexError:
-        raise IndexError("Unable to find observation data for the passed parameters.")
+    obs_data = obs_results.data
 
     # Save the observation data units
     try:
@@ -86,8 +79,8 @@ def single_site_footprint(
         footprint_site = site_modifier
 
     # Get the footprint data
-    footprint_results = search_footprints(
-        sites=footprint_site, domains=domain, inlet=height, start_date=start_date, end_date=end_date
+    footprint_results = search(
+        site=footprint_site, domain=domain, inlet=height, start_date=start_date, end_date=end_date, data_type="footprint"
     )
 
     try:
