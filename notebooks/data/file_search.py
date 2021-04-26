@@ -96,6 +96,8 @@ def find_crds_files(site):
 
 def find_icos_files(site):
     '''
+    NOT USED AT THE MOMENT
+    
     Find data files for ICOS sites.
 
     Args:
@@ -125,23 +127,31 @@ def find_icos_files(site):
     return data_files
 
 def data_type_function():
+    '''
+    Defines functions for finding files related to each data type.
+    Includes "GCWERKS", "CRDS" and "ICOS" at present.
     
+    Returns:
+        dict :
+            Dictionary of read file functions for each data type
+    
+    '''
     data_type_dict = {"GCWERKS": find_gc_files,
                       "CRDS": find_crds_files,
                       "ICOS": find_icos_files}
+    
     return data_type_dict
     
 
 def site_all():
     '''
-    Defines inputs needed to find the files for sites within the AGAGE, 
-    DECC and ICOS networks which are loaded as standard into our 
+    Defines inputs needed to find the files for sites within the AGAGE
+    and DECC networks which are loaded as standard into our 
     object store.
     
     This is split into three data types (based on the necessary processing):
         - GCWERKS
         - CRDS
-        - ICOS
     
     To find the data files and then to load the data details are needed
     for:
@@ -203,23 +213,16 @@ def site_all():
         {"site": "RGL","network":"DECC"},
         {"site": "TAC","network":"DECC"}        
       ]
-
-
-    icos_input = \
-      [
-        {"site": "MHD","network":"ICOS"}
-      ]
     
     instrument_details = {"GCWERKS":gc_werks_input,
-                          "CRDS":crds_input,
-                          "ICOS":icos_input}
+                          "CRDS":crds_input}
 
     return instrument_details
 
 def find_all_files():
     '''
-    Finds all the filenames for sites within the AGAGE, 
-    DECC and ICOS networks which are loaded as standard into our 
+    Finds all the filenames for sites within the AGAGE and
+    DECC networks which are loaded as standard into our 
     object store.
     See site_all() function for full list.
     
