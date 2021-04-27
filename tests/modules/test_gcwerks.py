@@ -77,7 +77,7 @@ def test_read_file_thd(data_thd, prec_thd):
     assert sorted(list(gas_data.keys())) == expected_keys
 
     expected_metadata = {
-        "instrument": "GCMD",
+        "instrument": "gcmd",
         "site": "thd",
         "network": "AGAGE",
         "species": "ch3ccl3",
@@ -97,15 +97,6 @@ def test_read_file_thd(data_thd, prec_thd):
     assert meas_data["ch3ccl3"][-1] == 34.649
 
 
-def test_read_file_incorrect_inlet_raises(cgo_prec_path):
-    data_path = get_datapath("capegrim-incorrect-inlet.18.C")
-
-    gc = GC()
-
-    with pytest.raises(ValueError):
-        gc.read_file(data_filepath=data_path, precision_filepath=cgo_prec_path, site="CGO", instrument="medusa", network="AGAGE")
-
-
 def test_read_invalid_instrument_raises(data_thd, prec_thd):
     gc = GC()
 
@@ -120,13 +111,13 @@ def test_instrument_translator_works():
 
     instrument_name = gc.instrument_translator(instrument=instrument_suffix)
 
-    assert instrument_name == "GCMD"
+    assert instrument_name == "gcmd"
 
     instrument_suffix = "gcms"
 
     instrument_name = gc.instrument_translator(instrument=instrument_suffix)
 
-    assert instrument_name == "GCMS"
+    assert instrument_name == "gcms"
 
     instrument_suffix = "medusa"
 
@@ -151,7 +142,7 @@ def test_instrument_translator_raises():
 def test_read_data(cgo_path, cgo_prec_path):
     # Capegrim
     site = "CGO"
-    instrument = "GCMD"
+    instrument = "gcmd"
 
     gc = GC()
     data = gc.read_data(
@@ -223,3 +214,92 @@ def test_no_precisions_species_raises(cgo_path):
 
     with pytest.raises(ValueError):
         gc.read_file(data_filepath=cgo_path, precision_filepath=missing_species_prec, site="cgo", network="AGAGE")
+
+
+def test_read_ridgehill_window_inlet_all_NaNs():
+    data_path = get_datapath(filename="ridgehill-md.11.C")
+    prec_path = get_datapath(filename="ridgehill-md.11.precisions.C")
+
+    gc = GC()
+    res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="RGL", instrument="medusa", network="AGAGE")
+
+    assert not res
+
+
+def test_read_thd_window_inlet():
+    data_path = get_datapath(filename="trinidadhead-window-inlet.01.C")
+    prec_path = get_datapath(filename="trinidadhead.01.precisions.C")
+
+    gc = GC()
+    res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="AGAGE")
+
+    expected_metadata = {
+        "instrument": "gcmd",
+        "site": "thd",
+        "network": "AGAGE",
+        "species": "ch4",
+        "units": "ppb",
+        "scale": "Tohoku",
+        "inlet": "10m",
+    }
+
+    metadata = res["ch4_10m"]["metadata"]
+
+    assert metadata == expected_metadata
+
+    data = res["ch4_10m"]["data"]
+
+    assert data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
+    assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
+    assert data["ch4"][0] == pytest.approx(1818.62)
+    assert data["ch4"][-1] == pytest.approx(1840.432)
+
+
+def test_read_shangdianzi_ASM_inlet():
+    data_path = get_datapath(filename="shangdianzi-medusa.18.C")
+    prec_path = get_datapath(filename="shangdianzi-medusa.18.precisions.C")
+
+    gc = GC()
+    res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="SDZ", instrument="medusa", network="AGAGE")
+
+    expected_metadata = {
+        "instrument": "medusa",
+        "site": "SDZ",
+        "network": "AGAGE",
+        "species": "nf3",
+        "units": "ppt",
+        "scale": "SIO-12",
+        "inlet": "80m",
+    }
+
+    metadata = res["nf3_80m"]["metadata"]
+
+    assert metadata == expected_metadata
+
+    data = res["nf3_80m"]["data"]
+
+    data.time[0] == pd.Timestamp("2018-01-16T09:10:00")
+    data.time[-1] == pd.Timestamp("2018-01-16T20:00:00")
+    data["nf3"][0] == pytest.approx(2.172)
+    data["nf3"][-1] == pytest.approx(2.061)
+
+    # expected_metadata = {
+    #     "instrument": "gcmd",
+    #     "site": "thd",
+    #     "network": "AGAGE",
+    #     "species": "ch4",
+    #     "units": "ppb",
+    #     "scale": "Tohoku",
+    #     "inlet": "10m",
+    # }
+
+    # metadata = res["ch4_10m"]["metadata"]
+
+    # assert metadata == expected_metadata
+
+    # data = res["ch4_10m"]["data"]
+
+    # assert data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
+    # assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
+    # assert data["ch4"][0] == pytest.approx(1818.62)
+    # assert data["ch4"][-1] == pytest.approx(1840.432)
