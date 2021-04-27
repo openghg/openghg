@@ -328,11 +328,11 @@ class GCWERKS:
 
             # Here inlet is the inlet in the data and inlet_label is the label we want to use as metadata
             for inlet, inlet_label in expected_inlets.items():
-                spec_metadata["inlet"] = inlet_label
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
                     spec_data = data[[spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]]
                     spec_data = spec_data.dropna(axis="index", how="any")
+                    spec_metadata["inlet"] = inlet_label
                 elif "date" in inlet:
                     # print("inlet : ", inlet)
                     dates = inlet.split("_")[1:]
@@ -343,13 +343,17 @@ class GCWERKS:
                         [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
                     ]
                     spec_data = spec_data.dropna(axis="index", how="any")
+                    spec_metadata["inlet"] = inlet_label
                 else:
+                    # Find the inlet
                     matching_inlets = [i for i in data_inlets if fnmatch(i, inlet)]
 
                     if not matching_inlets:
                         continue
 
-                    # Find the inlet
+                    # Only set the label in metadata when we have the correct label
+                    spec_metadata["inlet"] = inlet_label
+                    # There should only be one matching label
                     select_inlet = matching_inlets[0]
                     # Take only data for this inlet from the dataframe
                     inlet_data = data.loc[data["Inlet"] == select_inlet]
