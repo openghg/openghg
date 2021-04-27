@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._gcwerks &mdash; OpenGHG 0+untagged.1.g5459064 documentation</title>
+  <title>openghg.modules._gcwerks &mdash; OpenGHG 0+untagged.1.g16e98a9 documentation</title>
   
 
   
@@ -474,33 +474,13 @@
         <span class="kn">from</span> <span class="nn">fnmatch</span> <span class="kn">import</span> <span class="n">fnmatch</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">compliant_string</span>
 
-        <span class="c1"># Read inlets from the parameters dictionary</span>
+        <span class="c1"># Read inlets from the parameters</span>
         <span class="n">expected_inlets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inlets</span><span class="p">(</span><span class="n">site_code</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">expected_inlets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">expected_inlets</span><span class="p">))</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span><span class="p">:</span>
-            <span class="n">matching_inlets</span> <span class="o">=</span> <span class="n">expected_inlets</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Get the inlets in the dataframe</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">data_inlets</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Inlet&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-                    <span class="s2">&quot;Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module&quot;</span>
-                <span class="p">)</span>
-
-            <span class="c1"># For now just add air to the expected inlets</span>
-            <span class="n">expected_inlets</span><span class="p">[</span><span class="s2">&quot;air&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;air&quot;</span>
-
-            <span class="c1"># Make a mapping of the inlet we have in the data to the one we want to use</span>
-            <span class="n">matching_inlets</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">data_inlet</span><span class="p">:</span> <span class="n">expected_inlets</span><span class="p">[</span><span class="n">inlet</span><span class="p">]</span> <span class="k">for</span> <span class="n">data_inlet</span> <span class="ow">in</span> <span class="n">data_inlets</span> <span class="k">for</span> <span class="n">inlet</span> <span class="ow">in</span> <span class="n">expected_inlets</span> <span class="k">if</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">data_inlet</span><span class="p">,</span> <span class="n">inlet</span><span class="p">)</span>
-            <span class="p">}</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_inlets</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Inlet mismatch - please ensure correct site is selected.&quot;</span>
-                    <span class="s2">&quot;Mismatch between inlet in data and inlet in parameters file.&quot;</span>
-                <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data_inlets</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Inlet&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module&quot;</span><span class="p">)</span>
 
         <span class="n">combined_data</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -517,23 +497,36 @@
             <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span>
 
             <span class="c1"># Here inlet is the inlet in the data and inlet_label is the label we want to use as metadata</span>
-            <span class="k">for</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">inlet_label</span> <span class="ow">in</span> <span class="n">matching_inlets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_label</span>
+            <span class="k">for</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">inlet_label</span> <span class="ow">in</span> <span class="n">expected_inlets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="c1"># If we&#39;ve only got a single inlet</span>
                 <span class="k">if</span> <span class="n">inlet</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span> <span class="ow">or</span> <span class="n">inlet</span> <span class="o">==</span> <span class="s2">&quot;air&quot;</span><span class="p">:</span>
                     <span class="n">spec_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="n">spec</span><span class="p">,</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; repeatability&quot;</span><span class="p">,</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; status_flag&quot;</span><span class="p">,</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; integration_flag&quot;</span><span class="p">,</span> <span class="s2">&quot;Inlet&quot;</span><span class="p">]]</span>
                     <span class="n">spec_data</span> <span class="o">=</span> <span class="n">spec_data</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">)</span>
+                    <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_label</span>
                 <span class="k">elif</span> <span class="s2">&quot;date&quot;</span> <span class="ow">in</span> <span class="n">inlet</span><span class="p">:</span>
+                    <span class="c1"># print(&quot;inlet : &quot;, inlet)</span>
                     <span class="n">dates</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
-                    <span class="n">slice_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="nb">slice</span><span class="p">(</span><span class="n">dates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dates</span><span class="p">[</span><span class="mi">1</span><span class="p">])}</span>
-                    <span class="n">data_sliced</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">(</span><span class="n">slice_dict</span><span class="p">)</span>
+                    <span class="c1"># slice_dict = {&quot;time&quot;: slice(dates[0], dates[1])}</span>
+
+                    <span class="n">data_sliced</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">dates</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">dates</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
                     <span class="n">spec_data</span> <span class="o">=</span> <span class="n">data_sliced</span><span class="p">[</span>
                         <span class="p">[</span><span class="n">spec</span><span class="p">,</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; repeatability&quot;</span><span class="p">,</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; status_flag&quot;</span><span class="p">,</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; integration_flag&quot;</span><span class="p">,</span> <span class="s2">&quot;Inlet&quot;</span><span class="p">]</span>
                     <span class="p">]</span>
                     <span class="n">spec_data</span> <span class="o">=</span> <span class="n">spec_data</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">)</span>
+                    <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_label</span>
                 <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Find the inlet</span>
+                    <span class="n">matching_inlets</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">data_inlets</span> <span class="k">if</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">inlet</span><span class="p">)]</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_inlets</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># Only set the label in metadata when we have the correct label</span>
+                    <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_label</span>
+                    <span class="c1"># There should only be one matching label</span>
+                    <span class="n">select_inlet</span> <span class="o">=</span> <span class="n">matching_inlets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="c1"># Take only data for this inlet from the dataframe</span>
-                    <span class="n">inlet_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;Inlet&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">inlet</span><span class="p">]</span>
+                    <span class="n">inlet_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;Inlet&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">select_inlet</span><span class="p">]</span>
 
                     <span class="n">spec_data</span> <span class="o">=</span> <span class="n">inlet_data</span><span class="p">[</span>
                         <span class="p">[</span><span class="n">spec</span><span class="p">,</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; repeatability&quot;</span><span class="p">,</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; status_flag&quot;</span><span class="p">,</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; integration_flag&quot;</span><span class="p">,</span> <span class="s2">&quot;Inlet&quot;</span><span class="p">]</span>
@@ -584,6 +577,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            int: Precision of instrument in seconds</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">instrument</span> <span class="o">=</span> <span class="n">instrument</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">sampling_period</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">][</span><span class="n">instrument</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -638,14 +632,17 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary of attributes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()][</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
+        <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">instrument</span> <span class="o">=</span> <span class="n">instrument</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="n">attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
 
         <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">][</span><span class="n">instrument</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="n">valid_instruments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid instrument passed, valid instruments : </span><span class="si">{</span><span class="n">valid_instruments</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid instrument </span><span class="si">{</span><span class="n">instrument</span><span class="si">}</span><span class="s2"> passed, valid instruments : </span><span class="si">{</span><span class="n">valid_instruments</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">attributes</span></div></div>
 </pre></div>
@@ -661,7 +658,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 22, 2021.
+        Last updated on Apr 27, 2021.
       </span>
 
     </p>
