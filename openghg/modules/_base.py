@@ -147,6 +147,8 @@ class BaseModule:
         Returns:
             None
         """
+        from openghg.modules import Datasource
+
         for key, uid in datasource_uuids.items():
             md = metadata[key]
             site = md["site"]
@@ -157,6 +159,10 @@ class BaseModule:
             result = self._datasource_table[site][network][inlet][species]
 
             if result and result != uid:
+                print(metadata[key], "\n\n\n", result, uid)
+                d = Datasource.load(uuid=result)
+                print(d.metadata())
+
                 raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
             else:
                 self._datasource_table[site][network][inlet][species] = uid

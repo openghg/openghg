@@ -40,10 +40,10 @@ def assign_data(gas_data: Dict, lookup_results: Dict, overwrite: bool) -> Dict:
 
         # If we have a UUID for this Datasource load the existing object
         # from the object store
-        if uuid:
-            datasource = Datasource.load(uuid=uuid)
-        else:
+        if uuid is False:
             datasource = Datasource()
+        else:
+            datasource = Datasource.load(uuid=uuid)
 
         # Add the dataframe to the datasource
         datasource.add_data(metadata=metadata, data=data, overwrite=overwrite)
