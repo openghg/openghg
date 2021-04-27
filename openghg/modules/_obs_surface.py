@@ -148,7 +148,7 @@ class ObsSurface(BaseModule):
                     lookup_results = obs.datasource_lookup(metadata=metadata)
 
                     # Create Datasources, save them to the object store and get their UUIDs
-                    datasource_uuids = assign_data(gas_data=data, lookup_results=lookup_results, overwrite=overwrite)
+                    datasource_uuids = assign_data(data_dict=data, lookup_results=lookup_results, overwrite=overwrite)
 
                     results["processed"][data_filepath.name] = datasource_uuids
 
@@ -191,12 +191,37 @@ class ObsSurface(BaseModule):
 
             result = self._datasource_table[site][network][inlet][species]
 
+            # If we get an empty dict set as False
             if not result:
                 result = False
 
             lookup_results[key] = result
 
         return lookup_results
+
+    def add_datasources(self, datasource_uuids: Dict, metadata: Dict) -> None:
+        """Add the passed list of Datasources to the current list
+
+        Args:
+            datasource_uuids: Datasource UUIDs
+            metadata: Metadata for each species
+        Returns:
+            None
+        """
+        for key, uid in datasource_uuids.items():
+            md = metadata[key]
+            site = md["site"]
+            network = md["network"]
+            inlet = md["inlet"]
+            species = md["species"]
+
+            result = self._datasource_table[site][network][inlet][species]
+
+            if result and result != uid:
+                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
+            else:
+                self._datasource_table[site][network][inlet][species] = uid
+                self._datasource_uuids[uid] = key
 
     def save_datsource_info(self, datasource_data: Dict) -> None:
         """Save the datasource information to

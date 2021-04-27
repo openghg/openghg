@@ -33,9 +33,10 @@ class Emissions(BaseModule):
     def read_file(
         filepath: Union[str, Path],
         species: str,
-        domain: str,
         source: str,
-        high_time_resolution: bool,
+        domain: str,
+        date: str,
+        high_time_resolution: Optional[bool] = False,
         period: Optional[str] = None,
         overwrite: Optional[bool] = False,
     ):
@@ -50,9 +51,17 @@ class Emissions(BaseModule):
             period: Period of measurements, if not passed this is inferred from the time coords
             overwrite: Should this data overwrite currently stored data.
         """
-        from xarray import open_dataset, infer_freq
-        from openghg.processing import assign_emissions_data
-        from openghg.util import hash_file, timestamp_tzaware, timestamp_now
+        from collections import defaultdict
+        from xarray import open_dataset
+        from openghg.processing import assign_data
+        from openghg.util import clean_string, hash_file, timestamp_tzaware, timestamp_now
+
+        species = clean_string(species)
+        source = clean_string(source)
+        domain = clean_string(domain)
+        date = clean_string(date)
+
+        filepath = Path(filepath)
 
         em_store = Emissions.load()
 
@@ -60,7 +69,6 @@ class Emissions(BaseModule):
         if file_hash in em_store._file_hashes and not overwrite:
             raise ValueError(f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]}.")
 
-        filepath = Path(filepath)
         em_data = open_dataset(filepath)
 
         # Some attributes are numpy types we can't serialise to JSON so convert them
@@ -80,6 +88,8 @@ class Emissions(BaseModule):
 
         metadata["species"] = species
         metadata["domain"] = domain
+        metadata["source"] = source
+        metadata["date"] = date
         metadata["author"] = author_name
         metadata["processed"] = str(timestamp_now())
 
@@ -91,47 +101,108 @@ class Emissions(BaseModule):
         metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
         metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
 
-        metadata["time_resolution"] = "high_resolution" if high_time_resolution else "standard_resolution"
+        metadata["time_resolution"] = "high" if high_time_resolution else "standard"
 
         if period is not None:
             metadata["time_period"] = period
-        else:
-            metadata["time_period"] = infer_freq(em_data.time)
 
-        # Check if we've seen data from this site before
-        em_hash = em_store._get_emissions_hash(species=species, domain=domain)
+        key = "_".join((species, source, domain, date))
 
-        if em_hash in em_store._datasource_uuids:
-            datasource_uid = em_store._datasource_uuids[em_hash]
-        else:
-            datasource_uid = False
+        emissions_data = defaultdict(dict)
+        emissions_data[key]["data"] = em_data
+        emissions_data[key]["metadata"] = metadata
 
-        uid = assign_emissions_data(data=em_data, metadata=metadata, datasource_uid=datasource_uid)
+        keyed_metadata = {key: metadata}
 
-        em_store.add_datasources(datasource_uuids={em_hash: uid})
+        lookup_results = em_store.datasource_lookup(metadata=keyed_metadata)
+
+        data_type = "emissions"
+        datasource_uuids = assign_data(data_dict=emissions_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type)
+
+        em_store.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
 
         em_store.save()
 
-        return {str(filepath.name): uid}
+        return datasource_uuids
 
-    def _get_emissions_hash(self, species, domain, **kwargs):
-        from openghg.util import hash_string
-        import re
+    def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, Dict]:
+        """Perform a lookup for the UUID of a Datasource
 
-        terms = [species, domain]
-        safer_terms = []
-        for term in terms:
-            # Make sure we don't have any spaces and it's lowercase
-            safer = re.sub(r"\s+", "", term, flags=re.UNICODE).lower()
-            # Make sure we only have alphanumeric values
-            if re.match(r"^\w+$", safer) is None:
-                raise ValueError("Please ensure site, network and height arguments only contain alphanumeric values.")
+        Args:
+            site: Site code
+            domain: Domain
+            model: Model name
+            height: Height
+        Returns:
+            str or dict: UUID or empty dict if no entry
+        """
+        return self._datasource_table[species][source][domain][date]
 
-            safer_terms.append(safer)
+    def set_uuid(self, species: str, source: str, domain: str, date: str, uuid: str) -> None:
+        """Record a UUID of a Datasource in the datasource table
 
-        combined_str = "_".join(safer_terms)
+        Args:
+            site: Site code
+            domain: Domain
+            model: Model name
+            height: Height
+            uuid: UUID of Datasource
+        Returns:
+            None
+        """
+        self._datasource_table[species][source][domain][date] = uuid
 
-        return hash_string(to_hash=combined_str)
+    def datasource_lookup(self, metadata: Dict) -> Dict:
+        """Find the Datasource we should assign the data to
+
+        Args:
+            metadata: Dictionary of metadata
+        Returns:
+            dict: Dictionary of datasource information
+        """
+        # TODO - I'll leave this as a function for now as the way we read emissions may 
+        # change in the near future
+        # GJ - 2021-04-20
+        lookup_results = {}
+
+        for key, data in metadata.items():
+            species = data["species"]
+            source = data["source"]
+            domain = data["domain"]
+            date = data["date"]
+
+            result = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
+
+            if not result:
+                result = False
+
+            lookup_results[key] = result
+
+        return lookup_results
+
+    def add_datasources(self, datasource_uuids: Dict, metadata: Dict) -> None:
+        """Add the passed list of Datasources to the current list
+
+        Args:
+            datasource_uuids: Datasource UUIDs
+            metadata: Metadata for each species
+        Returns:
+            None
+        """
+        for key, uid in datasource_uuids.items():
+            md = metadata[key]
+            species = md["species"]
+            source = md["source"]
+            domain = md["domain"]
+            date = md["date"]
+
+            result = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
+
+            if result and result != uid:
+                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
+            else:
+                self.set_uuid(species=species, source=source, domain=domain, date=date, uuid=uid)
+                self._datasource_uuids[uid] = key

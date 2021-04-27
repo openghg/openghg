@@ -114,28 +114,44 @@ class Datasource:
         # Use daterange() to update the recorded values
         self.update_daterange()
 
-    def add_data(
-        self, metadata: Dict, data: Dataset, data_type: Optional[str] = "timeseries", overwrite: Optional[bool] = False
-    ) -> None:
+    def add_data(self, metadata: Dict, data: Dataset, data_type: str, overwrite: Optional[bool] = False) -> None:
         """Add data to this Datasource and segment the data by size.
         The data is stored as a tuple of the data and the daterange it covers.
 
         Args:
             metadata: Metadata on the data for this Datasource
-            data: Data
-            data_type: Placeholder for combination of this fn with add_footprint_data in the future
+            data: xarray.Dataset
+            data_type: Type of data, one of ["timeseries", "emissions", "met", "footprint"].
             overwrite: Overwrite existing data
         Returns:
             None
         """
-        from openghg.util import date_overlap
+        data_types = ["timeseries", "emissions", "met", "footprint"]
 
-        data_types = ["timeseries", "met"]
-
+        data_type = data_type.lower()
         if data_type not in data_types:
             raise TypeError(f"Incorrect data type selected. Please select from one of {data_types}")
 
         self.add_metadata(metadata=metadata)
+
+        if data_type == "timeseries":
+            return self.add_timeseries_data(data=data)
+        elif data_type == "footprint":
+            return self.add_footprint_data(data=data)
+        elif data_type == "emissions":
+            return self.add_emissions_data(data=data)
+        elif data_type == "met":
+            raise NotImplementedError()
+
+    def add_timeseries_data(self, data: Dataset) -> None:
+        """Add timeseries data to this Datasource
+
+        Args:
+            data: An xarray.Dataset
+        Returns:
+            None
+        """
+        from openghg.util import date_overlap
 
         # Group by year then by season
         year_group = list(data.groupby("time.year"))
@@ -175,7 +191,8 @@ class Datasource:
         else:
             self._data = additional_data
 
-        self._data_type = "timeseries"
+        data_type = "timeseries"
+        self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
         self.update_daterange()
 
@@ -192,7 +209,7 @@ class Datasource:
         metadata = to_lowercase(metadata)
         self._metadata.update(metadata)
 
-    def add_emissions_data(self, data: Dataset, metadata: Dict) -> None:
+    def add_emissions_data(self, data: Dataset) -> None:
         """Add flux data to this Datasource
 
         Args:
@@ -201,9 +218,9 @@ class Datasource:
         Returns:
             None
         """
-        self.add_field_data(data=data, metadata=metadata, data_type="emissions")
+        self.add_field_data(data=data, data_type="emissions")
 
-    def add_footprint_data(self, data: Dataset, metadata: Dict) -> None:
+    def add_footprint_data(self, data: Dataset) -> None:
         """Add footprint data to this Datasource
 
         Args:
@@ -212,9 +229,9 @@ class Datasource:
         Returns:
             None
         """
-        self.add_field_data(data=data, metadata=metadata, data_type="footprint")
+        self.add_field_data(data=data, data_type="footprint")
 
-    def add_field_data(self, data: Dataset, metadata: Dict, data_type: str) -> None:
+    def add_field_data(self, data: Dataset, data_type: str) -> None:
         """Add footprint data to this Datasource
 
         TODO - unsure if add_field_data is the best name for this function
@@ -228,8 +245,6 @@ class Datasource:
             None
         """
         from openghg.util import date_overlap
-
-        self.add_metadata(metadata=metadata)
 
         # Use a dictionary keyed with the daterange covered by each segment of data
         new_data = {}
@@ -683,6 +698,7 @@ class Datasource:
             bool: True if found else False
         """
         from warnings import warn
+
         warn("This function will be removed in a future release", DeprecationWarning)
 
         if start_date is not None and end_date is not None:
