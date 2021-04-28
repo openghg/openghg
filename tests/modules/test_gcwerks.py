@@ -303,3 +303,12 @@ def test_read_shangdianzi_ASM_inlet():
     # assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
     # assert data["ch4"][0] == pytest.approx(1818.62)
     # assert data["ch4"][-1] == pytest.approx(1840.432)
+
+
+# def test_cgo_multi_inlet_reads_correctly():
+#     data_path = "/home/gar/Documents/Devel/RSE/openghg/data/data-gcms/capegrim-medusa.05.C"
+#     prec_path = "/home/gar/Documents/Devel/RSE/openghg/data/data-gcms/capegrim-medusa.05.precisions.C"
+
+#     gc = GC()
+#     res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="CGO", instrument="medusa", network="AGAGE")
+

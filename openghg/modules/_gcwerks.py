@@ -319,26 +319,23 @@ class GCWERKS:
             if data[spec].isnull().all():
                 continue
 
-            # Create a copy of metadata for local modification
-            spec_metadata = metadata.copy()
-
-            spec_metadata["species"] = compliant_string(spec)
-            spec_metadata["units"] = units[spec]
-            spec_metadata["scale"] = scale[spec]
-
             # Here inlet is the inlet in the data and inlet_label is the label we want to use as metadata
             for inlet, inlet_label in expected_inlets.items():
+                # Create a copy of metadata for local modification
+                spec_metadata = metadata.copy()
+                spec_metadata["species"] = compliant_string(spec)
+                spec_metadata["units"] = units[spec]
+                spec_metadata["scale"] = scale[spec]
+
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
                     spec_data = data[[spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]]
                     spec_data = spec_data.dropna(axis="index", how="any")
                     spec_metadata["inlet"] = inlet_label
                 elif "date" in inlet:
-                    # print("inlet : ", inlet)
                     dates = inlet.split("_")[1:]
-                    # slice_dict = {"time": slice(dates[0], dates[1])}
-
                     data_sliced = data.loc[dates[0]:dates[1]]
+
                     spec_data = data_sliced[
                         [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
                     ]
@@ -371,7 +368,7 @@ class GCWERKS:
                 if spec_data.empty:
                     continue
 
-                attributes = self.get_site_attributes(site=site, inlet=inlet_label, instrument=instrument)
+                attributes = self.get_site_attributes(site=site, inlet=inlet_label, instrument=instrument).copy()
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
