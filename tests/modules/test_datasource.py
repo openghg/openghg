@@ -262,7 +262,7 @@ def test_from_data(data):
     metadata = d_2.metadata()
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
-    assert metadata["time_resolution"] == "1_minute"
+    assert metadata["sampling_period"] == 60
     assert metadata["inlet"] == "248m"
 
     assert d_2.data_keys() == d.data_keys()

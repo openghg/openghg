@@ -188,6 +188,7 @@ def test_read_GC():
         "units": "ppt",
         "scale": "SIO-05",
         "inlet": "70m",
+        "sampling_period": 1200,
     }
 
     # # Now test that if we add more data it adds it to the same Datasource
