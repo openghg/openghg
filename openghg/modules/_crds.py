@@ -2,7 +2,6 @@ from openghg.util import load_json
 from pandas import DataFrame, Timedelta
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
-import numbers
 
 
 __all__ = ["CRDS"]
@@ -49,9 +48,8 @@ class CRDS:
         # Process the data into separate Datasets
         gas_data = self.read_data(data_filepath=data_filepath, site=site, network=network, 
                                   sampling_period=sampling_period)
-        
+
         # Ensure the data is CF compliant
-        ##TODO: Need to work out the best way to pass the sampling period
         gas_data = assign_attributes(data=gas_data, site=site)
 
         return gas_data
@@ -213,11 +211,11 @@ class CRDS:
         inlet = split_filename[3]
 
         if sampling_period_str == "1minute":
-            #sampling_period = "1min"
+            # sampling_period = "1min"
             sampling_period = 60
         elif sampling_period_str == "hourly":
-            #sampling_period = "1H"
-            sampling_period = 60*60
+            # sampling_period = "1H"
+            sampling_period = 60 * 60
         else:
             raise ValueError("Unable to read time resolution from filename.")
 
