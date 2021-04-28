@@ -4,10 +4,11 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Beginner workflow &mdash; OpenGHG 0+untagged.1.geb5a8a1 documentation</title>
+  <title>Beginner workflow &mdash; OpenGHG 0+untagged.1.gb873182 documentation</title>
   
 
   
@@ -462,10 +463,10 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Beginner-workflow">
+<section id="Beginner-workflow">
 <h1>Beginner workflow<a class="headerlink" href="#Beginner-workflow" title="Permalink to this headline">¶</a></h1>
 <p>This tutorial is a beginner workflow for processing data, visualising the object store and retrieving and visualising data.</p>
-<div class="section" id="Check-installation">
+<section id="Check-installation">
 <h2>Check installation<a class="headerlink" href="#Check-installation" title="Permalink to this headline">¶</a></h2>
 <p>This tutorial assumes that you have installed <code class="docutils literal notranslate"><span class="pre">openghg</span></code>. To ensure install has been successful you can open an <code class="docutils literal notranslate"><span class="pre">ipython</span></code> console and import openghg</p>
 <p>In a terminal type</p>
@@ -479,11 +480,11 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <p>If you get an <code class="docutils literal notranslate"><span class="pre">ImportError</span></code> please go back to the install section of the documentation.</p>
-</div>
-<div class="section" id="Notebooks">
+</section>
+<section id="Notebooks">
 <h2>Notebooks<a class="headerlink" href="#Notebooks" title="Permalink to this headline">¶</a></h2>
 <p>If you haven’t used Jupyter notebooks before please see <a class="reference external" href="https://realpython.com/jupyter-notebook-introduction/">this introduction</a>.</p>
-<div class="section" id="1.-Setting-up-our-environment">
+<section id="1.-Setting-up-our-environment">
 <h3>1. Setting up our environment<a class="headerlink" href="#1.-Setting-up-our-environment" title="Permalink to this headline">¶</a></h3>
 <p>First the notebook sets up the environment needed to create the object store at our desired location. By default this location is at <code class="docutils literal notranslate"><span class="pre">/tmp/openghg_store</span></code>. For the purposes of this tutorial this path is fine but as it is a temporary directory it may not survive a reboot of the computer.</p>
 <p>If you want to create an object store that survives a reboot you can change the path to anything you like. We recommened a path such as <code class="docutils literal notranslate"><span class="pre">~/openghg_store</span></code> which will create the object store in your home directory in a directory called <code class="docutils literal notranslate"><span class="pre">openghg_store</span></code>.</p>
@@ -508,9 +509,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-</div>
-</div>
-<div class="section" id="Set-an-environment-variable-for-the-OpenGHG-object-store">
+</section>
+</section>
+<section id="Set-an-environment-variable-for-the-OpenGHG-object-store">
 <h2>Set an environment variable for the OpenGHG object store<a class="headerlink" href="#Set-an-environment-variable-for-the-OpenGHG-object-store" title="Permalink to this headline">¶</a></h2>
 <p>Here we create a temporary directory but you can use any folder you like by setting a path in place of <code class="docutils literal notranslate"><span class="pre">tmp_dir.name</span></code>. The object store created by this notebook will only have a lifetime as long as the notebook, if you want to create a longer lived object store set a path below.</p>
 <div class="nbinput nblast docutils container">
@@ -524,7 +525,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="section" id="2.-Processing-data">
+<section id="2.-Processing-data">
 <h3>2. Processing data<a class="headerlink" href="#2.-Processing-data" title="Permalink to this headline">¶</a></h3>
 <p>First we want to process some files from our local directory</p>
 <div class="nbinput nblast docutils container">
@@ -551,17 +552,17 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 1/1 [00:00&lt;00:00,  7.71it/s]
+Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 1/1 [00:00&lt;00:00,  7.75it/s]
 </pre></div></div>
 </div>
 <p>Here <code class="docutils literal notranslate"><span class="pre">decc_results</span></code> will give us a dictionary with the UUIDs (universally unique identifiers) for each of the Datasources the data has been assigned to. This tells us that the data has been processed and stored correctly.</p>
-</div>
-<div class="section" id="A-note-on-Datasources">
+</section>
+<section id="A-note-on-Datasources">
 <h3>A note on Datasources<a class="headerlink" href="#A-note-on-Datasources" title="Permalink to this headline">¶</a></h3>
 <p>Datasources are objects that are stored in the object store (add link to object store notes) that hold the data and metadata associated with each measurement we upload to the platform.</p>
 <p>For example, if we upload a file that contains readings for three gas species from a single site at a specific inlet height OpenGHG will assign this data to three different Datasources, one for each species. Metadata such as the site, inlet height, species, network etc are stored alongside the measurements for easy searching.</p>
 <p>Datasources can also handle multiple versions of data from a single site, so if scales or other factors change multiple versions may be stored for easy future comparison.</p>
-<div class="section" id="Note">
+<section id="Note">
 <h4>Note<a class="headerlink" href="#Note" title="Permalink to this headline">¶</a></h4>
 <p>When you run this notebook different UUIDs will be created for the Datasources. This is expected as each time a Datasource is created from scratch it is assigned a unique UUID.</p>
 <div class="nbinput docutils container">
@@ -580,9 +581,9 @@ Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 1
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 defaultdict(dict,
-            {&#39;processed&#39;: {&#39;bsd.picarro.1minute.248m.dat&#39;: {&#39;ch4&#39;: &#39;20dc53e5-82a9-45ba-975b-6ce699bfd8b0&#39;,
-               &#39;co2&#39;: &#39;3466af57-53af-4eff-8d24-0c9645272d3b&#39;,
-               &#39;co&#39;: &#39;15bed35c-ba75-4353-b693-de6f3dda8a2b&#39;}}})
+            {&#39;processed&#39;: {&#39;bsd.picarro.1minute.248m.dat&#39;: {&#39;ch4&#39;: &#39;fc3fc493-522a-43e2-9898-912160b2f3f8&#39;,
+               &#39;co2&#39;: &#39;14b7ad5b-667c-4b71-a6ca-bae8a1d71439&#39;,
+               &#39;co&#39;: &#39;846d75d3-fb54-46a0-b7db-82d0301a6bc2&#39;}}})
 </pre></div></div>
 </div>
 <p>We can now process the AGAGE data. The functions that process the AGAGE data expect data to have an accompanying precisions file. For each data file we create a tuple with the data filename and the precisions filename. A simpler method of uploading these file types is planned.</p>
@@ -614,7 +615,7 @@ defaultdict(dict,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:02&lt;00:00,  2.05s/it]
+Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:01&lt;00:00,  1.85s/it]
 </pre></div></div>
 </div>
 <p>When viewing <code class="docutils literal notranslate"><span class="pre">agage_results</span></code> there will be a large number of Datasource UUIDs shown due to the large number of gases in each data file</p>
@@ -634,71 +635,71 @@ Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 defaultdict(dict,
-            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;nf3_70m&#39;: &#39;776ce496-eae8-4597-b21c-16cbb9945fd8&#39;,
-               &#39;cf4_70m&#39;: &#39;e4d216ce-ce2d-44ff-b0ea-fc695885cc8a&#39;,
-               &#39;pfc116_70m&#39;: &#39;c91cab16-0912-494a-9764-de048e64d450&#39;,
-               &#39;pfc218_70m&#39;: &#39;0e8e912d-1112-47a1-8774-5c83cda55828&#39;,
-               &#39;pfc318_70m&#39;: &#39;f9742995-8736-4b49-9be3-9fa2d24cef13&#39;,
-               &#39;c4f10_70m&#39;: &#39;78095781-b873-4a30-af5f-b43e7e5361b3&#39;,
-               &#39;c6f14_70m&#39;: &#39;c66f5608-ebfd-421c-95e7-426f51120d43&#39;,
-               &#39;sf6_70m&#39;: &#39;33d67c28-87b9-4a28-9200-f5d974bc99bc&#39;,
-               &#39;so2f2_70m&#39;: &#39;e234194d-b726-4834-92ae-a70ff2f69cc6&#39;,
-               &#39;sf5cf3_70m&#39;: &#39;9eaf511f-9556-42b8-aa95-bece43948a3c&#39;,
-               &#39;hfc23_70m&#39;: &#39;f5b88179-70a1-4084-975d-cc99c6aa8e81&#39;,
-               &#39;hfc32_70m&#39;: &#39;76baf8af-e2a2-4499-a5bb-caf9a5dbbbe9&#39;,
-               &#39;hfc125_70m&#39;: &#39;edad5066-8c67-4b0c-bd66-618404e0368c&#39;,
-               &#39;hfc134a_70m&#39;: &#39;a63ddc6b-3623-4a98-bda7-8c8ebcd3bc42&#39;,
-               &#39;hfc143a_70m&#39;: &#39;29b6f964-1fb4-485d-a223-78b0f3c78cad&#39;,
-               &#39;hfc152a_70m&#39;: &#39;683a0dcf-f775-4b47-a959-4797498da7fa&#39;,
-               &#39;hfc227ea_70m&#39;: &#39;74bed1fa-0938-4611-9b81-0e29ffb0287f&#39;,
-               &#39;hfc236fa_70m&#39;: &#39;5ea19e29-c1ab-454b-b6b8-38ff1c643bd6&#39;,
-               &#39;hfc245fa_70m&#39;: &#39;258d8542-466d-455a-93f7-83522aa61535&#39;,
-               &#39;hfc365mfc_70m&#39;: &#39;6c92af2c-2beb-4c49-b0e8-355ca6b66eca&#39;,
-               &#39;hfc4310mee_70m&#39;: &#39;f242a4db-a842-408b-8447-d87507949fb3&#39;,
-               &#39;hcfc22_70m&#39;: &#39;3b1d3d0a-34f1-4bb0-839b-455bf880f3ba&#39;,
-               &#39;hcfc124_70m&#39;: &#39;0495231c-a908-4754-8835-93bf1a7d7113&#39;,
-               &#39;hcfc132b_70m&#39;: &#39;ff45eb42-2317-406b-873d-3fc3b8b89276&#39;,
-               &#39;hcfc133a_70m&#39;: &#39;938a722c-651b-4001-860c-c282e264f609&#39;,
-               &#39;hcfc141b_70m&#39;: &#39;69245f4a-1d87-40f9-9169-9816ec733e30&#39;,
-               &#39;hcfc142b_70m&#39;: &#39;45bc3aaf-8e9b-42e9-b309-f7cf00a67f01&#39;,
-               &#39;cfc11_70m&#39;: &#39;ad056b46-e916-406c-ac60-9182e4b6ca5b&#39;,
-               &#39;cfc12_70m&#39;: &#39;c879499d-359c-4c54-9e84-d0f8a2c9a9ef&#39;,
-               &#39;cfc13_70m&#39;: &#39;0f062f57-24ac-4dbc-85a6-dc9f02a7dfd2&#39;,
-               &#39;cfc112_70m&#39;: &#39;ef192243-7a98-411d-ba0b-4a3b231ef274&#39;,
-               &#39;cfc113_70m&#39;: &#39;75d860bb-a4e7-4143-a637-826c90553a5d&#39;,
-               &#39;cfc114_70m&#39;: &#39;f561cfb1-73b3-4abe-b7fc-63f703c76c7a&#39;,
-               &#39;cfc115_70m&#39;: &#39;8fa69549-2f83-4a2d-9c35-0df0beeca439&#39;,
-               &#39;h1211_70m&#39;: &#39;0c7a18a7-3255-4e33-8730-9b81b1e14112&#39;,
-               &#39;h1301_70m&#39;: &#39;476327b5-470c-40f8-9615-7ab79a8e3a11&#39;,
-               &#39;h2402_70m&#39;: &#39;a3458529-1e82-4153-8579-813c1efddf32&#39;,
-               &#39;ch3cl_70m&#39;: &#39;6c08bf85-c1fd-487e-ae12-439ea9f4fabd&#39;,
-               &#39;ch3br_70m&#39;: &#39;20d2e2ab-2170-41dc-9e37-029c91b3652f&#39;,
-               &#39;ch3i_70m&#39;: &#39;7c20529b-c6a1-4432-bb1e-eee659919e25&#39;,
-               &#39;ch2cl2_70m&#39;: &#39;9214e216-d022-4a68-a24f-5ac3a9e5aae0&#39;,
-               &#39;chcl3_70m&#39;: &#39;9f3c8d31-f31b-4af8-a940-ae4b587d4201&#39;,
-               &#39;ccl4_70m&#39;: &#39;67816c4f-e13f-44d4-bbde-6e900559e287&#39;,
-               &#39;ch2br2_70m&#39;: &#39;703482d9-0687-4835-86de-88d1226fd074&#39;,
-               &#39;chbr3_70m&#39;: &#39;766a7ba0-8c2e-4661-9374-346ffb71d29a&#39;,
-               &#39;ch3ccl3_70m&#39;: &#39;237407a7-7c24-4b14-9dbb-32c192d7b40c&#39;,
-               &#39;tce_70m&#39;: &#39;f63e229d-7b2a-4430-87a1-683f214a1724&#39;,
-               &#39;pce_70m&#39;: &#39;b1cf61f7-c534-4f63-ba3e-72d65b706355&#39;,
-               &#39;ethyne_70m&#39;: &#39;71541d12-8338-43bf-a0f8-1fcd655c8f42&#39;,
-               &#39;ethane_70m&#39;: &#39;9d7fdaef-74ec-4ffa-ad5c-7a2e8ac59eb7&#39;,
-               &#39;propane_70m&#39;: &#39;9cdec15c-06b1-4c25-be94-c50a1d90174e&#39;,
-               &#39;cpropane_70m&#39;: &#39;5e7952db-6492-43fd-b82a-f7dbdf2ae5fb&#39;,
-               &#39;benzene_70m&#39;: &#39;90e578fc-b3a2-4664-97b6-de9ecf251670&#39;,
-               &#39;toluene_70m&#39;: &#39;5b81439f-59bf-4bfe-9383-f72f1ceb7734&#39;,
-               &#39;cos_70m&#39;: &#39;72031503-7432-4ec6-a947-bb9562809243&#39;,
-               &#39;desflurane_70m&#39;: &#39;0034733f-0187-4d46-ba16-35602736d560&#39;}}})
+            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;nf3_70m&#39;: &#39;b9377675-f752-4240-a4ca-d4db9b3c4ade&#39;,
+               &#39;cf4_70m&#39;: &#39;5818f5e1-460c-4f3e-8552-c5cf844282f9&#39;,
+               &#39;pfc116_70m&#39;: &#39;8c37b60f-54cb-45b4-b79a-916f813e13a4&#39;,
+               &#39;pfc218_70m&#39;: &#39;cc9cfadc-221b-4cc0-937d-2b86eff35c38&#39;,
+               &#39;pfc318_70m&#39;: &#39;0ca91d1e-b867-4e5b-af03-bec00cf64706&#39;,
+               &#39;c4f10_70m&#39;: &#39;2b8829ee-4429-440f-8382-52c5219bed5f&#39;,
+               &#39;c6f14_70m&#39;: &#39;379146d4-b4fa-4e91-84cb-48f099d62344&#39;,
+               &#39;sf6_70m&#39;: &#39;9a3be5dc-fec7-46ea-bac6-d95d138b1783&#39;,
+               &#39;so2f2_70m&#39;: &#39;f5de0182-a356-4c21-979c-74364149e190&#39;,
+               &#39;sf5cf3_70m&#39;: &#39;3b06ed12-4cce-4cfe-93ab-c55d62d4cf70&#39;,
+               &#39;hfc23_70m&#39;: &#39;a1576de5-a62f-439f-a6be-610e3d86c786&#39;,
+               &#39;hfc32_70m&#39;: &#39;9d64bad7-529d-4e2b-97a9-18a09ad9cc19&#39;,
+               &#39;hfc125_70m&#39;: &#39;5b957bd5-e11b-4b61-9068-3379c9360cf0&#39;,
+               &#39;hfc134a_70m&#39;: &#39;27458900-e59c-4d9e-ba00-cdc1bec36128&#39;,
+               &#39;hfc143a_70m&#39;: &#39;46e85540-f0af-49e6-a057-bfc7b6da580d&#39;,
+               &#39;hfc152a_70m&#39;: &#39;6f54df3f-5b19-4682-ba2d-569ef58f5954&#39;,
+               &#39;hfc227ea_70m&#39;: &#39;7de56de5-db37-4d68-96de-7c396d15ac17&#39;,
+               &#39;hfc236fa_70m&#39;: &#39;0f568f5c-37cf-4ed3-8db2-d85317194efa&#39;,
+               &#39;hfc245fa_70m&#39;: &#39;140e8a0c-4fda-4d17-a441-a80578b7bd25&#39;,
+               &#39;hfc365mfc_70m&#39;: &#39;f795e6e9-c69d-4987-a33b-a7b29ee37ce8&#39;,
+               &#39;hfc4310mee_70m&#39;: &#39;9e1f519e-70bd-4d77-944c-868a29641dd2&#39;,
+               &#39;hcfc22_70m&#39;: &#39;cbb4475e-0493-4ae0-883b-8c92b21b490a&#39;,
+               &#39;hcfc124_70m&#39;: &#39;b7f0c798-18bc-4e02-8767-589dbba5728a&#39;,
+               &#39;hcfc132b_70m&#39;: &#39;0bf5fe61-cbbb-4d10-a6f7-6997d9ed09f1&#39;,
+               &#39;hcfc133a_70m&#39;: &#39;36eda35c-32a2-4f6b-b114-a743b1e10997&#39;,
+               &#39;hcfc141b_70m&#39;: &#39;736bfe92-5b8b-495b-9171-13358ca6d53d&#39;,
+               &#39;hcfc142b_70m&#39;: &#39;ec4c6723-8668-4897-aa4a-a648dc59135e&#39;,
+               &#39;cfc11_70m&#39;: &#39;1f228725-0d02-496f-bfe2-b7fd8be1fe72&#39;,
+               &#39;cfc12_70m&#39;: &#39;d9cf2ac0-021f-467d-862a-4c84ddfd4b81&#39;,
+               &#39;cfc13_70m&#39;: &#39;677d9f97-6548-4cd7-80e5-0f5e6f4b835f&#39;,
+               &#39;cfc112_70m&#39;: &#39;ba9d91b3-e39a-4dba-922b-8d99d0cf0b8a&#39;,
+               &#39;cfc113_70m&#39;: &#39;7c628596-ddf2-49f9-8f49-43fab33783b0&#39;,
+               &#39;cfc114_70m&#39;: &#39;1709c1d2-68ee-433d-88a5-deab210e97f2&#39;,
+               &#39;cfc115_70m&#39;: &#39;712a70ae-f9ec-4a7a-9e21-afd50b4c99c6&#39;,
+               &#39;h1211_70m&#39;: &#39;b9b9618e-0f57-4e86-af15-438e1ab19ec3&#39;,
+               &#39;h1301_70m&#39;: &#39;e8dd6e13-7172-4c9e-b217-666a5d399e76&#39;,
+               &#39;h2402_70m&#39;: &#39;da8d648b-bf29-451f-a2ba-8df6a440c47f&#39;,
+               &#39;ch3cl_70m&#39;: &#39;15f1aab6-ad31-4795-b842-73f43d6b8208&#39;,
+               &#39;ch3br_70m&#39;: &#39;1cbc7983-74fc-45fd-81df-4ae5eaf1e1f7&#39;,
+               &#39;ch3i_70m&#39;: &#39;e5d33e27-dc61-4fe3-abaa-144e2dd6be9e&#39;,
+               &#39;ch2cl2_70m&#39;: &#39;22d4f8a3-70d1-4b3a-8dab-69a944ee9369&#39;,
+               &#39;chcl3_70m&#39;: &#39;62f7da82-d0fe-4b9e-9cde-ca980c3ed9ca&#39;,
+               &#39;ccl4_70m&#39;: &#39;fabb7035-14e5-47f5-a85e-22c879db082c&#39;,
+               &#39;ch2br2_70m&#39;: &#39;d7fc28a1-3a63-4174-9a2c-3429a9714b7b&#39;,
+               &#39;chbr3_70m&#39;: &#39;3c281d80-f598-46fa-97cf-03a4d75c905e&#39;,
+               &#39;ch3ccl3_70m&#39;: &#39;92d757a2-00ca-458a-b036-04a7613ccdca&#39;,
+               &#39;tce_70m&#39;: &#39;2e31f2b8-b8ff-4f49-82a1-00d0d2b65089&#39;,
+               &#39;pce_70m&#39;: &#39;ab4e289f-f962-499a-9a4b-b1ccf895c809&#39;,
+               &#39;ethyne_70m&#39;: &#39;edc0fcb4-a498-459d-8407-111705e43d13&#39;,
+               &#39;ethane_70m&#39;: &#39;9ed9017b-f9f9-4426-a989-d2be435203ed&#39;,
+               &#39;propane_70m&#39;: &#39;183f87c3-6ed1-4f96-9702-d19cea599f13&#39;,
+               &#39;cpropane_70m&#39;: &#39;100518cb-df63-40c1-a204-065b96aa3f33&#39;,
+               &#39;benzene_70m&#39;: &#39;a8a270bc-f570-4874-96ff-027145d5565d&#39;,
+               &#39;toluene_70m&#39;: &#39;15092499-35d1-476d-8838-ae9e259ed3ca&#39;,
+               &#39;cos_70m&#39;: &#39;9d3758f2-9f4a-4e6e-9cad-8aa158641d92&#39;,
+               &#39;desflurane_70m&#39;: &#39;1fb1ca64-f242-424d-a9f4-35ce2f16149b&#39;}}})
 </pre></div></div>
 </div>
-</div>
-</div>
-<div class="section" id="3.-Visualising-the-object-store">
+</section>
+</section>
+<section id="3.-Visualising-the-object-store">
 <h3>3. Visualising the object store<a class="headerlink" href="#3.-Visualising-the-object-store" title="Permalink to this headline">¶</a></h3>
 <p>Now that we have a simple object store created we can view the objects within it in a simple force graph model. To do this we use the <code class="docutils literal notranslate"><span class="pre">view_store</span></code> function from the <code class="docutils literal notranslate"><span class="pre">objectstore</span></code> submodule. Note that the cell may take a few moments to load as the force graph is created.</p>
 <p>In the force graph the central blue node is the <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> node. Associated with this node are all the data processed by it. The next node in the topology are networks, shown in green. In the graph you will see <code class="docutils literal notranslate"><span class="pre">DECC</span></code> and <code class="docutils literal notranslate"><span class="pre">AGAGE</span></code> nodes. From these you’ll see site nodes in red and then individual datasources in orange.</p>
-<div class="section" id="id1">
+<section id="id1">
 <h4>Note<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
 <p>The object store visualisation created by this function is commented out here and won’t be visible in the documentation but can be uncommented and run when you use the notebook version.</p>
 <div class="nbinput nblast docutils container">
@@ -711,9 +712,9 @@ defaultdict(dict,
 </div>
 </div>
 <p>Now we know we have this data in the object store we can search it and retrieve data from it.</p>
-</div>
-</div>
-<div class="section" id="4.-Retrieving-data">
+</section>
+</section>
+<section id="4.-Retrieving-data">
 <h3>4. Retrieving data<a class="headerlink" href="#4.-Retrieving-data" title="Permalink to this headline">¶</a></h3>
 <p>To retrieve data from the object store we can use the <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code> function from the <code class="docutils literal notranslate"><span class="pre">localclient</span></code> submodule. This allows us to retrieve and view the data stored.</p>
 <div class="nbinput nblast docutils container">
@@ -762,7 +763,7 @@ Attributes: (12/22)
     port:                 8
     type:                 air
     network:              decc
-    scale:                WMO-X2014A, metadata={&#39;data_owner&#39;: &#34;Simon O&#39;Doherty&#34;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;inlet_height_magl&#39;: &#39;248m&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;Conditions of use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;Source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;File created&#39;: &#39;2021-04-27 14:04:40.888579+00:00&#39;, &#39;Processed by&#39;: &#39;OpenGHG_Cloud&#39;, &#39;species&#39;: &#39;co&#39;, &#39;station_longitude&#39;: -1.15033, &#39;station_latitude&#39;: 54.35858, &#39;station_long_name&#39;: &#39;Bilsdale, UK&#39;, &#39;station_height_masl&#39;: 380.0, &#39;site&#39;: &#39;bsd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;time_resolution&#39;: &#39;1_minute&#39;, &#39;inlet&#39;: &#39;248m&#39;, &#39;port&#39;: &#39;8&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;})
+    scale:                WMO-X2014A, metadata={&#39;data_owner&#39;: &#34;Simon O&#39;Doherty&#34;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;inlet_height_magl&#39;: &#39;248m&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;Conditions of use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;Source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;File created&#39;: &#39;2021-04-28 12:04:58.658733+00:00&#39;, &#39;Processed by&#39;: &#39;OpenGHG_Cloud&#39;, &#39;species&#39;: &#39;co&#39;, &#39;station_longitude&#39;: -1.15033, &#39;station_latitude&#39;: 54.35858, &#39;station_long_name&#39;: &#39;Bilsdale, UK&#39;, &#39;station_height_masl&#39;: 380.0, &#39;site&#39;: &#39;bsd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;time_resolution&#39;: &#39;1_minute&#39;, &#39;inlet&#39;: &#39;248m&#39;, &#39;port&#39;: &#39;8&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;})
 </pre></div></div>
 </div>
 <p>First we tell <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> that we are plotting inside a Jupyter notebook, this ensures a plot with controls is created.</p>
@@ -1781,7 +1782,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='6f664740-b892-4edb-811e-7af119168783'></div></div>
+<div id='11cf3904-80bf-48b1-937d-c406c87a9a59'></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
@@ -1789,18 +1790,18 @@ if (IPython.notebook.kernel !== null) {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7fca9e243a10&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f04445654d0&gt;]
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="5.-Ranking-data">
+</section>
+<section id="5.-Ranking-data">
 <h3>5. Ranking data<a class="headerlink" href="#5.-Ranking-data" title="Permalink to this headline">¶</a></h3>
 <p>The dates that the data from Heathfield retrieved above overlap. If we want to easily retrieve the highest quality data from Heathfield over a range of dates we don’t want to have to repeatedly check which was the correct inlet/instrument for a given daterange. This problem is solved using ranking.</p>
 <p>A given inlet on a specific instrument at a site can be given a rank for a daterange. To do this we use the <code class="docutils literal notranslate"><span class="pre">RankSources</span></code> class from the <code class="docutils literal notranslate"><span class="pre">localclient</span></code> submodule.</p>
-</div>
-</div>
-</div>
-<div class="section" id="The-rest-of-tutorial-requires-updating,-the-cells-below-will-not-work.">
+</section>
+</section>
+</section>
+<section id="The-rest-of-tutorial-requires-updating,-the-cells-below-will-not-work.">
 <h1>The rest of tutorial requires updating, the cells below will not work.<a class="headerlink" href="#The-rest-of-tutorial-requires-updating,-the-cells-below-will-not-work." title="Permalink to this headline">¶</a></h1>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
@@ -1933,7 +1934,7 @@ if (IPython.notebook.kernel !== null) {
 </div>
 </div>
 <p>Further tutorials will be added soon. If you want to explore the internal workings of OpenGHG please checkout the Developer API documentation, if you would like contribute to the project we welcome pull requests to both the code and the documentation. For help and guidance on contributing check our contributing page.</p>
-</div>
+</section>
 
 
            </div>
@@ -1951,7 +1952,7 @@ if (IPython.notebook.kernel !== null) {
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 27, 2021.
+        Last updated on Apr 28, 2021.
       </span>
 
     </p>
