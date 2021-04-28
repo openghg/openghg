@@ -1,6 +1,5 @@
 from typing import Dict, Optional, List
 from xarray import Dataset
-from pandas import Timedelta as pd_Timedelta
 
 __all__ = ["assign_attributes", "get_attributes"]
 
@@ -30,7 +29,7 @@ def assign_attributes(
 
         units = data[key].get("metadata", {}).get("units")
         scale = data[key].get("metadata", {}).get("scale")
-        
+
         if sampling_period is None:
             sampling_period = data[key].get("metadata", {}).get("sampling_period")
 
