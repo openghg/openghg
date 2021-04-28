@@ -82,9 +82,12 @@ def get_obs_surface(
     to_retrieve = obs_results[site_key]["keys"]
     data = recombine_datasets(keys=to_retrieve, sort=True)
 
+    # Slice the data to only cover the dates we're interested in
+    data = data.loc[dict(time=slice(start_date, end_date))]
+
     try:
-        start_date = timestamp_tzaware(data.time[0].values)
-        end_date = timestamp_tzaware(data.time[-1].values)
+        start_date_data = timestamp_tzaware(data.time[0].values)
+        end_date_data = timestamp_tzaware(data.time[-1].values)
     except AttributeError:
         raise AttributeError("This dataset does not have a time attribute, unable to read date range")
 
