@@ -237,7 +237,7 @@ def test_to_data(data):
     metadata = obj_data["metadata"]
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
-    assert metadata["time_resolution"] == "1_minute"
+    assert metadata["sampling_period"] == 60
     assert metadata["inlet"] == "248m"
     assert metadata["data_type"] == "timeseries"
     assert len(obj_data["data_keys"]) == 0
