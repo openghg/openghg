@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._crds &mdash; OpenGHG 0+untagged.3.ge6ed70e documentation</title>
+  <title>openghg.modules._crds &mdash; OpenGHG 0+untagged.3.g486bae2 documentation</title>
   
 
   
@@ -181,17 +181,15 @@
     <span class="sd">&quot;&quot;&quot; Class for processing CRDS data &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="CRDS.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Holds parameters used for writing attributes to Datasets</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span> <span class="o">=</span> <span class="p">{}</span>
-
         <span class="n">data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">)</span>
+        <span class="c1"># Holds parameters used for writing attributes to Datasets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;CRDS&quot;</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="CRDS.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
-        <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -200,9 +198,13 @@
         <span class="sd">&quot;&quot;&quot;Creates a CRDS object holding data stored within Datasources</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            filepath: Path of file to load</span>
-<span class="sd">            site: Name of site</span>
-<span class="sd">            source_id: Source&#39;s unique ID</span>
+<span class="sd">            data_filepath: Path to file</span>
+<span class="sd">            site: Three letter site code</span>
+<span class="sd">            network: Network name</span>
+<span class="sd">            inlet: Inlet height</span>
+<span class="sd">            instrument: Instrument name</span>
+<span class="sd">            sampling_period: Sampling period e.g. 2 hour: 2H, 2 minute: 2m</span>
+<span class="sd">            measurement_type: Measurement type e.g. insitu, flask</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary of gas data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -212,46 +214,68 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
             <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">site</span><span class="p">:</span>
-            <span class="n">site</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="c1"># Process the data into separate Datasets</span>
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> 
-                                  <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">)</span>
+        <span class="c1"># This may seem like an almost pointless function as this is all we do</span>
+        <span class="c1"># but it makes it a lot easier to test that assign_attributes</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span>
+            <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span>
+            <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+            <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
+            <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+            <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
+            <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Ensure the data is CF compliant</span>
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">gas_data</span></div>
 
-<div class="viewcode-block" id="CRDS.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
-                  <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
-                  <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
-                  <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                  <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Separates the gases stored in the dataframe in</span>
-<span class="sd">        separate dataframes and returns a dictionary of gases</span>
-<span class="sd">        with an assigned UUID as gas:UUID and a list of the processed</span>
-<span class="sd">        dataframes</span>
+<div class="viewcode-block" id="CRDS.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read the datafile passed in and extract the data we require.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data_filepath (pathlib.Path): Path of datafile</span>
+<span class="sd">            data_filepath: Path to file</span>
+<span class="sd">            site: Three letter site code</span>
+<span class="sd">            network: Network name</span>
+<span class="sd">            inlet: Inlet height</span>
+<span class="sd">            instrument: Instrument name</span>
+<span class="sd">            sampling_period: Sampling period including the unit (using pandas frequency aliases like &#39;1H&#39; or &#39;1min&#39;)</span>
+<span class="sd">            measurement_type: Measurement type e.g. insitu, flask</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: Dictionary containing metadata, data and attributes keys</span>
+<span class="sd">            dict: Dictionary of gas data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">RangeIndex</span><span class="p">,</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">NaT</span>
         <span class="kn">import</span> <span class="nn">warnings</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">compliant_string</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span>
 
-        <span class="c1"># At the moment we&#39;re using the filename as the source name</span>
-        <span class="n">source_name</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span>
-        <span class="c1"># -1 here as we&#39;ve already removed the file extension</span>
-        <span class="c1"># As we&#39;re not processing a list of datafiles here we&#39;ll only have one inlet</span>
-        <span class="n">inlet</span> <span class="o">=</span> <span class="n">source_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">split_fname</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="s2">&quot;m&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inlet</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="c1"># Do some checks to see if we&#39;ve got different data passed in to that read from the file</span>
+        <span class="n">site_fname</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">split_fname</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">inlet_fname</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">split_fname</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+
+        <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">site_fname</span> <span class="o">!=</span> <span class="n">site</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Site mismatch between passed site code and that read from filename.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;m&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inlet_fname</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">inlet</span> <span class="o">!=</span> <span class="n">inlet_fname</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Inlet mismatch between passed inlet and that read from filename.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet_fname</span>
 
         <span class="c1"># Function to parse the datetime format found in the datafile</span>
         <span class="k">def</span> <span class="nf">parse_date</span><span class="p">(</span><span class="n">date</span><span class="p">):</span>
@@ -296,18 +320,25 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">input_sampling_period</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Sampling period must be a string including the unit &quot;</span>
-                                <span class="s2">&quot;(using pandas frequency aliases like &#39;1H&#39; or &#39;1min&#39;)&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Sampling period must be a string including the unit &quot;</span> <span class="s2">&quot;(using pandas frequency aliases like &#39;1H&#39; or &#39;1min&#39;)&quot;</span>
+                <span class="p">)</span>
+
             <span class="c1"># Compare against value extracted from the file name</span>
             <span class="n">file_sampling_period</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">])</span>
+
             <span class="n">comparison_seconds</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">input_sampling_period</span> <span class="o">-</span> <span class="n">file_sampling_period</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
             <span class="n">tolerance_seconds</span> <span class="o">=</span> <span class="mi">1</span>
+
             <span class="k">if</span> <span class="n">comparison_seconds</span> <span class="o">&gt;</span> <span class="n">tolerance_seconds</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input sampling period </span><span class="si">{</span><span class="n">sampling_period</span><span class="si">}</span><span class="s2"> does not match to value &quot;</span>
-                                 <span class="sa">f</span><span class="s2">&quot;extracted from the file name of </span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;sampling_period&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Input sampling period </span><span class="si">{</span><span class="n">sampling_period</span><span class="si">}</span><span class="s2"> does not match to value &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;extracted from the file name of </span><span class="si">{</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;sampling_period&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> seconds.&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># Read the scale from JSON</span>
-        <span class="n">crds_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">)</span>
+        <span class="c1"># I&#39;ll leave this here for the possible future movement from class to functions</span>
+        <span class="c1"># crds_data = load_json(filename=&quot;process_gcwerks_parameters.json&quot;)</span>
 
         <span class="c1"># This dictionary is used to store the gas data and its associated metadata</span>
         <span class="n">combined_data</span> <span class="o">=</span> <span class="p">{}</span>
@@ -337,11 +368,11 @@
 
             <span class="n">site_attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_site_attributes</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span>
 
-            <span class="c1"># Create a copy of the metadata dict</span>
-            <span class="n">scale</span> <span class="o">=</span> <span class="n">crds_data</span><span class="p">[</span><span class="s2">&quot;CRDS&quot;</span><span class="p">][</span><span class="s2">&quot;default_scales&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span><span class="p">[</span><span class="s2">&quot;default_scales&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="s2">&quot;NA&quot;</span><span class="p">)</span>
 
+            <span class="c1"># Create a copy of the metadata dict</span>
             <span class="n">species_metadata</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="n">species_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">compliant_string</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+            <span class="n">species_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
             <span class="n">species_metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
             <span class="n">species_metadata</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale</span>
 
@@ -419,7 +450,7 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to read attributes for site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
         <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">attributes</span></div>
