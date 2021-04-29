@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from openghg.modules import GCWERKS as GC
+from openghg.modules import GCWERKS as GCWERKS
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -34,7 +34,7 @@ def prec_thd():
 
 
 def test_read_file_capegrim(cgo_path, cgo_prec_path):
-    gc = GC()
+    gc = GCWERKS()
 
     gas_data = gc.read_file(
         data_filepath=cgo_path,
@@ -65,7 +65,7 @@ def test_read_file_capegrim(cgo_path, cgo_prec_path):
 
 
 def test_read_file_thd(data_thd, prec_thd):
-    gc = GC()
+    gc = GCWERKS()
 
     gas_data = gc.read_file(
         data_filepath=data_thd,
@@ -101,14 +101,14 @@ def test_read_file_thd(data_thd, prec_thd):
 
 
 def test_read_invalid_instrument_raises(data_thd, prec_thd):
-    gc = GC()
+    gc = GCWERKS()
 
     with pytest.raises(ValueError):
         gc.read_file(data_filepath=data_thd, precision_filepath=prec_thd, site="CGO", instrument="fish", network="AGAGE")
 
 
 def test_instrument_translator_works():
-    gc = GC()
+    gc = GCWERKS()
 
     instrument_suffix = "md"
 
@@ -137,7 +137,7 @@ def test_instrument_translator_works():
 
 def test_instrument_translator_raises():
     with pytest.raises(KeyError):
-        gc = GC()
+        gc = GCWERKS()
         instrument_suffix = "spam"
         gc.instrument_translator(instrument=instrument_suffix)
 
@@ -147,7 +147,7 @@ def test_read_data(cgo_path, cgo_prec_path):
     site = "CGO"
     instrument = "gcmd"
 
-    gc = GC()
+    gc = GCWERKS()
     data = gc.read_data(
         data_filepath=cgo_path, precision_filepath=cgo_prec_path, site=site, instrument=instrument, network="AGAGE"
     )
@@ -182,7 +182,7 @@ def test_read_data(cgo_path, cgo_prec_path):
 
 
 def test_read_precision(cgo_prec_path):
-    gc = GC()
+    gc = GCWERKS()
 
     precision, precision_series = gc.read_precision(cgo_prec_path)
 
@@ -213,7 +213,7 @@ def test_read_precision(cgo_prec_path):
 def test_no_precisions_species_raises(cgo_path):
     missing_species_prec = get_datapath(filename="capegrim-medusa.18.precisions.broke.C")
 
-    gc = GC()
+    gc = GCWERKS()
 
     with pytest.raises(ValueError):
         gc.read_file(data_filepath=cgo_path, precision_filepath=missing_species_prec, site="cgo", network="AGAGE")
@@ -223,7 +223,7 @@ def test_read_ridgehill_window_inlet_all_NaNs():
     data_path = get_datapath(filename="ridgehill-md.11.C")
     prec_path = get_datapath(filename="ridgehill-md.11.precisions.C")
 
-    gc = GC()
+    gc = GCWERKS()
     res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="RGL", instrument="medusa", network="AGAGE")
 
     assert not res
@@ -233,7 +233,7 @@ def test_read_thd_window_inlet():
     data_path = get_datapath(filename="trinidadhead-window-inlet.01.C")
     prec_path = get_datapath(filename="trinidadhead.01.precisions.C")
 
-    gc = GC()
+    gc = GCWERKS()
     res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="AGAGE")
 
     expected_metadata = {
@@ -263,7 +263,7 @@ def test_read_shangdianzi_ASM_inlet():
     data_path = get_datapath(filename="shangdianzi-medusa.18.C")
     prec_path = get_datapath(filename="shangdianzi-medusa.18.precisions.C")
 
-    gc = GC()
+    gc = GCWERKS()
     res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="SDZ", instrument="medusa", network="AGAGE")
 
     expected_metadata = {
@@ -308,3 +308,42 @@ def test_read_shangdianzi_ASM_inlet():
     # assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
     # assert data["ch4"][0] == pytest.approx(1818.62)
     # assert data["ch4"][-1] == pytest.approx(1840.432)
+
+
+def test_find_instrument():
+    gc = GCWERKS()
+
+    filename = Path("zeppelin-medusa.18.C")
+
+    instrument = gc.find_instrument(filepath=filename)
+
+    assert instrument == "medusa"
+
+    filename = Path("macehead-gcms.98.C")
+
+    instrument = gc.find_instrument(filepath=filename)
+
+    assert instrument == "gcms"
+
+    filename = Path("india-md.13.C")
+
+    instrument = gc.find_instrument(filepath=filename)
+
+    assert instrument == "gcmd"
+
+
+def test_find_instrument_raises_correctly():
+    gc = GCWERKS()
+
+    filename = Path("zeppelin.18.C")
+
+    instrument = gc.find_instrument(filepath=filename, should_raise=False)
+
+    assert instrument is None
+
+    with pytest.raises(KeyError):
+        gc.find_instrument(filepath=filename, should_raise=True)
+
+
+
+

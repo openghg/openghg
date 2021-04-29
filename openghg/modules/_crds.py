@@ -86,7 +86,7 @@ class CRDS:
         from datetime import datetime
         from pandas import RangeIndex, read_csv, NaT
         import warnings
-        from openghg.util import clean_string
+        from openghg.util import clean_string, valid_site
 
         split_fname = data_filepath.stem.split(".")
 
@@ -95,6 +95,9 @@ class CRDS:
         inlet_fname = clean_string(split_fname[3])
 
         site = site.lower()
+
+        if not valid_site:
+            raise ValueError(f"{site} is not a valid site.")
 
         if site_fname != site:
             raise ValueError("Site mismatch between passed site code and that read from filename.")

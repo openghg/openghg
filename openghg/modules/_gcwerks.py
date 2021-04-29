@@ -88,60 +88,85 @@ class GCWERKS:
         """
         from pathlib import Path
         from openghg.processing import assign_attributes
-        from openghg.util import is_number, valid_site
-        import re
+        from openghg.util import valid_site, clean_string
 
         data_filepath = Path(data_filepath)
 
+        site = clean_string(site)
+        network = clean_string(network)
+        inlet = clean_string(inlet)
+        instrument = clean_string(instrument)
+
         if not valid_site(site):
             raise ValueError(f"Invalid site {site} passed.")
+        
+        # FIXME
 
-        # Try and find the instrument name in the filename
-        if instrument is None:
-            # Get the instrument from the filename
-            # Example filename: capegrim-medusa.18.C
-            instrument = re.findall(r"[\w']+", str(data_filepath.name))[1]
+        if instrument is not None:
+            fname_instrument = self.find_instrument(filepath=data_filepath, should_raise=True)
 
-            if is_number(instrument):
-                # has picked out the year, rather than the instrument. Default to GCMD for this type of file
-                instrument = "md"
-
-            # Now do the lookup for suffix to instrument name
-            instrument = self.instrument_translator(instrument=instrument)
-
-        if network is None:
-            network = "NA"
+            if fname_instrument is not None and instrument != fname_instrument:
+                raise ValueError(
+                    f"Mismatch between instrument passed as argument {instrument} and instrument read from filename {fname_instrument}"
+                )
+        else:
+            instrument = self.find_instrument(filepath=data_filepath, should_raise=True)
 
         gas_data = self.read_data(
-            data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, instrument=instrument, network=network,
-            sampling_period=sampling_period)
+            data_filepath=data_filepath,
+            precision_filepath=precision_filepath,
+            site=site,
+            instrument=instrument,
+            network=network,
+            sampling_period=sampling_period,
+        )
 
         # Assign attributes to the data for CF compliant NetCDFs
         gas_data = assign_attributes(data=gas_data, site=site)
 
         return gas_data
 
-    def instrument_translator(self, instrument: str) -> str:
+    def find_instrument(self, filepath: Path, should_raise: Optional[bool] = False) -> str:
         """Ensure we have the correct instrument or translate an instrument
         suffix to an instrument name.
 
         Args:
             instrument_suffix: Instrument suffix such as md
+            should_raise: Should we raise if we can't find a valid instrument
         Returns:
             str: Instrument name
         """
+        import re
+
+        instrument = re.findall(r"[\w']+", str(filepath.name))[1].lower()
         try:
-            instrument = self._gc_params["suffix_to_instrument"][instrument]
-        except KeyError:
-            if "medusa" in instrument:
-                instrument = "medusa"
+            if instrument in self._gc_params["instruments"]:
+                return instrument
             else:
-                raise KeyError(f"Invalid instrument {instrument}")
+                try:
+                    instrument = self._gc_params["suffix_to_instrument"][instrument]
+                except KeyError:
+                    if "medusa" in instrument:
+                        instrument = "medusa"
+                    else:
+                        raise KeyError(f"Invalid instrument {instrument}")
+        except KeyError:
+            if should_raise:
+                raise
+            else:
+                return None
 
         return instrument
 
-    def read_data(self, data_filepath: Path, precision_filepath: Path, 
-                  site: str, instrument: str, network: str, sampling_period: Optional[str] = None) -> Dict:
+    def read_data(
+        self,
+        data_filepath: Path,
+        precision_filepath: Path,
+        site: str,
+        instrument: str,
+        network: str,
+        sampling_period: Optional[str] = None,
+    ) -> Dict:
         """Read data from the data and precision files
 
         Args:
@@ -192,15 +217,18 @@ class GCWERKS:
             if isinstance(sampling_period, str):
                 input_sampling_period = pd_Timedelta(sampling_period)
             else:
-                raise TypeError("Sampling period must be a string including the unit "
-                                "(using pandas frequency aliases like '1H' or '1min')")
+                raise TypeError(
+                    "Sampling period must be a string including the unit " "(using pandas frequency aliases like '1H' or '1min')"
+                )
             # Compare input to definition within json file
             file_sampling_period = pd_Timedelta(seconds=extracted_sampling_period)
             comparison_seconds = abs(input_sampling_period - file_sampling_period).total_seconds()
             tolerance_seconds = 1
             if comparison_seconds > tolerance_seconds:
-                raise ValueError(f"Input sampling period {sampling_period} does not match to value "
-                                 f"extracted from the file name of {metadata['sampling_period']} seconds.")
+                raise ValueError(
+                    f"Input sampling period {sampling_period} does not match to value "
+                    f"extracted from the file name of {metadata['sampling_period']} seconds."
+                )
 
         units = {}
         scale = {}
@@ -328,7 +356,9 @@ class GCWERKS:
         try:
             data_inlets = data["Inlet"].unique().tolist()
         except KeyError:
-            raise KeyError("Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module")
+            raise KeyError(
+                "Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module"
+            )
 
         combined_data = {}
 
@@ -356,7 +386,7 @@ class GCWERKS:
                     dates = inlet.split("_")[1:]
                     # slice_dict = {"time": slice(dates[0], dates[1])}
 
-                    data_sliced = data.loc[dates[0]:dates[1]]
+                    data_sliced = data.loc[dates[0] : dates[1]]
                     spec_data = data_sliced[
                         [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
                     ]
@@ -474,15 +504,15 @@ class GCWERKS:
     def get_site_attributes(self, site: str, inlet: str, instrument: str) -> Dict:
         """Gets the site specific attributes for writing to Datsets
 
-        Args:
-            site: Site code
-<<<<<<< HEAD
-            inlet: Inlet (example: 108m)
-=======
-            inlet: Inlet label (example: 108m)
->>>>>>> updateCRDS
-        Returns:
-            dict: Dictionary of attributes
+                Args:
+                    site: Site code
+        <<<<<<< HEAD
+                    inlet: Inlet (example: 108m)
+        =======
+                    inlet: Inlet label (example: 108m)
+        >>>>>>> updateCRDS
+                Returns:
+                    dict: Dictionary of attributes
         """
         site = site.upper()
         instrument = instrument.lower()
