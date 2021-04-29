@@ -48,7 +48,10 @@ def test_read_CRDS():
 
     data_keys = list(datasource.data().keys())
 
-    assert data_keys == ['2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00', '2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00']
+    assert data_keys == [
+        "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00",
+        "2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00",
+    ]
 
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.future.dat", data_type="CRDS")
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
@@ -59,7 +62,7 @@ def test_read_CRDS():
 
     assert data_keys == [
         "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00",
-        '2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00',
+        "2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00",
         "2023-01-30-13:56:30+00:00_2023-01-30-14:20:30+00:00",
     ]
 
@@ -330,7 +333,14 @@ def test_read_noaa_raw():
 
     co_data = Datasource.load(uuid=uuid, shallow=False).data()
 
-    assert len(co_data.keys()) == 16
+    assert sorted(list(co_data.keys())) == [
+        "1990-06-29-05:00:00+00:00_1990-07-10-21:28:00+00:00",
+        "2009-06-13-16:32:00+00:00_2009-12-03-00:30:00+00:00",
+        "2010-01-10-00:13:00+00:00_2010-12-09-16:05:00+00:00",
+        "2011-01-27-04:55:00+00:00_2011-11-11-14:45:00+00:00",
+        "2016-12-03-12:37:00+00:00_2016-12-18-05:30:00+00:00",
+        "2017-01-27-19:10:00+00:00_2017-07-15-04:15:00+00:00",
+    ]
 
     co_data = co_data["1990-06-29-05:00:00+00:00_1990-07-10-21:28:00+00:00"]
 
@@ -347,20 +357,33 @@ def test_read_noaa_raw():
 def test_read_noaa_obspack():
     data_filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
 
-    results = ObsSurface.read_file(filepath=data_filepath, inlet="flask", data_type="NOAA", site="esp", network="NOAA", overwrite=True)
+    results = ObsSurface.read_file(
+        filepath=data_filepath, inlet="flask", data_type="NOAA", site="esp", network="NOAA", overwrite=True
+    )
 
     uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]
 
     ch4_data = Datasource.load(uuid=uuid, shallow=False).data()
 
-    data = ch4_data["1998-09-08-22:10:00+00:00_1998-09-08-22:10:00+00:00"]
+    assert sorted(list(ch4_data.keys())) == [
+        "1993-06-17-00:12:30+00:00_1993-11-20-21:50:00+00:00",
+        "1994-01-02-22:10:00+00:00_1994-12-24-22:15:00+00:00",
+        "1995-02-06-12:00:00+00:00_1995-11-08-19:55:00+00:00",
+        "1996-01-21-22:10:00+00:00_1996-12-01-20:00:00+00:00",
+        "1997-02-12-19:00:00+00:00_1997-12-20-20:15:00+00:00",
+        "1998-01-01-23:10:00+00:00_1998-12-31-19:50:00+00:00",
+        "1999-01-14-22:15:00+00:00_1999-12-31-23:35:00+00:00",
+        "2000-03-05-00:00:00+00:00_2000-11-04-22:30:00+00:00",
+        "2001-01-05-21:45:00+00:00_2001-12-06-12:00:00+00:00",
+        "2002-01-12-12:00:00+00:00_2002-01-12-12:00:00+00:00",
+    ]
 
-    assert len(ch4_data) == 34
+    data = ch4_data["1998-01-01-23:10:00+00:00_1998-12-31-19:50:00+00:00"]
 
-    assert data.time[0] == Timestamp("1998-09-08T22:10:00")
-    assert data["value"][0] == pytest.approx(1.84641e-06)
+    assert data.time[0] == Timestamp("1998-01-01T23:10:00")
+    assert data["value"][0] == pytest.approx(1.83337e-06)
     assert data["nvalue"][0] == 2.0
-    assert data["value_std_dev"][0] == pytest.approx(8.34386e-10)
+    assert data["value_std_dev"][0] == pytest.approx(2.093036e-09)
 
 
 def test_read_thames_barrier():
@@ -398,7 +421,7 @@ def test_upload_same_file_twice_raises():
 
     res = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
 
-    assert not res["error"] 
+    assert not res["error"]
 
     res = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
 

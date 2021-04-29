@@ -137,3 +137,32 @@ def test_gcwerks_retrieval():
     assert data["mf"][-1] == pytest.approx(226.017)
     assert data["mf_repeatability"][0] == pytest.approx(0.223)
     assert data["mf_repeatability"][-1] == pytest.approx(0.37784)
+
+
+def test_get_observations_fixed_dates():
+    results = get_obs_surface(site="hfd", species="co2", inlet="100m")
+
+    assert results.data.time[0] == Timestamp("2013-12-04T14:02:30")
+    assert results.data.time[-1] == Timestamp("2019-05-21T15:46:30")
+
+    start_date = "2015-01-01"
+    end_date = "2015-05-31"
+
+    results = get_obs_surface(site="hfd", species="co2", inlet="100m", start_date=start_date, end_date=end_date)
+
+    assert results.data.time[0] == Timestamp("2015-01-01T18:25:30")
+    assert results.data.time[-1] == Timestamp("2015-05-07T00:28:30")
+
+    start_date = Timestamp("2016-01-01")
+    end_date = Timestamp("2016-08-01")
+
+    results = get_obs_surface(site="hfd", species="co2", inlet="100m", start_date=start_date, end_date=end_date)
+
+    assert results.data.time[0] == Timestamp("2016-01-01T18:25:30")
+    assert results.data.time[-1] == Timestamp("2016-05-07T00:28:30")
+
+
+
+
+
+    
