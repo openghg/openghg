@@ -84,6 +84,7 @@ def test_read_file_thd(data_thd, prec_thd):
         "units": "ppt",
         "scale": "SIO-05",
         "inlet": "10m",
+        "sampling_period": 75
     }
 
     assert gas_data["ch3ccl3_10m"]["metadata"] == expected_metadata
@@ -241,6 +242,7 @@ def test_read_thd_window_inlet():
         "units": "ppb",
         "scale": "Tohoku",
         "inlet": "10m",
+        "sampling_period": 75
     }
 
     metadata = res["ch4_10m"]["metadata"]
@@ -270,6 +272,7 @@ def test_read_shangdianzi_ASM_inlet():
         "units": "ppt",
         "scale": "SIO-12",
         "inlet": "80m",
+        "sampling_period": 1200,
     }
 
     metadata = res["nf3_80m"]["metadata"]

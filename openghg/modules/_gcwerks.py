@@ -113,8 +113,8 @@ class GCWERKS:
             network = "NA"
 
         gas_data = self.read_data(
-            data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, instrument=instrument, network=network
-        )
+            data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, instrument=instrument, network=network,
+            sampling_period=sampling_period)
 
         # Assign attributes to the data for CF compliant NetCDFs
         gas_data = assign_attributes(data=gas_data, site=site)
@@ -140,7 +140,8 @@ class GCWERKS:
 
         return instrument
 
-    def read_data(self, data_filepath: Path, precision_filepath: Path, site: str, instrument: str, network: str) -> Dict:
+    def read_data(self, data_filepath: Path, precision_filepath: Path, 
+                  site: str, instrument: str, network: str, sampling_period: Optional[str] = None) -> Dict:
         """Read data from the data and precision files
 
         Args:
@@ -149,6 +150,7 @@ class GCWERKS:
             site: Name of site
             instrument: Instrument name
             network: Network name
+            sampling_period: Period over which the measurement was samplied.
         Returns:
             dict: Dictionary of gas data keyed by species
         """
@@ -181,6 +183,24 @@ class GCWERKS:
 
         # This metadata will be added to when species are split and attributes are written
         metadata = {"instrument": instrument, "site": site, "network": network}
+
+        extracted_sampling_period = self.get_precision(instrument)
+        metadata["sampling_period"] = extracted_sampling_period
+
+        if sampling_period is not None:
+            # Check input sampling_period can be interpreted
+            if isinstance(sampling_period, str):
+                input_sampling_period = pd_Timedelta(sampling_period)
+            else:
+                raise TypeError("Sampling period must be a string including the unit "
+                                "(using pandas frequency aliases like '1H' or '1min')")
+            # Compare input to definition within json file
+            file_sampling_period = pd_Timedelta(seconds=extracted_sampling_period)
+            comparison_seconds = abs(input_sampling_period - file_sampling_period).total_seconds()
+            tolerance_seconds = 1
+            if comparison_seconds > tolerance_seconds:
+                raise ValueError(f"Input sampling period {sampling_period} does not match to value "
+                                 f"extracted from the file name of {metadata['sampling_period']} seconds.")
 
         units = {}
         scale = {}
@@ -229,9 +249,7 @@ class GCWERKS:
             data[sp + " repeatability"] = precision[precision_index].astype(float).reindex_like(data, method="pad")
 
         # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
-        self._sampling_period = self.get_precision(instrument)
-
-        data["new_time"] = data.index - pd_Timedelta(seconds=self._sampling_period / 2.0)
+        data["new_time"] = data.index - pd_Timedelta(seconds=metadata["sampling_period"] / 2.0)
 
         data = data.set_index("new_time", inplace=False, drop=True)
         data.index.name = "time"

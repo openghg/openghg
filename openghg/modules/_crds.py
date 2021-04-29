@@ -1,7 +1,8 @@
 from openghg.util import load_json
-from pandas import DataFrame
+from pandas import DataFrame, Timedelta
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
+
 
 __all__ = ["CRDS"]
 
@@ -12,8 +13,6 @@ class CRDS:
     def __init__(self):
         # Holds parameters used for writing attributes to Datasets
         self._crds_params = {}
-        # Sampling period of CRDS data in seconds
-        self._sampling_period = 60
 
         data = load_json(filename="process_gcwerks_parameters.json")
         self._crds_params = data["CRDS"]
@@ -47,13 +46,19 @@ class CRDS:
             site = data_filepath.stem.split(".")[0]
 
         # Process the data into separate Datasets
-        gas_data = self.read_data(data_filepath=data_filepath, site=site, network=network)
+        gas_data = self.read_data(data_filepath=data_filepath, site=site, network=network, 
+                                  sampling_period=sampling_period)
+
         # Ensure the data is CF compliant
-        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=self._sampling_period)
+        gas_data = assign_attributes(data=gas_data, site=site)
 
         return gas_data
 
-    def read_data(self, data_filepath: Path, site: str, network: str) -> Dict:
+    def read_data(self, 
+                  data_filepath: Path, 
+                  site: str, 
+                  network: str,
+                  sampling_period: Optional[str] = None) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -115,6 +120,21 @@ class CRDS:
 
         if network is not None:
             metadata["network"] = network
+
+        if sampling_period is not None:
+            # Check input sampling_period can be interpreted
+            if isinstance(sampling_period, str):
+                input_sampling_period = Timedelta(sampling_period)
+            else:
+                raise TypeError("Sampling period must be a string including the unit "
+                                "(using pandas frequency aliases like '1H' or '1min')")
+            # Compare against value extracted from the file name
+            file_sampling_period = Timedelta(seconds=metadata["sampling_period"])
+            comparison_seconds = abs(input_sampling_period - file_sampling_period).total_seconds()
+            tolerance_seconds = 1
+            if comparison_seconds > tolerance_seconds:
+                raise ValueError(f"Input sampling period {sampling_period} does not match to value "
+                                 f"extracted from the file name of {metadata['sampling_period']} seconds.")
 
         # Read the scale from JSON
         crds_data = load_json(filename="process_gcwerks_parameters.json")
@@ -187,20 +207,22 @@ class CRDS:
 
         site = split_filename[0]
         instrument = split_filename[1]
-        resolution_str = split_filename[2]
+        sampling_period_str = split_filename[2]
         inlet = split_filename[3]
 
-        if resolution_str == "1minute":
-            resolution = "1_minute"
-        elif resolution_str == "hourly":
-            resolution = "1_hour"
+        if sampling_period_str == "1minute":
+            # sampling_period = "1min"
+            sampling_period = 60
+        elif sampling_period_str == "hourly":
+            # sampling_period = "1H"
+            sampling_period = 60 * 60
         else:
             raise ValueError("Unable to read time resolution from filename.")
 
         metadata = {}
         metadata["site"] = site
         metadata["instrument"] = instrument
-        metadata["time_resolution"] = resolution
+        metadata["sampling_period"] = sampling_period
         metadata["inlet"] = inlet
         metadata["port"] = port
         metadata["type"] = type_meas
