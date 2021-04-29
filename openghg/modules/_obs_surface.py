@@ -1,7 +1,7 @@
 from openghg.modules import BaseModule
 from pathlib import Path
 from typing import Dict, Optional, Union
-import traceback
+# import traceback
 
 __all__ = ["ObsSurface"]
 
