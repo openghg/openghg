@@ -66,7 +66,14 @@ jobs:
         pytest --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
       run: |
-        bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+        curl -s https://codecov.io/bash > codecov;
+        VERSION=$(grep -o 'VERSION=\"[0-9\.]*\"' codecov | cut -d'"' -f2);
+        for i in 1 256 512
+        do
+          shasum -a $i -c --ignore-missing <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM") ||
+          shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM")
+        done
+        bash codecov || echo "Codecov did not collect coverage reports"
       if: matrix.python-version == 3.8 && matrix.operating-system == 'ubuntu-latest'
     - name: Install pandoc and build the documentation
       run: |
@@ -75,7 +82,7 @@ jobs:
         make
       if: matrix.python-version == 3.7 && matrix.operating-system == 'ubuntu-latest'
     - name: Deploy to GitHub pages
-      uses: JamesIves/github-pages-deploy-action@3.7.1
+      uses: JamesIves/github-pages-deploy-action@164583b9e44b4fc5910e78feb607ea7c98d3c7b9
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages 
