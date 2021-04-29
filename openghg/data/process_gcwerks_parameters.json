@@ -1,47 +1,47 @@
 {
     "GCWERKS": {
         "instruments": {
-            "GCMD": "",
-            "GCMS": "",
+            "gcmd": "",
+            "gcms": "",
             "medusa": ""
         },
         "instruments_suffix": {
-            "GCMD": ["", "-md"],
-            "GCMS": ["", "-gcms"],
+            "gcmd": ["", "-md"],
+            "gcms": ["", "-gcms"],
             "medusa": ["-medusa"]
         },
         "suffix_to_instrument": {
-            "md": "GCMD",
-            "gcms": "GCMS",
+            "md": "gcmd",
+            "gcms": "gcms",
             "medusa": "medusa"
         },
         "instruments_out": {
-            "GCMD": {
+            "gcmd": {
                 "CH4": "GCFID",
                 "CO": "GCRGA",
                 "H2": "GCRGA",
                 "else": "GCECD"
             },
-            "GCMS": {
-                "else": "GCMS"
+            "gcms": {
+                "else": "gcms"
             },
             "medusa": {
-                "else": "GCMSMedusa"
+                "else": "gcmsMedusa"
             }
         },
         "directory" : {
-            "GCMD":   "/dagage2/agage/summary/data/",
-            "GCMS":   "/dagage2/agage/summary/data-gcms/",
+            "gcmd":   "/dagage2/agage/summary/data/",
+            "gcms":   "/dagage2/agage/summary/data-gcms/",
             "medusa": "/dagage2/agage/summary/data-gcms/"
         },
         "sampling_period": {
-            "GCMD": 75,
-            "GCMS": 1200,
+            "gcmd": 75,
+            "gcms": 1200,
             "medusa": 1200
         },
         "comment": {
-            "GCMD": "Gas chromatograph measurements. Output from GCWerks.",
-            "GCMS": "Gas chromatograph-mass spectrometer measurements. Output from GCWerks.",
+            "gcmd": "Gas chromatograph measurements. Output from GCWerks.",
+            "gcms": "Gas chromatograph-mass spectrometer measurements. Output from GCWerks.",
             "medusa": "Medusa measurements. Output from GCWerks. See Miller et al. (2008)."
         },
         "directory_output" : "/data/shared/obs_2018",

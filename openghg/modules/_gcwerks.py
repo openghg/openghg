@@ -113,8 +113,8 @@ class GCWERKS:
             network = "NA"
 
         gas_data = self.read_data(
-            data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, instrument=instrument, network=network
-        )
+            data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, instrument=instrument, network=network,
+            sampling_period=sampling_period)
 
         # Assign attributes to the data for CF compliant NetCDFs
         gas_data = assign_attributes(data=gas_data, site=site)
@@ -140,7 +140,8 @@ class GCWERKS:
 
         return instrument
 
-    def read_data(self, data_filepath: Path, precision_filepath: Path, site: str, instrument: str, network: str) -> Dict:
+    def read_data(self, data_filepath: Path, precision_filepath: Path, 
+                  site: str, instrument: str, network: str, sampling_period: Optional[str] = None) -> Dict:
         """Read data from the data and precision files
 
         Args:
@@ -149,6 +150,7 @@ class GCWERKS:
             site: Name of site
             instrument: Instrument name
             network: Network name
+            sampling_period: Period over which the measurement was samplied.
         Returns:
             dict: Dictionary of gas data keyed by species
         """
@@ -181,6 +183,24 @@ class GCWERKS:
 
         # This metadata will be added to when species are split and attributes are written
         metadata = {"instrument": instrument, "site": site, "network": network}
+
+        extracted_sampling_period = self.get_precision(instrument)
+        metadata["sampling_period"] = extracted_sampling_period
+
+        if sampling_period is not None:
+            # Check input sampling_period can be interpreted
+            if isinstance(sampling_period, str):
+                input_sampling_period = pd_Timedelta(sampling_period)
+            else:
+                raise TypeError("Sampling period must be a string including the unit "
+                                "(using pandas frequency aliases like '1H' or '1min')")
+            # Compare input to definition within json file
+            file_sampling_period = pd_Timedelta(seconds=extracted_sampling_period)
+            comparison_seconds = abs(input_sampling_period - file_sampling_period).total_seconds()
+            tolerance_seconds = 1
+            if comparison_seconds > tolerance_seconds:
+                raise ValueError(f"Input sampling period {sampling_period} does not match to value "
+                                 f"extracted from the file name of {metadata['sampling_period']} seconds.")
 
         units = {}
         scale = {}
@@ -229,9 +249,7 @@ class GCWERKS:
             data[sp + " repeatability"] = precision[precision_index].astype(float).reindex_like(data, method="pad")
 
         # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
-        self._sampling_period = self.get_precision(instrument)
-
-        data["new_time"] = data.index - pd_Timedelta(seconds=self._sampling_period / 2.0)
+        data["new_time"] = data.index - pd_Timedelta(seconds=metadata["sampling_period"] / 2.0)
 
         data = data.set_index("new_time", inplace=False, drop=True)
         data.index.name = "time"
@@ -304,33 +322,13 @@ class GCWERKS:
         from fnmatch import fnmatch
         from openghg.util import compliant_string
 
-        # Read inlets from the parameters dictionary
+        # Read inlets from the parameters
         expected_inlets = self.get_inlets(site_code=site)
 
-        if len(expected_inlets) == 1 and expected_inlets[0] == "any":
-            matching_inlets = expected_inlets
-        else:
-            # Get the inlets in the dataframe
-            try:
-                data_inlets = data["Inlet"].unique().tolist()
-            except KeyError:
-                raise KeyError(
-                    "Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module"
-                )
-
-            # For now just add air to the expected inlets
-            expected_inlets["air"] = "air"
-
-            # Make a mapping of the inlet we have in the data to the one we want to use
-            matching_inlets = {
-                data_inlet: expected_inlets[inlet] for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)
-            }
-
-            if not matching_inlets:
-                raise ValueError(
-                    "Inlet mismatch - please ensure correct site is selected."
-                    "Mismatch between inlet in data and inlet in parameters file."
-                )
+        try:
+            data_inlets = data["Inlet"].unique().tolist()
+        except KeyError:
+            raise KeyError("Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module")
 
         combined_data = {}
 
@@ -347,23 +345,36 @@ class GCWERKS:
             spec_metadata["scale"] = scale[spec]
 
             # Here inlet is the inlet in the data and inlet_label is the label we want to use as metadata
-            for inlet, inlet_label in matching_inlets.values():
-                spec_metadata["inlet"] = inlet_label
+            for inlet, inlet_label in expected_inlets.items():
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
                     spec_data = data[[spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]]
                     spec_data = spec_data.dropna(axis="index", how="any")
+                    spec_metadata["inlet"] = inlet_label
                 elif "date" in inlet:
+                    # print("inlet : ", inlet)
                     dates = inlet.split("_")[1:]
-                    slice_dict = {"time": slice(dates[0], dates[1])}
-                    data_sliced = data.loc(slice_dict)
+                    # slice_dict = {"time": slice(dates[0], dates[1])}
+
+                    data_sliced = data.loc[dates[0]:dates[1]]
                     spec_data = data_sliced[
                         [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
                     ]
                     spec_data = spec_data.dropna(axis="index", how="any")
+                    spec_metadata["inlet"] = inlet_label
                 else:
+                    # Find the inlet
+                    matching_inlets = [i for i in data_inlets if fnmatch(i, inlet)]
+
+                    if not matching_inlets:
+                        continue
+
+                    # Only set the label in metadata when we have the correct label
+                    spec_metadata["inlet"] = inlet_label
+                    # There should only be one matching label
+                    select_inlet = matching_inlets[0]
                     # Take only data for this inlet from the dataframe
-                    inlet_data = data.loc[data["Inlet"] == inlet]
+                    inlet_data = data.loc[data["Inlet"] == select_inlet]
 
                     spec_data = inlet_data[
                         [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
@@ -371,11 +382,14 @@ class GCWERKS:
 
                     spec_data = spec_data.dropna(axis="index", how="any")
 
+                # Now we drop the inlet column
+                spec_data = spec_data.drop("Inlet", axis="columns")
+
                 # Check that the Dataframe has something in it
                 if spec_data.empty:
                     continue
 
-                attributes = self.get_site_attributes(site=site, inlet=inlet, instrument=instrument)
+                attributes = self.get_site_attributes(site=site, inlet=inlet_label, instrument=instrument)
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
@@ -393,7 +407,7 @@ class GCWERKS:
 
                 # As a single species may have measurements from multiple inlets we
                 # use the species and inlet as a key
-                data_key = f"{comp_species}_{inlet}"
+                data_key = f"{comp_species}_{inlet_label}"
 
                 combined_data[data_key] = {}
                 combined_data[data_key]["metadata"] = spec_metadata
@@ -411,6 +425,7 @@ class GCWERKS:
         Returns:
             int: Precision of instrument in seconds
         """
+        instrument = instrument.lower()
         try:
             sampling_period = self._gc_params["sampling_period"][instrument]
         except KeyError:
@@ -461,17 +476,24 @@ class GCWERKS:
 
         Args:
             site: Site code
+<<<<<<< HEAD
             inlet: Inlet (example: 108m)
+=======
+            inlet: Inlet label (example: 108m)
+>>>>>>> updateCRDS
         Returns:
             dict: Dictionary of attributes
         """
-        attributes = self._gc_params[site.upper()]["global_attributes"]
+        site = site.upper()
+        instrument = instrument.lower()
+
+        attributes = self._gc_params[site]["global_attributes"]
 
         attributes["inlet_height_magl"] = inlet
         try:
             attributes["comment"] = self._gc_params["comment"][instrument]
         except KeyError:
             valid_instruments = list(self._gc_params["comment"].keys())
-            raise KeyError(f"Invalid instrument passed, valid instruments : {valid_instruments}")
+            raise KeyError(f"Invalid instrument {instrument} passed, valid instruments : {valid_instruments}")
 
         return attributes

@@ -1,7 +1,8 @@
 from openghg.util import load_json
-from pandas import DataFrame
+from pandas import DataFrame, Timedelta
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
+
 
 __all__ = ["CRDS"]
 
@@ -10,12 +11,8 @@ class CRDS:
     """ Class for processing CRDS data """
 
     def __init__(self):
-        # Holds parameters used for writing attributes to Datasets
-        self._crds_params = {}
-        # Sampling period of CRDS data in seconds
-        self._sampling_period = 60
-
         data = load_json(filename="process_gcwerks_parameters.json")
+        # Holds parameters used for writing attributes to Datasets
         self._crds_params = data["CRDS"]
 
     def read_file(
@@ -53,8 +50,7 @@ class CRDS:
 
         split_fname = data_filepath.stem.split(".")
 
-        # Do some sanity checks to see if we've got different data passed in to that read from
-        # the file
+        # Do some checks to see if we've got different data passed in to that read from the file
         site_fname = clean_string(split_fname[0])
         inlet_fname = clean_string(split_fname[3])
 
@@ -107,8 +103,29 @@ class CRDS:
 
         metadata = self.read_metadata(filepath=data_filepath, data=data)
 
+        if network is not None:
+            metadata["network"] = network
+
+        if sampling_period is not None:
+            # Check input sampling_period can be interpreted
+            if isinstance(sampling_period, str):
+                input_sampling_period = Timedelta(sampling_period)
+            else:
+                raise TypeError("Sampling period must be a string including the unit "
+                                "(using pandas frequency aliases like '1H' or '1min')")
+
+            # Compare against value extracted from the file name
+            file_sampling_period = Timedelta(seconds=metadata["sampling_period"])
+            comparison_seconds = abs(input_sampling_period - file_sampling_period).total_seconds()
+            tolerance_seconds = 1
+
+            if comparison_seconds > tolerance_seconds:
+                raise ValueError(f"Input sampling period {sampling_period} does not match to value "
+                                 f"extracted from the file name of {metadata['sampling_period']} seconds.")
+
         # Read the scale from JSON
-        crds_data = load_json(filename="process_gcwerks_parameters.json")
+        # I'll leave this here for the possible future movement from class to functions
+        # crds_data = load_json(filename="process_gcwerks_parameters.json")
 
         # This dictionary is used to store the gas data and its associated metadata
         combined_data = {}
@@ -138,9 +155,9 @@ class CRDS:
 
             site_attributes = self.get_site_attributes(site=site, inlet=inlet)
 
-            # Create a copy of the metadata dict
-            scale = crds_data["CRDS"]["default_scales"].get(species.upper())
+            scale = self._crds_params["CRDS"]["default_scales"].get(species.upper(), "NA")
 
+            # Create a copy of the metadata dict
             species_metadata = metadata.copy()
             species_metadata["species"] = clean_string(species)
             species_metadata["inlet"] = inlet
@@ -181,20 +198,22 @@ class CRDS:
 
         site = split_filename[0]
         instrument = split_filename[1]
-        resolution_str = split_filename[2]
+        sampling_period_str = split_filename[2]
         inlet = split_filename[3]
 
-        if resolution_str == "1minute":
-            resolution = "1_minute"
-        elif resolution_str == "hourly":
-            resolution = "1_hour"
+        if sampling_period_str == "1minute":
+            # sampling_period = "1min"
+            sampling_period = 60
+        elif sampling_period_str == "hourly":
+            # sampling_period = "1H"
+            sampling_period = 60 * 60
         else:
             raise ValueError("Unable to read time resolution from filename.")
 
         metadata = {}
         metadata["site"] = site
         metadata["instrument"] = instrument
-        metadata["time_resolution"] = resolution
+        metadata["sampling_period"] = sampling_period
         metadata["inlet"] = inlet
         metadata["port"] = port
         metadata["type"] = type_meas

@@ -79,68 +79,68 @@ def test_read_GC():
     results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
 
     expected_keys = [
-        "benzene_75m_4",
-        "c4f10_75m_4",
-        "c6f14_75m_4",
-        "ccl4_75m_4",
-        "cf4_75m_4",
-        "cfc112_75m_4",
-        "cfc113_75m_4",
-        "cfc114_75m_4",
-        "cfc115_75m_4",
-        "cfc11_75m_4",
-        "cfc12_75m_4",
-        "cfc13_75m_4",
-        "ch2br2_75m_4",
-        "ch2cl2_75m_4",
-        "ch3br_75m_4",
-        "ch3ccl3_75m_4",
-        "ch3cl_75m_4",
-        "ch3i_75m_4",
-        "chbr3_75m_4",
-        "chcl3_75m_4",
-        "cos_75m_4",
-        "cpropane_75m_4",
-        "desflurane_75m_4",
-        "ethane_75m_4",
-        "ethyne_75m_4",
-        "h1211_75m_4",
-        "h1301_75m_4",
-        "h2402_75m_4",
-        "hcfc124_75m_4",
-        "hcfc132b_75m_4",
-        "hcfc133a_75m_4",
-        "hcfc141b_75m_4",
-        "hcfc142b_75m_4",
-        "hcfc22_75m_4",
-        "hfc125_75m_4",
-        "hfc134a_75m_4",
-        "hfc143a_75m_4",
-        "hfc152a_75m_4",
-        "hfc227ea_75m_4",
-        "hfc236fa_75m_4",
-        "hfc23_75m_4",
-        "hfc245fa_75m_4",
-        "hfc32_75m_4",
-        "hfc365mfc_75m_4",
-        "hfc4310mee_75m_4",
-        "nf3_75m_4",
-        "pce_75m_4",
-        "pfc116_75m_4",
-        "pfc218_75m_4",
-        "pfc318_75m_4",
-        "propane_75m_4",
-        "sf5cf3_75m_4",
-        "sf6_75m_4",
-        "so2f2_75m_4",
-        "tce_75m_4",
-        "toluene_75m_4",
+        "benzene_70m",
+        "c4f10_70m",
+        "c6f14_70m",
+        "ccl4_70m",
+        "cf4_70m",
+        "cfc112_70m",
+        "cfc113_70m",
+        "cfc114_70m",
+        "cfc115_70m",
+        "cfc11_70m",
+        "cfc12_70m",
+        "cfc13_70m",
+        "ch2br2_70m",
+        "ch2cl2_70m",
+        "ch3br_70m",
+        "ch3ccl3_70m",
+        "ch3cl_70m",
+        "ch3i_70m",
+        "chbr3_70m",
+        "chcl3_70m",
+        "cos_70m",
+        "cpropane_70m",
+        "desflurane_70m",
+        "ethane_70m",
+        "ethyne_70m",
+        "h1211_70m",
+        "h1301_70m",
+        "h2402_70m",
+        "hcfc124_70m",
+        "hcfc132b_70m",
+        "hcfc133a_70m",
+        "hcfc141b_70m",
+        "hcfc142b_70m",
+        "hcfc22_70m",
+        "hfc125_70m",
+        "hfc134a_70m",
+        "hfc143a_70m",
+        "hfc152a_70m",
+        "hfc227ea_70m",
+        "hfc236fa_70m",
+        "hfc23_70m",
+        "hfc245fa_70m",
+        "hfc32_70m",
+        "hfc365mfc_70m",
+        "hfc4310mee_70m",
+        "nf3_70m",
+        "pce_70m",
+        "pfc116_70m",
+        "pfc218_70m",
+        "pfc318_70m",
+        "propane_70m",
+        "sf5cf3_70m",
+        "sf6_70m",
+        "so2f2_70m",
+        "tce_70m",
+        "toluene_70m",
     ]
 
     assert sorted(list(results["processed"]["capegrim-medusa.18.C"].keys())) == expected_keys
 
     # Load in some data
-    uuid = results["processed"]["capegrim-medusa.18.C"]["hfc152a_75m_4"]
+    uuid = results["processed"]["capegrim-medusa.18.C"]["hfc152a_70m"]
 
     hfc152a_data = Datasource.load(uuid=uuid, shallow=False).data()
     hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:33:00+00:00"]
@@ -170,7 +170,7 @@ def test_read_GC():
     assert hfc152a_data.attrs == {
         "data_owner": "Paul Krummel",
         "data_owner_email": "paul.krummel@csiro.au",
-        "inlet_height_magl": "75m_4",
+        "inlet_height_magl": "70m",
         "comment": "Medusa measurements. Output from GCWerks. See Miller et al. (2008).",
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
@@ -187,7 +187,8 @@ def test_read_GC():
         "network": "agage",
         "units": "ppt",
         "scale": "SIO-05",
-        "inlet": "75m_4",
+        "inlet": "70m",
+        "sampling_period": 1200,
     }
 
     # # Now test that if we add more data it adds it to the same Datasource
@@ -219,13 +220,13 @@ def test_read_GC():
     obs = ObsSurface.load()
     table = obs._datasource_table
 
-    assert table["cgo"]["agage"]["75m_4"]["nf3"]
-    assert table["cgo"]["agage"]["75m_4"]["hfc236fa"]
-    assert table["cgo"]["agage"]["75m_4"]["h1211"]
+    assert table["cgo"]["agage"]["70m"]["nf3"]
+    assert table["cgo"]["agage"]["70m"]["hfc236fa"]
+    assert table["cgo"]["agage"]["70m"]["h1211"]
 
-    assert table["thd"]["agage"]["any"]["cfc11"]
-    assert table["thd"]["agage"]["any"]["n2o"]
-    assert table["thd"]["agage"]["any"]["ccl4"]
+    assert table["thd"]["agage"]["10m"]["cfc11"]
+    assert table["thd"]["agage"]["10m"]["n2o"]
+    assert table["thd"]["agage"]["10m"]["ccl4"]
 
 
 def test_read_cranfield():
