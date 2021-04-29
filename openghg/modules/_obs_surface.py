@@ -144,7 +144,7 @@ class ObsSurface(BaseModule):
 
                     # Extract the metadata for each set of measurements to perform a Datasource lookup
                     metadata = {key: data["metadata"] for key, data in data.items()}
-
+                
                     lookup_results = obs.datasource_lookup(metadata=metadata)
 
                     # Create Datasources, save them to the object store and get their UUIDs
@@ -189,7 +189,7 @@ class ObsSurface(BaseModule):
 
             species = data["species"]
 
-            result = self._datasource_table[site][network][inlet][species]
+            result = self.lookup_uuid(site=site, network=network, inlet=inlet, species=species)
 
             # If we get an empty dict set as False
             if not result:
@@ -215,13 +215,40 @@ class ObsSurface(BaseModule):
             inlet = md["inlet"]
             species = md["species"]
 
-            result = self._datasource_table[site][network][inlet][species]
+            result = self.lookup_uuid(site=site, network=network, inlet=inlet, species=species)
 
             if result and result != uid:
                 raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
-            else:
-                self._datasource_table[site][network][inlet][species] = uid
-                self._datasource_uuids[uid] = key
+
+            self.set_uuid(site=site, network=network, inlet=inlet, species=species, uuid=uid)
+            self._datasource_uuids[uid] = key
+
+    def lookup_uuid(self, site: str, network: str, inlet: str, species: str) -> Union[str, Dict]:
+        """Perform a lookup for the UUID of a Datasource
+
+        Args:
+            site: Site code
+            network: Network name
+            Inlet: Inlet height
+            Species: Species name
+        Returns:
+            str or dict: UUID or empty dict if no entry
+        """
+        return self._datasource_table[site][network][inlet][species]
+
+    def set_uuid(self, site: str, network: str, inlet: str, species: str, uuid: str) -> None:
+        """Record a UUID of a Datasource in the datasource table
+
+        Args:
+            site: Site code
+            network: Network name
+            Inlet: Inlet height
+            Species: Species name
+            uuid: UUID of Datasource
+        Returns:
+            None
+        """
+        self._datasource_table[site][network][inlet][species] = uuid
 
     def save_datsource_info(self, datasource_data: Dict) -> None:
         """Save the datasource information to

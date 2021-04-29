@@ -38,10 +38,10 @@ def assign_data(data_dict: Dict, lookup_results: Dict, overwrite: bool, data_typ
 
         # If we have a UUID for this Datasource load the existing object
         # from the object store
-        if uuid:
-            datasource = Datasource.load(uuid=uuid)
-        else:
+        if uuid is False:
             datasource = Datasource()
+        else:
+            datasource = Datasource.load(uuid=uuid)
 
         # Add the dataframe to the datasource
         datasource.add_data(metadata=metadata, data=data, overwrite=overwrite, data_type=data_type)

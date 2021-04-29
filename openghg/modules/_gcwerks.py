@@ -304,33 +304,13 @@ class GCWERKS:
         from fnmatch import fnmatch
         from openghg.util import compliant_string
 
-        # Read inlets from the parameters dictionary
+        # Read inlets from the parameters
         expected_inlets = self.get_inlets(site_code=site)
 
-        if len(expected_inlets) == 1 and next(iter(expected_inlets)) == "any":
-            matching_inlets = expected_inlets
-        else:
-            # Get the inlets in the dataframe
-            try:
-                data_inlets = data["Inlet"].unique().tolist()
-            except KeyError:
-                raise KeyError(
-                    "Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module"
-                )
-
-            # For now just add air to the expected inlets
-            expected_inlets["air"] = "air"
-
-            # Make a mapping of the inlet we have in the data to the one we want to use
-            matching_inlets = {
-                data_inlet: expected_inlets[inlet] for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)
-            }
-
-            if not matching_inlets:
-                raise ValueError(
-                    "Inlet mismatch - please ensure correct site is selected."
-                    "Mismatch between inlet in data and inlet in parameters file."
-                )
+        try:
+            data_inlets = data["Inlet"].unique().tolist()
+        except KeyError:
+            raise KeyError("Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module")
 
         combined_data = {}
 
@@ -339,31 +319,41 @@ class GCWERKS:
             if data[spec].isnull().all():
                 continue
 
-            # Create a copy of metadata for local modification
-            spec_metadata = metadata.copy()
-
-            spec_metadata["species"] = compliant_string(spec)
-            spec_metadata["units"] = units[spec]
-            spec_metadata["scale"] = scale[spec]
-
             # Here inlet is the inlet in the data and inlet_label is the label we want to use as metadata
-            for inlet, inlet_label in matching_inlets.items():
-                spec_metadata["inlet"] = inlet_label
+            for inlet, inlet_label in expected_inlets.items():
+                # Create a copy of metadata for local modification
+                spec_metadata = metadata.copy()
+                spec_metadata["species"] = compliant_string(spec)
+                spec_metadata["units"] = units[spec]
+                spec_metadata["scale"] = scale[spec]
+
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
                     spec_data = data[[spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]]
                     spec_data = spec_data.dropna(axis="index", how="any")
+                    spec_metadata["inlet"] = inlet_label
                 elif "date" in inlet:
                     dates = inlet.split("_")[1:]
-                    slice_dict = {"time": slice(dates[0], dates[1])}
-                    data_sliced = data.loc(slice_dict)
+                    data_sliced = data.loc[dates[0]:dates[1]]
+
                     spec_data = data_sliced[
                         [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
                     ]
                     spec_data = spec_data.dropna(axis="index", how="any")
+                    spec_metadata["inlet"] = inlet_label
                 else:
+                    # Find the inlet
+                    matching_inlets = [i for i in data_inlets if fnmatch(i, inlet)]
+
+                    if not matching_inlets:
+                        continue
+
+                    # Only set the label in metadata when we have the correct label
+                    spec_metadata["inlet"] = inlet_label
+                    # There should only be one matching label
+                    select_inlet = matching_inlets[0]
                     # Take only data for this inlet from the dataframe
-                    inlet_data = data.loc[data["Inlet"] == inlet]
+                    inlet_data = data.loc[data["Inlet"] == select_inlet]
 
                     spec_data = inlet_data[
                         [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
@@ -378,7 +368,7 @@ class GCWERKS:
                 if spec_data.empty:
                     continue
 
-                attributes = self.get_site_attributes(site=site, inlet=inlet_label, instrument=instrument)
+                attributes = self.get_site_attributes(site=site, inlet=inlet_label, instrument=instrument).copy()
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
@@ -414,6 +404,7 @@ class GCWERKS:
         Returns:
             int: Precision of instrument in seconds
         """
+        instrument = instrument.lower()
         try:
             sampling_period = self._gc_params["sampling_period"][instrument]
         except KeyError:
@@ -468,13 +459,16 @@ class GCWERKS:
         Returns:
             dict: Dictionary of attributes
         """
-        attributes = self._gc_params[site.upper()]["global_attributes"]
+        site = site.upper()
+        instrument = instrument.lower()
+
+        attributes = self._gc_params[site]["global_attributes"]
 
         attributes["inlet_height_magl"] = inlet
         try:
             attributes["comment"] = self._gc_params["comment"][instrument]
         except KeyError:
             valid_instruments = list(self._gc_params["comment"].keys())
-            raise KeyError(f"Invalid instrument passed, valid instruments : {valid_instruments}")
+            raise KeyError(f"Invalid instrument {instrument} passed, valid instruments : {valid_instruments}")
 
         return attributes
