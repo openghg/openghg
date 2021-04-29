@@ -38,15 +38,55 @@ class CRDS:
         Returns:
             dict: Dictionary of gas data
         """
-        from datetime import datetime
-        from pandas import RangeIndex, read_csv, NaT
         from pathlib import Path
-        import warnings
         from openghg.processing import assign_attributes
-        from openghg.util import clean_string
 
         if not isinstance(data_filepath, Path):
             data_filepath = Path(data_filepath)
+
+        # This may seem like an almost pointless function as this is all we do
+        # but it makes it a lot easier to test that assign_attributes
+        gas_data = self.read_data(
+            data_filepath=data_filepath,
+            site=site,
+            network=network,
+            instrument=instrument,
+            sampling_period=sampling_period,
+            measurement_type=measurement_type,
+        )
+
+        # Ensure the data is CF compliant
+        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=sampling_period)
+
+        return gas_data
+
+    def read_data(
+        self,
+        data_filepath: Path,
+        site: str,
+        network: str,
+        inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+        measurement_type: Optional[str] = None,
+    ) -> Dict:
+        """Read the datafile passed in and extract the data we require.
+
+        Args:
+            data_filepath: Path to file
+            site: Three letter site code
+            network: Network name
+            inlet: Inlet height
+            instrument: Instrument name
+            sampling_period: Sampling period including the unit (using pandas frequency aliases like '1H' or '1min')
+            measurement_type: Measurement type e.g. insitu, flask
+        Returns:
+            dict: Dictionary of gas data
+        """
+        from datetime import datetime
+        from pandas import RangeIndex, read_csv, NaT
+        import warnings
+        from openghg.util import clean_string
 
         split_fname = data_filepath.stem.split(".")
 
@@ -54,19 +94,18 @@ class CRDS:
         site_fname = clean_string(split_fname[0])
         inlet_fname = clean_string(split_fname[3])
 
+        site = site.lower()
+
         if site_fname != site:
             raise ValueError("Site mismatch between passed site code and that read from filename.")
 
         if "m" not in inlet_fname:
             raise ValueError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
 
-        if inlet is not None and inlet_fname != inlet:
+        if inlet is not None and inlet != inlet_fname:
             raise ValueError("Inlet mismatch between passed inlet and that read from filename.")
-
-        if sampling_period is not None:
-            samp_period = sampling_period
         else:
-            samp_period = self._sampling_period
+            inlet = inlet_fname
 
         # Function to parse the datetime format found in the datafile
         def parse_date(date):
@@ -111,17 +150,21 @@ class CRDS:
             if isinstance(sampling_period, str):
                 input_sampling_period = Timedelta(sampling_period)
             else:
-                raise TypeError("Sampling period must be a string including the unit "
-                                "(using pandas frequency aliases like '1H' or '1min')")
+                raise TypeError(
+                    "Sampling period must be a string including the unit " "(using pandas frequency aliases like '1H' or '1min')"
+                )
 
             # Compare against value extracted from the file name
             file_sampling_period = Timedelta(seconds=metadata["sampling_period"])
+
             comparison_seconds = abs(input_sampling_period - file_sampling_period).total_seconds()
             tolerance_seconds = 1
 
             if comparison_seconds > tolerance_seconds:
-                raise ValueError(f"Input sampling period {sampling_period} does not match to value "
-                                 f"extracted from the file name of {metadata['sampling_period']} seconds.")
+                raise ValueError(
+                    f"Input sampling period {sampling_period} does not match to value "
+                    f"extracted from the file name of {metadata['sampling_period']} seconds."
+                )
 
         # Read the scale from JSON
         # I'll leave this here for the possible future movement from class to functions
@@ -155,7 +198,7 @@ class CRDS:
 
             site_attributes = self.get_site_attributes(site=site, inlet=inlet)
 
-            scale = self._crds_params["CRDS"]["default_scales"].get(species.upper(), "NA")
+            scale = self._crds_params["default_scales"].get(species.upper(), "NA")
 
             # Create a copy of the metadata dict
             species_metadata = metadata.copy()
@@ -169,10 +212,7 @@ class CRDS:
                 "attributes": site_attributes,
             }
 
-        # Ensure the data is CF compliant
-        gas_data = assign_attributes(data=combined_data, site=site, sampling_period=samp_period)
-
-        return gas_data
+        return combined_data
 
     def read_metadata(self, filepath: Path, data: DataFrame) -> Dict:
         """Parse CRDS files and create a metadata dict

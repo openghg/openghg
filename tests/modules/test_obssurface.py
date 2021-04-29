@@ -397,13 +397,14 @@ def test_upload_same_file_twice_raises():
 
     data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
 
-    res = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+    ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
 
-    assert not res["error"] 
+    # assert not res["error"] 
 
-    res = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+    with pytest.raises(ValueError):
+        ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
 
-    assert "tta.co2.1minute.222m.min.dat" in res["error"]
+    # assert "tta.co2.1minute.222m.min.dat" in res["error"]
 
 
 def test_delete_Datasource():
