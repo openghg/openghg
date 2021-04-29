@@ -11,10 +11,8 @@ class CRDS:
     """ Class for processing CRDS data """
 
     def __init__(self):
-        # Holds parameters used for writing attributes to Datasets
-        self._crds_params = {}
-
         data = load_json(filename="process_gcwerks_parameters.json")
+        # Holds parameters used for writing attributes to Datasets
         self._crds_params = data["CRDS"]
 
     def read_file(
@@ -36,43 +34,18 @@ class CRDS:
         Returns:
             dict: Dictionary of gas data
         """
+        from datetime import datetime
         from pathlib import Path
+        from pandas import RangeIndex, read_csv, NaT
+        import warnings
         from openghg.processing import assign_attributes
+        from openghg.util import clean_string
 
         if not isinstance(data_filepath, Path):
             data_filepath = Path(data_filepath)
 
         if not site:
             site = data_filepath.stem.split(".")[0]
-
-        # Process the data into separate Datasets
-        gas_data = self.read_data(data_filepath=data_filepath, site=site, network=network, 
-                                  sampling_period=sampling_period)
-
-        # Ensure the data is CF compliant
-        gas_data = assign_attributes(data=gas_data, site=site)
-
-        return gas_data
-
-    def read_data(self, 
-                  data_filepath: Path, 
-                  site: str, 
-                  network: str,
-                  sampling_period: Optional[str] = None) -> Dict:
-        """Separates the gases stored in the dataframe in
-        separate dataframes and returns a dictionary of gases
-        with an assigned UUID as gas:UUID and a list of the processed
-        dataframes
-
-        Args:
-            data_filepath (pathlib.Path): Path of datafile
-        Returns:
-            dict: Dictionary containing metadata, data and attributes keys
-        """
-        from datetime import datetime
-        from pandas import RangeIndex, read_csv, NaT
-        import warnings
-        from openghg.util import compliant_string
 
         # At the moment we're using the filename as the source name
         source_name = data_filepath.stem
@@ -167,11 +140,11 @@ class CRDS:
 
             site_attributes = self.get_site_attributes(site=site, inlet=inlet)
 
-            # Create a copy of the metadata dict
-            scale = crds_data["CRDS"]["default_scales"].get(species.upper())
+            scale = crds_data["CRDS"]["default_scales"].get(species.upper(), "NA")
 
+            # Create a copy of the metadata dict
             species_metadata = metadata.copy()
-            species_metadata["species"] = compliant_string(species)
+            species_metadata["species"] = clean_string(species)
             species_metadata["inlet"] = inlet
             species_metadata["scale"] = scale
 
@@ -181,7 +154,10 @@ class CRDS:
                 "attributes": site_attributes,
             }
 
-        return combined_data
+        # Ensure the data is CF compliant
+        gas_data = assign_attributes(data=combined_data, site=site)
+
+        return gas_data
 
     def read_metadata(self, filepath: Path, data: DataFrame) -> Dict:
         """Parse CRDS files and create a metadata dict
