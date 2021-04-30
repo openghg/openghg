@@ -66,7 +66,7 @@ def test_add_data(data):
     assert ch4_data["ch4_variability"][0] == pytest.approx(0.236)
     assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(26.0)
 
-    d.add_data(metadata=metadata, data=ch4_data)
+    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
     d.save()
     bucket = get_local_bucket()
 
@@ -102,15 +102,15 @@ def test_versioning(data):
     v2 = ch4_data.head(30)
     v3 = ch4_data.head(40)
 
-    d.add_data(metadata=metadata, data=v1)
+    d.add_data(metadata=metadata, data=v1, data_type="timeseries")
 
     d.save()
 
-    d.add_data(metadata=metadata, data=v2)
+    d.add_data(metadata=metadata, data=v2, data_type="timeseries")
 
     d.save()
 
-    d.add_data(metadata=metadata, data=v3)
+    d.add_data(metadata=metadata, data=v3, data_type="timeseries")
 
     d.save()
 
@@ -176,7 +176,7 @@ def test_save_footprint():
     data = xr.open_dataset(filepath)
 
     datasource = Datasource()
-    datasource.add_footprint_data(data=data, metadata=metadata)
+    datasource.add_data(data=data, metadata=metadata, data_type="footprint")
     datasource.save()
 
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
@@ -191,6 +191,8 @@ def test_save_footprint():
     assert float(data.pressure[0].values) == pytest.approx(1023.971)
     assert float(data.pressure[2].values) == pytest.approx(1009.940)
     assert float(data.pressure[-1].values) == pytest.approx(1021.303)
+
+    assert datasource_2._data_type == "footprint"
 
 
 def test_add_metadata_key(datasource):
@@ -286,7 +288,7 @@ def test_update_daterange_replacement(data):
 
     ch4_data = data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=ch4_data)
+    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
 
     assert d._start_date == pd.Timestamp("2014-01-30 10:52:30+00:00")
     assert d._end_date == pd.Timestamp("2018-01-30 14:20:30+00:00")
@@ -295,7 +297,7 @@ def test_update_daterange_replacement(data):
 
     d._data = None
 
-    d.add_data(metadata=metadata, data=ch4_short, overwrite=True)
+    d.add_data(metadata=metadata, data=ch4_short, data_type="timeseries")
 
     assert d._start_date == pd.Timestamp("2014-01-30 10:52:30+00:00")
     assert d._end_date == pd.Timestamp("2014-01-30 13:22:30+00:00")
@@ -313,7 +315,7 @@ def test_load_dataset():
 
     d = Datasource()
 
-    d.add_footprint_data(metadata=metadata, data=ds)
+    d.add_data(metadata=metadata, data=ds, data_type="footprint")
 
     d.save()
 
@@ -505,7 +507,7 @@ def test_in_daterange(data):
     data = data["ch4"]["data"]
 
     d = Datasource()
-    d.add_data(metadata=metadata, data=data)
+    d.add_data(metadata=metadata, data=data, data_type="timeseries")
     d.save()
 
     start = pd.Timestamp("2014-1-1")
@@ -533,7 +535,7 @@ def test_shallow_then_load_data(data):
     data = data["ch4"]["data"]
 
     d = Datasource()
-    d.add_data(metadata=metadata, data=data)
+    d.add_data(metadata=metadata, data=data, data_type="timeseries")
     d.save()
 
     new_d = Datasource.load(uuid=d.uuid(), shallow=True)

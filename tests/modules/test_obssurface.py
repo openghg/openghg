@@ -48,7 +48,10 @@ def test_read_CRDS():
 
     data_keys = list(datasource.data().keys())
 
-    assert data_keys == ['2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00', '2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00']
+    assert data_keys == [
+        "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00",
+        "2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00",
+    ]
 
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.future.dat", data_type="CRDS")
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
@@ -59,7 +62,7 @@ def test_read_CRDS():
 
     assert data_keys == [
         "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00",
-        '2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00',
+        "2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00",
         "2023-01-30-13:56:30+00:00_2023-01-30-14:20:30+00:00",
     ]
 
@@ -348,7 +351,9 @@ def test_read_noaa_raw():
 def test_read_noaa_obspack():
     data_filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
 
-    results = ObsSurface.read_file(filepath=data_filepath, inlet="flask", data_type="NOAA", site="esp", network="NOAA", overwrite=True)
+    results = ObsSurface.read_file(
+        filepath=data_filepath, inlet="flask", data_type="NOAA", site="esp", network="NOAA", overwrite=True
+    )
 
     uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]
 
@@ -438,3 +443,34 @@ def test_delete_Datasource():
     assert uuid not in obs.datasources()
 
     assert not exists(bucket=bucket, key=key)
+
+
+def test_add_new_data_correct_datasource():
+    get_local_bucket(empty=True)
+
+    data_filepath = get_datapath(filename="capegrim-medusa.05.C", data_type="GC")
+    precision_filepath = get_datapath(filename="capegrim-medusa.05.precisions.C", data_type="GC")
+
+    results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
+
+    first_results = results["processed"]["capegrim-medusa.05.C"]
+
+    sorted_keys = sorted(list(results["processed"]["capegrim-medusa.05.C"].keys()))
+
+    assert sorted_keys[:4] == ["benzene_10m", "benzene_70m", "ccl4_10m", "ccl4_70m"]
+    assert sorted_keys[-4:] == ["so2f2_10m", "so2f2_70m", "toluene_10m", "toluene_70m"]
+    assert len(sorted_keys) == 69
+
+    data_filepath = get_datapath(filename="capegrim-medusa.06.C", data_type="GC")
+    precision_filepath = get_datapath(filename="capegrim-medusa.06.precisions.C", data_type="GC")
+
+    new_results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
+
+    second_results = new_results["processed"]["capegrim-medusa.06.C"]
+
+    shared_keys = [key for key in first_results if key in second_results]
+
+    assert len(shared_keys) == 67
+
+    for key in shared_keys:
+        assert first_results[key] == second_results[key]

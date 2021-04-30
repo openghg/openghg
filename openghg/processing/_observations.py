@@ -19,12 +19,7 @@ def get_obs_surface(
     calibration_scale: Optional[str] = None,
     keep_missing: Optional[bool] = False,
 ) -> ObsData:
-    """Get measurements from one site as a list of ObsData types.
-
-    If there are multiple instruments and inlets at a particular site,
-    note that the acrg_obs_defaults.csv file may be referenced to determine which instrument and inlet to use for each time period.
-    If an inlet or instrument changes at some point during time period, multiple datasets will be returned,
-    one for each inlet/instrument.
+    """Get measurements from one site.
 
     Args:
         site: Site of interest e.g. MHD for the Mace Head site.
@@ -39,7 +34,7 @@ def get_obs_surface(
         instrument: Specific instrument for the site (must match number of sites).
         calibration_scale: Convert to this calibration scale
     Returns:
-        list: List of ObsData objects
+        ObsData: ObsData object
     """
     from pandas import Timestamp, Timedelta
     import numpy as np

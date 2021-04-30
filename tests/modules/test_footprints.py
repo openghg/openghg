@@ -2,7 +2,7 @@ from pathlib import Path
 import pytest
 
 from openghg.modules import FOOTPRINTS
-from openghg.processing import search_footprints, recombine_datasets
+from openghg.processing import search, recombine_datasets
 from openghg.objectstore import get_local_bucket
 
 
@@ -10,30 +10,27 @@ def get_datapath(filename):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/footprints/{filename}")
 
 
-@pytest.mark.skip(reason="Footprint object needs to be updated with new datasource table")
 def test_read_footprint():
-    _ = get_local_bucket(empty=True)
+    get_local_bucket(empty=True)
 
     datapath = get_datapath("footprint_test.nc")
-    model_params = {"simulation_params": "123"}
+    # model_params = {"simulation_params": "123"}
 
     site = "TMB"
     network = "LGHG"
     height = "10m"
     domain = "EUROPE"
+    model = "test_model"
 
-    start_date = "2010-01-01"
-    end_date = "2022-01-01"
-
-    FOOTPRINTS.read_file(filepath=datapath, site=site, network=network, height=height, domain=domain, model_params=model_params)
+    FOOTPRINTS.read_file(filepath=datapath, site=site, model=model, network=network, height=height, domain=domain)
 
     # Get the footprint data
-    footprint_results = search_footprints(sites=site, domains=domain, inlet=height, start_date=start_date, end_date=end_date)
+    footprint_results = search(site=site, domain=domain, data_type="footprint")
 
     fp_site_key = list(footprint_results.keys())[0]
 
     footprint_keys = footprint_results[fp_site_key]["keys"]
-    footprint_data = recombine_datasets(data_keys=footprint_keys, sort=False)
+    footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
 
     assert list(footprint_data.coords.keys()) == ["time", "lon", "lat", "lev", "height", "lat_high", "lon_high"]
     assert list(footprint_data.dims) == ["height", "index", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
@@ -64,31 +61,28 @@ def test_read_footprint():
         ]
     ).all()
 
-    assert (
-        footprint_data.attrs["variables"]
-        == [
-            "fp",
-            "temperature",
-            "pressure",
-            "wind_speed",
-            "wind_direction",
-            "PBLH",
-            "release_lon",
-            "release_lat",
-            "particle_locations_n",
-            "particle_locations_e",
-            "particle_locations_s",
-            "particle_locations_w",
-            "mean_age_particles_n",
-            "mean_age_particles_e",
-            "mean_age_particles_s",
-            "mean_age_particles_w",
-            "fp_low",
-            "fp_high",
-            "index_lons",
-            "index_lats",
-        ]
-    )
+    assert footprint_data.attrs["variables"] == [
+        "fp",
+        "temperature",
+        "pressure",
+        "wind_speed",
+        "wind_direction",
+        "PBLH",
+        "release_lon",
+        "release_lat",
+        "particle_locations_n",
+        "particle_locations_e",
+        "particle_locations_s",
+        "particle_locations_w",
+        "mean_age_particles_n",
+        "mean_age_particles_e",
+        "mean_age_particles_s",
+        "mean_age_particles_w",
+        "fp_low",
+        "fp_high",
+        "index_lons",
+        "index_lats",
+    ]
 
     del footprint_data.attrs["processed"]
     del footprint_data.attrs["heights"]
@@ -97,10 +91,11 @@ def test_read_footprint():
     expected_attrs = {
         "author": "OpenGHG Cloud",
         "data_type": "footprint",
-        "site": "TMB",
-        "network": "LGHG",
+        "site": "tmb",
+        "network": "lghg",
         "height": "10m",
-        "domain": "EUROPE",
+        "model": "test_model",
+        "domain": "europe",
         "start_date": "2020-08-01 00:00:00+00:00",
         "end_date": "2020-08-01 00:00:00+00:00",
         "max_longitude": 39.38,
@@ -119,10 +114,84 @@ def test_read_footprint():
     footprint_data["fp_high"].min().values == 0.0
     footprint_data["pressure"].min().values == 1011.92
 
-@pytest.mark.skip(reason="Footprint object needs to be updated with new datasource table")
+
 def test_read_same_footprint_twice_raises():
     datapath = get_datapath("footprint_test.nc")
-    model_params = {"simulation_params": "123"}
 
     with pytest.raises(ValueError):
-        FOOTPRINTS.read_file(filepath=datapath, site="TMB", network="LGHG", domain="EUROPE", height="10magl", model_params=model_params)
+        FOOTPRINTS.read_file(
+            filepath=datapath,
+            site="TMB",
+            model="test_model",
+            network="LGHG",
+            domain="EUROPE",
+            height="10magl",
+        )
+
+
+def test_set_lookup_uuids():
+    f = FOOTPRINTS()
+
+    fake_uuid = "123456789"
+
+    site = "test_site"
+    domain = "test_domain"
+    model = "test_model"
+    height = "test_height"
+
+    f.set_uuid(site=site, domain=domain, model=model, height=height, uuid=fake_uuid)
+
+    found_uid = f.lookup_uuid(site=site, domain=domain, model=model, height=height)
+
+    assert f._datasource_table[site][domain][model][height] == found_uid == fake_uuid
+
+
+def test_datasource_add_lookup():
+    f = FOOTPRINTS()
+
+    fake_datasource = {"tmb_lghg_10m_europe": "mock-uuid-123456"}
+
+    fake_metadata = {
+        "tmb_lghg_10m_europe": {
+            "data_type": "footprint",
+            "site": "tmb",
+            "height": "10m",
+            "domain": "europe",
+            "model": "test_model",
+            "network": "lghg",
+        }
+    }
+
+    f.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
+
+    assert f.datasources() == ["mock-uuid-123456"]
+
+    lookup = f.datasource_lookup(fake_metadata)
+
+    assert lookup == fake_datasource
+
+
+def test_wrong_uuid_raises():
+    f = FOOTPRINTS()
+
+    fake_datasource = {"tmb_lghg_10m_europe": "mock-uuid-123456"}
+
+    fake_metadata = {
+        "tmb_lghg_10m_europe": {
+            "data_type": "footprint",
+            "site": "tmb",
+            "height": "10m",
+            "domain": "europe",
+            "model": "test_model",
+            "network": "lghg",
+        }
+    }
+
+    f.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
+
+    assert f.datasources() == ["mock-uuid-123456"]
+
+    changed_datasource = {"tmb_lghg_10m_europe": "mock-uuid-8888888"}
+
+    with pytest.raises(ValueError):
+        f.add_datasources(datasource_uuids=changed_datasource, metadata=fake_metadata)
