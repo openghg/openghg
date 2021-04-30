@@ -6,7 +6,7 @@ import pytest
 
 from openghg.modules import CRDS, GCWERKS, ObsSurface
 from openghg.objectstore import get_local_bucket
-from openghg.processing import recombine_sections, search
+from openghg.processing import recombine_datasets, search
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -14,20 +14,12 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def data_path():
-    return (
-        os.path.dirname(os.path.abspath(__file__))
-        + os.path.sep
-        + "../data/proc_test_data/GC/capegrim-medusa.18.C"
-    )
+    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.C"
 
 
 @pytest.fixture(scope="session")
 def precision_path():
-    return (
-        os.path.dirname(os.path.abspath(__file__))
-        + os.path.sep
-        + "../data/proc_test_data/GC/capegrim-medusa.18.precisions.C"
-    )
+    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.precisions.C"
 
 
 def get_datapath(filename, data_type):
@@ -42,20 +34,22 @@ def test_recombination_CRDS():
 
     crds = CRDS()
 
-    ObsSurface.read_file(filepath, data_type="CRDS")
+    ObsSurface.read_file(filepath, data_type="CRDS", site="hfd", network="DECC")
 
     gas_data = crds.read_data(data_filepath=filepath, site="HFD", network="AGAGE")
 
     ch4_data_read = gas_data["ch4"]["data"]
 
     gas_name = "ch4"
-    location = "hfd"
+    site = "hfd"
 
-    keys = search(species=gas_name, locations=location)
+    result = search(species=gas_name, site=site)
 
-    to_download = keys["ch4_hfd_100m_picarro"]["keys"]["2013-12-04-14:02:30_2019-05-21-15:46:30"]
+    uid = next(iter(result))
 
-    ch4_data_recombined = recombine_sections(data_keys=to_download)
+    keys = result[uid]["keys"]
+
+    ch4_data_recombined = recombine_datasets(keys=keys)
 
     ch4_data_recombined.attrs = {}
 
@@ -71,20 +65,21 @@ def test_recombination_GC():
     data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     precision = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    ObsSurface.read_file((data, precision), data_type="GCWERKS")
+    ObsSurface.read_file((data, precision), data_type="GCWERKS", site="cgo", network="agage")
 
     data = gc.read_data(data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa", network="AGAGE")
 
     toluene_data = data["toluene_75m_4"]["data"]
 
     gas_name = "toluene"
-    location = "CGO"
+    site = "CGO"
 
-    keys = search(species=gas_name, locations=location)
+    results = search(species=gas_name, site=site)
 
-    to_download = keys["toluene_cgo_75m_4_medusa"]["keys"]["2018-01-01-02:24:00_2018-01-31-23:33:00"]
+    uid = next(iter(results))
+    keys = results[uid]["keys"]
 
-    toluene_data_recombined = recombine_sections(data_keys=to_download)
+    toluene_data_recombined = recombine_datasets(keys=keys)
 
     toluene_data.attrs = {}
     toluene_data_recombined.attrs = {}

@@ -39,6 +39,8 @@ def test_read_file(cranfield_path):
         "time_resolution": "1_hour",
         "height": "10magl",
         "species": "co",
+        "inlet": "10magl",
+        "network": "CRANFIELD",
     }
 
     assert data["co2"]["metadata"] == {
@@ -47,6 +49,8 @@ def test_read_file(cranfield_path):
         "time_resolution": "1_hour",
         "height": "10magl",
         "species": "co2",
+        "inlet": "10magl",
+        "network": "CRANFIELD",
     }
 
     assert data["ch4"]["metadata"] == {
@@ -55,4 +59,6 @@ def test_read_file(cranfield_path):
         "time_resolution": "1_hour",
         "height": "10magl",
         "species": "ch4",
+        "inlet": "10magl",
+        "network": "CRANFIELD",
     }

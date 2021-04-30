@@ -69,9 +69,8 @@ class NOAA(BaseModule):
             Returns:
                 dict: Dictionary containing attributes, data and metadata keys
         """
-        from openghg.util import read_header
+        from openghg.util import compliant_string, read_header
         from pandas import read_csv, Timestamp
-        import numpy as np
 
         header = read_header(filepath=data_filepath)
 
@@ -83,12 +82,12 @@ class NOAA(BaseModule):
         date_parsing = {"time": ["sample_year", "sample_month", "sample_day", "sample_hour", "sample_minute", "sample_seconds"]}
 
         data_types = {
-            "sample_year": np.int,
-            "sample_month": np.int,
-            "sample_day": np.int,
-            "sample_hour": np.int,
-            "sample_minute": np.int,
-            "sample_seconds": np.int,
+            "sample_year": int,
+            "sample_month": int,
+            "sample_day": int,
+            "sample_hour": int,
+            "sample_minute": int,
+            "sample_seconds": int,
         }
 
         # Number of header lines to skip
@@ -174,10 +173,11 @@ class NOAA(BaseModule):
         site_attributes["instrument"] = self._noaa_params["instrument"][species.upper()]
 
         metadata = {}
-        metadata["species"] = species.lower()
+        metadata["species"] = compliant_string(species)
         metadata["site"] = site
         metadata["measurement_type"] = measurement_type
         metadata["network"] = "NOAA"
+        metadata["inlet"] = "NA"
 
         combined_data[species.lower()] = {
             "metadata": metadata,

@@ -58,6 +58,7 @@ class CRDS:
         from datetime import datetime
         from pandas import RangeIndex, read_csv, NaT
         import warnings
+        from openghg.util import compliant_string
 
         # At the moment we're using the filename as the source name
         source_name = data_filepath.stem
@@ -115,7 +116,7 @@ class CRDS:
             species = gas_data[0][0]
             species = species.lower()
 
-            column_labels = [species, f"{species} stdev", f"{species} n_meas"]
+            column_labels = [species, f"{species}_variability", f"{species}_number_of_observations"]
 
             # Name columns
             gas_data = gas_data.set_axis(column_labels, axis="columns", inplace=False)
@@ -135,7 +136,7 @@ class CRDS:
             scale = crds_data["CRDS"]["default_scales"].get(species.upper())
 
             species_metadata = metadata.copy()
-            species_metadata["species"] = species
+            species_metadata["species"] = compliant_string(species)
             species_metadata["inlet"] = inlet
             species_metadata["scale"] = scale
 

@@ -8,7 +8,7 @@ processing API Detail
 
 .. autofunction:: openghg.processing.get_ceda_file
 
-.. autofunction:: openghg.processing.recombine_sections
+.. autofunction:: openghg.processing.recombine_datasets
 
 .. autofunction:: openghg.processing.search
 

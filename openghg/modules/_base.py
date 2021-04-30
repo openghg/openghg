@@ -14,13 +14,13 @@ class BaseModule:
 
     @classmethod
     def exists(cls: Type[T], bucket: Optional[str] = None) -> bool:
-        """ Check if a GC object is already saved in the object
-            store
+        """Check if a GC object is already saved in the object
+        store
 
-            Args:
-                bucket: Bucket for data storage
-            Returns:
-                bool: True if object exists
+        Args:
+            bucket: Bucket for data storage
+        Returns:
+            bool: True if object exists
         """
         from openghg.objectstore import exists, get_bucket
 
@@ -33,17 +33,18 @@ class BaseModule:
 
     @classmethod
     def from_data(cls: Type[T], data: str, bucket: Optional[Dict] = None) -> T:
-        """ Create an object from data
+        """Create an object from data
 
-            Args:
-                data: JSON data
-                bucket: Bucket for data storage
-            Returns:
-                cls: Class object of cls type
+        Args:
+            data: JSON data
+            bucket: Bucket for data storage
+        Returns:
+            cls: Class object of cls type
         """
         from Acquire.ObjectStore import string_to_datetime
         from openghg.objectstore import get_bucket
         from collections import defaultdict
+        from openghg.util import to_defaultdict
 
         if not data:
             raise ValueError("Unable to create object with empty dictionary")
@@ -56,9 +57,10 @@ class BaseModule:
         c._datasource_uuids = data["datasource_uuids"]
         c._datasource_names = data["datasource_names"]
         c._file_hashes = data["file_hashes"]
+        c._datasource_table = to_defaultdict(data["datasource_table"])
 
         try:
-            c._rank_data = defaultdict(dict, data["rank_data"])
+            c._rank_data = to_defaultdict(data["rank_data"])
         except KeyError:
             c._rank_data = defaultdict(dict)
 
@@ -68,13 +70,13 @@ class BaseModule:
 
     @classmethod
     def load(cls: Type[T], bucket: Optional[str] = None) -> T:
-        """ Load an object from the datastore using the passed
-            bucket and UUID
+        """Load an object from the datastore using the passed
+        bucket and UUID
 
-            Args:
-                bucket: Bucket to store object
-            Returns:
-                class: Class created from JSON data
+        Args:
+            bucket: Bucket to store object
+        Returns:
+            class: Class created from JSON data
         """
         from openghg.objectstore import get_bucket, get_object_from_json
 
@@ -91,39 +93,54 @@ class BaseModule:
 
     @classmethod
     def uuid(cls: Type[T]) -> str:
-        """ Return the UUID of this object
+        """Return the UUID of this object
 
-            Returns:
-                str: UUID of object
+        Returns:
+            str: UUID of object
         """
         return cls._uuid
 
-    def add_datasources(self: T, datasource_uuids: Dict) -> None:
-        """ Add the passed list of Datasources to the current list
+    def add_datasources(self: T, datasource_uuids: Dict, metadata: Dict) -> None:
+        """Add the passed list of Datasources to the current list
 
-            Args:
-                datasource_uuids: Dict of Datasource UUIDs
-            Returns:
-                None
+        Args:
+            datasource_uuids: Datasource UUIDs
+            metadata: Metadata for each species
+        Returns:
+            None
         """
+        for key, uid in datasource_uuids.items():
+            md = metadata[key]
+            site = md["site"]
+            network = md["network"]
+            inlet = md["inlet"]
+            species = md["species"]
+
+            result = self._datasource_table[site][network][inlet][species]
+
+            if result and result != uid:
+                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
+            else:
+                self._datasource_table[site][network][inlet][species] = uid
+
         self._datasource_names.update(datasource_uuids)
         # Invert the dictionary to update the dict keyed by UUID
         uuid_keyed = {v: k for k, v in datasource_uuids.items()}
         self._datasource_uuids.update(uuid_keyed)
 
     def datasources(self: T) -> List[str]:
-        """ Return the list of Datasources UUIDs associated with this object
+        """Return the list of Datasources UUIDs associated with this object
 
-            Returns:
-                list: List of Datasource UUIDs
+        Returns:
+            list: List of Datasource UUIDs
         """
         return list(self._datasource_uuids.keys())
 
     def datasource_names(self: T) -> Dict:
-        """ Return the names of the datasources
+        """Return the names of the datasources
 
-            Returns:
-                dict: Dictionary of Datasource names
+        Returns:
+            dict: Dictionary of Datasource names
         """
         import warnings
 
@@ -132,31 +149,31 @@ class BaseModule:
         return self._datasource_names
 
     def remove_datasource(self: T, uuid: str) -> None:
-        """ Remove the Datasource with the given uuid from the list
-            of Datasources
+        """Remove the Datasource with the given uuid from the list
+        of Datasources
 
-            Args:
-                uuid (str): UUID of Datasource to be removed
-            Returns: 
-                None
+        Args:
+            uuid (str): UUID of Datasource to be removed
+        Returns:
+            None
         """
         del self._datasource_uuids[uuid]
 
     def set_rank(self: T, uuid: str, rank: Union[int, str], daterange: Union[str, List[str]]) -> None:
-        """ Set the rank of a Datasource associated with this object.
+        """Set the rank of a Datasource associated with this object.
 
-            This function performs checks to ensure multiple ranks aren't set for
-            overlapping dateranges.
+        This function performs checks to ensure multiple ranks aren't set for
+        overlapping dateranges.
 
-            Passing a daterange and rank to this function will overwrite any current 
-            daterange stored for that rank.
+        Passing a daterange and rank to this function will overwrite any current
+        daterange stored for that rank.
 
-            Args:
-                uuid (str): UUID of Datasource
-                rank (int): Rank of data
-                daterange (str, list): Daterange(s)
-            Returns:
-                None
+        Args:
+            uuid (str): UUID of Datasource
+            rank (int): Rank of data
+            daterange (str, list): Daterange(s)
+        Returns:
+            None
         """
         from openghg.modules import Datasource
         from openghg.util import daterange_from_str
@@ -198,11 +215,12 @@ class BaseModule:
             self._rank_data[uuid][rank] = daterange
 
     def clear_datasources(self: T) -> None:
-        """ Remove all Datasources from the object
+        """Remove all Datasources from the object
 
-            Returns:
-                None
+        Returns:
+            None
         """
+        self._datasource_table.clear()
         self._datasource_uuids.clear()
         self._datasource_names.clear()
         self._file_hashes.clear()

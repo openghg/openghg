@@ -33,7 +33,7 @@ class Process:
         data_type,
         overwrite=False,
         extension="dat",
-        hugs_url=None,
+        openghg_url=None,
         storage_url=None,
     ):
         """ Process the passed directory of data files
@@ -44,7 +44,7 @@ class Process:
                 user (User): Authenticated Acquire User
                 folder_path (str, pathlib.Path): Path of folder containing files to be processed
                 data_type (str): Type of data to be processed (CRDS, GC etc)
-                hugs_url (str): URL of OpenGHG service. Currently used for testing
+                openghg_url (str): URL of OpenGHG service. Currently used for testing
                 This may be removed in the future.
                 storage_url (str): URL of storage service. Currently used for testing
                 This may be removed in the future.
@@ -59,7 +59,7 @@ class Process:
         data_type,
         source_name=None,
         overwrite=False,
-        hugs_url=None,
+        openghg_url=None,
         storage_url=None,
         datasource=None,
         site=None,
@@ -71,7 +71,7 @@ class Process:
                 user (User): Authenticated Acquire User
                 files (str, list): Path of files to be processed
                 data_type (str): Type of data to be processed (CRDS, GC etc)
-                hugs_url (str): URL of OpenGHG service. Currently used for testing
+                openghg_url (str): URL of OpenGHG service. Currently used for testing
                 datasource (str): Datasource name or UUID
                 This may be removed in the future.
                 storage_url (str): URL of storage service. Currently used for testing
@@ -103,13 +103,13 @@ class Process:
         if storage_url is None:
             storage_url = self._service_url + "/storage"
 
-        if hugs_url is None:
-            hugs_url = self._service_url + "/hugs"
+        if openghg_url is None:
+            openghg_url = self._service_url + "/openghg"
 
         # # Take the filename without the file extension
         # source_name = [os.path.splitext((filepath.name).split("/")[-1])[0] for filepath in files]
 
-        openghg = Service(service_url=hugs_url)
+        openghg = Service(service_url=openghg_url)
         creds = StorageCreds(user=user, service_url=storage_url)
         drive = Drive(creds=creds, name="test_drive")
         auth = Authorisation(resource="process", user=user)

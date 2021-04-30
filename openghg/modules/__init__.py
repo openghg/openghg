@@ -15,3 +15,7 @@ from ._obs_surface import ObsSurface
 from ._ecmwf import retrieve_met, METData
 from ._metstore import METStore
 from ._beaco2n import BEACO2N
+from ._btt import BTT
+from ._npl import NPL
+from ._footprints import FOOTPRINTS
+from ._emissions import Emissions

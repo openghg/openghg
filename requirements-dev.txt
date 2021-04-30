@@ -1,10 +1,11 @@
 coverage
-fdk==0.0.35
+fdk
 flake8
+notebook
+nbsphinx
 pytest
 pytest-tornasync
 pytest-cov
-nbsphinx
 requests-mock
 sphinx
 sphinx-issues

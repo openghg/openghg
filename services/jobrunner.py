@@ -17,13 +17,13 @@ def job_runner(args):
     # Verify that this process had authorisation to be called
     authorisation.verify("job_runner")
 
-    hugs = get_this_service(need_private_access=True)
+    serv = get_this_service(need_private_access=True)
 
     job_data = args["requirements"]
     # # Pass the PAR through to allow use in the control script
     job_data["par"] = args["par"]
     # Pass the decrypted PAR secret here as we're on the server already
-    job_data["par_secret"] = openghg.decrypt_data(args["par_secret"])
+    job_data["par_secret"] = serv.decrypt_data(args["par_secret"])
 
     hostname = job_data["hostname"]
     username = job_data["username"]
@@ -35,7 +35,7 @@ def job_runner(args):
         known_host = False
 
     # Decrypt the password we use to access the private key
-    password = openghg.decrypt_data(args["key_password"])
+    password = serv.decrypt_data(args["key_password"])
 
     results = run_job(
         username=username,

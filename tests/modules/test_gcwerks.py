@@ -36,17 +36,23 @@ def precision_path_no_instrument():
 def test_read_file(data_path, precision_path):
     gc = GC()
 
-    gas_data = gc.read_file(data_filepath=data_path, precision_filepath=precision_path, site="CGO", instrument="medusa",)
+    gas_data = gc.read_file(
+        data_filepath=data_path,
+        precision_filepath=precision_path,
+        site="CGO",
+        instrument="medusa",
+        network="AGAGE",
+    )
 
     expected_eight = [
-        "C4F10_75m_4",
-        "C6F14_75m_4",
-        "CCl4_75m_4",
-        "CF4_75m_4",
-        "CFC-112_75m_4",
-        "CFC-113_75m_4",
-        "CFC-114_75m_4",
-        "CFC-115_75m_4",
+        "benzene_75m_4",
+        "c4f10_75m_4",
+        "c6f14_75m_4",
+        "ccl4_75m_4",
+        "cf4_75m_4",
+        "cfc112_75m_4",
+        "cfc113_75m_4",
+        "cfc114_75m_4",
     ]
 
     sorted_keys = sorted(list(gas_data.keys()))
@@ -63,7 +69,10 @@ def test_read_file_incorrect_inlet_raises(precision_path):
 
     with pytest.raises(ValueError):
         gc.read_file(
-            data_filepath=data_path, precision_filepath=precision_path, site="CGO", instrument="medusa",
+            data_filepath=data_path,
+            precision_filepath=precision_path,
+            site="CGO",
+            instrument="medusa",
         )
 
 
@@ -72,21 +81,11 @@ def test_read_invalid_instrument_raises(data_path_no_instrument, precision_path_
 
     with pytest.raises(ValueError):
         gc.read_file(
-            data_filepath=data_path_no_instrument, precision_filepath=precision_path_no_instrument, site="CGO", instrument="fish",
+            data_filepath=data_path_no_instrument,
+            precision_filepath=precision_path_no_instrument,
+            site="CGO",
+            instrument="fish",
         )
-
-
-def test_read_valid_instrument_passed(data_path_no_instrument, precision_path_no_instrument):
-    gc = GC()
-    data = gc.read_file(
-        data_filepath=data_path_no_instrument, precision_filepath=precision_path_no_instrument, site="CGO", instrument="medusa",
-    )
-
-    expected_keys = sorted(
-        ["CCl4_air", "CFC-113_air", "CFC-11_air", "CFC-12_air", "CH3CCl3_air", "CH4_air", "CHCl3_air", "N2O_air"]
-    )
-
-    assert sorted(list(data.keys())) == expected_keys
 
 
 def test_instrument_translator_works():
@@ -199,112 +198,6 @@ def test_read_precision(precision_path):
     assert precision_head.iloc[0, 5] == 10
     assert precision_head.iloc[0, 7] == 10
     assert precision_head.iloc[0, 10] == 0.00565
-
-
-# TODO - write a new test for this function
-def test_split(data_path, precision_path):
-    site = "CGO"
-    instrument = "GCMD"
-
-    data_path = Path(__file__).resolve().parent.joinpath("../data/proc_test_data/GC/test_split_data.pkl")
-
-    # Load in the test data
-    # TODO - investigate error here
-    # df = pd.read_hdf(data_path)
-    # Use pickle due to error in CI with hdf verion
-    df = pd.read_pickle(data_path)
-
-    species = [
-        "NF3",
-        "CF4",
-        "PFC-116",
-        "PFC-218",
-        "PFC-318",
-        "C4F10",
-        "C6F14",
-        "SF6",
-        "SO2F2",
-        "SF5CF3",
-        "HFC-23",
-        "HFC-32",
-        "HFC-125",
-        "HFC-134a",
-        "HFC-143a",
-        "HFC-152a",
-        "HFC-227ea",
-        "HFC-236fa",
-        "HFC-245fa",
-        "HFC-365mfc",
-        "HFC-4310mee",
-        "HCFC-22",
-        "HCFC-123",
-        "HCFC-124",
-        "HCFC-132b",
-        "HCFC-133a",
-        "HCFC-141b",
-        "HCFC-142b",
-        "CFC-11",
-        "CFC-12",
-        "CFC-13",
-        "CFC-112",
-        "CFC-113",
-        "CFC-114",
-        "CFC-115",
-        "H-1211",
-        "H-1301",
-        "H-2402",
-        "CH3Cl",
-        "CH3Br",
-        "CH3I",
-        "CH2Cl2",
-        "CHCl3",
-        "CCl4",
-        "CH2Br2",
-        "CHBr3",
-        "CH3CCl3",
-        "TCE",
-        "PCE",
-        "ethyne",
-        "ethene",
-        "ethane",
-        "propane",
-        "c-propane",
-        "benzene",
-        "toluene",
-        "COS",
-        "desflurane",
-    ]
-
-    metadata = {"foo": "bar"}
-
-    gc = GC()
-
-    units = {}
-    scale = {}
-    for s in species:
-        units[s] = "test_units"
-        scale[s] = "test_scale"
-
-    data = gc.split_species(
-        data=df, site=site, instrument=instrument, species=species, metadata=metadata, units=units, scale=scale,
-    )
-
-    sorted_species = [
-        "C4F10_75m_4",
-        "C6F14_75m_4",
-        "CCl4_75m_4",
-        "CF4_75m_4",
-        "CFC-112_75m_4",
-        "CFC-113_75m_4",
-        "CFC-114_75m_4",
-        "CFC-115_75m_4",
-        "CFC-11_75m_4",
-        "CFC-12_75m_4",
-    ]
-
-    assert len(data) == 56
-
-    assert sorted(list(data.keys()))[:10] == sorted_species
 
 
 def test_no_precisions_species_raises(data_path):

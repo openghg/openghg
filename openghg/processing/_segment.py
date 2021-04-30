@@ -1,95 +1,116 @@
 """ Segment the data into Datasources
 
 """
-__all__ = ["get_split_frequency", "create_footprint_datasources", "assign_data"]
+from typing import Dict, Union
+from xarray import Dataset
 
-# def create_datasources(gas_data):
-#     """ Create or get an existing Datasource for each gas in the file
-
-#         TODO - currently this function will only take data from a single Datasource
-
-#         Args:
-#             gas_data (list): List of tuples gas name, datasource_id, Pandas.Dataframe
-#         Returns:
-#             list: List of UUIDs
-#     """
-#     from openghg.modules import Datasource
-
-#     uuids = []
-
-#     # Rework this to for the segmentation of data within the Datasource
-#     # How to reliably get existing UUIDs to be passed through from an interface or selection?
-#     # Rely on site_species for now via name lookup?
-#     # Need to allow UUID input here so we can add new data to existing Datasources easily without
-#     # relying on the naming method
-#     for species, metadata, data in gas_data:
-#         # Lookup Datasource uuid, if exists
-#         if Datasource.exists(datasource_id=datasource_id):
-#             datasource = Datasource.load(uuid=datasource_id)
-#             # TODO - add metadata in here - append to existing?
-#         else:
-#             datasource = Datasource.create(name=species)
-
-#         # Store the name and datasource_id
-#         # self._species[gas_name] = datasource_id
-#         # Add the dataframe to the datasource
-#         datasource.add_data(metadata, data)
-#         # Save Datasource to object store
-#         datasource.save()
-
-#         # Add the Datasource to the list
-#         uuids.append(datasource.uuid())
-
-#     return uuids
+__all__ = ["get_split_frequency", "assign_footprint_data", "assign_data", "assign_emissions_data"]
 
 
-def assign_data(gas_data, lookup_results, overwrite):
+def assign_data(gas_data: Dict, lookup_results: Dict, overwrite: bool) -> Dict:
     """ Assign data to a Datasource. This will either create a new Datasource 
     Create or get an existing Datasource for each gas in the file
 
         Args:
-            gas_data (dict): Dictionary containing data and metadata for species
-            lookup_results (dict): Dictionary of lookup results]
-            overwrite (bool): If True overwrite current data stored
+            gas_data: Dictionary containing data and metadata for species
+            lookup_results: Dictionary of lookup results]
+            overwrite: If True overwrite current data stored
         Returns:
             dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
     """
     from openghg.modules import Datasource
 
     uuids = {}
+
     # Add in copying of attributes, or add attributes to the metadata at an earlier state.
-    for species in gas_data:
-        metadata = gas_data[species]["metadata"]
-        data = gas_data[species]["data"]
-        name = lookup_results[species]["name"]
-        uuid = lookup_results[species]["uuid"]
+    for key in gas_data:
+        metadata = gas_data[key]["metadata"]
+        data = gas_data[key]["data"]
+
+        # Our lookup results and gas data have the same keys
+        uuid = lookup_results[key]
+
+        # TODO - Could this be done somewhere else? It doesn't feel quite right it
+        # being here
+
+        # Add the read metadata to the Dataset attributes being careful 
+        # not to overwrite any attributes that are already there
+        to_add = {k: v for k, v in metadata.items() if k not in data.attrs}
+        data.attrs.update(to_add)
 
         # If we have a UUID for this Datasource load the existing object
         # from the object store
         if uuid:
             datasource = Datasource.load(uuid=uuid)
         else:
-            datasource = Datasource(name=name)
+            datasource = Datasource()
 
         # Add the dataframe to the datasource
         datasource.add_data(metadata=metadata, data=data, overwrite=overwrite)
         # Save Datasource to object store
         datasource.save()
 
-        uuids[name] = datasource.uuid()
+        uuids[key] = datasource.uuid()
 
     return uuids
 
 
-def create_footprint_datasources(footprint_data):
+def assign_footprint_data(data: Dataset, metadata: Dict, datasource_uid: Union[str, bool]) -> str:
     """ Create Datasources for the passed footprint data
 
         Args:
-            footprint_data (list): List of tupes of footprint name, datasource_id, xarray.Dataset
+            data: xarray Dataset of footprint data
+            metadata: Associated metadata
+            datasource_uid: The UUID of the datasource if we've processed footprint data from this
+            source before, otherwise False
         Returns:
-            list: List of UUIDs of used/created Datasources
+            str: UUID of Datasource
     """
-    raise NotImplementedError()
+    from openghg.modules import Datasource
+
+    if datasource_uid is not False:
+        datasource = Datasource.load(uuid=datasource_uid)
+    else:
+        datasource = Datasource()
+
+    # Add the read metadata to the Dataset attributes being careful 
+    # not to overwrite any attributes that are already there
+    to_add = {k: v for k, v in metadata.items() if k not in data.attrs}
+    data.attrs.update(to_add)
+
+    datasource.add_footprint_data(data=data, metadata=metadata)
+    datasource.save()
+
+    return datasource.uuid()
+
+
+def assign_emissions_data(data: Dataset, metadata: Dict, datasource_uid: Union[str, bool]) -> str:
+    """ Create Datasources for the passed flux data
+
+        Args:
+            data: xarray Dataset of footprint data
+            metadata: Associated metadata
+            datasource_uid: The UUID of the datasource if we've processed flux data from this
+            source before, otherwise False
+        Returns:
+            str: UUID of Datasource
+    """
+    from openghg.modules import Datasource
+
+    if datasource_uid is not False:
+        datasource = Datasource.load(uuid=datasource_uid)
+    else:
+        datasource = Datasource()
+
+    # Add the read metadata to the Dataset attributes being careful 
+    # not to overwrite any attributes that are already there
+    to_add = {k: v for k, v in metadata.items() if k not in data.attrs}
+    data.attrs.update(to_add)
+
+    datasource.add_emissions_data(data=data, metadata=metadata)
+    datasource.save()
+
+    return datasource.uuid()
 
 
 def get_split_frequency(data):
