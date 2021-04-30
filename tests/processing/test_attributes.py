@@ -23,7 +23,7 @@ def test_crds_attributes():
 
     filepath = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
 
-    combined = crds.read_data(data_filepath=filepath, site="tac", network="DECC")
+    combined = crds.read_file(data_filepath=filepath, site="tac", network="DECC")
 
     combined_attributes = assign_attributes(data=combined, site="tac")
 
@@ -76,6 +76,7 @@ def test_crds_attributes():
         "label": "left",
         "standard_name": "time",
         "comment": "Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.",
+        "sampling_period_seconds": 60,
     }
 
     assert ch4_data.time.attrs == time_attributes

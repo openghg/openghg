@@ -30,6 +30,9 @@ def assign_attributes(
         units = data[key].get("metadata", {}).get("units")
         scale = data[key].get("metadata", {}).get("scale")
 
+        if sampling_period is None:
+            sampling_period = data[key].get("metadata", {}).get("sampling_period")
+
         data[key]["data"] = get_attributes(
             ds=data[key]["data"],
             species=species,
