@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Development API modules &mdash; OpenGHG 0+untagged.3.g486bae2 documentation</title>
+  <title>Development API modules &mdash; OpenGHG 0+untagged.3.g13f98a6 documentation</title>
   
 
   
@@ -437,6 +437,47 @@ the processed data has been assigned to</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="openghg.modules.GCWERKS.check_instrument">
+<code class="sig-name descname"><span class="pre">check_instrument</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">should_raise</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.check_instrument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.GCWERKS.check_instrument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure we have the correct instrument or translate an instrument
+suffix to an instrument name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>instrument_suffix</strong> – Instrument suffix such as md</p></li>
+<li><p><strong>should_raise</strong> – Should we raise if we can’t find a valid instrument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Instrument name</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="openghg.modules.GCWERKS.check_site">
+<code class="sig-name descname"><span class="pre">check_site</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_code</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.check_site"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.GCWERKS.check_site" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the site passed in matches that in the filename</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> – Path to data file</p></li>
+<li><p><strong>site</strong> – Site code</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Site code</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="openghg.modules.GCWERKS.find_files">
 <code class="sig-name descname"><span class="pre">find_files</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_str</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'sf6'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">,</span> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.find_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.GCWERKS.find_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>A helper file to find GCWERKS data and precisions file in a given folder.
@@ -500,24 +541,18 @@ then retrieve the precision of that instrument.</p>
 <dt id="openghg.modules.GCWERKS.get_site_attributes">
 <code class="sig-name descname"><span class="pre">get_site_attributes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.get_site_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.GCWERKS.get_site_attributes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the site specific attributes for writing to Datsets</p>
-<blockquote>
-<div><dl class="simple">
-<dt>Args:</dt><dd><p>site: Site code</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site</strong> – Site code</p></li>
+<li><p><strong>inlet</strong> – Inlet (example: 108m)</p></li>
+</ul>
 </dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</dt><dd><p>inlet: Inlet (example: 108m)</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary of attributes</p>
 </dd>
-</dl>
-<blockquote>
-<div><p>inlet: Inlet label (example: 108m)</p>
-</div></blockquote>
-<dl class="simple">
-<dt>&gt;&gt;&gt;&gt;&gt;&gt;&gt; updateCRDS</dt><dd><dl class="simple">
-<dt>Returns:</dt><dd><p>dict: Dictionary of attributes</p>
-</dd>
-</dl>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -532,24 +567,6 @@ then retrieve the precision of that instrument.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Site code</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="openghg.modules.GCWERKS.instrument_translator">
-<code class="sig-name descname"><span class="pre">instrument_translator</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.instrument_translator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.GCWERKS.instrument_translator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Ensure we have the correct instrument or translate an instrument
-suffix to an instrument name.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>instrument_suffix</strong> – Instrument suffix such as md</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Instrument name</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>str</p>
@@ -1856,7 +1873,7 @@ this Datasource</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 29, 2021.
+        Last updated on Apr 30, 2021.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._crds &mdash; OpenGHG 0+untagged.3.g486bae2 documentation</title>
+  <title>openghg.modules._crds &mdash; OpenGHG 0+untagged.3.g13f98a6 documentation</title>
   
 
   
@@ -256,7 +256,7 @@
         <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">RangeIndex</span><span class="p">,</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">NaT</span>
         <span class="kn">import</span> <span class="nn">warnings</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">valid_site</span>
 
         <span class="n">split_fname</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
 
@@ -265,6 +265,9 @@
         <span class="n">inlet_fname</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">split_fname</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
 
         <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_site</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> is not a valid site.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">site_fname</span> <span class="o">!=</span> <span class="n">site</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Site mismatch between passed site code and that read from filename.&quot;</span><span class="p">)</span>
@@ -498,7 +501,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 29, 2021.
+        Last updated on Apr 30, 2021.
       </span>
 
     </p>
