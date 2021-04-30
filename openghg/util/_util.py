@@ -88,8 +88,8 @@ def get_datapath(filename, directory=None):
 
 
 def load_json(filename):
-    """Returns a dictionary deserialised from JSON. This function only works
-        for JSON files in the openghg/data directory.
+    """Returns a dictionary deserialised from JSON. This function only 
+    works for JSON files in the openghg/data directory.
 
     Args:
         filename (str): Name of JSON file
@@ -138,14 +138,7 @@ def valid_site(site):
     """
     site_data = load_json("acrg_site_info.json")
 
-    site = site.upper()
-
-    if site not in site_data:
-        site = site.lower()
-        site_name_code = load_json("site_codes.json")
-        return site in site_name_code["name_code"]
-
-    return True
+    return site.upper() in site_data
 
 
 def is_number(s):

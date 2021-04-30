@@ -54,7 +54,7 @@ def test_get_observations_few_args():
         "station_height_masl": 150.0,
         "site": "hfd",
         "instrument": "picarro",
-        "time_resolution": "1_minute",
+        "sampling_period": 60,
         "inlet": "100m",
         "port": "10",
         "type": "air",
@@ -127,6 +127,7 @@ def test_gcwerks_retrieval():
         "units": "ppt",
         "scale": "SIO-05",
         "inlet": "70m",
+        "sampling_period": 1200,
     }
 
     assert metadata == expected_metadata
