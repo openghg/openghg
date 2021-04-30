@@ -144,7 +144,7 @@ class ObsSurface(BaseModule):
 
                     # Extract the metadata for each set of measurements to perform a Datasource lookup
                     metadata = {key: data["metadata"] for key, data in data.items()}
-                
+
                     lookup_results = obs.datasource_lookup(metadata=metadata)
 
                     # Create Datasources, save them to the object store and get their UUIDs
