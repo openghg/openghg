@@ -98,19 +98,25 @@ def search(**kwargs) -> Dict:
         metadata = datasource.metadata()
         # Get the site inlet and species 
         site = metadata["site"]
-        inlet = metadata["inlet"]
         species = metadata["species"]
-        instrument = metadata["instrument"]
+        inlet = metadata["inlet"]
 
-        key = "_".join((site, species, inlet, instrument))
+        key = "_".join((site, species))
 
         ranking = datasource.get_rank(start_date=start_date, end_date=end_date)
 
-        ranked_data[key] = ranking
+        ranked_data[key][inlet] = ranking
 
+    return ranked_data
     # Then loop over the ranked data and for each get the highest ranked data that covers the dates
     # we require data for
     highest_ranked_data = defaultdict(dict)
+
+    for key, rank_data in ranked_data.items():
+        # If we only have one rank for this data return that
+        # if rank_data["inlet"]
+        pass
+
 
     # # TODO - this section of the function needs refactoring
     # # GJ - 2021-03-09
