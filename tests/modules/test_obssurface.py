@@ -215,7 +215,7 @@ def test_read_GC():
     data_filepath = get_datapath(filename="trinidadhead.01.C", data_type="GC")
     precision_filepath = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
 
-    ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="THD", network="AGAGE")
+    ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="THD", instrument="gcmd", network="AGAGE")
 
     obs = ObsSurface.load()
     table = obs._datasource_table
@@ -397,13 +397,14 @@ def test_upload_same_file_twice_raises():
 
     data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
 
-    res = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+    ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
 
-    assert not res["error"] 
+    # assert not res["error"] 
 
-    res = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+    with pytest.raises(ValueError):
+        ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
 
-    assert "tta.co2.1minute.222m.min.dat" in res["error"]
+    # assert "tta.co2.1minute.222m.min.dat" in res["error"]
 
 
 def test_delete_Datasource():

@@ -33,7 +33,7 @@ def test_read_file():
 
     crds = CRDS()
 
-    gas_data = crds.read_file(data_filepath=hfd_filepath)
+    gas_data = crds.read_file(data_filepath=hfd_filepath, site="hfd", network="DECC")
 
     ch4_data = gas_data["ch4"]["data"]
     co2_data = gas_data["co2"]["data"]
@@ -50,44 +50,6 @@ def test_read_file():
     assert co_data["co"][0] == pytest.approx(214.28)
     assert co_data["co_variability"][0] == pytest.approx(4.081)
     assert co_data["co_number_of_observations"][0] == pytest.approx(19.0)
-
-
-def test_read_data():
-    crds = CRDS()
-
-    tac_filepath = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
-
-    combined = crds.read_data(data_filepath=tac_filepath, site="tac", network="DECC")
-
-    assert len(combined) == 2
-
-    assert list(combined.keys()) == ["ch4", "co2"]
-
-    ch4_metadata = combined["ch4"]["metadata"]
-
-    assert ch4_metadata["site"] == "tac"
-    assert ch4_metadata["instrument"] == "picarro"
-    assert ch4_metadata["sampling_period"] == 60
-    assert ch4_metadata["inlet"] == "100m"
-    assert ch4_metadata["port"] == "9"
-    assert ch4_metadata["type"] == "air"
-    assert ch4_metadata["species"] == "ch4"
-    assert ch4_metadata["network"] == "DECC"
-
-    ch4_data = combined["ch4"]["data"]
-
-    assert ch4_data.time[0] == pd.Timestamp("2012-07-31 14:50:30")
-    assert ch4_data["ch4"][0] == pytest.approx(1905.28)
-    assert ch4_data["ch4_variability"][0] == pytest.approx(0.268)
-    assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(20)
-
-
-def test_read_data_no_inlet_raises():
-    crds = CRDS()
-    filepath = Path("tac.picarro.1minute.no_inlet.dat")
-
-    with pytest.raises(ValueError):
-        crds.read_data(data_filepath=filepath, site="tac", network="DECC")
 
 
 def test_gas_info(hfd_filepath):
@@ -126,8 +88,4 @@ def test_get_site_attributes_unknown_site_raises():
     crds = CRDS()
 
     with pytest.raises(ValueError):
-        _ = crds.get_site_attributes(site="jupiter", inlet="10008m")
-
-
-
-
+        crds.get_site_attributes(site="jupiter", inlet="10008m")

@@ -23,7 +23,7 @@ def test_crds_attributes():
 
     filepath = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
 
-    combined = crds.read_data(data_filepath=filepath, site="tac", network="DECC")
+    combined = crds.read_file(data_filepath=filepath, site="tac", network="DECC")
 
     combined_attributes = assign_attributes(data=combined, site="tac")
 
