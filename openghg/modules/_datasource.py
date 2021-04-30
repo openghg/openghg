@@ -915,34 +915,57 @@ class Datasource:
         """
         return self._metadata
 
-    def rank(self) -> Union[int, Dict]:
-        """Return the rank of this Datasource
+    def get_rank(self, start_date: Optional[Timestamp] = None, end_date: Optional[Timestamp] = None) -> Dict:
+        """Get the ranks of data contained within Datasource for the passed daterange.
+        If no rank has been set an empty dictionary is returned.
 
-        Where a value of 0 means no rank, 1 the highest
+        If no start or end date is passed all ranking data will be returned.
 
+        Args:
+            start_date: Start date
+            end_date: End date
         Returns:
-            dict: Dictionary of rank: dateranges
+            dict: Dictionary of rank: daterange
         """
-        if not self._rank:
-            return 0
+        from collections import defaultdict
+        from openghg.util import daterange_from_str, daterange_to_str, create_daterange
 
-        return self._rank
+        # If we don't have a rank return an empty dictionary
+        if not self._rank:
+            return {}
+
+        if start_date is None or end_date is None:
+            return self._rank
+
+        search_daterange = create_daterange(start=start_date, end=end_date)
+
+        results = defaultdict(list)
+
+        for rank, dateranges in self._rank.items():
+            for daterange_str in dateranges:
+                daterange = daterange_from_str(daterange_str)
+
+                intersection = search_daterange.intersection(daterange)
+                if len(intersection) > 0:
+                    results[rank].append(daterange_to_str(intersection))
+
+        return results
 
     def set_rank(self, rank: Union[int, str], daterange: Union[str, List]) -> None:
         """Set the rank of this Datsource. This allows users to select
         the best data for a specific species at a site. By default
-        a Datasource is unranked with a value of 0. The highest rank is 1 and the lowest 10.
+        a Datasource is unranked with a value of 10. The highest rank is 1 and the lowest 9.
 
         TODO - add a check to ensure multiple ranks aren't set for the same daterange
 
         Args:
-            rank: Rank number between 0 and 10.
+            rank: Rank number between 1 (highest rank) and 10 (unranked).
             daterange: List of daterange strings such as 2019-01-01T00:00:00_2019-12-31T00:00:00
         Returns:
             None
         """
-        if not 0 <= int(rank) <= 10:
-            raise ValueError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
+        if not 1 <= int(rank) <= 10:
+            raise ValueError("Rank can only take values 1 to 10 (for unranked). Where 1 is the highest rank.")
 
         if not isinstance(daterange, list):
             daterange = [daterange]
@@ -1039,42 +1062,6 @@ class Datasource:
         end = Timestamp(split[1], tz="UTC")
 
         return start, end
-
-    def get_rank(self, start_date: Optional[Timestamp] = None, end_date: Optional[Timestamp] = None) -> Dict:
-        """Get the ranks of data contained within Datasource for the passed daterange.
-
-        If no rank has been set zero is returned.
-        If no start or end date is passed all ranking data will be returned.
-
-        Args:
-            start_date
-            end_date
-        Returns:
-            dict: Dictionary of rank: daterange
-        """
-        from collections import defaultdict
-        from openghg.util import daterange_from_str, daterange_to_str, create_daterange
-
-        # If we don't have a rank return 9
-        if not self._rank:
-            return {}
-
-        if start_date is None or end_date is None:
-            return self._rank
-
-        search_daterange = create_daterange(start=start_date, end=end_date)
-
-        results = defaultdict(list)
-
-        for rank, dateranges in self._rank.items():
-            for daterange_str in dateranges:
-                daterange = daterange_from_str(daterange_str)
-
-                intersection = search_daterange.intersection(daterange)
-                if len(intersection) > 0:
-                    results[rank].append(daterange_to_str(intersection))
-
-        return results
 
     def data_type(self) -> str:
         """Returns the data type held by this Datasource

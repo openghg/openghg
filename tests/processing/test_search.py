@@ -31,7 +31,7 @@ def data_read():
 
 
 def test_keyword_search():
-    results = search(species="co2", site=["bsd"], inlet="248m")
+    results = search(species="co2", site=["bsd"], inlet="248m", instrument="picarro")
 
     key = next(iter(results))
 

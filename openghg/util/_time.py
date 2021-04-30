@@ -9,6 +9,7 @@ __all__ = [
     "create_daterange_str",
     "create_daterange",
     "create_aligned_timestamp",
+    "date_overlap",
 ]
 
 
@@ -101,14 +102,6 @@ def date_overlap(daterange_a, daterange_b):
     end_b = Timestamp(ts_input=daterange_b[1], tz="UTC")
 
     return start_a <= end_b and end_a >= start_b
-
-
-def dates_overlap(range_a, range_b):
-    """Check if two dateranges overlap"""
-    # For this logic see
-    # https://stackoverflow.com/a/325964
-    # if (start_key <= end_date) and (end_key >= start_date):
-    raise NotImplementedError
 
 
 def create_aligned_timestamp(time):

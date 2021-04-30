@@ -176,8 +176,8 @@ class BaseModule:
         from openghg.modules import Datasource
         from openghg.util import daterange_from_str
 
-        if not 0 <= int(rank) <= 10:
-            raise TypeError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
+        if not 1 <= int(rank) <= 10:
+            raise TypeError("Rank can only take values 1 to 10 (for unranked). Where 1 is the highest rank.")
 
         if not isinstance(daterange, list):
             daterange = [daterange]
