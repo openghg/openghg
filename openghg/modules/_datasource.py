@@ -8,9 +8,6 @@ __all___ = ["Datasource"]
 class Datasource:
     """A Datasource holds data relating to a single source, such as a specific species
     at a certain height on a specific instrument
-
-    Args:
-        name: Name of Datasource
     """
 
     _datasource_root = "datasource"
@@ -153,24 +150,16 @@ class Datasource:
         """
         from openghg.util import date_overlap
 
-        # Group by year then by season
+        # Group by year
         year_group = list(data.groupby("time.year"))
         year_data = [data for _, data in year_group if data]
-
-        # TODO - improve this
-        grouped_data = []
-        for year in year_data:
-            season_group = list(year.groupby("time.season"))
-            seasons = [data for _, data in season_group if data]
-            grouped_data.append(seasons)
 
         # Use a dictionary keyed with the daterange covered by each segment of data
         additional_data = {}
 
-        for year in grouped_data:
-            for month in year:
-                daterange_str = self.get_dataset_daterange_str(dataset=month)
-                additional_data[daterange_str] = month
+        for year in year_data:
+            daterange_str = self.get_dataset_daterange_str(dataset=year)
+            additional_data[daterange_str] = year
 
         if self._data:
             # We don't want the same data twice, this will be stored in previous versions
@@ -395,8 +384,8 @@ class Datasource:
         from binary data at the moment.
 
         Args:
-            bucket (dict): Bucket containing data
-            key (str): Key for data
+            bucket: Bucket containing data
+            key: Key for data
         Returns:
             xarray.Dataset: Dataset from NetCDF file
         """
