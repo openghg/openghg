@@ -215,7 +215,7 @@ def test_read_GC():
     data_filepath = get_datapath(filename="trinidadhead.01.C", data_type="GC")
     precision_filepath = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
 
-    ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="THD", network="AGAGE")
+    ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="THD", instrument="gcmd", network="AGAGE")
 
     obs = ObsSurface.load()
     table = obs._datasource_table

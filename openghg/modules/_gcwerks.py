@@ -11,12 +11,19 @@ class GCWERKS:
     def __init__(self):
         from openghg.util import load_json
 
-        self._sampling_period = 0
         # Load site data
         data = load_json(filename="process_gcwerks_parameters.json")
         self._gc_params = data["GCWERKS"]
-        # Site codes for inlet readings
-        self._site_codes = load_json(filename="site_codes.json")
+        # Build the name to code dictionary to check check
+        # passed metadata on read
+        self._name_to_code = {}
+
+        for site_code, value in self._gc_params["sites"].items():
+            try:
+                name = value["gcwerks_site_name"]
+                self._name_to_code[name] = site_code
+            except KeyError:
+                pass
 
     def find_files(
         self, data_path: Union[str, Path], skip_str: Optional[Union[str, List[str]]] = "sf6"
@@ -94,23 +101,27 @@ class GCWERKS:
 
         site = clean_string(site)
         network = clean_string(network)
+        # We don't currently do anything with inlet here as it's always read from data
+        # or taken from process_gcwerks_parameters.json
         inlet = clean_string(inlet)
         instrument = clean_string(instrument)
 
         if not valid_site(site):
             raise ValueError(f"Invalid site {site} passed.")
-        
-        # FIXME
 
-        if instrument is not None:
-            fname_instrument = self.find_instrument(filepath=data_filepath, should_raise=True)
+        # Check if the site code passed matches that read from the filename
+        site = self.check_site(filepath=data_filepath, site_code=site)
+
+        # If we're not passed the instrument name and we can't find it raise an error
+        if instrument is None:
+            instrument = self.check_instrument(filepath=data_filepath, should_raise=True)
+        else:
+            fname_instrument = self.check_instrument(filepath=data_filepath, should_raise=False)
 
             if fname_instrument is not None and instrument != fname_instrument:
                 raise ValueError(
                     f"Mismatch between instrument passed as argument {instrument} and instrument read from filename {fname_instrument}"
                 )
-        else:
-            instrument = self.find_instrument(filepath=data_filepath, should_raise=True)
 
         gas_data = self.read_data(
             data_filepath=data_filepath,
@@ -126,7 +137,34 @@ class GCWERKS:
 
         return gas_data
 
-    def find_instrument(self, filepath: Path, should_raise: Optional[bool] = False) -> str:
+    def check_site(self, filepath: Path, site_code: str) -> str:
+        """ Check if the site passed in matches that in the filename
+
+            Args:
+                filepath: Path to data file
+                site: Site code
+            Returns:
+                str: Site code
+        """
+        from re import findall
+
+        site_code = site_code.lower()
+        site_name = findall(r"[\w']+", str(filepath.name))[0].lower()
+
+        if len(site_code) > 3:
+            raise ValueError("Please pass in a 3 letter site code as the site argument.")
+
+        try:
+            confirmed_code = self._name_to_code[site_name].lower()
+        except KeyError:
+            raise ValueError(f"Cannot match {site_name} to a site code.")
+
+        if site_code != confirmed_code:
+            raise ValueError(f"Mismatch between code reasd from filename: {confirmed_code} and that given: {site_code}")
+
+        return site_code
+
+    def check_instrument(self, filepath: Path, should_raise: Optional[bool] = False) -> Union[str, None]:
         """Ensure we have the correct instrument or translate an instrument
         suffix to an instrument name.
 
@@ -136,9 +174,9 @@ class GCWERKS:
         Returns:
             str: Instrument name
         """
-        import re
+        from re import findall
 
-        instrument = re.findall(r"[\w']+", str(filepath.name))[1].lower()
+        instrument = findall(r"[\w']+", str(filepath.name))[1].lower()
         try:
             if instrument in self._gc_params["instruments"]:
                 return instrument
@@ -218,12 +256,14 @@ class GCWERKS:
                 input_sampling_period = pd_Timedelta(sampling_period)
             else:
                 raise TypeError(
-                    "Sampling period must be a string including the unit " "(using pandas frequency aliases like '1H' or '1min')"
+                    "Sampling period must be a string including the unit using pandas frequency aliases like '1H' or '1min')"
                 )
+
             # Compare input to definition within json file
             file_sampling_period = pd_Timedelta(seconds=extracted_sampling_period)
             comparison_seconds = abs(input_sampling_period - file_sampling_period).total_seconds()
             tolerance_seconds = 1
+
             if comparison_seconds > tolerance_seconds:
                 raise ValueError(
                     f"Input sampling period {sampling_period} does not match to value "
@@ -475,10 +515,12 @@ class GCWERKS:
             dict: Mapping dictionary of inlet and required inlet label
         """
         site = site_code.upper()
+        site_params = self._gc_params["sites"]
+
         # Create a mapping of inlet to match to the inlet label
-        inlets = self._gc_params[site]["inlets"]
+        inlets = site_params[site]["inlets"]
         try:
-            inlet_labels = self._gc_params[site]["inlet_label"]
+            inlet_labels = site_params[site]["inlet_label"]
         except KeyError:
             inlet_labels = inlets
 
@@ -506,18 +548,14 @@ class GCWERKS:
 
                 Args:
                     site: Site code
-        <<<<<<< HEAD
                     inlet: Inlet (example: 108m)
-        =======
-                    inlet: Inlet label (example: 108m)
-        >>>>>>> updateCRDS
                 Returns:
                     dict: Dictionary of attributes
         """
         site = site.upper()
         instrument = instrument.lower()
 
-        attributes = self._gc_params[site]["global_attributes"]
+        attributes = self._gc_params["sites"][site]["global_attributes"]
 
         attributes["inlet_height_magl"] = inlet
         try:

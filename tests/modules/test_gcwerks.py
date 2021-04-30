@@ -41,7 +41,7 @@ def test_read_file_capegrim(cgo_path, cgo_prec_path):
         precision_filepath=cgo_prec_path,
         site="CGO",
         instrument="medusa",
-        network="AGAGE",
+        network="agage",
     )
 
     return False
@@ -71,7 +71,8 @@ def test_read_file_thd(data_thd, prec_thd):
         data_filepath=data_thd,
         precision_filepath=prec_thd,
         site="thd",
-        network="AGAGE",
+        network="agage",
+        instrument="gcmd"
     )
 
     expected_keys = ["ccl4_10m", "cfc113_10m", "cfc11_10m", "cfc12_10m", "ch3ccl3_10m", "ch4_10m", "chcl3_10m", "n2o_10m"]
@@ -81,7 +82,7 @@ def test_read_file_thd(data_thd, prec_thd):
     expected_metadata = {
         "instrument": "gcmd",
         "site": "thd",
-        "network": "AGAGE",
+        "network": "agage",
         "species": "ch3ccl3",
         "units": "ppt",
         "scale": "SIO-05",
@@ -104,42 +105,7 @@ def test_read_invalid_instrument_raises(data_thd, prec_thd):
     gc = GCWERKS()
 
     with pytest.raises(ValueError):
-        gc.read_file(data_filepath=data_thd, precision_filepath=prec_thd, site="CGO", instrument="fish", network="AGAGE")
-
-
-def test_instrument_translator_works():
-    gc = GCWERKS()
-
-    instrument_suffix = "md"
-
-    instrument_name = gc.instrument_translator(instrument=instrument_suffix)
-
-    assert instrument_name == "gcmd"
-
-    instrument_suffix = "gcms"
-
-    instrument_name = gc.instrument_translator(instrument=instrument_suffix)
-
-    assert instrument_name == "gcms"
-
-    instrument_suffix = "medusa"
-
-    instrument_name = gc.instrument_translator(instrument=instrument_suffix)
-
-    assert instrument_name == "medusa"
-
-    instrument_suffix = "medusa21"
-
-    instrument_name = gc.instrument_translator(instrument=instrument_suffix)
-
-    assert instrument_name == "medusa"
-
-
-def test_instrument_translator_raises():
-    with pytest.raises(KeyError):
-        gc = GCWERKS()
-        instrument_suffix = "spam"
-        gc.instrument_translator(instrument=instrument_suffix)
+        gc.read_file(data_filepath=data_thd, precision_filepath=prec_thd, site="CGO", instrument="fish", network="agage")
 
 
 def test_read_data(cgo_path, cgo_prec_path):
@@ -149,7 +115,7 @@ def test_read_data(cgo_path, cgo_prec_path):
 
     gc = GCWERKS()
     data = gc.read_data(
-        data_filepath=cgo_path, precision_filepath=cgo_prec_path, site=site, instrument=instrument, network="AGAGE"
+        data_filepath=cgo_path, precision_filepath=cgo_prec_path, site=site, instrument=instrument, network="agage"
     )
 
     propane_data = data["propane_70m"]["data"]
@@ -216,7 +182,7 @@ def test_no_precisions_species_raises(cgo_path):
     gc = GCWERKS()
 
     with pytest.raises(ValueError):
-        gc.read_file(data_filepath=cgo_path, precision_filepath=missing_species_prec, site="cgo", network="AGAGE")
+        gc.read_file(data_filepath=cgo_path, precision_filepath=missing_species_prec, site="cgo", network="agage")
 
 
 def test_read_ridgehill_window_inlet_all_NaNs():
@@ -224,22 +190,22 @@ def test_read_ridgehill_window_inlet_all_NaNs():
     prec_path = get_datapath(filename="ridgehill-md.11.precisions.C")
 
     gc = GCWERKS()
-    res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="RGL", instrument="medusa", network="AGAGE")
+    res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="RGL", instrument="gcmd", network="agage")
 
     assert not res
 
 
 def test_read_thd_window_inlet():
-    data_path = get_datapath(filename="trinidadhead-window-inlet.01.C")
+    data_path = get_datapath(filename="trinidadhead.01.window-inlet.C")
     prec_path = get_datapath(filename="trinidadhead.01.precisions.C")
 
     gc = GCWERKS()
-    res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="AGAGE")
+    res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="agage")
 
     expected_metadata = {
         "instrument": "gcmd",
         "site": "thd",
-        "network": "AGAGE",
+        "network": "agage",
         "species": "ch4",
         "units": "ppb",
         "scale": "Tohoku",
@@ -264,12 +230,12 @@ def test_read_shangdianzi_ASM_inlet():
     prec_path = get_datapath(filename="shangdianzi-medusa.18.precisions.C")
 
     gc = GCWERKS()
-    res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="SDZ", instrument="medusa", network="AGAGE")
+    res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="sdz", instrument="medusa", network="agage")
 
     expected_metadata = {
         "instrument": "medusa",
-        "site": "SDZ",
-        "network": "AGAGE",
+        "site": "sdz",
+        "network": "agage",
         "species": "nf3",
         "units": "ppt",
         "scale": "SIO-12",
@@ -291,7 +257,7 @@ def test_read_shangdianzi_ASM_inlet():
     # expected_metadata = {
     #     "instrument": "gcmd",
     #     "site": "thd",
-    #     "network": "AGAGE",
+    #     "network": "agage",
     #     "species": "ch4",
     #     "units": "ppb",
     #     "scale": "Tohoku",
@@ -310,40 +276,58 @@ def test_read_shangdianzi_ASM_inlet():
     # assert data["ch4"][-1] == pytest.approx(1840.432)
 
 
-def test_find_instrument():
+def test_check_instrument():
     gc = GCWERKS()
 
     filename = Path("zeppelin-medusa.18.C")
 
-    instrument = gc.find_instrument(filepath=filename)
+    instrument = gc.check_instrument(filepath=filename)
 
     assert instrument == "medusa"
 
     filename = Path("macehead-gcms.98.C")
 
-    instrument = gc.find_instrument(filepath=filename)
+    instrument = gc.check_instrument(filepath=filename)
 
     assert instrument == "gcms"
 
     filename = Path("india-md.13.C")
 
-    instrument = gc.find_instrument(filepath=filename)
+    instrument = gc.check_instrument(filepath=filename)
 
     assert instrument == "gcmd"
 
 
-def test_find_instrument_raises_correctly():
+def test_check_instrument_raises_correctly():
     gc = GCWERKS()
 
     filename = Path("zeppelin.18.C")
 
-    instrument = gc.find_instrument(filepath=filename, should_raise=False)
+    instrument = gc.check_instrument(filepath=filename, should_raise=False)
 
     assert instrument is None
 
     with pytest.raises(KeyError):
-        gc.find_instrument(filepath=filename, should_raise=True)
+        gc.check_instrument(filepath=filename, should_raise=True)
 
 
+def test_check_site():
+    gc = GCWERKS()
 
+    filename = Path("zeppelin.18.C")
 
+    site = gc.check_site(filepath=filename, site_code="zep")
+
+    assert site == "zep"
+
+    site = gc.check_site(filepath=filename, site_code="ZEP")
+
+    assert site == "zep"
+
+    with pytest.raises(ValueError):
+        site = gc.check_site(filepath=filename, site_code="AAA")
+
+    filename = Path("parrot.18.C")
+
+    with pytest.raises(ValueError):
+        site = gc.check_site(filepath=filename, site_code="ZEP")
