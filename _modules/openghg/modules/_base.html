@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.3.g00146ea documentation</title>
+  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.3.gaf060f7 documentation</title>
   
 
   
@@ -307,30 +307,6 @@
 <span class="sd">            str: UUID of object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_uuid</span></div>
-
-<div class="viewcode-block" id="BaseModule.add_datasources"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.add_datasources">[docs]</a>    <span class="k">def</span> <span class="nf">add_datasources</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">datasource_uuids</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Add the passed list of Datasources to the current list</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            datasource_uuids: Datasource UUIDs</span>
-<span class="sd">            metadata: Metadata for each species</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">uid</span> <span class="ow">in</span> <span class="n">datasource_uuids</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">md</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="n">site</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
-            <span class="n">network</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span>
-            <span class="n">inlet</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
-            <span class="n">species</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
-
-            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="n">species</span><span class="p">]</span>
-
-            <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">result</span> <span class="o">!=</span> <span class="n">uid</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mismatch between assigned uuid and stored Datasource uuid.&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="n">uid</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span></div>
 
 <div class="viewcode-block" id="BaseModule.datasources"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.datasources">[docs]</a>    <span class="k">def</span> <span class="nf">datasources</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Return the list of Datasources UUIDs associated with this object</span>
