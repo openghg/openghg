@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.3.g9719518 documentation</title>
+  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.3.g00146ea documentation</title>
   
 
   
@@ -307,24 +307,23 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">add_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
 
-        <span class="c1"># Group by year then by season</span>
+        <span class="c1"># Group by year</span>
         <span class="n">year_group</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;time.year&quot;</span><span class="p">))</span>
         <span class="n">year_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">year_group</span> <span class="k">if</span> <span class="n">data</span><span class="p">]</span>
 
-        <span class="c1"># TODO - improve this</span>
-        <span class="n">grouped_data</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="n">year_data</span><span class="p">:</span>
-            <span class="n">season_group</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">year</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;time.season&quot;</span><span class="p">))</span>
-            <span class="n">seasons</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">season_group</span> <span class="k">if</span> <span class="n">data</span><span class="p">]</span>
-            <span class="n">grouped_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">seasons</span><span class="p">)</span>
+        <span class="c1"># # TODO - improve this</span>
+        <span class="c1"># grouped_data = []</span>
+        <span class="c1"># for year in year_data:</span>
+        <span class="c1">#     season_group = list(year.groupby(&quot;time.season&quot;))</span>
+        <span class="c1">#     seasons = [data for _, data in season_group if data]</span>
+        <span class="c1">#     grouped_data.append(seasons)</span>
 
         <span class="c1"># Use a dictionary keyed with the daterange covered by each segment of data</span>
         <span class="n">additional_data</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="n">grouped_data</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">month</span> <span class="ow">in</span> <span class="n">year</span><span class="p">:</span>
-                <span class="n">daterange_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset_daterange_str</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">month</span><span class="p">)</span>
-                <span class="n">additional_data</span><span class="p">[</span><span class="n">daterange_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">month</span>
+        <span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="n">year_data</span><span class="p">:</span>
+            <span class="n">daterange_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataset_daterange_str</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">year</span><span class="p">)</span>
+            <span class="n">additional_data</span><span class="p">[</span><span class="n">daterange_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">year</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span>
             <span class="c1"># We don&#39;t want the same data twice, this will be stored in previous versions</span>
@@ -550,8 +549,8 @@
 <span class="sd">        from binary data at the moment.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            bucket (dict): Bucket containing data</span>
-<span class="sd">            key (str): Key for data</span>
+<span class="sd">            bucket: Bucket containing data</span>
+<span class="sd">            key: Key for data</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            xarray.Dataset: Dataset from NetCDF file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
