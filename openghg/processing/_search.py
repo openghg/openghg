@@ -34,6 +34,7 @@ def search(**kwargs) -> Dict:
     from collections import defaultdict
     from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions
     from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, clean_string
+    from addict import Dict as aDict
 
     # Do this here otherwise we have to produce them for every datasource
     start_date = kwargs.get("start_date")
@@ -74,15 +75,16 @@ def search(**kwargs) -> Dict:
     # Shallow load the Datasources so we can search their metadata
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
-    matching_sources = defaultdict(dict)
-    for datasource in datasources:
-        if datasource.search_metadata(**search_kwargs):
-            uid = datasource.uuid()
-            data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-            matching_sources[uid]["keys"] = data_keys
-            matching_sources[uid]["metadata"] = datasource.metadata()
+    # Old search code
+    # matching_sources = defaultdict(dict)
+    # for datasource in datasources:
+    #     if datasource.search_metadata(**search_kwargs):
+    #         uid = datasource.uuid()
+    #         data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+    #         matching_sources[uid]["keys"] = data_keys
+    #         matching_sources[uid]["metadata"] = datasource.metadata()
 
-    return matching_sources
+    # return matching_sources
 
     matching_sources = defaultdict(dict)
     for datasource in datasources:
@@ -100,9 +102,8 @@ def search(**kwargs) -> Dict:
 
         return specific_sources
 
-    # Otherwise we want to find the highest ranking data for each site
-    # We just want to return the highest ranked data for each site for each species
-    ranked_data = defaultdict(dict)
+    highest_ranked = aDict()
+
     for uid, datasource in matching_sources.items():
         # Find the site and then the ranking
         metadata = datasource.metadata()
@@ -110,14 +111,42 @@ def search(**kwargs) -> Dict:
         site = metadata["site"]
         species = metadata["species"]
         inlet = metadata["inlet"]
+        sampling_period = metadata["sampling_period"]
 
-        key = "_".join((site, species))
+        rank_data = obj.get_rank(uuid=uid, start_date=start_date, end_date=end_date)
 
-        ranking = datasource.rank(start_date=start_date, end_date=end_date)
+        # If this Datasource doesn't have any ranking data skip it and move on
+        if not rank_data:
+            continue
 
-        ranked_data[key][inlet] = {"ranking": ranking, "uuid": uid}
+        rank_value = next(iter(rank_data))
 
-    return ranked_data
+        # Need to ensure we get all the dates covered
+        
+        if species in highest_ranked[site]:
+            species_data = highest_ranked[site][species]
+            if rank_value < species_data["rank"]:
+                species_data["rank"] = rank_value
+                species_data["uuid"] = uid
+        else:
+            highest_ranked[site][species]["rank"] = rank_value
+            highest_ranked[site][species]["uuid"] = uid
+
+    return highest_ranked
+
+
+    # # Otherwise we want to find the highest ranking data for each site
+    # # We just want to return the highest ranked data for each site for each species
+    # ranked_data = defaultdict(dict)
+    # for uid, datasource in matching_sources.items():
+
+    #     key = "_".join((site, species))
+
+    #     ranking = datasource.rank(start_date=start_date, end_date=end_date)
+
+    #     ranked_data[key][inlet] = {"ranking": ranking, "uuid": uid}
+
+    # return ranked_data
 
     # Then loop over the ranked data and for each get the highest ranked data that covers the dates
     # we require data for

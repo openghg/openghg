@@ -233,8 +233,12 @@ class ObsSurface(BaseModule):
         Returns:
             str or bool: UUID if exists else None
         """
-        key = "_".join((site, network, inlet, species, str(sampling_period))).lower()
-        return self._datasource_table.get(key, False)
+        uuid = self._datasource_table[site][network][inlet][species][sampling_period]
+
+        if uuid:
+            return uuid
+        else:
+            return False
 
     def set_uuid(self, site: str, network: str, inlet: str, species: str, sampling_period: int, uuid: str) -> None:
         """Record a UUID of a Datasource in the datasource table
@@ -249,8 +253,7 @@ class ObsSurface(BaseModule):
         Returns:
             None
         """
-        key = "_".join((site, network, inlet, species, str(sampling_period))).lower()
-        self._datasource_table[key] = uuid
+        self._datasource_table[site][network][inlet][species][sampling_period] = uuid
 
     def save_datsource_info(self, datasource_data: Dict) -> None:
         """Save the datasource information to

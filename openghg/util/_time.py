@@ -1,4 +1,5 @@
 from pandas import Timestamp
+from typing import List, Tuple
 
 __all__ = [
     "timestamp_tzaware",
@@ -10,6 +11,8 @@ __all__ = [
     "create_daterange",
     "create_aligned_timestamp",
     "date_overlap",
+    "combine_dateranges",
+    "split_daterange_str"
 ]
 
 
@@ -197,3 +200,95 @@ def daterange_to_str(daterange):
     end = str(daterange[-1]).replace(" ", "-")
 
     return "_".join([start, end])
+
+
+def combine_dateranges(dateranges: List[str]) -> List:
+    """Checks a list of daterange strings for overlapping and combines
+    those that do.
+
+    Note : this function expects daterange strings in the form
+    2019-01-01T00:00:00_2019-12-31T00:00:00
+
+    Args:
+        dateranges: List of strings
+    Returns:
+        list: List of dateranges with overlapping ranges combined
+    """
+    from itertools import tee
+    from collections import defaultdict
+    from openghg.util import daterange_from_str, daterange_to_str
+
+    # Ensure there are no duplciates
+    dateranges = list(set(dateranges))
+
+    # We can't combine a single daterange
+    if len(dateranges) < 2:
+        return dateranges
+
+    dateranges.sort()
+
+    daterange_objects = [daterange_from_str(x) for x in dateranges]
+
+    def pairwise(iterable):
+        a, b = tee(iterable)
+        next(b, None)
+        return zip(a, b)
+
+    # We want lists of dateranges to combine
+    groups = defaultdict(list)
+    # Each group contains a number of dateranges that overlap
+    group_n = 0
+    # Do a pairwise comparison
+    # "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    for a, b in pairwise(daterange_objects):
+        if len(a.intersection(b)) > 0:
+            groups[group_n].append(a)
+            groups[group_n].append(b)
+        else:
+            # If the first pair don't match we want to keep both but
+            # have them in separate groups
+            if group_n == 0:
+                groups[group_n].append(a)
+                group_n += 1
+                groups[group_n].append(b)
+                continue
+
+            # Otherwise increment the group number and just keep the second of the pair
+            # The first of the pair was a previous second so will have been saved in the
+            # last iteration
+            group_n += 1
+            groups[group_n].append(b)
+
+    # Now we need to combine each group into a single daterange
+    combined_dateranges = []
+    for group_number, daterange_list in groups.items():
+        combined = daterange_list[0].union_many(daterange_list[1:])
+        combined_dateranges.append(combined)
+
+    # Conver the dateranges backt to strings for storing
+    combined_dateranges = [daterange_to_str(x) for x in combined_dateranges]
+
+    print(combine_dateranges)
+
+    return combined_dateranges
+
+
+def split_daterange_str(daterange_str: str) -> Tuple[Timestamp, Timestamp]:
+    """Split a daterange string to the component start and end
+    Timestamps
+
+    Args:
+        daterange_str (str): Daterange string of the form
+
+        2019-01-01T00:00:00_2019-12-31T00:00:00
+    Returns:
+        tuple (Timestamp, Timestamp): Tuple of start, end pandas Timestamps
+    """
+    from pandas import Timestamp
+
+    split = daterange_str.split("_")
+
+    start = Timestamp(split[0], tz="UTC")
+    end = Timestamp(split[1], tz="UTC")
+
+    return start, end

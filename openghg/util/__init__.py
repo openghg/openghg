@@ -30,4 +30,6 @@ from ._time import (
     create_daterange,
     create_aligned_timestamp,
     date_overlap,
+    combine_dateranges,
+    split_daterange_str,
 )
