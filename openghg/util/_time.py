@@ -80,9 +80,6 @@ def get_datetime(year, month, day, hour=None, minute=None, second=None):
 def date_overlap(daterange_a, daterange_b):
     """Check if daterange_a is within daterange_b.
 
-    For this logic see
-    https://stackoverflow.com/a/325964
-
     Args:
         daterange_a (str): Timezone aware daterange string. Example:
         2014-01-30-10:52:30+00:00_2014-01-30-13:22:30+00:00
@@ -101,6 +98,8 @@ def date_overlap(daterange_a, daterange_b):
     start_b = Timestamp(ts_input=daterange_b[0], tz="UTC")
     end_b = Timestamp(ts_input=daterange_b[1], tz="UTC")
 
+    # For this logic see
+    # https://stackoverflow.com/a/325964
     return start_a <= end_b and end_a >= start_b
 
 

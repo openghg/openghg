@@ -11,23 +11,18 @@ T = TypeVar("T", bound="BaseModule")
 class BaseModule:
     def __init__(self):
         from openghg.util import timestamp_now
-        from collections import defaultdict
 
         self._creation_datetime = timestamp_now()
         self._stored = False
 
-        # We want to created a nested dictionary
-        def nested_dict():
-            return defaultdict(nested_dict)
-
         # Stores metadata about the Datasource, keyed by site
-        self._datasource_table = nested_dict()
+        self._datasource_table = {}
         # Keyed by Datasource UUID
         self._datasource_uuids = {}
         # Hashes of previously uploaded files
         self._file_hashes = {}
         # Keyed by UUID
-        self._rank_data = defaultdict(dict)
+        self._rank_data = {}
 
     def is_null(self):
         return not self.datasources
@@ -63,7 +58,6 @@ class BaseModule:
         """
         from Acquire.ObjectStore import string_to_datetime
         from openghg.objectstore import get_bucket
-        from collections import defaultdict
         from openghg.util import to_defaultdict
 
         if not data:
@@ -76,13 +70,8 @@ class BaseModule:
         c._creation_datetime = string_to_datetime(data["creation_datetime"])
         c._datasource_uuids = data["datasource_uuids"]
         c._file_hashes = data["file_hashes"]
-        c._datasource_table = to_defaultdict(data["datasource_table"])
-
-        try:
-            c._rank_data = to_defaultdict(data["rank_data"])
-        except KeyError:
-            c._rank_data = defaultdict(dict)
-
+        c._datasource_table = data["datasource_table"]
+        c._rank_data = to_defaultdict(data["rank_data"])
         c._stored = False
 
         return c
@@ -157,7 +146,9 @@ class BaseModule:
         """
         del self._datasource_uuids[uuid]
 
-    def set_rank(self: T, uuid: str, rank: Union[int, str], daterange: Union[str, List[str]]) -> None:
+    def set_rank(
+        self: T, uuid: str, rank: Union[int, str], date_range: Union[str, List[str]], overwrite: Optional[bool] = False
+    ) -> None:
         """Set the rank of a Datasource associated with this object.
 
         This function performs checks to ensure multiple ranks aren't set for
@@ -167,50 +158,46 @@ class BaseModule:
         daterange stored for that rank.
 
         Args:
-            uuid (str): UUID of Datasource
-            rank (int): Rank of data
-            daterange (str, list): Daterange(s)
+            uuid: UUID of Datasource
+            rank: Rank of data
+            daterange: Daterange(s)
+            overwrite: Overwrite current ranking data
         Returns:
             None
         """
         from openghg.modules import Datasource
-        from openghg.util import daterange_from_str
+        from openghg.util import date_overlap
 
         if not 1 <= int(rank) <= 10:
             raise TypeError("Rank can only take values 1 to 10 (for unranked). Where 1 is the highest rank.")
 
-        if not isinstance(daterange, list):
-            daterange = [daterange]
+        if not isinstance(date_range, list):
+            date_range = [date_range]
 
         try:
             rank_data = self._rank_data[uuid]
             # Check this source isn't ranked differently for the same dates
-            for d in daterange:
+            for d in date_range:
                 # Check we don't have any overlapping dateranges for other ranks
-                daterange_obj = daterange_from_str(d)
-                # Check the other dateranges for overlapping dates and raise error
                 for existing_rank, existing_daterange in rank_data.items():
                     for e in existing_daterange:
-                        e = daterange_from_str(e)
-
-                        intersection = daterange_obj.intersection(e)
-                        if len(intersection) > 0 and int(existing_rank) != int(rank):
+                        if date_overlap(daterange_a=e, daterange_b=d):
                             raise ValueError(
-                                f"This datasource has already got the rank {existing_rank} for dates that overlap the ones given. \
-                                                Overlapping dates are {intersection}"
+                                f"This datasource has rank {existing_rank} for dates that overlap the ones given. \
+                                                Overlapping dateranges are {e} and {d}"
                             )
         except KeyError:
             pass
 
         # Store the rank within the Datasource
         datasource = Datasource.load(uuid=uuid, shallow=True)
-        datasource.set_rank(rank=rank, daterange=daterange)
+        datasource.set_rank(rank=rank, daterange=date_range)
         datasource.save()
 
         try:
-            self._rank_data[uuid][rank].extend(daterange)
-        except KeyError:
-            self._rank_data[uuid][rank] = daterange
+            self._rank_data[uuid][rank].extend(date_range)
+        except AttributeError:
+            self._rank_data[uuid][rank] = date_range
 
     def clear_datasources(self: T) -> None:
         """Remove all Datasources from the object

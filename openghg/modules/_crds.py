@@ -236,7 +236,7 @@ class CRDS:
         if len(split_filename) < 4:
             raise ValueError(
                 "Error reading metadata from filename. The expected format is \
-                {site}.{instrument}.{time resolution}.{height}.dat"
+                {site}.{instrument}.{sampling period}.{height}.dat"
             )
 
         site = split_filename[0]
@@ -251,7 +251,7 @@ class CRDS:
             # sampling_period = "1H"
             sampling_period = 60 * 60
         else:
-            raise ValueError("Unable to read time resolution from filename.")
+            raise ValueError("Unable to read sampling period from filename.")
 
         metadata = {}
         metadata["site"] = site

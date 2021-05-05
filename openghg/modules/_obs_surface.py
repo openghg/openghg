@@ -1,6 +1,7 @@
 from openghg.modules import BaseModule
 from pathlib import Path
 from typing import Dict, Optional, Union
+
 # import traceback
 
 __all__ = ["ObsSurface"]
@@ -114,9 +115,7 @@ class ObsSurface(BaseModule):
                 # try:
                 file_hash = hash_file(filepath=data_filepath)
                 if file_hash in obs._file_hashes and overwrite is False:
-                    raise ValueError(
-                        f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
-                    )
+                    raise ValueError(f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}.")
 
                 progress_bar.set_description(f"Processing: {data_filepath.name}")
 
@@ -129,7 +128,7 @@ class ObsSurface(BaseModule):
                         inlet=inlet,
                         instrument=instrument,
                         sampling_period=sampling_period,
-                        measurement_type=measurement_type
+                        measurement_type=measurement_type,
                     )
                 else:
                     data = data_obj.read_file(
@@ -139,7 +138,7 @@ class ObsSurface(BaseModule):
                         inlet=inlet,
                         instrument=instrument,
                         sampling_period=sampling_period,
-                        measurement_type=measurement_type
+                        measurement_type=measurement_type,
                     )
 
                 # Extract the metadata for each set of measurements to perform a Datasource lookup
@@ -181,21 +180,19 @@ class ObsSurface(BaseModule):
             site = data["site"]
             network = data["network"]
             inlet = data["inlet"]
+            sampling_period = data["sampling_period"]
 
-            # TODO - remove this once further checks for inlet processing
-            # are in place
+            # TODO - remove these once further checks for metadata inputs are in place
             if inlet is None:
                 raise ValueError("No valid inlet height.")
 
+            if sampling_period is None:
+                raise ValueError("No valid sampling period.")
+
             species = data["species"]
 
-            result = self.lookup_uuid(site=site, network=network, inlet=inlet, species=species)
-
-            # If we get an empty dict set as False
-            if not result:
-                result = False
-
-            lookup_results[key] = result
+            lookup_results[key] = self.lookup_uuid(site=site, network=network, inlet=inlet, 
+                                                    species=species, sampling_period=sampling_period)
 
         return lookup_results
 
@@ -214,41 +211,46 @@ class ObsSurface(BaseModule):
             network = md["network"]
             inlet = md["inlet"]
             species = md["species"]
+            sampling_period = md["sampling_period"]
 
-            result = self.lookup_uuid(site=site, network=network, inlet=inlet, species=species)
+            result = self.lookup_uuid(site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period)
 
             if result and result != uid:
                 raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
 
-            self.set_uuid(site=site, network=network, inlet=inlet, species=species, uuid=uid)
+            self.set_uuid(site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period, uuid=uid)
             self._datasource_uuids[uid] = key
 
-    def lookup_uuid(self, site: str, network: str, inlet: str, species: str) -> Union[str, Dict]:
+    def lookup_uuid(self, site: str, network: str, inlet: str, species: str, sampling_period: int) -> Union[str, bool]:
         """Perform a lookup for the UUID of a Datasource
 
         Args:
             site: Site code
             network: Network name
-            Inlet: Inlet height
-            Species: Species name
+            inlet: Inlet height
+            species: Species name
+            sampling_period: Sampling period in seconds
         Returns:
-            str or dict: UUID or empty dict if no entry
+            str or bool: UUID if exists else None
         """
-        return self._datasource_table[site][network][inlet][species]
+        key = "_".join((site, network, inlet, species, str(sampling_period))).lower()
+        return self._datasource_table.get(key, False)
 
-    def set_uuid(self, site: str, network: str, inlet: str, species: str, uuid: str) -> None:
+    def set_uuid(self, site: str, network: str, inlet: str, species: str, sampling_period: int, uuid: str) -> None:
         """Record a UUID of a Datasource in the datasource table
 
         Args:
             site: Site code
             network: Network name
-            Inlet: Inlet height
-            Species: Species name
+            inlet: Inlet height
+            species: Species name
+            sampling_period: Sampling period in seconds
             uuid: UUID of Datasource
         Returns:
             None
         """
-        self._datasource_table[site][network][inlet][species] = uuid
+        key = "_".join((site, network, inlet, species, str(sampling_period))).lower()
+        self._datasource_table[key] = uuid
 
     def save_datsource_info(self, datasource_data: Dict) -> None:
         """Save the datasource information to

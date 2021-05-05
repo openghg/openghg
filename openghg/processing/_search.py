@@ -77,6 +77,16 @@ def search(**kwargs) -> Dict:
     matching_sources = defaultdict(dict)
     for datasource in datasources:
         if datasource.search_metadata(**search_kwargs):
+            uid = datasource.uuid()
+            data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+            matching_sources[uid]["keys"] = data_keys
+            matching_sources[uid]["metadata"] = datasource.metadata()
+
+    return matching_sources
+
+    matching_sources = defaultdict(dict)
+    for datasource in datasources:
+        if datasource.search_metadata(**search_kwargs):
             matching_sources[datasource.uuid()] = datasource
 
     # If we have the site, inlet and instrument then just return the data
@@ -90,9 +100,9 @@ def search(**kwargs) -> Dict:
 
         return specific_sources
 
-    ranked_data = defaultdict(dict)
     # Otherwise we want to find the highest ranking data for each site
     # We just want to return the highest ranked data for each site for each species
+    ranked_data = defaultdict(dict)
     for uid, datasource in matching_sources.items():
         # Find the site and then the ranking
         metadata = datasource.metadata()
@@ -103,20 +113,31 @@ def search(**kwargs) -> Dict:
 
         key = "_".join((site, species))
 
-        ranking = datasource.get_rank(start_date=start_date, end_date=end_date)
+        ranking = datasource.rank(start_date=start_date, end_date=end_date)
 
-        ranked_data[key][inlet] = ranking
+        ranked_data[key][inlet] = {"ranking": ranking, "uuid": uid}
 
     return ranked_data
+
     # Then loop over the ranked data and for each get the highest ranked data that covers the dates
     # we require data for
     highest_ranked_data = defaultdict(dict)
 
-    for key, rank_data in ranked_data.items():
+    for key, inlet_data in ranked_data.items():
         # If we only have one rank for this data return that
-        # if rank_data["inlet"]
-        pass
+        if len(inlet_data) == 1:
+            inlet_height = next(iter(inlet_data))
+            highest_ranked_data[key] = inlet_data[inlet_height]["uuid"]
+        else:
+            # Iterate over the inlets to find the highest ranked
+            for inlet, specific_inlet_data in inlet_data.items():
+                highest_rank = min(specific_inlet_data)
 
+            # Get the highest ranked in let that covers these dates
+            high_rank = min(rank_data.keys())
+            highest_ranked_data[high_rank] = "some_data"
+
+    # return highest_ranked_data
 
     # # TODO - this section of the function needs refactoring
     # # GJ - 2021-03-09

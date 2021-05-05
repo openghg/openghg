@@ -904,7 +904,24 @@ class Datasource:
         """
         return self._metadata
 
-    def get_rank(self, start_date: Optional[Timestamp] = None, end_date: Optional[Timestamp] = None) -> Dict:
+    def highest_rank(self, start_date: Optional[Timestamp] = None, end_date: Optional[Timestamp] = None) -> int:
+        """ Get the highest rank this Datasource has for the passed dates. If this Datasource is not ranked
+        a value of 10 is returned.
+
+        Args:
+            start_date: Start date
+            end_date: End date
+        Returns:
+            int: Rank value or 10 if unranked.
+        """
+        ranking = self.rank(start_date=start_date, end_date=end_date)
+
+        if not ranking:
+            return 10
+
+        return int(min(ranking.keys()))
+
+    def rank(self, start_date: Optional[Timestamp] = None, end_date: Optional[Timestamp] = None) -> Dict:
         """Get the ranks of data contained within Datasource for the passed daterange.
         If no rank has been set an empty dictionary is returned.
 
