@@ -1,5 +1,5 @@
-from pandas import Timestamp
-from typing import List, Tuple
+from pandas import Timestamp, DatetimeIndex
+from typing import List, Tuple, Optional, Union
 
 __all__ = [
     "timestamp_tzaware",
@@ -12,7 +12,7 @@ __all__ = [
     "create_aligned_timestamp",
     "date_overlap",
     "combine_dateranges",
-    "split_daterange_str"
+    "split_daterange_str",
 ]
 
 
@@ -47,7 +47,7 @@ def timestamp_now() -> Timestamp:
     return timestamp_tzaware(Timestamp.now())
 
 
-def timestamp_epoch():
+def timestamp_epoch() -> Timestamp:
     """Returns the UNIX epoch time
     1st of January 1970
 
@@ -75,7 +75,7 @@ def get_datetime(year, month, day, hour=None, minute=None, second=None):
     from datetime import datetime
     from Acquire.ObjectStore import datetime_to_datetime
 
-    date = datetime(year=year, month=month, day=day)  # , hour=hour, minute=minute, second=second)
+    date = datetime(year=year, month=month, day=day)
 
     return datetime_to_datetime(date)
 
@@ -106,7 +106,7 @@ def date_overlap(daterange_a, daterange_b):
     return start_a <= end_b and end_a >= start_b
 
 
-def create_aligned_timestamp(time):
+def create_aligned_timestamp(time: Union[str, Timestamp]) -> Timestamp:
     """Align the passed datetime / Timestamp object to the minute
     interval for use in dateranges and overlap checks.
 
@@ -131,12 +131,12 @@ def create_aligned_timestamp(time):
     return t
 
 
-def create_daterange(start, end):
+def create_daterange(start: Timestamp, end: Timestamp, freq: Optional[str] = "D") -> DatetimeIndex:
     """Create a minute aligned daterange
 
     Args:
-        start (Timestamp)
-        end (Timestamp)
+        start: Start date
+        end: End date
     Returns:
         pandas.DatetimeIndex
     """
@@ -148,16 +148,16 @@ def create_daterange(start, end):
     start = create_aligned_timestamp(start)
     end = create_aligned_timestamp(end)
 
-    return date_range(start=start, end=end, freq="min")
+    return date_range(start=start, end=end, freq=freq)
 
 
-def create_daterange_str(start, end):
+def create_daterange_str(start, end) -> str:
     """Convert the passed datetimes into a daterange string
     for use in searches and Datasource interactions
 
     Args:
-        start_date (Timestamp)
-        end_date (Timestamp)
+        start_date: Start date
+        end_date: End date
     Returns:
         str: Daterange string
     """
@@ -166,7 +166,7 @@ def create_daterange_str(start, end):
     return daterange_to_str(daterange)
 
 
-def daterange_from_str(daterange_str):
+def daterange_from_str(daterange_str: str, freq: Optional[str] = "D") -> DatetimeIndex:
     """Get a Pandas DatetimeIndex from a string. The created
     DatetimeIndex has minute frequency.
 
@@ -174,7 +174,7 @@ def daterange_from_str(daterange_str):
         daterange_str (str): Daterange string
         of the form 2019-01-01T00:00:00_2019-12-31T00:00:00
     Returns:
-        pandas.DatetimeIndex: DatetimeIndex with minute frequency
+        pandas.DatetimeIndex: DatetimeIndex covering daterange
     """
     from pandas import date_range
 
@@ -184,7 +184,7 @@ def daterange_from_str(daterange_str):
     start = create_aligned_timestamp(split[0])
     end = create_aligned_timestamp(split[1])
 
-    return date_range(start=start, end=end, freq="min")
+    return date_range(start=start, end=end, freq=freq)
 
 
 def daterange_to_str(daterange):
@@ -267,8 +267,6 @@ def combine_dateranges(dateranges: List[str]) -> List:
 
     # Conver the dateranges backt to strings for storing
     combined_dateranges = [daterange_to_str(x) for x in combined_dateranges]
-
-    print(combine_dateranges)
 
     return combined_dateranges
 

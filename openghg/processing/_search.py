@@ -31,9 +31,11 @@ def search(**kwargs) -> Dict:
     Returns:
         dict: List of keys of Datasources matching the search parameters
     """
-    from collections import defaultdict
+    from collections import defaultdict, namedtuple
     from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions
-    from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, clean_string
+    from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, clean_string, daterange_from_str, split_daterange_str
+    from pandas import date_range as pd_date_range
+    from pandas import Timedelta as pd_Timedelta
     from addict import Dict as aDict
 
     # Do this here otherwise we have to produce them for every datasource
@@ -92,7 +94,8 @@ def search(**kwargs) -> Dict:
             matching_sources[datasource.uuid()] = datasource
 
     # If we have the site, inlet and instrument then just return the data
-    if {"site", "inlet", "instrument"} <= search_kwargs.keys():
+    # TODO - should instrument be added here
+    if {"site", "inlet", "species"} <= search_kwargs.keys():
         specific_sources = defaultdict(dict)
 
         for uid, datasource in matching_sources.items():
@@ -107,11 +110,10 @@ def search(**kwargs) -> Dict:
     for uid, datasource in matching_sources.items():
         # Find the site and then the ranking
         metadata = datasource.metadata()
-        # Get the site inlet and species 
+        # Get the site inlet and species
         site = metadata["site"]
         species = metadata["species"]
-        inlet = metadata["inlet"]
-        sampling_period = metadata["sampling_period"]
+        network = metadata["network"]
 
         rank_data = obj.get_rank(uuid=uid, start_date=start_date, end_date=end_date)
 
@@ -119,21 +121,90 @@ def search(**kwargs) -> Dict:
         if not rank_data:
             continue
 
+        # There will only be a single rank key
         rank_value = next(iter(rank_data))
+        # Get the daterange this rank covers
+        rank_daterange = rank_data[rank_value]
+
+        # If we have a high rank we'll store this below
+        # Adding network in here doesn't feel quite right but I can't think of a cleaner
+        # way currently
+        match = {"uuid": uid, "daterange": rank_daterange, "network": network}
 
         # Need to ensure we get all the dates covered
-        
         if species in highest_ranked[site]:
-            species_data = highest_ranked[site][species]
-            if rank_value < species_data["rank"]:
-                species_data["rank"] = rank_value
-                species_data["uuid"] = uid
+            species_rank_data = highest_ranked[site][species]
+
+            # If we have a higher (lower number) rank save it
+            if rank_value < species_rank_data["rank"]:
+                species_rank_data["rank"] = rank_value
+                species_rank_data["matching"] = [match]
+            # If another Datasource has the same rank for another daterange
+            # we want to save that as well
+            elif rank_value == species_rank_data["rank"]:
+                species_rank_data["matching"].append(match)
         else:
             highest_ranked[site][species]["rank"] = rank_value
-            highest_ranked[site][species]["uuid"] = uid
+            highest_ranked[site][species]["matching"] = [match]
 
-    return highest_ranked
+    # Now we have the highest ranked data the dateranges there are ranks for
+    # we want to fill in the gaps with (currently) the highest inlet from that site
 
+    data_keys = aDict()
+    for site, species in highest_ranked.items():
+        for sp, data in species.items():
+            dateranges = (daterange_from_str(m["daterange"]) for m in data["matching"])
+            combined = dateranges[0].union_many(dateranges[1:])
+            search_daterange = pd_date_range(start=start_date, end=end_date)
+
+            # Dates that are in the search daterange but aren't covered by the rank dates
+            diff = search_daterange.difference(combined)
+
+            # If we don't have any missing dates just continue
+            if diff.empty:
+                continue
+
+            for rank_block_n, m in enumerate(data["matching"]):
+                uuid = m["uuid"]
+                daterange = m["daterange"]
+                datasource = matching_sources[uuid]
+                keys = datasource.keys_in_daterange_str(daterange=daterange)
+                metadata = datasource.metadata().copy()
+                
+                # TODO - here add in the rank that this block has and the daterange that rank covers
+                raise NotImplementedError()
+                # metadata["rank_data"] = {"rank": }
+
+                data_keys[site][sp]["ranked"][rank_block_n] = 0
+
+                
+            # Get the data from the Datasources we have the ranking for
+            datasources = (matching_sources[m["uuid"]] for m in data["matching"])
+            for
+                data_keys[site][sp] = []
+
+
+
+            date_series = diff.to_series()
+            grp = date_series.diff().ne(pd_Timedelta(days=1)).cumsum()
+            gaps = date_series.groupby(grp).agg(["min", "max"])
+            # These tuples represent the start and end Timestamps of the gaps
+            # which aren't covered by the ranked data
+            timestamps = gaps[["min", "max"]].apply(tuple, axis=1).tolist()
+
+            network = data["network"]
+
+            # Then get the gaps
+            highest_inlet = obj.get_highest_inlet(site=site, network=network, species=species)
+
+            for n, (start, end) in enumerate(timestamps):
+                data_keys[site][species][n] = search(site=site, species=sp, inlet=highest_inlet, network=network, start_date=start, end_date=end)
+
+
+            # We want to get the data for the above date ranges from the highest inlet
+            # From the ObsSurface class we can get the highest inlet
+
+    # return highest_ranked
 
     # # Otherwise we want to find the highest ranking data for each site
     # # We just want to return the highest ranked data for each site for each species
@@ -150,21 +221,21 @@ def search(**kwargs) -> Dict:
 
     # Then loop over the ranked data and for each get the highest ranked data that covers the dates
     # we require data for
-    highest_ranked_data = defaultdict(dict)
+    # highest_ranked_data = defaultdict(dict)
 
-    for key, inlet_data in ranked_data.items():
-        # If we only have one rank for this data return that
-        if len(inlet_data) == 1:
-            inlet_height = next(iter(inlet_data))
-            highest_ranked_data[key] = inlet_data[inlet_height]["uuid"]
-        else:
-            # Iterate over the inlets to find the highest ranked
-            for inlet, specific_inlet_data in inlet_data.items():
-                highest_rank = min(specific_inlet_data)
+    # for key, inlet_data in ranked_data.items():
+    #     # If we only have one rank for this data return that
+    #     if len(inlet_data) == 1:
+    #         inlet_height = next(iter(inlet_data))
+    #         highest_ranked_data[key] = inlet_data[inlet_height]["uuid"]
+    #     else:
+    #         # Iterate over the inlets to find the highest ranked
+    #         for inlet, specific_inlet_data in inlet_data.items():
+    #             highest_rank = min(specific_inlet_data)
 
-            # Get the highest ranked in let that covers these dates
-            high_rank = min(rank_data.keys())
-            highest_ranked_data[high_rank] = "some_data"
+    #         # Get the highest ranked in let that covers these dates
+    #         high_rank = min(rank_data.keys())
+    #         highest_ranked_data[high_rank] = "some_data"
 
     # return highest_ranked_data
 

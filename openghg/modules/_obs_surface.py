@@ -233,7 +233,7 @@ class ObsSurface(BaseModule):
         Returns:
             str or bool: UUID if exists else None
         """
-        uuid = self._datasource_table[site][network][inlet][species][sampling_period]
+        uuid = self._datasource_table[site][network][species][inlet][sampling_period]
 
         if uuid:
             return uuid
@@ -253,7 +253,21 @@ class ObsSurface(BaseModule):
         Returns:
             None
         """
-        self._datasource_table[site][network][inlet][species][sampling_period] = uuid
+        self._datasource_table[site][network][species][inlet][sampling_period] = uuid
+
+    def get_highest_inlet(self, site: str, network: str, species: str) -> str:
+        """ Get the highest inlet we have data for at a site
+
+            Args:
+                site: Site code
+                network: Network name
+            Returns:
+                str: Inlet height
+        """
+        if species in self._datasource_table[site][network]:
+            return max(self._datasource_table[site][network][species].keys())
+        else:
+            raise ValueError(f"Unable to find any inlets for {site} in the {network} network.")
 
     def save_datsource_info(self, datasource_data: Dict) -> None:
         """Save the datasource information to
