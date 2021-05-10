@@ -13,6 +13,7 @@ __all__ = [
     "date_overlap",
     "combine_dateranges",
     "split_daterange_str",
+    "closest_daterange",
 ]
 
 
@@ -290,3 +291,52 @@ def split_daterange_str(daterange_str: str) -> Tuple[Timestamp, Timestamp]:
     end = Timestamp(split[1], tz="UTC")
 
     return start, end
+
+
+def closest_daterange(to_compare: str, dateranges: Union[str, List]) -> str:
+    """Finds the closest daterange in a list of dateranges
+
+    Args:
+        to_compare: Daterange (as a string) to compare
+        dateranges: List of dateranges
+    Returns:
+        str: Daterange from dateranges that's the closest in time to to_compare
+    """
+    from openghg.util import split_daterange_str
+    from pandas import Timedelta
+
+    min_start = Timedelta("3650days")
+    min_end = Timedelta("3650days")
+
+    if not isinstance(dateranges, list):
+        dateranges = [dateranges]
+
+    dateranges = sorted(dateranges)
+
+    start_comp, end_comp = split_daterange_str(daterange_str=to_compare)
+    # We want to iterate over the dateranges and first check if they overlap
+    # if they do, return that daterange
+    # otherwise check how far apart the
+    for daterange in dateranges:
+        # If they're close to overlap the start and end will be close
+        start, end = split_daterange_str(daterange_str=daterange)
+
+        # Check for an overlap
+        if start <= end_comp and end >= start_comp:
+            raise ValueError("Overlapping daterange.")
+
+        # Find the min between all the starts and all the ends
+        diff_start_end = abs(start_comp - end)
+        if diff_start_end < min_start:
+            min_start = diff_start_end
+            closest_daterange_start = daterange
+
+        diff_end_start = abs(end_comp - start)
+        if diff_end_start < min_end:
+            min_end = diff_end_start
+            closest_daterange_end = daterange
+
+    if min_start < min_end:
+        return closest_daterange_start
+    else:
+        return closest_daterange_end

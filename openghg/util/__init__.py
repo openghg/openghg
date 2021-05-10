@@ -32,4 +32,5 @@ from ._time import (
     date_overlap,
     combine_dateranges,
     split_daterange_str,
+    closest_daterange,
 )
