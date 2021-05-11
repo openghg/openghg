@@ -274,7 +274,8 @@ def align_datasets(
 
     if platform is not None:
         platform = platform.lower()
-        if platform in ("satellite"):#, "flask"):
+        # Do not apply resampling for "satellite" (but have re-included "flask" for now)
+        if platform in ("satellite"):
             return obs_data, footprint_data
 
     # Get the period of measurements in time
@@ -285,15 +286,15 @@ def align_datasets(
         obs_data_period_s = obs_attributes["sampling_period"]
     else:
         # Attempt to derive sampling period from frequency of data
-        obs_data_period_s = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1])/1e9).astype(int64)
-        
-        obs_data_period_s_min = (np.diff(obs_data.time.data).min()/1e9)
-        obs_data_period_s_max = (np.diff(obs_data.time.data).max()/1e9)
-        
+        obs_data_period_s = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9).astype("int64")
+
+        obs_data_period_s_min = (np.diff(obs_data.time.data).min() / 1e9)
+        obs_data_period_s_max = (np.diff(obs_data.time.data).max() / 1e9)
+
         # Check if the periods differ by more than 1 second
         if np.isclose(obs_data_period_s_min, obs_data_period_s_max, 1):
             raise ValueError("Sample period can be not be derived from observations")
-   
+
     obs_data_timeperiod = Timedelta(seconds=obs_data_period_s)
 
     # Derive the footprint period from the frequency of the data
@@ -319,7 +320,7 @@ def align_datasets(
 
     # Only non satellite datasets with different periods need to be resampled
     timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
-    tolerance = 1e-9 # seconds
+    tolerance = 1e-9  # seconds
     if timeperiod_diff_s >= tolerance:
         base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
 
