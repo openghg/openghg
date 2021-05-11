@@ -155,6 +155,9 @@ def search(**kwargs) -> Dict:
             highest_ranked[site][species]["rank"] = rank_value
             highest_ranked[site][species]["matching"] = [match]
 
+    if not highest_ranked:
+        raise ValueError(("No ranking data set for the given search parameters."
+                            " Please refine your search to include a specific site, species and inlet."))
     # Now we have the highest ranked data the dateranges there are ranks for
     # we want to fill in the gaps with (currently) the highest inlet from that site
 

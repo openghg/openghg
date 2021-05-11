@@ -38,7 +38,7 @@ def test_keyword_search():
     expected_metadata = {
         "site": "bsd",
         "instrument": "picarro",
-        "sampling_period": 60,
+        "sampling_period": "60",
         "inlet": "248m",
         "port": "8",
         "type": "air",
@@ -54,7 +54,7 @@ def test_keyword_search():
 
 
 def test_search_gc():
-    results = search(species=["NF3"], site="CGO")
+    results = search(species=["NF3"], site="CGO", inlet="70m")
 
     key = next(iter(results))
 
@@ -69,14 +69,13 @@ def test_search_gc():
         "inlet": "70m",
         "data_type": "timeseries",
         "network": "agage",
-        "sampling_period": 1200,
+        "sampling_period": "1200",
     }
 
     assert metadata == expected_metadata
 
 
 def test_location_search():
-    # TODO - I feel this test could be improved
     species = ["co2", "ch4"]
     locations = ["hfd", "tac", "bsd"]
 
@@ -126,7 +125,7 @@ def test_search_datetimes():
     expected_metadata = {
         "site": "bsd",
         "instrument": "picarro",
-        "sampling_period": 60,
+        "sampling_period": "60",
         "inlet": "248m",
         "port": "8",
         "type": "air",
