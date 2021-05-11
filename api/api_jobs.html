@@ -8,12 +8,14 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>jobs API Detail &mdash; OpenGHG 0+untagged.3.g70ef136 documentation</title>
+  <title>jobs API Detail &mdash; OpenGHG 0+untagged.3.gc0f8ad5 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
@@ -31,6 +33,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -197,19 +200,19 @@
 <section id="sshconnect">
 <h2>SSHConnect<a class="headerlink" href="#sshconnect" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="openghg.jobs.SSHConnect">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">openghg.jobs.</span></code><code class="sig-name descname"><span class="pre">SSHConnect</span></code><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.jobs.SSHConnect">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">openghg.jobs.</span></span><span class="sig-name descname"><span class="pre">SSHConnect</span></span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use Paramiko to connect to an SSH server</p>
 <p>This class can be used as a context manager</p>
 <dl class="py method">
-<dt id="openghg.jobs.SSHConnect.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.__init__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.jobs.SSHConnect.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.jobs.SSHConnect.close">
-<code class="sig-name descname"><span class="pre">close</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.close" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.jobs.SSHConnect.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calls close on the paramiko SSHClient instance used
 the SSH connection</p>
 <dl class="field-list simple">
@@ -220,8 +223,8 @@ the SSH connection</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.jobs.SSHConnect.connect">
-<code class="sig-name descname"><span class="pre">connect</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hostname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keypath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known_host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.connect" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.jobs.SSHConnect.connect">
+<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hostname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keypath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known_host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.connect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use Paramiko to connect the hostname</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -244,8 +247,8 @@ the SSH connection</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.jobs.SSHConnect.run_command">
-<code class="sig-name descname"><span class="pre">run_command</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commands</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.run_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.run_command" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.jobs.SSHConnect.run_command">
+<span class="sig-name descname"><span class="pre">run_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commands</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.run_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.run_command" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run commands on the remote server</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -261,8 +264,8 @@ the SSH connection</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.jobs.SSHConnect.write_files">
-<code class="sig-name descname"><span class="pre">write_files</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.write_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.write_files" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.jobs.SSHConnect.write_files">
+<span class="sig-name descname"><span class="pre">write_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remote_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.write_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.write_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the job script to the remote server</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -284,8 +287,8 @@ the SSH connection</p>
 <section id="jobdrive">
 <h2>JobDrive<a class="headerlink" href="#jobdrive" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="openghg.jobs.JobDrive">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">openghg.jobs.</span></code><code class="sig-name descname"><span class="pre">JobDrive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_secret</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.JobDrive" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.jobs.JobDrive">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">openghg.jobs.</span></span><span class="sig-name descname"><span class="pre">JobDrive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_secret</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.JobDrive" title="Permalink to this definition">¶</a></dt>
 <dd><p>” This is used to upload files to the cloud drive for use in a
 HPC job</p>
 <dl class="field-list simple">
@@ -297,14 +300,14 @@ HPC job</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="openghg.jobs.JobDrive.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_secret</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.JobDrive.__init__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.jobs.JobDrive.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_secret</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.JobDrive.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.jobs.JobDrive.download">
-<code class="sig-name descname"><span class="pre">download</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.download"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.JobDrive.download" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.jobs.JobDrive.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.download"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.JobDrive.download" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download the files in the given list to a local directory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -323,8 +326,8 @@ HPC job</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.jobs.JobDrive.list_files">
-<code class="sig-name descname"><span class="pre">list_files</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.list_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.JobDrive.list_files" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.jobs.JobDrive.list_files">
+<span class="sig-name descname"><span class="pre">list_files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.list_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.JobDrive.list_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>List files in drive</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -337,8 +340,8 @@ HPC job</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.jobs.JobDrive.upload">
-<code class="sig-name descname"><span class="pre">upload</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'input'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.upload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.JobDrive.upload" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.jobs.JobDrive.upload">
+<span class="sig-name descname"><span class="pre">upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'input'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.upload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.JobDrive.upload" title="Permalink to this definition">¶</a></dt>
 <dd><p>Upload files to the cloud drive that’s accessed using the Acquire
 PAR</p>
 <dl class="field-list simple">
@@ -373,7 +376,7 @@ PAR</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 30, 2021.
+        Last updated on May 11, 2021.
       </span>
 
     </p>

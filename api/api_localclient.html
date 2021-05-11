@@ -8,12 +8,14 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>localclient API Detail &mdash; OpenGHG 0+untagged.3.g70ef136 documentation</title>
+  <title>localclient API Detail &mdash; OpenGHG 0+untagged.3.gc0f8ad5 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
@@ -31,6 +33,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -202,8 +205,8 @@
 <h2>process_files<a class="headerlink" href="#process-files" title="Permalink to this headline">¶</a></h2>
 <p>Used to process files for storage in the local object store.</p>
 <dl class="py function">
-<dt id="openghg.localclient.process_files">
-<code class="sig-prename descclassname"><span class="pre">openghg.localclient.</span></code><code class="sig-name descname"><span class="pre">process_files</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_process.html#process_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.process_files" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.localclient.process_files">
+<span class="sig-prename descclassname"><span class="pre">openghg.localclient.</span></span><span class="sig-name descname"><span class="pre">process_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_process.html#process_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.process_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process the passed file(s)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -232,17 +235,17 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">RankSources</span></code> class is used to rank sources of data. Setting a high rank for a Datasource across a specific daterange means
 that data from that Datasource will be preferred when a user searches for data.</p>
 <dl class="py class">
-<dt id="openghg.localclient.RankSources">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">openghg.localclient.</span></code><code class="sig-name descname"><span class="pre">RankSources</span></code><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.localclient.RankSources">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">openghg.localclient.</span></span><span class="sig-name descname"><span class="pre">RankSources</span></span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
-<dt id="openghg.localclient.RankSources.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.__init__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.localclient.RankSources.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.localclient.RankSources.create_daterange">
-<code class="sig-name descname"><span class="pre">create_daterange</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.create_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.create_daterange" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.localclient.RankSources.create_daterange">
+<span class="sig-name descname"><span class="pre">create_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.create_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.create_daterange" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a JSON serialisable daterange string for use in ranking dict</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -261,8 +264,8 @@ that data from that Datasource will be preferred when a user searches for data.<
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.localclient.RankSources.get_sources">
-<code class="sig-name descname"><span class="pre">get_sources</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.get_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.get_sources" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.localclient.RankSources.get_sources">
+<span class="sig-name descname"><span class="pre">get_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.get_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.get_sources" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the datasources for this site and species to allow a ranking to be set</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -281,8 +284,8 @@ that data from that Datasource will be preferred when a user searches for data.<
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.localclient.RankSources.rank_sources">
-<code class="sig-name descname"><span class="pre">rank_sources</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">updated_rankings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.rank_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.rank_sources" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.localclient.RankSources.rank_sources">
+<span class="sig-name descname"><span class="pre">rank_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">updated_rankings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.rank_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.rank_sources" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign the precendence of sources for each.
 This function expects a dictionary of the form</p>
 <p>{‘site_string’: {‘rank’: [daterange_str, …], ‘daterange’: ‘start_end’, ‘uuid’: uuid},</p>
@@ -297,8 +300,8 @@ This function expects a dictionary of the form</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.localclient.RankSources.set_rank">
-<code class="sig-name descname"><span class="pre">set_rank</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rank_key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.set_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.set_rank" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.localclient.RankSources.set_rank">
+<span class="sig-name descname"><span class="pre">set_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rank_key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.set_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.set_rank" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the rank data for the</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -316,8 +319,8 @@ This function expects a dictionary of the form</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.localclient.RankSources.visualise_rankings">
-<code class="sig-name descname"><span class="pre">visualise_rankings</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pyvis.network.Network</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.visualise_rankings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.visualise_rankings" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.localclient.RankSources.visualise_rankings">
+<span class="sig-name descname"><span class="pre">visualise_rankings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pyvis.network.Network</span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.visualise_rankings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.visualise_rankings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a small network graph of ranked data with each rank given a colour</p>
 <p>Note that this function should only be run from a Jupyter Notebook</p>
 <dl class="field-list simple">
@@ -340,18 +343,18 @@ This function expects a dictionary of the form</p>
 <h2>Search<a class="headerlink" href="#search" title="Permalink to this headline">¶</a></h2>
 <p>Search the local object store for data. This will be removed as it has been replaced with the <code class="docutils literal notranslate"><span class="pre">get_obs</span></code> function above.</p>
 <dl class="py class">
-<dt id="openghg.localclient.Search">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">openghg.localclient.</span></code><code class="sig-name descname"><span class="pre">Search</span></code><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.Search" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.localclient.Search">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">openghg.localclient.</span></span><span class="sig-name descname"><span class="pre">Search</span></span><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.Search" title="Permalink to this definition">¶</a></dt>
 <dd><p>Used to search and download data from the object store</p>
 <dl class="py method">
-<dt id="openghg.localclient.Search.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.Search.__init__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.localclient.Search.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.Search.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.localclient.Search.retrieve">
-<code class="sig-name descname"><span class="pre">retrieve</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selected_keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search.retrieve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.Search.retrieve" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.localclient.Search.retrieve">
+<span class="sig-name descname"><span class="pre">retrieve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selected_keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search.retrieve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.Search.retrieve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads the selected keys and returns a dictionary of
 xarray Datasets</p>
 <dl class="field-list simple">
@@ -368,8 +371,8 @@ xarray Datasets</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="openghg.localclient.Search.search">
-<code class="sig-name descname"><span class="pre">search</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.Search.search" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="openghg.localclient.Search.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/localclient/_search.html#Search.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.Search.search" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is just a wrapper for the search function that allows easy access through LocalClient</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -411,7 +414,7 @@ xarray Datasets</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Apr 30, 2021.
+        Last updated on May 11, 2021.
       </span>
 
     </p>
