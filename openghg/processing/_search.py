@@ -33,6 +33,7 @@ def search(**kwargs) -> Dict:
     """
     from collections import defaultdict, namedtuple
     from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions
+    from openghg.dataobjects import SearchResults
     from openghg.util import (
         timestamp_now,
         timestamp_epoch,
@@ -170,13 +171,8 @@ def search(**kwargs) -> Dict:
                 # Get the datasource as it's already in the dictionary
                 # we created earlier
                 datasource = matching_sources[uuid]
-
                 metadata = datasource.metadata()
-
                 inlet = metadata["inlet"]
-                network = metadata["network"]
-                instrument = metadata["instrument"]
-                sampling_period = metadata["sampling_period"]
                 # Get the keys that are in this daterange
                 keys = datasource.keys_in_daterange_str(daterange=daterange)
 
@@ -224,13 +220,17 @@ def search(**kwargs) -> Dict:
                 # Find the closest ranked inlet by date
                 chosen_inlet = inlet_dateranges[closest_dr]
 
+                inlet_metadata = data_keys[site][sp]["metadata"][chosen_inlet]
+                inlet_instrument = inlet_metadata["instrument"]
+                inlet_sampling_period = inlet_metadata["sampling_period"]
+
+                # Then we want to retrieve the correct metadata for those inlets
                 results = search(
                     site=site,
                     species=sp,
                     inlet=chosen_inlet,
-                    instrument=instrument,
-                    network=network,
-                    sampling_period=sampling_period,
+                    instrument=inlet_instrument,
+                    sampling_period=inlet_sampling_period,
                     start_date=start,
                     end_date=end,
                 )
@@ -240,11 +240,16 @@ def search(**kwargs) -> Dict:
 
                 # There can only be one key here
                 key_uuid = next(iter(results))
-                data_keys = results[key_uuid]["keys"]
+                inlet_data_keys = results[key_uuid]["keys"]
 
-                data_keys[site][sp].extend(data_keys)
+                data_keys[site][sp]["keys"].extend(inlet_data_keys)
 
-    return data_keys
+            # Remove any duplicate keys
+            data_keys[site][sp]["keys"] = list(set(data_keys[site][sp]["keys"]))
+
+    dict_data_keys = data_keys.to_dict()
+
+    return SearchResults(results=dict_data_keys)
 
 
 # def search_footprints(

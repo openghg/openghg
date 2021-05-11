@@ -256,7 +256,7 @@ class CRDS:
         metadata = {}
         metadata["site"] = site
         metadata["instrument"] = instrument
-        metadata["sampling_period"] = sampling_period
+        metadata["sampling_period"] = str(sampling_period)
         metadata["inlet"] = inlet
         metadata["port"] = port
         metadata["type"] = type_meas
