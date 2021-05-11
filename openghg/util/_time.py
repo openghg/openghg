@@ -162,9 +162,13 @@ def create_daterange_str(start, end) -> str:
     Returns:
         str: Daterange string
     """
-    daterange = create_daterange(start=start, end=end)
+    start = create_aligned_timestamp(start)
+    end = create_aligned_timestamp(end)
 
-    return daterange_to_str(daterange)
+    start = str(start).replace(" ", "-")
+    end = str(end).replace(" ", "-")
+
+    return "_".join((start, end))
 
 
 def daterange_from_str(daterange_str: str, freq: Optional[str] = "D") -> DatetimeIndex:
