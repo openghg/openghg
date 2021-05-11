@@ -17,7 +17,7 @@ def single_site_footprint(
     domain: str,
     start_date: Union[str, Timestamp],
     end_date: Union[str, Timestamp],
-    resample_to: Optional[str] = "obs",
+    resample_to: Optional[str] = "coarsest",
     site_modifier: Optional[str] = None,
     platform: Optional[str] = None,
     instrument: Optional[str] = None,
@@ -51,7 +51,7 @@ def single_site_footprint(
     end_date = timestamp_tzaware(end_date)
 
     resample_to = resample_to.lower()
-    resample_choices = ("obs", "footprint", "coarsen")
+    resample_choices = ("obs", "footprint", "coarsest")
     if resample_to not in resample_choices:
         raise ValueError(f"Invalid resample choice {resample_to} past, please select from one of {resample_choices}")
 
@@ -117,7 +117,7 @@ def footprints_data_merge(
     domain: str,
     start_date: Union[str, Timestamp],
     end_date: Union[str, Timestamp],
-    resample_to: Optional[str] = "obs",
+    resample_to: Optional[str] = "coarsest",
     site_modifier: Optional[str] = None,
     platform: Optional[str] = None,
     instrument: Optional[str] = None,
@@ -274,25 +274,30 @@ def align_datasets(
 
     if platform is not None:
         platform = platform.lower()
-        if platform in ("satellite", "flask"):
+        if platform in ("satellite"):#, "flask"):
             return obs_data, footprint_data
 
-    # Get the frequency / period of measurements in time
-    # obs_data_period_ns = np.diff(obs_data.time.data).min().astype("int64")
-    # footprint_data_period_ns = np.diff(footprint_data.time.data).min().astype("int64")
+    # Get the period of measurements in time
+    obs_attributes = obs_data.attrs
+    if "averaged_period" in obs_attributes:
+        obs_data_period_s = obs_attributes["averaged_period"]
+    elif "sampling_period" in obs_attributes:
+        obs_data_period_s = obs_attributes["sampling_period"]
+    else:
+        # Attempt to derive sampling period from frequency of data
+        obs_data_period_s = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1])/1e9).astype(int64)
+        
+        obs_data_period_s_min = (np.diff(obs_data.time.data).min()/1e9)
+        obs_data_period_s_max = (np.diff(obs_data.time.data).max()/1e9)
+        
+        # Check if the periods differ by more than 1 second
+        if np.isclose(obs_data_period_s_min, obs_data_period_s_max, 1):
+            raise ValueError("Sample period can be not be derived from observations")
+   
+    obs_data_timeperiod = Timedelta(seconds=obs_data_period_s)
 
-    # # Check if the periods differ
-    # if obs_data_period_ns != np.diff(obs_data.time.data).max().astype("int64"):
-    #     raise ValueError("Frequency of observations data not fixed")
-
-    # TODO - RT to check - will these time periods change or can we just do the above?
-    # This gets the median period / frequency between measurements in both Datasets
-
-    # This gives us the period in ns
-    obs_data_period_ns = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]).astype("int64"))
+    # Derive the footprint period from the frequency of the data
     footprint_data_period_ns = np.nanmedian((footprint_data.time.data[1:] - footprint_data.time.data[0:-1]).astype("int64"))
-
-    obs_data_timeperiod = Timedelta(obs_data_period_ns, unit="ns")
     footprint_data_timeperiod = Timedelta(footprint_data_period_ns, unit="ns")
 
     # Here we want timezone naive Timestamps
@@ -313,7 +318,9 @@ def align_datasets(
     footprint_data = footprint_data.sel(time=slice(start_slice, end_slice))
 
     # Only non satellite datasets with different periods need to be resampled
-    if not np.isclose(obs_data_period_ns, footprint_data_period_ns):
+    timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
+    tolerance = 1e-9 # seconds
+    if timeperiod_diff_s >= tolerance:
         base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
 
         if (obs_data_timeperiod >= footprint_data_timeperiod) or resample_to == "obs":
