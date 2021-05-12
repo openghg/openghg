@@ -2,12 +2,13 @@
     the object store
 
 """
+from openghg.dataobjects import SearchResults
 from typing import Dict
 
 __all__ = ["search"]
 
 
-def search(**kwargs) -> Dict:
+def search(**kwargs) -> SearchResults:
     # site: Union[str, List],
     # species: Optional[Union[str, List]] = None,
     # inlet: Optional[Union[str, List]] = None,
@@ -31,7 +32,7 @@ def search(**kwargs) -> Dict:
     Returns:
         dict: List of keys of Datasources matching the search parameters
     """
-    from collections import defaultdict, namedtuple
+    from collections import defaultdict
     from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions
     from openghg.dataobjects import SearchResults
     from openghg.util import (
@@ -40,7 +41,6 @@ def search(**kwargs) -> Dict:
         timestamp_tzaware,
         clean_string,
         daterange_from_str,
-        split_daterange_str,
         closest_daterange,
         create_daterange_str,
     )
@@ -106,13 +106,18 @@ def search(**kwargs) -> Dict:
     # If we have the site, inlet and instrument then just return the data
     # TODO - should instrument be added here
     if {"site", "inlet", "species"} <= search_kwargs.keys():
-        specific_sources = defaultdict(dict)
-        for uid, datasource in matching_sources.items():
+        specific_sources = aDict()
+        for datasource in matching_sources.values():
             data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-            specific_sources[uid]["keys"] = data_keys
-            specific_sources[uid]["metadata"] = datasource.metadata()
+            metadata = datasource.metadata()
 
-        return specific_sources
+            site = metadata["site"]
+            species = metadata["species"]
+
+            specific_sources[site][species]["keys"] = data_keys
+            specific_sources[site][species]["metadata"] = metadata
+
+        return SearchResults(results=specific_sources.to_dict())
 
     highest_ranked = aDict()
 
@@ -242,8 +247,7 @@ def search(**kwargs) -> Dict:
                     continue
 
                 # There can only be one key here
-                key_uuid = next(iter(results))
-                inlet_data_keys = results[key_uuid]["keys"]
+                inlet_data_keys = results.keys(site=site, species=sp)
 
                 data_keys[site][sp]["keys"].extend(inlet_data_keys)
 

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 from openghg.dataobjects import ObsData
 from openghg.processing import recombine_datasets
 from openghg.util import clean_string
@@ -17,7 +17,60 @@ class SearchResults():
     results: Dict
 
     def __str__(self):
-        return f"Results: {self.results}"
+        print_strs = []
+        for site, species in self.results.items():
+            print_strs.append(f"Site: {site.upper()} \nSpecies found: {', '.join(self.results[site])}\n\n")
+
+        return "\n".join(print_strs)
+
+    def __bool__(self):
+        return bool(self.results)
+
+    def __len__(self):
+        return len(self.results)
+
+    def __iter__(self):
+        yield from self.results
+
+    def keys(self, site: str, species: str) -> List:
+        """ Return the data keys for the specified site and species.
+        This is intended mainly for use in the search function when filling 
+        gaps of unranked dateranges.
+
+            Args:
+                site: Three letter site code
+                species: Species name
+            Returns:
+                list: List of keys
+        """
+        site = site.lower()
+        species = species.lower()
+
+        try:
+            keys = self.results[site][species]["keys"]
+        except KeyError:
+            raise ValueError(f"No keys found for {species} at {site}")
+
+        return keys
+
+    def metadata(self, site: str, species: str) -> List:
+        """ Return the metadata for the specified site and species
+
+            Args:
+                site: Three letter site code
+                species: Species name
+            Returns:
+                list: List of keys
+        """
+        site = site.lower()
+        species = species.lower()
+
+        try:
+            metadata = self.results[site][species]["metadata"]
+        except KeyError:
+            raise KeyError(f"No metadata found for {species} at {site}")
+
+        return metadata
 
     def retrieve(self, site: Optional[str] = None, species: Optional[str] = None) -> Union[Dict, ObsData]:
         """ Retrieve some or all of the data found in the object store.

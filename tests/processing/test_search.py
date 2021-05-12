@@ -30,10 +30,15 @@ def data_read():
     ObsSurface.read_file(filepath=(data_filepath, prec_filepath), site="CGO", data_type="GCWERKS", network="AGAGE", inlet=None)
 
 
-def test_keyword_search():
-    results = search(species="co2", site=["bsd"], inlet="248m", instrument="picarro")
+def test_specific_keyword_search():
+    site = "bsd"
+    species = "co2"
+    inlet = "248m"
+    instrument = "picarro"
 
-    key = next(iter(results))
+    results = search(species=species, site=site, inlet=inlet, instrument=instrument)
+
+    metadata = results.metadata(site=site, species=species)
 
     expected_metadata = {
         "site": "bsd",
@@ -48,17 +53,13 @@ def test_keyword_search():
         "data_type": "timeseries",
     }
 
-    metadata = results[key]["metadata"]
-
     assert metadata == expected_metadata
 
 
-def test_search_gc():
+def test_specific_search_gc():
     results = search(species=["NF3"], site="CGO", inlet="70m")
 
-    key = next(iter(results))
-
-    metadata = results[key]["metadata"]
+    metadata = results.metadata(site="cgo", species="nf3")
 
     expected_metadata = {
         "site": "cgo",
@@ -75,34 +76,32 @@ def test_search_gc():
     assert metadata == expected_metadata
 
 
-def test_location_search():
+def test_unranked_location_search():
     species = ["co2", "ch4"]
-    locations = ["hfd", "tac", "bsd"]
+    sites = ["hfd", "tac", "bsd"]
 
-    results = search(species=species, locations=locations, find_all=False)
+    results = search(species=species, site=sites, inlet="100m")
 
-    assert len(results) == 8
+    assert len(results) == 2
 
-    expected_results = [
-        ("bsd", "ch4", "248m"),
-        ("bsd", "co2", "248m"),
-        ("hfd", "ch4", "100m"),
-        ("hfd", "ch4", "50m"),
-        ("hfd", "co2", "100m"),
-        ("hfd", "co2", "50m"),
-        ("tac", "ch4", "100m"),
-        ("tac", "co2", "100m"),
-    ]
+    tac_data = results.results["tac"]
+    hfd_data = results.results["hfd"]
 
-    expected_results.sort()
+    assert sorted(list(tac_data.keys())) == ["ch4", "co2"]
+    assert sorted(list(hfd_data.keys())) == ["ch4", "co2"]
 
-    found_results = []
-    for k in results:
-        found_results.append((results[k]["metadata"]["site"], results[k]["metadata"]["species"], results[k]["metadata"]["inlet"]))
+    tac_co2_keys = results.keys(site="tac", species="co2")
+    tac_ch4_keys = results.keys(site="tac", species="co2")
 
-    found_results.sort()
+    assert len(tac_co2_keys) == 4
+    assert len(tac_ch4_keys) == 4
 
-    assert expected_results == found_results
+    with pytest.raises(ValueError):
+        results.keys(site="bsd", species="co2")
+
+    with pytest.raises(ValueError):
+        results.keys(site="bsd", species="ch4")
+
 
 
 def test_search_datetimes():
