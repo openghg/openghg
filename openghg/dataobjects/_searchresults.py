@@ -32,6 +32,14 @@ class SearchResults():
     def __iter__(self):
         yield from self.results
 
+    def raw(self) -> Dict:
+        """ Returns the raw results data
+
+            Returns:
+                dict: Dictionary of results returned from search function
+        """
+        return self.results
+
     def keys(self, site: str, species: str) -> List:
         """ Return the data keys for the specified site and species.
         This is intended mainly for use in the search function when filling 
