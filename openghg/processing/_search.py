@@ -143,6 +143,8 @@ def search(**kwargs) -> SearchResults:
         # Adding network in here doesn't feel quite right but I can't think of a cleaner
         # way currently
         match = {"uuid": uid, "daterange": rank_daterange}
+        # matches = []
+
 
         # Need to ensure we get all the dates covered
         if species in highest_ranked[site]:
@@ -165,6 +167,9 @@ def search(**kwargs) -> SearchResults:
                             " Please refine your search to include a specific site, species and inlet."))
     # Now we have the highest ranked data the dateranges there are ranks for
     # we want to fill in the gaps with (currently) the highest inlet from that site
+
+    print("highest_ranked_data ", highest_ranked[site][species])
+    
 
     # We just want some rank_metadata to go along with the final data scheme
     # Can key a key of date - inlet

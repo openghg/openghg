@@ -162,6 +162,11 @@ class BaseModule:
 
         if uuid not in self._rank_data:
             return {}
+        
+        raise NotImplementedError()
+
+        # need to modify this to use daterange as a key so a datasource can be ranked and then drop rank and then be ranked again
+        # otherwise we can only return a single rank over a large daterange
 
         search_daterange = create_daterange_str(start=start_date, end=end_date)
 
@@ -193,7 +198,7 @@ class BaseModule:
         Returns:
             None
         """
-        from openghg.util import combine_dateranges, date_overlap
+        from openghg.util import combine_dateranges, date_overlap, valid_daterange
 
         if not 1 <= int(rank) <= 10:
             raise TypeError("Rank can only take values 1 to 10 (for unranked). Where 1 is the highest rank.")
@@ -207,6 +212,9 @@ class BaseModule:
             rank_data = self._rank_data[uuid]
             # Check this source isn't ranked differently for the same dates
             for d in date_range:
+                if not valid_daterange(d):
+                    raise ValueError("Invalid daterange, please ensure start and end dates are correct.")
+
                 # Check we don't have any overlapping dateranges for other ranks
                 for existing_rank, existing_daterange in rank_data.items():
                     for e in existing_daterange:
@@ -219,20 +227,14 @@ class BaseModule:
                                 )
 
             # Combine the dateranges
-            date_range.extend(self._rank_data[uuid][rank])
+            self._rank_data[uuid][rank].extend(date_range)
 
             if overlap:
-                all_dateranges = combine_dateranges(date_range)
+                self._rank_data[uuid][rank] = combine_dateranges(date_range)
         else:
-            all_dateranges = date_range
+            self._rank_data[uuid][rank] = date_range
 
-        self._rank_data[uuid][rank] = all_dateranges
         self.save()
-
-        # Store the rank within the Datasource
-        # datasource = Datasource.load(uuid=uuid, shallow=True)
-        # datasource.set_rank(rank=rank, daterange=combined_dateranges)
-        # datasource.save()
 
     def clear_datasources(self: T) -> None:
         """Remove all Datasources from the object

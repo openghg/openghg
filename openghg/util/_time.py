@@ -14,6 +14,7 @@ __all__ = [
     "combine_dateranges",
     "split_daterange_str",
     "closest_daterange",
+    "valid_daterange",
 ]
 
 
@@ -295,6 +296,24 @@ def split_daterange_str(daterange_str: str) -> Tuple[Timestamp, Timestamp]:
     end = Timestamp(split[1], tz="UTC")
 
     return start, end
+
+
+def valid_daterange(daterange: str) -> bool:
+    """Check if the passed daterange is valid
+
+    Args:
+        daterange: Daterange string
+    Returns:
+        bool: True if valid
+    """
+    from openghg.util import split_daterange_str
+
+    start, end = split_daterange_str(daterange)
+
+    if start >= end:
+        return False
+
+    return True
 
 
 def closest_daterange(to_compare: str, dateranges: Union[str, List]) -> str:
