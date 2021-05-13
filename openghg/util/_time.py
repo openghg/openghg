@@ -222,7 +222,7 @@ def combine_dateranges(dateranges: List[str]) -> List:
     """
     from itertools import tee
     from collections import defaultdict
-    from openghg.util import daterange_from_str, daterange_to_str
+    from openghg.util import daterange_from_str, daterange_to_str, pairwise
 
     # Ensure there are no duplciates
     dateranges = list(set(dateranges))
@@ -234,11 +234,6 @@ def combine_dateranges(dateranges: List[str]) -> List:
     dateranges.sort()
 
     daterange_objects = [daterange_from_str(x) for x in dateranges]
-
-    def pairwise(iterable):
-        a, b = tee(iterable)
-        next(b, None)
-        return zip(a, b)
 
     # We want lists of dateranges to combine
     groups = defaultdict(list)
@@ -363,3 +358,75 @@ def closest_daterange(to_compare: str, dateranges: Union[str, List]) -> str:
         return closest_daterange_start
     else:
         return closest_daterange_end
+
+
+def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, dateranges: List) -> List[str]:
+    """ Given a start and end date and a list of dateranges find the gaps.
+
+        For example given a list of dateranges
+        
+        example = ['2014-09-02_2014-11-01', '2016-09-02_2018-11-01']
+
+        start = timestamp_tzaware("2012-01-01")
+        end = timestamp_tzaware("2019-09-01")
+
+        gaps = find_daterange_gaps(start, end, example)
+
+        gaps == ['2012-01-01-00:00:00+00:00_2014-09-01-00:00:00+00:00',
+                '2014-11-02-00:00:00+00:00_2016-09-01-00:00:00+00:00',
+                '2018-11-02-00:00:00+00:00_2019-09-01-00:00:00+00:00']
+
+        Args:
+            start_search: Start timestamp
+            end_search: End timestamp
+            dateranges: List of daterange strings
+        Returns:
+            list: List of dateranges
+    """
+    from pandas import Timedelta
+    from openghg.util import pairwise
+
+    sorted_dateranges = sorted(dateranges)
+
+    # The difference between the start and end of the successived dateranges
+    range_gap = "1day"
+    # First find the gap between the start and the end
+    start_first, end_first = split_daterange_str(sorted_dateranges[0])
+
+    gaps = []
+    if start_search < start_first:
+        gap_start = start_search
+        gap_end = start_first - Timedelta(range_gap)
+        gap = create_daterange_str(start=gap_start, end=gap_end)
+        gaps.append(gap)
+
+    # Then find the gap between the end
+    start_last, end_last = split_daterange_str(sorted_dateranges[-1])
+
+    if end_search > end_last:
+        gap_end = end_search
+        gap_start = end_last + Timedelta(range_gap)
+        gap = create_daterange_str(start=gap_start, end=gap_end)
+        gaps.append(gap)
+
+    for a, b in pairwise(sorted_dateranges):
+        start_a, end_a = split_daterange_str(a)
+        start_b, end_b = split_daterange_str(b)
+
+        # Ignore any that are outside our search window
+        if end_a < start_search or start_a > end_search:
+            continue
+
+        diff = start_b - end_a
+        if diff > Timedelta(range_gap) and diff.value > 0:
+            gap_start = end_a + Timedelta(range_gap)
+            gap_end = start_b - Timedelta(range_gap)
+
+            gap = create_daterange_str(start=gap_start, end=gap_end)
+            gaps.append(gap)
+        else:
+            pass
+
+    gaps.sort()
+
+    return gaps

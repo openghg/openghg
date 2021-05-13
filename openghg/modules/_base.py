@@ -159,25 +159,24 @@ class BaseModule:
                 dict: Dictionary of rank and daterange covered by that rank
         """
         from openghg.util import date_overlap, create_daterange_str
+        from collections import defaultdict
 
         if uuid not in self._rank_data:
             return {}
-        
-        raise NotImplementedError()
-
-        # need to modify this to use daterange as a key so a datasource can be ranked and then drop rank and then be ranked again
-        # otherwise we can only return a single rank over a large daterange
 
         search_daterange = create_daterange_str(start=start_date, end=end_date)
 
         rank_data = self._rank_data[uuid]
+
+        ranked = defaultdict(list)
         # Check if this Datasource is ranked for the dates passed
         for rank, dateranges in rank_data.items():
             for stored_daterange in dateranges:
                 if date_overlap(daterange_a=search_daterange, daterange_b=stored_daterange):
-                    return {rank: stored_daterange}
+                    # return {rank: stored_daterange}
+                    ranked[rank].append(stored_daterange)
 
-        return {}
+        return ranked
 
     def set_rank(
         self: T, uuid: str, rank: Union[int, str], date_range: Union[str, List[str]], overwrite: Optional[bool] = False

@@ -47,6 +47,7 @@ def search(**kwargs) -> SearchResults:
     from pandas import date_range as pd_date_range
     from pandas import Timedelta as pd_Timedelta
     from addict import Dict as aDict
+    from itertools import chain as iter_chain
 
     # Do this here otherwise we have to produce them for every datasource
     start_date = kwargs.get("start_date")
@@ -137,14 +138,11 @@ def search(**kwargs) -> SearchResults:
         # There will only be a single rank key
         rank_value = next(iter(rank_data))
         # Get the daterange this rank covers
-        rank_daterange = rank_data[rank_value]
+        rank_dateranges = rank_data[rank_value]
 
-        # If we have a high rank we'll store this below
-        # Adding network in here doesn't feel quite right but I can't think of a cleaner
-        # way currently
-        match = {"uuid": uid, "daterange": rank_daterange}
-        # matches = []
-
+        # Each match we store gives us the information we need
+        # to retrieve the data
+        match = {"uuid": uid, "dateranges": rank_dateranges}
 
         # Need to ensure we get all the dates covered
         if species in highest_ranked[site]:
@@ -170,7 +168,6 @@ def search(**kwargs) -> SearchResults:
 
     print("highest_ranked_data ", highest_ranked[site][species])
     
-
     # We just want some rank_metadata to go along with the final data scheme
     # Can key a key of date - inlet
     data_keys = aDict()
@@ -180,18 +177,22 @@ def search(**kwargs) -> SearchResults:
 
             for match_data in data["matching"]:
                 uuid = match_data["uuid"]
-                daterange = match_data["daterange"]
+                dateranges = match_data["dateranges"]
                 # Get the datasource as it's already in the dictionary
                 # we created earlier
                 datasource = matching_sources[uuid]
                 metadata = datasource.metadata()
                 inlet = metadata["inlet"]
-                # Get the keys that are in this daterange
-                keys = datasource.keys_in_daterange_str(daterange=daterange)
 
-                # We'll add this to the metadata in the search results we
-                # return at the end
-                data_keys[site][sp]["rank_metadata"][daterange] = inlet
+                keys = []
+                for dr in dateranges:
+                    date_keys = datasource.keys_in_daterange_str(daterange=dr)
+
+                    if date_keys:
+                        keys.extend(date_keys)
+                        # We'll add this to the metadata in the search results we return at the end
+                        data_keys[site][sp]["rank_metadata"][dr] = inlet
+
                 # data_keys[site][sp]["metadata"][inlet] = inlet
                 data_keys[site][sp]["keys"].extend(keys)
                 data_keys[site][sp]["metadata"][inlet] = metadata
@@ -199,7 +200,14 @@ def search(**kwargs) -> SearchResults:
             # We now need to retrieve data for the dateranges for which we don't have ranking data
             # To do this find the gaps in the daterange over which the user has requested data
             # and the dates for which we have ranking information
-            dateranges = [daterange_from_str(m["daterange"]) for m in data["matching"]]
+            # dateranges = []
+
+            for m in data["matching"]:
+                dateranges.extend([daterange_from_str(d) for d in m["dateranges"]])
+
+            # daterange_strs = list(iter_chain.from_iterable([m["dateranges"] for m in data["matching"]]))
+            # dateranges = [daterange_from_str(d) for d in daterange_strs]
+
             combined = dateranges[0].union_many(dateranges[1:])
             search_daterange = pd_date_range(start=start_date, end=end_date)
 
@@ -210,7 +218,6 @@ def search(**kwargs) -> SearchResults:
             if diff.empty:
                 continue
 
-            # Here we 
             date_series = diff.to_series()
             # Find gaps between dates that are greater than a day, then create groups of
             # these records

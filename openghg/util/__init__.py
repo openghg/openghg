@@ -13,6 +13,7 @@ from ._util import (
     is_number,
     to_lowercase,
     to_defaultdict,
+    pairwise,
 )
 
 from ._hashing import hash_string, hash_file
