@@ -15,6 +15,7 @@ __all__ = [
     "split_daterange_str",
     "closest_daterange",
     "valid_daterange",
+    "find_daterange_gaps",
 ]
 
 
@@ -364,7 +365,7 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
     """ Given a start and end date and a list of dateranges find the gaps.
 
         For example given a list of dateranges
-        
+
         example = ['2014-09-02_2014-11-01', '2016-09-02_2018-11-01']
 
         start = timestamp_tzaware("2012-01-01")

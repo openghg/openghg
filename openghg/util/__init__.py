@@ -35,4 +35,5 @@ from ._time import (
     split_daterange_str,
     closest_daterange,
     valid_daterange,
+    find_daterange_gaps,
 )

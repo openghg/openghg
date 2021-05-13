@@ -125,6 +125,15 @@ class SearchResults():
 
             return results
 
+        results = {}
+
+        for a_site, species in self.results.items():
+            for sp in species:
+                key = "_".join((a_site, sp))
+                results[key] = self._create_obsdata(site=a_site, species=sp)
+
+        return results
+
     def _create_obsdata(self, site: str, species: str) -> ObsData:
         """ Creates an ObsData object for return to the user
 

@@ -40,12 +40,11 @@ def search(**kwargs) -> SearchResults:
         timestamp_epoch,
         timestamp_tzaware,
         clean_string,
-        daterange_from_str,
         closest_daterange,
         create_daterange_str,
+        find_daterange_gaps,
+        split_daterange_str,
     )
-    from pandas import date_range as pd_date_range
-    from pandas import Timedelta as pd_Timedelta
     from addict import Dict as aDict
     from itertools import chain as iter_chain
 
@@ -87,22 +86,8 @@ def search(**kwargs) -> SearchResults:
 
     # Shallow load the Datasources so we can search their metadata
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
-
-    # Old search code
-    # matching_sources = defaultdict(dict)
-    # for datasource in datasources:
-    #     if datasource.search_metadata(**search_kwargs):
-    #         uid = datasource.uuid()
-    #         data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-    #         matching_sources[uid]["keys"] = data_keys
-    #         matching_sources[uid]["metadata"] = datasource.metadata()
-
-    # return matching_sources
-
-    matching_sources = defaultdict(dict)
-    for datasource in datasources:
-        if datasource.search_metadata(**search_kwargs):
-            matching_sources[datasource.uuid()] = datasource
+    # Find the Datasources that contain matching metadata
+    matching_sources = {d.uuid(): d for d in datasources if d.search_metadata(**search_kwargs)}
 
     # If we have the site, inlet and instrument then just return the data
     # TODO - should instrument be added here
@@ -161,13 +146,15 @@ def search(**kwargs) -> SearchResults:
             highest_ranked[site][species]["matching"] = [match]
 
     if not highest_ranked:
-        raise ValueError(("No ranking data set for the given search parameters."
-                            " Please refine your search to include a specific site, species and inlet."))
+        raise ValueError(
+            (
+                "No ranking data set for the given search parameters."
+                " Please refine your search to include a specific site, species and inlet."
+            )
+        )
     # Now we have the highest ranked data the dateranges there are ranks for
     # we want to fill in the gaps with (currently) the highest inlet from that site
 
-    print("highest_ranked_data ", highest_ranked[site][species])
-    
     # We just want some rank_metadata to go along with the final data scheme
     # Can key a key of date - inlet
     data_keys = aDict()
@@ -177,7 +164,7 @@ def search(**kwargs) -> SearchResults:
 
             for match_data in data["matching"]:
                 uuid = match_data["uuid"]
-                dateranges = match_data["dateranges"]
+                match_dateranges = match_data["dateranges"]
                 # Get the datasource as it's already in the dictionary
                 # we created earlier
                 datasource = matching_sources[uuid]
@@ -185,7 +172,7 @@ def search(**kwargs) -> SearchResults:
                 inlet = metadata["inlet"]
 
                 keys = []
-                for dr in dateranges:
+                for dr in match_dateranges:
                     date_keys = datasource.keys_in_daterange_str(daterange=dr)
 
                     if date_keys:
@@ -200,43 +187,22 @@ def search(**kwargs) -> SearchResults:
             # We now need to retrieve data for the dateranges for which we don't have ranking data
             # To do this find the gaps in the daterange over which the user has requested data
             # and the dates for which we have ranking information
-            # dateranges = []
 
-            for m in data["matching"]:
-                dateranges.extend([daterange_from_str(d) for d in m["dateranges"]])
-
-            # daterange_strs = list(iter_chain.from_iterable([m["dateranges"] for m in data["matching"]]))
-            # dateranges = [daterange_from_str(d) for d in daterange_strs]
-
-            combined = dateranges[0].union_many(dateranges[1:])
-            search_daterange = pd_date_range(start=start_date, end=end_date)
-
-            # Dates that are in the search daterange but aren't covered by the rank dates
-            diff = search_daterange.difference(combined)
-
-            # If we don't have any missing dates just continue
-            if diff.empty:
-                continue
-
-            date_series = diff.to_series()
-            # Find gaps between dates that are greater than a day, then create groups of
-            # these records
-            grp = date_series.diff().ne(pd_Timedelta(days=1)).cumsum()
-            # Group the gaps and get the min and max values
-            gaps = date_series.groupby(grp).agg(["min", "max"])
-            # These tuples represent the start and end Timestamps of the gaps
-            # which aren't covered by the ranked data
-            timestamps = gaps[["min", "max"]].apply(tuple, axis=1).tolist()
-
-            # Now we need to get the data for the unranked time periods
+            # Get the dateranges that are covered by ranking information
+            daterange_strs = list(iter_chain.from_iterable([m["dateranges"] for m in data["matching"]]))
+            # Find the gaps in the ranking coverage
+            gap_dateranges = find_daterange_gaps(start_search=start_date, end_search=end_date, dateranges=daterange_strs)
 
             # We want the dateranges and inlets for those dateranges
             inlet_dateranges = data_keys[site][sp]["rank_metadata"]
-            daterange_list = list(data_keys[site][sp]["rank_metadata"].keys())
-            for start, end in timestamps:
+            # These are the dateranges for which we have ranking information for this site and species
+            ranked_dateranges = list(data_keys[site][sp]["rank_metadata"].keys())
+
+            for gap_daterange in gap_dateranges:
                 # We want to select the inlet that's ranked for dates closest to the ones we have here
-                daterange_str = create_daterange_str(start=start, end=end)
-                closest_dr = closest_daterange(to_compare=daterange_str, dateranges=daterange_list)
+                closest_dr = closest_daterange(to_compare=gap_daterange, dateranges=ranked_dateranges)
+
+                gap_start, gap_end = split_daterange_str(gap_daterange)
                 # Find the closest ranked inlet by date
                 chosen_inlet = inlet_dateranges[closest_dr]
 
@@ -251,16 +217,15 @@ def search(**kwargs) -> SearchResults:
                     inlet=chosen_inlet,
                     instrument=inlet_instrument,
                     sampling_period=inlet_sampling_period,
-                    start_date=start,
-                    end_date=end,
+                    start_date=gap_start,
+                    end_date=gap_end,
                 )
 
                 if not results:
                     continue
 
-                # There can only be one key here
+                # Retrieve the data keys
                 inlet_data_keys = results.keys(site=site, species=sp)
-
                 data_keys[site][sp]["keys"].extend(inlet_data_keys)
 
             # Remove any duplicate keys
