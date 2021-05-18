@@ -36,8 +36,6 @@ class Datasource:
         # Currently unused
         self._latest_version = None
         self._versions = {}
-        # A rank of 10 is unset, 1 is a primary source, 2 secondary
-        self._rank = defaultdict(list)
 
     def start_date(self) -> Timestamp:
         """Returns the starting datetime for the data in this Datasource
@@ -353,7 +351,6 @@ class Datasource:
         data["data_keys"] = self._data_keys
         data["data_type"] = self._data_type
         data["latest_version"] = self._latest_version
-        data["rank"] = self._rank
 
         return data
 
@@ -508,7 +505,6 @@ class Datasource:
         d._data = {}
         d._data_type = data["data_type"]
         d._latest_version = data["latest_version"]
-        d._rank = defaultdict(list, data["rank"])
 
         if d._stored and not shallow:
             for date_key in d._data_keys["latest"]["keys"]:
@@ -840,7 +836,6 @@ class Datasource:
 
         in_date = []
         for key in keys:
-
             end_key = key.split("/")[-1]
             dates = end_key.split("_")
 
@@ -904,84 +899,6 @@ class Datasource:
             dict: Metadata of Datasource
         """
         return self._metadata
-
-    def highest_rank(self, start_date: Optional[Timestamp] = None, end_date: Optional[Timestamp] = None) -> int:
-        """ Get the highest rank this Datasource has for the passed dates. If this Datasource is not ranked
-        a value of 10 is returned.
-
-        Args:
-            start_date: Start date
-            end_date: End date
-        Returns:
-            int: Rank value or 10 if unranked.
-        """
-        ranking = self.rank(start_date=start_date, end_date=end_date)
-
-        if not ranking:
-            return 10
-
-        return int(min(ranking.keys()))
-
-    def rank(self, start_date: Optional[Timestamp] = None, end_date: Optional[Timestamp] = None) -> Dict:
-        """Get the ranks of data contained within Datasource for the passed daterange.
-        If no rank has been set an empty dictionary is returned.
-
-        If no start or end date is passed all ranking data will be returned.
-
-        Args:
-            start_date: Start date
-            end_date: End date
-        Returns:
-            dict: Dictionary of rank: daterange
-        """
-        from collections import defaultdict
-        from openghg.util import daterange_from_str, daterange_to_str, create_daterange
-
-        # If we don't have a rank return an empty dictionary
-        if not self._rank:
-            return {}
-
-        if start_date is None or end_date is None:
-            return self._rank
-
-        search_daterange = create_daterange(start=start_date, end=end_date)
-
-        results = defaultdict(list)
-
-        for rank, dateranges in self._rank.items():
-            for daterange_str in dateranges:
-                daterange = daterange_from_str(daterange_str)
-
-                intersection = search_daterange.intersection(daterange)
-                if len(intersection) > 0:
-                    results[rank].append(daterange_to_str(intersection))
-
-        return results
-
-    def set_rank(self, rank: Union[int, str], daterange: Union[str, List]) -> None:
-        """Set the rank of this Datsource. This allows users to select
-        the best data for a specific species at a site. By default
-        a Datasource is unranked with a value of 10. The highest rank is 1 and the lowest 9.
-
-        TODO - add a check to ensure multiple ranks aren't set for the same daterange
-
-        Args:
-            rank: Rank number between 1 (highest rank) and 10 (unranked).
-            daterange: List of daterange strings such as 2019-01-01T00:00:00_2019-12-31T00:00:00
-        Returns:
-            None
-        """
-        if not 1 <= int(rank) <= 10:
-            raise ValueError("Rank can only take values 1 to 10 (for unranked). Where 1 is the highest rank.")
-
-        if not isinstance(daterange, list):
-            daterange = [daterange]
-
-        try:
-            self._rank[rank].extend(daterange)
-            # self._rank[rank] = combine_dateranges(self._rank[rank])
-        except KeyError:
-            self._rank[rank] = daterange
 
     def data_type(self) -> str:
         """Returns the data type held by this Datasource

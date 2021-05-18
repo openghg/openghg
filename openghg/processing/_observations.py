@@ -65,17 +65,8 @@ def get_obs_surface(
     # if len(obs_results) > 1:
     #     raise ValueError("More than one search result found for the passed argument. Please be more specific with your search terms.")
 
-    # TODO - what if we want to return observations from multiple heights?
-    try:
-        site_key = list(obs_results.keys())[0]
-    except IndexError:
-        raise ValueError(f"Unable to find any measurement data for {site}")
-    
-    # TODO - update Search to return a SearchResult object that makes it easier to retrieve data
-    # GJ 2021-03-09
-    # This is clunky
-    to_retrieve = obs_results[site_key]["keys"]
-    data = recombine_datasets(keys=to_retrieve, sort=True)
+    obs_data = obs_results.retrieve(site=site, species=species, inlet=inlet)
+    data = obs_data.data
 
     # Slice the data to only cover the dates we're interested in
     data = data.loc[dict(time=slice(start_date, end_date))]

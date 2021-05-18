@@ -221,7 +221,6 @@ def combine_dateranges(dateranges: List[str]) -> List:
     Returns:
         list: List of dateranges with overlapping ranges combined
     """
-    from itertools import tee
     from collections import defaultdict
     from openghg.util import daterange_from_str, daterange_to_str, pairwise
 

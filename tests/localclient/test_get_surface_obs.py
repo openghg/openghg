@@ -54,7 +54,7 @@ def test_get_observations_few_args():
         "station_height_masl": 150.0,
         "site": "hfd",
         "instrument": "picarro",
-        "sampling_period": 60,
+        "sampling_period": "60",
         "inlet": "100m",
         "port": "10",
         "type": "air",
@@ -66,11 +66,11 @@ def test_get_observations_few_args():
 
 
 def test_get_observations_with_average():
-    result_no_average = get_obs_surface(site="hfd", species="co2")
+    result_no_average = get_obs_surface(site="hfd", species="co2", inlet="100m")
 
     data_no_average = result_no_average.data
 
-    result = get_obs_surface(site="hfd", species="co2", average="2h")
+    result = get_obs_surface(site="hfd", species="co2", average="2h", inlet="100m")
 
     data = result.data
 
@@ -80,7 +80,7 @@ def test_get_observations_with_average():
     assert data["mf"][0] == pytest.approx(414.21)
     assert data["mf"][-1] == pytest.approx(411.08)
 
-    result_with_missing = get_obs_surface(site="hfd", species="co2", average="2h", keep_missing=True)
+    result_with_missing = get_obs_surface(site="hfd", species="co2", average="2h", inlet="100m", keep_missing=True)
 
     data_missing = result_with_missing.data
 
@@ -88,7 +88,7 @@ def test_get_observations_with_average():
 
 
 def test_get_observations_datetime_selection():
-    results = get_obs_surface(site="hfd", species="co2", start_date="2001-01-01", end_date="2015-01-01")
+    results = get_obs_surface(site="hfd", species="co2", inlet="100m", start_date="2001-01-01", end_date="2015-01-01")
 
     data = results.data
 
@@ -100,7 +100,7 @@ def test_get_observations_datetime_selection():
 
 
 def test_gcwerks_retrieval():
-    results = get_obs_surface(site="CGO", species="cfc11")
+    results = get_obs_surface(site="CGO", species="cfc11", inlet="70m")
 
     data = results.data
     metadata = results.metadata
@@ -127,7 +127,7 @@ def test_gcwerks_retrieval():
         "units": "ppt",
         "scale": "SIO-05",
         "inlet": "70m",
-        "sampling_period": 1200,
+        "sampling_period": "1200",
     }
 
     assert metadata == expected_metadata

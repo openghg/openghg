@@ -3,12 +3,12 @@
 
 """
 from openghg.dataobjects import SearchResults
-from typing import Dict
+from typing import Dict, Union
 
 __all__ = ["search"]
 
 
-def search(**kwargs) -> SearchResults:
+def search(**kwargs) -> Union[Dict, SearchResults]:
     # site: Union[str, List],
     # species: Optional[Union[str, List]] = None,
     # inlet: Optional[Union[str, List]] = None,
@@ -32,7 +32,10 @@ def search(**kwargs) -> SearchResults:
     Returns:
         dict: List of keys of Datasources matching the search parameters
     """
+    from addict import Dict as aDict
     from collections import defaultdict
+    from itertools import chain as iter_chain
+
     from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions
     from openghg.dataobjects import SearchResults
     from openghg.util import (
@@ -41,12 +44,9 @@ def search(**kwargs) -> SearchResults:
         timestamp_tzaware,
         clean_string,
         closest_daterange,
-        create_daterange_str,
         find_daterange_gaps,
         split_daterange_str,
     )
-    from addict import Dict as aDict
-    from itertools import chain as iter_chain
 
     # Do this here otherwise we have to produce them for every datasource
     start_date = kwargs.get("start_date")
@@ -69,6 +69,7 @@ def search(**kwargs) -> SearchResults:
     search_kwargs = {k: clean_string(v) for k, v in kwargs.items() if v is not None}
 
     data_type = search_kwargs.get("data_type", "timeseries")
+    skip_ranking = search_kwargs.get("skip_ranking")
 
     valid_data_types = ("timeseries", "footprint", "emissions")
     if data_type not in valid_data_types:
@@ -86,24 +87,43 @@ def search(**kwargs) -> SearchResults:
 
     # Shallow load the Datasources so we can search their metadata
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+
+    # For the time being this will return a dict until we know how best to represent
+    # the footprint and emissions results in a SearchResult object
+    if data_type in {"emissions", "footprint"} :
+        sources = defaultdict(dict)
+        for datasource in datasources:
+            if datasource.search_metadata(**search_kwargs):
+                uid = datasource.uuid()
+                data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+                sources[uid]["keys"] = data_keys
+                sources[uid]["metadata"] = datasource.metadata()
+
+        return sources
+
     # Find the Datasources that contain matching metadata
     matching_sources = {d.uuid(): d for d in datasources if d.search_metadata(**search_kwargs)}
 
     # If we have the site, inlet and instrument then just return the data
     # TODO - should instrument be added here
-    if {"site", "inlet", "species"} <= search_kwargs.keys():
+    if {"site", "inlet", "species"} <= search_kwargs.keys() or skip_ranking is True:
         specific_sources = aDict()
         for datasource in matching_sources.values():
             data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+
+            if not data_keys:
+                continue
+
             metadata = datasource.metadata()
 
             site = metadata["site"]
             species = metadata["species"]
+            inlet = metadata["inlet"]
 
-            specific_sources[site][species]["keys"] = data_keys
-            specific_sources[site][species]["metadata"] = metadata
+            specific_sources[site][species][inlet]["keys"] = data_keys
+            specific_sources[site][species][inlet]["metadata"] = metadata
 
-        return SearchResults(results=specific_sources.to_dict())
+        return SearchResults(results=specific_sources.to_dict(), ranked_data=False)
 
     highest_ranked = aDict()
 
@@ -160,7 +180,11 @@ def search(**kwargs) -> SearchResults:
     data_keys = aDict()
     for site, species in highest_ranked.items():
         for sp, data in species.items():
-            data_keys[site][sp]["keys"] = []
+            # data_keys[site][sp]["keys"] = []
+
+            species_keys = []
+            species_rank_data = {}
+            species_metadata = {}
 
             for match_data in data["matching"]:
                 uuid = match_data["uuid"]
@@ -178,11 +202,18 @@ def search(**kwargs) -> SearchResults:
                     if date_keys:
                         keys.extend(date_keys)
                         # We'll add this to the metadata in the search results we return at the end
-                        data_keys[site][sp]["rank_metadata"][dr] = inlet
+                        species_rank_data[dr] = inlet
 
-                # data_keys[site][sp]["metadata"][inlet] = inlet
-                data_keys[site][sp]["keys"].extend(keys)
-                data_keys[site][sp]["metadata"][inlet] = metadata
+                species_keys.extend(keys)
+                species_metadata[inlet] = metadata
+
+            # Only create the dictionary keys if we have some data keys
+            if species_keys:
+                data_keys[site][sp]["keys"] = species_keys
+                data_keys[site][sp]["rank_metadata"] = species_rank_data
+                data_keys[site][sp]["metadata"] = species_metadata
+            else:
+                continue
 
             # We now need to retrieve data for the dateranges for which we don't have ranking data
             # To do this find the gaps in the daterange over which the user has requested data
@@ -226,6 +257,9 @@ def search(**kwargs) -> SearchResults:
 
                 # Retrieve the data keys
                 inlet_data_keys = results.keys(site=site, species=sp)
+
+                print("inlet_data_keys", inlet_data_keys)
+
                 data_keys[site][sp]["keys"].extend(inlet_data_keys)
 
             # Remove any duplicate keys
@@ -233,7 +267,7 @@ def search(**kwargs) -> SearchResults:
 
     dict_data_keys = data_keys.to_dict()
 
-    return SearchResults(results=dict_data_keys)
+    return SearchResults(results=dict_data_keys, ranked_data=True)
 
 
 # def search_footprints(

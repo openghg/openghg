@@ -21,19 +21,19 @@ def data_read():
 
     bsd_results = ObsSurface.read_file(filepath=bsd_paths, data_type="CRDS", site="bsd", network=network)
 
-    # hfd_100_path = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
-    # hfd_50_path = get_datapath(filename="hfd.picarro.1minute.50m.min.dat", data_type="CRDS")
-    # hfd_paths = [hfd_100_path, hfd_50_path]
+    hfd_100_path = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
+    hfd_50_path = get_datapath(filename="hfd.picarro.1minute.50m.min.dat", data_type="CRDS")
+    hfd_paths = [hfd_100_path, hfd_50_path]
 
-    # ObsSurface.read_file(filepath=hfd_paths, data_type="CRDS", site="hfd", network=network)
+    ObsSurface.read_file(filepath=hfd_paths, data_type="CRDS", site="hfd", network=network)
 
-    # tac_path = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
-    # ObsSurface.read_file(filepath=tac_path, data_type="CRDS", site="tac", network=network)
+    tac_path = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
+    ObsSurface.read_file(filepath=tac_path, data_type="CRDS", site="tac", network=network)
 
-    # data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
-    # prec_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
+    data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
+    prec_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    # ObsSurface.read_file(filepath=(data_filepath, prec_filepath), site="CGO", data_type="GCWERKS", network="AGAGE")
+    ObsSurface.read_file(filepath=(data_filepath, prec_filepath), site="CGO", data_type="GCWERKS", network="AGAGE")
 
     obs = ObsSurface.load()
 
@@ -59,7 +59,7 @@ def test_specific_keyword_search():
 
     results = search(species=species, site=site, inlet=inlet, instrument=instrument)
 
-    metadata = results.metadata(site=site, species=species)
+    metadata = results.metadata(site=site, species=species, inlet=inlet)
 
     expected_metadata = {
         "site": "bsd",
@@ -80,7 +80,7 @@ def test_specific_keyword_search():
 def test_specific_search_gc():
     results = search(species=["NF3"], site="CGO", inlet="70m")
 
-    metadata = results.metadata(site="cgo", species="nf3")
+    metadata = results.metadata(site="cgo", species="nf3", inlet="70m")
 
     expected_metadata = {
         "site": "cgo",
@@ -111,8 +111,11 @@ def test_unranked_location_search():
     assert sorted(list(tac_data.keys())) == ["ch4", "co2"]
     assert sorted(list(hfd_data.keys())) == ["ch4", "co2"]
 
-    tac_co2_keys = results.keys(site="tac", species="co2")
-    tac_ch4_keys = results.keys(site="tac", species="co2")
+    with pytest.raises(ValueError):
+        tac_co2_keys = results.keys(site="tac", species="co2")
+
+    tac_co2_keys = results.keys(site="tac", species="co2", inlet="100m")
+    tac_ch4_keys = results.keys(site="tac", species="co2", inlet="100m")
 
     assert len(tac_co2_keys) == 4
     assert len(tac_ch4_keys) == 4
@@ -139,14 +142,14 @@ def test_unranked_search_datetimes():
         end_date=end,
     )
 
-    metadata = results.metadata(site="bsd", species="co2")
+    metadata = results.metadata(site="bsd", species="co2", inlet="248m")
 
     expected_metadata = {
         "site": "bsd",
         "instrument": "picarro",
         "sampling_period": "60",
         "inlet": "248m",
-        "port": "8",
+        "port": "9",
         "type": "air",
         "network": "decc",
         "species": "co2",
@@ -154,7 +157,7 @@ def test_unranked_search_datetimes():
         "data_type": "timeseries",
     }
 
-    data_keys = results.keys(site="bsd", species="co2")
+    data_keys = results.keys(site="bsd", species="co2", inlet="248m")
     assert len(data_keys) == 1
     assert metadata == expected_metadata
 
@@ -169,8 +172,8 @@ def test_unranked_search_datetimes():
         end_date=end,
     )
 
-    data_keys = results.keys(site="bsd", species="co2")
-    assert len(data_keys) == 2
+    data_keys = results.keys(site="bsd", species="co2", inlet="248m")
+    assert len(data_keys) == 7
 
 
 def test_search_find_any_unranked():
@@ -179,12 +182,7 @@ def test_search_find_any_unranked():
     inlet = "248m"
     instrument = "picarro"
 
-    start = timestamp_tzaware("2014-1-1")
-    end = timestamp_tzaware("2015-1-1")
-
-    results = search(
-        find_all=False, species=species, site=sites, start_date=start, end_date=end, inlet=inlet, instrument=instrument
-    )
+    results = search(find_all=False, species=species, site=sites, inlet=inlet, instrument=instrument)
 
     raw_results = results.raw()
 
@@ -198,15 +196,34 @@ def test_search_find_any_unranked():
     assert sorted(list(raw_results["hfd"].keys())) == hfd_expected
     assert sorted(list(raw_results["tac"].keys())) == tac_expected
 
+    start = timestamp_tzaware("2014-1-1")
+    end = timestamp_tzaware("2015-1-1")
+
+    results = search(
+        find_all=False, species=species, site=sites, start_date=start, end_date=end, inlet=inlet, instrument=instrument
+    )
+
+    raw_results = results.raw()
+
+    assert len(raw_results) == 2
+
+    assert sorted(list(raw_results.keys())) == ["bsd", "hfd"]
+
 
 def test_ranked_bsd_search():
     site = "bsd"
     species = "ch4"
 
     result = search(site=site, species=species)
+
     raw_result = result.raw()
 
-    expected_rank_metadata = {"2012-01-01_2014-01-01": "248m", "2015-09-02_2016-01-01": "108m", "2019-01-02_2021-01-01": "42m"}
+    expected_rank_metadata = {
+        "2015-01-01_2015-11-01": "248m",
+        "2014-09-02_2014-11-01": "108m",
+        "2016-09-02_2018-11-01": "108m",
+        "2019-01-02_2021-01-01": "42m",
+    }
 
     assert expected_rank_metadata == raw_result["bsd"]["ch4"]["rank_metadata"]
 
@@ -258,15 +275,15 @@ def test_ranked_bsd_search():
     ch4_data = obs_data.data
 
     assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")
-    assert ch4_data.time[-1] == Timestamp("2020-02-01T22:31:30")
+    assert ch4_data.time[-1] == Timestamp("2020-12-01T22:31:30")
     assert ch4_data["ch4"][0] == pytest.approx(1959.55)
     assert ch4_data["ch4"][-1] == pytest.approx(1955.93)
     assert ch4_data["ch4_variability"][0] == 0.79
     assert ch4_data["ch4_variability"][-1] == 0.232
-    assert len(ch4_data.time) == 117
+    assert len(ch4_data.time) == 196
 
 
-@pytest.mark.skip(reason="Needs update for ranking search")
+# @pytest.mark.skip(reason="Needs update for ranking search")
 def test_search_find_any():
     species = ["co2"]
     sites = ["bsd"]
@@ -280,96 +297,50 @@ def test_search_find_any():
         find_all=False, species=species, site=sites, start_date=start, end_date=end, inlet=inlet, instrument=instrument
     )
 
-    expected_results = [
-        ("bsd", "ch4", "248m", "picarro"),
-        ("bsd", "co", "248m", "picarro"),
-        ("bsd", "co2", "248m", "picarro"),
-        ("hfd", "ch4", "100m", "picarro"),
-        ("hfd", "ch4", "50m", "picarro"),
-        ("hfd", "co", "100m", "picarro"),
-        ("hfd", "co", "50m", "picarro"),
-        ("hfd", "co2", "100m", "picarro"),
-        ("hfd", "co2", "50m", "picarro"),
-        ("tac", "ch4", "100m", "picarro"),
-        ("tac", "co2", "100m", "picarro"),
-    ]
+    # print(results)
 
-    found_results = []
-    for k in results:
-        found_results.append(
-            (
-                results[k]["metadata"]["site"],
-                results[k]["metadata"]["species"],
-                results[k]["metadata"]["inlet"],
-                results[k]["metadata"]["instrument"],
-            )
-        )
+    raw_results = results.raw()
 
-    found_results.sort()
+    bsd_data = raw_results["bsd"]
+    hfd_data = raw_results["hfd"]
 
-    assert found_results == expected_results
+    expected_bsd_heights = sorted(["248m", "108m", "42m"])
 
-    results = search(find_all=True, species=species, site=sites, inlet=inlet, start_date=start, end_date=end)
+    assert sorted(list(bsd_data["ch4"].keys())) == expected_bsd_heights
+    assert sorted(list(bsd_data["co"].keys())) == expected_bsd_heights
+    assert sorted(list(bsd_data["co2"].keys())) == expected_bsd_heights
 
-    found_results = []
-    for k in results:
-        found_results.append(
-            (
-                results[k]["metadata"]["site"],
-                results[k]["metadata"]["species"],
-                results[k]["metadata"]["inlet"],
-                results[k]["metadata"]["instrument"],
-            )
-        )
+    expected_hfd_heights = ["100m", "50m"]
 
-    found_results.sort()
+    assert sorted(list(hfd_data["ch4"].keys())) == expected_hfd_heights
+    assert sorted(list(hfd_data["co"].keys())) == expected_hfd_heights
+    assert sorted(list(hfd_data["co2"].keys())) == expected_hfd_heights
 
-    assert found_results == [("bsd", "co2", "248m", "picarro")]
-
-
-@pytest.mark.skip(reason="Needs update for new keyword arg search")
-def test_search_instrument_no_inlet():
-    locations = "bsd"
-    species = "n2o"
-    instrument = "picarro5310"
-
-    results = search(locations=locations, species=species, instrument=instrument)
-
-    expected_keys = ["n2o_bsd_108m_picarro5310", "n2o_bsd_248m_picarro5310"]
-
-    assert sorted(list(results.keys())) == sorted(expected_keys)
-
-    assert len(results["n2o_bsd_108m_picarro5310"]["keys"]) == 1
-    assert len(results["n2o_bsd_248m_picarro5310"]["keys"]) == 1
-
-    metadata_108m = {
+    assert bsd_data["ch4"]["metadata"] == {
         "site": "bsd",
-        "instrument": "picarro5310",
-        "time_resolution": "1_minute",
-        "network": "decc",
-        "inlet": "108m",
-        "port": "2",
+        "instrument": "picarro",
+        "sampling_period": "60",
+        "inlet": "42m",
+        "port": "9",
         "type": "air",
-        "species": "n2o",
+        "network": "decc",
+        "species": "ch4",
+        "scale": "wmo-x2004a",
         "data_type": "timeseries",
-        "scale": "wmo-x2006a",
     }
 
-    metadata_248m = {
+    assert bsd_data["co2"]["metadata"] == {
         "site": "bsd",
-        "instrument": "picarro5310",
-        "time_resolution": "1_minute",
-        "network": "decc",
-        "inlet": "248m",
-        "port": "1",
+        "instrument": "picarro",
+        "sampling_period": "60",
+        "inlet": "42m",
+        "port": "9",
         "type": "air",
-        "species": "n2o",
+        "network": "decc",
+        "species": "co2",
+        "scale": "wmo-x2007",
         "data_type": "timeseries",
-        "scale": "wmo-x2006a",
     }
-
-    assert results["n2o_bsd_108m_picarro5310"]["metadata"] == metadata_108m
-    assert results["n2o_bsd_248m_picarro5310"]["metadata"] == metadata_248m
 
 
 def test_search_incorrect_inlet_site_finds_nothing():
