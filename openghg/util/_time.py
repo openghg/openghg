@@ -361,27 +361,27 @@ def closest_daterange(to_compare: str, dateranges: Union[str, List]) -> str:
 
 
 def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, dateranges: List) -> List[str]:
-    """ Given a start and end date and a list of dateranges find the gaps.
+    """Given a start and end date and a list of dateranges find the gaps.
 
-        For example given a list of dateranges
+    For example given a list of dateranges
 
-        example = ['2014-09-02_2014-11-01', '2016-09-02_2018-11-01']
+    example = ['2014-09-02_2014-11-01', '2016-09-02_2018-11-01']
 
-        start = timestamp_tzaware("2012-01-01")
-        end = timestamp_tzaware("2019-09-01")
+    start = timestamp_tzaware("2012-01-01")
+    end = timestamp_tzaware("2019-09-01")
 
-        gaps = find_daterange_gaps(start, end, example)
+    gaps = find_daterange_gaps(start, end, example)
 
-        gaps == ['2012-01-01-00:00:00+00:00_2014-09-01-00:00:00+00:00',
-                '2014-11-02-00:00:00+00:00_2016-09-01-00:00:00+00:00',
-                '2018-11-02-00:00:00+00:00_2019-09-01-00:00:00+00:00']
+    gaps == ['2012-01-01-00:00:00+00:00_2014-09-01-00:00:00+00:00',
+            '2014-11-02-00:00:00+00:00_2016-09-01-00:00:00+00:00',
+            '2018-11-02-00:00:00+00:00_2019-09-01-00:00:00+00:00']
 
-        Args:
-            start_search: Start timestamp
-            end_search: End timestamp
-            dateranges: List of daterange strings
-        Returns:
-            list: List of dateranges
+    Args:
+        start_search: Start timestamp
+        end_search: End timestamp
+        dateranges: List of daterange strings
+    Returns:
+        list: List of dateranges
     """
     from pandas import Timedelta
     from openghg.util import pairwise

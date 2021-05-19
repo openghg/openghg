@@ -323,7 +323,7 @@ def test_load_dataset():
 
     d.save()
 
-    keys = example_keys["latest"]["keys"]
+    keys = d._data_keys["latest"]["keys"]
 
     key = list(keys.values())[0]
 
@@ -388,7 +388,7 @@ def test_search_metadata_find_all():
     assert result is False
 
 
-@pytest.mark.skip(reason="Need to add recursive search to new function")
+@pytest.mark.skip(reason="We don't currently have recursive search functionality")
 def test_search_metadata_finds_recursively():
     d = Datasource()
 
@@ -412,31 +412,31 @@ def test_in_daterange(data):
     data = data["ch4"]["data"]
 
     d = Datasource()
+    d._uuid = "test-id-123"
     d.add_data(metadata=metadata, data=data, data_type="timeseries")
     d.save()
 
+
+
+    expected_keys = [
+        "data/uuid/test-id-123/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "data/uuid/test-id-123/v1/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "data/uuid/test-id-123/v1/2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
+        "data/uuid/test-id-123/v1/2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
+        "data/uuid/test-id-123/v1/2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00",
+        "data/uuid/test-id-123/v1/2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00",
+        "data/uuid/test-id-123/v1/2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00",
+    ]
+
+    assert d.data_keys() == expected_keys
+
     start = pd.Timestamp("2014-1-1")
     end = pd.Timestamp("2014-2-1")
-
     daterange = create_daterange_str(start=start, end=end)
 
-    example_keys = aDict()
+    dated_keys = d.keys_in_daterange_str(daterange=daterange)
 
-    example_keys["latest"]["keys"]["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"] = [
-        "data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
-    ]
-    example_keys["latest"]["keys"]["2015-01-30-10:52:30+00:00_2016-01-30-14:20:30+00:00"] = [
-        "data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2015-01-30-10:52:30+00:00_2016-01-30-14:20:30+00:00"
-    ]
-    example_keys["latest"]["keys"]["2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00"] = [
-        "data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00"
-    ]
-
-    d._data_keys = example_keys.to_dict()
-
-    keys = d.keys_in_daterange_str(daterange=daterange)
-
-    assert keys[0].split("/")[-1] == "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
+    assert dated_keys[0].split("/")[-1] == "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00"
 
 
 def test_shallow_then_load_data(data):
@@ -455,6 +455,6 @@ def test_shallow_then_load_data(data):
 
     assert ds_data
 
-    ch4_data = ds_data["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"]
+    ch4_data = ds_data["2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00"]
 
-    assert ch4_data.time[0] == pd.Timestamp("2014-01-30T10:52:30")
+    assert ch4_data.time[0] == pd.Timestamp("2014-01-30-11:12:30")

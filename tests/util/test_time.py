@@ -7,7 +7,7 @@ from openghg.util import (
     find_daterange_gaps,
     timestamp_tzaware,
     combine_dateranges,
-    split_datrange_str,
+    split_daterange_str,
 )
 
 
@@ -151,7 +151,7 @@ def test_split_daterange_str():
 
     daterange_1 = "2001-01-01-00:00:00_2001-03-01-00:00:00"
 
-    start, end = split_datrange_str(daterange_str=daterange_1)
+    start, end = split_daterange_str(daterange_str=daterange_1)
 
     assert start_true == start
     assert end_true == end

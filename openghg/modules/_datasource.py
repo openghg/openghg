@@ -121,11 +121,11 @@ class Datasource:
         Returns:
             None
         """
-        data_types = ["timeseries", "emissions", "met", "footprint"]
+        expected_data_types = ("timeseries", "emissions", "met", "footprint")
 
         data_type = data_type.lower()
-        if data_type not in data_types:
-            raise TypeError(f"Incorrect data type selected. Please select from one of {data_types}")
+        if data_type not in expected_data_types:
+            raise TypeError(f"Incorrect data type selected. Please select from one of {expected_data_types}")
 
         self.add_metadata(metadata=metadata)
 
