@@ -1,6 +1,9 @@
 import pytest
-import pandas as pd
+from pandas import Timestamp
 from openghg.util import (
+    create_daterange,
+    daterange_from_str,
+    create_aligned_timestamp,
     date_overlap,
     create_daterange_str,
     closest_daterange,
@@ -9,6 +12,56 @@ from openghg.util import (
     combine_dateranges,
     split_daterange_str,
 )
+
+
+def test_create_aligned_timestamp():
+    t = Timestamp("2001-01-01-15:33:33", tz="UTC")
+
+    aligned = create_aligned_timestamp(t)
+
+    assert aligned == Timestamp("2001-01-01 15:33:00", tz="UTC")
+
+    t = Timestamp(2000, 1, 1, 1, 1, 1)
+
+    aligned = create_aligned_timestamp(t)
+
+    assert str(aligned.tzinfo) == "UTC"
+
+
+def test_create_daterange():
+    start = Timestamp("2019-1-1-15:33:12", tz="UTC")
+    end = Timestamp("2020-1-1-18:55:12", tz="UTC")
+
+    daterange = create_daterange(start, end)
+
+    assert str(daterange[0]) == "2019-01-01 15:33:00+00:00"
+    assert str(daterange[-1]) == "2020-01-01 15:33:00+00:00"
+
+
+def test_create_daterange_wrong_way_raises():
+    start = Timestamp("2019-1-1-15:33:12", tz="UTC")
+    end = Timestamp("2020-1-1-18:55:12", tz="UTC")
+
+    with pytest.raises(ValueError):
+        _ = create_daterange(start=end, end=start)
+
+
+def test_create_daterange_str():
+    start = Timestamp("2019-1-1-15:33:12", tz="UTC")
+    end = Timestamp("2020-1-1-18:55:12", tz="UTC")
+
+    s = create_daterange_str(start=start, end=end)
+
+    assert s == "2019-01-01-15:33:00+00:00_2020-01-01-18:55:00+00:00"
+
+
+def test_daterange_from_str():
+    s = "2019-01-01-15:33:00+00:00_2020-01-01-18:55:00+00:00"
+
+    daterange = daterange_from_str(daterange_str=s)
+
+    assert daterange[0] == Timestamp("2019-01-01 15:33:00", tz="UTC")
+    assert daterange[-1] == Timestamp("2020-01-01 15:33:00", tz="UTC")
 
 
 def test_date_overlap():
@@ -146,8 +199,8 @@ def test_combining_no_overlap():
 
 def test_split_daterange_str():
 
-    start_true = pd.Timestamp("2001-01-01-00:00:00", tz="UTC")
-    end_true = pd.Timestamp("2001-03-01-00:00:00", tz="UTC")
+    start_true = Timestamp("2001-01-01-00:00:00", tz="UTC")
+    end_true = Timestamp("2001-03-01-00:00:00", tz="UTC")
 
     daterange_1 = "2001-01-01-00:00:00_2001-03-01-00:00:00"
 

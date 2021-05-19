@@ -138,7 +138,7 @@ class NOAA(BaseModule):
         metadata["network"] = network
         metadata["measurement_type"] = measurement_type
         metadata["species"] = species
-        metadata["sampling_period"] = sampling_period
+        metadata["sampling_period"] = str(sampling_period)
 
         if instrument is not None:
             metadata["instrument"] = instrument
@@ -319,7 +319,7 @@ class NOAA(BaseModule):
         metadata["measurement_type"] = measurement_type
         metadata["network"] = "NOAA"
         metadata["inlet"] = inlet
-        metadata["sampling_period"] = sampling_period
+        metadata["sampling_period"] = str(sampling_period)
 
         combined_data[species.lower()] = {
             "metadata": metadata,

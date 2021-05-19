@@ -23,7 +23,7 @@ class SearchResults:
         print_strs = []
         for site, species in self.results.items():
             if self.ranked_data:
-                print_strs.append(f"Site: {site.upper()} \nSpecies found: {', '.join(self.results[site].keys())}\n")
+                print_strs.append(f"Site: {site.upper()} \nSpecies found: {', '.join(self.results[site].keys())}")
             else:
                 print_strs.append(f"Site: {site.upper()}")
                 print_strs.append("---------")

@@ -215,7 +215,7 @@ class ObsSurface(BaseModule):
             sampling_period = md["sampling_period"]
 
             # TODO - remove this check when improved input sanitisation is in place
-            if not any(site, network, inlet, species, sampling_period):
+            if not any((site, network, inlet, species, sampling_period)):
                 raise ValueError("Please ensure site, network, inlet, species and sampling_period are not None")
 
             result = self.lookup_uuid(site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period)

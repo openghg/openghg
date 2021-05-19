@@ -264,7 +264,7 @@ def test_read_icos():
 
     data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS", sampling_period=60)
 
     uuid = results["processed"]["tta.co2.1minute.222m.min.dat"]["co2"]
 
@@ -300,7 +300,7 @@ def test_read_icos():
         "station_height_masl": 300.0,
         "site": "tta",
         "inlet": "222m",
-        "time_resolution": "1minute",
+        "sampling_period": "60",
         "network": "ICOS",
     }
 
@@ -393,7 +393,7 @@ def test_read_thames_barrier():
 
     data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER", site="TMB", network="LGHG")
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER", site="TMB", network="LGHG", sampling_period=3600)
 
     expected_keys = sorted(["CH4", "CO2", "CO"])
 
@@ -421,12 +421,12 @@ def test_upload_same_file_twice_raises():
 
     data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
 
-    ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+    ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS", sampling_period=60)
 
     # assert not res["error"]
 
     with pytest.raises(ValueError):
-        ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+        ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS", sampling_period=60)
 
     # assert "tta.co2.1minute.222m.min.dat" in res["error"]
 

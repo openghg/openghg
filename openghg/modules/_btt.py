@@ -45,7 +45,7 @@ class BTT(BaseModule):
         if sampling_period is None:
             sampling_period = "NOT_SET"
 
-        gas_data = self.read_data(data_filepath=data_filepath)
+        gas_data = self.read_data(data_filepath=data_filepath, sampling_period=sampling_period)
         gas_data = assign_attributes(data=gas_data, site=site, network=network)
 
         return gas_data
@@ -99,7 +99,7 @@ class BTT(BaseModule):
             site_attributes["instrument"] = self._params["instrument"]
 
             # TODO - add in better metadata reading
-            metadata = {"species": compliant_string(species), "sampling_period": sampling_period}
+            metadata = {"species": compliant_string(species), "sampling_period": str(sampling_period)}
 
             combined_data[species] = {
                 "metadata": metadata,

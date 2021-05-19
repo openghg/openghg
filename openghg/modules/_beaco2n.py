@@ -31,6 +31,9 @@ class BEACO2N:
         from collections import defaultdict
         from openghg.util import compliant_string
 
+        if sampling_period is None:
+            sampling_period = "NOT_SET"
+
         datetime_columns = {"time": ["datetime"]}
         rename_cols = {"PM_ug/m3": "pm", "PM_ug/m3_QC_level": "pm_qc", "co2_ppm": "co2", "co2_ppm_QC_level": "co2_qc"}
         use_cols = [1, 5, 6, 7, 8]
@@ -77,6 +80,7 @@ class BEACO2N:
                 "species": compliant_string(mt),
                 "inlet": "NA",
                 "network": "beaco2n",
+                "sampling_period": str(sampling_period),
             }
 
             gas_data[mt]["data"] = m_data

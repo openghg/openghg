@@ -43,7 +43,7 @@ def test_read_file_site_filename_read():
 
     filepath = get_datapath(filename="ch4_scsn06_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
-    data = noaa.read_file(data_filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask")
+    data = noaa.read_file(data_filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask", sampling_period="1200")
 
     ch4_data = data["ch4"]["data"]
 
@@ -54,7 +54,14 @@ def test_read_file_site_filename_read():
 
     metadata = data["ch4"]["metadata"]
 
-    expected_metadata = {"species": "ch4", "site": "SCSN06", "measurement_type": "flask", "network": "NOAA", "inlet": "flask"}
+    expected_metadata = {
+        "species": "ch4",
+        "site": "SCSN06",
+        "measurement_type": "flask",
+        "network": "NOAA",
+        "inlet": "flask",
+        "sampling_period": "1200",
+    }
 
     assert metadata == expected_metadata
 
@@ -85,7 +92,7 @@ def test_read_raw_file():
 
     filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
-    data = noaa.read_file(data_filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask")
+    data = noaa.read_file(data_filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask", sampling_period=1200)
 
     assert data["co"]["metadata"] == {
         "species": "co",
@@ -93,6 +100,7 @@ def test_read_raw_file():
         "measurement_type": "flask",
         "network": "NOAA",
         "inlet": "flask",
+        "sampling_period": "1200",
     }
 
     co_data = data["co"]["data"]

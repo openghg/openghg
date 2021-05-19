@@ -30,8 +30,10 @@ class CRANFIELD:
         from pandas import read_csv
         from openghg.util import compliant_string
 
-        data_filepath = Path(data_filepath)
+        if sampling_period is None:
+            sampling_period = "NOT_SET"
 
+        data_filepath = Path(data_filepath)
         data = read_csv(data_filepath, parse_dates=["Date"], index_col="Date")
 
         data = data.rename(
@@ -55,7 +57,7 @@ class CRANFIELD:
         metadata = {}
         metadata["site"] = "THB"
         metadata["instrument"] = "CRDS"
-        metadata["sampling_period"] = "NOT_SET"
+        metadata["sampling_period"] = str(sampling_period)
         metadata["height"] = "10magl"
         metadata["inlet"] = "10magl"
         metadata["network"] = "CRANFIELD"

@@ -35,7 +35,7 @@ def test_read_file():
 def test_read_data():
     icos = ICOS()
     filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
-    data = icos.read_data(data_filepath=filepath, species="CO2")
+    data = icos.read_data(data_filepath=filepath, species="CO2", sampling_period=60)
 
     co2_data = data["co2"]["data"]
 
@@ -44,4 +44,4 @@ def test_read_data():
     assert co2_data["co2 number_of_observations"][0].values == 13
 
     assert data["co2"]["metadata"] == {'site': 'tta', 'species': 'co2', 'inlet': '222m', 
-                                        'time_resolution': '1minute', 'network': 'ICOS'}
+                                        'sampling_period': '60', 'network': 'ICOS'}

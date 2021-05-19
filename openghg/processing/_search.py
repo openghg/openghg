@@ -69,7 +69,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     search_kwargs = {k: clean_string(v) for k, v in kwargs.items() if v is not None}
 
     data_type = search_kwargs.get("data_type", "timeseries")
-    skip_ranking = search_kwargs.get("skip_ranking")
+    skip_ranking = search_kwargs.get("skip_ranking", False)
 
     valid_data_types = ("timeseries", "footprint", "emissions")
     if data_type not in valid_data_types:
@@ -256,9 +256,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
                     continue
 
                 # Retrieve the data keys
-                inlet_data_keys = results.keys(site=site, species=sp)
-
-                print("inlet_data_keys", inlet_data_keys)
+                inlet_data_keys = results.keys(site=site, species=sp, inlet=chosen_inlet)
 
                 data_keys[site][sp]["keys"].extend(inlet_data_keys)
 

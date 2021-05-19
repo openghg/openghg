@@ -316,7 +316,7 @@ def test_search_find_any():
     assert sorted(list(hfd_data["co"].keys())) == expected_hfd_heights
     assert sorted(list(hfd_data["co2"].keys())) == expected_hfd_heights
 
-    assert bsd_data["ch4"]["metadata"] == {
+    assert bsd_data["ch4"]["42m"]["metadata"] == {
         "site": "bsd",
         "instrument": "picarro",
         "sampling_period": "60",
@@ -329,7 +329,7 @@ def test_search_find_any():
         "data_type": "timeseries",
     }
 
-    assert bsd_data["co2"]["metadata"] == {
+    assert bsd_data["co2"]["42m"]["metadata"] == {
         "site": "bsd",
         "instrument": "picarro",
         "sampling_period": "60",
