@@ -494,7 +494,6 @@ class Datasource:
             Datasource: Datasource created from JSON
         """
         from Acquire.ObjectStore import string_to_datetime
-        from collections import defaultdict
 
         d = Datasource()
         d._uuid = data["UUID"]
