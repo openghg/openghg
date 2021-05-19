@@ -55,7 +55,7 @@ class CRANFIELD:
         metadata = {}
         metadata["site"] = "THB"
         metadata["instrument"] = "CRDS"
-        metadata["time_resolution"] = "1_hour"
+        metadata["sampling_period"] = "NOT_SET"
         metadata["height"] = "10magl"
         metadata["inlet"] = "10magl"
         metadata["network"] = "CRANFIELD"

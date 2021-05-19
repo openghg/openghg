@@ -44,6 +44,9 @@ class NOAA(BaseModule):
         if inlet is None:
             raise ValueError("Inlet must be given for NOAA data processing. If flask data pass flask as inlet.")
 
+        if sampling_period is None:
+            sampling_period = "NOT_SET"
+
         file_extension = Path(data_filepath).suffix
 
         if file_extension == ".nc":
@@ -70,9 +73,9 @@ class NOAA(BaseModule):
         data_filepath: Union[str, Path],
         site: str,
         inlet: str,
+        sampling_period: str,
         measurement_type: str,
         instrument: Optional[str] = None,
-        sampling_period: Optional[str] = None,
     ):
         """Read NOAA ObsPack NetCDF files
 
@@ -135,12 +138,10 @@ class NOAA(BaseModule):
         metadata["network"] = network
         metadata["measurement_type"] = measurement_type
         metadata["species"] = species
+        metadata["sampling_period"] = sampling_period
 
         if instrument is not None:
             metadata["instrument"] = instrument
-
-        if sampling_period is not None:
-            metadata["sampling_period"] = sampling_period
 
         data = {}
         data[species] = {"data": processed_ds, "metadata": metadata}
@@ -156,9 +157,9 @@ class NOAA(BaseModule):
         data_filepath: Union[str, Path],
         site: str,
         inlet: str,
+        sampling_period: str,
         measurement_type: str,
         instrument: Optional[str] = None,
-        sampling_period: Optional[str] = None,
     ) -> Dict:
         """Reads NOAA data files and returns a dictionary of processed
         data and metadata.
@@ -182,14 +183,20 @@ class NOAA(BaseModule):
         source_name = source_name.split("-")[0]
 
         gas_data = self.read_raw_data(
-            data_filepath=data_filepath, inlet=inlet, species=species, measurement_type=measurement_type
+            data_filepath=data_filepath,
+            inlet=inlet,
+            species=species,
+            measurement_type=measurement_type,
+            sampling_period=sampling_period,
         )
 
         gas_data = assign_attributes(data=gas_data, site=site, network="NOAA")
 
         return gas_data
 
-    def read_raw_data(self, data_filepath: Path, species: str, inlet: str, measurement_type: Optional[str] = "flask") -> Dict:
+    def read_raw_data(
+        self, data_filepath: Path, species: str, inlet: str, sampling_period: str, measurement_type: Optional[str] = "flask"
+    ) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -312,6 +319,7 @@ class NOAA(BaseModule):
         metadata["measurement_type"] = measurement_type
         metadata["network"] = "NOAA"
         metadata["inlet"] = inlet
+        metadata["sampling_period"] = sampling_period
 
         combined_data[species.lower()] = {
             "metadata": metadata,

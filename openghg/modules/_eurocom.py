@@ -157,6 +157,7 @@ class EUROCOM:
         metadata["inlet_height"] = site_attributes["inlet_height_m"]
         metadata["calibration_scale"] = calibration_scale
         metadata["network"] = "EUROCOM"
+        metadata["sampling_period"] = "NOT_SET"
 
         combined_data[species] = {
             "metadata": metadata,

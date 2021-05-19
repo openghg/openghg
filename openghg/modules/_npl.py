@@ -93,7 +93,7 @@ class NPL(BaseModule):
             site_attributes["inlet_height_magl"] = self._params["inlet"]
             site_attributes["instrument"] = self._params["instrument"]
 
-            metadata = {"species": compliant_string(species)}
+            metadata = {"species": compliant_string(species), "sampling_period": "NOT_SET"}
             # TODO - add in better metadata reading
             combined_data[species] = {
                 "metadata": metadata,

@@ -191,8 +191,9 @@ class ObsSurface(BaseModule):
 
             species = data["species"]
 
-            lookup_results[key] = self.lookup_uuid(site=site, network=network, inlet=inlet, 
-                                                    species=species, sampling_period=sampling_period)
+            lookup_results[key] = self.lookup_uuid(
+                site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period
+            )
 
         return lookup_results
 
@@ -212,6 +213,10 @@ class ObsSurface(BaseModule):
             inlet = md["inlet"]
             species = md["species"]
             sampling_period = md["sampling_period"]
+
+            # TODO - remove this check when improved input sanitisation is in place
+            if not any(site, network, inlet, species, sampling_period):
+                raise ValueError("Please ensure site, network, inlet, species and sampling_period are not None")
 
             result = self.lookup_uuid(site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period)
 

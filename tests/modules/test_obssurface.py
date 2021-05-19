@@ -1,46 +1,32 @@
 import pytest
 from pandas import Timestamp
-from pathlib import Path
 
 from openghg.modules import Datasource, ObsSurface
 from openghg.objectstore import get_local_bucket, exists
-
-
-@pytest.fixture(scope="session")
-def clear_store():
-    get_local_bucket(empty=True)
-
-
-def get_datapath(filename, data_type):
-    """Get the path of a file in the tests directory
-
-    Returns:
-        pathlib.Path
-    """
-    return Path(__file__).resolve().parent.parent.joinpath("data", "proc_test_data", data_type, filename)
+from helpers import get_datapath
 
 
 def test_read_CRDS():
     get_local_bucket(empty=True)
 
-    filepath = get_datapath(filename="bsd.picarro.1minute.248m.dat", data_type="CRDS")
+    filepath = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
 
-    keys = results["processed"]["bsd.picarro.1minute.248m.dat"].keys()
+    keys = results["processed"]["bsd.picarro.1minute.248m.min.dat"].keys()
 
     assert sorted(keys) == ["ch4", "co", "co2"]
 
     # Load up the assigned Datasources and check they contain the correct data
-    data = results["processed"]["bsd.picarro.1minute.248m.dat"]
+    data = results["processed"]["bsd.picarro.1minute.248m.min.dat"]
 
     ch4_data = Datasource.load(uuid=data["ch4"]).data()
-    ch4_data = ch4_data["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"]
+    ch4_data = ch4_data["2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00"]
 
-    assert ch4_data.time[0] == Timestamp("2014-01-30T10:52:30")
-    assert ch4_data["ch4"][0] == 1960.24
-    assert ch4_data["ch4"][-1] == 1952.24
-    assert ch4_data["ch4_variability"][-1] == 0.674
-    assert ch4_data["ch4_number_of_observations"][-1] == 25.0
+    assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")
+    assert ch4_data["ch4"][0] == 1959.55
+    assert ch4_data["ch4"][-1] == 1962.8
+    assert ch4_data["ch4_variability"][-1] == 1.034
+    assert ch4_data["ch4_number_of_observations"][-1] == 26.0
 
     obs = ObsSurface.load()
     uuid_one = obs.datasources()[0]
@@ -48,10 +34,17 @@ def test_read_CRDS():
 
     data_keys = list(datasource.data().keys())
 
-    assert data_keys == [
-        "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00",
-        "2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00",
+    expected_keys = [
+        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
+        "2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
+        "2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00",
+        "2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00",
+        "2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00",
     ]
+
+    assert data_keys == expected_keys
 
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.future.dat", data_type="CRDS")
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
@@ -60,17 +53,23 @@ def test_read_CRDS():
     datasource = Datasource.load(uuid=uuid_one)
     data_keys = sorted(list(datasource.data().keys()))
 
-    assert data_keys == [
-        "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00",
-        "2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00",
+    new_expected_keys = [
+        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
+        "2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
+        "2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00",
+        "2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00",
+        "2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00",
         "2023-01-30-13:56:30+00:00_2023-01-30-14:20:30+00:00",
     ]
 
-    table = obs._datasource_table
+    assert data_keys == new_expected_keys
 
-    assert table["bsd"]["decc"]["248m"]["ch4"]
-    assert table["bsd"]["decc"]["248m"]["co2"]
-    assert table["bsd"]["decc"]["248m"]["co"]
+    table = obs._datasource_table
+    assert table["bsd"]["decc"]["ch4"]["248m"]
+    assert table["bsd"]["decc"]["co2"]["248m"]
+    assert table["bsd"]["decc"]["co"]["248m"]
 
 
 def test_read_GC():
@@ -191,7 +190,7 @@ def test_read_GC():
         "units": "ppt",
         "scale": "SIO-05",
         "inlet": "70m",
-        "sampling_period": 1200,
+        "sampling_period": "1200",
     }
 
     # # Now test that if we add more data it adds it to the same Datasource
@@ -218,18 +217,20 @@ def test_read_GC():
     data_filepath = get_datapath(filename="trinidadhead.01.C", data_type="GC")
     precision_filepath = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
 
-    ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="THD", instrument="gcmd", network="AGAGE")
+    ObsSurface.read_file(
+        filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="THD", instrument="gcmd", network="AGAGE"
+    )
 
     obs = ObsSurface.load()
     table = obs._datasource_table
 
-    assert table["cgo"]["agage"]["70m"]["nf3"]
-    assert table["cgo"]["agage"]["70m"]["hfc236fa"]
-    assert table["cgo"]["agage"]["70m"]["h1211"]
+    assert table["cgo"]["agage"]["nf3"]["70m"]
+    assert table["cgo"]["agage"]["hfc236fa"]["70m"]
+    assert table["cgo"]["agage"]["h1211"]["70m"]
 
-    assert table["thd"]["agage"]["10m"]["cfc11"]
-    assert table["thd"]["agage"]["10m"]["n2o"]
-    assert table["thd"]["agage"]["10m"]["ccl4"]
+    assert table["thd"]["agage"]["cfc11"]["10m"]
+    assert table["thd"]["agage"]["n2o"]["10m"]
+    assert table["thd"]["agage"]["ccl4"]["10m"]
 
 
 def test_read_cranfield():
@@ -422,7 +423,7 @@ def test_upload_same_file_twice_raises():
 
     ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
 
-    # assert not res["error"] 
+    # assert not res["error"]
 
     with pytest.raises(ValueError):
         ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
@@ -482,7 +483,9 @@ def test_add_new_data_correct_datasource():
     data_filepath = get_datapath(filename="capegrim-medusa.06.C", data_type="GC")
     precision_filepath = get_datapath(filename="capegrim-medusa.06.precisions.C", data_type="GC")
 
-    new_results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
+    new_results = ObsSurface.read_file(
+        filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE"
+    )
 
     second_results = new_results["processed"]["capegrim-medusa.06.C"]
 
