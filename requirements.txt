@@ -1,4 +1,5 @@
 Acquire @ git+git://github.com/gareth-j/acquire@testStore#egg=Acquire
+addict
 backports-datetime-fromisoformat
 cachetools
 cdsapi
