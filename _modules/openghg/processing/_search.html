@@ -1,0 +1,615 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>openghg.processing._search &mdash; OpenGHG 0+untagged.3.g42c0657 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../../../_static/custom.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../features.html">Features</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index_devel.html">Development</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index_devapi.html">Developer API documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenGHG</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>openghg.processing._search</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for openghg.processing._search</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Generic search functions that can be used to find data in</span>
+<span class="sd">    the object store</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">SearchResults</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;search&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="search"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.search">[docs]</a><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">SearchResults</span><span class="p">]:</span>
+    <span class="c1"># site: Union[str, List],</span>
+    <span class="c1"># species: Optional[Union[str, List]] = None,</span>
+    <span class="c1"># inlet: Optional[Union[str, List]] = None,</span>
+    <span class="c1"># instrument: Optional[str] = None,</span>
+    <span class="c1"># find_all: Optional[bool] = True,</span>
+    <span class="c1"># start_date: Optional[Union[str, Timestamp]] = None,</span>
+    <span class="c1"># end_date: Optional[Union[str, Timestamp]] = None,</span>
+    <span class="c1"># data_type: Optional[str] = &quot;timeseries&quot;,</span>
+    <span class="sd">&quot;&quot;&quot;Search for observations data</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        species: Terms to search for in Datasources</span>
+<span class="sd">        locations: Where to search for the terms in species</span>
+<span class="sd">        inlet: Inlet height such as 100m</span>
+<span class="sd">        instrument: Instrument name such as picarro</span>
+<span class="sd">        find_all: Require all search terms to be satisfied</span>
+<span class="sd">        start_date: Start datetime for search.</span>
+<span class="sd">        If None a start datetime of UNIX epoch (1970-01-01) is set</span>
+<span class="sd">        end_date: End datetime for search.</span>
+<span class="sd">        If None an end datetime of the current datetime is set</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: List of keys of Datasources matching the search parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">Dict</span> <span class="k">as</span> <span class="n">aDict</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+    <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span> <span class="k">as</span> <span class="n">iter_chain</span>
+
+    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span><span class="p">,</span> <span class="n">ObsSurface</span><span class="p">,</span> <span class="n">FOOTPRINTS</span><span class="p">,</span> <span class="n">Emissions</span>
+    <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">SearchResults</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">timestamp_now</span><span class="p">,</span>
+        <span class="n">timestamp_epoch</span><span class="p">,</span>
+        <span class="n">timestamp_tzaware</span><span class="p">,</span>
+        <span class="n">clean_string</span><span class="p">,</span>
+        <span class="n">closest_daterange</span><span class="p">,</span>
+        <span class="n">find_daterange_gaps</span><span class="p">,</span>
+        <span class="n">split_daterange_str</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Do this here otherwise we have to produce them for every datasource</span>
+    <span class="n">start_date</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;start_date&quot;</span><span class="p">)</span>
+    <span class="n">end_date</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;end_date&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_epoch</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_now</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_date</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_date</span>
+
+    <span class="c1"># As we might have kwargs that are None we want to get rid of those</span>
+    <span class="n">search_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+
+    <span class="n">data_type</span> <span class="o">=</span> <span class="n">search_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data_type&quot;</span><span class="p">,</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">)</span>
+    <span class="n">skip_ranking</span> <span class="o">=</span> <span class="n">search_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;skip_ranking&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">valid_data_types</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="s2">&quot;footprint&quot;</span><span class="p">,</span> <span class="s2">&quot;emissions&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">data_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_data_types</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> is not a valid data type, please select one of </span><span class="si">{</span><span class="n">valid_data_types</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Here we want to load in the ObsSurface module for now</span>
+    <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;footprint&quot;</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">FOOTPRINTS</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;emissions&quot;</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">Emissions</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+    <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">datasources</span><span class="p">()</span>
+
+    <span class="c1"># Shallow load the Datasources so we can search their metadata</span>
+    <span class="n">datasources</span> <span class="o">=</span> <span class="p">(</span><span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">datasource_uuids</span><span class="p">)</span>
+
+    <span class="c1"># For the time being this will return a dict until we know how best to represent</span>
+    <span class="c1"># the footprint and emissions results in a SearchResult object</span>
+    <span class="k">if</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;emissions&quot;</span><span class="p">,</span> <span class="s2">&quot;footprint&quot;</span><span class="p">}</span> <span class="p">:</span>
+        <span class="n">sources</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">datasource</span> <span class="ow">in</span> <span class="n">datasources</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">datasource</span><span class="o">.</span><span class="n">search_metadata</span><span class="p">(</span><span class="o">**</span><span class="n">search_kwargs</span><span class="p">):</span>
+                <span class="n">uid</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">()</span>
+                <span class="n">data_keys</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">keys_in_daterange</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
+                <span class="n">sources</span><span class="p">[</span><span class="n">uid</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_keys</span>
+                <span class="n">sources</span><span class="p">[</span><span class="n">uid</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">sources</span>
+
+    <span class="c1"># Find the Datasources that contain matching metadata</span>
+    <span class="n">matching_sources</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="o">.</span><span class="n">uuid</span><span class="p">():</span> <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datasources</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">search_metadata</span><span class="p">(</span><span class="o">**</span><span class="n">search_kwargs</span><span class="p">)}</span>
+
+    <span class="c1"># If we have the site, inlet and instrument then just return the data</span>
+    <span class="c1"># TODO - should instrument be added here</span>
+    <span class="k">if</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">,</span> <span class="s2">&quot;inlet&quot;</span><span class="p">,</span> <span class="s2">&quot;species&quot;</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">search_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">or</span> <span class="n">skip_ranking</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">specific_sources</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">datasource</span> <span class="ow">in</span> <span class="n">matching_sources</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">data_keys</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">keys_in_daterange</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">data_keys</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span>
+
+            <span class="n">site</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
+            <span class="n">species</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+            <span class="n">inlet</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+
+            <span class="n">specific_sources</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_keys</span>
+            <span class="n">specific_sources</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
+
+        <span class="k">return</span> <span class="n">SearchResults</span><span class="p">(</span><span class="n">results</span><span class="o">=</span><span class="n">specific_sources</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">ranked_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">highest_ranked</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">uid</span><span class="p">,</span> <span class="n">datasource</span> <span class="ow">in</span> <span class="n">matching_sources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Find the site and then the ranking</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span>
+        <span class="c1"># Get the site inlet and species</span>
+        <span class="n">site</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+
+        <span class="n">rank_data</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_rank</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
+
+        <span class="c1"># If this Datasource doesn&#39;t have any ranking data skip it and move on</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rank_data</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># There will only be a single rank key</span>
+        <span class="n">rank_value</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">rank_data</span><span class="p">))</span>
+        <span class="c1"># Get the daterange this rank covers</span>
+        <span class="n">rank_dateranges</span> <span class="o">=</span> <span class="n">rank_data</span><span class="p">[</span><span class="n">rank_value</span><span class="p">]</span>
+
+        <span class="c1"># Each match we store gives us the information we need</span>
+        <span class="c1"># to retrieve the data</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">uid</span><span class="p">,</span> <span class="s2">&quot;dateranges&quot;</span><span class="p">:</span> <span class="n">rank_dateranges</span><span class="p">}</span>
+
+        <span class="c1"># Need to ensure we get all the dates covered</span>
+        <span class="k">if</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">highest_ranked</span><span class="p">[</span><span class="n">site</span><span class="p">]:</span>
+            <span class="n">species_rank_data</span> <span class="o">=</span> <span class="n">highest_ranked</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">]</span>
+
+            <span class="c1"># If we have a higher (lower number) rank save it</span>
+            <span class="k">if</span> <span class="n">rank_value</span> <span class="o">&lt;</span> <span class="n">species_rank_data</span><span class="p">[</span><span class="s2">&quot;rank&quot;</span><span class="p">]:</span>
+                <span class="n">species_rank_data</span><span class="p">[</span><span class="s2">&quot;rank&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank_value</span>
+                <span class="n">species_rank_data</span><span class="p">[</span><span class="s2">&quot;matching&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">match</span><span class="p">]</span>
+            <span class="c1"># If another Datasource has the same rank for another daterange</span>
+            <span class="c1"># we want to save that as well</span>
+            <span class="k">elif</span> <span class="n">rank_value</span> <span class="o">==</span> <span class="n">species_rank_data</span><span class="p">[</span><span class="s2">&quot;rank&quot;</span><span class="p">]:</span>
+                <span class="n">species_rank_data</span><span class="p">[</span><span class="s2">&quot;matching&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">highest_ranked</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;rank&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank_value</span>
+            <span class="n">highest_ranked</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;matching&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">match</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">highest_ranked</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="s2">&quot;No ranking data set for the given search parameters.&quot;</span>
+                <span class="s2">&quot; Please refine your search to include a specific site, species and inlet.&quot;</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="c1"># Now we have the highest ranked data the dateranges there are ranks for</span>
+    <span class="c1"># we want to fill in the gaps with (currently) the highest inlet from that site</span>
+
+    <span class="c1"># We just want some rank_metadata to go along with the final data scheme</span>
+    <span class="c1"># Can key a key of date - inlet</span>
+    <span class="n">data_keys</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">highest_ranked</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">sp</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">species</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># data_keys[site][sp][&quot;keys&quot;] = []</span>
+
+            <span class="n">species_keys</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">species_rank_data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">species_metadata</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">for</span> <span class="n">match_data</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;matching&quot;</span><span class="p">]:</span>
+                <span class="n">uuid</span> <span class="o">=</span> <span class="n">match_data</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span>
+                <span class="n">match_dateranges</span> <span class="o">=</span> <span class="n">match_data</span><span class="p">[</span><span class="s2">&quot;dateranges&quot;</span><span class="p">]</span>
+                <span class="c1"># Get the datasource as it&#39;s already in the dictionary</span>
+                <span class="c1"># we created earlier</span>
+                <span class="n">datasource</span> <span class="o">=</span> <span class="n">matching_sources</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
+                <span class="n">metadata</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span>
+                <span class="n">inlet</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+
+                <span class="n">keys</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">dr</span> <span class="ow">in</span> <span class="n">match_dateranges</span><span class="p">:</span>
+                    <span class="n">date_keys</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">keys_in_daterange_str</span><span class="p">(</span><span class="n">daterange</span><span class="o">=</span><span class="n">dr</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">date_keys</span><span class="p">:</span>
+                        <span class="n">keys</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">date_keys</span><span class="p">)</span>
+                        <span class="c1"># We&#39;ll add this to the metadata in the search results we return at the end</span>
+                        <span class="n">species_rank_data</span><span class="p">[</span><span class="n">dr</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
+
+                <span class="n">species_keys</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+                <span class="n">species_metadata</span><span class="p">[</span><span class="n">inlet</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
+
+            <span class="c1"># Only create the dictionary keys if we have some data keys</span>
+            <span class="k">if</span> <span class="n">species_keys</span><span class="p">:</span>
+                <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species_keys</span>
+                <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species_rank_data</span>
+                <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species_metadata</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># We now need to retrieve data for the dateranges for which we don&#39;t have ranking data</span>
+            <span class="c1"># To do this find the gaps in the daterange over which the user has requested data</span>
+            <span class="c1"># and the dates for which we have ranking information</span>
+
+            <span class="c1"># Get the dateranges that are covered by ranking information</span>
+            <span class="n">daterange_strs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">iter_chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">([</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;dateranges&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;matching&quot;</span><span class="p">]]))</span>
+            <span class="c1"># Find the gaps in the ranking coverage</span>
+            <span class="n">gap_dateranges</span> <span class="o">=</span> <span class="n">find_daterange_gaps</span><span class="p">(</span><span class="n">start_search</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_search</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span> <span class="n">dateranges</span><span class="o">=</span><span class="n">daterange_strs</span><span class="p">)</span>
+
+            <span class="c1"># We want the dateranges and inlets for those dateranges</span>
+            <span class="n">inlet_dateranges</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span>
+            <span class="c1"># These are the dateranges for which we have ranking information for this site and species</span>
+            <span class="n">ranked_dateranges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+            <span class="k">for</span> <span class="n">gap_daterange</span> <span class="ow">in</span> <span class="n">gap_dateranges</span><span class="p">:</span>
+                <span class="c1"># We want to select the inlet that&#39;s ranked for dates closest to the ones we have here</span>
+                <span class="n">closest_dr</span> <span class="o">=</span> <span class="n">closest_daterange</span><span class="p">(</span><span class="n">to_compare</span><span class="o">=</span><span class="n">gap_daterange</span><span class="p">,</span> <span class="n">dateranges</span><span class="o">=</span><span class="n">ranked_dateranges</span><span class="p">)</span>
+
+                <span class="n">gap_start</span><span class="p">,</span> <span class="n">gap_end</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">gap_daterange</span><span class="p">)</span>
+                <span class="c1"># Find the closest ranked inlet by date</span>
+                <span class="n">chosen_inlet</span> <span class="o">=</span> <span class="n">inlet_dateranges</span><span class="p">[</span><span class="n">closest_dr</span><span class="p">]</span>
+
+                <span class="n">inlet_metadata</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span><span class="n">chosen_inlet</span><span class="p">]</span>
+                <span class="n">inlet_instrument</span> <span class="o">=</span> <span class="n">inlet_metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
+                <span class="n">inlet_sampling_period</span> <span class="o">=</span> <span class="n">inlet_metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span>
+
+                <span class="c1"># Then we want to retrieve the correct metadata for those inlets</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span>
+                    <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                    <span class="n">species</span><span class="o">=</span><span class="n">sp</span><span class="p">,</span>
+                    <span class="n">inlet</span><span class="o">=</span><span class="n">chosen_inlet</span><span class="p">,</span>
+                    <span class="n">instrument</span><span class="o">=</span><span class="n">inlet_instrument</span><span class="p">,</span>
+                    <span class="n">sampling_period</span><span class="o">=</span><span class="n">inlet_sampling_period</span><span class="p">,</span>
+                    <span class="n">start_date</span><span class="o">=</span><span class="n">gap_start</span><span class="p">,</span>
+                    <span class="n">end_date</span><span class="o">=</span><span class="n">gap_end</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Retrieve the data keys</span>
+                <span class="n">inlet_data_keys</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">sp</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">chosen_inlet</span><span class="p">)</span>
+
+                <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">inlet_data_keys</span><span class="p">)</span>
+
+            <span class="c1"># Remove any duplicate keys</span>
+            <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]))</span>
+
+    <span class="n">dict_data_keys</span> <span class="o">=</span> <span class="n">data_keys</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">SearchResults</span><span class="p">(</span><span class="n">results</span><span class="o">=</span><span class="n">dict_data_keys</span><span class="p">,</span> <span class="n">ranked_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<span class="c1"># def search_footprints(</span>
+<span class="c1">#     sites: Union[str, List[str]], domains: Union[str, List[str]], inlet: str, start_date: Timestamp, end_date: Timestamp</span>
+<span class="c1"># ) -&gt; Dict:</span>
+<span class="c1">#     &quot;&quot;&quot;Search for footprints for the given locations and inlet height.</span>
+
+<span class="c1">#     Args:</span>
+<span class="c1">#         locations: Location name or list of names</span>
+<span class="c1">#         inlet: Inlet height</span>
+<span class="c1">#         start_date: Start date</span>
+<span class="c1">#         end_date: End date</span>
+<span class="c1">#     Returns:</span>
+<span class="c1">#         dict: Dictionary of keys keyed by location</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from collections import defaultdict</span>
+<span class="c1">#     from openghg.modules import Datasource, FOOTPRINTS</span>
+
+<span class="c1">#     if not isinstance(sites, list):</span>
+<span class="c1">#         sites = [sites]</span>
+
+<span class="c1">#     if not isinstance(domains, list):</span>
+<span class="c1">#         domains = [domains]</span>
+
+<span class="c1">#     footprints = FOOTPRINTS.load()</span>
+<span class="c1">#     datasource_uuids = footprints.datasources()</span>
+<span class="c1">#     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)</span>
+
+<span class="c1">#     keys = defaultdict(dict)</span>
+<span class="c1">#     # If we have locations to search</span>
+<span class="c1">#     # for sites in sites:</span>
+<span class="c1">#     for datasource in datasources:</span>
+<span class="c1">#         for site in sites:</span>
+<span class="c1">#             # TODO - should we iterate over the domains? Will there be the same site in multiple footprint domains?</span>
+<span class="c1">#             search_terms = [inlet, site] + domains</span>
+<span class="c1">#             if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):</span>
+<span class="c1">#                 # Get the data keys for the data in the matching daterange</span>
+<span class="c1">#                 in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)</span>
+<span class="c1">#                 keys[site][&quot;keys&quot;] = in_date</span>
+<span class="c1">#                 keys[site][&quot;metadata&quot;] = datasource.metadata()</span>
+
+<span class="c1">#     return keys</span>
+
+
+<span class="c1"># def search_emissions(</span>
+<span class="c1">#     species: Union[str, List[str]],</span>
+<span class="c1">#     sources: Union[str, List[str]],</span>
+<span class="c1">#     domains: Union[str, List[str]],</span>
+<span class="c1">#     high_time_res: Optional[bool] = False,</span>
+<span class="c1">#     start_date: Optional[Union[str, Timestamp]] = None,</span>
+<span class="c1">#     end_date: Optional[Union[str, Timestamp]] = None,</span>
+<span class="c1"># ) -&gt; Dict:</span>
+<span class="c1">#     &quot;&quot;&quot;Search for emissions for the given locations and inlet height.</span>
+
+<span class="c1">#     Args:</span>
+<span class="c1">#         locations: Location name or list of names</span>
+<span class="c1">#         inlet: Inlet height</span>
+<span class="c1">#         start_date: Start date</span>
+<span class="c1">#         end_date: End date</span>
+<span class="c1">#     Returns:</span>
+<span class="c1">#         dict: Dictionary of keys keyed by location</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from collections import defaultdict</span>
+<span class="c1">#     from openghg.modules import Datasource, Emissions</span>
+<span class="c1">#     from openghg.util import timestamp_epoch, timestamp_now, timestamp_tzaware</span>
+
+<span class="c1">#     if not isinstance(species, list):</span>
+<span class="c1">#         species = [species]</span>
+
+<span class="c1">#     if not isinstance(domains, list):</span>
+<span class="c1">#         domains = [domains]</span>
+
+<span class="c1">#     if sources is not None and not isinstance(sources, list):</span>
+<span class="c1">#         sources = [sources]</span>
+
+<span class="c1">#     if start_date is None:</span>
+<span class="c1">#         start_date = timestamp_epoch()</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         start_date = timestamp_tzaware(start_date)</span>
+
+<span class="c1">#     if end_date is None:</span>
+<span class="c1">#         end_date = timestamp_now()</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         end_date = timestamp_tzaware(end_date)</span>
+
+<span class="c1">#     emissions = Emissions.load()</span>
+<span class="c1">#     datasource_uuids = emissions.datasources()</span>
+<span class="c1">#     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)</span>
+
+<span class="c1">#     gen_search_terms = []</span>
+<span class="c1">#     if sources is not None:</span>
+<span class="c1">#         gen_search_terms += sources</span>
+<span class="c1">#     if high_time_res:</span>
+<span class="c1">#         gen_search_terms.append(&quot;high_time_resolution&quot;)</span>
+
+<span class="c1">#     keys = defaultdict(dict)</span>
+<span class="c1">#     # If we have locations to search</span>
+<span class="c1">#     # for sites in sites:</span>
+<span class="c1">#     for datasource in datasources:</span>
+<span class="c1">#         for sp in species:</span>
+<span class="c1">#             for domain in domains:</span>
+<span class="c1">#                 search_terms = [sp, domain] + gen_search_terms</span>
+<span class="c1">#                 if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):</span>
+<span class="c1">#                     # Get the data keys for the data in the matching daterange</span>
+<span class="c1">#                     in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)</span>
+<span class="c1">#                     key = &quot;_&quot;.join(search_terms)</span>
+<span class="c1">#                     keys[key][&quot;keys&quot;] = in_date</span>
+<span class="c1">#                     keys[key][&quot;metadata&quot;] = datasource.metadata()</span>
+
+<span class="c1">#     return keys</span>
+
+
+<span class="k">def</span> <span class="nf">_strip_dates_keys</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Strips the date from a key, could this data just be read from JSON instead?</span>
+<span class="sd">    Read dates covered from the Datasource?</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        keys (list): List of keys containing data</span>
+<span class="sd">        data/uuid/&lt;uuid&gt;/&lt;version&gt;/2019-03-01-04:14:30+00:00_2019-05-31-20:44:30+00:00</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Daterange string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">keys</span><span class="p">]</span>
+
+    <span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">start_key</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">end_key</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># Get the first and last dates from the keys in the search results</span>
+    <span class="n">start_date</span> <span class="o">=</span> <span class="n">start_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;+00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">end_date</span> <span class="o">=</span> <span class="n">end_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;+00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">])</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020 OpenGHG development team.
+      <span class="lastupdated">
+        Last updated on May 20, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

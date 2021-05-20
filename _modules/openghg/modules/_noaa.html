@@ -1,0 +1,544 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>openghg.modules._noaa &mdash; OpenGHG 0+untagged.3.g42c0657 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../../../_static/custom.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../features.html">Features</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/index_devel.html">Development</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index_devapi.html">Developer API documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenGHG</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>openghg.modules._noaa</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for openghg.modules._noaa</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">BaseModule</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;NOAA&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="NOAA"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA">[docs]</a><span class="k">class</span> <span class="nc">NOAA</span><span class="p">(</span><span class="n">BaseModule</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for processing NOAA data&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="NOAA.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
+
+        <span class="c1"># Holds parameters used for writing attributes to Datasets</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_noaa_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;NOAA&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_site_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;acrg_site_info.json&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NOAA.read_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read NOAA data from raw text file or ObsPack NetCDF</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_filepath: Data filepath</span>
+<span class="sd">            site: Three letter site code</span>
+<span class="sd">            inlet: Inlet height, if no height use measurement type e.g. flask</span>
+<span class="sd">            measurement_type: One of (&quot;flask&quot;, &quot;insitu&quot;, &quot;pfp&quot;)</span>
+<span class="sd">            network: Network, defaults to NOAA</span>
+<span class="sd">            instrument: Instrument name</span>
+<span class="sd">            sampling_period: Sampling period</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of data and metadata</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+        <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Inlet must be given for NOAA data processing. If flask data pass flask as inlet.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sampling_period</span> <span class="o">=</span> <span class="s2">&quot;NOT_SET&quot;</span>
+
+        <span class="n">file_extension</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span>
+
+        <span class="k">if</span> <span class="n">file_extension</span> <span class="o">==</span> <span class="s2">&quot;.nc&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_obspack</span><span class="p">(</span>
+                <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+                <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
+                <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+                <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_file</span><span class="p">(</span>
+                <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+                <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
+                <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+                <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="NOAA.read_obspack"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.read_obspack">[docs]</a>    <span class="k">def</span> <span class="nf">read_obspack</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read NOAA ObsPack NetCDF files</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_filepath: Path to file</span>
+<span class="sd">            site: Three letter site code</span>
+<span class="sd">            inlet: Inlet height, if no height use measurement type e.g. flask</span>
+<span class="sd">            measurement_type: One of flask, insity or pfp</span>
+<span class="sd">            instrument: Instrument name</span>
+<span class="sd">            sampling_period: Sampling period</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of results</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span>
+
+        <span class="c1"># from numpy import array as np_array</span>
+
+        <span class="c1"># from openghg.processing import assign_attributes</span>
+
+        <span class="n">valid_types</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;flask&quot;</span><span class="p">,</span> <span class="s2">&quot;insitu&quot;</span><span class="p">,</span> <span class="s2">&quot;pfp&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">measurement_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;measurement_type must be one of </span><span class="si">{</span><span class="n">valid_types</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">obspack_ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
+        <span class="n">orig_attrs</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span>
+
+        <span class="c1"># TODO - the simplest way of getting a clean Dataset in the form we want</span>
+        <span class="c1"># seems to be to go to a pandas Dataframe and back, open to suggestions on this.</span>
+        <span class="c1"># GJ - 2021-04-15</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)]</span>
+
+        <span class="n">wanted</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;value_unc&quot;</span><span class="p">,</span> <span class="s2">&quot;nvalue&quot;</span><span class="p">,</span> <span class="s2">&quot;value_std_dev&quot;</span><span class="p">]</span>
+        <span class="n">to_extract</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">wanted</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">df</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">to_extract</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No valid data columns found in converted DataFrame. We expect the following data variables in the passed NetCDF: </span><span class="si">{</span><span class="n">wanted</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">to_extract</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">is_monotonic_increasing</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+
+        <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
+        <span class="c1"># TODO - need to choose which keys we want to keep</span>
+        <span class="c1"># GJ - 2021-04-15</span>
+        <span class="n">processed_ds</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">orig_attrs</span>
+
+        <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;dataset_parameter&quot;</span><span class="p">])</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;measurement_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement_type</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">instrument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">processed_ds</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">}</span>
+
+        <span class="c1"># TODO - how do we want to handle the CF compliance for the ObsPack files?</span>
+        <span class="c1"># GJ - 2021-04-14</span>
+        <span class="c1"># data = assign_attributes(data=data, site=site, network=network)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="NOAA.read_raw_file"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.read_raw_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_raw_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reads NOAA data files and returns a dictionary of processed</span>
+<span class="sd">        data and metadata.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_filepath: Path of file to load</span>
+<span class="sd">            species: Species name</span>
+<span class="sd">            site: Site name</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: UUIDs of Datasources data has been assigned to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openghg.processing</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
+        <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+        <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="n">species</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="n">source_name</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span>
+        <span class="n">source_name</span> <span class="o">=</span> <span class="n">source_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span>
+            <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span>
+            <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+            <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
+            <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;NOAA&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">gas_data</span></div>
+
+<div class="viewcode-block" id="NOAA.read_raw_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.read_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_raw_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;flask&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Separates the gases stored in the dataframe in</span>
+<span class="sd">        separate dataframes and returns a dictionary of gases</span>
+<span class="sd">        with an assigned UUID as gas:UUID and a list of the processed</span>
+<span class="sd">        dataframes</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_filepath: Path of datafile</span>
+<span class="sd">            species: Species string such as CH4, CO</span>
+<span class="sd">            measurement_type: Type of measurements e.g. flask</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary containing attributes, data and metadata keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">compliant_string</span><span class="p">,</span> <span class="n">read_header</span>
+        <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">Timestamp</span>
+
+        <span class="n">header</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
+
+        <span class="n">column_names</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">14</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">date_parser</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">hour</span><span class="p">,</span> <span class="n">minute</span><span class="p">,</span> <span class="n">second</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">hour</span><span class="p">,</span> <span class="n">minute</span><span class="p">,</span> <span class="n">second</span><span class="p">)</span>
+
+        <span class="n">date_parsing</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;sample_year&quot;</span><span class="p">,</span> <span class="s2">&quot;sample_month&quot;</span><span class="p">,</span> <span class="s2">&quot;sample_day&quot;</span><span class="p">,</span> <span class="s2">&quot;sample_hour&quot;</span><span class="p">,</span> <span class="s2">&quot;sample_minute&quot;</span><span class="p">,</span> <span class="s2">&quot;sample_seconds&quot;</span><span class="p">]}</span>
+
+        <span class="n">data_types</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;sample_year&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="s2">&quot;sample_month&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="s2">&quot;sample_day&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="s2">&quot;sample_hour&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="s2">&quot;sample_minute&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="s2">&quot;sample_seconds&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Number of header lines to skip</span>
+        <span class="n">n_skip</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span>
+            <span class="n">data_filepath</span><span class="p">,</span>
+            <span class="n">skiprows</span><span class="o">=</span><span class="n">n_skip</span><span class="p">,</span>
+            <span class="n">names</span><span class="o">=</span><span class="n">column_names</span><span class="p">,</span>
+            <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">data_types</span><span class="p">,</span>
+            <span class="n">parse_dates</span><span class="o">=</span><span class="n">date_parsing</span><span class="p">,</span>
+            <span class="n">date_parser</span><span class="o">=</span><span class="n">date_parser</span><span class="p">,</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
+            <span class="n">skipinitialspace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Drop duplicates</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)]</span>
+
+        <span class="c1"># Check if the index is sorted</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">is_monotonic_increasing</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+
+        <span class="c1"># Read the site code from the Dataframe</span>
+        <span class="n">site</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sample_site_code&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+        <span class="c1"># If this isn&#39;t a site we recognize try and read it from the filename</span>
+        <span class="k">if</span> <span class="n">site</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_site_data</span><span class="p">:</span>
+            <span class="n">site</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">site</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_site_data</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The site </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> is not recognized.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># If we&#39;re passed a species ensure that it is in fact the correct species</span>
+            <span class="n">data_species</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;parameter_formula&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+            <span class="n">passed_species</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">data_species</span> <span class="o">!=</span> <span class="n">passed_species</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Mismatch between passed species (</span><span class="si">{</span><span class="n">passed_species</span><span class="si">}</span><span class="s2">) and species read from data (</span><span class="si">{</span><span class="n">data_species</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="p">)</span>
+
+        <span class="n">species</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+        <span class="n">flag</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">selection_flag</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">flag_str</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">analysis_flag</span><span class="p">:</span>
+            <span class="n">flag</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flag_str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">selection_flag</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flag_str</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;.&quot;</span><span class="p">))</span>
+
+        <span class="n">combined_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">data</span><span class="p">[</span><span class="n">species</span> <span class="o">+</span> <span class="s2">&quot;_status_flag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flag</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">species</span> <span class="o">+</span> <span class="s2">&quot;_selection_flag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">selection_flag</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">species</span> <span class="o">+</span> <span class="s2">&quot;_status_flag&quot;</span><span class="p">]]</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span>
+            <span class="p">[</span>
+                <span class="s2">&quot;sample_latitude&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;sample_longitude&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;sample_altitude&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;analysis_value&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;analysis_uncertainty&quot;</span><span class="p">,</span>
+                <span class="n">species</span> <span class="o">+</span> <span class="s2">&quot;_selection_flag&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">]</span>
+
+        <span class="n">rename_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;analysis_value&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
+            <span class="s2">&quot;analysis_uncertainty&quot;</span><span class="p">:</span> <span class="n">species</span> <span class="o">+</span> <span class="s2">&quot;_repeatability&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sample_longitude&quot;</span><span class="p">:</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sample_latitude&quot;</span><span class="p">:</span> <span class="s2">&quot;latitude&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sample_altitude&quot;</span><span class="p">:</span> <span class="s2">&quot;altitude&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_dict</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
+
+        <span class="n">site_attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noaa_params</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
+        <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
+        <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noaa_params</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">][</span><span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">compliant_string</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;measurement_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement_type</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
+
+        <span class="n">combined_data</span><span class="p">[</span><span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+            <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">site_attributes</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">combined_data</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020 OpenGHG development team.
+      <span class="lastupdated">
+        Last updated on May 20, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
