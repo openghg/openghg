@@ -3,6 +3,7 @@ from pandas import Timestamp
 
 from openghg.modules import Datasource, ObsSurface
 from openghg.objectstore import get_local_bucket, exists
+from openghg.util import create_daterange_str
 from helpers import get_datapath
 
 
@@ -393,7 +394,9 @@ def test_read_thames_barrier():
 
     data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER", site="TMB", network="LGHG", sampling_period=3600)
+    results = ObsSurface.read_file(
+        filepath=data_filepath, data_type="THAMESBARRIER", site="TMB", network="LGHG", sampling_period=3600
+    )
 
     expected_keys = sorted(["CH4", "CO2", "CO"])
 
@@ -495,3 +498,41 @@ def test_add_new_data_correct_datasource():
 
     for key in shared_keys:
         assert first_results[key] == second_results[key]
+
+
+def test_set_rank():
+    o = ObsSurface.load()
+
+    o._rank_data.clear()
+
+    test_uid = "test-uid-123"
+
+    daterange_str = create_daterange_str(start="2001-01-01", end="2005-01-01")
+    o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
+
+    assert o._rank_data == {"test-uid-123": {1: ["2001-01-01-00:00:00+00:00_2005-01-01-00:00:00+00:00"]}}
+
+    daterange_str = create_daterange_str(start="2007-01-01", end="2009-01-01")
+    o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
+
+    assert o._rank_data["test-uid-123"][1] == [
+        "2001-01-01-00:00:00+00:00_2005-01-01-00:00:00+00:00",
+        "2007-01-01-00:00:00+00:00_2009-01-01-00:00:00+00:00",
+    ]
+
+    # Make sure we can't set another rank for the same daterange
+    with pytest.raises(ValueError):
+        o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str)
+
+    daterange_str = create_daterange_str(start="2008-01-01", end="2009-01-01")
+
+    with pytest.raises(ValueError):
+        o.set_rank(uuid=test_uid, rank=3, date_range=daterange_str)
+
+    daterange_str = create_daterange_str(start="2007-01-01", end="2015-01-01")
+    o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
+
+    assert o._rank_data["test-uid-123"][1] == [
+        "2001-01-01-00:00:00+00:00_2005-01-01-00:00:00+00:00",
+        "2007-01-01-00:00:00+00:00_2015-01-01-00:00:00+00:00",
+    ]

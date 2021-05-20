@@ -199,7 +199,9 @@ class BaseModule:
         """
         from openghg.util import combine_dateranges, date_overlap, valid_daterange
 
-        if not 1 <= int(rank) <= 10:
+        rank = int(rank)
+
+        if not 1 <= rank <= 10:
             raise TypeError("Rank can only take values 1 to 10 (for unranked). Where 1 is the highest rank.")
 
         if not isinstance(date_range, list):
@@ -226,10 +228,13 @@ class BaseModule:
                                 )
 
             # Combine the dateranges
-            self._rank_data[uuid][rank].extend(date_range)
+            if rank in rank_data:
+                rank_data[rank].extend(date_range)
+            else:
+                rank_data[rank] = [date_range]
 
             if overlap:
-                self._rank_data[uuid][rank] = combine_dateranges(date_range)
+                rank_data[rank] = combine_dateranges(rank_data[rank])
         else:
             self._rank_data[uuid][rank] = date_range
 

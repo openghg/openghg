@@ -154,7 +154,7 @@ def create_daterange(start: Timestamp, end: Timestamp, freq: Optional[str] = "D"
     return date_range(start=start, end=end, freq=freq)
 
 
-def create_daterange_str(start, end) -> str:
+def create_daterange_str(start: Union[str, Timestamp], end: Union[str, Timestamp]) -> str:
     """Convert the passed datetimes into a daterange string
     for use in searches and Datasource interactions
 
