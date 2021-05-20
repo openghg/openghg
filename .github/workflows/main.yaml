@@ -81,7 +81,7 @@ jobs:
         sudo apt-get install -yq pandoc
         cd doc
         make
-      if: matrix.python-version == 3.7 && matrix.operating-system == 'ubuntu-latest'
+      if: matrix.python-version == 3.8 && matrix.operating-system == 'ubuntu-latest'
     - name: Deploy to GitHub pages
       uses: JamesIves/github-pages-deploy-action@164583b9e44b4fc5910e78feb607ea7c98d3c7b9
       with:
