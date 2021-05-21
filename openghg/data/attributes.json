@@ -182,6 +182,7 @@
     },
     "instrument": "Picarro 2311-f",
     "inlet": "192m",
+    "sampling_period": 1800,
     "global_attributes": {
       "data_owner": "Carole Helfter",
       "data_owner_email": "caro2@ceh.ac.uk"
