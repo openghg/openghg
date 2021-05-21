@@ -12,9 +12,6 @@ class BTT(BaseModule):
     def __init__(self):
         from openghg.util import load_json
 
-        # Sampling period of  data in seconds
-        #self._sampling_period = "NA"
-
         data = load_json(filename="attributes.json")
         self._params = data["BTT"]
 
@@ -74,11 +71,10 @@ class BTT(BaseModule):
         species_sd = {"CO2": "co2.sd.ppm", "CH4": "ch4.sd.ppb"}
 
         sampling_period = self._params["sampling_period"]
-        sampling_period_seconds = str(int(sampling_period))+'s'
+        sampling_period_seconds = str(int(sampling_period)) + 's'
 
         data = read_csv(data_filepath)
         data["time"] = Timestamp("2019-01-01 00:00") + to_timedelta(data["DOY"] - 1, unit="D")
-        #data["time"] = data["time"].dt.round("30min")
         data["time"] = data["time"].dt.round(sampling_period_seconds)
         data = data[~isnull(data.time)]
 
@@ -114,6 +110,3 @@ class BTT(BaseModule):
             }
 
         return combined_data
-            
-        
-        
