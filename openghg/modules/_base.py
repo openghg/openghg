@@ -170,11 +170,9 @@ class BaseModule:
 
         ranked = defaultdict(list)
         # Check if this Datasource is ranked for the dates passed
-        for rank, dateranges in rank_data.items():
-            for stored_daterange in dateranges:
-                if daterange_overlap(daterange_a=search_daterange, daterange_b=stored_daterange):
-                    # return {rank: stored_daterange}
-                    ranked[rank].append(stored_daterange)
+        for daterange, rank in rank_data.items():
+            if daterange_overlap(daterange_a=search_daterange, daterange_b=daterange):
+                ranked[rank].append(daterange)
 
         return ranked
 
