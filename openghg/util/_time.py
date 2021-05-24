@@ -10,12 +10,13 @@ __all__ = [
     "create_daterange_str",
     "create_daterange",
     "create_aligned_timestamp",
-    "date_overlap",
+    "daterange_overlap",
     "combine_dateranges",
     "split_daterange_str",
     "closest_daterange",
     "valid_daterange",
     "find_daterange_gaps",
+    "trim_daterange",
 ]
 
 
@@ -83,7 +84,7 @@ def get_datetime(year, month, day, hour=None, minute=None, second=None):
     return datetime_to_datetime(date)
 
 
-def date_overlap(daterange_a, daterange_b):
+def daterange_overlap(daterange_a, daterange_b):
     """Check if daterange_a is within daterange_b.
 
     Args:
@@ -430,3 +431,34 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
     gaps.sort()
 
     return gaps
+
+
+def trim_daterange(to_trim: str, overlapping: str) -> str:
+    """Trims a daterange
+
+    Args:
+        to_trim: Daterange to trim down. Dates that overlap
+        with overlap_daterange will be removed from to_trim
+        overlap_daterange: Daterange containing dates we want to trim
+        from to_trim
+    Returns:
+        str: Trimmed daterange
+    """
+    from pandas import Timedelta
+    from openghg.util import create_daterange_str, split_daterange_str
+
+    if not daterange_overlap(daterange_a=to_trim, daterange_b=overlapping):
+        raise ValueError("No overlap of dateranges.")
+
+    # We need to work out which way round they overlap
+    start_trim, end_trim = split_daterange_str(to_trim)
+    start_overlap, end_overlap = split_daterange_str(overlapping)
+    gap = "1s"
+
+    # Work out if to_trim is before or after the overlap_daterange
+    if end_trim > start_overlap and end_overlap > end_trim:
+        new_end_trim = start_overlap - Timedelta(gap)
+        return create_daterange_str(start=start_trim, end=new_end_trim)
+    else:
+        new_start_trim = end_overlap + Timedelta(gap)
+        return create_daterange_str(start=new_start_trim, end=end_trim)

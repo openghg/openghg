@@ -149,16 +149,16 @@ class BaseModule:
         del self._datasource_uuids[uuid]
 
     def get_rank(self: T, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
-        """ Get the rank for the given Datasource for a given date range
+        """Get the rank for the given Datasource for a given date range
 
-            Args:
-                uuid: UUID of Datasource
-                start_date: Start date
-                end_date: End date
-            Returns:
-                dict: Dictionary of rank and daterange covered by that rank
+        Args:
+            uuid: UUID of Datasource
+            start_date: Start date
+            end_date: End date
+        Returns:
+            dict: Dictionary of rank and daterange covered by that rank
         """
-        from openghg.util import date_overlap, create_daterange_str
+        from openghg.util import daterange_overlap, create_daterange_str
         from collections import defaultdict
 
         if uuid not in self._rank_data:
@@ -172,7 +172,7 @@ class BaseModule:
         # Check if this Datasource is ranked for the dates passed
         for rank, dateranges in rank_data.items():
             for stored_daterange in dateranges:
-                if date_overlap(daterange_a=search_daterange, daterange_b=stored_daterange):
+                if daterange_overlap(daterange_a=search_daterange, daterange_b=stored_daterange):
                     # return {rank: stored_daterange}
                     ranked[rank].append(stored_daterange)
 
@@ -197,7 +197,8 @@ class BaseModule:
         Returns:
             None
         """
-        from openghg.util import combine_dateranges, date_overlap, valid_daterange
+        from openghg.util import combine_dateranges, daterange_overlap, valid_daterange, trim_daterange
+        from copy import deepcopy
 
         rank = int(rank)
 
@@ -207,36 +208,66 @@ class BaseModule:
         if not isinstance(date_range, list):
             date_range = [date_range]
 
-        overlap = False
+        # Used to store dateranges that need to be trimmed to ensure no daterange overlap
+        to_update = []
+        # Non-overlapping dateranges that can be stored directly
+        to_add = []
 
         if uuid in self._rank_data:
             rank_data = self._rank_data[uuid]
             # Check this source isn't ranked differently for the same dates
-            for d in date_range:
-                if not valid_daterange(d):
+            for new_daterange in date_range:
+                if not valid_daterange(new_daterange):
                     raise ValueError("Invalid daterange, please ensure start and end dates are correct.")
 
-                # Check we don't have any overlapping dateranges for other ranks
-                for existing_rank, existing_daterange in rank_data.items():
-                    for e in existing_daterange:
-                        if date_overlap(daterange_a=e, daterange_b=d):
-                            overlap = True
-                            if rank != existing_rank:
-                                raise ValueError(
-                                    f"This datasource has rank {existing_rank} for dates that overlap the ones given. \
-                                                    Overlapping dateranges are {e} and {d}"
-                                )
+                overlap = False
+                # Check for overlapping dateranges and add 
+                for existing_daterange, existing_rank in rank_data.items():
+                    if daterange_overlap(daterange_a=new_daterange, daterange_b=existing_daterange):
+                        overlap = True
 
-            # Combine the dateranges
-            if rank in rank_data:
-                rank_data[rank].extend(date_range)
-            else:
-                rank_data[rank] = [date_range]
+                        if rank != existing_rank and overwrite:
+                            # Save the daterange we need to update
+                            to_update.append((existing_daterange, new_daterange))
+                            continue
+                        # If the ranks are the same we just want to combine the dateranges
+                        elif rank == existing_rank:
+                            combined = combine_dateranges(new_daterange, existing_daterange)[0]
+                            to_add.append(combined)
+                        else:
+                            raise ValueError(
+                                f"This datasource has rank {existing_rank} for dates that overlap the ones given. \
+                                                Overlapping dateranges are {new_daterange} and {existing_daterange}"
+                            )
+                # Otherwise we just want to add the new daterange to the dict
+                if not overlap:
+                    to_add.append(new_daterange)
 
-            if overlap:
-                rank_data[rank] = combine_dateranges(rank_data[rank])
+            # If we've got dateranges to update and ranks to overwrite we need to trim the 
+            # previous ranking daterange down so we don't have overlapping dateranges
+            if overwrite and to_update:
+                # Here we first take a backup of the old ranking data, update
+                # it and then write it back
+                ranking_backup = deepcopy(rank_data)
+                for exisiting, new in to_update:
+                    rank_copy = rank_data[exisiting]
+                    # Remove the exisiting daterange rank
+                    del ranking_backup[existing_daterange]
+                    # Here we trim the existing daterange down and reassign its rank
+                    trimmed = trim_daterange(to_trim=exisiting, overlapping=new)
+                    # Set the old rank with the newly trimmed daterange
+                    ranking_backup[trimmed] = rank_copy
+                    # Add in the new daterange 
+                    ranking_backup[new] = rank
+
+                rank_data = ranking_backup
+
+            # Finally, store the dateranges that didn't overlap
+            for d in to_add:
+                rank_data[d] = rank
         else:
-            self._rank_data[uuid][rank] = date_range
+            for d in date_range:
+                self._rank_data[uuid][d] = rank    
 
         self.save()
 
