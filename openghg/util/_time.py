@@ -1,5 +1,5 @@
 from pandas import Timestamp, DatetimeIndex
-from typing import List, Tuple, Optional, Union
+from typing import Dict, List, Tuple, Optional, Union
 
 __all__ = [
     "timestamp_tzaware",
@@ -17,6 +17,8 @@ __all__ = [
     "valid_daterange",
     "find_daterange_gaps",
     "trim_daterange",
+    "split_encompassed_daterange",
+    "daterange_contains",
 ]
 
 
@@ -433,6 +435,21 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
     return gaps
 
 
+def daterange_contains(container: str, contained: str) -> bool:
+    """Check if container contains contained
+
+        Args:
+            container: Daterange
+            contained: Daterange
+        Returns:
+            bool
+    """
+    start_a, end_a = split_daterange_str(container)
+    start_b, end_b = split_daterange_str(contained)
+
+    return start_a < start_b and end_b < end_a
+
+
 def trim_daterange(to_trim: str, overlapping: str) -> str:
     """Trims a daterange
 
@@ -445,20 +462,67 @@ def trim_daterange(to_trim: str, overlapping: str) -> str:
         str: Trimmed daterange
     """
     from pandas import Timedelta
-    from openghg.util import create_daterange_str, split_daterange_str
 
     if not daterange_overlap(daterange_a=to_trim, daterange_b=overlapping):
-        raise ValueError("No overlap of dateranges.")
+        raise ValueError(f"Dateranges {to_trim} and {overlapping} do not overlap")
 
     # We need to work out which way round they overlap
     start_trim, end_trim = split_daterange_str(to_trim)
     start_overlap, end_overlap = split_daterange_str(overlapping)
-    gap = "1s"
+
+    delta_gap = Timedelta("1s")
 
     # Work out if to_trim is before or after the overlap_daterange
     if end_trim > start_overlap and end_overlap > end_trim:
-        new_end_trim = start_overlap - Timedelta(gap)
+        new_end_trim = start_overlap - delta_gap
         return create_daterange_str(start=start_trim, end=new_end_trim)
     else:
-        new_start_trim = end_overlap + Timedelta(gap)
+        new_start_trim = end_overlap + delta_gap
         return create_daterange_str(start=new_start_trim, end=end_trim)
+
+
+def split_encompassed_daterange(container: str, contained: str) -> Dict:
+    """ Checks if one of the passed dateranges contains the other, if so, then
+    split the larger daterange into three sections.
+
+          <---a--->
+    <---------b----------->
+
+    Here b is split into three and we end up with:
+
+    <-dr1-><---a---><-dr2->
+
+    Args:
+        daterange_a: Daterange
+        daterange_b: Daterange
+    Returns:
+        dict: Dictionary of results
+    """
+    from pandas import Timedelta
+
+    if not daterange_overlap(daterange_a=container, daterange_b=contained):
+        raise ValueError("No overlap of dateranges.")
+
+    container_start, container_end = split_daterange_str(daterange_str=container)
+    contained_start, contained_end = split_daterange_str(daterange_str=contained)
+
+    delta_gap = Timedelta("1s")
+
+    dr1_start = container_start
+    dr1_end = contained_start - delta_gap
+    dr1 = create_daterange_str(start=dr1_start, end=dr1_end)
+
+    dr3_start = contained_end + delta_gap
+    dr3_end = container_end
+    dr3 = create_daterange_str(start=dr3_start, end=dr3_end)
+
+    # Trim a gap off the end of contained
+    new_contained_end = contained_end - delta_gap
+    new_contained = create_daterange_str(start=contained_start, end=new_contained_end)
+
+    results = {}
+    results["container_start"] = dr1
+    results["contained"] = new_contained
+    results["container_end"] = dr3
+
+    return results

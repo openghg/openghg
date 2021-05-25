@@ -190,12 +190,20 @@ class BaseModule:
         Args:
             uuid: UUID of Datasource
             rank: Rank of data
-            daterange: Daterange(s)
+            date_range: Daterange(s)
             overwrite: Overwrite current ranking data
         Returns:
             None
         """
-        from openghg.util import combine_dateranges, daterange_overlap, valid_daterange, trim_daterange
+        from openghg.util import (
+            combine_dateranges,
+            daterange_overlap,
+            valid_daterange,
+            trim_daterange,
+            daterange_contains,
+            split_encompassed_daterange,
+        )
+
         from copy import deepcopy
 
         rank = int(rank)
@@ -219,7 +227,7 @@ class BaseModule:
                     raise ValueError("Invalid daterange, please ensure start and end dates are correct.")
 
                 overlap = False
-                # Check for overlapping dateranges and add 
+                # Check for overlapping dateranges and add
                 for existing_daterange, existing_rank in rank_data.items():
                     if daterange_overlap(daterange_a=new_daterange, daterange_b=existing_daterange):
                         overlap = True
@@ -230,8 +238,9 @@ class BaseModule:
                             continue
                         # If the ranks are the same we just want to combine the dateranges
                         elif rank == existing_rank:
-                            combined = combine_dateranges(new_daterange, existing_daterange)[0]
-                            to_add.append(combined)
+                            to_combine = (new_daterange, existing_daterange)
+                            combined = combine_dateranges(dateranges=to_combine)[0]
+                            to_update.append((existing_daterange, combined))
                         else:
                             raise ValueError(
                                 f"This datasource has rank {existing_rank} for dates that overlap the ones given. \
@@ -241,31 +250,52 @@ class BaseModule:
                 if not overlap:
                     to_add.append(new_daterange)
 
-            # If we've got dateranges to update and ranks to overwrite we need to trim the 
+            # If we've got dateranges to update and ranks to overwrite we need to trim the
             # previous ranking daterange down so we don't have overlapping dateranges
-            if overwrite and to_update:
+            if to_update:
                 # Here we first take a backup of the old ranking data, update
                 # it and then write it back
                 ranking_backup = deepcopy(rank_data)
-                for exisiting, new in to_update:
-                    rank_copy = rank_data[exisiting]
-                    # Remove the exisiting daterange rank
-                    del ranking_backup[existing_daterange]
-                    # Here we trim the existing daterange down and reassign its rank
-                    trimmed = trim_daterange(to_trim=exisiting, overlapping=new)
-                    # Set the old rank with the newly trimmed daterange
-                    ranking_backup[trimmed] = rank_copy
-                    # Add in the new daterange 
-                    ranking_backup[new] = rank
 
-                rank_data = ranking_backup
+                for existing, new in to_update:
+                    # Remove the existing daterange key
+                    del ranking_backup[existing]
+                    # If we want to overwrite an existing rank we need to trim that daterange and
+                    # rewrite it back to the dictionary
+                    rank_copy = rank_data[existing]
+                    if overwrite:
+                        # Here we trim the existing daterange down and reassign its rank
+                        # If the existing daterange contains the new we need to split it out, save the old rank chunks
+                        # and add the new daterangea and rank in.
+                        if daterange_contains(container=existing, contained=new):
+                            result = split_encompassed_daterange(container=existing, contained=new)
+
+                            existing_start = result["container_start"]
+                            ranking_backup[existing_start] = rank_copy
+
+                            updated_new = result["contained"]
+                            ranking_backup[updated_new] = rank
+
+                            existing_end = result["container_end"]
+                            ranking_backup[existing_end] = rank_copy
+                        # If the new daterange contains the existing we can just overwrite it
+                        elif daterange_contains(container=new, contained=existing):
+                            ranking_backup[new] = rank_copy
+                        else:
+                            trimmed = trim_daterange(to_trim=existing, overlapping=new)
+                            ranking_backup[trimmed] = rank_copy
+                    elif rank_copy == rank:
+                        # If we're not overwriting we just need to update to use the new combined
+                        ranking_backup[new] = rank_copy
+
+                self._rank_data[uuid] = ranking_backup
 
             # Finally, store the dateranges that didn't overlap
             for d in to_add:
-                rank_data[d] = rank
+                self._rank_data[uuid][d] = rank
         else:
             for d in date_range:
-                self._rank_data[uuid][d] = rank    
+                self._rank_data[uuid][d] = rank
 
         self.save()
 

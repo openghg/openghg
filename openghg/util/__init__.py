@@ -37,4 +37,6 @@ from ._time import (
     valid_daterange,
     find_daterange_gaps,
     trim_daterange,
+    split_encompassed_daterange,
+    daterange_contains,
 )

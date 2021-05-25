@@ -510,15 +510,15 @@ def test_set_rank():
     daterange_str = create_daterange_str(start="2001-01-01", end="2005-01-01")
     o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
 
-    assert o._rank_data == {"test-uid-123": {1: ["2001-01-01-00:00:00+00:00_2005-01-01-00:00:00+00:00"]}}
+    assert o._rank_data == {"test-uid-123": {"2001-01-01-00:00:00+00:00_2005-01-01-00:00:00+00:00": 1}}
 
     daterange_str = create_daterange_str(start="2007-01-01", end="2009-01-01")
     o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
 
-    assert o._rank_data["test-uid-123"][1] == [
-        "2001-01-01-00:00:00+00:00_2005-01-01-00:00:00+00:00",
-        "2007-01-01-00:00:00+00:00_2009-01-01-00:00:00+00:00",
-    ]
+    assert o._rank_data["test-uid-123"] == {
+        "2001-01-01-00:00:00+00:00_2005-01-01-00:00:00+00:00": 1,
+        "2007-01-01-00:00:00+00:00_2009-01-01-00:00:00+00:00": 1,
+    }
 
     # Make sure we can't set another rank for the same daterange
     with pytest.raises(ValueError):
@@ -532,7 +532,58 @@ def test_set_rank():
     daterange_str = create_daterange_str(start="2007-01-01", end="2015-01-01")
     o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
 
-    assert o._rank_data["test-uid-123"][1] == [
-        "2001-01-01-00:00:00+00:00_2005-01-01-00:00:00+00:00",
-        "2007-01-01-00:00:00+00:00_2015-01-01-00:00:00+00:00",
-    ]
+    assert o._rank_data["test-uid-123"] == {
+        "2001-01-01-00:00:00+00:00_2005-01-01-00:00:00+00:00": 1,
+        "2007-01-01-00:00:00+00:00_2015-01-01-00:00:00+00:00": 1,
+    }
+
+
+def test_set_rank_overwrite():
+    o = ObsSurface.load()
+
+    o._rank_data.clear()
+
+    test_uid = "test-uid-123"
+
+    daterange_str = create_daterange_str(start="2007-01-01", end="2015-01-01")
+    o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
+    assert o._rank_data["test-uid-123"] == {"2007-01-01-00:00:00+00:00_2015-01-01-00:00:00+00:00": 1}
+
+    daterange_str = create_daterange_str(start="2008-01-01", end="2009-01-01")
+    o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str, overwrite=True)
+
+    expected_ranking = {
+        "2007-01-01-00:00:00+00:00_2007-12-31-23:59:00+00:00": 1,
+        "2008-01-01-00:00:00+00:00_2008-12-31-23:59:00+00:00": 2,
+        "2009-01-01-00:00:00+00:00_2015-01-01-00:00:00+00:00": 1,
+    }
+
+    assert o._rank_data["test-uid-123"] == expected_ranking
+
+    daterange_str = create_daterange_str(start="1994-01-01", end="2023-01-01")
+    o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str, overwrite=True)
+
+    assert o._rank_data["test-uid-123"] == {"1994-01-01-00:00:00+00:00_2023-01-01-00:00:00+00:00": 1}
+
+    o._rank_data.clear()
+
+    daterange_str = create_daterange_str(start="2001-01-01", end="2021-01-01")
+    o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
+
+    assert o._rank_data["test-uid-123"] == {"2001-01-01-00:00:00+00:00_2021-01-01-00:00:00+00:00": 1}
+
+    daterange_str = create_daterange_str(start="2007-01-01", end="2009-01-01")
+    o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str, overwrite=True)
+
+    daterange_str = create_daterange_str(start="2015-01-01", end="2016-01-01")
+    o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str, overwrite=True)
+
+    expected = {
+        "2001-01-01-00:00:00+00:00_2006-12-31-23:59:00+00:00": 1,
+        "2007-01-01-00:00:00+00:00_2008-12-31-23:59:00+00:00": 2,
+        "2009-01-01-00:00:00+00:00_2014-12-31-23:59:00+00:00": 1,
+        "2015-01-01-00:00:00+00:00_2015-12-31-23:59:00+00:00": 2,
+        "2016-01-01-00:00:00+00:00_2021-01-01-00:00:00+00:00": 1,
+    }
+
+    assert o._rank_data["test-uid-123"] == expected
