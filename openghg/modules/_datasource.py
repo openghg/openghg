@@ -146,7 +146,7 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.util import date_overlap
+        from openghg.util import daterange_overlap
 
         # Group by year
         year_group = list(data.groupby("time.year"))
@@ -165,7 +165,7 @@ class Datasource:
             to_keep = []
             for current_daterange in self._data:
                 for new_daterange in additional_data:
-                    if not date_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
+                    if not daterange_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
                         to_keep.append(current_daterange)
 
             updated_data = {}
@@ -231,7 +231,7 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.util import date_overlap
+        from openghg.util import daterange_overlap
 
         # Use a dictionary keyed with the daterange covered by each segment of data
         new_data = {}
@@ -246,7 +246,7 @@ class Datasource:
             to_keep = []
             for current_daterange in self._data:
                 for new_daterange in new_data:
-                    if not date_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
+                    if not daterange_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
                         to_keep.append(current_daterange)
 
             updated_data = {}
