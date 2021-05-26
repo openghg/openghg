@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.3.g42c0657 documentation</title>
+  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.3.g50b55e4 documentation</title>
   
 
   
@@ -319,7 +319,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">date_overlap</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">daterange_overlap</span>
 
         <span class="c1"># Group by year</span>
         <span class="n">year_group</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;time.year&quot;</span><span class="p">))</span>
@@ -338,7 +338,7 @@
             <span class="n">to_keep</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">current_daterange</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">new_daterange</span> <span class="ow">in</span> <span class="n">additional_data</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">date_overlap</span><span class="p">(</span><span class="n">daterange_a</span><span class="o">=</span><span class="n">current_daterange</span><span class="p">,</span> <span class="n">daterange_b</span><span class="o">=</span><span class="n">new_daterange</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">daterange_overlap</span><span class="p">(</span><span class="n">daterange_a</span><span class="o">=</span><span class="n">current_daterange</span><span class="p">,</span> <span class="n">daterange_b</span><span class="o">=</span><span class="n">new_daterange</span><span class="p">):</span>
                         <span class="n">to_keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_daterange</span><span class="p">)</span>
 
             <span class="n">updated_data</span> <span class="o">=</span> <span class="p">{}</span>
@@ -404,7 +404,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">date_overlap</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">daterange_overlap</span>
 
         <span class="c1"># Use a dictionary keyed with the daterange covered by each segment of data</span>
         <span class="n">new_data</span> <span class="o">=</span> <span class="p">{}</span>
@@ -419,7 +419,7 @@
             <span class="n">to_keep</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">current_daterange</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">new_daterange</span> <span class="ow">in</span> <span class="n">new_data</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">date_overlap</span><span class="p">(</span><span class="n">daterange_a</span><span class="o">=</span><span class="n">current_daterange</span><span class="p">,</span> <span class="n">daterange_b</span><span class="o">=</span><span class="n">new_daterange</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">daterange_overlap</span><span class="p">(</span><span class="n">daterange_a</span><span class="o">=</span><span class="n">current_daterange</span><span class="p">,</span> <span class="n">daterange_b</span><span class="o">=</span><span class="n">new_daterange</span><span class="p">):</span>
                         <span class="n">to_keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_daterange</span><span class="p">)</span>
 
             <span class="n">updated_data</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1129,7 +1129,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on May 20, 2021.
+        Last updated on May 26, 2021.
       </span>
 
     </p>
