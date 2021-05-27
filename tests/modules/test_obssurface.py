@@ -597,5 +597,7 @@ def test_rank_overlapping_dateranges():
 
     test_uid = "test-uid-123"
 
+    o.set_rank(uuid=test_uid, rank=1, date_range=dateranges)
+
     with pytest.raises(ValueError):
-        o.set_rank(uuid=test_uid, rank=1, date_range=dateranges)
+        o.set_rank(uuid=test_uid, rank=2, date_range=dateranges)
