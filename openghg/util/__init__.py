@@ -40,3 +40,5 @@ from ._time import (
     split_encompassed_daterange,
     daterange_contains,
 )
+
+from ._tutorial import tacolneston_datapaths

@@ -214,6 +214,13 @@ class BaseModule:
         if not isinstance(date_range, list):
             date_range = [date_range]
 
+        # Sanitise the input in case we have overlappng dateranges
+        date_range = combine_dateranges(date_range)
+
+        print(date_range)
+
+        return
+
         # Used to store dateranges that need to be trimmed to ensure no daterange overlap
         to_update = []
         # Non-overlapping dateranges that can be stored directly
@@ -259,7 +266,14 @@ class BaseModule:
 
                 for existing, new in to_update:
                     # Remove the existing daterange key
-                    del ranking_backup[existing]
+                    # Here we pass if it doesn't exist as if we have multiple new dateranges
+                    # that overlap the existing daterange it might have been deleted during 
+                    # a previous iteration
+                    try:
+                        del ranking_backup[existing]
+                    except KeyError:
+                        pass
+
                     # If we want to overwrite an existing rank we need to trim that daterange and
                     # rewrite it back to the dictionary
                     rank_copy = rank_data[existing]
@@ -298,6 +312,15 @@ class BaseModule:
                 self._rank_data[uuid][d] = rank
 
         self.save()
+
+    def rank_data(self: T) -> Dict:
+        """ Return a dictionary of rank data keyed
+        by UUID
+
+            Returns:
+                dict: Dictionary of rank data
+        """
+        return self._rank_data.to_dict()
 
     def clear_datasources(self: T) -> None:
         """Remove all Datasources from the object

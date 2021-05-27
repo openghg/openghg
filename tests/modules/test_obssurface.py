@@ -587,3 +587,15 @@ def test_set_rank_overwrite():
     }
 
     assert o._rank_data["test-uid-123"] == expected
+
+
+def test_rank_overlapping_dateranges():
+    dateranges = ["2014-01-01_2099-06-06", "2014-06-07_2015-09-09", "2015-09-10_2019-01-06"]
+
+    o = ObsSurface.load()
+    o._rank_data.clear()
+
+    test_uid = "test-uid-123"
+
+    with pytest.raises(ValueError):
+        o.set_rank(uuid=test_uid, rank=1, date_range=dateranges)

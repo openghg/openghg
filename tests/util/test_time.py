@@ -199,6 +199,12 @@ def test_combining_no_overlap():
         "2011-02-01-00:00:00+00:00_2011-06-01-00:00:00+00:00",
     ]
 
+def test_combining_big_daterange():
+    dateranges = ["2014-01-01_2099-06-06", "2014-06-07_2015-09-09", "2015-09-10_2019-01-06"]
+    combined = combine_dateranges(dateranges=dateranges)
+
+    assert combined == ["2014-01-01-00:00:00+00:00_2099-06-06-00:00:00+00:00"]
+
 
 def test_split_daterange_str():
 
