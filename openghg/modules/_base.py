@@ -176,6 +176,20 @@ class BaseModule:
 
         return ranked
 
+    def clear_rank(self: T, uuid: str) -> None:
+        """ Clear the ranking data for a Datasource
+
+        Args:
+            uuid: UUID of Datasource
+        Returns:
+            None
+        """
+        if uuid in self._rank_data:
+            del self._rank_data[uuid]
+            self.save()
+        else:
+            raise ValueError("No ranking data set for that UUID.")
+
     def set_rank(
         self: T, uuid: str, rank: Union[int, str], date_range: Union[str, List[str]], overwrite: Optional[bool] = False
     ) -> None:
@@ -195,6 +209,7 @@ class BaseModule:
         Returns:
             None
         """
+        from copy import deepcopy
         from openghg.util import (
             combine_dateranges,
             daterange_overlap,
@@ -203,8 +218,6 @@ class BaseModule:
             daterange_contains,
             split_encompassed_daterange,
         )
-
-        from copy import deepcopy
 
         rank = int(rank)
 
@@ -216,10 +229,6 @@ class BaseModule:
 
         # Sanitise the input in case we have overlappng dateranges
         date_range = combine_dateranges(date_range)
-
-        print(date_range)
-
-        return
 
         # Used to store dateranges that need to be trimmed to ensure no daterange overlap
         to_update = []

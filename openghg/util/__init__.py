@@ -41,4 +41,4 @@ from ._time import (
     daterange_contains,
 )
 
-from ._tutorial import tacolneston_datapaths
+from ._tutorial import bilsdale_datapaths

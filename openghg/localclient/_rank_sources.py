@@ -33,6 +33,9 @@ class RankSources:
 
         matching_sources = [d for d in datasources if d.search_metadata(site=site, species=species)]
 
+        if not matching_sources:
+            return {}
+
         def name_str(d):
             return "_".join([d.species(), d.inlet(), d.instrument()])
 
@@ -41,6 +44,9 @@ class RankSources:
         }
 
         self._key_lookup = {name_str(d): d.uuid() for d in matching_sources}
+
+        self._lookup_data = {"site": site, "species": species}
+        self._needs_update = False
 
         return self._user_info
 
@@ -52,6 +58,11 @@ class RankSources:
         Returns:
             dict: Dictionary of ranking data
         """
+        if self._needs_update:
+            site = self._lookup_data["site"]
+            species = self._lookup_data["species"]
+            _ = self.get_sources(site=site, species=species)
+
         return self._user_info[key]["rank_data"]
 
     def set_rank(
@@ -85,7 +96,21 @@ class RankSources:
             dateranges = create_daterange_str(start=start_date, end=end_date)
 
         obs.set_rank(uuid=uuid, rank=rank, date_range=dateranges, overwrite=overwrite)
-        obs.save()
+
+        self._needs_update = True
+
+    def clear_rank(self, key: str) -> None:
+        """ Clear the ranking data for a Datasource
+
+        Args:
+            key: Key for specific source
+        Returns:
+            None
+        """
+        obs = ObsSurface.load()
+        uuid = self._key_lookup[key]
+        obs.clear_rank(uuid=uuid)
+        self._needs_update = True
 
     # def visualise_rankings(self) -> Network:
     #     """ Creates a small network graph of ranked data with each rank given a colour
