@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Development API modules &mdash; OpenGHG 0+untagged.3.g50b55e4 documentation</title>
+  <title>Development API modules &mdash; OpenGHG 0+untagged.3.g6c7e66c documentation</title>
   
 
   
@@ -899,6 +899,20 @@ the processed data has been assigned to</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="openghg.modules.BaseModule.clear_rank">
+<span class="sig-name descname"><span class="pre">clear_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uuid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_base.html#BaseModule.clear_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.BaseModule.clear_rank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear the ranking data for a Datasource</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>uuid</strong> – UUID of Datasource</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="openghg.modules.BaseModule.datasources">
 <span class="sig-name descname"><span class="pre">datasources</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/openghg/modules/_base.html#BaseModule.datasources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.BaseModule.datasources" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the list of Datasources UUIDs associated with this object</p>
@@ -987,6 +1001,19 @@ bucket and UUID</p>
 <dd class="field-odd"><p>class</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.modules.BaseModule.rank_data">
+<span class="sig-name descname"><span class="pre">rank_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_base.html#BaseModule.rank_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.BaseModule.rank_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary of rank data keyed
+by UUID</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Returns:</dt><dd><p>dict: Dictionary of rank data</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
@@ -1792,7 +1819,7 @@ this Datasource</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on May 26, 2021.
+        Last updated on May 27, 2021.
       </span>
 
     </p>

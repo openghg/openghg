@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.3.g50b55e4 documentation</title>
+  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.3.g6c7e66c documentation</title>
   
 
   
@@ -349,6 +349,20 @@
 
         <span class="k">return</span> <span class="n">ranked</span></div>
 
+<div class="viewcode-block" id="BaseModule.clear_rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.clear_rank">[docs]</a>    <span class="k">def</span> <span class="nf">clear_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Clear the ranking data for a Datasource</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            uuid: UUID of Datasource</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No ranking data set for that UUID.&quot;</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="BaseModule.set_rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.set_rank">[docs]</a>    <span class="k">def</span> <span class="nf">set_rank</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rank</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">date_range</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">overwrite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -368,6 +382,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
             <span class="n">combine_dateranges</span><span class="p">,</span>
             <span class="n">daterange_overlap</span><span class="p">,</span>
@@ -377,8 +392,6 @@
             <span class="n">split_encompassed_daterange</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-
         <span class="n">rank</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">rank</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
@@ -386,6 +399,9 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date_range</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">date_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">date_range</span><span class="p">]</span>
+
+        <span class="c1"># Sanitise the input in case we have overlappng dateranges</span>
+        <span class="n">date_range</span> <span class="o">=</span> <span class="n">combine_dateranges</span><span class="p">(</span><span class="n">date_range</span><span class="p">)</span>
 
         <span class="c1"># Used to store dateranges that need to be trimmed to ensure no daterange overlap</span>
         <span class="n">to_update</span> <span class="o">=</span> <span class="p">[]</span>
@@ -432,7 +448,14 @@
 
                 <span class="k">for</span> <span class="n">existing</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">to_update</span><span class="p">:</span>
                     <span class="c1"># Remove the existing daterange key</span>
-                    <span class="k">del</span> <span class="n">ranking_backup</span><span class="p">[</span><span class="n">existing</span><span class="p">]</span>
+                    <span class="c1"># Here we pass if it doesn&#39;t exist as if we have multiple new dateranges</span>
+                    <span class="c1"># that overlap the existing daterange it might have been deleted during </span>
+                    <span class="c1"># a previous iteration</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">ranking_backup</span><span class="p">[</span><span class="n">existing</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
                     <span class="c1"># If we want to overwrite an existing rank we need to trim that daterange and</span>
                     <span class="c1"># rewrite it back to the dictionary</span>
                     <span class="n">rank_copy</span> <span class="o">=</span> <span class="n">rank_data</span><span class="p">[</span><span class="n">existing</span><span class="p">]</span>
@@ -472,6 +495,15 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="BaseModule.rank_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.rank_data">[docs]</a>    <span class="k">def</span> <span class="nf">rank_data</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Return a dictionary of rank data keyed</span>
+<span class="sd">        by UUID</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                dict: Dictionary of rank data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+
 <div class="viewcode-block" id="BaseModule.clear_datasources"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.clear_datasources">[docs]</a>    <span class="k">def</span> <span class="nf">clear_datasources</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Remove all Datasources from the object</span>
 
@@ -494,7 +526,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on May 26, 2021.
+        Last updated on May 27, 2021.
       </span>
 
     </p>
