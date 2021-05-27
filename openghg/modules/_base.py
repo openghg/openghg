@@ -176,6 +176,20 @@ class BaseModule:
 
         return ranked
 
+    def clear_rank(self: T, uuid: str) -> None:
+        """ Clear the ranking data for a Datasource
+
+        Args:
+            uuid: UUID of Datasource
+        Returns:
+            None
+        """
+        if uuid in self._rank_data:
+            del self._rank_data[uuid]
+            self.save()
+        else:
+            raise ValueError("No ranking data set for that UUID.")
+
     def set_rank(
         self: T, uuid: str, rank: Union[int, str], date_range: Union[str, List[str]], overwrite: Optional[bool] = False
     ) -> None:
@@ -195,6 +209,7 @@ class BaseModule:
         Returns:
             None
         """
+        from copy import deepcopy
         from openghg.util import (
             combine_dateranges,
             daterange_overlap,
@@ -204,8 +219,6 @@ class BaseModule:
             split_encompassed_daterange,
         )
 
-        from copy import deepcopy
-
         rank = int(rank)
 
         if not 1 <= rank <= 10:
@@ -213,6 +226,9 @@ class BaseModule:
 
         if not isinstance(date_range, list):
             date_range = [date_range]
+
+        # Sanitise the input in case we have overlappng dateranges
+        date_range = combine_dateranges(date_range)
 
         # Used to store dateranges that need to be trimmed to ensure no daterange overlap
         to_update = []
@@ -259,7 +275,14 @@ class BaseModule:
 
                 for existing, new in to_update:
                     # Remove the existing daterange key
-                    del ranking_backup[existing]
+                    # Here we pass if it doesn't exist as if we have multiple new dateranges
+                    # that overlap the existing daterange it might have been deleted during 
+                    # a previous iteration
+                    try:
+                        del ranking_backup[existing]
+                    except KeyError:
+                        pass
+
                     # If we want to overwrite an existing rank we need to trim that daterange and
                     # rewrite it back to the dictionary
                     rank_copy = rank_data[existing]
@@ -298,6 +321,15 @@ class BaseModule:
                 self._rank_data[uuid][d] = rank
 
         self.save()
+
+    def rank_data(self: T) -> Dict:
+        """ Return a dictionary of rank data keyed
+        by UUID
+
+            Returns:
+                dict: Dictionary of rank data
+        """
+        return self._rank_data.to_dict()
 
     def clear_datasources(self: T) -> None:
         """Remove all Datasources from the object

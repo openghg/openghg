@@ -1,85 +1,62 @@
-import os
 import pytest
 from openghg.localclient import RankSources
 from openghg.modules import ObsSurface
 from openghg.objectstore import get_local_bucket
+from openghg.util import bilsdale_datapaths
 
 
 # Ensure we have something to rank
 @pytest.fixture(scope="session", autouse=True)
 def crds():
     get_local_bucket(empty=True)
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/proc_test_data/CRDS"
-    filename = "hfd.picarro.1minute.100m.min.dat"
-    filepath = os.path.join(dir_path, test_data, filename)
+    bsd_paths = bilsdale_datapaths()
+    ObsSurface.read_file(filepath=bsd_paths, data_type="CRDS", site="bsd", network="DECC")
 
-    ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="hfd", network="DECC")
 
-@pytest.mark.skip(reason="RankSources class needs updating")
-def test_ranking(crds):
+def test_set_rank():
     r = RankSources()
 
-    results = r.get_sources(site="hfd", species="co2")
-
-    hundred_uuid = results["co2_hfd_100m_picarro"]["uuid"]
-
-    del results["co2_hfd_100m_picarro"]["uuid"]
-
-    expected_results = {"co2_hfd_100m_picarro": {"rank": 0, "data_range": "2013-12-04T14:02:30_2019-05-21T15:46:30"}}
+    results = r.get_sources(site="bsd", species="co2")
 
     expected_results = {
-        "co2_hfd_100m_picarro": {
-            "rank": 0,
-            "data_range": "2013-12-04T14:02:30_2019-05-21T15:46:30",
-            "metadata": {
-                "site": "hfd",
-                "instrument": "picarro",
-                "time_resolution": "1_minute",
-                "inlet": "100m",
-                "port": "10",
-                "type": "air",
-                "species": "co2",
-                "scale": "wmo-x2007",
-                "data_type": "timeseries",
-            },
-        }
+        "co2_248m_picarro": {"rank_data": "NA", "data_range": "2014-01-30T11:12:30_2020-12-01T22:31:30"},
+        "co2_42m_picarro": {"rank_data": "NA", "data_range": "2014-01-30T11:12:30_2020-12-01T22:31:30"},
+        "co2_108m_picarro": {"rank_data": "NA", "data_range": "2014-01-30T11:12:30_2020-12-01T22:31:30"},
     }
 
     assert results == expected_results
 
-    rank_daterange = r.create_daterange(start="2013-12-04", end="2016-05-05")
+    r.set_rank(key="co2_42m_picarro", rank=1, start_date="2001-01-01", end_date="2007-01-01")
 
-    updated = {
-        "co2_hfd_100m_picarro": {
-            "rank": {1: [rank_daterange]},
-            "data_range": "2013-12-04T14:02:30_2019-05-21T15:46:30",
-            "uuid": hundred_uuid,
-        }
-    }
+    specific_results = r.get_specific_source(key="co2_42m_picarro")
 
-    r.rank_sources(updated_rankings=updated)
+    assert specific_results == {"2001-01-01-00:00:00+00:00_2007-01-01-00:00:00+00:00": 1}
 
-    results = r.get_sources(site="hfd", species="co2")
 
-    del results["co2_hfd_100m_picarro"]["uuid"]
+def test_passed_dates_and_dateranges_raises():
+    r = RankSources()
 
-    expected_results = {
-        "co2_hfd_100m_picarro": {
-            "rank": {"1": ["2013-12-04T00:00:00_2016-05-05T00:00:00"]},
-            "data_range": "2013-12-04T14:02:30_2019-05-21T15:46:30",
-            "metadata": {
-                "site": "hfd",
-                "instrument": "picarro",
-                "time_resolution": "1_minute",
-                "inlet": "100m",
-                "port": "10",
-                "type": "air",
-                "species": "co2",
-                "scale": "wmo-x2007",
-                "data_type": "timeseries",
-            },
-        }
-    }
+    r.get_sources(site="bsd", species="co2")
 
-    assert results == expected_results
+    with pytest.raises(ValueError):
+        r.set_rank(key="co2_42m_picarro", rank=1, start_date="2001-01-01", end_date="2007-01-01", dateranges=["2021-01-01_2056-05-06"])
+
+
+def test_clear_rank():
+    r = RankSources()
+
+    results = r.get_sources(site="bsd", species="co2")
+    r.set_rank(key="co2_42m_picarro", rank=1, start_date="2001-01-01", end_date="2007-01-01")
+
+    r.clear_rank(key="co2_42m_picarro")
+
+    specific_result = r.get_specific_source(key="co2_42m_picarro")
+
+    assert specific_result == "NA"
+
+    results = r.get_sources(site="bsd", species="co2")
+
+    assert results["co2_42m_picarro"]["rank_data"] == "NA"
+
+    with pytest.raises(ValueError):
+        r.clear_rank(key="co2_42m_picarro")
