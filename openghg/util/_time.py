@@ -123,8 +123,6 @@ def create_aligned_timestamp(time: Union[str, Timestamp]) -> Timestamp:
         pandas.Timestamp: Timestamp aligned to minute
         with UTC timezone
     """
-    from pandas import Timedelta, Timestamp
-
     if not isinstance(time, Timestamp):
         time = Timestamp(ts_input=time)
 
