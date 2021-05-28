@@ -601,3 +601,34 @@ def test_rank_overlapping_dateranges():
 
     with pytest.raises(ValueError):
         o.set_rank(uuid=test_uid, rank=2, date_range=dateranges)
+
+
+def test_rank_same_daterange_doesnt_change():
+    o = ObsSurface.load()
+    o._rank_data.clear()
+
+    test_uid = "test-uid-123"
+
+    o.set_rank(uuid=test_uid, rank=1, date_range="2012-01-01_2012-06-01")
+
+    assert o._rank_data == {'test-uid-123': {'2012-01-01-00:00:00+00:00_2012-06-01-00:00:00+00:00': 1}}
+
+    o.set_rank(uuid=test_uid, rank=1, date_range="2012-01-01_2012-06-01")
+
+    assert o._rank_data == {'test-uid-123': {'2012-01-01-00:00:00+00:00_2012-06-01-00:00:00+00:00': 1}}
+
+
+def test_rank_daterange_start_overlap_overwrite():
+    o = ObsSurface.load()
+    o._rank_data.clear()
+
+    test_uid = "test-uid-123"
+
+    o.set_rank(uuid=test_uid, rank=1, date_range="2012-01-01_2013-01-01")
+
+    assert o._rank_data == {'test-uid-123': {'2012-01-01-00:00:00+00:00_2013-01-01-00:00:00+00:00': 1}}
+
+    o.set_rank(uuid=test_uid, rank=2, date_range="2012-01-01_2012-06-01", overwrite=True)
+
+    print(o._rank_data)
+

@@ -39,6 +39,7 @@ from ._time import (
     trim_daterange,
     split_encompassed_daterange,
     daterange_contains,
+    sanitise_daterange,
 )
 
 from ._tutorial import bilsdale_datapaths

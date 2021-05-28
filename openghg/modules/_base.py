@@ -31,7 +31,7 @@ class BaseModule:
 
     @classmethod
     def exists(cls: Type[T], bucket: Optional[str] = None) -> bool:
-        """Check if a GC object is already saved in the object
+        """Check if the object is already saved in the object
         store
 
         Args:
@@ -213,10 +213,10 @@ class BaseModule:
         from openghg.util import (
             combine_dateranges,
             daterange_overlap,
-            valid_daterange,
             trim_daterange,
             daterange_contains,
             split_encompassed_daterange,
+            sanitise_daterange
         )
 
         rank = int(rank)
@@ -227,7 +227,9 @@ class BaseModule:
         if not isinstance(date_range, list):
             date_range = [date_range]
 
-        # Sanitise the input in case we have overlappng dateranges
+        # Make sure the dateranges passed are correct and are tz-aware
+        date_range = [sanitise_daterange(d) for d in date_range]
+        # Combine in case we have overlappng dateranges
         date_range = combine_dateranges(date_range)
 
         # Used to store dateranges that need to be trimmed to ensure no daterange overlap
@@ -239,9 +241,6 @@ class BaseModule:
             rank_data = self._rank_data[uuid]
             # Check this source isn't ranked differently for the same dates
             for new_daterange in date_range:
-                if not valid_daterange(new_daterange):
-                    raise ValueError("Invalid daterange, please ensure start and end dates are correct.")
-
                 overlap = False
                 # Check for overlapping dateranges and add
                 for existing_daterange, existing_rank in rank_data.items():
@@ -286,11 +285,13 @@ class BaseModule:
                     # If we want to overwrite an existing rank we need to trim that daterange and
                     # rewrite it back to the dictionary
                     rank_copy = rank_data[existing]
+
                     if overwrite:
-                        # Here we trim the existing daterange down and reassign its rank
-                        # If the existing daterange contains the new we need to split it out, save the old rank chunks
-                        # and add the new daterangea and rank in.
-                        if daterange_contains(container=existing, contained=new):
+                        if existing == new:
+                            ranking_backup[new] = rank_copy
+                        # If the existing daterange contains the new daterange
+                        # we need to split it into parts and save those
+                        elif daterange_contains(container=existing, contained=new):
                             result = split_encompassed_daterange(container=existing, contained=new)
 
                             existing_start = result["container_start"]
@@ -307,6 +308,7 @@ class BaseModule:
                         else:
                             trimmed = trim_daterange(to_trim=existing, overlapping=new)
                             ranking_backup[trimmed] = rank_copy
+                            ranking_backup[new] = rank
                     elif rank_copy == rank:
                         # If we're not overwriting we just need to update to use the new combined
                         ranking_backup[new] = rank_copy

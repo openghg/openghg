@@ -19,10 +19,11 @@ __all__ = [
     "trim_daterange",
     "split_encompassed_daterange",
     "daterange_contains",
+    "sanitise_daterange",
 ]
 
 
-def timestamp_tzaware(timestamp: Timestamp) -> Timestamp:
+def timestamp_tzaware(timestamp: Union[str, Timestamp]) -> Timestamp:
     """Returns the pandas Timestamp passed as a timezone (UTC) aware
     Timestamp.
 
@@ -132,8 +133,6 @@ def create_aligned_timestamp(time: Union[str, Timestamp]) -> Timestamp:
     else:
         t = time.tz_convert(tz="UTC")
 
-    t -= Timedelta(f"{t.second} s")
-
     return t
 
 
@@ -167,8 +166,8 @@ def create_daterange_str(start: Union[str, Timestamp], end: Union[str, Timestamp
     Returns:
         str: Daterange string
     """
-    start = create_aligned_timestamp(start)
-    end = create_aligned_timestamp(end)
+    start = timestamp_tzaware(start)
+    end = timestamp_tzaware(end)
 
     start = str(start).replace(" ", "-")
     end = str(end).replace(" ", "-")
@@ -213,14 +212,14 @@ def daterange_to_str(daterange):
 
 
 def combine_dateranges(dateranges: List[str]) -> List[str]:
-    """ Combine dateranges
+    """Combine dateranges
 
     Args:
         dateranges: Daterange strings
     Returns:
         list: List of combined dateranges
 
-    Modified from 
+    Modified from
     https://codereview.stackexchange.com/a/69249
     """
     if len(dateranges) == 1:
@@ -241,7 +240,7 @@ def combine_dateranges(dateranges: List[str]) -> List[str]:
             if higher[0] <= lower[1]:
                 upper_bound = max(lower[1], higher[1])
                 # Replace by combined interval
-                combined[-1] = (lower[0], upper_bound)  
+                combined[-1] = (lower[0], upper_bound)
             else:
                 combined.append(higher)
 
@@ -413,11 +412,11 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
 def daterange_contains(container: str, contained: str) -> bool:
     """Check if container contains contained
 
-        Args:
-            container: Daterange
-            contained: Daterange
-        Returns:
-            bool
+    Args:
+        container: Daterange
+        contained: Daterange
+    Returns:
+        bool
     """
     start_a, end_a = split_daterange_str(container)
     start_b, end_b = split_daterange_str(contained)
@@ -457,7 +456,7 @@ def trim_daterange(to_trim: str, overlapping: str) -> str:
 
 
 def split_encompassed_daterange(container: str, contained: str) -> Dict:
-    """ Checks if one of the passed dateranges contains the other, if so, then
+    """Checks if one of the passed dateranges contains the other, if so, then
     split the larger daterange into three sections.
 
           <---a--->
@@ -501,3 +500,20 @@ def split_encompassed_daterange(container: str, contained: str) -> Dict:
     results["container_end"] = dr3
 
     return results
+
+
+def sanitise_daterange(daterange: str) -> str:
+    """Make sure the daterange is correct and return
+    tzaware daterange.
+
+    Args:
+        daterange: Daterange str
+    Returns:
+        str: Timezone aware daterange str
+    """
+    start, end = split_daterange_str(daterange)
+
+    if start >= end:
+        raise ValueError("Invalid daterange, start after end date")
+
+    return create_daterange_str(start=start, end=end)
