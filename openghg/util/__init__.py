@@ -29,7 +29,6 @@ from ._time import (
     daterange_to_str,
     create_daterange_str,
     create_daterange,
-    create_aligned_timestamp,
     daterange_overlap,
     combine_dateranges,
     split_daterange_str,

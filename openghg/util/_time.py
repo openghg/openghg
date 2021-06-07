@@ -9,7 +9,6 @@ __all__ = [
     "daterange_to_str",
     "create_daterange_str",
     "create_daterange",
-    "create_aligned_timestamp",
     "daterange_overlap",
     "combine_dateranges",
     "split_daterange_str",
@@ -113,27 +112,6 @@ def daterange_overlap(daterange_a, daterange_b):
     return start_a <= end_b and end_a >= start_b
 
 
-def create_aligned_timestamp(time: Union[str, Timestamp]) -> Timestamp:
-    """Align the passed datetime / Timestamp object to the minute
-    interval for use in dateranges and overlap checks.
-
-    Args:
-        time (str, pandas.Timestamp)
-    Returns:
-        pandas.Timestamp: Timestamp aligned to minute
-        with UTC timezone
-    """
-    if not isinstance(time, Timestamp):
-        time = Timestamp(ts_input=time)
-
-    if time.tzinfo is None:
-        t = time.tz_localize(tz="UTC")
-    else:
-        t = time.tz_convert(tz="UTC")
-
-    return t
-
-
 def create_daterange(start: Timestamp, end: Timestamp, freq: Optional[str] = "D") -> DatetimeIndex:
     """Create a minute aligned daterange
 
@@ -148,8 +126,8 @@ def create_daterange(start: Timestamp, end: Timestamp, freq: Optional[str] = "D"
     if start > end:
         raise ValueError("Start date is after end date")
 
-    start = create_aligned_timestamp(start)
-    end = create_aligned_timestamp(end)
+    start = timestamp_tzaware(start)
+    end = timestamp_tzaware(end)
 
     return date_range(start=start, end=end, freq=freq)
 
@@ -188,8 +166,8 @@ def daterange_from_str(daterange_str: str, freq: Optional[str] = "D") -> Datetim
     split = daterange_str.split("_")
 
     # Align the seconds
-    start = create_aligned_timestamp(split[0])
-    end = create_aligned_timestamp(split[1])
+    start = timestamp_tzaware(split[0])
+    end = timestamp_tzaware(split[1])
 
     return date_range(start=start, end=end, freq=freq)
 
@@ -419,7 +397,7 @@ def daterange_contains(container: str, contained: str) -> bool:
     start_a, end_a = split_daterange_str(container)
     start_b, end_b = split_daterange_str(contained)
 
-    return start_a < start_b and end_b < end_a
+    return start_a <= start_b and end_b <= end_a
 
 
 def trim_daterange(to_trim: str, overlapping: str) -> str:
@@ -445,7 +423,7 @@ def trim_daterange(to_trim: str, overlapping: str) -> str:
     delta_gap = Timedelta("1s")
 
     # Work out if to_trim is before or after the overlap_daterange
-    if end_trim > start_overlap and end_overlap > end_trim:
+    if start_trim < start_overlap and end_overlap > end_trim:
         new_end_trim = start_overlap - delta_gap
         return create_daterange_str(start=start_trim, end=new_end_trim)
     else:
@@ -472,13 +450,39 @@ def split_encompassed_daterange(container: str, contained: str) -> Dict:
     """
     from pandas import Timedelta
 
-    if not daterange_overlap(daterange_a=container, daterange_b=contained):
-        raise ValueError("No overlap of dateranges.")
-
     container_start, container_end = split_daterange_str(daterange_str=container)
     contained_start, contained_end = split_daterange_str(daterange_str=contained)
 
+    # First check one contains the other
+    if not (container_start <= contained_start and contained_end <= container_end):
+        raise ValueError(f"Range {container} does not contain {contained}")
+
+    # Gap to add between dateranegs so they don't overlap
     delta_gap = Timedelta("1s")
+    # If the difference is less than this we'll assume they're the same timestamp
+    tolerance = Timedelta("2h")
+
+    results = {}
+    # If one of them starts at the same point we just want to split the range in two
+    if abs(contained_start - container_start) < tolerance:
+        new_contained = create_daterange_str(start=contained_start, end=contained_end)
+        dr1_start = contained_end + delta_gap
+        dr1 = create_daterange_str(start=dr1_start, end=container_end)
+
+        results["container_start"] = dr1
+        results["contained"] = new_contained
+
+        return results
+
+    if abs(contained_end - container_end) < tolerance:
+        new_contained = create_daterange_str(start=contained_start, end=contained_end)
+        dr1_end = contained_start - delta_gap
+        dr1 = create_daterange_str(start=container_start, end=dr1_end)
+
+        results["container_start"] = dr1
+        results["contained"] = new_contained
+
+        return results
 
     dr1_start = container_start
     dr1_end = contained_start - delta_gap
@@ -492,7 +496,6 @@ def split_encompassed_daterange(container: str, contained: str) -> Dict:
     new_contained_end = contained_end - delta_gap
     new_contained = create_daterange_str(start=contained_start, end=new_contained_end)
 
-    results = {}
     results["container_start"] = dr1
     results["contained"] = new_contained
     results["container_end"] = dr3

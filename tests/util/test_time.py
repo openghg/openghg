@@ -3,7 +3,6 @@ from pandas import Timestamp
 from openghg.util import (
     create_daterange,
     daterange_from_str,
-    create_aligned_timestamp,
     daterange_overlap,
     create_daterange_str,
     closest_daterange,
@@ -17,28 +16,14 @@ from openghg.util import (
 )
 
 
-def test_create_aligned_timestamp():
-    t = Timestamp("2001-01-01-15:33:33", tz="UTC")
-
-    aligned = create_aligned_timestamp(t)
-
-    assert aligned == Timestamp("2001-01-01 15:33:00", tz="UTC")
-
-    t = Timestamp(2000, 1, 1, 1, 1, 1)
-
-    aligned = create_aligned_timestamp(t)
-
-    assert str(aligned.tzinfo) == "UTC"
-
-
 def test_create_daterange():
     start = Timestamp("2019-1-1-15:33:12", tz="UTC")
     end = Timestamp("2020-1-1-18:55:12", tz="UTC")
 
     daterange = create_daterange(start, end)
 
-    assert str(daterange[0]) == "2019-01-01 15:33:00+00:00"
-    assert str(daterange[-1]) == "2020-01-01 15:33:00+00:00"
+    assert str(daterange[0]) == "2019-01-01 15:33:12+00:00"
+    assert str(daterange[-1]) == "2020-01-01 15:33:12+00:00"
 
 
 def test_create_daterange_wrong_way_raises():
@@ -55,7 +40,7 @@ def test_create_daterange_str():
 
     s = create_daterange_str(start=start, end=end)
 
-    assert s == "2019-01-01-15:33:00+00:00_2020-01-01-18:55:00+00:00"
+    assert s == "2019-01-01-15:33:12+00:00_2020-01-01-18:55:12+00:00"
 
 
 def test_daterange_from_str():
@@ -240,14 +225,14 @@ def test_trim_daterange():
 
     trimmed = trim_daterange(to_trim=trim_me, overlapping=overlapping)
 
-    assert trimmed == "2013-01-01-00:00:00+00:00_2021-09-01-00:00:00+00:00"
+    assert trimmed == "2013-01-01-00:00:01+00:00_2021-09-01-00:00:00+00:00"
 
     trim_me = create_daterange_str(start="2001-01-01", end="2005-09-01")
     overlapping = create_daterange_str(start="2004-05-09", end="2013-01-01")
 
     trimmed = trim_daterange(to_trim=trim_me, overlapping=overlapping)
 
-    assert trimmed == "2001-01-01-00:00:00+00:00_2004-05-08-23:59:00+00:00"
+    assert trimmed == "2001-01-01-00:00:00+00:00_2004-05-08-23:59:59+00:00"
 
     trim_me = create_daterange_str(start="2000-01-01", end="2005-09-01")
     overlapping = create_daterange_str(start="2007-05-09", end="2013-01-01")
@@ -264,14 +249,52 @@ def test_split_encompassed_daterange():
     result = split_encompassed_daterange(container=container, contained=contained)
 
     expected = {
-        "container_start": "2004-05-09-00:00:00+00:00_2007-05-08-23:59:00+00:00",
-        "contained": "2007-05-09-00:00:00+00:00_2009-12-31-23:59:00+00:00",
-        "container_end": "2010-01-01-00:00:00+00:00_2013-01-01-00:00:00+00:00",
+        "container_start": "2004-05-09-00:00:00+00:00_2007-05-08-23:59:59+00:00",
+        "contained": "2007-05-09-00:00:00+00:00_2009-12-31-23:59:59+00:00",
+        "container_end": "2010-01-01-00:00:01+00:00_2013-01-01-00:00:00+00:00",
     }
 
     assert result == expected
 
     container = create_daterange_str(start="1995-05-09", end="1997-01-01")
+
+    with pytest.raises(ValueError):
+        split_encompassed_daterange(container=container, contained=contained)
+
+
+def test_split_encompassed_daterange_same_start_end():
+    container = create_daterange_str(start="2004-05-09", end="2013-01-01")
+    contained = create_daterange_str(start="2004-05-09", end="2007-01-01")
+
+    result = split_encompassed_daterange(container=container, contained=contained)
+
+    expected = {
+        "container_start": "2007-01-01-00:00:01+00:00_2013-01-01-00:00:00+00:00",
+        "contained": "2004-05-09-00:00:00+00:00_2007-01-01-00:00:00+00:00",
+    }
+
+    assert result == expected
+
+    container = create_daterange_str(start="2001-01-01", end="2013-01-01")
+    contained = create_daterange_str(start="2004-05-09", end="2013-01-01")
+
+    result = split_encompassed_daterange(container=container, contained=contained)
+
+    expected = {
+        "container_start": "2001-01-01-00:00:00+00:00_2004-05-08-23:59:59+00:00",
+        "contained": "2004-05-09-00:00:00+00:00_2013-01-01-00:00:00+00:00",
+    }
+
+    assert result == expected
+
+    container = create_daterange_str(start="2010-01-01", end="2013-01-01")
+    contained = create_daterange_str(start="2004-05-09", end="2013-01-01")
+
+    with pytest.raises(ValueError):
+        split_encompassed_daterange(container=container, contained=contained)
+
+    contained = create_daterange_str(start="2004-05-09", end="2013-01-01")
+    container = create_daterange_str(start="2004-05-09", end="2007-01-01")
 
     with pytest.raises(ValueError):
         split_encompassed_daterange(container=container, contained=contained)

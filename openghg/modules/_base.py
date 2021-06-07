@@ -177,7 +177,7 @@ class BaseModule:
         return ranked
 
     def clear_rank(self: T, uuid: str) -> None:
-        """ Clear the ranking data for a Datasource
+        """Clear the ranking data for a Datasource
 
         Args:
             uuid: UUID of Datasource
@@ -216,7 +216,7 @@ class BaseModule:
             trim_daterange,
             daterange_contains,
             split_encompassed_daterange,
-            sanitise_daterange
+            sanitise_daterange,
         )
 
         rank = int(rank)
@@ -275,7 +275,7 @@ class BaseModule:
                 for existing, new in to_update:
                     # Remove the existing daterange key
                     # Here we pass if it doesn't exist as if we have multiple new dateranges
-                    # that overlap the existing daterange it might have been deleted during 
+                    # that overlap the existing daterange it might have been deleted during
                     # a previous iteration
                     try:
                         del ranking_backup[existing]
@@ -300,11 +300,15 @@ class BaseModule:
                             updated_new = result["contained"]
                             ranking_backup[updated_new] = rank
 
-                            existing_end = result["container_end"]
-                            ranking_backup[existing_end] = rank_copy
+                            # We might only end up with two dateranges
+                            try:
+                                existing_end = result["container_end"]
+                                ranking_backup[existing_end] = rank_copy
+                            except KeyError:
+                                pass
                         # If the new daterange contains the existing we can just overwrite it
                         elif daterange_contains(container=new, contained=existing):
-                            ranking_backup[new] = rank_copy
+                            ranking_backup[new] = rank
                         else:
                             trimmed = trim_daterange(to_trim=existing, overlapping=new)
                             ranking_backup[trimmed] = rank_copy
@@ -325,7 +329,7 @@ class BaseModule:
         self.save()
 
     def rank_data(self: T) -> Dict:
-        """ Return a dictionary of rank data keyed
+        """Return a dictionary of rank data keyed
         by UUID
 
             Returns:

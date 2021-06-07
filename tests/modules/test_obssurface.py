@@ -553,9 +553,9 @@ def test_set_rank_overwrite():
     o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str, overwrite=True)
 
     expected_ranking = {
-        "2007-01-01-00:00:00+00:00_2007-12-31-23:59:00+00:00": 1,
-        "2008-01-01-00:00:00+00:00_2008-12-31-23:59:00+00:00": 2,
-        "2009-01-01-00:00:00+00:00_2015-01-01-00:00:00+00:00": 1,
+        "2007-01-01-00:00:00+00:00_2007-12-31-23:59:59+00:00": 1,
+        "2008-01-01-00:00:00+00:00_2008-12-31-23:59:59+00:00": 2,
+        "2009-01-01-00:00:01+00:00_2015-01-01-00:00:00+00:00": 1,
     }
 
     assert o._rank_data["test-uid-123"] == expected_ranking
@@ -563,7 +563,7 @@ def test_set_rank_overwrite():
     daterange_str = create_daterange_str(start="1994-01-01", end="2023-01-01")
     o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str, overwrite=True)
 
-    assert o._rank_data["test-uid-123"] == {"1994-01-01-00:00:00+00:00_2023-01-01-00:00:00+00:00": 1}
+    assert o._rank_data["test-uid-123"] == {"1994-01-01-00:00:00+00:00_2023-01-01-00:00:00+00:00": 2}
 
     o._rank_data.clear()
 
@@ -579,11 +579,11 @@ def test_set_rank_overwrite():
     o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str, overwrite=True)
 
     expected = {
-        "2001-01-01-00:00:00+00:00_2006-12-31-23:59:00+00:00": 1,
-        "2007-01-01-00:00:00+00:00_2008-12-31-23:59:00+00:00": 2,
-        "2009-01-01-00:00:00+00:00_2014-12-31-23:59:00+00:00": 1,
-        "2015-01-01-00:00:00+00:00_2015-12-31-23:59:00+00:00": 2,
-        "2016-01-01-00:00:00+00:00_2021-01-01-00:00:00+00:00": 1,
+        "2001-01-01-00:00:00+00:00_2006-12-31-23:59:59+00:00": 1,
+        "2007-01-01-00:00:00+00:00_2008-12-31-23:59:59+00:00": 2,
+        "2009-01-01-00:00:01+00:00_2014-12-31-23:59:59+00:00": 1,
+        "2015-01-01-00:00:00+00:00_2015-12-31-23:59:59+00:00": 2,
+        "2016-01-01-00:00:01+00:00_2021-01-01-00:00:00+00:00": 1,
     }
 
     assert o._rank_data["test-uid-123"] == expected
@@ -611,11 +611,11 @@ def test_rank_same_daterange_doesnt_change():
 
     o.set_rank(uuid=test_uid, rank=1, date_range="2012-01-01_2012-06-01")
 
-    assert o._rank_data == {'test-uid-123': {'2012-01-01-00:00:00+00:00_2012-06-01-00:00:00+00:00': 1}}
+    assert o._rank_data == {"test-uid-123": {"2012-01-01-00:00:00+00:00_2012-06-01-00:00:00+00:00": 1}}
 
     o.set_rank(uuid=test_uid, rank=1, date_range="2012-01-01_2012-06-01")
 
-    assert o._rank_data == {'test-uid-123': {'2012-01-01-00:00:00+00:00_2012-06-01-00:00:00+00:00': 1}}
+    assert o._rank_data == {"test-uid-123": {"2012-01-01-00:00:00+00:00_2012-06-01-00:00:00+00:00": 1}}
 
 
 def test_rank_daterange_start_overlap_overwrite():
@@ -626,9 +626,19 @@ def test_rank_daterange_start_overlap_overwrite():
 
     o.set_rank(uuid=test_uid, rank=1, date_range="2012-01-01_2013-01-01")
 
-    assert o._rank_data == {'test-uid-123': {'2012-01-01-00:00:00+00:00_2013-01-01-00:00:00+00:00': 1}}
+    assert o._rank_data == {"test-uid-123": {"2012-01-01-00:00:00+00:00_2013-01-01-00:00:00+00:00": 1}}
 
     o.set_rank(uuid=test_uid, rank=2, date_range="2012-01-01_2012-06-01", overwrite=True)
 
-    print(o._rank_data)
+    assert o._rank_data == {
+        "test-uid-123": {
+            "2012-06-01-00:00:01+00:00_2013-01-01-00:00:00+00:00": 1,
+            "2012-01-01-00:00:00+00:00_2012-06-01-00:00:00+00:00": 2,
+        }
+    }
 
+    o.set_rank(uuid=test_uid, rank=1, date_range="2012-01-01_2013-01-01", overwrite=True)
+
+    expected = {"test-uid-123": {"2012-01-01-00:00:00+00:00_2013-01-01-00:00:00+00:00": 1}}
+
+    assert o._rank_data == expected
