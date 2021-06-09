@@ -10,14 +10,17 @@ import Acquire
 import Acquire.Stubs
 import pytest
 
-from access.route import access_functions
-from accounting.route import accounting_functions
+from access.route import route as access_functions
+from accounting.route import route as accounting_functions
 from admin.handler import create_handler
-from compute.route import compute_functions
-from hugs_service.route import hugs_functions
-from identity.route import identity_functions
-from registry.route import registry_functions
-from storage.route import storage_functions
+from compute.route import route as compute_functions
+from identity.route import route as identity_functions
+from registry.route import route as registry_functions
+from storage.route import route as storage_functions
+
+# We no longer have the openghg_service folder but just have the service functions
+# in their respective files
+import route as openghg_functions
 
 identity_handler = create_handler(identity_functions)
 accounting_handler = create_handler(accounting_functions)
@@ -25,7 +28,8 @@ access_handler = create_handler(access_functions)
 registry_handler = create_handler(registry_functions)
 storage_handler = create_handler(storage_functions)
 compute_handler = create_handler(compute_functions)
-hugs_handler = create_handler(hugs_functions)
+
+openghg_handler = create_handler(openghg_functions)
 
 
 def _set_services(s, wallet_dir, wallet_password):
@@ -52,11 +56,11 @@ Acquire.Client._wallet._get_wallet_password = _get_wallet_password
 
 class MockedRequests:
     """Mocked requests object. This provides a requests interface which calls
-       the 'handler' functions of the services directly, rather
-       than posting the arguments to the online services via a requests
-       call. In addition, as services can call services, this also
-       handles switching between the different local object stores for
-       each of the services
+    the 'handler' functions of the services directly, rather
+    than posting the arguments to the online services via a requests
+    call. In addition, as services can call services, this also
+    handles switching between the different local object stores for
+    each of the services
     """
 
     def __init__(self, status_code, content, encoding="utf-8"):
@@ -104,9 +108,9 @@ class MockedRequests:
         elif url.startswith("registry"):
             push_testing_objstore(_services["registry"])
             func = registry_handler
-        elif url.startswith("hugs"):
-            push_testing_objstore(_services["hugs"])
-            func = hugs_handler
+        elif url.startswith("openghg"):
+            push_testing_objstore(_services["openghg"])
+            func = openghg_handler
         else:
             raise ValueError("Cannot recognise service from '%s'" % url)
 
@@ -146,7 +150,7 @@ _wallet_password = Acquire.Crypto.PrivateKey.random_passphrase()
 
 def _login_admin(service_url, username, password, otp):
     """Internal function used to get a valid login to the specified
-       service for the passed username, password and otp
+    service for the passed username, password and otp
     """
     from Acquire.Client import User
     from Acquire.Client import Wallet
@@ -175,9 +179,9 @@ def _login_admin(service_url, username, password, otp):
 @pytest.fixture(scope="session")
 def aaai_services(tmpdir_factory):
     """This function creates mocked versions of all of the main services
-       of the system, returning the json describing each service as
-       a dictionary (which is passed to the test functions as the
-       fixture)
+    of the system, returning the json describing each service as
+    a dictionary (which is passed to the test functions as the
+    fixture)
     """
     from Acquire.Identity import Authorisation
     from Acquire.Crypto import PrivateKey, OTP
@@ -191,7 +195,7 @@ def aaai_services(tmpdir_factory):
     _services["storage"] = tmpdir_factory.mktemp("storage")
     _services["userdata"] = tmpdir_factory.mktemp("userdata")
     _services["compute"] = tmpdir_factory.mktemp("compute")
-    _services["hugs"] = tmpdir_factory.mktemp("hugs")
+    _services["openghg"] = tmpdir_factory.mktemp("openghg")
 
     wallet_dir = tmpdir_factory.mktemp("wallet")
     wallet_password = PrivateKey.random_passphrase()
@@ -306,16 +310,16 @@ def aaai_services(tmpdir_factory):
     assert storage_service.uid() not in service_uids
     service_uids.append(storage_service.uid())
 
-    args["canonical_url"] = "hugs"
-    args["service_type"] = "hugs"
-    response = call_function("hugs", function="admin/setup", args=args)
-    responses["hugs"] = response
-    hugs_service = Service.from_data(response["service"])
-    hugs_otp = OTP(OTP.extract_secret(response["provisioning_uri"]))
-    hugs_user = _login_admin("hugs", "admin", password, hugs_otp)
-    responses["hugs"] = {
-        "service": hugs_service,
-        "user": hugs_user,
+    args["canonical_url"] = "openghg"
+    args["service_type"] = "openghg"
+    response = call_function("openghg", function="admin/setup", args=args)
+    responses["openghg"] = response
+    openghg_service = Service.from_data(response["service"])
+    openghg_otp = OTP(OTP.extract_secret(response["provisioning_uri"]))
+    openghg_user = _login_admin("openghg", "admin", password, openghg_otp)
+    responses["openghg"] = {
+        "service": openghg_service,
+        "user": openghg_user,
         "response": response,
     }
 
@@ -339,9 +343,7 @@ def authenticated_user(aaai_services):
     username = str(uuid.uuid4())
     password = PrivateKey.random_passphrase()
 
-    result = User.register(
-        username=username, password=password, identity_url="identity"
-    )
+    result = User.register(username=username, password=password, identity_url="identity")
 
     otpsecret = result["otpsecret"]
     otp = OTP(otpsecret)
