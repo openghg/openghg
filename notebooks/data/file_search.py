@@ -94,38 +94,6 @@ def find_crds_files(site):
 
     return data_files
 
-def find_icos_files(site):
-    '''
-    NOT USED AT THE MOMENT
-    
-    Find data files for ICOS sites.
-
-    Args:
-        site (str) - three-letter site code e.g. "MHD"
-    Returns:
-        list:
-            List of data file names for that site
-    '''    
-    
-    try:
-        # Get directories and site strings
-        params_icos = params["ICOS"]
-        site_string = params_icos[site]["gcwerks_site_name"]
-    
-        data_folder = params_icos["directory"].replace("%site", site_string)
-
-    except KeyError:
-        print("Unable to extract data files")
-        print(f"site {site} not found within json parameters file for CRDS instrument")
-        return []
-
-    # Find files
-    fname_search = f"{site.lower()}.*.1minute.*.dat"
-    data_file_search = join(data_folder, fname_search)
-    data_files = glob.glob(data_file_search)
-
-    return data_files
-
 def data_type_function():
     '''
     Defines functions for finding files related to each data type.
@@ -137,8 +105,7 @@ def data_type_function():
     
     '''
     data_type_dict = {"GCWERKS": find_gc_files,
-                      "CRDS": find_crds_files,
-                      "ICOS": find_icos_files}
+                      "CRDS": find_crds_files}
     
     return data_type_dict
     
