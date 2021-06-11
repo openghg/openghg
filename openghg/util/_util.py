@@ -1,7 +1,7 @@
 """ Utility functions that are used by multiple modules
 
 """
-from typing import Dict
+from typing import Dict, Set, List, Union, Tuple
 
 __all__ = [
     "create_uuid",
@@ -88,8 +88,8 @@ def get_datapath(filename, directory=None):
 
 
 def load_json(filename):
-    """Returns a dictionary deserialised from JSON. This function only works
-        for JSON files in the openghg/data directory.
+    """Returns a dictionary deserialised from JSON. This function only 
+    works for JSON files in the openghg/data directory.
 
     Args:
         filename (str): Name of JSON file
@@ -138,14 +138,7 @@ def valid_site(site):
     """
     site_data = load_json("acrg_site_info.json")
 
-    site = site.upper()
-
-    if site not in site_data:
-        site = site.lower()
-        site_name_code = load_json("site_codes.json")
-        return site in site_name_code["name_code"]
-
-    return True
+    return site.upper() in site_data
 
 
 def is_number(s):
@@ -161,11 +154,14 @@ def is_number(s):
         return False
 
 
-def to_lowercase(d: Dict) -> Dict:
-    """Convert all keys and values in a dictionary to lowercase
+def to_lowercase(d: Union[Dict, List, Tuple, Set, str]) -> Union[Dict, List, Tuple, Set, str]:
+    """Convert an object to lowercase. All keys and values in a dictionary will be converted
+    to lowercase as will all objects in a list, tuple or set.
+
+    Based on the answer https://stackoverflow.com/a/40789531/1303032
 
     Args:
-        d: Dictionary to lower case
+        d: Object to lower case
     Returns:
         dict: Dictionary of lower case keys and values
     """

@@ -1,7 +1,8 @@
 from openghg.util import load_json
-from pandas import DataFrame
+from pandas import DataFrame, Timedelta
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
+
 
 __all__ = ["CRDS"]
 
@@ -10,19 +11,15 @@ class CRDS:
     """ Class for processing CRDS data """
 
     def __init__(self):
-        # Holds parameters used for writing attributes to Datasets
-        self._crds_params = {}
-        # Sampling period of CRDS data in seconds
-        self._sampling_period = 60
-
         data = load_json(filename="process_gcwerks_parameters.json")
+        # Holds parameters used for writing attributes to Datasets
         self._crds_params = data["CRDS"]
 
     def read_file(
         self,
         data_filepath: Union[str, Path],
-        site: Optional[str] = None,
-        network: Optional[str] = None,
+        site: str,
+        network: str,
         inlet: Optional[str] = None,
         instrument: Optional[str] = None,
         sampling_period: Optional[str] = None,
@@ -31,9 +28,13 @@ class CRDS:
         """Creates a CRDS object holding data stored within Datasources
 
         Args:
-            filepath: Path of file to load
-            site: Name of site
-            source_id: Source's unique ID
+            data_filepath: Path to file
+            site: Three letter site code
+            network: Network name
+            inlet: Inlet height
+            instrument: Instrument name
+            sampling_period: Sampling period e.g. 2 hour: 2H, 2 minute: 2m
+            measurement_type: Measurement type e.g. insitu, flask
         Returns:
             dict: Dictionary of gas data
         """
@@ -43,40 +44,71 @@ class CRDS:
         if not isinstance(data_filepath, Path):
             data_filepath = Path(data_filepath)
 
-        if not site:
-            site = data_filepath.stem.split(".")[0]
+        # This may seem like an almost pointless function as this is all we do
+        # but it makes it a lot easier to test that assign_attributes
+        gas_data = self.read_data(
+            data_filepath=data_filepath,
+            site=site,
+            network=network,
+            instrument=instrument,
+            sampling_period=sampling_period,
+            measurement_type=measurement_type,
+        )
 
-        # Process the data into separate Datasets
-        gas_data = self.read_data(data_filepath=data_filepath, site=site, network=network)
         # Ensure the data is CF compliant
-        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=self._sampling_period)
+        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=sampling_period)
 
         return gas_data
 
-    def read_data(self, data_filepath: Path, site: str, network: str) -> Dict:
-        """Separates the gases stored in the dataframe in
-        separate dataframes and returns a dictionary of gases
-        with an assigned UUID as gas:UUID and a list of the processed
-        dataframes
+    def read_data(
+        self,
+        data_filepath: Path,
+        site: str,
+        network: str,
+        inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+        measurement_type: Optional[str] = None,
+    ) -> Dict:
+        """Read the datafile passed in and extract the data we require.
 
         Args:
-            data_filepath (pathlib.Path): Path of datafile
+            data_filepath: Path to file
+            site: Three letter site code
+            network: Network name
+            inlet: Inlet height
+            instrument: Instrument name
+            sampling_period: Sampling period including the unit (using pandas frequency aliases like '1H' or '1min')
+            measurement_type: Measurement type e.g. insitu, flask
         Returns:
-            dict: Dictionary containing metadata, data and attributes keys
+            dict: Dictionary of gas data
         """
         from datetime import datetime
         from pandas import RangeIndex, read_csv, NaT
         import warnings
-        from openghg.util import compliant_string
+        from openghg.util import clean_string, valid_site
 
-        # At the moment we're using the filename as the source name
-        source_name = data_filepath.stem
-        # -1 here as we've already removed the file extension
-        # As we're not processing a list of datafiles here we'll only have one inlet
-        inlet = source_name.split(".")[3]
+        split_fname = data_filepath.stem.split(".")
 
-        if "m" not in inlet.lower():
+        # Do some checks to see if we've got different data passed in to that read from the file
+        site_fname = clean_string(split_fname[0])
+        inlet_fname = clean_string(split_fname[3])
+
+        site = site.lower()
+
+        if not valid_site:
+            raise ValueError(f"{site} is not a valid site.")
+
+        if site_fname != site:
+            raise ValueError("Site mismatch between passed site code and that read from filename.")
+
+        if "m" not in inlet_fname:
             raise ValueError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
+
+        if inlet is not None and inlet != inlet_fname:
+            raise ValueError("Inlet mismatch between passed inlet and that read from filename.")
+        else:
+            inlet = inlet_fname
 
         # Function to parse the datetime format found in the datafile
         def parse_date(date):
@@ -116,8 +148,30 @@ class CRDS:
         if network is not None:
             metadata["network"] = network
 
+        if sampling_period is not None:
+            # Check input sampling_period can be interpreted
+            if isinstance(sampling_period, str):
+                input_sampling_period = Timedelta(sampling_period)
+            else:
+                raise TypeError(
+                    "Sampling period must be a string including the unit " "(using pandas frequency aliases like '1H' or '1min')"
+                )
+
+            # Compare against value extracted from the file name
+            file_sampling_period = Timedelta(seconds=metadata["sampling_period"])
+
+            comparison_seconds = abs(input_sampling_period - file_sampling_period).total_seconds()
+            tolerance_seconds = 1
+
+            if comparison_seconds > tolerance_seconds:
+                raise ValueError(
+                    f"Input sampling period {sampling_period} does not match to value "
+                    f"extracted from the file name of {metadata['sampling_period']} seconds."
+                )
+
         # Read the scale from JSON
-        crds_data = load_json(filename="process_gcwerks_parameters.json")
+        # I'll leave this here for the possible future movement from class to functions
+        # crds_data = load_json(filename="process_gcwerks_parameters.json")
 
         # This dictionary is used to store the gas data and its associated metadata
         combined_data = {}
@@ -147,11 +201,11 @@ class CRDS:
 
             site_attributes = self.get_site_attributes(site=site, inlet=inlet)
 
-            # Create a copy of the metadata dict
-            scale = crds_data["CRDS"]["default_scales"].get(species.upper())
+            scale = self._crds_params["default_scales"].get(species.upper(), "NA")
 
+            # Create a copy of the metadata dict
             species_metadata = metadata.copy()
-            species_metadata["species"] = compliant_string(species)
+            species_metadata["species"] = clean_string(species)
             species_metadata["inlet"] = inlet
             species_metadata["scale"] = scale
 
@@ -187,20 +241,22 @@ class CRDS:
 
         site = split_filename[0]
         instrument = split_filename[1]
-        resolution_str = split_filename[2]
+        sampling_period_str = split_filename[2]
         inlet = split_filename[3]
 
-        if resolution_str == "1minute":
-            resolution = "1_minute"
-        elif resolution_str == "hourly":
-            resolution = "1_hour"
+        if sampling_period_str == "1minute":
+            # sampling_period = "1min"
+            sampling_period = 60
+        elif sampling_period_str == "hourly":
+            # sampling_period = "1H"
+            sampling_period = 60 * 60
         else:
             raise ValueError("Unable to read time resolution from filename.")
 
         metadata = {}
         metadata["site"] = site
         metadata["instrument"] = instrument
-        metadata["time_resolution"] = resolution
+        metadata["sampling_period"] = sampling_period
         metadata["inlet"] = inlet
         metadata["port"] = port
         metadata["type"] = type_meas
@@ -227,7 +283,7 @@ class CRDS:
         except KeyError:
             raise ValueError(f"Unable to read attributes for site: {site}")
 
-        attributes["inlet_height_magl"] = inlet.split("_")[0]
+        attributes["inlet_height_magl"] = inlet
         attributes["comment"] = self._crds_params["comment"]
 
         return attributes

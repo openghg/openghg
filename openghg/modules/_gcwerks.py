@@ -11,12 +11,19 @@ class GCWERKS:
     def __init__(self):
         from openghg.util import load_json
 
-        self._sampling_period = 0
         # Load site data
         data = load_json(filename="process_gcwerks_parameters.json")
         self._gc_params = data["GCWERKS"]
-        # Site codes for inlet readings
-        self._site_codes = load_json(filename="site_codes.json")
+        # Build the name to code dictionary to check check
+        # passed metadata on read
+        self._name_to_code = {}
+
+        for site_code, value in self._gc_params["sites"].items():
+            try:
+                name = value["gcwerks_site_name"]
+                self._name_to_code[name] = site_code
+            except KeyError:
+                pass
 
     def find_files(
         self, data_path: Union[str, Path], skip_str: Optional[Union[str, List[str]]] = "sf6"
@@ -88,32 +95,41 @@ class GCWERKS:
         """
         from pathlib import Path
         from openghg.processing import assign_attributes
-        from openghg.util import is_number, valid_site
-        import re
+        from openghg.util import valid_site, clean_string
 
         data_filepath = Path(data_filepath)
+
+        site = clean_string(site)
+        network = clean_string(network)
+        # We don't currently do anything with inlet here as it's always read from data
+        # or taken from process_gcwerks_parameters.json
+        inlet = clean_string(inlet)
+        instrument = clean_string(instrument)
 
         if not valid_site(site):
             raise ValueError(f"Invalid site {site} passed.")
 
-        # Try and find the instrument name in the filename
+        # Check if the site code passed matches that read from the filename
+        site = self.check_site(filepath=data_filepath, site_code=site)
+
+        # If we're not passed the instrument name and we can't find it raise an error
         if instrument is None:
-            # Get the instrument from the filename
-            # Example filename: capegrim-medusa.18.C
-            instrument = re.findall(r"[\w']+", str(data_filepath.name))[1]
+            instrument = self.check_instrument(filepath=data_filepath, should_raise=True)
+        else:
+            fname_instrument = self.check_instrument(filepath=data_filepath, should_raise=False)
 
-            if is_number(instrument):
-                # has picked out the year, rather than the instrument. Default to GCMD for this type of file
-                instrument = "md"
-
-            # Now do the lookup for suffix to instrument name
-            instrument = self.instrument_translator(instrument=instrument)
-
-        if network is None:
-            network = "NA"
+            if fname_instrument is not None and instrument != fname_instrument:
+                raise ValueError(
+                    f"Mismatch between instrument passed as argument {instrument} and instrument read from filename {fname_instrument}"
+                )
 
         gas_data = self.read_data(
-            data_filepath=data_filepath, precision_filepath=precision_filepath, site=site, instrument=instrument, network=network
+            data_filepath=data_filepath,
+            precision_filepath=precision_filepath,
+            site=site,
+            instrument=instrument,
+            network=network,
+            sampling_period=sampling_period,
         )
 
         # Assign attributes to the data for CF compliant NetCDFs
@@ -121,26 +137,74 @@ class GCWERKS:
 
         return gas_data
 
-    def instrument_translator(self, instrument: str) -> str:
+    def check_site(self, filepath: Path, site_code: str) -> str:
+        """ Check if the site passed in matches that in the filename
+
+            Args:
+                filepath: Path to data file
+                site: Site code
+            Returns:
+                str: Site code
+        """
+        from re import findall
+
+        site_code = site_code.lower()
+        site_name = findall(r"[\w']+", str(filepath.name))[0].lower()
+
+        if len(site_code) > 3:
+            raise ValueError("Please pass in a 3 letter site code as the site argument.")
+
+        try:
+            confirmed_code = self._name_to_code[site_name].lower()
+        except KeyError:
+            raise ValueError(f"Cannot match {site_name} to a site code.")
+
+        if site_code != confirmed_code:
+            raise ValueError(f"Mismatch between code reasd from filename: {confirmed_code} and that given: {site_code}")
+
+        return site_code
+
+    def check_instrument(self, filepath: Path, should_raise: Optional[bool] = False) -> Union[str, None]:
         """Ensure we have the correct instrument or translate an instrument
         suffix to an instrument name.
 
         Args:
             instrument_suffix: Instrument suffix such as md
+            should_raise: Should we raise if we can't find a valid instrument
         Returns:
             str: Instrument name
         """
+        from re import findall
+
+        instrument = findall(r"[\w']+", str(filepath.name))[1].lower()
         try:
-            instrument = self._gc_params["suffix_to_instrument"][instrument]
-        except KeyError:
-            if "medusa" in instrument:
-                instrument = "medusa"
+            if instrument in self._gc_params["instruments"]:
+                return instrument
             else:
-                raise KeyError(f"Invalid instrument {instrument}")
+                try:
+                    instrument = self._gc_params["suffix_to_instrument"][instrument]
+                except KeyError:
+                    if "medusa" in instrument:
+                        instrument = "medusa"
+                    else:
+                        raise KeyError(f"Invalid instrument {instrument}")
+        except KeyError:
+            if should_raise:
+                raise
+            else:
+                return None
 
         return instrument
 
-    def read_data(self, data_filepath: Path, precision_filepath: Path, site: str, instrument: str, network: str) -> Dict:
+    def read_data(
+        self,
+        data_filepath: Path,
+        precision_filepath: Path,
+        site: str,
+        instrument: str,
+        network: str,
+        sampling_period: Optional[str] = None,
+    ) -> Dict:
         """Read data from the data and precision files
 
         Args:
@@ -149,6 +213,7 @@ class GCWERKS:
             site: Name of site
             instrument: Instrument name
             network: Network name
+            sampling_period: Period over which the measurement was samplied.
         Returns:
             dict: Dictionary of gas data keyed by species
         """
@@ -181,6 +246,29 @@ class GCWERKS:
 
         # This metadata will be added to when species are split and attributes are written
         metadata = {"instrument": instrument, "site": site, "network": network}
+
+        extracted_sampling_period = self.get_precision(instrument)
+        metadata["sampling_period"] = extracted_sampling_period
+
+        if sampling_period is not None:
+            # Check input sampling_period can be interpreted
+            if isinstance(sampling_period, str):
+                input_sampling_period = pd_Timedelta(sampling_period)
+            else:
+                raise TypeError(
+                    "Sampling period must be a string including the unit using pandas frequency aliases like '1H' or '1min')"
+                )
+
+            # Compare input to definition within json file
+            file_sampling_period = pd_Timedelta(seconds=extracted_sampling_period)
+            comparison_seconds = abs(input_sampling_period - file_sampling_period).total_seconds()
+            tolerance_seconds = 1
+
+            if comparison_seconds > tolerance_seconds:
+                raise ValueError(
+                    f"Input sampling period {sampling_period} does not match to value "
+                    f"extracted from the file name of {metadata['sampling_period']} seconds."
+                )
 
         units = {}
         scale = {}
@@ -229,9 +317,7 @@ class GCWERKS:
             data[sp + " repeatability"] = precision[precision_index].astype(float).reindex_like(data, method="pad")
 
         # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
-        self._sampling_period = self.get_precision(instrument)
-
-        data["new_time"] = data.index - pd_Timedelta(seconds=self._sampling_period / 2.0)
+        data["new_time"] = data.index - pd_Timedelta(seconds=metadata["sampling_period"] / 2.0)
 
         data = data.set_index("new_time", inplace=False, drop=True)
         data.index.name = "time"
@@ -304,33 +390,15 @@ class GCWERKS:
         from fnmatch import fnmatch
         from openghg.util import compliant_string
 
-        # Read inlets from the parameters dictionary
+        # Read inlets from the parameters
         expected_inlets = self.get_inlets(site_code=site)
 
-        if len(expected_inlets) == 1 and next(iter(expected_inlets)) == "any":
-            matching_inlets = expected_inlets
-        else:
-            # Get the inlets in the dataframe
-            try:
-                data_inlets = data["Inlet"].unique().tolist()
-            except KeyError:
-                raise KeyError(
-                    "Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module"
-                )
-
-            # For now just add air to the expected inlets
-            expected_inlets["air"] = "air"
-
-            # Make a mapping of the inlet we have in the data to the one we want to use
-            matching_inlets = {
-                data_inlet: expected_inlets[inlet] for data_inlet in data_inlets for inlet in expected_inlets if fnmatch(data_inlet, inlet)
-            }
-
-            if not matching_inlets:
-                raise ValueError(
-                    "Inlet mismatch - please ensure correct site is selected."
-                    "Mismatch between inlet in data and inlet in parameters file."
-                )
+        try:
+            data_inlets = data["Inlet"].unique().tolist()
+        except KeyError:
+            raise KeyError(
+                "Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module"
+            )
 
         combined_data = {}
 
@@ -339,31 +407,41 @@ class GCWERKS:
             if data[spec].isnull().all():
                 continue
 
-            # Create a copy of metadata for local modification
-            spec_metadata = metadata.copy()
-
-            spec_metadata["species"] = compliant_string(spec)
-            spec_metadata["units"] = units[spec]
-            spec_metadata["scale"] = scale[spec]
-
             # Here inlet is the inlet in the data and inlet_label is the label we want to use as metadata
-            for inlet, inlet_label in matching_inlets.items():
-                spec_metadata["inlet"] = inlet_label
+            for inlet, inlet_label in expected_inlets.items():
+                # Create a copy of metadata for local modification
+                spec_metadata = metadata.copy()
+                spec_metadata["species"] = compliant_string(spec)
+                spec_metadata["units"] = units[spec]
+                spec_metadata["scale"] = scale[spec]
+
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
                     spec_data = data[[spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]]
                     spec_data = spec_data.dropna(axis="index", how="any")
+                    spec_metadata["inlet"] = inlet_label
                 elif "date" in inlet:
                     dates = inlet.split("_")[1:]
-                    slice_dict = {"time": slice(dates[0], dates[1])}
-                    data_sliced = data.loc(slice_dict)
+                    data_sliced = data.loc[dates[0] : dates[1]]
+
                     spec_data = data_sliced[
                         [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
                     ]
                     spec_data = spec_data.dropna(axis="index", how="any")
+                    spec_metadata["inlet"] = inlet_label
                 else:
+                    # Find the inlet
+                    matching_inlets = [i for i in data_inlets if fnmatch(i, inlet)]
+
+                    if not matching_inlets:
+                        continue
+
+                    # Only set the label in metadata when we have the correct label
+                    spec_metadata["inlet"] = inlet_label
+                    # There should only be one matching label
+                    select_inlet = matching_inlets[0]
                     # Take only data for this inlet from the dataframe
-                    inlet_data = data.loc[data["Inlet"] == inlet]
+                    inlet_data = data.loc[data["Inlet"] == select_inlet]
 
                     spec_data = inlet_data[
                         [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
@@ -378,7 +456,7 @@ class GCWERKS:
                 if spec_data.empty:
                     continue
 
-                attributes = self.get_site_attributes(site=site, inlet=inlet_label, instrument=instrument)
+                attributes = self.get_site_attributes(site=site, inlet=inlet_label, instrument=instrument).copy()
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
@@ -414,6 +492,7 @@ class GCWERKS:
         Returns:
             int: Precision of instrument in seconds
         """
+        instrument = instrument.lower()
         try:
             sampling_period = self._gc_params["sampling_period"][instrument]
         except KeyError:
@@ -433,10 +512,12 @@ class GCWERKS:
             dict: Mapping dictionary of inlet and required inlet label
         """
         site = site_code.upper()
+        site_params = self._gc_params["sites"]
+
         # Create a mapping of inlet to match to the inlet label
-        inlets = self._gc_params[site]["inlets"]
+        inlets = site_params[site]["inlets"]
         try:
-            inlet_labels = self._gc_params[site]["inlet_label"]
+            inlet_labels = site_params[site]["inlet_label"]
         except KeyError:
             inlet_labels = inlets
 
@@ -462,19 +543,22 @@ class GCWERKS:
     def get_site_attributes(self, site: str, inlet: str, instrument: str) -> Dict:
         """Gets the site specific attributes for writing to Datsets
 
-        Args:
-            site: Site code
-            inlet: Inlet label (example: 108m)
-        Returns:
-            dict: Dictionary of attributes
+                Args:
+                    site: Site code
+                    inlet: Inlet (example: 108m)
+                Returns:
+                    dict: Dictionary of attributes
         """
-        attributes = self._gc_params[site.upper()]["global_attributes"]
+        site = site.upper()
+        instrument = instrument.lower()
+
+        attributes = self._gc_params["sites"][site]["global_attributes"]
 
         attributes["inlet_height_magl"] = inlet
         try:
             attributes["comment"] = self._gc_params["comment"][instrument]
         except KeyError:
             valid_instruments = list(self._gc_params["comment"].keys())
-            raise KeyError(f"Invalid instrument passed, valid instruments : {valid_instruments}")
+            raise KeyError(f"Invalid instrument {instrument} passed, valid instruments : {valid_instruments}")
 
         return attributes

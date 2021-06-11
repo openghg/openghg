@@ -1,4 +1,3 @@
-import os
 import pytest
 
 from openghg.modules import ObsSurface
@@ -39,7 +38,7 @@ def test_keyword_search():
     expected_metadata = {
         "site": "bsd",
         "instrument": "picarro",
-        "time_resolution": "1_minute",
+        "sampling_period": 60,
         "inlet": "248m",
         "port": "8",
         "type": "air",
@@ -70,6 +69,7 @@ def test_search_gc():
         "inlet": "70m",
         "data_type": "timeseries",
         "network": "agage",
+        "sampling_period": 1200,
     }
 
     assert metadata == expected_metadata
@@ -126,7 +126,7 @@ def test_search_datetimes():
     expected_metadata = {
         "site": "bsd",
         "instrument": "picarro",
-        "time_resolution": "1_minute",
+        "sampling_period": 60,
         "inlet": "248m",
         "port": "8",
         "type": "air",

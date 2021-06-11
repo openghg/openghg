@@ -1,7 +1,7 @@
 from openghg.modules import BaseModule
 from pathlib import Path
 from typing import Dict, Optional, Union
-import traceback
+# import traceback
 
 __all__ = ["ObsSurface"]
 
@@ -111,55 +111,55 @@ class ObsSurface(BaseModule):
                 else:
                     data_filepath = Path(fp)
 
-                try:
-                    file_hash = hash_file(filepath=data_filepath)
-                    if file_hash in obs._file_hashes and overwrite is False:
-                        raise ValueError(
-                            f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
-                        )
+                # try:
+                file_hash = hash_file(filepath=data_filepath)
+                if file_hash in obs._file_hashes and overwrite is False:
+                    raise ValueError(
+                        f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
+                    )
 
-                    progress_bar.set_description(f"Processing: {data_filepath.name}")
+                progress_bar.set_description(f"Processing: {data_filepath.name}")
 
-                    if data_type == "GCWERKS":
-                        data = data_obj.read_file(
-                            data_filepath=data_filepath,
-                            precision_filepath=precision_filepath,
-                            site=site,
-                            network=network,
-                            inlet=inlet,
-                            instrument=instrument,
-                            sampling_period=sampling_period,
-                            measurement_type=measurement_type
-                        )
-                    else:
-                        data = data_obj.read_file(
-                            data_filepath=data_filepath,
-                            site=site,
-                            network=network,
-                            inlet=inlet,
-                            instrument=instrument,
-                            sampling_period=sampling_period,
-                            measurement_type=measurement_type
-                        )
+                if data_type == "GCWERKS":
+                    data = data_obj.read_file(
+                        data_filepath=data_filepath,
+                        precision_filepath=precision_filepath,
+                        site=site,
+                        network=network,
+                        inlet=inlet,
+                        instrument=instrument,
+                        sampling_period=sampling_period,
+                        measurement_type=measurement_type
+                    )
+                else:
+                    data = data_obj.read_file(
+                        data_filepath=data_filepath,
+                        site=site,
+                        network=network,
+                        inlet=inlet,
+                        instrument=instrument,
+                        sampling_period=sampling_period,
+                        measurement_type=measurement_type
+                    )
 
-                    # Extract the metadata for each set of measurements to perform a Datasource lookup
-                    metadata = {key: data["metadata"] for key, data in data.items()}
+                # Extract the metadata for each set of measurements to perform a Datasource lookup
+                metadata = {key: data["metadata"] for key, data in data.items()}
 
-                    lookup_results = obs.datasource_lookup(metadata=metadata)
+                lookup_results = obs.datasource_lookup(metadata=metadata)
 
-                    # Create Datasources, save them to the object store and get their UUIDs
-                    datasource_uuids = assign_data(gas_data=data, lookup_results=lookup_results, overwrite=overwrite)
+                # Create Datasources, save them to the object store and get their UUIDs
+                datasource_uuids = assign_data(data_dict=data, lookup_results=lookup_results, overwrite=overwrite)
 
-                    results["processed"][data_filepath.name] = datasource_uuids
+                results["processed"][data_filepath.name] = datasource_uuids
 
-                    # Record the Datasources we've created / appended to
-                    obs.add_datasources(datasource_uuids, metadata)
+                # Record the Datasources we've created / appended to
+                obs.add_datasources(datasource_uuids, metadata)
 
-                    # Store the hash as the key for easy searching, store the filename as well for
-                    # ease of checking by user
-                    obs._file_hashes[file_hash] = data_filepath.name
-                except Exception:
-                    results["error"][data_filepath.name] = traceback.format_exc()
+                # Store the hash as the key for easy searching, store the filename as well for
+                # ease of checking by user
+                obs._file_hashes[file_hash] = data_filepath.name
+                # except Exception:
+                #     results["error"][data_filepath.name] = traceback.format_exc()
 
                 progress_bar.update(1)
 
@@ -189,14 +189,66 @@ class ObsSurface(BaseModule):
 
             species = data["species"]
 
-            result = self._datasource_table[site][network][inlet][species]
+            result = self.lookup_uuid(site=site, network=network, inlet=inlet, species=species)
 
+            # If we get an empty dict set as False
             if not result:
                 result = False
 
             lookup_results[key] = result
 
         return lookup_results
+
+    def add_datasources(self, datasource_uuids: Dict, metadata: Dict) -> None:
+        """Add the passed list of Datasources to the current list
+
+        Args:
+            datasource_uuids: Datasource UUIDs
+            metadata: Metadata for each species
+        Returns:
+            None
+        """
+        for key, uid in datasource_uuids.items():
+            md = metadata[key]
+            site = md["site"]
+            network = md["network"]
+            inlet = md["inlet"]
+            species = md["species"]
+
+            result = self.lookup_uuid(site=site, network=network, inlet=inlet, species=species)
+
+            if result and result != uid:
+                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
+
+            self.set_uuid(site=site, network=network, inlet=inlet, species=species, uuid=uid)
+            self._datasource_uuids[uid] = key
+
+    def lookup_uuid(self, site: str, network: str, inlet: str, species: str) -> Union[str, Dict]:
+        """Perform a lookup for the UUID of a Datasource
+
+        Args:
+            site: Site code
+            network: Network name
+            Inlet: Inlet height
+            Species: Species name
+        Returns:
+            str or dict: UUID or empty dict if no entry
+        """
+        return self._datasource_table[site][network][inlet][species]
+
+    def set_uuid(self, site: str, network: str, inlet: str, species: str, uuid: str) -> None:
+        """Record a UUID of a Datasource in the datasource table
+
+        Args:
+            site: Site code
+            network: Network name
+            Inlet: Inlet height
+            Species: Species name
+            uuid: UUID of Datasource
+        Returns:
+            None
+        """
+        self._datasource_table[site][network][inlet][species] = uuid
 
     def save_datsource_info(self, datasource_data: Dict) -> None:
         """Save the datasource information to
