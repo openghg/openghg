@@ -4,10 +4,11 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Development API modules &mdash; OpenGHG 0+untagged.1.g1d34214 documentation</title>
+  <title>Development API modules &mdash; OpenGHG 0+untagged.3.gb2c52cf documentation</title>
   
 
   
@@ -194,9 +195,9 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="development-api-modules">
+<section id="development-api-modules">
 <h1>Development API modules<a class="headerlink" href="#development-api-modules" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="cranfield">
+<section id="cranfield">
 <h2>CRANFIELD<a class="headerlink" href="#cranfield" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.modules.CRANFIELD">
@@ -226,8 +227,8 @@
 
 </dd></dl>
 
-</div>
-<div class="section" id="crds">
+</section>
+<section id="crds">
 <h2>CRDS<a class="headerlink" href="#crds" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.modules.CRDS">
@@ -280,17 +281,22 @@ columns of data for each gas</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.modules.CRDS.read_data">
-<span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_crds.html#CRDS.read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.CRDS.read_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Separates the gases stored in the dataframe in
-separate dataframes and returns a dictionary of gases
-with an assigned UUID as gas:UUID and a list of the processed
-dataframes</p>
+<span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_crds.html#CRDS.read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.CRDS.read_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the datafile passed in and extract the data we require.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data_filepath</strong> (<em>pathlib.Path</em>) – Path of datafile</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_filepath</strong> – Path to file</p></li>
+<li><p><strong>site</strong> – Three letter site code</p></li>
+<li><p><strong>network</strong> – Network name</p></li>
+<li><p><strong>inlet</strong> – Inlet height</p></li>
+<li><p><strong>instrument</strong> – Instrument name</p></li>
+<li><p><strong>sampling_period</strong> – Sampling period including the unit (using pandas frequency aliases like ‘1H’ or ‘1min’)</p></li>
+<li><p><strong>measurement_type</strong> – Measurement type e.g. insitu, flask</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary containing metadata, data and attributes keys</p>
+<dd class="field-even"><p>Dictionary of gas data</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>dict</p>
@@ -300,14 +306,18 @@ dataframes</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.modules.CRDS.read_file">
-<span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_crds.html#CRDS.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.CRDS.read_file" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_crds.html#CRDS.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.CRDS.read_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a CRDS object holding data stored within Datasources</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filepath</strong> – Path of file to load</p></li>
-<li><p><strong>site</strong> – Name of site</p></li>
-<li><p><strong>source_id</strong> – Source’s unique ID</p></li>
+<li><p><strong>data_filepath</strong> – Path to file</p></li>
+<li><p><strong>site</strong> – Three letter site code</p></li>
+<li><p><strong>network</strong> – Network name</p></li>
+<li><p><strong>inlet</strong> – Inlet height</p></li>
+<li><p><strong>instrument</strong> – Instrument name</p></li>
+<li><p><strong>sampling_period</strong> – Sampling period e.g. 2 hour: 2H, 2 minute: 2m</p></li>
+<li><p><strong>measurement_type</strong> – Measurement type e.g. insitu, flask</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -341,8 +351,8 @@ dataframes</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="eurocom">
+</section>
+<section id="eurocom">
 <h2>EUROCOM<a class="headerlink" href="#eurocom" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.modules.EUROCOM">
@@ -416,8 +426,8 @@ the processed data has been assigned to</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="gcwerks">
+</section>
+<section id="gcwerks">
 <h2>GCWERKS<a class="headerlink" href="#gcwerks" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.modules.GCWERKS">
@@ -427,6 +437,47 @@ the processed data has been assigned to</p>
 <dt class="sig sig-object py" id="openghg.modules.GCWERKS.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.GCWERKS.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.modules.GCWERKS.check_instrument">
+<span class="sig-name descname"><span class="pre">check_instrument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">should_raise</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.check_instrument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.GCWERKS.check_instrument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure we have the correct instrument or translate an instrument
+suffix to an instrument name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>instrument_suffix</strong> – Instrument suffix such as md</p></li>
+<li><p><strong>should_raise</strong> – Should we raise if we can’t find a valid instrument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Instrument name</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.modules.GCWERKS.check_site">
+<span class="sig-name descname"><span class="pre">check_site</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_code</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.check_site"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.GCWERKS.check_site" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the site passed in matches that in the filename</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> – Path to data file</p></li>
+<li><p><strong>site</strong> – Site code</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Site code</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -497,7 +548,7 @@ then retrieve the precision of that instrument.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>site</strong> – Site code</p></li>
-<li><p><strong>inlet</strong> – Inlet label (example: 108m)</p></li>
+<li><p><strong>inlet</strong> – Inlet (example: 108m)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -527,26 +578,8 @@ then retrieve the precision of that instrument.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.modules.GCWERKS.instrument_translator">
-<span class="sig-name descname"><span class="pre">instrument_translator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.instrument_translator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.GCWERKS.instrument_translator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Ensure we have the correct instrument or translate an instrument
-suffix to an instrument name.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>instrument_suffix</strong> – Instrument suffix such as md</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Instrument name</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="openghg.modules.GCWERKS.read_data">
-<span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.GCWERKS.read_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_gcwerks.html#GCWERKS.read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.GCWERKS.read_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read data from the data and precision files</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -556,6 +589,7 @@ suffix to an instrument name.</p>
 <li><p><strong>site</strong> – Name of site</p></li>
 <li><p><strong>instrument</strong> – Instrument name</p></li>
 <li><p><strong>network</strong> – Network name</p></li>
+<li><p><strong>sampling_period</strong> – Period over which the measurement was samplied.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -635,8 +669,8 @@ precision data</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="icos">
+</section>
+<section id="icos">
 <h2>ICOS<a class="headerlink" href="#icos" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.modules.ICOS">
@@ -695,8 +729,8 @@ the processed data has been assigned to</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="noaa">
+</section>
+<section id="noaa">
 <h2>NOAA<a class="headerlink" href="#noaa" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.modules.NOAA">
@@ -805,8 +839,8 @@ data and metadata.</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="thamesbarrier">
+</section>
+<section id="thamesbarrier">
 <h2>THAMESBARRIER<a class="headerlink" href="#thamesbarrier" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.modules.THAMESBARRIER">
@@ -841,8 +875,8 @@ the processed data has been assigned to</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="basemodule">
+</section>
+<section id="basemodule">
 <h2>BaseModule<a class="headerlink" href="#basemodule" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.modules.BaseModule">
@@ -851,23 +885,6 @@ the processed data has been assigned to</p>
 <dt class="sig sig-object py" id="openghg.modules.BaseModule.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/modules/_base.html#BaseModule.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.BaseModule.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.modules.BaseModule.add_datasources">
-<span class="sig-name descname"><span class="pre">add_datasources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_uuids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_base.html#BaseModule.add_datasources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.BaseModule.add_datasources" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add the passed list of Datasources to the current list</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>datasource_uuids</strong> – Datasource UUIDs</p></li>
-<li><p><strong>metadata</strong> – Metadata for each species</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1019,8 +1036,8 @@ for storage in object store</p>
 
 </dd></dl>
 
-</div>
-<div class="section" id="datasource">
+</section>
+<section id="datasource">
 <h2>Datasource<a class="headerlink" href="#datasource" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.modules.Datasource">
@@ -1040,15 +1057,15 @@ at a certain height on a specific instrument</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.modules.Datasource.add_data">
-<span class="sig-name descname"><span class="pre">add_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'timeseries'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add data to this Datasource and segment the data by size.
 The data is stored as a tuple of the data and the daterange it covers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>metadata</strong> – Metadata on the data for this Datasource</p></li>
-<li><p><strong>data</strong> – Data</p></li>
-<li><p><strong>data_type</strong> – Placeholder for combination of this fn with add_footprint_data in the future</p></li>
+<li><p><strong>data</strong> – xarray.Dataset</p></li>
+<li><p><strong>data_type</strong> – Type of data, one of [“timeseries”, “emissions”, “met”, “footprint”].</p></li>
 <li><p><strong>overwrite</strong> – Overwrite existing data</p></li>
 </ul>
 </dd>
@@ -1079,7 +1096,7 @@ The data is stored as a tuple of the data and the daterange it covers.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.modules.Datasource.add_emissions_data">
-<span class="sig-name descname"><span class="pre">add_emissions_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_emissions_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_emissions_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_emissions_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_emissions_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_emissions_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add flux data to this Datasource</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1096,7 +1113,7 @@ The data is stored as a tuple of the data and the daterange it covers.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.modules.Datasource.add_field_data">
-<span class="sig-name descname"><span class="pre">add_field_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_field_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_field_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_field_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_field_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_field_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add footprint data to this Datasource</p>
 <p>TODO - unsure if add_field_data is the best name for this function
 Could add a more general function that allows toggle of chunking</p>
@@ -1116,7 +1133,7 @@ Could add a more general function that allows toggle of chunking</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.modules.Datasource.add_footprint_data">
-<span class="sig-name descname"><span class="pre">add_footprint_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_footprint_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_footprint_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_footprint_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_footprint_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_footprint_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add footprint data to this Datasource</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1156,6 +1173,20 @@ This will overwrite any previous entry stored at that key.</p>
 <li><p><strong>key</strong> – Key for dictionary</p></li>
 <li><p><strong>value</strong> – Value for dictionary</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.modules.Datasource.add_timeseries_data">
+<span class="sig-name descname"><span class="pre">add_timeseries_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_timeseries_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_timeseries_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add timeseries data to this Datasource</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – An xarray.Dataset</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>None</p>
@@ -1827,8 +1858,8 @@ this Datasource</p>
 
 <div class="toctree-wrapper compound">
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

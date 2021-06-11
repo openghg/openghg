@@ -4,10 +4,11 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>modules API Detail &mdash; OpenGHG 0+untagged.1.g1d34214 documentation</title>
+  <title>modules API Detail &mdash; OpenGHG 0+untagged.3.gb2c52cf documentation</title>
   
 
   
@@ -194,15 +195,32 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="modules-api-detail">
+<section id="modules-api-detail">
 <h1>modules API Detail<a class="headerlink" href="#modules-api-detail" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="obssurface">
+<section id="obssurface">
 <h2>ObsSurface<a class="headerlink" href="#obssurface" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> class is used to process surface observation data.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.modules.ObsSurface">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">openghg.modules.</span></span><span class="sig-name descname"><span class="pre">ObsSurface</span></span><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.ObsSurface" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class is used to process surface observation data</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.modules.ObsSurface.add_datasources">
+<span class="sig-name descname"><span class="pre">add_datasources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_uuids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.add_datasources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.ObsSurface.add_datasources" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the passed list of Datasources to the current list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datasource_uuids</strong> – Datasource UUIDs</p></li>
+<li><p><strong>metadata</strong> – Metadata for each species</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.modules.ObsSurface.datasource_lookup">
 <span class="sig-name descname"><span class="pre">datasource_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.datasource_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.ObsSurface.datasource_lookup" title="Permalink to this definition">¶</a></dt>
@@ -231,6 +249,28 @@
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.modules.ObsSurface.lookup_uuid">
+<span class="sig-name descname"><span class="pre">lookup_uuid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.lookup_uuid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.ObsSurface.lookup_uuid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a lookup for the UUID of a Datasource</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site</strong> – Site code</p></li>
+<li><p><strong>network</strong> – Network name</p></li>
+<li><p><strong>Inlet</strong> – Inlet height</p></li>
+<li><p><strong>Species</strong> – Species name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>UUID or empty dict if no entry</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str or dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -298,12 +338,32 @@ to handle each data type.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.modules.ObsSurface.set_uuid">
+<span class="sig-name descname"><span class="pre">set_uuid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uuid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_obs_surface.html#ObsSurface.set_uuid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.ObsSurface.set_uuid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Record a UUID of a Datasource in the datasource table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site</strong> – Site code</p></li>
+<li><p><strong>network</strong> – Network name</p></li>
+<li><p><strong>Inlet</strong> – Inlet height</p></li>
+<li><p><strong>Species</strong> – Species name</p></li>
+<li><p><strong>uuid</strong> – UUID of Datasource</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <div class="toctree-wrapper compound">
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
