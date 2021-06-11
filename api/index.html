@@ -4,11 +4,10 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Documentation &mdash; OpenGHG 0+untagged.3.ga2b3ed4 documentation</title>
+  <title>Documentation &mdash; OpenGHG 0+untagged.1.g1d34214 documentation</title>
   
 
   
@@ -214,11 +213,11 @@
     text-align: unset;
 }
 </style>
-<section id="documentation">
+<div class="section" id="documentation">
 <h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
 <p>This section of the documentation gives an overview of the public facing functions used in the Jupyter notebooks available at the
 OpenGHG hub. For developers documentation of the internal workings of the library are available in the developer API section.</p>
-<section id="modules">
+<div class="section" id="modules">
 <h2>modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h2>
 <p>These modules are used to process observation data. Classes in this module should not be used directly as they
 are used by functions in the <code class="docutils literal notranslate"><span class="pre">Client</span></code> or <code class="docutils literal notranslate"><span class="pre">LocalClient</span></code> modules when either uploading data to the OpenGHG cloud platform
@@ -227,8 +226,8 @@ or processing data for storage in a local object store.</p>
 <dt><a class="reference internal" href="api_modules.html#openghg.modules.ObsSurface" title="openghg.modules.ObsSurface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsSurface</span></code></a></dt><dd><p>Process surface observation data</p>
 </dd>
 </dl>
-</section>
-<section id="client">
+</div>
+<div class="section" id="client">
 <h2>client<a class="headerlink" href="#client" title="Permalink to this headline">¶</a></h2>
 <p>Classes within the client module are used to interact with the cloud based OpenGHG system.</p>
 <dl class="simple">
@@ -241,8 +240,8 @@ or processing data for storage in a local object store.</p>
 <dt><a class="reference internal" href="api_client.html#openghg.client.JobRunner" title="openghg.client.JobRunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobRunner</span></code></a></dt><dd><p>Run jobs on a local or cloud HPC cluster</p>
 </dd>
 </dl>
-</section>
-<section id="jobs">
+</div>
+<div class="section" id="jobs">
 <h2>jobs<a class="headerlink" href="#jobs" title="Permalink to this headline">¶</a></h2>
 <p>Classes within this module are used for running simulation jobs on high performace computing (HPC) clusters either locally
 or within the cloud based on a cluster as a service (CaaS) offering (see CitC).</p>
@@ -252,14 +251,14 @@ or within the cloud based on a cluster as a service (CaaS) offering (see CitC).<
 <dt><a class="reference internal" href="api_jobs.html#openghg.jobs.JobDrive" title="openghg.jobs.JobDrive"><code class="xref py py-class docutils literal notranslate"><span class="pre">JobDrive</span></code></a></dt><dd><p>Create a cloud storage drive for use by the HPC job</p>
 </dd>
 </dl>
-</section>
-<section id="localclient">
+</div>
+<div class="section" id="localclient">
 <h2>localclient<a class="headerlink" href="#localclient" title="Permalink to this headline">¶</a></h2>
 <p>For use with a local version of the object store. These functions make it easy to take advantage of the processing and export capabilities
 of OpenGHG on your local filesystem. Use of this module results in the creation of a local object store in a location controlled by the
 <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code> environment variable.</p>
 <dl class="simple">
-<dt><a class="reference internal" href="api_localclient.html#openghg.localclient.get_obs_surface" title="openghg.localclient.get_obs_surface"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_obs_surface()</span></code></a></dt><dd><p>Search for surface observations in the object store using a site, species and date range.</p>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">get_observations()</span></code></dt><dd><p>Search for observations in the object store using a site, species and date range.</p>
 </dd>
 <dt><a class="reference internal" href="api_localclient.html#openghg.localclient.process_files" title="openghg.localclient.process_files"><code class="xref py py-func docutils literal notranslate"><span class="pre">process_files()</span></code></a></dt><dd><p>Process files for storage in the object store</p>
 </dd>
@@ -268,16 +267,16 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
 <dt><a class="reference internal" href="api_localclient.html#openghg.localclient.Search" title="openghg.localclient.Search"><code class="xref py py-class docutils literal notranslate"><span class="pre">Search</span></code></a></dt><dd><p>Search for data within the object store (soon to be deprecated in favour of <code class="docutils literal notranslate"><span class="pre">get_obs</span></code></p>
 </dd>
 </dl>
-</section>
-<section id="objectstore">
+</div>
+<div class="section" id="objectstore">
 <h2>objectstore<a class="headerlink" href="#objectstore" title="Permalink to this headline">¶</a></h2>
 <p>Many of the functions in this submodule are only for internal use and will be renamed.</p>
 <dl class="simple">
 <dt><a class="reference internal" href="api_objectstore.html#openghg.objectstore.get_bucket" title="openghg.objectstore.get_bucket"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_bucket()</span></code></a></dt><dd><p>Get a bucket (data container) for storing of data within the object store</p>
 </dd>
 </dl>
-</section>
-<section id="processing">
+</div>
+<div class="section" id="processing">
 <h2>processing<a class="headerlink" href="#processing" title="Permalink to this headline">¶</a></h2>
 <p>This submodule contains functions that are widely used in the processing functions found in <code class="docutils literal notranslate"><span class="pre">modules</span></code>.</p>
 <dl class="simple">
@@ -294,8 +293,8 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
 <dt><a class="reference internal" href="api_processing.html#openghg.processing.assign_data" title="openghg.processing.assign_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">assign_data()</span></code></a></dt><dd><p>Assings data to exisiting Datasources or creates new Datasources</p>
 </dd>
 </dl>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
@@ -313,7 +312,7 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jun 07, 2021.
+        Last updated on Jun 11, 2021.
       </span>
 
     </p>

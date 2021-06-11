@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._noaa &mdash; OpenGHG 0+untagged.3.ga2b3ed4 documentation</title>
+  <title>openghg.modules._noaa &mdash; OpenGHG 0+untagged.1.g1d34214 documentation</title>
   
 
   
@@ -217,9 +217,6 @@
         <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Inlet must be given for NOAA data processing. If flask data pass flask as inlet.&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">sampling_period</span> <span class="o">=</span> <span class="s2">&quot;NOT_SET&quot;</span>
-
         <span class="n">file_extension</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span>
 
         <span class="k">if</span> <span class="n">file_extension</span> <span class="o">==</span> <span class="s2">&quot;.nc&quot;</span><span class="p">:</span>
@@ -246,9 +243,9 @@
         <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
         <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Read NOAA ObsPack NetCDF files</span>
 
@@ -311,10 +308,12 @@
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;measurement_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement_type</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">instrument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
+
+        <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampling_period</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">processed_ds</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">}</span>
@@ -330,9 +329,9 @@
         <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
         <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Reads NOAA data files and returns a dictionary of processed</span>
 <span class="sd">        data and metadata.</span>
@@ -356,20 +355,14 @@
         <span class="n">source_name</span> <span class="o">=</span> <span class="n">source_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">gas_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_raw_data</span><span class="p">(</span>
-            <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span>
-            <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
-            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-            <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
-            <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
+            <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span>
         <span class="p">)</span>
 
         <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;NOAA&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">gas_data</span></div>
 
-<div class="viewcode-block" id="NOAA.read_raw_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.read_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_raw_data</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;flask&quot;</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="NOAA.read_raw_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.NOAA.read_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;flask&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Separates the gases stored in the dataframe in</span>
 <span class="sd">        separate dataframes and returns a dictionary of gases</span>
 <span class="sd">        with an assigned UUID as gas:UUID and a list of the processed</span>
@@ -492,7 +485,6 @@
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;measurement_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement_type</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
 
         <span class="n">combined_data</span><span class="p">[</span><span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
@@ -514,7 +506,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jun 07, 2021.
+        Last updated on Jun 11, 2021.
       </span>
 
     </p>
