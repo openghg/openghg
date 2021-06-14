@@ -20,7 +20,7 @@ from storage.route import route as storage_functions
 
 # We no longer have the openghg_service folder but just have the service functions
 # in their respective files
-import route as openghg_functions
+from route import route as openghg_functions
 
 identity_handler = create_handler(identity_functions)
 accounting_handler = create_handler(accounting_functions)
