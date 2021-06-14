@@ -56,13 +56,14 @@ class EulerianModel(BaseModule):
             setup: Additional setup details for run
             overwrite: Should this data overwrite currently stored data.
         """
-        # TODO: Written currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format. 
+        # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format. 
         # May need to split out into multiple modules (like with ObsSurface) or into separate processing functions as needed.
 
         from collections import defaultdict
         from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
         from openghg.processing import assign_data
         from xarray import open_dataset
+        from pandas import Timestamp as pd_Timestamp
 
         model = clean_string(model)
         species = clean_string(species)
@@ -89,6 +90,7 @@ class EulerianModel(BaseModule):
             else:
                     raise ValueError("Input data must contain one of '{coord_options}' co-ordinate")
             if name != coord:
+                print("Renaming co-ordinate '{coord}' to '{name}'")
                 em_data = em_data.rename({coord:name})
 
         attrs = em_data.attrs
@@ -99,6 +101,7 @@ class EulerianModel(BaseModule):
         metadata = {}
         metadata.update(attrs)
 
+        metadata["model"] = model
         metadata["species"] = species
         metadata["processed"] = str(timestamp_now())
 
@@ -110,6 +113,8 @@ class EulerianModel(BaseModule):
                     start_date = attrs["simulation_start_date_and_time"]
                 except KeyError:
                     raise Exception("Unable to derive start_date from data, please provide as an input.")
+                else:
+                    start_date = str(timestamp_tzaware(start_date))
 
         if end_date is None:
             if len(em_data["time"]) > 1:
@@ -119,6 +124,8 @@ class EulerianModel(BaseModule):
                     end_date = attrs["simulation_end_date_and_time"]
                 except KeyError:
                     raise Exception("Unable to derive `end_date` from data, please provide as an input.")
+                else:
+                    end_date = str(timestamp_tzaware(end_date))
 
         date = start_date
 
@@ -130,6 +137,11 @@ class EulerianModel(BaseModule):
         metadata["min_longitude"] = round(float(em_data["lon"].min()), 5)
         metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
         metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
+        
+        history = metadata.get("history")
+        if history is None:
+            history = ""
+        metadata["history"] = history + f" {str(timestamp_now())} Processed onto OpenGHG cloud"
 
         key = "_".join((model, species, date))
 
