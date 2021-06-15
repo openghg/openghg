@@ -11,6 +11,8 @@ class JobRunner:
     """
 
     def __init__(self, service_url):
+        raise NotImplementedError
+
         from Acquire.Client import Wallet
 
         wallet = Wallet()
