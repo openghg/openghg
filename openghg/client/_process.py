@@ -25,7 +25,7 @@ class Process:
             self._service_url = "https://fn.openghg.org/t"
 
         wallet = Wallet()
-        self._service = wallet.get_service(service_url=f"{self._service_url}/hugs")
+        self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
 
     def process_files(
         self,

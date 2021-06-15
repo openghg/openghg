@@ -1,6 +1,9 @@
 __all__ = ["RankSources"]
 
 import copy
+from typing import Dict, Optional
+
+from openghg.util import InvalidSiteError
 from Acquire.Client import Wallet
 
 
@@ -8,13 +11,13 @@ class RankSources:
     """
     This class is used to select the primary datasources for species from different sites
     """
-    def __init__(self, service_url=None):
+    def __init__(self, service_url: Optional[str] = None):
         wallet = Wallet()
 
         if service_url is None:
-            service_url = "https://openghg.acquire-aaai.com/t"
+            service_url = "https://fn.openghg.org/t"
 
-        self._service = wallet.get_service(service_url=f"{service_url}/hugs")
+        self._service = wallet.get_service(service_url=f"{service_url}/openghg")
 
         self._before_ranking = {}
 
@@ -33,8 +36,7 @@ class RankSources:
             raise PermissionError("Cannot use a null service")
 
         if not valid_site(site):
-            # raise InvalidSiteError(f"{site} is not a valid site code")
-            raise ValueError(f"{site} is not a valid site code")
+            raise InvalidSiteError(f"{site} is not a valid site code")
 
         args = {"site": site, "species": species}
 
