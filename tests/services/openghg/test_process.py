@@ -1,33 +1,17 @@
-import os
 import pytest
 from pathlib import Path
 
-from Acquire.Client import PAR, Authorisation, Drive, Service, StorageCreds
-
 from openghg.client import Process
-from openghg.modules import CRDS, GCWERKS
 from openghg.objectstore import get_local_bucket
 
 
 def get_datapath(filename, data_type):
-    """ Get the path of a file in the tests directory 
+    """Get the path of a file in the tests directory
 
-        Returns:
-            pathlib.Path
+    Returns:
+        pathlib.Path
     """
-    return (
-        Path(__file__)
-        .resolve()
-        .parent.parent.parent.joinpath(
-            "data", "proc_test_data", data_type.upper(), filename
-        )
-    )
-
-
-@pytest.fixture(scope="session")
-def tempdir(tmpdir_factory):
-    d = tmpdir_factory.mktemp("tmp_process")
-    return str(d)
+    return Path(__file__).resolve().parent.parent.parent.joinpath("data", "proc_test_data", data_type.upper(), filename)
 
 
 @pytest.fixture(autouse=True)
@@ -35,45 +19,93 @@ def run_before_tests():
     get_local_bucket(empty=True)
 
 
-def get_test_folder(filename):
-    dir_path = os.path.dirname(__file__)
-    test_folder = "../../../tests/data/search_data"
-    return os.path.join(dir_path, test_folder, filename)
-
-
-@pytest.mark.skip(reason="Need to fix dependence on Acquire")
 def test_process_CRDS_files(authenticated_user):
-    service_url = "hugs"
+    get_local_bucket(empty=True)
 
-    files = [
-        "bsd.picarro.1minute.108m.min.dat",
-        "hfd.picarro.1minute.100m.min.dat",
-        "tac.picarro.1minute.100m.min.dat",
-    ]
-    filepaths = [get_test_folder(f) for f in files]
+    service_url = "openghg"
 
-    # Make sure don't have the temporary files
-    for f in files:
-        Path(f"/tmp/{f}").unlink(missing_ok=True)
+    bsd_file = get_datapath(filename="bsd.picarro.1minute.248m.dat", data_type="CRDS")
 
     process = Process(service_url=service_url)
 
     response = process.process_files(
         user=authenticated_user,
-        files=filepaths,
+        files=bsd_file,
         data_type="CRDS",
-        hugs_url="hugs",
+        site="bsd",
+        network="DECC",
+        openghg_url="openghg",
         storage_url="storage",
     )
 
-    assert len(response["bsd.picarro.1minute.108m.min.dat"]) == 3
-    assert len(response["hfd.picarro.1minute.100m.min.dat"]) == 3
-    assert len(response["tac.picarro.1minute.100m.min.dat"]) == 2
+    processed_species = response["processed"]["bsd.picarro.1minute.248m.dat"]
+
+    assert sorted(list(processed_species.keys())) == ["ch4", "co", "co2"]
+
+    response = process.process_files(
+        user=authenticated_user,
+        files=bsd_file,
+        data_type="CRDS",
+        site="tac",
+        network="DECC",
+        openghg_url="openghg",
+        storage_url="storage",
+    )
+
+    assert type(response["bsd.picarro.1minute.248m.dat"]) == ValueError
 
 
-@pytest.mark.skip(reason="Need to fix dependence on Acquire")
-def test_process_GC_files(authenticated_user):
-    service_url = "hugs"
+def test_process_CRDS_incorrect_args(authenticated_user):
+    hfd_file = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
+
+    service_url = "openghg"
+    process = Process(service_url=service_url)
+
+    response = process.process_files(
+        user=authenticated_user,
+        files=hfd_file,
+        data_type="CRDS",
+        site="bsd",
+        network="DECC",
+        openghg_url="openghg",
+        storage_url="storage",
+    )
+
+    assert type(response["hfd.picarro.1minute.100m.min.dat"]) == ValueError
+
+    assert (
+        str(response["hfd.picarro.1minute.100m.min.dat"])
+        == "Error calling 'process' on 'https://openghg': Site mismatch between passed site code and that read from filename."
+    )
+
+    with pytest.raises(TypeError):
+        response = process.process_files(
+            user=authenticated_user,
+            files=hfd_file,
+            data_type="GCWERKS",
+            site="bsd",
+            network="DECC",
+            openghg_url="openghg",
+            storage_url="storage",
+        )
+
+    response = process.process_files(
+        user=authenticated_user,
+        files=hfd_file,
+        data_type="CRDS",
+        site="hfd",
+        network="DECC",
+        openghg_url="openghg",
+        storage_url="storage",
+    )
+
+    processed_species = response["processed"]["hfd.picarro.1minute.100m.min.dat"]
+
+    assert sorted(list(processed_species.keys())) == ["ch4", "co", "co2"]
+
+
+def test_process_GCWERKS_files(authenticated_user):
+    service_url = "openghg"
 
     # Get the precisin filepath
     data = get_datapath("capegrim-medusa.18.C", "GC")
@@ -83,123 +115,20 @@ def test_process_GC_files(authenticated_user):
 
     process = Process(service_url=service_url)
 
-    # TODO - work out a cleaner way to do this
-    Path("/tmp/capegrim-medusa.18.C").unlink(missing_ok=True)
-    Path("/tmp/capegrim-medusa.18.precisions.C").unlink(missing_ok=True)
-
     response = process.process_files(
         user=authenticated_user,
         files=filepaths,
         data_type="GCWERKS",
-        hugs_url="hugs",
+        site="cgo",
+        network="AGAGE",
+        openghg_url="openghg",
         storage_url="storage",
         instrument="medusa",
-        site="capegrim",
     )
 
-    expected_keys = [
-        "capegrim-medusa.18_C4F10",
-        "capegrim-medusa.18_C6F14",
-        "capegrim-medusa.18_CCl4",
-        "capegrim-medusa.18_CF4",
-        "capegrim-medusa.18_CFC-11",
-    ] 
+    cgo_response = response["processed"]["capegrim-medusa.18.C"]
 
-    assert len(response["capegrim-medusa.18.C"].keys()) == 56
-    assert sorted(response["capegrim-medusa.18.C"].keys())[:5] == expected_keys
+    partial_expected_keys = ["benzene_70m", "c4f10_70m", "c6f14_70m", "ccl4_70m", "cf4_70m"]
 
-
-@pytest.mark.skip(reason="Need to fix dependence on Acquire")
-def test_process_CRDS(authenticated_user, tempdir):
-    creds = StorageCreds(user=authenticated_user, service_url="storage")
-    drive = Drive(creds=creds, name="test_drive")
-    filepath = os.path.join(
-        os.path.dirname(__file__),
-        "../../../tests/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat",
-    )
-    filemeta = drive.upload(filepath)
-
-    Path("/tmp/bsd.picarro.1minute.248m.dat").unlink(missing_ok=True)
-
-    par = PAR(location=filemeta.location(), user=authenticated_user)
-
-    hugs = Service(service_url="hugs")
-    par_secret = openghg.encrypt_data(par.secret())
-
-    auth = Authorisation(resource="process", user=authenticated_user)
-
-    args = {
-        "authorisation": auth.to_data(),
-        "par": {"data": par.to_data()},
-        "par_secret": {"data": par_secret},
-        "data_type": "CRDS",
-        "source_name": "bsd.picarro.1minute.248m",
-    }
-
-    response = openghg.call_function(function="process", args=args)
-
-    expected_keys = [
-        "bsd.picarro.1minute.248m_ch4",
-        "bsd.picarro.1minute.248m_co",
-        "bsd.picarro.1minute.248m_co2",
-    ]
-
-    results = response["results"]["bsd.picarro.1minute.248m.dat"]
-
-    assert sorted(results.keys()) == expected_keys
-
-
-@pytest.mark.skip(reason="Need to fix dependence on Acquire")
-def test_process_GC(authenticated_user, tempdir):
-    creds = StorageCreds(user=authenticated_user, service_url="storage")
-    drive = Drive(creds=creds, name="test_drive")
-    data_filepath = os.path.join(
-        os.path.dirname(__file__),
-        "../../../tests/data/proc_test_data/GC/capegrim-medusa.18.C",
-    )
-    precision_filepath = os.path.join(
-        os.path.dirname(__file__),
-        "../../../tests/data/proc_test_data/GC/capegrim-medusa.18.precisions.C",
-    )
-
-    Path("/tmp/capegrim-medusa.18.C").unlink(missing_ok=True)
-    Path("/tmp/capegrim-medusa.18.precisions.C").unlink(missing_ok=True)
-
-    data_meta = drive.upload(data_filepath)
-    precision_meta = drive.upload(precision_filepath)
-
-    data_par = PAR(location=data_meta.location(), user=authenticated_user)
-    precision_par = PAR(location=precision_meta.location(), user=authenticated_user)
-
-    hugs = Service(service_url="hugs")
-    data_secret = openghg.encrypt_data(data_par.secret())
-    precision_secret = openghg.encrypt_data(precision_par.secret())
-
-    auth = Authorisation(resource="process", user=authenticated_user)
-
-    args = {
-        "authorisation": auth.to_data(),
-        "par": {"data": data_par.to_data(), "precision": precision_par.to_data()},
-        "par_secret": {"data": data_secret, "precision": precision_secret},
-        "data_type": "GCWERKS",
-        "source_name": "capegrim-medusa",
-        "site": "CGO",
-        "instrument": "medusa",
-    }
-
-    response = openghg.call_function(function="process", args=args)
-
-    result_keys = (sorted(response["results"]["capegrim-medusa.18.C"].keys()))[:8]
-
-    expected_keys = [
-        "capegrim-medusa.18_C4F10",
-        "capegrim-medusa.18_C6F14",
-        "capegrim-medusa.18_CCl4",
-        "capegrim-medusa.18_CF4",
-        "capegrim-medusa.18_CFC-11",
-        "capegrim-medusa.18_CFC-112",
-        "capegrim-medusa.18_CFC-113",
-        "capegrim-medusa.18_CFC-114",
-    ]
-
-    assert result_keys == expected_keys
+    assert len(cgo_response.keys()) == 56
+    assert sorted(cgo_response.keys())[:5] == partial_expected_keys

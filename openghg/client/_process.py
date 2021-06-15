@@ -44,7 +44,7 @@ class Process:
         Args:
             user: Authenticated Acquire User
             files (str, list): Path of files to be processed
-            data_type: Type of data to be processed (CRDS, GC etc)
+            data_type: Type of data to be processed (CRDS, GCWERKS etc)
             site: Site name
             network: Network name
             instrument: If no instrument name is passed we will attempt
@@ -65,9 +65,9 @@ class Process:
         if not isinstance(files, list):
             files = [files]
 
-        if data_type == "GC":
+        if data_type == "GCWERKS":
             if not all(isinstance(item, tuple) for item in files):
-                return TypeError("If data type is GC, a list of tuples for data and precision filenames must be passed")
+                raise TypeError("If data type is GCWERKS, a list of tuples for data and precision filenames must be passed")
 
             files = [(Path(f), Path(p)) for f, p in files]
         else:
@@ -84,7 +84,7 @@ class Process:
         drive = Drive(creds=creds, name="test_drive")
         auth = Authorisation(resource="process", user=user)
 
-        # Here we'll need special cases for different data types. As GC requires
+        # Here we'll need special cases for different data types. As GCWERKS requires
         # both the data file and precision data and they need to be kept together
         # for use in processing.
         # We can maybe reconsider the way this is done if there ends up being a lot of test
@@ -93,7 +93,7 @@ class Process:
         # TODO - this should also just upload all the files at once and get them processed
         results = {}
         for file in files:
-            if data_type == "GC":
+            if data_type == "GCWERKS":
 
                 if "-" in site:
                     site = site.split("-")[0]
