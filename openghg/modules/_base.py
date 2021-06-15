@@ -151,7 +151,7 @@ class BaseModule:
         of Datasources
 
         Args:
-            uuid (str): UUID of Datasource to be removed
+            uuid: UUID of Datasource to be removed
         Returns:
             None
         """
@@ -167,9 +167,9 @@ class BaseModule:
         daterange stored for that rank.
 
         Args:
-            uuid (str): UUID of Datasource
-            rank (int): Rank of data
-            daterange (str, list): Daterange(s)
+            uuid: UUID of Datasource
+            rank: Rank of data
+            daterangetr: Daterange(s)
         Returns:
             None
         """

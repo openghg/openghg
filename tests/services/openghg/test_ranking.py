@@ -4,6 +4,7 @@ import os
 from openghg.client import RankSources, Process
 from openghg.objectstore import get_local_bucket
 
+
 @pytest.fixture(scope="session")
 def tempdir(tmpdir_factory):
     d = tmpdir_factory.mktemp("tmp_searchfn")
@@ -25,47 +26,25 @@ def load_crds(authenticated_user):
     ]
     filepaths = [test_folder(f) for f in files]
 
-    process = Process(service_url="hugs")
+    process = Process(service_url="openghg")
 
     process.process_files(
         user=authenticated_user,
         files=filepaths,
+        site="hfd",
+        network="DECC",
         data_type="CRDS",
-        hugs_url="hugs",
+        openghg_url="openghg",
         storage_url="storage",
     )
 
 
-@pytest.mark.skip(reason="Need to fix dependence on Acquire")
 def test_set_ranking(authenticated_user, load_crds):
-    r = RankSources(service_url="hugs")
+    r = RankSources(service_url="openghg")
 
-    sources = r.get_sources(site="hfd", species="ch4")
+    response = r.get_sources(site="hfd", species="co2")
 
-    fifty_metre_uuid = sources["ch4_hfd_50m_picarro"]["uuid"]
-    hundred_metre_uuid = sources["ch4_hfd_100m_picarro"]["uuid"]
+    print(response)
 
-    del sources["ch4_hfd_100m_picarro"]["uuid"]
-    del sources["ch4_hfd_50m_picarro"]["uuid"]
 
-    expected_sources = {'ch4_hfd_100m_picarro': {'rank': 0, 'data_range': '2013-12-04T14:02:30_2019-05-21T15:46:30'}, 
-                        'ch4_hfd_50m_picarro': {'rank': 0, 'data_range': '2013-11-23T12:28:30_2020-06-24T09:41:30'}}
 
-    assert sources == expected_sources
-
-    new_rankings = {'ch4_hfd_100m_picarro': {'rank': {1: ["2013-12-04T14:02:30_2019-05-21T15:46:30"]}, 'uuid': hundred_metre_uuid}, 
-                    'ch4_hfd_50m_picarro': {'rank': {2: ['2013-11-23T12:28:30_2020-06-24T09:41:30']}, 'uuid': fifty_metre_uuid}}
-
-    r.rank_sources(updated_rankings=new_rankings)
-
-    sources = r.get_sources(site="hfd", species="ch4")
-
-    del sources["ch4_hfd_100m_picarro"]["uuid"]
-    del sources["ch4_hfd_50m_picarro"]["uuid"]
-
-    expected = {'ch4_hfd_100m_picarro': {'rank': {'1': ['2013-12-04T14:02:30_2019-05-21T15:46:30']}, 
-                'data_range': '2013-12-04T14:02:30_2019-05-21T15:46:30'}, 
-                'ch4_hfd_50m_picarro': {'rank': {'2': ['2013-11-23T12:28:30_2020-06-24T09:41:30']}, 
-                'data_range': '2013-11-23T12:28:30_2020-06-24T09:41:30'}}
-
-    assert sources == expected
