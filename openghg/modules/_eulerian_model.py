@@ -4,6 +4,7 @@ from typing import Dict, Optional, Union
 
 __all__ = ["EulerianModel"]
 
+
 # TODO: Currently built around these keys but will probably need more unique distiguishers for different setups
 # model name
 # species
@@ -12,7 +13,6 @@ __all__ = ["EulerianModel"]
 # setup (included as option for now)
 
 class EulerianModel(BaseModule):
-
     """This class is used to process Eulerian model data"""
 
     _root = "EulerianModel"
