@@ -4,7 +4,7 @@ from typing import Dict, Optional, Union
 
 __all__ = ["EulerianModel"]
 
-## TODO: Currently built around these keys but will probably need more unique distiguishers for different setups
+# TODO: Currently built around these keys but will probably need more unique distiguishers for different setups
 # model name
 # species
 # date (start_date)
@@ -12,6 +12,7 @@ __all__ = ["EulerianModel"]
 # setup (included as option for now)
 
 class EulerianModel(BaseModule):
+
     """This class is used to process Eulerian model data"""
 
     _root = "EulerianModel"
@@ -63,7 +64,6 @@ class EulerianModel(BaseModule):
         from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
         from openghg.processing import assign_data
         from xarray import open_dataset
-        import pandas as pd
         from pandas import Timestamp as pd_Timestamp
 
         model = clean_string(model)
@@ -82,17 +82,17 @@ class EulerianModel(BaseModule):
 
         em_data = open_dataset(filepath)
 
-        ## Check necessary 4D coordinates are present and rename if necessary (for consitency)
-        check_coords = {"time":["time"], "lat":["lat", "latitude"], "lon":["lon", "longitude"], "lev":["lev", "level", "layer", "sigma_level"]}
+        # Check necessary 4D coordinates are present and rename if necessary (for consitency)
+        check_coords = {"time": ["time"], "lat": ["lat", "latitude"], "lon": ["lon", "longitude"], "lev": ["lev", "level", "layer", "sigma_level"]}
         for name, coord_options in check_coords.items():
             for coord in coord_options:
                 if coord in em_data.coords:
                     break
             else:
-                    raise ValueError("Input data must contain one of '{coord_options}' co-ordinate")
+                raise ValueError("Input data must contain one of '{coord_options}' co-ordinate")
             if name != coord:
                 print("Renaming co-ordinate '{coord}' to '{name}'")
-                em_data = em_data.rename({coord:name})
+                em_data = em_data.rename({coord: name})
 
         attrs = em_data.attrs
 
@@ -144,7 +144,7 @@ class EulerianModel(BaseModule):
         metadata["min_longitude"] = round(float(em_data["lon"].min()), 5)
         metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
         metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
-        
+
         history = metadata.get("history")
         if history is None:
             history = ""
@@ -171,7 +171,6 @@ class EulerianModel(BaseModule):
         em_store.save()
 
         return datasource_uuids
-
 
     def lookup_uuid(self, model: str, species: str, date: str) -> Union[str, Dict]:
         """Perform a lookup for the UUID of a Datasource
