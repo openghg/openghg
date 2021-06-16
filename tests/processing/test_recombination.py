@@ -40,14 +40,13 @@ def test_recombination_CRDS():
 
     ch4_data_read = gas_data["ch4"]["data"]
 
-    gas_name = "ch4"
+    species = "ch4"
     site = "hfd"
+    inlet = "100m"
 
-    result = search(species=gas_name, site=site)
+    result = search(species=species, site=site, inlet=inlet)
 
-    uid = next(iter(result))
-
-    keys = result[uid]["keys"]
+    keys = result.keys(site=site, species=species, inlet=inlet)
 
     ch4_data_recombined = recombine_datasets(keys=keys)
 
@@ -71,13 +70,12 @@ def test_recombination_GC():
 
     toluene_data = data["toluene_70m"]["data"]
 
-    gas_name = "toluene"
+    species = "toluene"
     site = "CGO"
+    inlet = "70m"
 
-    results = search(species=gas_name, site=site)
-
-    uid = next(iter(results))
-    keys = results[uid]["keys"]
+    result = search(species=species, site=site, inlet=inlet)
+    keys = result.keys(site=site, species=species, inlet=inlet)
 
     toluene_data_recombined = recombine_datasets(keys=keys)
 

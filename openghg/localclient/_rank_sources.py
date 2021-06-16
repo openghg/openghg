@@ -1,10 +1,8 @@
 from openghg.modules import Datasource, ObsSurface
 from openghg.util import valid_site, create_daterange_str, InvalidSiteError
-
 # from pyvis.network import Network
 # import matplotlib.cm as cm
 # import matplotlib
-
 from typing import Dict, List, Optional, Union
 
 __all__ = ["RankSources"]

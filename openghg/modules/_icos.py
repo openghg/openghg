@@ -43,13 +43,13 @@ class ICOS:
         species = source_name.split(".")[1]
 
         # This should return xarray Datasets
-        gas_data = self.read_data(data_filepath=data_filepath, species=species, site=site)
+        gas_data = self.read_data(data_filepath=data_filepath, species=species, site=site, sampling_period=sampling_period)
         # Assign attributes to the xarray Datasets here data here makes it a lot easier to test
-        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=self._sampling_period)
+        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=sampling_period)
 
         return gas_data
 
-    def read_data(self, data_filepath: Path, species: str, site: Optional[str] = None) -> Dict:
+    def read_data(self, data_filepath: Path, species: str, sampling_period: str, site: Optional[str] = None) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -139,17 +139,29 @@ class ICOS:
 
         try:
             site = split_filename[0]
-            time_resolution = split_filename[2]
+            file_sampling_period = split_filename[2]
             inlet_height = split_filename[3]
         except KeyError:
             raise ValueError("Unable to read metadata from filename. We expect a filename such as tta.co2.1minute.222m.dat")
+
+        if file_sampling_period == "1minute":
+            file_sampling_period = 60
+        elif file_sampling_period == "1hour":
+            file_sampling_period = 3600
+
+        if sampling_period is not None:
+            if file_sampling_period != sampling_period:
+                raise ValueError("Mismatch between sampling period read from filename and that passed in.")
+        else:
+            sampling_period = file_sampling_period
 
         metadata = {
             "site": site,
             "species": compliant_string(species),
             "inlet": inlet_height,
-            "time_resolution": time_resolution,
+            "sampling_period": str(sampling_period),
             "network": "ICOS",
+
         }
 
         combined_data[species] = {

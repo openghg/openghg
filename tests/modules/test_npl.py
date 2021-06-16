@@ -21,7 +21,7 @@ def test_read_file():
 
     filepath = get_datapath(filename="NPL_test.csv", data_type="LGHG")
 
-    data = npl.read_file(data_filepath=filepath)
+    data = npl.read_file(data_filepath=filepath, sampling_period=60)
 
     co2_data = data["CO2"]["data"]
     ch4_data = data["CH4"]["data"]

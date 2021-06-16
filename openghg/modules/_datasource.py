@@ -8,9 +8,6 @@ __all___ = ["Datasource"]
 class Datasource:
     """A Datasource holds data relating to a single source, such as a specific species
     at a certain height on a specific instrument
-
-    Args:
-        name: Name of Datasource
     """
 
     _datasource_root = "datasource"
@@ -39,8 +36,6 @@ class Datasource:
         # Currently unused
         self._latest_version = None
         self._versions = {}
-        # A rank of -1 is unset, 1 is a primary source, 2 secondary
-        self._rank = defaultdict(list)
 
     def start_date(self) -> Timestamp:
         """Returns the starting datetime for the data in this Datasource
@@ -126,11 +121,11 @@ class Datasource:
         Returns:
             None
         """
-        data_types = ["timeseries", "emissions", "met", "footprint"]
+        expected_data_types = ("timeseries", "emissions", "met", "footprint")
 
         data_type = data_type.lower()
-        if data_type not in data_types:
-            raise TypeError(f"Incorrect data type selected. Please select from one of {data_types}")
+        if data_type not in expected_data_types:
+            raise TypeError(f"Incorrect data type selected. Please select from one of {expected_data_types}")
 
         self.add_metadata(metadata=metadata)
 
@@ -151,26 +146,18 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.util import date_overlap
+        from openghg.util import daterange_overlap
 
-        # Group by year then by season
+        # Group by year
         year_group = list(data.groupby("time.year"))
         year_data = [data for _, data in year_group if data]
-
-        # TODO - improve this
-        grouped_data = []
-        for year in year_data:
-            season_group = list(year.groupby("time.season"))
-            seasons = [data for _, data in season_group if data]
-            grouped_data.append(seasons)
 
         # Use a dictionary keyed with the daterange covered by each segment of data
         additional_data = {}
 
-        for year in grouped_data:
-            for month in year:
-                daterange_str = self.get_dataset_daterange_str(dataset=month)
-                additional_data[daterange_str] = month
+        for year in year_data:
+            daterange_str = self.get_dataset_daterange_str(dataset=year)
+            additional_data[daterange_str] = year
 
         if self._data:
             # We don't want the same data twice, this will be stored in previous versions
@@ -178,7 +165,7 @@ class Datasource:
             to_keep = []
             for current_daterange in self._data:
                 for new_daterange in additional_data:
-                    if not date_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
+                    if not daterange_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
                         to_keep.append(current_daterange)
 
             updated_data = {}
@@ -244,7 +231,7 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.util import date_overlap
+        from openghg.util import daterange_overlap
 
         # Use a dictionary keyed with the daterange covered by each segment of data
         new_data = {}
@@ -259,7 +246,7 @@ class Datasource:
             to_keep = []
             for current_daterange in self._data:
                 for new_daterange in new_data:
-                    if not date_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
+                    if not daterange_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
                         to_keep.append(current_daterange)
 
             updated_data = {}
@@ -364,7 +351,6 @@ class Datasource:
         data["data_keys"] = self._data_keys
         data["data_type"] = self._data_type
         data["latest_version"] = self._latest_version
-        data["rank"] = self._rank
 
         return data
 
@@ -395,8 +381,8 @@ class Datasource:
         from binary data at the moment.
 
         Args:
-            bucket (dict): Bucket containing data
-            key (str): Key for data
+            bucket: Bucket containing data
+            key: Key for data
         Returns:
             xarray.Dataset: Dataset from NetCDF file
         """
@@ -508,7 +494,6 @@ class Datasource:
             Datasource: Datasource created from JSON
         """
         from Acquire.ObjectStore import string_to_datetime
-        from collections import defaultdict
 
         d = Datasource()
         d._uuid = data["UUID"]
@@ -519,7 +504,6 @@ class Datasource:
         d._data = {}
         d._data_type = data["data_type"]
         d._latest_version = data["latest_version"]
-        d._rank = defaultdict(list, data["rank"])
 
         if d._stored and not shallow:
             for date_key in d._data_keys["latest"]["keys"]:
@@ -645,6 +629,7 @@ class Datasource:
         Returns:
             None
         """
+        from openghg.util import split_daterange_str
         # If we've only shallow loaded (without the data)
         # this Datasource we use the latest data keys
         if not self._data:
@@ -652,8 +637,8 @@ class Datasource:
         else:
             keys = sorted(self._data.keys())
 
-        start, _ = self.split_datrange_str(daterange_str=keys[0])
-        _, end = self.split_datrange_str(daterange_str=keys[-1])
+        start, _ = split_daterange_str(daterange_str=keys[0])
+        _, end = split_daterange_str(daterange_str=keys[-1])
 
         self._start_date = start
         self._end_date = end
@@ -850,7 +835,6 @@ class Datasource:
 
         in_date = []
         for key in keys:
-
             end_key = key.split("/")[-1]
             dates = end_key.split("_")
 
@@ -914,167 +898,6 @@ class Datasource:
             dict: Metadata of Datasource
         """
         return self._metadata
-
-    def rank(self) -> Union[int, Dict]:
-        """Return the rank of this Datasource
-
-        Where a value of 0 means no rank, 1 the highest
-
-        Returns:
-            dict: Dictionary of rank: dateranges
-        """
-        if not self._rank:
-            return 0
-
-        return self._rank
-
-    def set_rank(self, rank: Union[int, str], daterange: Union[str, List]) -> None:
-        """Set the rank of this Datsource. This allows users to select
-        the best data for a specific species at a site. By default
-        a Datasource is unranked with a value of 0. The highest rank is 1 and the lowest 10.
-
-        TODO - add a check to ensure multiple ranks aren't set for the same daterange
-
-        Args:
-            rank: Rank number between 0 and 10.
-            daterange: List of daterange strings such as 2019-01-01T00:00:00_2019-12-31T00:00:00
-        Returns:
-            None
-        """
-        if not 0 <= int(rank) <= 10:
-            raise ValueError("Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.")
-
-        if not isinstance(daterange, list):
-            daterange = [daterange]
-
-        try:
-            self._rank[rank].extend(daterange)
-            self._rank[rank] = self.combine_dateranges(self._rank[rank])
-        except KeyError:
-            self._rank[rank] = daterange
-
-    def combine_dateranges(self, dateranges: List[str]) -> List:
-        """Checks a list of daterange strings for overlapping and combines
-        those that do.
-
-        Note : this function expects daterange strings in the form
-        2019-01-01T00:00:00_2019-12-31T00:00:00
-
-        Args:
-            dateranges: List of strings
-        Returns:
-            list: List of dateranges with overlapping ranges combined
-        """
-        from itertools import tee
-        from collections import defaultdict
-        from openghg.util import daterange_from_str, daterange_to_str
-
-        # Ensure there are no duplciates
-        dateranges = list(set(dateranges))
-        # We can't combine a single daterange
-        if len(dateranges) < 2:
-            return dateranges
-
-        dateranges.sort()
-
-        daterange_objects = [daterange_from_str(x) for x in dateranges]
-
-        def pairwise(iterable):
-            a, b = tee(iterable)
-            next(b, None)
-            return zip(a, b)
-
-        # We want lists of dateranges to combine
-        groups = defaultdict(list)
-        # Each group contains a number of dateranges that overlap
-        group_n = 0
-        # Do a pairwise comparison
-        # "s -> (s0,s1), (s1,s2), (s2, s3), ..."
-        for a, b in pairwise(daterange_objects):
-            if len(a.intersection(b)) > 0:
-                groups[group_n].append(a)
-                groups[group_n].append(b)
-            else:
-                # If the first pair don't match we want to keep both but
-                # have them in separate groups
-                if group_n == 0:
-                    groups[group_n].append(a)
-                    group_n += 1
-                    groups[group_n].append(b)
-                    continue
-
-                # Otherwise increment the group number and just keep the second of the pair
-                # The first of the pair was a previous second so will have been saved in the
-                # last iteration
-                group_n += 1
-                groups[group_n].append(b)
-
-        # Now we need to combine each group into a single daterange
-        combined_dateranges = []
-        for group_number, daterange_list in groups.items():
-            combined = daterange_list[0].union_many(daterange_list[1:])
-            combined_dateranges.append(combined)
-
-        # Conver the dateranges backt to strings for storing
-        combined_dateranges = [daterange_to_str(x) for x in combined_dateranges]
-
-        return combined_dateranges
-
-    def split_datrange_str(self, daterange_str: str) -> Tuple[Timestamp, Timestamp]:
-        """Split a daterange string to the component start and end
-        Timestamps
-
-        Args:
-            daterange_str (str): Daterange string of the form
-
-            2019-01-01T00:00:00_2019-12-31T00:00:00
-        Returns:
-            tuple (Timestamp, Timestamp): Tuple of start, end pandas Timestamps
-        """
-        from pandas import Timestamp
-
-        split = daterange_str.split("_")
-
-        start = Timestamp(split[0], tz="UTC")
-        end = Timestamp(split[1], tz="UTC")
-
-        return start, end
-
-    def get_rank(self, start_date: Optional[Timestamp] = None, end_date: Optional[Timestamp] = None) -> Dict:
-        """Get the ranks of data contained within Datasource for the passed daterange.
-
-        If no rank has been set zero is returned.
-        If no start or end date is passed all ranking data will be returned.
-
-        Args:
-            start_date
-            end_date
-        Returns:
-            dict: Dictionary of rank: daterange
-        """
-        from collections import defaultdict
-        from openghg.util import daterange_from_str, daterange_to_str, create_daterange
-
-        # If we don't have a rank return 9
-        if not self._rank:
-            return {}
-
-        if start_date is None or end_date is None:
-            return self._rank
-
-        search_daterange = create_daterange(start=start_date, end=end_date)
-
-        results = defaultdict(list)
-
-        for rank, dateranges in self._rank.items():
-            for daterange_str in dateranges:
-                daterange = daterange_from_str(daterange_str)
-
-                intersection = search_daterange.intersection(daterange)
-                if len(intersection) > 0:
-                    results[rank].append(daterange_to_str(intersection))
-
-        return results
 
     def data_type(self) -> str:
         """Returns the data type held by this Datasource

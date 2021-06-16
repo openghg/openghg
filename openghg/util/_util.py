@@ -2,6 +2,7 @@
 
 """
 from typing import Dict, Set, List, Union, Tuple
+from collections.abc import Iterable
 
 __all__ = [
     "create_uuid",
@@ -14,6 +15,7 @@ __all__ = [
     "is_number",
     "to_lowercase",
     "to_defaultdict",
+    "pairwise",
 ]
 
 
@@ -88,7 +90,7 @@ def get_datapath(filename, directory=None):
 
 
 def load_json(filename):
-    """Returns a dictionary deserialised from JSON. This function only 
+    """Returns a dictionary deserialised from JSON. This function only
     works for JSON files in the openghg/data directory.
 
     Args:
@@ -195,3 +197,20 @@ def to_defaultdict(to_parse: Dict) -> Dict:
         return defaultdict(nested_dict, {k: recurse_convert(v) for k, v in d.items()})
 
     return recurse_convert(to_parse)
+
+
+def pairwise(iterable: Iterable) -> Tuple[Iterable, Iterable]:
+    """Return a zip of an iterable where a is the iterable
+    and b is the iterable advanced one step.
+
+    Args:
+        iterable: Any iterable type
+    Returns:
+        tuple: Tuple of iterables
+    """
+    from itertools import tee
+
+    a, b = tee(iterable)
+    next(b, None)
+
+    return zip(a, b)
