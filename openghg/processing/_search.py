@@ -32,7 +32,7 @@ def search(**kwargs) -> Dict:
         dict: List of keys of Datasources matching the search parameters
     """
     from collections import defaultdict
-    from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions
+    from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions, EulerianModel
     from openghg.util import timestamp_now, timestamp_epoch, timestamp_tzaware, clean_string
 
     # if species is not None and not isinstance(species, list):
@@ -94,7 +94,7 @@ def search(**kwargs) -> Dict:
 
     data_type = search_kwargs.get("data_type", "timeseries")
 
-    valid_data_types = ("timeseries", "footprint", "emissions")
+    valid_data_types = ("timeseries", "footprint", "emissions", "eulerian_model")
     if data_type not in valid_data_types:
         raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
 
@@ -105,6 +105,8 @@ def search(**kwargs) -> Dict:
         obj = FOOTPRINTS.load()
     elif data_type == "emissions":
         obj = Emissions.load()
+    elif data_type == "eulerian_model":
+        obj = EulerianModel.load()
 
     datasource_uuids = obj.datasources()
 

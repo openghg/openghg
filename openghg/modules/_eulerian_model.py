@@ -15,7 +15,7 @@ class EulerianModel(BaseModule):
     """This class is used to process Eulerian model data"""
 
     _root = "EulerianModel"
-    #_uuid = "c5c88168-0498-40ac-9ad3-949e91a30872" # TODO: How do we generate a new uuid for this class?
+    _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
 
     def save(self, bucket: Optional[Dict] = None) -> None:
         """Save the object to the object store
@@ -63,6 +63,7 @@ class EulerianModel(BaseModule):
         from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
         from openghg.processing import assign_data
         from xarray import open_dataset
+        import pandas as pd
         from pandas import Timestamp as pd_Timestamp
 
         model = clean_string(model)
@@ -114,7 +115,8 @@ class EulerianModel(BaseModule):
                 except KeyError:
                     raise Exception("Unable to derive start_date from data, please provide as an input.")
                 else:
-                    start_date = str(timestamp_tzaware(start_date))
+                    start_date = timestamp_tzaware(start_date)
+                    start_date = str(start_date)
 
         if end_date is None:
             if len(em_data["time"]) > 1:
@@ -125,9 +127,14 @@ class EulerianModel(BaseModule):
                 except KeyError:
                     raise Exception("Unable to derive `end_date` from data, please provide as an input.")
                 else:
-                    end_date = str(timestamp_tzaware(end_date))
+                    end_date = timestamp_tzaware(end_date)
+                    end_date = str(end_date)
 
-        date = start_date
+        date = str(pd_Timestamp(start_date).date())
+
+        print("Writing start date and end date to metadata")
+        print(date, start_date, end_date)
+        print(type(date), type(start_date), type(end_date))
 
         metadata["date"] = date
         metadata["start_date"] = start_date

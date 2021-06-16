@@ -6,22 +6,26 @@ from openghg.processing import search, recombine_datasets
 from openghg.objectstore import get_local_bucket
 from xarray import open_dataset
 
+import os
+import tempfile
+tmp_dir = tempfile.TemporaryDirectory()
+os.environ["OPENGHG_PATH"] = tmp_dir.name # "/tmp/openghg_store"
+
 
 def get_datapath(filename):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/eulerian_model/{filename}")
 
-
 def test_read_file():
     get_local_bucket(empty=True)
 
-    test_datapath = get_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc")
+    test_datapath = get_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 
     proc_results = EulerianModel.read_file(
-        filepath=test_datapath, model="GEOSChem", species="ch4", start_date="2015", end_date="2016")
+        filepath=test_datapath, model="GEOSChem", species="ch4")
 
-    assert "ch4_geoschem_2015" in proc_results
+    assert "geoschem_ch4_2015-01-01" in proc_results
 
-    search_results = search(species="ch4", model="geoschem", date="2015", data_type="eulerian_model")
+    search_results = search(species="ch4", model="geoschem", start_date="2015-01-01", data_type="eulerian_model")
 
     key = list(search_results.keys())[0]
 
@@ -40,7 +44,7 @@ def test_read_file():
 
     expected_metadata_values = {
         "species": "ch4",
-        "date": "2015-01-01 00:00:00+00:00",
+        "date": "2015-01-01",
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date" : "2016-01-01 00:00:00+00:00",
         "max_longitude" : 175.0,
