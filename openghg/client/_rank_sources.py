@@ -93,7 +93,7 @@ class RankSources:
         args["dateranges"] = dateranges
         args["overwrite"] = overwrite
 
-        self._service.call_function(function="search_rank_sources", args=args)
+        self._service.call_function(function="set_rank", args=args)
         self._needs_update = True
 
     def clear_rank(self, key: str) -> None:

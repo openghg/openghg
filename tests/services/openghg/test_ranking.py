@@ -44,7 +44,15 @@ def test_set_ranking(authenticated_user, load_crds):
 
     response = r.get_sources(site="hfd", species="co2")
 
+    expected_response = {
+        "co2_100m_picarro": {"rank_data": "NA", "data_range": "2013-12-04T14:02:30_2019-05-21T15:46:30"},
+        "co2_50m_picarro": {"rank_data": "NA", "data_range": "2013-11-23T12:28:30_2020-06-24T09:41:30"},
+    }
+
+    assert response == expected_response
+
+    r.set_rank(key="co2_100m_picarro", rank=1, start_date="2015-01-01", end_date="2017-01-01")
+
+    response = r.get_sources(site="hfd", species="co2")
+
     print(response)
-
-
-
