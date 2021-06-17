@@ -110,18 +110,18 @@ class NOAA(BaseModule):
         # The dimension within the original dataset is called "obs" and has no associated coordinates 
         # Extract time from original Dataset (dimension is "obs")
         time = obspack_ds.time
-        
+
         # To keep associated "obs" dimension, need to assign coordinate values to this (just 0, len(obs))
         time = time.assign_coords(obs=obspack_ds.obs)
-        
+
         # Make "time" the primary dimension (while retaining "obs") and add "time" values as coordinates
-        time = time.swap_dims(dims_dict={"obs":"time"})
+        time = time.swap_dims(dims_dict={"obs": "time"})
         time = time.assign_coords(time=time)
-        
+
         # Drop any duplicate time values and extract the associated "obs" values
         time_unique = time.drop_duplicates(dim="time", keep="first")
         obs_unique = time_unique.obs
-        
+
         # Use these obs values to filter the original dataset to remove any repeated times
         processed_ds = obspack_ds.sel(obs=obs_unique)
         processed_ds = processed_ds.set_coords(["time"])
@@ -153,7 +153,7 @@ class NOAA(BaseModule):
             # Extract units attribute from value data variable
             units = processed_ds["value"].units
         except (KeyError, AttributeError):
-            print(f"Unable to extract units from 'value' within input dataset")
+            print("Unable to extract units from 'value' within input dataset")
         else:
             # TODO: What would we want to include for "mol mol-1" here?
             if units == "micromol mol-1":
