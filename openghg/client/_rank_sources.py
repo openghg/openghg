@@ -31,7 +31,7 @@ class RankSources:
 
         args = {"site": site, "species": species}
 
-        response = self._service.call_function(function="search_rank_sources", args=args)
+        response = self._service.call_function(function="rank.get_sources", args=args)
 
         if not response:
             raise ValueError(f"No sources found for {species} at {site}")
@@ -93,7 +93,7 @@ class RankSources:
         args["dateranges"] = dateranges
         args["overwrite"] = overwrite
 
-        self._service.call_function(function="set_rank", args=args)
+        self._service.call_function(function="rank.set_rank", args=args)
         self._needs_update = True
 
     def clear_rank(self, key: str) -> None:
@@ -108,7 +108,7 @@ class RankSources:
 
         args = {"uuid": uuid}
 
-        self._service.call_function(function="clear_rank", args=args)
+        self._service.call_function(function="rank.clear_rank", args=args)
 
 
     # def visualise_rankings(self) -> Network:

@@ -41,5 +41,5 @@ from ._time import (
     sanitise_daterange,
 )
 
-from ._errors import InvalidSiteError, UnknownDataError
+from ._errors import InvalidSiteError, UnknownDataError, FunctionError
 from ._tutorial import bilsdale_datapaths

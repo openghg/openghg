@@ -24,7 +24,7 @@ def test_process_CRDS_files(authenticated_user):
 
     service_url = "openghg"
 
-    bsd_file = get_datapath(filename="bsd.picarro.1minute.248m.dat", data_type="CRDS")
+    bsd_file = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
 
     process = Process(service_url=service_url)
 
@@ -38,21 +38,21 @@ def test_process_CRDS_files(authenticated_user):
         storage_url="storage",
     )
 
-    processed_species = response["processed"]["bsd.picarro.1minute.248m.dat"]
+    processed_species = response["processed"]["bsd.picarro.1minute.248m.min.dat"]
 
     assert sorted(list(processed_species.keys())) == ["ch4", "co", "co2"]
 
-    response = process.process_files(
-        user=authenticated_user,
-        files=bsd_file,
-        data_type="CRDS",
-        site="tac",
-        network="DECC",
-        openghg_url="openghg",
-        storage_url="storage",
-    )
+    # response = process.process_files(
+    #     user=authenticated_user,
+    #     files=bsd_file,
+    #     data_type="CRDS",
+    #     site="tac",
+    #     network="DECC",
+    #     openghg_url="openghg",
+    #     storage_url="storage",
+    # )
 
-    assert type(response["bsd.picarro.1minute.248m.dat"]) == ValueError
+    # assert type(response["bsd.picarro.1minute.248m.min.dat"]) == ValueError
 
 
 def test_process_CRDS_incorrect_args(authenticated_user):
@@ -71,11 +71,8 @@ def test_process_CRDS_incorrect_args(authenticated_user):
         storage_url="storage",
     )
 
-    assert type(response["hfd.picarro.1minute.100m.min.dat"]) == ValueError
-
     assert (
-        str(response["hfd.picarro.1minute.100m.min.dat"])
-        == "Error calling 'process' on 'https://openghg': Site mismatch between passed site code and that read from filename."
+        str(response["hfd.picarro.1minute.100m.min.dat"]) == "Site mismatch between passed site code and that read from filename."
     )
 
     with pytest.raises(TypeError):

@@ -39,7 +39,7 @@ def load_crds(authenticated_user):
     )
 
 
-def test_set_ranking(authenticated_user, load_crds):
+def test_set_and_clear_ranking(authenticated_user, load_crds):
     r = RankSources(service_url="openghg")
 
     response = r.get_sources(site="hfd", species="co2")
@@ -55,4 +55,23 @@ def test_set_ranking(authenticated_user, load_crds):
 
     response = r.get_sources(site="hfd", species="co2")
 
-    print(response)
+    expected_new_response = {
+        "co2_100m_picarro": {
+            "rank_data": {"2015-01-01-00:00:00+00:00_2017-01-01-00:00:00+00:00": 1},
+            "data_range": "2013-12-04T14:02:30_2019-05-21T15:46:30",
+        },
+        "co2_50m_picarro": {"rank_data": "NA", "data_range": "2013-11-23T12:28:30_2020-06-24T09:41:30"},
+    }
+
+    assert response == expected_new_response
+
+    r.clear_rank(key="co2_100m_picarro")
+
+    response = r.get_sources(site="hfd", species="co2")
+
+    expected_clear_response = {
+        "co2_100m_picarro": {"rank_data": "NA", "data_range": "2013-12-04T14:02:30_2019-05-21T15:46:30"},
+        "co2_50m_picarro": {"rank_data": "NA", "data_range": "2013-11-23T12:28:30_2020-06-24T09:41:30"},
+    }
+
+    assert response == expected_clear_response

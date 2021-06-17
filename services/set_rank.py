@@ -10,4 +10,3 @@ def set_rank(args):
     overwrite = args["overwrite"]
 
     obs.set_rank(uuid=uuid, rank=rank, date_range=dateranges, overwrite=overwrite)
-

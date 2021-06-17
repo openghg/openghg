@@ -17,7 +17,7 @@ class JobRunner:
 
         wallet = Wallet()
 
-        self._service = wallet.get_service(service_url=f"{service_url}/hugs")
+        self._service = wallet.get_service(service_url=f"{service_url}/openghg")
         self._service_url = service_url
 
     def create_job(

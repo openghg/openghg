@@ -1,4 +1,4 @@
-def testconnection(args):
+def test_connection(args):
     from openghg.util import timestamp_now
 
     now_str = f"Function run at {str(timestamp_now())}"

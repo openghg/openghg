@@ -133,10 +133,11 @@ class Process:
 
             # If we try to upload many files we don't want it to fail if a single
             # file contains overlapping data
-            try:
-                response = self._service.call_function(function="process", args=args)
+            response = self._service.call_function(function="process.process", args=args)
+
+            if "error" in response:
+                results[file.name] = response["error"]
+            elif "results" in response:
                 results.update(response["results"])
-            except ValueError as err:
-                results[file.name] = err
 
         return results

@@ -1,7 +1,7 @@
 from openghg.modules import ObsSurface
 
 
-def set_rank(args):
+def clear_rank(args):
     obs = ObsSurface.load()
 
     uuid = args["uuid"]
