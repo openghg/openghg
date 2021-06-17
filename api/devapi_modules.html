@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Development API modules &mdash; OpenGHG 0+untagged.3.g74ccc2c documentation</title>
+  <title>Development API modules &mdash; OpenGHG 0+untagged.3.g599e455 documentation</title>
   
 
   
@@ -1065,7 +1065,7 @@ The data is stored as a tuple of the data and the daterange it covers.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>metadata</strong> – Metadata on the data for this Datasource</p></li>
 <li><p><strong>data</strong> – xarray.Dataset</p></li>
-<li><p><strong>data_type</strong> – Type of data, one of [“timeseries”, “emissions”, “met”, “footprint”, “eulerian_model”].</p></li>
+<li><p><strong>data_type</strong> – Type of data, one of [“timeseries”, “emissions”, “met”, “footprint”].</p></li>
 <li><p><strong>overwrite</strong> – Overwrite existing data</p></li>
 </ul>
 </dd>
@@ -1102,23 +1102,6 @@ The data is stored as a tuple of the data and the daterange it covers.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> – Flux data as an xarray.Dataset</p></li>
-<li><p><strong>metadata</strong> – Metadata</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.modules.Datasource.add_eulerian_model_data">
-<span class="sig-name descname"><span class="pre">add_eulerian_model_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xarray.core.dataset.Dataset</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/openghg/modules/_datasource.html#Datasource.add_eulerian_model_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.modules.Datasource.add_eulerian_model_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add Eulerian model data to this Datasource</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> – Eulerian model data as an xarray.Dataset</p></li>
 <li><p><strong>metadata</strong> – Metadata</p></li>
 </ul>
 </dd>
@@ -1890,7 +1873,7 @@ this Datasource</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jun 16, 2021.
+        Last updated on Jun 17, 2021.
       </span>
 
     </p>
