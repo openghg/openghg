@@ -4,14 +4,7 @@ from pathlib import Path
 from openghg.client import Process
 from openghg.objectstore import get_local_bucket
 
-
-def get_datapath(filename, data_type):
-    """Get the path of a file in the tests directory
-
-    Returns:
-        pathlib.Path
-    """
-    return Path(__file__).resolve().parent.parent.parent.joinpath("data", "proc_test_data", data_type.upper(), filename)
+from helpers import get_datapath
 
 
 @pytest.fixture(autouse=True)

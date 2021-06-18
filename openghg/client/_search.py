@@ -1,15 +1,17 @@
-__all__ = ["Search"]
-
 import json
 import warnings
+from typing import Dict, List, Optional, Union
 import xarray
+
 from Acquire.Client import Wallet
 from Acquire.ObjectStore import string_to_datetime, datetime_to_string
 
+__all__ = ["Search"]
+
 
 class Search:
-    def __init__(self, service_url=None):
-        if service_url:
+    def __init__(self, service_url: Optional[str] = None):
+        if service_url is not None:
             self._service_url = service_url
         else:
             self._service_url = "https://fn.openghg.org/t"
@@ -17,16 +19,39 @@ class Search:
         wallet = Wallet()
         self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
 
-    def search(self, locations, species=None, inlet=None, instrument=None, start_date=None, end_date=None):
-        """ Document me!
+    def search(
+        self,
+        species: Optional[Union[str, List]] = None,
+        site: Optional[Union[str, List]] = None,
+        inlet: Optional[Union[str, List]] = None,
+        instrument: Optional[Union[str, List]] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+    ) -> Dict:
+        """Search for surface observations data in the object store
 
+        Args:
+            species: Species
+            site: Three letter site code
+            inlet: Inlet height
+            instrument: Instrument name
+            start_date: Start date
+            end_date: End date
+            **kwargs: Optional
         """
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
+        if not any(species, site, inlet, instrument):
+            raise ValueError("We must have at least one of  species, site, inlet or instrument")
+
         args = {}
-        args["species"] = species
-        args["locations"] = locations
+
+        if species is not None:
+            args["species"] = species
+
+        if site is not None:
+            args["site"] = site
 
         if inlet is not None:
             args["inlet"] = inlet
@@ -34,36 +59,37 @@ class Search:
         if instrument is not None:
             args["instrument"] = instrument
 
-        if start_date:
-            args["start_date"] = datetime_to_string(start_date)
-        if end_date:
-            args["end_date"] = datetime_to_string(end_date)
+        if start_date is not None:
+            args["start_date"] = start_date
+        if end_date is not None:
+            args["end_date"] = end_date
 
-        response = self._service.call_function(function="search", args=args)["results"]
+        response = self._service.call_function(function="search.search", args=args)
 
-        self._results = response
+        results = response["results"]
 
-        return response
+        self._results = results
+
+        return results
 
     def results(self):
-        """ Return the results in an easy to read format when printed to screen
+        """Return the results in an easy to read format when printed to screen
 
-            Returns:    
-                dict: Dictionary of results
+        Returns:
+            dict: Dictionary of results
         """
         return {
-            key: f"Daterange : {self._results[key]['start_date']} - {self._results[key]['end_date']}"
-            for key in self._results
+            key: f"Daterange : {self._results[key]['start_date']} - {self._results[key]['end_date']}" for key in self._results
         }
 
     def download(self, selected_keys):
-        """ Downloads the selected keys and returns a dictionary of
-            xarray Datasets
+        """Downloads the selected keys and returns a dictionary of
+        xarray Datasets
 
-            Args:
-                keys (str, list): Key(s) from search results to download
-            Returns:
-                defaultdict(dict): Dictionary of Datasets
+        Args:
+            keys (str, list): Key(s) from search results to download
+        Returns:
+            defaultdict(dict): Dictionary of Datasets
         """
         if not isinstance(selected_keys, list):
             selected_keys = [selected_keys]

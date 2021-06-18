@@ -1,9 +1,8 @@
 import pytest
-import os
 
 from openghg.client import RankSources, Process
 from openghg.objectstore import get_local_bucket
-
+from helpers import get_datapath
 
 @pytest.fixture(scope="session")
 def tempdir(tmpdir_factory):
@@ -15,16 +14,11 @@ def tempdir(tmpdir_factory):
 def load_crds(authenticated_user):
     get_local_bucket(empty=True)
 
-    def test_folder(filename):
-        dir_path = os.path.dirname(__file__)
-        test_folder = "../../../tests/data/proc_test_data/CRDS"
-        return os.path.join(dir_path, test_folder, filename)
-
     files = [
         "hfd.picarro.1minute.100m.min.dat",
         "hfd.picarro.1minute.50m.min.dat",
     ]
-    filepaths = [test_folder(f) for f in files]
+    filepaths = [get_datapath(filename=f, data_type="CRDS") for f in files]
 
     process = Process(service_url="openghg")
 
