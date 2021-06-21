@@ -2,7 +2,26 @@ from typing import Dict
 from openghg.modules import Datasource, ObsSurface
 
 
-def search_rank_sources(args: Dict) -> Dict:
+def set_rank(args: Dict) -> None:
+    obs = ObsSurface.load()
+
+    rank = args["rank"]
+    uuid = args["uuid"]
+    dateranges = args["dateranges"]
+    overwrite = args["overwrite"]
+
+    obs.set_rank(uuid=uuid, rank=rank, date_range=dateranges, overwrite=overwrite)
+
+
+def clear_rank(args: Dict) -> None:
+    obs = ObsSurface.load()
+
+    uuid = args["uuid"]
+
+    obs.clear_rank(uuid=uuid)
+
+
+def get_sources(args: Dict) -> Dict:
     obs = ObsSurface.load()
     datasource_uuids = obs.datasources()
     rank_table = obs.rank_data()
