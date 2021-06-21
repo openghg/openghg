@@ -42,7 +42,7 @@ def process(args: Dict) -> Dict:
         inlet = args.get("inlet")
         overwrite = args.get("overwrite", False)
 
-        if data_type == "GCWERKS":
+        if data_type in ("GCWERKS", "GC"):
             precision_par = PAR.from_data(args["par"]["precision"])
             precision_secret = args["par_secret"]["precision"]
             precision_secret = openghg.decrypt_data(precision_secret)

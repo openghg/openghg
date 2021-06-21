@@ -65,9 +65,9 @@ class Process:
         if not isinstance(files, list):
             files = [files]
 
-        if data_type == "GCWERKS":
+        if data_type in ("GCWERKS", "GC"):
             if not all(isinstance(item, tuple) for item in files):
-                raise TypeError("If data type is GCWERKS, a list of tuples for data and precision filenames must be passed")
+                raise TypeError("If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed")
 
             files = [(Path(f), Path(p)) for f, p in files]
         else:
@@ -93,7 +93,7 @@ class Process:
         # TODO - this should also just upload all the files at once and get them processed
         results = {}
         for file in files:
-            if data_type == "GCWERKS":
+            if data_type in ("GCWERKS", "GC"):
 
                 if "-" in site:
                     site = site.split("-")[0]

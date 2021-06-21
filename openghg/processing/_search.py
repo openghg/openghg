@@ -17,7 +17,11 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     # start_date: Optional[Union[str, Timestamp]] = None,
     # end_date: Optional[Union[str, Timestamp]] = None,
     # data_type: Optional[str] = "timeseries",
-    """Search for observations data
+    """Search for observations data. Any keyword arguments may be passed to the 
+    the function and these keywords will be used to search the metadata associated
+    with each Datasource.
+
+    Example / commonly used arguments are given below.
 
     Args:
         species: Terms to search for in Datasources
@@ -29,11 +33,13 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
         If None a start datetime of UNIX epoch (1970-01-01) is set
         end_date: End datetime for search.
         If None an end datetime of the current datetime is set
+        skip_ranking: If True skip ranking system, defaults to False
     Returns:
         dict: List of keys of Datasources matching the search parameters
     """
     from addict import Dict as aDict
     from collections import defaultdict
+    from copy import deepcopy
     from itertools import chain as iter_chain
 
     from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions
@@ -46,7 +52,10 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
         closest_daterange,
         find_daterange_gaps,
         split_daterange_str,
-    )
+    )  
+
+    # Get a copy of kwargs as we make some modifications below
+    kwargs_copy = deepcopy(kwargs)
 
     # Do this here otherwise we have to produce them for every datasource
     start_date = kwargs.get("start_date")
@@ -62,14 +71,20 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     else:
         end_date = timestamp_tzaware(end_date)
 
-    kwargs["start_date"] = start_date
-    kwargs["end_date"] = end_date
+    kwargs_copy["start_date"] = start_date
+    kwargs_copy["end_date"] = end_date
+
+    skip_ranking = kwargs_copy.get("skip_ranking", False)
+
+    try:
+        del kwargs_copy["skip_ranking"]
+    except KeyError:
+        pass
 
     # As we might have kwargs that are None we want to get rid of those
-    search_kwargs = {k: clean_string(v) for k, v in kwargs.items() if v is not None}
+    search_kwargs = {k: clean_string(v) for k, v in kwargs_copy.items() if v is not None}
 
     data_type = search_kwargs.get("data_type", "timeseries")
-    skip_ranking = search_kwargs.get("skip_ranking", False)
 
     valid_data_types = ("timeseries", "footprint", "emissions")
     if data_type not in valid_data_types:
@@ -90,7 +105,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
 
     # For the time being this will return a dict until we know how best to represent
     # the footprint and emissions results in a SearchResult object
-    if data_type in {"emissions", "footprint"} :
+    if data_type in {"emissions", "footprint"}:
         sources = defaultdict(dict)
         for datasource in datasources:
             if datasource.search_metadata(**search_kwargs):

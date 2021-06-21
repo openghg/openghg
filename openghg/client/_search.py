@@ -6,6 +6,7 @@ import xarray
 from Acquire.Client import Wallet
 from Acquire.ObjectStore import string_to_datetime, datetime_to_string
 
+
 __all__ = ["Search"]
 
 
@@ -27,6 +28,8 @@ class Search:
         instrument: Optional[Union[str, List]] = None,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
+        skip_ranking: Optional[bool] = False,
+        data_type: Optional[str] = "timeseries",
     ) -> Dict:
         """Search for surface observations data in the object store
 
@@ -37,12 +40,13 @@ class Search:
             instrument: Instrument name
             start_date: Start date
             end_date: End date
-            **kwargs: Optional
         """
+        from openghg.dataobjects import SearchResults
+
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
-        if not any(species, site, inlet, instrument):
+        if not any((species, site, inlet, instrument)):
             raise ValueError("We must have at least one of  species, site, inlet or instrument")
 
         args = {}
@@ -64,13 +68,17 @@ class Search:
         if end_date is not None:
             args["end_date"] = end_date
 
+        args["skip_ranking"] = str(skip_ranking)
+        args["data_type"] = data_type
+
         response = self._service.call_function(function="search.search", args=args)
 
-        results = response["results"]
-
-        self._results = results
-
-        return results
+        try:
+            results_data = response["results"]
+            search_results = SearchResults.from_data(results_data)
+            return search_results
+        except KeyError:
+            return response
 
     def results(self):
         """Return the results in an easy to read format when printed to screen

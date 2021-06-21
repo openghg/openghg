@@ -1,10 +1,12 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, TypeVar, Type
 from openghg.dataobjects import ObsData
 from openghg.processing import recombine_datasets
 from openghg.util import clean_string
 
 __all__ = ["SearchResults"]
+
+T = TypeVar("T", bound="SearchResults")
 
 
 @dataclass(frozen=True)
@@ -20,6 +22,9 @@ class SearchResults:
     ranked_data: bool
 
     def __str__(self):
+        if not self.results:
+            return "No results"
+
         print_strs = []
         for site, species in self.results.items():
             if self.ranked_data:
@@ -40,6 +45,25 @@ class SearchResults:
 
     def __iter__(self):
         yield from self.results
+
+    def to_data(self) -> Dict:
+        """ Convert this object to a dictionary for JSON serialisation
+
+            Returns:
+                dict: Dictionary of data
+        """
+        return {"results": self.results, "ranked_data": self.ranked_data}
+
+    @classmethod
+    def from_data(cls: Type[T], data: Dict) -> Type[T]:
+        """ Create a SearchResults object from a dictionary
+
+            Args:
+                data: Dictionary created by SearchResults.to_data
+            Returns:
+                SearchResults: SearchResults object
+        """
+        return cls(results=data["results"], ranked_data=["ranked_data"])
 
     def raw(self) -> Dict:
         """Returns the raw results data
