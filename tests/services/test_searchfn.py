@@ -1,8 +1,6 @@
 import pytest
-
-from openghg.client import Process, Search
+from openghg.client import Process, Search, Retrieve
 from openghg.objectstore import get_local_bucket
-
 from helpers import get_datapath, glob_files
 
 
@@ -126,3 +124,36 @@ def test_search(read_data):
     }
 
     assert len(raw_results["cgo"]["nf3"]["70m"]["keys"]) == 1
+
+
+def test_search_and_retrieve(read_data, monkeypatch):
+    def fixed_init(self):
+        from Acquire.Client import Wallet
+
+        self._service_url = "openghg"
+        wallet = Wallet()
+        self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
+
+    monkeypatch.setattr(Retrieve, "__init__", fixed_init)
+
+    search = Search(service_url="openghg")
+
+    search_results = search.search(species="nf3", site="cgo", inlet="70m")
+
+    assert search_results.cloud is True
+
+    data = search_results.retrieve(site="cgo", species="nf3", inlet="70m")
+
+    expected_metadata = {
+        "instrument": "medusa",
+        "site": "cgo",
+        "network": "agage",
+        "sampling_period": "1200",
+        "species": "nf3",
+        "units": "ppt",
+        "scale": "sio-12",
+        "inlet": "70m",
+        "data_type": "timeseries",
+    }
+
+    assert data.metadata == expected_metadata

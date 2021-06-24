@@ -1,5 +1,4 @@
-from typing import Dict, List, Optional, Union
-
+from typing import Dict, Optional
 from Acquire.Client import Wallet
 
 __all__ = ["Retrieve"]
@@ -20,7 +19,7 @@ class Retrieve:
         wallet = Wallet()
         self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
 
-    def retrieve(self, keys: Dict]) -> Dict:
+    def retrieve(self, keys: Dict) -> Dict:
         """Retrieve the data at the keys found by the search function
 
         Args:
@@ -29,6 +28,9 @@ class Retrieve:
             dict: Dictionary of xarray Datasets
         """
         from xarray import open_dataset
+
+        if not isinstance(keys, dict):
+            raise TypeError("keys must be a dictionary")
 
         if self._service is None:
             raise PermissionError("Cannot use a null service")

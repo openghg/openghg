@@ -353,7 +353,7 @@ def authenticated_user(aaai_services):
 
     result = user.request_login()
 
-    assert type(result) is dict
+    assert isinstance(result, dict)
 
     wallet = Wallet()
 

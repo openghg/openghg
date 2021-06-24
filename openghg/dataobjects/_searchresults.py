@@ -55,7 +55,7 @@ class SearchResults:
         Returns:
             dict: Dictionary of data
         """
-        return {"results": self.results, "ranked_data": self.ranked_data}
+        return {"results": self.results, "ranked_data": self.ranked_data, "cloud": self.cloud}
 
     @classmethod
     def from_data(cls: Type[T], data: Dict) -> Type[T]:
@@ -66,7 +66,7 @@ class SearchResults:
         Returns:
             SearchResults: SearchResults object
         """
-        return cls(results=data["results"], ranked_data=data["ranked_data"])
+        return cls(results=data["results"], ranked_data=data["ranked_data"], cloud=data["cloud"])
 
     def raw(self) -> Dict:
         """Returns the raw results data
