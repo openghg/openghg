@@ -3,13 +3,14 @@ from typing import Dict, List, Optional, Union, TypeVar, Type
 from openghg.dataobjects import ObsData
 from openghg.processing import recombine_datasets
 from openghg.util import clean_string
+from openghg.client import Retrieve
 
 __all__ = ["SearchResults"]
 
 T = TypeVar("T", bound="SearchResults")
 
 
-@dataclass(frozen=True)
+@dataclass
 class SearchResults:
     """This class is used to return data from the search function
 
@@ -20,6 +21,8 @@ class SearchResults:
 
     results: Dict
     ranked_data: bool
+    # Local or cloud service to be used
+    cloud: bool = False
 
     def __str__(self):
         if not self.results:
@@ -206,7 +209,11 @@ class SearchResults:
 
         data_keys = specific_source["keys"]
 
-        data = recombine_datasets(data_keys, sort=True)
+        if self.cloud:
+            pass
+        else:
+            data = recombine_datasets(data_keys, sort=True)
+
         metadata = specific_source["metadata"]
 
         if self.ranked_data:

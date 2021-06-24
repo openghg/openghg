@@ -7,16 +7,13 @@ import pytest
 
 from openghg.modules import NOAA, Datasource
 from openghg.objectstore import get_local_bucket
+from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
 # Disable this for long strings below - Line break occurred before a binary operator (W503)
 # flake8: noqa: W503
-
-
-def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 
 def test_read_obspack():

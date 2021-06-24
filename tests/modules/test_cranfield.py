@@ -1,22 +1,14 @@
-from pathlib import Path
 import pytest
 
 from openghg.modules import CRANFIELD
+from helpers import get_datapath
 
 
-def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
-
-
-@pytest.fixture(autouse=True)
-def cranfield_path():
-    return get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")
-
-
-def test_read_file(cranfield_path):
+def test_read_file():
     c = CRANFIELD()
 
-    data = c.read_file(data_filepath=cranfield_path, sampling_period="1200")
+    filepath = get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")
+    data = c.read_file(data_filepath=filepath, sampling_period="1200")
 
     assert sorted(list(data.keys())) == sorted(["co2", "co", "ch4"])
 

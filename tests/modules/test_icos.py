@@ -3,13 +3,11 @@ from pathlib import Path
 import pytest
 
 from openghg.modules import ICOS
+from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
-
-def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 
 def test_read_file():

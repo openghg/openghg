@@ -53,9 +53,9 @@ def route(ctx: InvokeContext, data: Union[Dict, BytesIO]) -> Response:
         # Only the directly called Fn routing function needs to have a response really
         return response_data
         # return Response(ctx=ctx, response_data=response_data, headers=headers)
-    except Exception as e:
+    except Exception:
         tb = traceback.format_exc()
-        return {"error": str(e)}
+        return {"Error": str(tb)}
     #     raise ModuleNotFoundError(f"{module_function} is not an OpenGHG service, {str(e)}")
     # except Exception:
     #     tb = traceback.format_exc()

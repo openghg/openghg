@@ -1,11 +1,7 @@
 from openghg.modules import BEACO2N
 from pandas import Timestamp
-from pathlib import Path
 import pytest
-
-
-def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.parent.joinpath(f"data/proc_test_data/{data_type}/{filename}")
+from helpers import get_datapath
 
 
 def test_read_file():

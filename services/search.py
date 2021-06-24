@@ -13,6 +13,10 @@ def search(args: Dict) -> Dict:
 
     results = openghg_search(**args)
 
+    # Tell the SearchResults class that it should
+    # retrieve data from the cloud
+    results.cloud = True
+
     results_data = results.to_data()
 
     return {"results": results_data}

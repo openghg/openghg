@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 
 from openghg.client import Process
 from openghg.objectstore import get_local_bucket
@@ -35,18 +34,6 @@ def test_process_CRDS_files(authenticated_user):
 
     assert sorted(list(processed_species.keys())) == ["ch4", "co", "co2"]
 
-    # response = process.process_files(
-    #     user=authenticated_user,
-    #     files=bsd_file,
-    #     data_type="CRDS",
-    #     site="tac",
-    #     network="DECC",
-    #     openghg_url="openghg",
-    #     storage_url="storage",
-    # )
-
-    # assert type(response["bsd.picarro.1minute.248m.min.dat"]) == ValueError
-
 
 def test_process_CRDS_incorrect_args(authenticated_user):
     hfd_file = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
@@ -64,9 +51,7 @@ def test_process_CRDS_incorrect_args(authenticated_user):
         storage_url="storage",
     )
 
-    assert (
-        str(response["hfd.picarro.1minute.100m.min.dat"]) == "Site mismatch between passed site code and that read from filename."
-    )
+    assert "ValueError: Site mismatch between passed site code and that read from filename." in (response["hfd.picarro.1minute.100m.min.dat"])
 
     with pytest.raises(TypeError):
         response = process.process_files(

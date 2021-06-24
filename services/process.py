@@ -34,7 +34,7 @@ def process(args: Dict) -> Dict:
     # Here we're downloading the data to a temporary directory
     # Be good if we could load it directly from the object store
     with TemporaryDirectory() as tmp_dir:
-        data_file = data_filename.download(dir=tmp_dir)
+        data_file = data_filename.download(directory=tmp_dir)
 
         site = args["site"]
         network = args["network"]
@@ -47,7 +47,7 @@ def process(args: Dict) -> Dict:
             precision_secret = args["par_secret"]["precision"]
             precision_secret = openghg.decrypt_data(precision_secret)
             precision_filename = precision_par.resolve(precision_secret)
-            precision_file = precision_filename.download(dir=tmp_dir)
+            precision_file = precision_filename.download(directory=tmp_dir)
 
             data_file = data_file, precision_file
 

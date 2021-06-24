@@ -9,14 +9,6 @@ __all__ = ["search"]
 
 
 def search(**kwargs) -> Union[Dict, SearchResults]:
-    # site: Union[str, List],
-    # species: Optional[Union[str, List]] = None,
-    # inlet: Optional[Union[str, List]] = None,
-    # instrument: Optional[str] = None,
-    # find_all: Optional[bool] = True,
-    # start_date: Optional[Union[str, Timestamp]] = None,
-    # end_date: Optional[Union[str, Timestamp]] = None,
-    # data_type: Optional[str] = "timeseries",
     """Search for observations data. Any keyword arguments may be passed to the 
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
@@ -43,7 +35,6 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     from itertools import chain as iter_chain
 
     from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions
-    from openghg.dataobjects import SearchResults
     from openghg.util import (
         timestamp_now,
         timestamp_epoch,

@@ -81,7 +81,7 @@ class Process:
 
         openghg = Service(service_url=openghg_url)
         creds = StorageCreds(user=user, service_url=storage_url)
-        drive = Drive(creds=creds, name="test_drive")
+        drive = Drive(creds=creds, name="openghg_drive")
         auth = Authorisation(resource="process", user=user)
 
         # Here we'll need special cases for different data types. As GCWERKS requires
@@ -135,8 +135,13 @@ class Process:
             # file contains overlapping data
             response = self._service.call_function(function="process.process", args=args)
 
-            if "error" in response:
-                results[file.name] = response["error"]
+            if "Error" in response:
+                if data_type in ("GCWERKS", "GC"):
+                    filename = file[0].name
+                else:
+                    filename = file.name
+
+                results[filename] = response["Error"]
             elif "results" in response:
                 results.update(response["results"])
 

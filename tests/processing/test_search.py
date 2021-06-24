@@ -76,6 +76,38 @@ def test_specific_keyword_search():
 
     assert metadata == expected_metadata
 
+    data = results.retrieve(site=site, species=species, inlet="248m")
+    ds = data.data
+
+    del ds.attrs["File created"]
+
+    expected_attrs = {
+        "data_owner": "Simon O'Doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk",
+        "inlet_height_magl": "248m",
+        "comment": "Cavity ring-down measurements. Output from GCWerks",
+        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
+        "Source": "In situ measurements of air",
+        "Conventions": "CF-1.6",
+        "Processed by": "OpenGHG_Cloud",
+        "species": "co2",
+        "Calibration_scale": "WMO-X2007",
+        "station_longitude": -1.15033,
+        "station_latitude": 54.35858,
+        "station_long_name": "Bilsdale, UK",
+        "station_height_masl": 380.0,
+        "site": "bsd",
+        "instrument": "picarro",
+        "sampling_period": "60",
+        "inlet": "248m",
+        "port": "9",
+        "type": "air",
+        "network": "decc",
+        "scale": "WMO-X2007",
+    }
+
+    assert ds.attrs == expected_attrs
+
 
 def test_specific_search_gc():
     results = search(species=["NF3"], site="CGO", inlet="70m")
