@@ -1,10 +1,8 @@
-import os
-
-import pandas as pd
 import pytest
-from Acquire.Client import PAR, Authorisation, Drive, Service, StorageCreds
-from openghg.client import Search
+from pandas import Timestamp
+from openghg.client import Search, Process, Retrieve
 from openghg.objectstore import get_local_bucket
+from helpers import get_datapath
 
 
 @pytest.fixture(scope="session")
@@ -16,47 +14,38 @@ def tempdir(tmpdir_factory):
 @pytest.fixture(autouse=True)
 def crds(authenticated_user):
     get_local_bucket(empty=True)
-    creds = StorageCreds(user=authenticated_user, service_url="storage")
-    drive = Drive(creds=creds, name="test_drive")
-    filepath = os.path.join(
-        os.path.dirname(__file__),
-        "../../../tests/data/proc_test_data/CRDS/bsd.picarro.1minute.248m.dat",
+    service_url = "openghg"
+    bsd_file = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+    process = Process(service_url=service_url)
+
+    process.process_files(
+        user=authenticated_user,
+        files=bsd_file,
+        data_type="CRDS",
+        site="bsd",
+        network="DECC",
+        openghg_url="openghg",
+        storage_url="storage",
     )
-    filemeta = drive.upload(filepath)
-
-    par = PAR(location=filemeta.location(), user=authenticated_user)
-
-    hugs = Service(service_url="hugs")
-    par_secret = openghg.encrypt_data(par.secret())
-
-    auth = Authorisation(resource="process", user=authenticated_user)
-
-    args = {
-        "authorisation": auth.to_data(),
-        "par": {"data": par.to_data()},
-        "par_secret": {"data": par_secret},
-        "data_type": "CRDS",
-        "source_name": "bsd.picarro.1minute.248m",
-    }
-
-    openghg.call_function(function="process", args=args)
 
 
-@pytest.mark.skip(reason="Need to fix dependence on Acquire")
-def test_retrieve(authenticated_user, crds):
-    search_term = "co"
-    location = "bsd"
+def test_retrieve(authenticated_user):
+    search = Search(service_url="openghg")
 
-    search_obj = Search(service_url="hugs")
+    species = "co2"
+    site = "bsd"
 
-    search_results = search_obj.search(species=search_term, locations=location)
+    results = search.search(species=species, site=site, inlet="248m")
 
-    key = list(search_results.keys())[0]
+    keys = results.keys(site="bsd", species="co2", inlet="248m")
 
-    result = search_obj.download(selected_keys=key)
-    data = result[0]
+    retrieve = Retrieve(service_url="openghg")
 
-    del data.attrs["File created"]
+    data = retrieve.retrieve(keys=keys)
+
+    ds = data["bsd_co2_248m"]
+
+    del ds.attrs["File created"]
 
     expected_attributes = {
         "data_owner": "Simon O'Doherty",
@@ -66,25 +55,23 @@ def test_retrieve(authenticated_user, crds):
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
-        'Processed by': 'OpenGHG_Cloud',
-        "species": "co",
-        "Calibration_scale": "unknown",
+        "Processed by": "OpenGHG_Cloud",
+        "species": "co2",
+        "Calibration_scale": "WMO-X2007",
         "station_longitude": -1.15033,
         "station_latitude": 54.35858,
         "station_long_name": "Bilsdale, UK",
         "station_height_masl": 380.0,
+        "site": "bsd",
+        "instrument": "picarro",
+        "sampling_period": "60",
+        "inlet": "248m",
+        "port": "9",
+        "type": "air",
+        "network": "decc",
+        "scale": "WMO-X2007",
     }
 
-    assert data["time"][0] == pd.Timestamp("2014-01-30T10:52:30")
-    assert data["co"][0] == pytest.approx(204.62)
-    assert data.attrs == expected_attributes
-
-    # # Here we get some JSON data that can be converted back into a DataFrame
-    # df = read_json(data["bsd_co"])
-
-    # head = df.head(1)
-
-    # assert head.first_valid_index() == Timestamp("2014-01-30 10:52:30")
-    # assert head["co count"].iloc[0] == 204.62
-    # assert head["co stdev"].iloc[0] == 6.232
-    # assert head["co n_meas"].iloc[0] == 26
+    assert ds["time"][0] == Timestamp("2014-01-30T11:12:30")
+    assert ds["co2"][0] == 409.55
+    assert ds.attrs == expected_attributes

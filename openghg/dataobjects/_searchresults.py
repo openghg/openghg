@@ -50,23 +50,23 @@ class SearchResults:
         yield from self.results
 
     def to_data(self) -> Dict:
-        """ Convert this object to a dictionary for JSON serialisation
+        """Convert this object to a dictionary for JSON serialisation
 
-            Returns:
-                dict: Dictionary of data
+        Returns:
+            dict: Dictionary of data
         """
         return {"results": self.results, "ranked_data": self.ranked_data}
 
     @classmethod
     def from_data(cls: Type[T], data: Dict) -> Type[T]:
-        """ Create a SearchResults object from a dictionary
+        """Create a SearchResults object from a dictionary
 
-            Args:
-                data: Dictionary created by SearchResults.to_data
-            Returns:
-                SearchResults: SearchResults object
+        Args:
+            data: Dictionary created by SearchResults.to_data
+        Returns:
+            SearchResults: SearchResults object
         """
-        return cls(results=data["results"], ranked_data=["ranked_data"])
+        return cls(results=data["results"], ranked_data=data["ranked_data"])
 
     def raw(self) -> Dict:
         """Returns the raw results data
@@ -76,7 +76,7 @@ class SearchResults:
         """
         return self.results
 
-    def keys(self, site: str, species: str, inlet: Optional[str] = None) -> List:
+    def keys(self, site: str, species: str, inlet: Optional[str] = None) -> Dict:
         """Return the data keys for the specified site and species.
         This is intended mainly for use in the search function when filling
         gaps of unranked dateranges.
@@ -86,7 +86,7 @@ class SearchResults:
                 species: Species name
                 inlet: Inlet height, required for unranked data
             Returns:
-                list: List of keys
+                dict: Dictionary of keys, site_species_inlet: [keys]
         """
         site = site.lower()
         species = species.lower()
@@ -105,7 +105,9 @@ class SearchResults:
         except KeyError:
             raise ValueError(f"No keys found for {species} at {site}")
 
-        return keys
+        site_key = f"{site}_{species}_{inlet}"
+
+        return {site_key: keys}
 
     def metadata(self, site: str, species: str, inlet: Optional[str] = None) -> List:
         """Return the metadata for the specified site and species
@@ -209,8 +211,14 @@ class SearchResults:
 
         data_keys = specific_source["keys"]
 
+        # If cloud use the Retrieve object
         if self.cloud:
-            pass
+            retrieve = Retrieve()
+            # TODO - update this function to allow multi-site / species retrieval
+            key = f"{site}_{species}_{inlet}"
+            keys_to_retrieve = {key: data_keys}
+            retrieved = retrieve.retrieve(keys=keys_to_retrieve)
+            data = retrieved[key]
         else:
             data = recombine_datasets(data_keys, sort=True)
 

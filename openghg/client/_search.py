@@ -30,7 +30,7 @@ class Search:
         end_date: Optional[str] = None,
         skip_ranking: Optional[bool] = False,
         data_type: Optional[str] = "timeseries",
-    ) -> Dict:
+    ):
         """Search for surface observations data in the object store
 
         Args:
@@ -40,6 +40,8 @@ class Search:
             instrument: Instrument name
             start_date: Start date
             end_date: End date
+        Returns:
+            SearchResults:  SearchResults object
         """
         from openghg.dataobjects import SearchResults
 

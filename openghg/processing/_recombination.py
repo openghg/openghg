@@ -19,7 +19,7 @@ def recombine_multisite(keys: Dict, sort: Optional[bool] = True) -> Dict:
     """
     result = {}
     for key, key_list in keys.items():
-        result[key] = recombine_datasets(data_keys=key_list, sort=sort)
+        result[key] = recombine_datasets(keys=key_list, sort=sort)
 
     return result
 

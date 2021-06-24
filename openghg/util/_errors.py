@@ -11,4 +11,3 @@ class UnknownDataError(Exception):
 
 class FunctionError(Exception):
     """ Raised if a serverless function cannot be called correctly """
-
