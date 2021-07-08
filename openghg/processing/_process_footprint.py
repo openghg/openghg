@@ -416,14 +416,3 @@ def add_timeseries(combined_dataset: Dataset, flux_dict: Dict):
 
     return combined_dataset
 
-    # sources = list(flux_dict.keys()) 
-    # for source in sources:
-    #     if type(fp_and_data['.flux'][source]) == dict:
-    #         fp_and_data[site]['mf_mod_'+source] = xr.DataArray(timeseries_HiTRes(fp_and_data[site],fp_and_data['.flux'][source], output_fpXflux=False), coords = {'time': fp_and_data[site].time})
-    #     else:
-    #         flux_reindex = fp_and_data['.flux'][source].reindex_like(fp_and_data[site], 'ffill')
-    #         if source == 'all':
-    #             fp_and_data[site]['mf_mod'] = xr.DataArray((fp_and_data[site].fp*flux_reindex.flux).sum(["lat", "lon"]), coords = {'time':fp_and_data[site].time})
-    #         else:
-    #             fp_and_data[site]['mf_mod_'+source] = xr.DataArray((fp_and_data[site].fp*flux_reindex.flux).sum(["lat", "lon"]), coords = {'time':fp_and_data[site].time})
-    # return fp_and_data
