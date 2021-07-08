@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Beginner workflow &mdash; OpenGHG 0+untagged.3.g599e455 documentation</title>
+  <title>Beginner workflow &mdash; OpenGHG 0+untagged.3.g72e1841 documentation</title>
   
 
   
@@ -493,7 +493,7 @@ div.rendered_html tbody tr:hover {
 <h3>1. Setting up our environment<a class="headerlink" href="#1.-Setting-up-our-environment" title="Permalink to this headline">¶</a></h3>
 <p>First the notebook sets up the environment needed to create the object store at our desired location. By default this location is at <code class="docutils literal notranslate"><span class="pre">/tmp/openghg_store</span></code>. For the purposes of this tutorial this path is fine but as it is a temporary directory it may not survive a reboot of the computer.</p>
 <p>If you want to create an object store that survives a reboot you can change the path to anything you like. We recommened a path such as <code class="docutils literal notranslate"><span class="pre">~/openghg_store</span></code> which will create the object store in your home directory in a directory called <code class="docutils literal notranslate"><span class="pre">openghg_store</span></code>.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -513,6 +513,14 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">tempfile</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:numexpr.utils:NumExpr defaulting to 2 threads.
+</pre></div></div>
 </div>
 </section>
 </section>
@@ -557,7 +565,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 1/1 [00:00&lt;00:00,  9.53it/s]
+Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 1/1 [00:00&lt;00:00, 11.07it/s]
 </pre></div></div>
 </div>
 <p>Here <code class="docutils literal notranslate"><span class="pre">decc_results</span></code> will give us a dictionary with the UUIDs (universally unique identifiers) for each of the Datasources the data has been assigned to. This tells us that the data has been processed and stored correctly.</p>
@@ -586,9 +594,9 @@ Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 1
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 defaultdict(dict,
-            {&#39;processed&#39;: {&#39;bsd.picarro.1minute.248m.dat&#39;: {&#39;ch4&#39;: &#39;76275b66-bf7a-4eab-aa40-53c4737318f4&#39;,
-               &#39;co2&#39;: &#39;f18a5df3-b08f-4a9e-b685-239d1af1b6d3&#39;,
-               &#39;co&#39;: &#39;d68b7066-2b07-4c3f-8db1-e0a1966a85f8&#39;}}})
+            {&#39;processed&#39;: {&#39;bsd.picarro.1minute.248m.dat&#39;: {&#39;ch4&#39;: &#39;1ed154d3-a3ff-4bc8-acd3-93eb1be32690&#39;,
+               &#39;co2&#39;: &#39;0fd90b5f-c4c3-46f4-b01c-33871cfe6d62&#39;,
+               &#39;co&#39;: &#39;9aa19e80-0978-4869-ae69-9ca3a7b64455&#39;}}})
 </pre></div></div>
 </div>
 <p>We can now process the AGAGE data. The functions that process the AGAGE data expect data to have an accompanying precisions file. For each data file we create a tuple with the data filename and the precisions filename. A simpler method of uploading these file types is planned.</p>
@@ -615,12 +623,35 @@ defaultdict(dict,
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Processing: capegrim-medusa.18.C:   0%|          | 0/1 [00:00&lt;?, ?it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/openghg/modules/_gcwerks.py:288: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider using pd.concat instead.  To get a de-fragmented frame, use `newframe = frame.copy()`
+  data[gas_name + &#34; integration_flag&#34;] = (data[column].str[1] != &#34;-&#34;).astype(int)
+/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/openghg/modules/_gcwerks.py:287: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider using pd.concat instead.  To get a de-fragmented frame, use `newframe = frame.copy()`
+  data[gas_name + &#34; status_flag&#34;] = (data[column].str[0] != &#34;-&#34;).astype(int)
+/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/openghg/modules/_gcwerks.py:317: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider using pd.concat instead.  To get a de-fragmented frame, use `newframe = frame.copy()`
+  data[sp + &#34; repeatability&#34;] = precision[precision_index].astype(float).reindex_like(data, method=&#34;pad&#34;)
+/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/openghg/modules/_gcwerks.py:320: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider using pd.concat instead.  To get a de-fragmented frame, use `newframe = frame.copy()`
+  data[&#34;new_time&#34;] = data.index - pd_Timedelta(seconds=metadata[&#34;sampling_period&#34;] / 2.0)
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:01&lt;00:00,  1.63s/it]
+Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:01&lt;00:00,  1.50s/it]
 </pre></div></div>
 </div>
 <p>When viewing <code class="docutils literal notranslate"><span class="pre">agage_results</span></code> there will be a large number of Datasource UUIDs shown due to the large number of gases in each data file</p>
@@ -640,62 +671,62 @@ Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 defaultdict(dict,
-            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;nf3_70m&#39;: &#39;99648001-f578-40b3-bcd5-9ed2e7df2d20&#39;,
-               &#39;cf4_70m&#39;: &#39;bad23d5e-4303-488e-9c68-dfb0b9836b4e&#39;,
-               &#39;pfc116_70m&#39;: &#39;618fb6ec-1d1b-4db4-a3d4-a7b449a8aab0&#39;,
-               &#39;pfc218_70m&#39;: &#39;e70d0af8-315b-439d-9590-10ea1efacefd&#39;,
-               &#39;pfc318_70m&#39;: &#39;a4e32b9b-1b59-4be0-ae4a-8abacc2d33da&#39;,
-               &#39;c4f10_70m&#39;: &#39;866e4942-6216-4ddc-ab83-37e39d2692fa&#39;,
-               &#39;c6f14_70m&#39;: &#39;aa9c5890-7fec-4724-8a70-a4ef587a8a94&#39;,
-               &#39;sf6_70m&#39;: &#39;46df2c2f-5bf5-4d1a-ad16-b2e098f49a0a&#39;,
-               &#39;so2f2_70m&#39;: &#39;2f481807-3714-4333-adb0-3c1ab5ccbb99&#39;,
-               &#39;sf5cf3_70m&#39;: &#39;aca5e410-62d5-4d32-8259-9b5d04f3f566&#39;,
-               &#39;hfc23_70m&#39;: &#39;2bdc6386-1440-44df-82c7-7c56f9b69dd1&#39;,
-               &#39;hfc32_70m&#39;: &#39;c867a6d9-367a-4bb2-839f-0a002900d72f&#39;,
-               &#39;hfc125_70m&#39;: &#39;2678c0fd-fa7a-4b43-a4dd-d34f8397ed76&#39;,
-               &#39;hfc134a_70m&#39;: &#39;c072c826-dd7d-4960-bc69-fcdf5cd0ab94&#39;,
-               &#39;hfc143a_70m&#39;: &#39;7439d9dd-9a6c-425f-b692-ceb460dd1617&#39;,
-               &#39;hfc152a_70m&#39;: &#39;6dd551d7-d701-4982-a68d-c903a0c49184&#39;,
-               &#39;hfc227ea_70m&#39;: &#39;599c12b8-f20d-445f-bb96-2b4e1cc74ee5&#39;,
-               &#39;hfc236fa_70m&#39;: &#39;15370fae-316a-4234-bade-8429f2fe55a0&#39;,
-               &#39;hfc245fa_70m&#39;: &#39;0656734f-5670-4996-ace1-18bd92c3cd73&#39;,
-               &#39;hfc365mfc_70m&#39;: &#39;51c3c428-16b3-4690-937a-a0bf2c7f51fd&#39;,
-               &#39;hfc4310mee_70m&#39;: &#39;30d13256-f97a-4f76-9708-297f12f7052d&#39;,
-               &#39;hcfc22_70m&#39;: &#39;57725f7e-80fd-41cc-b9e4-2bddf6b8c358&#39;,
-               &#39;hcfc124_70m&#39;: &#39;91b0a80d-d273-4d47-9a1f-19197ee79ec8&#39;,
-               &#39;hcfc132b_70m&#39;: &#39;ba476c3a-0782-44a7-8f9a-d65924e99fa0&#39;,
-               &#39;hcfc133a_70m&#39;: &#39;52577afe-973a-4352-8d7a-b7463059ff7f&#39;,
-               &#39;hcfc141b_70m&#39;: &#39;7c7edc4f-243f-432d-8543-9e03418efcf7&#39;,
-               &#39;hcfc142b_70m&#39;: &#39;86c3b396-7f48-4097-9db3-e6d28934bc21&#39;,
-               &#39;cfc11_70m&#39;: &#39;9db4b295-220a-4c22-8036-f1e5fad0db2a&#39;,
-               &#39;cfc12_70m&#39;: &#39;f0dfc15a-bff2-4363-9c6c-e3381a507050&#39;,
-               &#39;cfc13_70m&#39;: &#39;3fefe921-70cc-49ca-8870-b06ffdad5049&#39;,
-               &#39;cfc112_70m&#39;: &#39;fbea8942-5c94-41e1-8be2-85dc323b220b&#39;,
-               &#39;cfc113_70m&#39;: &#39;4f3a7103-60b9-4382-8498-9ef53e94eb83&#39;,
-               &#39;cfc114_70m&#39;: &#39;fede1d6f-6048-46d8-95af-08a5b82351c9&#39;,
-               &#39;cfc115_70m&#39;: &#39;8c47ddf1-8fe8-49b2-a305-56575faf4bda&#39;,
-               &#39;h1211_70m&#39;: &#39;676b32e6-0e32-445d-b21f-1ad85b35243b&#39;,
-               &#39;h1301_70m&#39;: &#39;4df4f0eb-9b59-4657-91a8-b613d16015c7&#39;,
-               &#39;h2402_70m&#39;: &#39;a602645e-1aa6-4df9-af85-db7fc9ca42be&#39;,
-               &#39;ch3cl_70m&#39;: &#39;6dce6f75-8b91-4ada-b1dc-b0ed22cb355f&#39;,
-               &#39;ch3br_70m&#39;: &#39;e8c479a0-d6a6-4177-9c27-d23f21d18435&#39;,
-               &#39;ch3i_70m&#39;: &#39;e88d99a7-4ac4-4b03-b06e-c7a9c6b4682d&#39;,
-               &#39;ch2cl2_70m&#39;: &#39;60a6ae0a-871b-46db-b5f5-552ffcfaa942&#39;,
-               &#39;chcl3_70m&#39;: &#39;df129212-f92b-48bc-ac24-2bece69b9abb&#39;,
-               &#39;ccl4_70m&#39;: &#39;eeb67b71-0a96-4f46-a38c-da43a0f84213&#39;,
-               &#39;ch2br2_70m&#39;: &#39;daed6d48-6855-4f2d-8fdc-7d658664fc9d&#39;,
-               &#39;chbr3_70m&#39;: &#39;5ca3b153-ab12-4a22-be62-a63655d0ef1e&#39;,
-               &#39;ch3ccl3_70m&#39;: &#39;7b7f3fcc-6407-4c89-8b24-89d3dd219d55&#39;,
-               &#39;tce_70m&#39;: &#39;d8c4c356-6dca-4210-94a3-0b9c98a1f28f&#39;,
-               &#39;pce_70m&#39;: &#39;eef65c60-74ea-496a-a85e-c2dfe6ca5f9c&#39;,
-               &#39;ethyne_70m&#39;: &#39;ff9ed18a-84e3-400b-b7d4-4ed51fa3e5b6&#39;,
-               &#39;ethane_70m&#39;: &#39;a886b486-eeee-424b-bf0d-204a6e8660c7&#39;,
-               &#39;propane_70m&#39;: &#39;18b083c0-faec-47f8-8ddf-6870c3e204c4&#39;,
-               &#39;cpropane_70m&#39;: &#39;81be57df-63b9-48d1-a54a-9da2679ac5c2&#39;,
-               &#39;benzene_70m&#39;: &#39;e9dfb7cc-cea1-4210-958c-42c3f1017220&#39;,
-               &#39;toluene_70m&#39;: &#39;1113a8c6-0cb0-419f-889c-347688277c2a&#39;,
-               &#39;cos_70m&#39;: &#39;4d7df6bf-c1e1-4760-8e62-298c895c4dcd&#39;,
-               &#39;desflurane_70m&#39;: &#39;78c25170-a1da-419e-98f8-021ad416204b&#39;}}})
+            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;nf3_70m&#39;: &#39;16e3c82f-6d06-463d-bdf0-04c89d275b5c&#39;,
+               &#39;cf4_70m&#39;: &#39;0c367fbe-f882-4485-8bae-2e307da59bf5&#39;,
+               &#39;pfc116_70m&#39;: &#39;e84c4118-0a85-4cd7-9caf-7a0097e4aaa3&#39;,
+               &#39;pfc218_70m&#39;: &#39;d4ed4d8c-b754-4d97-bce2-54db70ee3670&#39;,
+               &#39;pfc318_70m&#39;: &#39;f6c334ad-86db-40fb-8081-c7fce74eedaf&#39;,
+               &#39;c4f10_70m&#39;: &#39;cc608a6e-7408-4f7f-952a-a3ed962b5fd3&#39;,
+               &#39;c6f14_70m&#39;: &#39;e92f7077-bd5b-4c73-9cd3-998d0261be63&#39;,
+               &#39;sf6_70m&#39;: &#39;3ce0bdbc-0b25-4ece-a39f-10dd2bb942a7&#39;,
+               &#39;so2f2_70m&#39;: &#39;789d2e20-e2cd-4c14-91b2-af58c9d7fd4c&#39;,
+               &#39;sf5cf3_70m&#39;: &#39;bf667f54-d21c-4ff3-8607-a9f66534dc93&#39;,
+               &#39;hfc23_70m&#39;: &#39;2b5f03e7-bd91-4d14-b928-8049783d02de&#39;,
+               &#39;hfc32_70m&#39;: &#39;858fbed0-8aa4-4657-b041-76b34801bb54&#39;,
+               &#39;hfc125_70m&#39;: &#39;ecb784b1-58d4-4564-a655-bf9dd1d7ca0f&#39;,
+               &#39;hfc134a_70m&#39;: &#39;5558c265-caf9-4d8c-bf87-22fd90cabf38&#39;,
+               &#39;hfc143a_70m&#39;: &#39;358347c2-2a5c-4eac-8c6f-108c4fcd985f&#39;,
+               &#39;hfc152a_70m&#39;: &#39;10579358-ad75-449e-a869-785b17e99dbc&#39;,
+               &#39;hfc227ea_70m&#39;: &#39;a38f7f95-98d6-4664-b470-d3e31db0e20c&#39;,
+               &#39;hfc236fa_70m&#39;: &#39;3fcfe6a0-2ba9-4cb1-980a-701de8bb4ea9&#39;,
+               &#39;hfc245fa_70m&#39;: &#39;8b99e74a-c0b2-42ad-92a1-7d0b974c009a&#39;,
+               &#39;hfc365mfc_70m&#39;: &#39;89551250-7f47-4213-9044-4930b4c30596&#39;,
+               &#39;hfc4310mee_70m&#39;: &#39;64946946-2063-4184-93f0-647590d9c805&#39;,
+               &#39;hcfc22_70m&#39;: &#39;6132bc56-0937-438b-8fe2-dddc71f1d641&#39;,
+               &#39;hcfc124_70m&#39;: &#39;ba0277a1-af19-46b4-8db4-13596c86ee86&#39;,
+               &#39;hcfc132b_70m&#39;: &#39;c8ec1355-3f4f-4d9e-bcb4-6c6628bef4ea&#39;,
+               &#39;hcfc133a_70m&#39;: &#39;2f573eba-dc12-4a4f-ab55-8765d2066128&#39;,
+               &#39;hcfc141b_70m&#39;: &#39;674c0cd8-bbf0-4bfa-9eba-a4ae2f4a98d6&#39;,
+               &#39;hcfc142b_70m&#39;: &#39;ddf383fd-0c96-46d8-bad8-43c8f4e30e5c&#39;,
+               &#39;cfc11_70m&#39;: &#39;8acf5f54-b675-4f97-b0ea-46dd9e19c89d&#39;,
+               &#39;cfc12_70m&#39;: &#39;6d35e822-0875-4808-ab5f-5c43a68a32e2&#39;,
+               &#39;cfc13_70m&#39;: &#39;f77c8060-73d5-4ab4-aecc-7f6c984dc947&#39;,
+               &#39;cfc112_70m&#39;: &#39;d329bce5-62a4-44cf-9b64-53d313838d4b&#39;,
+               &#39;cfc113_70m&#39;: &#39;e3d986ed-b54d-428f-96bd-24f246f56c3f&#39;,
+               &#39;cfc114_70m&#39;: &#39;7841b0e0-611e-4017-a9b5-b73f3f7b927e&#39;,
+               &#39;cfc115_70m&#39;: &#39;7ad0c7ef-ad94-4141-92eb-0509bdbd23a7&#39;,
+               &#39;h1211_70m&#39;: &#39;d04f239e-b7d7-4c64-9f4d-8dc9c8bf789a&#39;,
+               &#39;h1301_70m&#39;: &#39;01791a17-3fef-4c94-88c3-9b9e38df4595&#39;,
+               &#39;h2402_70m&#39;: &#39;374b5b70-77b8-4373-8fa9-c87e3965cc76&#39;,
+               &#39;ch3cl_70m&#39;: &#39;32c9ba2f-d561-42d6-a1e1-22ad4e7e33ef&#39;,
+               &#39;ch3br_70m&#39;: &#39;97064f4c-9d8a-4895-972b-5052d4dcd4de&#39;,
+               &#39;ch3i_70m&#39;: &#39;228d2795-8118-4caf-ab89-69cb89ee822f&#39;,
+               &#39;ch2cl2_70m&#39;: &#39;e77e0ff1-3d6b-4dce-88e9-36e15d8f71d6&#39;,
+               &#39;chcl3_70m&#39;: &#39;6e3b7966-c43b-4d97-9ada-dd92b84c8e82&#39;,
+               &#39;ccl4_70m&#39;: &#39;1303c728-ddd8-4c5c-b0fe-3b58bfc21124&#39;,
+               &#39;ch2br2_70m&#39;: &#39;b95460fc-44f7-4cbf-8df8-5e808750cdf2&#39;,
+               &#39;chbr3_70m&#39;: &#39;ed3fe24a-c4ed-4488-a544-0b07c7262601&#39;,
+               &#39;ch3ccl3_70m&#39;: &#39;e78aef3e-1179-47c8-a97b-3f58140f4264&#39;,
+               &#39;tce_70m&#39;: &#39;3c1b9cf4-9cbc-47fb-bec0-d9039c338b4d&#39;,
+               &#39;pce_70m&#39;: &#39;09bf02aa-442d-4449-9512-685b1316540a&#39;,
+               &#39;ethyne_70m&#39;: &#39;7cc19b62-3907-48bc-a0ea-15ee9fb0211a&#39;,
+               &#39;ethane_70m&#39;: &#39;3bcbe632-8301-43c0-8996-3843ea339411&#39;,
+               &#39;propane_70m&#39;: &#39;4e412aa2-90f7-483c-84f7-fddfa009d97d&#39;,
+               &#39;cpropane_70m&#39;: &#39;adb33f35-b1da-40f3-97dc-5d9ced7f51fa&#39;,
+               &#39;benzene_70m&#39;: &#39;2cfdc4e9-781d-4a79-9cff-25a5b5462f0e&#39;,
+               &#39;toluene_70m&#39;: &#39;66845831-0cd4-4202-a6be-6c1b3d51eba5&#39;,
+               &#39;cos_70m&#39;: &#39;ee99b105-8ef8-44e2-9155-71886879eea7&#39;,
+               &#39;desflurane_70m&#39;: &#39;34de345c-f7f0-44e1-9aa8-eace7cae17d2&#39;}}})
 </pre></div></div>
 </div>
 </section>
@@ -768,7 +799,7 @@ Attributes: (12/22)
     port:                 8
     type:                 air
     network:              decc
-    scale:                WMO-X2014A, metadata={&#39;data_owner&#39;: &#34;Simon O&#39;Doherty&#34;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;inlet_height_magl&#39;: &#39;248m&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;Conditions of use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;Source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;File created&#39;: &#39;2021-06-17 10:57:25.479156+00:00&#39;, &#39;Processed by&#39;: &#39;OpenGHG_Cloud&#39;, &#39;species&#39;: &#39;co&#39;, &#39;station_longitude&#39;: -1.15033, &#39;station_latitude&#39;: 54.35858, &#39;station_long_name&#39;: &#39;Bilsdale, UK&#39;, &#39;station_height_masl&#39;: 380.0, &#39;site&#39;: &#39;bsd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: 60, &#39;inlet&#39;: &#39;248m&#39;, &#39;port&#39;: &#39;8&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;})
+    scale:                WMO-X2014A, metadata={&#39;data_owner&#39;: &#34;Simon O&#39;Doherty&#34;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;inlet_height_magl&#39;: &#39;248m&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;Conditions of use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;Source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;File created&#39;: &#39;2021-07-08 13:36:41.403158+00:00&#39;, &#39;Processed by&#39;: &#39;OpenGHG_Cloud&#39;, &#39;species&#39;: &#39;co&#39;, &#39;station_longitude&#39;: -1.15033, &#39;station_latitude&#39;: 54.35858, &#39;station_long_name&#39;: &#39;Bilsdale, UK&#39;, &#39;station_height_masl&#39;: 380.0, &#39;site&#39;: &#39;bsd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: 60, &#39;inlet&#39;: &#39;248m&#39;, &#39;port&#39;: &#39;8&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;})
 </pre></div></div>
 </div>
 <p>First we tell <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> that we are plotting inside a Jupyter notebook, this ensures a plot with controls is created.</p>
@@ -1787,7 +1818,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='7ab6eeb1-a0ec-412d-95f1-e946dc90bd24'></div></div>
+<div id='47d1f506-e9a3-402b-832e-f8ff956ab228'></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
@@ -1795,7 +1826,7 @@ if (IPython.notebook.kernel !== null) {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7fb4be73f8d0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7fefa6f0f110&gt;]
 </pre></div></div>
 </div>
 </section>
@@ -1957,7 +1988,7 @@ if (IPython.notebook.kernel !== null) {
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jun 17, 2021.
+        Last updated on Jul 08, 2021.
       </span>
 
     </p>
