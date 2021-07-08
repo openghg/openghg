@@ -394,10 +394,11 @@ def get_flux(
 
     return em_ds
 
+
 def add_timeseries(combined_dataset: Dataset, flux_dict: Dict):
     """
     Add timeseries mole fraction values in footprint_data_merge
-    
+
     Args:
         combined_dataset [Dataset]:
             output created during footprint_data_merge
@@ -410,9 +411,8 @@ def add_timeseries(combined_dataset: Dataset, flux_dict: Dict):
     for key, flux_ds in flux_dict.items():
         if key != "high_time_res":
             flux_reindex = flux_ds.reindex_like(combined_dataset, 'ffill')
-            combined_dataset['mf_mod'] = DataArray((combined_dataset.fp*flux_reindex.flux).sum(["lat", "lon"]), coords = {'time':combined_dataset.time})
+            combined_dataset['mf_mod'] = DataArray((combined_dataset.fp * flux_reindex.flux).sum(["lat", "lon"]), coords={'time': combined_dataset.time})
         else:
             print("Unable to create modelled mole fraction for high time resolution datasets yet.")
 
     return combined_dataset
-
