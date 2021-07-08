@@ -19,3 +19,4 @@ from ._btt import BTT
 from ._npl import NPL
 from ._footprints import FOOTPRINTS
 from ._emissions import Emissions
+from ._scenario import ModelScenario
