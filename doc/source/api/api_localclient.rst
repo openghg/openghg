@@ -2,12 +2,12 @@
 localclient API Detail
 =========================
 
-get_observations
+get_obs_surface
 ================
 
 Used to search the object store using a site name, species and daterange and returns the data found.
 
-.. autofunction:: openghg.localclient.get_observations
+.. autofunction:: openghg.localclient.get_obs_surface
     
 
 process_files
