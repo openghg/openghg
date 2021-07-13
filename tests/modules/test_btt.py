@@ -53,6 +53,7 @@ def test_read_file():
         "station_longitude": -0.1389,
         "station_latitude": 51.5215,
         "station_long_name": "BT Tower, UK",
+        "sampling_period": 1800
     }
 
     assert co2_data.attrs == expected_attrs
