@@ -121,12 +121,12 @@ class Datasource:
         Args:
             metadata: Metadata on the data for this Datasource
             data: xarray.Dataset
-            data_type: Type of data, one of ["timeseries", "emissions", "met", "footprint"].
+            data_type: Type of data, one of ["timeseries", "emissions", "met", "footprint", "eulerian_model"].
             overwrite: Overwrite existing data
         Returns:
             None
         """
-        data_types = ["timeseries", "emissions", "met", "footprint"]
+        data_types = ["timeseries", "emissions", "met", "footprint", "eulerian_model"]
 
         data_type = data_type.lower()
         if data_type not in data_types:
@@ -142,6 +142,8 @@ class Datasource:
             return self.add_emissions_data(data=data)
         elif data_type == "met":
             raise NotImplementedError()
+        elif data_type == "eulerian_model":
+            return self.add_eulerian_model_data(data=data)
 
     def add_timeseries_data(self, data: Dataset) -> None:
         """Add timeseries data to this Datasource
@@ -275,6 +277,17 @@ class Datasource:
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
         self.update_daterange()
+
+    def add_eulerian_model_data(self, data: Dataset) -> None:
+        """Add Eulerian model data to this Datasource
+
+        Args:
+            data: Eulerian model data as an xarray.Dataset
+            metadata: Metadata
+        Returns:
+            None
+        """
+        self.add_field_data(data=data, data_type="eulerian_model")
 
     def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
         """Returns the daterange for the passed DataFrame
