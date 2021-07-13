@@ -38,7 +38,7 @@ def single_site_footprint(
                        This is useful for example if the same site footprints are run with a different met and
                        they are named slightly differently from the obs file. E.g.
                        site="DJI", site_modifier = "DJI-SAM" - station called DJI, footprint site called DJI-SAM
-        platform:
+        platform: Observation platform used to decide whether to resample
         instrument:
         species:
     Returns:
@@ -133,7 +133,26 @@ def footprints_data_merge(
     TODO - Should this be renamed?
 
     Args:
-        TODO
+        site: Three letter site code
+        height: Height of inlet in metres
+        network: Network name
+        domain: Domain name
+        start_date: Start date
+        end_date: End date
+        resample_to: Overrides resampling to coarsest time resolution, can be one of ["coarsest", "footprint", "obs"]
+        site_modifier: The name of the site given in the footprint.
+                This is useful for example if the same site footprints are run with a different met and
+                they are named slightly differently from the obs file. E.g.
+                site="DJI", site_modifier = "DJI-SAM" - station called DJI, footprint site called DJI-SAM
+        platform: Observation platform used to decide whether to resample
+        instrument: Instrument name
+        species: Species name
+        load_flux: Load flux
+        flux_sources: Flux source names
+        load_bc: Load boundary conditions (not currently implemented)
+        calc_timeseries: Calculate timeseries data (not currently implemented)
+        calc_bc: Calculate boundary conditions (not currently implemented)
+        time_resolution: One of ["standard", "high"]
     Returns:
         dict: Dictionary footprint data objects
     """
@@ -275,7 +294,7 @@ def align_datasets(
     if platform is not None:
         platform = platform.lower()
         # Do not apply resampling for "satellite" (but have re-included "flask" for now)
-        if platform in ("satellite"):
+        if platform == "satellite":
             return obs_data, footprint_data
 
     # Get the period of measurements in time
@@ -288,8 +307,8 @@ def align_datasets(
         # Attempt to derive sampling period from frequency of data
         obs_data_period_s = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9).astype("int64")
 
-        obs_data_period_s_min = (np.diff(obs_data.time.data).min() / 1e9)
-        obs_data_period_s_max = (np.diff(obs_data.time.data).max() / 1e9)
+        obs_data_period_s_min = np.diff(obs_data.time.data).min() / 1e9
+        obs_data_period_s_max = np.diff(obs_data.time.data).max() / 1e9
 
         # Check if the periods differ by more than 1 second
         if np.isclose(obs_data_period_s_min, obs_data_period_s_max, 1):
