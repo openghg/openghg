@@ -3,8 +3,8 @@ This hopes to recreate the functionality of the ACRG repo function
 footprints_data_merge
 """
 from pandas import Timestamp
-from xarray import Dataset
-from typing import List, Optional, Tuple, Union
+from xarray import Dataset, DataArray
+from typing import List, Optional, Tuple, Union, Dict
 from openghg.dataobjects import FootprintData
 
 __all__ = ["single_site_footprint", "footprints_data_merge"]
@@ -173,6 +173,10 @@ def footprints_data_merge(
                 start_date=start_date,
                 end_date=end_date,
             )
+
+    # Calculate model time series, if required
+    if calc_timeseries:
+        combined_dataset = add_timeseries(combined_dataset, flux_dict)
 
     return FootprintData(
         data=combined_dataset, metadata={}, flux=flux_dict, bc={}, species=species, scales="scale", units="units"
@@ -389,3 +393,26 @@ def get_flux(
         return em_ds.drop_vars(names="lev")
 
     return em_ds
+
+
+def add_timeseries(combined_dataset: Dataset, flux_dict: Dict):
+    """
+    Add timeseries mole fraction values in footprint_data_merge
+
+    Args:
+        combined_dataset [Dataset]:
+            output created during footprint_data_merge
+        flux_dict [dict]:
+            Dictionary containing flux datasets
+    """
+
+    # TODO: Extend to include multiple sources
+    # TODO: Add ability to merge high time resolution footprints (e.g. species as co2)
+    for key, flux_ds in flux_dict.items():
+        if key != "high_time_res":
+            flux_reindex = flux_ds.reindex_like(combined_dataset, 'ffill')
+            combined_dataset['mf_mod'] = DataArray((combined_dataset.fp * flux_reindex.flux).sum(["lat", "lon"]), coords={'time': combined_dataset.time})
+        else:
+            print("Unable to create modelled mole fraction for high time resolution datasets yet.")
+
+    return combined_dataset
