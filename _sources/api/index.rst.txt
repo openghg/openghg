@@ -52,7 +52,7 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
 ``OPENGHG_PATH`` environment variable.
 
 
-:func:`~openghg.localclient.get_obs_surface`
+:func:`~openghg.localclient.get_observations`
     Search for observations in the object store using a site, species and date range.
 
 :func:`~openghg.localclient.process_files`
