@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>localclient API Detail &mdash; OpenGHG 0+untagged.3.ge78c844 documentation</title>
+  <title>localclient API Detail &mdash; OpenGHG 0+untagged.3.g43f0fd0 documentation</title>
   
 
   
@@ -197,9 +197,40 @@
 </style>
 <section id="localclient-api-detail">
 <h1>localclient API Detail<a class="headerlink" href="#localclient-api-detail" title="Permalink to this headline">¶</a></h1>
-<section id="get-observations">
-<h2>get_observations<a class="headerlink" href="#get-observations" title="Permalink to this headline">¶</a></h2>
+<section id="get-obs-surface">
+<h2>get_obs_surface<a class="headerlink" href="#get-obs-surface" title="Permalink to this headline">¶</a></h2>
 <p>Used to search the object store using a site name, species and daterange and returns the data found.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="openghg.localclient.get_obs_surface">
+<span class="sig-prename descclassname"><span class="pre">openghg.localclient.</span></span><span class="sig-name descname"><span class="pre">get_obs_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_scale</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_missing</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">openghg.dataobjects._obsdata.ObsData</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openghg/localclient/_observations.html#get_obs_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.get_obs_surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the equivalent of the get_obs function from the ACRG repository.</p>
+<p>Usage and return values are the same whilst implementation may differ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site</strong> – Site of interest e.g. MHD for the Mace Head site.</p></li>
+<li><p><strong>species</strong> – Species identifier e.g. ch4 for methane.</p></li>
+<li><p><strong>start_date</strong> – Output start date in a format that Pandas can interpret</p></li>
+<li><p><strong>end_date</strong> – Output end date in a format that Pandas can interpret</p></li>
+<li><p><strong>inlet</strong> – Inlet label</p></li>
+<li><p><strong>average</strong> – Averaging period for each dataset. Each value should be a string of</p></li>
+<li><p><strong>&quot;2H&quot;</strong> (<em>the form e.g.</em>) – </p></li>
+<li><p><strong>&quot;30min&quot;</strong> (<em>should match pandas offset aliases format</em>) – </p></li>
+<li><p><strong>keep_missing</strong> – Keep missing data points or drop them.</p></li>
+<li><p><strong>network</strong> – Network for the site/instrument (must match number of sites).</p></li>
+<li><p><strong>instrument</strong> – Specific instrument for the site (must match number of sites).</p></li>
+<li><p><strong>calibration_scale</strong> – Convert to this calibration scale</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of ObsData objects</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="process-files">
 <h2>process_files<a class="headerlink" href="#process-files" title="Permalink to this headline">¶</a></h2>
