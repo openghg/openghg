@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.processing._search &mdash; OpenGHG 0+untagged.3.g61e3a54 documentation</title>
+  <title>openghg.processing._search &mdash; OpenGHG 0+untagged.3.gb999570 documentation</title>
   
 
   
@@ -205,7 +205,7 @@
 <span class="sd">        dict: List of keys of Datasources matching the search parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span><span class="p">,</span> <span class="n">ObsSurface</span><span class="p">,</span> <span class="n">FOOTPRINTS</span><span class="p">,</span> <span class="n">Emissions</span>
+    <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span><span class="p">,</span> <span class="n">ObsSurface</span><span class="p">,</span> <span class="n">FOOTPRINTS</span><span class="p">,</span> <span class="n">Emissions</span><span class="p">,</span> <span class="n">EulerianModel</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">timestamp_now</span><span class="p">,</span> <span class="n">timestamp_epoch</span><span class="p">,</span> <span class="n">timestamp_tzaware</span><span class="p">,</span> <span class="n">clean_string</span>
 
     <span class="c1"># if species is not None and not isinstance(species, list):</span>
@@ -267,7 +267,7 @@
 
     <span class="n">data_type</span> <span class="o">=</span> <span class="n">search_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data_type&quot;</span><span class="p">,</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">)</span>
 
-    <span class="n">valid_data_types</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="s2">&quot;footprint&quot;</span><span class="p">,</span> <span class="s2">&quot;emissions&quot;</span><span class="p">)</span>
+    <span class="n">valid_data_types</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="s2">&quot;footprint&quot;</span><span class="p">,</span> <span class="s2">&quot;emissions&quot;</span><span class="p">,</span> <span class="s2">&quot;eulerian_model&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">data_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_data_types</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> is not a valid data type, please select one of </span><span class="si">{</span><span class="n">valid_data_types</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -278,6 +278,8 @@
         <span class="n">obj</span> <span class="o">=</span> <span class="n">FOOTPRINTS</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;emissions&quot;</span><span class="p">:</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="n">Emissions</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;eulerian_model&quot;</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">EulerianModel</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 
     <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">datasources</span><span class="p">()</span>
 

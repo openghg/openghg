@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.3.g61e3a54 documentation</title>
+  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.3.gb999570 documentation</title>
   
 
   
@@ -294,12 +294,12 @@
 <span class="sd">        Args:</span>
 <span class="sd">            metadata: Metadata on the data for this Datasource</span>
 <span class="sd">            data: xarray.Dataset</span>
-<span class="sd">            data_type: Type of data, one of [&quot;timeseries&quot;, &quot;emissions&quot;, &quot;met&quot;, &quot;footprint&quot;].</span>
+<span class="sd">            data_type: Type of data, one of [&quot;timeseries&quot;, &quot;emissions&quot;, &quot;met&quot;, &quot;footprint&quot;, &quot;eulerian_model&quot;].</span>
 <span class="sd">            overwrite: Overwrite existing data</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data_types</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="s2">&quot;emissions&quot;</span><span class="p">,</span> <span class="s2">&quot;met&quot;</span><span class="p">,</span> <span class="s2">&quot;footprint&quot;</span><span class="p">]</span>
+        <span class="n">data_types</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="s2">&quot;emissions&quot;</span><span class="p">,</span> <span class="s2">&quot;met&quot;</span><span class="p">,</span> <span class="s2">&quot;footprint&quot;</span><span class="p">,</span> <span class="s2">&quot;eulerian_model&quot;</span><span class="p">]</span>
 
         <span class="n">data_type</span> <span class="o">=</span> <span class="n">data_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">data_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_types</span><span class="p">:</span>
@@ -314,7 +314,9 @@
         <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;emissions&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_emissions_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;met&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;eulerian_model&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_eulerian_model_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Datasource.add_timeseries_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.add_timeseries_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_timeseries_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Add timeseries data to this Datasource</span>
@@ -448,6 +450,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span> <span class="o">=</span> <span class="n">data_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_metadata_key</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;data_type&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_daterange</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Datasource.add_eulerian_model_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.add_eulerian_model_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_eulerian_model_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Add Eulerian model data to this Datasource</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Eulerian model data as an xarray.Dataset</span>
+<span class="sd">            metadata: Metadata</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_field_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;eulerian_model&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Datasource.get_dataframe_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.get_dataframe_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">get_dataframe_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Returns the daterange for the passed DataFrame</span>
