@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>jobs API Detail &mdash; OpenGHG 0+untagged.3.g3bc7d8f documentation</title>
+  <title>jobs API Detail &mdash; OpenGHG 0+untagged.3.g414dad7 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
 
           
             
-            <img src="../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+            <img src="../_static/images/openghg_logo_v1.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -207,8 +207,7 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.jobs.SSHConnect.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_sshconnect.html#SSHConnect.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.SSHConnect.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.jobs.SSHConnect.close">
@@ -232,12 +231,12 @@ the SSH connection</p>
 <li><p><strong>user</strong> (<em>str</em>) – Username for login</p></li>
 <li><p><strong>hostname</strong> (<em>str</em>) – Hostname of server. This can also be an IP address</p></li>
 <li><p><strong>key_path</strong> (<em>Path</em><em> or </em><em>str</em><em>, </em><em>default=None</em>) – Path to private key to use for authentication.</p></li>
-<li><p><strong>default Paramiko will attempt to use any “id_rsa”</strong> (<em>By</em>) – </p></li>
-<li><p><strong>or “id_ecdsa” key</strong> (<em>“id_dsa”</em>) – </p></li>
-<li><p><strong>in ~/.ssh/</strong> (<em>discoverable</em>) – </p></li>
+<li><p><strong>“id_rsa”</strong> (<em>By default Paramiko will attempt to use any</em>) – </p></li>
+<li><p><strong>key</strong> (<em>private</em>) – </p></li>
+<li><p><strong>ssh/</strong> (<em>discoverable in</em>) – </p></li>
 <li><p><strong>passsword</strong> (<em>str</em><em>, </em><em>default=None</em>) – Password used for authentication or for unlocking a</p></li>
 <li><p><strong>protected</strong> (<em>password</em>) – </p></li>
-<li><p><strong>key</strong> (<em>private</em>) – </p></li>
+<li><p><strong>key</strong> – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -272,7 +271,7 @@ the SSH connection</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>files</strong> (<em>list</em>) – List of paths of files to transfer</p></li>
 <li><p><strong>path</strong> (<em>str</em><em>, </em><em>default=None</em>) – Path to write script, if not passed the script</p></li>
-<li><p><strong>be written to the user's home directory</strong> (<em>will</em>) – </p></li>
+<li><p><strong>directory</strong> (<em>will be written to the user's home</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -302,8 +301,7 @@ HPC job</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.jobs.JobDrive.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_secret</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/jobs/_jobdrive.html#JobDrive.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.jobs.JobDrive.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.jobs.JobDrive.download">
@@ -376,7 +374,7 @@ PAR</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 08, 2021.
+        Last updated on Jul 13, 2021.
       </span>
 
     </p>

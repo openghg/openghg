@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>client API Detail &mdash; OpenGHG 0+untagged.3.g3bc7d8f documentation</title>
+  <title>client API Detail &mdash; OpenGHG 0+untagged.3.g414dad7 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
 
           
             
-            <img src="../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+            <img src="../_static/images/openghg_logo_v1.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -228,12 +228,12 @@
 <li><p><strong>data_type</strong> (<em>str</em>) – Type of data to be processed (CRDS, GC etc)</p></li>
 <li><p><strong>openghg_url</strong> (<em>str</em>) – URL of OpenGHG service. Currently used for testing</p></li>
 <li><p><strong>datasource</strong> (<em>str</em>) – Datasource name or UUID</p></li>
-<li><p><strong>may be removed in the future.</strong> (<em>This</em>) – </p></li>
+<li><p><strong>future.</strong> (<em>This may be removed in the</em>) – </p></li>
 <li><p><strong>storage_url</strong> (<em>str</em>) – URL of storage service. Currently used for testing</p></li>
-<li><p><strong>may be removed in the future.</strong> – </p></li>
+<li><p><strong>future.</strong> – </p></li>
 <li><p><strong>site</strong> (<em>str</em><em>, </em><em>default=None</em>) – Name of site, three letter code or long name</p></li>
 <li><p><strong>instrument</strong> (<em>str</em><em>, </em><em>default=None</em>) – If no instrument name is passed we will attempt</p></li>
-<li><p><strong>find it from the filename.</strong> (<em>to</em>) – </p></li>
+<li><p><strong>filename.</strong> (<em>to find it from the</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -257,9 +257,9 @@
 <li><p><strong>folder_path</strong> (<em>str</em><em>, </em><em>pathlib.Path</em>) – Path of folder containing files to be processed</p></li>
 <li><p><strong>data_type</strong> (<em>str</em>) – Type of data to be processed (CRDS, GC etc)</p></li>
 <li><p><strong>openghg_url</strong> (<em>str</em>) – URL of OpenGHG service. Currently used for testing</p></li>
-<li><p><strong>may be removed in the future.</strong> (<em>This</em>) – </p></li>
+<li><p><strong>future.</strong> (<em>This may be removed in the</em>) – </p></li>
 <li><p><strong>storage_url</strong> (<em>str</em>) – URL of storage service. Currently used for testing</p></li>
-<li><p><strong>may be removed in the future.</strong> – </p></li>
+<li><p><strong>future.</strong> – </p></li>
 </ul>
 </dd>
 </dl>
@@ -277,8 +277,7 @@
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="openghg.client.Search.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_search.html#Search.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.Search.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.client.Search.download">
@@ -332,8 +331,7 @@ that data from that Datasource will be preferred when a user searches for data.<
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.client.RankSources.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_rank_sources.html#RankSources.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.RankSources.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.client.RankSources.create_daterange">
@@ -429,8 +427,7 @@ This function expects a dictionary of the form</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.client.JobRunner.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_jobrunner.html#JobRunner.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.JobRunner.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.client.JobRunner.create_job">
@@ -440,9 +437,9 @@ This function expects a dictionary of the form</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>auth_user</strong> (<em>Acquire.User</em>) – Authenticated Acquire user</p></li>
-<li><p><strong>following keys are required</strong> (<em>The</em>) – “hostname”, “username”, “name”, “run_command”, “partition”, “n_nodes”, “n_tasks_per_node”,
+<li><p><strong>required</strong> (<em>The following keys are</em>) – “hostname”, “username”, “name”, “run_command”, “partition”, “n_nodes”, “n_tasks_per_node”,
 “n_cpus_per_task”, “memory_req”, “job_duration”</p></li>
-<li><p><strong>partition must be one of</strong> (<em>where</em>) – “cpu_test”, “dcv”, “gpu”, “gpu_veryshort”, “hmem”, “serial”, “test”, “veryshort”</p></li>
+<li><p><strong>of</strong> (<em>where partition must be one</em>) – “cpu_test”, “dcv”, “gpu”, “gpu_veryshort”, “hmem”, “serial”, “test”, “veryshort”</p></li>
 <li><p><strong>Example</strong> – <dl class="simple">
 <dt>requirements = {“hostname”: hostname, “username”: username, “name”: “test_job,</dt><dd><p>”n_nodes”: 2,”n_tasks_per_node”: 2,
 “n_cpus_per_task”: 2, “memory”: “128G”, …}</p>
@@ -452,11 +449,11 @@ This function expects a dictionary of the form</p>
 <li><p><strong>requirements</strong> (<em>dict</em>) – Dictionary containing job details and requested resources</p></li>
 <li><p><strong>key_password</strong> (<em>str</em>) – Password for private key used to access the HPC</p></li>
 <li><p><strong>data_files</strong> (<em>dict</em>) – Data file(s) to be uploaded to the cloud drive to</p></li>
-<li><p><strong>the simulation. Simulation code files should be given in the &quot;app&quot; key and data</strong> (<em>run</em>) – </p></li>
-<li><p><strong>in the &quot;data&quot; key</strong> (<em>files</em>) – </p></li>
-<li><p><strong>- having to pass in a password and get it through to Paramiko seems</strong> (<em>TODO</em>) – </p></li>
+<li><p><strong>data</strong> (<em>run the simulation. Simulation code files should be given in the &quot;app&quot; key and</em>) – </p></li>
+<li><p><strong>key</strong> (<em>files in the &quot;data&quot;</em>) – </p></li>
+<li><p><strong>seems</strong> (<em>TODO - having to pass in a password and get it through to Paramiko</em>) – </p></li>
 <li><p><strong>winded</strong> (<em>long</em>) – </p></li>
-<li><p><strong>there a better way to do this?</strong> (<em>is</em>) – </p></li>
+<li><p><strong>this?</strong> (<em>is there a better way to do</em>) – </p></li>
 <li><p><strong>hugs_url</strong> (<em>str</em>) – URL of OpenGHG service</p></li>
 <li><p><strong>storage_url</strong> (<em>str</em>) – URL of storage service</p></li>
 </ul>
@@ -490,7 +487,7 @@ This will contain the PAR for access for data upload and download.</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 08, 2021.
+        Last updated on Jul 13, 2021.
       </span>
 
     </p>
