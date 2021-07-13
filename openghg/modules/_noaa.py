@@ -99,35 +99,72 @@ class NOAA(BaseModule):
             raise ValueError(f"measurement_type must be one of {valid_types}")
 
         obspack_ds = xr.open_dataset(data_filepath)
-        orig_attrs = obspack_ds.attrs
+        # orig_attrs = obspack_ds.attrs
 
-        # TODO - the simplest way of getting a clean Dataset in the form we want
-        # seems to be to go to a pandas Dataframe and back, open to suggestions on this.
-        # GJ - 2021-04-15
-        df = obspack_ds.to_dataframe()
-        df = df.set_index(df["time"])
-        df = df[~df.index.duplicated(keep="first")]
+        # Want to find and drop any duplicate time values for the original dataset
+        # Using xarray directly we have to do in a slightly convoluted way as this is not well built 
+        # into the xarray workflow yet - https://github.com/pydata/xarray/pull/5239
+        # - can use da.drop_duplicates() but only on one variable at a time and not on the whole Dataset
+        # This method keeps attributes for each of the variables including units
+
+        # The dimension within the original dataset is called "obs" and has no associated coordinates 
+        # Extract time from original Dataset (dimension is "obs")
+        time = obspack_ds.time
+
+        # To keep associated "obs" dimension, need to assign coordinate values to this (just 0, len(obs))
+        time = time.assign_coords(obs=obspack_ds.obs)
+
+        # Make "time" the primary dimension (while retaining "obs") and add "time" values as coordinates
+        time = time.swap_dims(dims_dict={"obs": "time"})
+        time = time.assign_coords(time=time)
+
+        # Drop any duplicate time values and extract the associated "obs" values
+        time_unique = time.drop_duplicates(dim="time", keep="first")
+        obs_unique = time_unique.obs
+
+        # Use these obs values to filter the original dataset to remove any repeated times
+        processed_ds = obspack_ds.sel(obs=obs_unique)
+        processed_ds = processed_ds.set_coords(["time"])
 
         wanted = ["value", "value_unc", "nvalue", "value_std_dev"]
-        to_extract = [x for x in wanted if x in df]
+        to_extract = [x for x in wanted if x in processed_ds]
 
         if not to_extract:
             raise ValueError(
                 f"No valid data columns found in converted DataFrame. We expect the following data variables in the passed NetCDF: {wanted}"
             )
 
-        df = df[to_extract]
+        processed_ds = processed_ds[to_extract]
+        processed_ds = processed_ds.sortby("time")
 
-        if not df.index.is_monotonic_increasing:
-            df = df.sort_index()
-
-        processed_ds = df.to_xarray()
         # TODO - need to choose which keys we want to keep
         # GJ - 2021-04-15
-        processed_ds.attrs = orig_attrs
+        # processed_ds.attrs = orig_attrs
 
         species = clean_string(obspack_ds.attrs["dataset_parameter"])
         network = "NOAA"
+
+        # TODO: Do we have a standard format for "units" attribute associated
+        # with each data variable?
+        # At the moment the NOAA data included e.g. "mol mol-1", "micromol mol-1" 
+        # but should this be updated to 1.0 or 1e-6
+
+        try:
+            # Extract units attribute from value data variable
+            units = processed_ds["value"].units
+        except (KeyError, AttributeError):
+            print("Unable to extract units from 'value' within input dataset")
+        else:
+            # TODO: What would we want to include for "mol mol-1" here?
+            if units == "micromol mol-1":
+                units = "ppm"
+            elif units == "nmol mol-1":
+                units = "ppb"
+            elif units == "pmol mol-1":
+                units = "ppt"
+            else:
+                print(f"Using unit {units} directly")
+                # raise ValueError(f"Did not recognise input units from file: {units}")
 
         metadata = {}
         metadata["site"] = site
@@ -135,6 +172,7 @@ class NOAA(BaseModule):
         metadata["network"] = network
         metadata["measurement_type"] = measurement_type
         metadata["species"] = species
+        metadata["units"] = units
 
         if instrument is not None:
             metadata["instrument"] = instrument
