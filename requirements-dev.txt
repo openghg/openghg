@@ -11,4 +11,3 @@ sphinx
 sphinx-issues
 sphinx_rtd_theme
 sphinxcontrib-programoutput
-xarray >= 0.18.2
