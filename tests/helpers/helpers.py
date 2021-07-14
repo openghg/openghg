@@ -36,3 +36,4 @@ def glob_files(search_str: str, data_type: str) -> List:
     files = [str(g) for g in globule]
 
     return files
+

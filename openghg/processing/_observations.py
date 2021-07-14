@@ -116,6 +116,10 @@ def get_obs_surface(
         # keep_attrs doesn't seem to work for some reason, so manually copy
         ds_resampled.attrs = data.attrs.copy()
 
+        average_in_seconds = Timedelta(average).total_seconds()
+        ds_resampled.attrs["averaged_period"] = average_in_seconds
+        ds_resampled.attrs["averaged_period_str"] = average
+
         # For some variables, need a different type of resampling
         for var in data.variables:
             if "repeatability" in var:

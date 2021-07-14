@@ -6,13 +6,11 @@ __all__ = ["BTT"]
 
 
 class BTT(BaseModule):
-    """Class for processing National Physical Laboratory (NPL) data"""
+    """Class for processing the BT Tower (BTT) data.
+    """
 
     def __init__(self):
         from openghg.util import load_json
-
-        # Sampling period of  data in seconds
-        self._sampling_period = "NA"
 
         data = load_json(filename="attributes.json")
         self._params = data["BTT"]
@@ -37,6 +35,9 @@ class BTT(BaseModule):
             dict: UUIDs of Datasources data has been assigned to
         """
         from openghg.processing import assign_attributes
+
+        # TODO: Decide what to do about inputs which aren't use anywhere
+        # at present - inlet, instrument, sampling_period, measurement_type
 
         data_filepath = Path(data_filepath)
 
@@ -72,9 +73,12 @@ class BTT(BaseModule):
         # Take std-dev measurements from these columns for these species
         species_sd = {"CO2": "co2.sd.ppm", "CH4": "ch4.sd.ppb"}
 
+        sampling_period = self._params["sampling_period"]
+        sampling_period_seconds = str(int(sampling_period)) + 's'
+
         data = read_csv(data_filepath)
         data["time"] = Timestamp("2019-01-01 00:00") + to_timedelta(data["DOY"] - 1, unit="D")
-        data["time"] = data["time"].dt.round("30min")
+        data["time"] = data["time"].dt.round(sampling_period_seconds)
         data = data[~isnull(data.time)]
 
         data = data.rename(columns=rename_dict)
@@ -97,6 +101,7 @@ class BTT(BaseModule):
             site_attributes = self._params["global_attributes"]
             site_attributes["inlet_height_magl"] = self._params["inlet"]
             site_attributes["instrument"] = self._params["instrument"]
+            site_attributes["sampling_period"] = sampling_period
 
             # TODO - add in better metadata reading
             metadata = {"species": compliant_string(species), "sampling_period": str(sampling_period)}
