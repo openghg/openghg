@@ -112,7 +112,7 @@ def get_obs_surface(
         #     data = data.sortby("time")
 
         # First do a mean resample on all variables
-        ds_resampled = data.resample(time=average, keep_attrs=True).mean(skipna=False)
+        ds_resampled = data.resample(time=average).mean(skipna=False, keep_attrs=True)
         # keep_attrs doesn't seem to work for some reason, so manually copy
         ds_resampled.attrs = data.attrs.copy()
 
@@ -131,7 +131,7 @@ def get_obs_surface(
                 ds_resampled[var].attrs["units"] = data[var].attrs["units"]
 
         # Create a new variability variable, containing the standard deviation within the resampling period
-        ds_resampled[f"{species}_variability"] = data[species].resample(time=average, keep_attrs=True).std(skipna=False)
+        ds_resampled[f"{species}_variability"] = data[species].resample(time=average).std(skipna=False, keep_attrs=True)
         # If there are any periods where only one measurement was resampled, just use the median variability
         ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
             f"{species}_variability"
@@ -145,7 +145,6 @@ def get_obs_surface(
             ds_resampled = ds_resampled.dropna(dim="time")
 
         data = ds_resampled
-
 
     # Rename variables
     rename = {}
@@ -167,7 +166,7 @@ def get_obs_surface(
     data = data.rename_vars(rename)
 
     data.attrs["species"] = species
-    
+
     if "Calibration_scale" in data.attrs:
         data.attrs["scale"] = data.attrs.pop("Calibration_scale")
 

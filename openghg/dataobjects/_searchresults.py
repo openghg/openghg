@@ -18,6 +18,7 @@ class SearchResults:
         results: Search results
         ranked_data: True if results are ranked, else False
     """
+
     results: Dict
     ranked_data: bool
     # Local or cloud service to be used
@@ -89,6 +90,9 @@ class SearchResults:
         """
         site = site.lower()
         species = species.lower()
+
+        if inlet is not None:
+            inlet = inlet.lower()
 
         try:
             if self.ranked_data:
