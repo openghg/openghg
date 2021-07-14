@@ -5,6 +5,7 @@ from openghg.processing import recombine_datasets
 
 __all__ = ["Search"]
 
+
 class Search:
     """Used to search and download data from the object store"""
 

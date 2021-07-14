@@ -1,10 +1,5 @@
-import json
-import warnings
-from typing import Dict, List, Optional, Union
-import xarray
-
+from typing import List, Optional, Union
 from Acquire.Client import Wallet
-from Acquire.ObjectStore import string_to_datetime, datetime_to_string
 
 
 __all__ = ["Search"]
@@ -81,56 +76,3 @@ class Search:
             return search_results
         except KeyError:
             return response
-
-    def results(self):
-        """Return the results in an easy to read format when printed to screen
-
-        Returns:
-            dict: Dictionary of results
-        """
-        return {
-            key: f"Daterange : {self._results[key]['start_date']} - {self._results[key]['end_date']}" for key in self._results
-        }
-
-    def download(self, selected_keys):
-        """Downloads the selected keys and returns a dictionary of
-        xarray Datasets
-
-        Args:
-            keys (str, list): Key(s) from search results to download
-        Returns:
-            defaultdict(dict): Dictionary of Datasets
-        """
-        if not isinstance(selected_keys, list):
-            selected_keys = [selected_keys]
-
-        # Create a Retrieve object to interact with the object store
-        # Select the keys we want to download
-        download_keys = {key: self._results[key]["keys"] for key in selected_keys}
-
-        args = {"keys": download_keys, "return_type": "json"}
-        response = self._service.call_function(function="retrieve", args=args)
-        result_data = response["results"]
-
-        # datasets = defaultdict(dict)
-        datasets = []
-        # TODO - find a better way of doing this, returning compressed binary data would be far better
-        for key, dateranges in result_data.items():
-            for daterange in dateranges:
-                serialised_data = json.loads(result_data[key][daterange])
-
-                # We need to convert the datetime string back to datetime objects here
-                datetime_data = serialised_data["coords"]["time"]["data"]
-                for i, _ in enumerate(datetime_data):
-                    datetime_data[i] = string_to_datetime(datetime_data[i])
-
-                # TODO - catch FutureWarnings here that may affect run when used within voila
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    # datasets[key][daterange] = xarray.Dataset.from_dict(serialised_data)
-                    datasets.append(xarray.Dataset.from_dict(serialised_data))
-
-        return datasets
-
-    def service(self):
-        return self._service
