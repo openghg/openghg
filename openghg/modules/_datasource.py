@@ -121,7 +121,7 @@ class Datasource:
         Returns:
             None
         """
-        data_types = ["timeseries", "emissions", "met", "footprint", "eulerian_model"]
+        expected_data_types = ("timeseries", "emissions", "met", "footprint", "eulerian_model")
 
         data_type = data_type.lower()
         if data_type not in expected_data_types:

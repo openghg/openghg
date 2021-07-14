@@ -34,7 +34,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     from copy import deepcopy
     from itertools import chain as iter_chain
 
-    from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions
+    from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions, EulerianModel
     from openghg.util import (
         timestamp_now,
         timestamp_epoch,
@@ -98,7 +98,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
 
     # For the time being this will return a dict until we know how best to represent
     # the footprint and emissions results in a SearchResult object
-    if data_type in {"emissions", "footprint"}:
+    if data_type in {"emissions", "footprint", "eulerian_model"}:
         sources = defaultdict(dict)
         for datasource in datasources:
             if datasource.search_metadata(**search_kwargs):
