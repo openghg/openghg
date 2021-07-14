@@ -1,5 +1,6 @@
 from openghg.modules import Datasource, ObsSurface
 from openghg.util import valid_site, create_daterange_str, InvalidSiteError
+
 # from pyvis.network import Network
 # import matplotlib.cm as cm
 # import matplotlib
@@ -9,6 +10,12 @@ __all__ = ["RankSources"]
 
 
 class RankSources:
+    def __init__(self):
+        self._lookup_data = {}
+        self._key_lookup = {}
+        self._user_info = {}
+        self._needs_update = True
+
     def get_sources(self, site: str, species: str) -> Dict:
         """Get the datasources for this site and species to allow a ranking to be set
 
@@ -97,7 +104,7 @@ class RankSources:
         self._needs_update = True
 
     def clear_rank(self, key: str) -> None:
-        """ Clear the ranking data for a Datasource
+        """Clear the ranking data for a Datasource
 
         Args:
             key: Key for specific source

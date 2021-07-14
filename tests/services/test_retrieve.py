@@ -41,7 +41,9 @@ def test_retrieve(authenticated_user):
 
     retrieve = Retrieve(service_url="openghg")
 
-    data = retrieve.retrieve(keys=keys)
+    to_retrieve = {"bsd_co2_248m": keys}
+
+    data = retrieve.retrieve(keys=to_retrieve)
 
     ds = data["bsd_co2_248m"]
 

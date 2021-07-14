@@ -144,7 +144,7 @@ def test_unranked_location_search():
     assert sorted(list(hfd_data.keys())) == ["ch4", "co2"]
 
     with pytest.raises(ValueError):
-        tac_co2_keys = results.keys(site="tac", species="co2")
+        tac_co2_keys = results.keys(site="tac", species="co2", inlet="105m")
 
     tac_co2_keys = results.keys(site="tac", species="co2", inlet="100m")
     tac_ch4_keys = results.keys(site="tac", species="co2", inlet="100m")

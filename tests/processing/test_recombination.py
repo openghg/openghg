@@ -1,29 +1,12 @@
 import logging
-import os
-from pathlib import Path
-
-import pytest
 
 from openghg.modules import CRDS, GCWERKS, ObsSurface
 from openghg.objectstore import get_local_bucket
 from openghg.processing import recombine_datasets, search
+from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
-
-
-@pytest.fixture(scope="session")
-def data_path():
-    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.C"
-
-
-@pytest.fixture(scope="session")
-def precision_path():
-    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.precisions.C"
-
-
-def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 
 def test_recombination_CRDS():

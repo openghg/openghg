@@ -18,7 +18,6 @@ class SearchResults:
         results: Search results
         ranked_data: True if results are ranked, else False
     """
-
     results: Dict
     ranked_data: bool
     # Local or cloud service to be used
@@ -76,7 +75,7 @@ class SearchResults:
         """
         return self.results
 
-    def keys(self, site: str, species: str, inlet: Optional[str] = None) -> Dict:
+    def keys(self, site: str, species: str, inlet: Optional[str] = None) -> List:
         """Return the data keys for the specified site and species.
         This is intended mainly for use in the search function when filling
         gaps of unranked dateranges.
@@ -86,16 +85,10 @@ class SearchResults:
                 species: Species name
                 inlet: Inlet height, required for unranked data
             Returns:
-                dict: Dictionary of keys, site_species_inlet: [keys]
+                list: List of keys
         """
         site = site.lower()
         species = species.lower()
-
-        if inlet is None and not self.ranked_data:
-            raise ValueError("Please pass an inlet height.")
-
-        if inlet is not None:
-            inlet = inlet.lower()
 
         try:
             if self.ranked_data:
@@ -105,9 +98,7 @@ class SearchResults:
         except KeyError:
             raise ValueError(f"No keys found for {species} at {site}")
 
-        site_key = f"{site}_{species}_{inlet}"
-
-        return {site_key: keys}
+        return keys
 
     def metadata(self, site: str, species: str, inlet: Optional[str] = None) -> List:
         """Return the metadata for the specified site and species
@@ -151,6 +142,7 @@ class SearchResults:
         """
         site = clean_string(site)
         species = clean_string(species)
+        inlet = clean_string(inlet)
 
         if self.ranked_data:
             results = {}
@@ -187,7 +179,7 @@ class SearchResults:
                     key = "_".join((a_site, sp))
                     results[key] = self._create_obsdata(site=a_site, species=sp)
         else:
-            if not any((species, site, inlet)):
+            if not all((species, site, inlet)):
                 raise ValueError("Please pass site, species and inlet.")
 
             return self._create_obsdata(site=site, species=species, inlet=inlet)
