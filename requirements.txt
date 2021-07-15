@@ -1,4 +1,4 @@
-Acquire @ git+git://github.com/gareth-j/acquire@testStore#egg=Acquire
+Acquire @ git+git://github.com/gareth-j/acquire@devel#egg=Acquire
 addict
 backports-datetime-fromisoformat
 cachetools
