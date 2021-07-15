@@ -19,7 +19,7 @@ def recombine_multisite(keys: Dict, sort: Optional[bool] = True) -> Dict:
     """
     result = {}
     for key, key_list in keys.items():
-        result[key] = recombine_datasets(data_keys=key_list, sort=sort)
+        result[key] = recombine_datasets(keys=key_list, sort=sort)
 
     return result
 
@@ -52,14 +52,7 @@ def recombine_datasets(keys: List[str], sort: Optional[bool] = True) -> Dataset:
 
     # Check for duplicates?
     # This is taken from https://stackoverflow.com/questions/51058379/drop-duplicate-times-in-xarray
-    # _, index = np.unique(f['time'], return_index=True)
-    # f.isel(time=index)
-
-    # Check that the dataframe's index is sorted by date
-    # if not combined.time.is_monotonic_increasing:
-    #     combined = combined.sortby("time")
-
-    # if not combined.index.is_unique:
-    #     raise ValueError("Dataframe index is not unique")
+    # _, index = np.unique(combined['time'], return_index=True)
+    # combined = combined.isel(time=index)
 
     return combined

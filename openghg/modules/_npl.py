@@ -38,16 +38,19 @@ class NPL(BaseModule):
         """
         from openghg.processing import assign_attributes
 
+        if sampling_period is None:
+            sampling_period = "NOT_SET"
+
         data_filepath = Path(data_filepath)
 
         site = "NPL"
 
-        gas_data = self.read_data(data_filepath=data_filepath)
+        gas_data = self.read_data(data_filepath=data_filepath, sampling_period=sampling_period)
         gas_data = assign_attributes(data=gas_data, site=site, network=network)
 
         return gas_data
 
-    def read_data(self, data_filepath: Path) -> Dict:
+    def read_data(self, data_filepath: Path, sampling_period: str) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -93,7 +96,7 @@ class NPL(BaseModule):
             site_attributes["inlet_height_magl"] = self._params["inlet"]
             site_attributes["instrument"] = self._params["instrument"]
 
-            metadata = {"species": compliant_string(species)}
+            metadata = {"species": compliant_string(species), "sampling_period": str(sampling_period)}
             # TODO - add in better metadata reading
             combined_data[species] = {
                 "metadata": metadata,

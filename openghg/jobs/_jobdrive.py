@@ -40,9 +40,9 @@ class JobDrive:
         for f in files:
             filesize = os.path.getsize(f)
             if filesize < chunk_limit:
-                self._drive.upload(filename=f, dir=directory)
+                self._drive.upload(filename=f, directory=directory)
             else:
-                self._drive.chunk_upload(filename=f, dir=directory)
+                self._drive.chunk_upload(filename=f, directory=directory)
 
     def list_files(self):
         """ List files in drive
@@ -71,6 +71,6 @@ class JobDrive:
 
         file_metadata = {}
         for fname in files:
-            file_metadata[fname] = self._drive.download(filename=fname, dir=local_dir)
+            file_metadata[fname] = self._drive.download(filename=fname, directory=local_dir)
 
         return file_metadata

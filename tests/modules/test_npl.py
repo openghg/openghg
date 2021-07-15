@@ -1,19 +1,12 @@
 import logging
-import os
-from pathlib import Path
 import pandas as pd
 import pytest
 
-from openghg.modules import Datasource, NPL
-from openghg.objectstore import get_local_bucket
+from openghg.modules import NPL
+from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
-
-# Disable this for long strings below - Line break occurred before a binary operator (W503)
-# flake8: noqa: W503
-def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 
 def test_read_file():
@@ -21,7 +14,7 @@ def test_read_file():
 
     filepath = get_datapath(filename="NPL_test.csv", data_type="LGHG")
 
-    data = npl.read_file(data_filepath=filepath)
+    data = npl.read_file(data_filepath=filepath, sampling_period=60)
 
     co2_data = data["CO2"]["data"]
     ch4_data = data["CH4"]["data"]

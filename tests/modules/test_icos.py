@@ -3,13 +3,11 @@ from pathlib import Path
 import pytest
 
 from openghg.modules import ICOS
+from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
-
-def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 
 def test_read_file():
@@ -35,7 +33,7 @@ def test_read_file():
 def test_read_data():
     icos = ICOS()
     filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
-    data = icos.read_data(data_filepath=filepath, species="CO2")
+    data = icos.read_data(data_filepath=filepath, species="CO2", sampling_period=60)
 
     co2_data = data["co2"]["data"]
 
@@ -44,4 +42,4 @@ def test_read_data():
     assert co2_data["co2 number_of_observations"][0].values == 13
 
     assert data["co2"]["metadata"] == {'site': 'tta', 'species': 'co2', 'inlet': '222m', 
-                                        'time_resolution': '1minute', 'network': 'ICOS'}
+                                        'sampling_period': '60', 'network': 'ICOS'}

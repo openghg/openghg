@@ -53,7 +53,7 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
 
 
 :func:`~openghg.localclient.get_obs_surface`
-    Search for observations in the object store using a site, species and date range.
+    Search for surface observations in the object store using a site, species and date range.
 
 :func:`~openghg.localclient.process_files`
     Process files for storage in the object store

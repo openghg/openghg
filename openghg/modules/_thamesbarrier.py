@@ -42,6 +42,9 @@ class THAMESBARRIER(BaseModule):
         from pandas import read_csv as pd_read_csv
         from openghg.util import clean_string, compliant_string
 
+        if sampling_period is None:
+            sampling_period = "NOT_SET"
+
         data_filepath = Path(data_filepath)
 
         data = pd_read_csv(data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0)
@@ -83,6 +86,7 @@ class THAMESBARRIER(BaseModule):
                 "site": site,
                 "inlet": clean_string(self._tb_params["inlet"]),
                 "network": "LGHG",
+                "sampling_period": str(sampling_period)
             }
             metadata.update(site_attributes)
 

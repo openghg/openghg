@@ -49,12 +49,15 @@ tag_str = ":".join(("openghg/openghg-complete", tag))
 
 if args.build:
     args.deploy = False
+    print("\nBuilding docker file...\n")
     subprocess.check_call(["docker", "build", "--tag", tag_str, "."])
 
 if args.base:
+    print("\nBuilding base docker image...\n")
     subprocess.check_call(["python3", "build.py", "--tag", tag], cwd="base_image")
 
 if args.deploy:
+    print("\nDeploying Fn functions...\n")
     # Make sure we have an app calld openghg
     subprocess.run(["fn", "create", "app", "openghg"])
     # Build and deploy the function container

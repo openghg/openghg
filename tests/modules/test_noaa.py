@@ -7,16 +7,13 @@ import pytest
 
 from openghg.modules import NOAA, Datasource
 from openghg.objectstore import get_local_bucket
+from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
 # Disable this for long strings below - Line break occurred before a binary operator (W503)
 # flake8: noqa: W503
-
-
-def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 
 def test_read_obspack():
@@ -43,7 +40,7 @@ def test_read_file_site_filename_read():
 
     filepath = get_datapath(filename="ch4_scsn06_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
-    data = noaa.read_file(data_filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask")
+    data = noaa.read_file(data_filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask", sampling_period="1200")
 
     ch4_data = data["ch4"]["data"]
 
@@ -54,7 +51,14 @@ def test_read_file_site_filename_read():
 
     metadata = data["ch4"]["metadata"]
 
-    expected_metadata = {"species": "ch4", "site": "SCSN06", "measurement_type": "flask", "network": "NOAA", "inlet": "flask"}
+    expected_metadata = {
+        "species": "ch4",
+        "site": "SCSN06",
+        "measurement_type": "flask",
+        "network": "NOAA",
+        "inlet": "flask",
+        "sampling_period": "1200",
+    }
 
     assert metadata == expected_metadata
 
@@ -85,7 +89,7 @@ def test_read_raw_file():
 
     filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
-    data = noaa.read_file(data_filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask")
+    data = noaa.read_file(data_filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask", sampling_period=1200)
 
     assert data["co"]["metadata"] == {
         "species": "co",
@@ -93,6 +97,7 @@ def test_read_raw_file():
         "measurement_type": "flask",
         "network": "NOAA",
         "inlet": "flask",
+        "sampling_period": "1200",
     }
 
     co_data = data["co"]["data"]
