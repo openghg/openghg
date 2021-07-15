@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._icos &mdash; OpenGHG 0+untagged.3.g6a64624 documentation</title>
+  <title>openghg.modules._icos &mdash; OpenGHG 0+untagged.3.ge59fb20 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
 
           
             
-            <img src="../../../_static/images/openghg_logo_v1.png" class="logo" alt="Logo"/>
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -216,13 +216,13 @@
         <span class="n">species</span> <span class="o">=</span> <span class="n">source_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="c1"># This should return xarray Datasets</span>
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">)</span>
         <span class="c1"># Assign attributes to the xarray Datasets here data here makes it a lot easier to test</span>
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sampling_period</span><span class="p">)</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">gas_data</span></div>
 
-<div class="viewcode-block" id="ICOS.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.ICOS.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="ICOS.read_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.ICOS.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Separates the gases stored in the dataframe in</span>
 <span class="sd">        separate dataframes and returns a dictionary of gases</span>
 <span class="sd">        with an assigned UUID as gas:UUID and a list of the processed</span>
@@ -312,17 +312,29 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">site</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">time_resolution</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">file_sampling_period</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
             <span class="n">inlet_height</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to read metadata from filename. We expect a filename such as tta.co2.1minute.222m.dat&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">file_sampling_period</span> <span class="o">==</span> <span class="s2">&quot;1minute&quot;</span><span class="p">:</span>
+            <span class="n">file_sampling_period</span> <span class="o">=</span> <span class="mi">60</span>
+        <span class="k">elif</span> <span class="n">file_sampling_period</span> <span class="o">==</span> <span class="s2">&quot;1hour&quot;</span><span class="p">:</span>
+            <span class="n">file_sampling_period</span> <span class="o">=</span> <span class="mi">3600</span>
+
+        <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">file_sampling_period</span> <span class="o">!=</span> <span class="n">sampling_period</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mismatch between sampling period read from filename and that passed in.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sampling_period</span> <span class="o">=</span> <span class="n">file_sampling_period</span>
 
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
             <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">compliant_string</span><span class="p">(</span><span class="n">species</span><span class="p">),</span>
             <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">inlet_height</span><span class="p">,</span>
-            <span class="s2">&quot;time_resolution&quot;</span><span class="p">:</span> <span class="n">time_resolution</span><span class="p">,</span>
+            <span class="s2">&quot;sampling_period&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">),</span>
             <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;ICOS&quot;</span><span class="p">,</span>
+
         <span class="p">}</span>
 
         <span class="n">combined_data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
@@ -345,7 +357,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 13, 2021.
+        Last updated on Jul 15, 2021.
       </span>
 
     </p>

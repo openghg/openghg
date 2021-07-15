@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Fn Development &mdash; OpenGHG 0+untagged.3.g6a64624 documentation</title>
+  <title>Fn Development &mdash; OpenGHG 0+untagged.3.ge59fb20 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
 
           
             
-            <img src="../_static/images/openghg_logo_v1.png" class="logo" alt="Logo"/>
+            <img src="../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -110,6 +110,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#first-function">First function</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dockerise">Dockerise</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#openghg-functions">OpenGHG functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#test-a-function">Test a function</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#calling-from-openghg">Calling from OpenGHG</a></li>
 </ul>
 </li>
@@ -333,26 +334,27 @@ Successfully created <span class="k">function</span>: openghg_fn with openghg_fn
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer openghg_fn<span class="o">]</span>$ fn inspect <span class="k">function</span> openghg openghg_fn
 <span class="o">{</span>
     <span class="s2">&quot;annotations&quot;</span>: <span class="o">{</span>
-        <span class="s2">&quot;fnproject.io/fn/invokeEndpoint&quot;</span>: <span class="s2">&quot;http://localhost:8080/invoke/01ES6PE0FGNG8G00GZJ0000009&quot;</span>
+        <span class="s2">&quot;fnproject.io/fn/invokeEndpoint&quot;</span>: <span class="s2">&quot;http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009&quot;</span>
     <span class="o">}</span>,
-    <span class="s2">&quot;app_id&quot;</span>: <span class="s2">&quot;01ES6PDS9FNG8G00GZJ0000008&quot;</span>,
-    <span class="s2">&quot;created_at&quot;</span>: <span class="s2">&quot;2020-12-10T16:06:05.040Z&quot;</span>,
-    <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;01ES6PE0FGNG8G00GZJ0000009&quot;</span>,
+    <span class="s2">&quot;app_id&quot;</span>: <span class="s2">&quot;01ES9D6T23NG8G00GZJ0000008&quot;</span>,
+    <span class="s2">&quot;created_at&quot;</span>: <span class="s2">&quot;2020-12-11T17:22:35.461Z&quot;</span>,
+    <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;01ES9D6TA5NG8G00GZJ0000009&quot;</span>,
     <span class="s2">&quot;idle_timeout&quot;</span>: <span class="m">30</span>,
-    <span class="s2">&quot;image&quot;</span>: <span class="s2">&quot;openghg_fn:0.0.6&quot;</span>,
-    <span class="s2">&quot;memory&quot;</span>: <span class="m">256</span>,
-    <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;openghg_fn&quot;</span>,
+    <span class="s2">&quot;image&quot;</span>: <span class="s2">&quot;openghg:0.0.82&quot;</span>,
+    <span class="s2">&quot;memory&quot;</span>: <span class="m">2048</span>,
+    <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;openghg&quot;</span>,
     <span class="s2">&quot;timeout&quot;</span>: <span class="m">30</span>,
-    <span class="s2">&quot;updated_at&quot;</span>: <span class="s2">&quot;2020-12-10T16:09:22.043Z&quot;</span>
+    <span class="s2">&quot;updated_at&quot;</span>: <span class="s2">&quot;2021-06-08T13:26:48.066Z&quot;</span>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>We can see that there is an invocation endpoint at <code class="docutils literal notranslate"><span class="pre">http://localhost:8080/invoke/01ES6PE0FGNG8G00GZJ0000009</span></code>, using curl we can
+<p>We can see that there is an invocation endpoint at <code class="docutils literal notranslate"><span class="pre">http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009</span></code>, using curl we can
 call the function like so</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer openghg_fn<span class="o">]</span>$ curl -X POST http://localhost:8080/invoke/01ES6PE0FGNG8G00GZJ0000009
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer openghg_fn<span class="o">]</span>$ curl -X POST http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009
 <span class="o">{</span><span class="s2">&quot;message&quot;</span>: <span class="s2">&quot;Hello from OpenGHG&quot;</span><span class="o">}</span>
 </pre></div>
 </div>
+<p>Note that your invocation endpoint may differ slightly from the one shown above.</p>
 </section>
 </section>
 <section id="dockerise">
@@ -474,7 +476,7 @@ code into <code class="docutils literal notranslate"><span class="pre">/python</
 it may be worth trying changing this value.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">schema_version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">20180708</span>
 <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">openghg</span>
-<span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0.69</span>
+<span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0.82</span>
 <span class="nt">runtime</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">docker</span>
 <span class="nt">memory</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2048</span>
 <span class="nt">triggers</span><span class="p">:</span>
@@ -511,6 +513,40 @@ functions to Fn run</p>
 image. This ensures all dependencies are installed in the base image.</p>
 </section>
 </section>
+<section id="test-a-function">
+<h2>Test a function<a class="headerlink" href="#test-a-function" title="Permalink to this headline">¶</a></h2>
+<p>Say we want to test a function such as the <code class="docutils literal notranslate"><span class="pre">testconnection</span></code> function that is a part of OpenGHG. This simple function returns a simple
+string of the timestamp at which the function was called to the user.</p>
+<p>As above we inspect the funtion and find its endpoint.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer openghg_fn<span class="o">]</span>$ fn inspect <span class="k">function</span> openghg openghg
+<span class="o">{</span>
+    <span class="s2">&quot;annotations&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;fnproject.io/fn/invokeEndpoint&quot;</span>: <span class="s2">&quot;http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009&quot;</span>
+    <span class="o">}</span>,
+    <span class="s2">&quot;app_id&quot;</span>: <span class="s2">&quot;01ES9D6T23NG8G00GZJ0000008&quot;</span>,
+    <span class="s2">&quot;created_at&quot;</span>: <span class="s2">&quot;2020-12-11T17:22:35.461Z&quot;</span>,
+    <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;01ES9D6TA5NG8G00GZJ0000009&quot;</span>,
+    <span class="s2">&quot;idle_timeout&quot;</span>: <span class="m">30</span>,
+    <span class="s2">&quot;image&quot;</span>: <span class="s2">&quot;openghg:0.0.82&quot;</span>,
+    <span class="s2">&quot;memory&quot;</span>: <span class="m">2048</span>,
+    <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;openghg&quot;</span>,
+    <span class="s2">&quot;timeout&quot;</span>: <span class="m">30</span>,
+    <span class="s2">&quot;updated_at&quot;</span>: <span class="s2">&quot;2021-06-08T13:26:48.066Z&quot;</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>We can then call the function using</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<p>curl -X POST -d ‘{“function” : “testconnection”, “args”: {}}’ <a class="reference external" href="http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009">http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009</a></p>
+<p>And we should recieve a response such as</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<p>{‘results’: ‘Function run at 2021-06-08 13:34:17.095579+00:00’}</p>
+<p>Now we know our Dockerised function can be called and works correctly.</p>
+</section>
 <section id="calling-from-openghg">
 <h2>Calling from OpenGHG<a class="headerlink" href="#calling-from-openghg" title="Permalink to this headline">¶</a></h2>
 <p>For information on how we’ve setup calling functions from OpenGHG please see the <a class="reference internal" href="fn_usage.html"><span class="doc">Fn usage</span></a> section of the documentation.</p>
@@ -533,7 +569,7 @@ image. This ensures all dependencies are installed in the base image.</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 13, 2021.
+        Last updated on Jul 15, 2021.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.3.g6a64624 documentation</title>
+  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.3.ge59fb20 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
 
           
             
-            <img src="../../../_static/images/openghg_logo_v1.png" class="logo" alt="Logo"/>
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -175,6 +175,7 @@
 <span class="sd">    modules inherit.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;BaseModule&quot;</span><span class="p">]</span>
 
@@ -184,30 +185,26 @@
 <div class="viewcode-block" id="BaseModule"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule">[docs]</a><span class="k">class</span> <span class="nc">BaseModule</span><span class="p">:</span>
 <div class="viewcode-block" id="BaseModule.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">timestamp_now</span>
-        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+        <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">Dict</span> <span class="k">as</span> <span class="n">aDict</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_creation_datetime</span> <span class="o">=</span> <span class="n">timestamp_now</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stored</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="c1"># We want to created a nested dictionary</span>
-        <span class="k">def</span> <span class="nf">nested_dict</span><span class="p">():</span>
-            <span class="k">return</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">nested_dict</span><span class="p">)</span>
-
-        <span class="c1"># Stores metadata about the Datasource, keyed by site</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">()</span>
+        <span class="c1"># Use an addict Dict here for easy nested data storage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">()</span>
         <span class="c1"># Keyed by Datasource UUID</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># Hashes of previously uploaded files</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># Keyed by UUID</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">is_null</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasources</span>
 
 <div class="viewcode-block" id="BaseModule.exists"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.exists">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Check if a GC object is already saved in the object</span>
+        <span class="sd">&quot;&quot;&quot;Check if the object is already saved in the object</span>
 <span class="sd">        store</span>
 
 <span class="sd">        Args:</span>
@@ -236,8 +233,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">string_to_datetime</span>
         <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_bucket</span>
-        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">to_defaultdict</span>
+        <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">Dict</span> <span class="k">as</span> <span class="n">aDict</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to create object with empty dictionary&quot;</span><span class="p">)</span>
@@ -249,13 +245,8 @@
         <span class="n">c</span><span class="o">.</span><span class="n">_creation_datetime</span> <span class="o">=</span> <span class="n">string_to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;creation_datetime&quot;</span><span class="p">])</span>
         <span class="n">c</span><span class="o">.</span><span class="n">_datasource_uuids</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_uuids&quot;</span><span class="p">]</span>
         <span class="n">c</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;file_hashes&quot;</span><span class="p">]</span>
-        <span class="n">c</span><span class="o">.</span><span class="n">_datasource_table</span> <span class="o">=</span> <span class="n">to_defaultdict</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_table&quot;</span><span class="p">])</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">_rank_data</span> <span class="o">=</span> <span class="n">to_defaultdict</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;rank_data&quot;</span><span class="p">])</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">_rank_data</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
-
+        <span class="n">c</span><span class="o">.</span><span class="n">_datasource_table</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;datasource_table&quot;</span><span class="p">])</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">_rank_data</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;rank_data&quot;</span><span class="p">])</span>
         <span class="n">c</span><span class="o">.</span><span class="n">_stored</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">return</span> <span class="n">c</span></div>
@@ -330,7 +321,51 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="BaseModule.set_rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.set_rank">[docs]</a>    <span class="k">def</span> <span class="nf">set_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rank</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">daterange</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="BaseModule.get_rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.get_rank">[docs]</a>    <span class="k">def</span> <span class="nf">get_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get the rank for the given Datasource for a given date range</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            uuid: UUID of Datasource</span>
+<span class="sd">            start_date: Start date</span>
+<span class="sd">            end_date: End date</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of rank and daterange covered by that rank</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">daterange_overlap</span><span class="p">,</span> <span class="n">create_daterange_str</span>
+        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+        <span class="k">if</span> <span class="n">uuid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="n">search_daterange</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
+
+        <span class="n">rank_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
+
+        <span class="n">ranked</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="c1"># Check if this Datasource is ranked for the dates passed</span>
+        <span class="k">for</span> <span class="n">daterange</span><span class="p">,</span> <span class="n">rank</span> <span class="ow">in</span> <span class="n">rank_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">daterange_overlap</span><span class="p">(</span><span class="n">daterange_a</span><span class="o">=</span><span class="n">search_daterange</span><span class="p">,</span> <span class="n">daterange_b</span><span class="o">=</span><span class="n">daterange</span><span class="p">):</span>
+                <span class="n">ranked</span><span class="p">[</span><span class="n">rank</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daterange</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ranked</span></div>
+
+<div class="viewcode-block" id="BaseModule.clear_rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.clear_rank">[docs]</a>    <span class="k">def</span> <span class="nf">clear_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Clear the ranking data for a Datasource</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            uuid: UUID of Datasource</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No ranking data set for that UUID.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseModule.set_rank"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.set_rank">[docs]</a>    <span class="k">def</span> <span class="nf">set_rank</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rank</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">date_range</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">overwrite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Set the rank of a Datasource associated with this object.</span>
 
 <span class="sd">        This function performs checks to ensure multiple ranks aren&#39;t set for</span>
@@ -340,50 +375,140 @@
 <span class="sd">        daterange stored for that rank.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            uuid (str): UUID of Datasource</span>
-<span class="sd">            rank (int): Rank of data</span>
-<span class="sd">            daterange (str, list): Daterange(s)</span>
+<span class="sd">            uuid: UUID of Datasource</span>
+<span class="sd">            rank: Rank of data</span>
+<span class="sd">            date_range: Daterange(s)</span>
+<span class="sd">            overwrite: Overwrite current ranking data</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">daterange_from_str</span>
+        <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
+            <span class="n">combine_dateranges</span><span class="p">,</span>
+            <span class="n">daterange_overlap</span><span class="p">,</span>
+            <span class="n">trim_daterange</span><span class="p">,</span>
+            <span class="n">daterange_contains</span><span class="p">,</span>
+            <span class="n">split_encompassed_daterange</span><span class="p">,</span>
+            <span class="n">sanitise_daterange</span><span class="p">,</span>
+        <span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Rank can only take values 0 (for unranked) to 10. Where 1 is the highest rank.&quot;</span><span class="p">)</span>
+        <span class="n">rank</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">daterange</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">daterange</span> <span class="o">=</span> <span class="p">[</span><span class="n">daterange</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">rank</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Rank can only take values 1 to 10 (for unranked). Where 1 is the highest rank.&quot;</span><span class="p">)</span>
 
-        <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date_range</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">date_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">date_range</span><span class="p">]</span>
+
+        <span class="c1"># Make sure the dateranges passed are correct and are tz-aware</span>
+        <span class="n">date_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">sanitise_daterange</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">date_range</span><span class="p">]</span>
+        <span class="c1"># Combine in case we have overlappng dateranges</span>
+        <span class="n">date_range</span> <span class="o">=</span> <span class="n">combine_dateranges</span><span class="p">(</span><span class="n">date_range</span><span class="p">)</span>
+
+        <span class="c1"># Used to store dateranges that need to be trimmed to ensure no daterange overlap</span>
+        <span class="n">to_update</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Non-overlapping dateranges that can be stored directly</span>
+        <span class="n">to_add</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">:</span>
             <span class="n">rank_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
             <span class="c1"># Check this source isn&#39;t ranked differently for the same dates</span>
-            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">daterange</span><span class="p">:</span>
-                <span class="c1"># Check we don&#39;t have any overlapping dateranges for other ranks</span>
-                <span class="n">daterange_obj</span> <span class="o">=</span> <span class="n">daterange_from_str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-                <span class="c1"># Check the other dateranges for overlapping dates and raise error</span>
-                <span class="k">for</span> <span class="n">existing_rank</span><span class="p">,</span> <span class="n">existing_daterange</span> <span class="ow">in</span> <span class="n">rank_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">existing_daterange</span><span class="p">:</span>
-                        <span class="n">e</span> <span class="o">=</span> <span class="n">daterange_from_str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">new_daterange</span> <span class="ow">in</span> <span class="n">date_range</span><span class="p">:</span>
+                <span class="n">overlap</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="c1"># Check for overlapping dateranges and add</span>
+                <span class="k">for</span> <span class="n">existing_daterange</span><span class="p">,</span> <span class="n">existing_rank</span> <span class="ow">in</span> <span class="n">rank_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">daterange_overlap</span><span class="p">(</span><span class="n">daterange_a</span><span class="o">=</span><span class="n">new_daterange</span><span class="p">,</span> <span class="n">daterange_b</span><span class="o">=</span><span class="n">existing_daterange</span><span class="p">):</span>
+                        <span class="n">overlap</span> <span class="o">=</span> <span class="kc">True</span>
 
-                        <span class="n">intersection</span> <span class="o">=</span> <span class="n">daterange_obj</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersection</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">existing_rank</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rank</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">rank</span> <span class="o">!=</span> <span class="n">existing_rank</span> <span class="ow">and</span> <span class="n">overwrite</span><span class="p">:</span>
+                            <span class="c1"># Save the daterange we need to update</span>
+                            <span class="n">to_update</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">existing_daterange</span><span class="p">,</span> <span class="n">new_daterange</span><span class="p">))</span>
+                            <span class="k">continue</span>
+                        <span class="c1"># If the ranks are the same we just want to combine the dateranges</span>
+                        <span class="k">elif</span> <span class="n">rank</span> <span class="o">==</span> <span class="n">existing_rank</span><span class="p">:</span>
+                            <span class="n">to_combine</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_daterange</span><span class="p">,</span> <span class="n">existing_daterange</span><span class="p">)</span>
+                            <span class="n">combined</span> <span class="o">=</span> <span class="n">combine_dateranges</span><span class="p">(</span><span class="n">dateranges</span><span class="o">=</span><span class="n">to_combine</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="n">to_update</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">existing_daterange</span><span class="p">,</span> <span class="n">combined</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
                             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                                <span class="sa">f</span><span class="s2">&quot;This datasource has already got the rank </span><span class="si">{</span><span class="n">existing_rank</span><span class="si">}</span><span class="s2"> for dates that overlap the ones given. </span><span class="se">\</span>
-<span class="s2">                                                Overlapping dates are </span><span class="si">{</span><span class="n">intersection</span><span class="si">}</span><span class="s2">&quot;</span>
+                                <span class="sa">f</span><span class="s2">&quot;This datasource has rank </span><span class="si">{</span><span class="n">existing_rank</span><span class="si">}</span><span class="s2"> for dates that overlap the ones given. </span><span class="se">\</span>
+<span class="s2">                                                Overlapping dateranges are </span><span class="si">{</span><span class="n">new_daterange</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">existing_daterange</span><span class="si">}</span><span class="s2">&quot;</span>
                             <span class="p">)</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">pass</span>
+                <span class="c1"># Otherwise we just want to add the new daterange to the dict</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">overlap</span><span class="p">:</span>
+                    <span class="n">to_add</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_daterange</span><span class="p">)</span>
 
-        <span class="c1"># Store the rank within the Datasource</span>
-        <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">datasource</span><span class="o">.</span><span class="n">set_rank</span><span class="p">(</span><span class="n">rank</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span> <span class="n">daterange</span><span class="o">=</span><span class="n">daterange</span><span class="p">)</span>
-        <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="c1"># If we&#39;ve got dateranges to update and ranks to overwrite we need to trim the</span>
+            <span class="c1"># previous ranking daterange down so we don&#39;t have overlapping dateranges</span>
+            <span class="k">if</span> <span class="n">to_update</span><span class="p">:</span>
+                <span class="c1"># Here we first take a backup of the old ranking data, update</span>
+                <span class="c1"># it and then write it back</span>
+                <span class="n">ranking_backup</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">rank_data</span><span class="p">)</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="n">rank</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">daterange</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="n">rank</span><span class="p">]</span> <span class="o">=</span> <span class="n">daterange</span></div>
+                <span class="k">for</span> <span class="n">existing</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">to_update</span><span class="p">:</span>
+                    <span class="c1"># Remove the existing daterange key</span>
+                    <span class="c1"># Here we pass if it doesn&#39;t exist as if we have multiple new dateranges</span>
+                    <span class="c1"># that overlap the existing daterange it might have been deleted during</span>
+                    <span class="c1"># a previous iteration</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">ranking_backup</span><span class="p">[</span><span class="n">existing</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="c1"># If we want to overwrite an existing rank we need to trim that daterange and</span>
+                    <span class="c1"># rewrite it back to the dictionary</span>
+                    <span class="n">rank_copy</span> <span class="o">=</span> <span class="n">rank_data</span><span class="p">[</span><span class="n">existing</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">existing</span> <span class="o">==</span> <span class="n">new</span><span class="p">:</span>
+                            <span class="n">ranking_backup</span><span class="p">[</span><span class="n">new</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank_copy</span>
+                        <span class="c1"># If the existing daterange contains the new daterange</span>
+                        <span class="c1"># we need to split it into parts and save those</span>
+                        <span class="k">elif</span> <span class="n">daterange_contains</span><span class="p">(</span><span class="n">container</span><span class="o">=</span><span class="n">existing</span><span class="p">,</span> <span class="n">contained</span><span class="o">=</span><span class="n">new</span><span class="p">):</span>
+                            <span class="n">result</span> <span class="o">=</span> <span class="n">split_encompassed_daterange</span><span class="p">(</span><span class="n">container</span><span class="o">=</span><span class="n">existing</span><span class="p">,</span> <span class="n">contained</span><span class="o">=</span><span class="n">new</span><span class="p">)</span>
+
+                            <span class="n">existing_start</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;container_start&quot;</span><span class="p">]</span>
+                            <span class="n">ranking_backup</span><span class="p">[</span><span class="n">existing_start</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank_copy</span>
+
+                            <span class="n">updated_new</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;contained&quot;</span><span class="p">]</span>
+                            <span class="n">ranking_backup</span><span class="p">[</span><span class="n">updated_new</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank</span>
+
+                            <span class="c1"># We might only end up with two dateranges</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">existing_end</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;container_end&quot;</span><span class="p">]</span>
+                                <span class="n">ranking_backup</span><span class="p">[</span><span class="n">existing_end</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank_copy</span>
+                            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                                <span class="k">pass</span>
+                        <span class="c1"># If the new daterange contains the existing we can just overwrite it</span>
+                        <span class="k">elif</span> <span class="n">daterange_contains</span><span class="p">(</span><span class="n">container</span><span class="o">=</span><span class="n">new</span><span class="p">,</span> <span class="n">contained</span><span class="o">=</span><span class="n">existing</span><span class="p">):</span>
+                            <span class="n">ranking_backup</span><span class="p">[</span><span class="n">new</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">trimmed</span> <span class="o">=</span> <span class="n">trim_daterange</span><span class="p">(</span><span class="n">to_trim</span><span class="o">=</span><span class="n">existing</span><span class="p">,</span> <span class="n">overlapping</span><span class="o">=</span><span class="n">new</span><span class="p">)</span>
+                            <span class="n">ranking_backup</span><span class="p">[</span><span class="n">trimmed</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank_copy</span>
+                            <span class="n">ranking_backup</span><span class="p">[</span><span class="n">new</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank</span>
+                    <span class="k">elif</span> <span class="n">rank_copy</span> <span class="o">==</span> <span class="n">rank</span><span class="p">:</span>
+                        <span class="c1"># If we&#39;re not overwriting we just need to update to use the new combined</span>
+                        <span class="n">ranking_backup</span><span class="p">[</span><span class="n">new</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank_copy</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span> <span class="o">=</span> <span class="n">ranking_backup</span>
+
+            <span class="c1"># Finally, store the dateranges that didn&#39;t overlap</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">to_add</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">date_range</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BaseModule.rank_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.rank_data">[docs]</a>    <span class="k">def</span> <span class="nf">rank_data</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return a dictionary of rank data keyed</span>
+<span class="sd">        by UUID</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                dict: Dictionary of rank data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseModule.clear_datasources"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.clear_datasources">[docs]</a>    <span class="k">def</span> <span class="nf">clear_datasources</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Remove all Datasources from the object</span>
@@ -407,7 +532,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 13, 2021.
+        Last updated on Jul 15, 2021.
       </span>
 
     </p>

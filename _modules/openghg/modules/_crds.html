@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._crds &mdash; OpenGHG 0+untagged.3.g6a64624 documentation</title>
+  <title>openghg.modules._crds &mdash; OpenGHG 0+untagged.3.ge59fb20 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
 
           
             
-            <img src="../../../_static/images/openghg_logo_v1.png" class="logo" alt="Logo"/>
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -409,7 +409,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split_filename</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;Error reading metadata from filename. The expected format is </span><span class="se">\</span>
-<span class="s2">                </span><span class="si">{site}</span><span class="s2">.</span><span class="si">{instrument}</span><span class="s2">.{time resolution}.</span><span class="si">{height}</span><span class="s2">.dat&quot;</span>
+<span class="s2">                </span><span class="si">{site}</span><span class="s2">.</span><span class="si">{instrument}</span><span class="s2">.{sampling period}.</span><span class="si">{height}</span><span class="s2">.dat&quot;</span>
             <span class="p">)</span>
 
         <span class="n">site</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -424,12 +424,12 @@
             <span class="c1"># sampling_period = &quot;1H&quot;</span>
             <span class="n">sampling_period</span> <span class="o">=</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to read time resolution from filename.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to read sampling period from filename.&quot;</span><span class="p">)</span>
 
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampling_period</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;port&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">port</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">type_meas</span>
@@ -504,7 +504,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 13, 2021.
+        Last updated on Jul 15, 2021.
       </span>
 
     </p>

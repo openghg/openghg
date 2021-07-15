@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>processing API Detail &mdash; OpenGHG 0+untagged.3.g6a64624 documentation</title>
+  <title>processing API Detail &mdash; OpenGHG 0+untagged.3.ge59fb20 documentation</title>
   
 
   
@@ -63,7 +63,7 @@
 
           
             
-            <img src="../_static/images/openghg_logo_v1.png" class="logo" alt="Logo"/>
+            <img src="../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -333,8 +333,11 @@ into a single datasets</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.processing.search">
-<span class="sig-prename descclassname"><span class="pre">openghg.processing.</span></span><span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/openghg/processing/_search.html#search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.processing.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search for observations data</p>
+<span class="sig-prename descclassname"><span class="pre">openghg.processing.</span></span><span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">,</span> </span><span class="pre">openghg.dataobjects._searchresults.SearchResults</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openghg/processing/_search.html#search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.processing.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search for observations data. Any keyword arguments may be passed to the
+the function and these keywords will be used to search the metadata associated
+with each Datasource.</p>
+<p>Example / commonly used arguments are given below.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -347,6 +350,7 @@ into a single datasets</p>
 <li><p><strong>epoch</strong> (<em>If None a start datetime of UNIX</em>) – </p></li>
 <li><p><strong>end_date</strong> – End datetime for search.</p></li>
 <li><p><strong>set</strong> (<em>If None an end datetime of the current datetime is</em>) – </p></li>
+<li><p><strong>skip_ranking</strong> – If True skip ranking system, defaults to False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -389,7 +393,7 @@ overwrite: If True overwrite current data stored</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 13, 2021.
+        Last updated on Jul 15, 2021.
       </span>
 
     </p>

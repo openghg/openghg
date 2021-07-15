@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.jobs._jobdrive &mdash; OpenGHG 0+untagged.3.g6a64624 documentation</title>
+  <title>openghg.jobs._jobdrive &mdash; OpenGHG 0+untagged.3.ge59fb20 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
 
           
             
-            <img src="../../../_static/images/openghg_logo_v1.png" class="logo" alt="Logo"/>
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -213,9 +213,9 @@
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
             <span class="n">filesize</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">filesize</span> <span class="o">&lt;</span> <span class="n">chunk_limit</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_drive</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_drive</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_drive</span><span class="o">.</span><span class="n">chunk_upload</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_drive</span><span class="o">.</span><span class="n">chunk_upload</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="JobDrive.list_files"><a class="viewcode-back" href="../../../api/api_jobs.html#openghg.jobs.JobDrive.list_files">[docs]</a>    <span class="k">def</span> <span class="nf">list_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; List files in drive</span>
@@ -244,7 +244,7 @@
 
         <span class="n">file_metadata</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="n">file_metadata</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drive</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">fname</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">local_dir</span><span class="p">)</span>
+            <span class="n">file_metadata</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drive</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">fname</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">local_dir</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">file_metadata</span></div></div>
 </pre></div>
@@ -260,7 +260,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 13, 2021.
+        Last updated on Jul 15, 2021.
       </span>
 
     </p>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.client._search &mdash; OpenGHG 0+untagged.3.g6a64624 documentation</title>
+  <title>openghg.client._search &mdash; OpenGHG 0+untagged.3.ge59fb20 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
 
           
             
-            <img src="../../../_static/images/openghg_logo_v1.png" class="logo" alt="Logo"/>
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -171,18 +171,16 @@
            <div itemprop="articleBody">
             
   <h1>Source code for openghg.client._search</h1><div class="highlight"><pre>
-<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Search&quot;</span><span class="p">]</span>
-
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">xarray</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">Acquire.Client</span> <span class="kn">import</span> <span class="n">Wallet</span>
-<span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">string_to_datetime</span><span class="p">,</span> <span class="n">datetime_to_string</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Search&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Search"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.Search">[docs]</a><span class="k">class</span> <span class="nc">Search</span><span class="p">:</span>
-<div class="viewcode-block" id="Search.__init__"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.Search.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service_url</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">service_url</span><span class="p">:</span>
+<div class="viewcode-block" id="Search.__init__"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.Search.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">service_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_service_url</span> <span class="o">=</span> <span class="n">service_url</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_service_url</span> <span class="o">=</span> <span class="s2">&quot;https://fn.openghg.org/t&quot;</span>
@@ -190,16 +188,44 @@
         <span class="n">wallet</span> <span class="o">=</span> <span class="n">Wallet</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_service</span> <span class="o">=</span> <span class="n">wallet</span><span class="o">.</span><span class="n">get_service</span><span class="p">(</span><span class="n">service_url</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_service_url</span><span class="si">}</span><span class="s2">/openghg&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Search.search"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.Search.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locations</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instrument</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Document me!</span>
+<div class="viewcode-block" id="Search.search"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.Search.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">skip_ranking</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Search for surface observations data in the object store</span>
 
+<span class="sd">        Args:</span>
+<span class="sd">            species: Species</span>
+<span class="sd">            site: Three letter site code</span>
+<span class="sd">            inlet: Inlet height</span>
+<span class="sd">            instrument: Instrument name</span>
+<span class="sd">            start_date: Start date</span>
+<span class="sd">            end_date: End date</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            SearchResults:  SearchResults object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">SearchResults</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="s2">&quot;Cannot use a null service&quot;</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">((</span><span class="n">species</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">instrument</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;We must have at least one of  species, site, inlet or instrument&quot;</span><span class="p">)</span>
+
         <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
-        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;locations&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">locations</span>
+
+        <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
+
+        <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
 
         <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">args</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
@@ -207,70 +233,22 @@
         <span class="k">if</span> <span class="n">instrument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">args</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
 
-        <span class="k">if</span> <span class="n">start_date</span><span class="p">:</span>
-            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime_to_string</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">end_date</span><span class="p">:</span>
-            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime_to_string</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_date</span>
+        <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_date</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s2">&quot;search&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
+        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;skip_ranking&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">skip_ranking</span><span class="p">)</span>
+        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_type</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="n">response</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s2">&quot;search.search&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">response</span></div>
-
-<div class="viewcode-block" id="Search.results"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.Search.results">[docs]</a>    <span class="k">def</span> <span class="nf">results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Return the results in an easy to read format when printed to screen</span>
-
-<span class="sd">            Returns:    </span>
-<span class="sd">                dict: Dictionary of results</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="n">key</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Daterange : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;start_date&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;end_date&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span>
-        <span class="p">}</span></div>
-
-<div class="viewcode-block" id="Search.download"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.Search.download">[docs]</a>    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected_keys</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Downloads the selected keys and returns a dictionary of</span>
-<span class="sd">            xarray Datasets</span>
-
-<span class="sd">            Args:</span>
-<span class="sd">                keys (str, list): Key(s) from search results to download</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                defaultdict(dict): Dictionary of Datasets</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selected_keys</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">selected_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">selected_keys</span><span class="p">]</span>
-
-        <span class="c1"># Create a Retrieve object to interact with the object store</span>
-        <span class="c1"># Select the keys we want to download</span>
-        <span class="n">download_keys</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">selected_keys</span><span class="p">}</span>
-
-        <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="n">download_keys</span><span class="p">,</span> <span class="s2">&quot;return_type&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">}</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s2">&quot;retrieve&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
-        <span class="n">result_data</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
-
-        <span class="c1"># datasets = defaultdict(dict)</span>
-        <span class="n">datasets</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="c1"># TODO - find a better way of doing this, returning compressed binary data would be far better</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">dateranges</span> <span class="ow">in</span> <span class="n">result_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">daterange</span> <span class="ow">in</span> <span class="n">dateranges</span><span class="p">:</span>
-                <span class="n">serialised_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">result_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">daterange</span><span class="p">])</span>
-
-                <span class="c1"># We need to convert the datetime string back to datetime objects here</span>
-                <span class="n">datetime_data</span> <span class="o">=</span> <span class="n">serialised_data</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="s2">&quot;time&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">datetime_data</span><span class="p">):</span>
-                    <span class="n">datetime_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">string_to_datetime</span><span class="p">(</span><span class="n">datetime_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-
-                <span class="c1"># TODO - catch FutureWarnings here that may affect run when used within voila</span>
-                <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
-                    <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
-                    <span class="c1"># datasets[key][daterange] = xarray.Dataset.from_dict(serialised_data)</span>
-                    <span class="n">datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">serialised_data</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="n">datasets</span></div>
-
-    <span class="k">def</span> <span class="nf">service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span></div>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">results_data</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
+            <span class="n">search_results</span> <span class="o">=</span> <span class="n">SearchResults</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">results_data</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">search_results</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">response</span></div></div>
 </pre></div>
 
            </div>
@@ -284,7 +262,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 13, 2021.
+        Last updated on Jul 15, 2021.
       </span>
 
     </p>

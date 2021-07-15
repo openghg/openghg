@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Beginner workflow &mdash; OpenGHG 0+untagged.3.g6a64624 documentation</title>
+  <title>Beginner workflow &mdash; OpenGHG 0+untagged.3.ge59fb20 documentation</title>
   
 
   
@@ -67,7 +67,7 @@
 
           
             
-            <img src="../../_static/images/openghg_logo_v1.png" class="logo" alt="Logo"/>
+            <img src="../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -498,14 +498,9 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;/home/gar/Documents/Devel/RSE/openghg&quot;</span><span class="p">)</span>
-
-<span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">ObsSurface</span>
+<span></span><span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">ObsSurface</span>
 <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">visualise_store</span>
 <span class="kn">from</span> <span class="nn">openghg.localclient</span> <span class="kn">import</span> <span class="n">get_obs_surface</span><span class="p">,</span> <span class="n">RankSources</span>
-
-
 
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
@@ -546,7 +541,7 @@ INFO:numexpr.utils:NumExpr defaulting to 2 threads.
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">decc_file</span> <span class="o">=</span> <span class="s2">&quot;../data/DECC/bsd.picarro.1minute.248m.dat&quot;</span>
+<span></span><span class="n">decc_file</span> <span class="o">=</span> <span class="s2">&quot;../data/DECC/bsd.picarro.1minute.248m.min.dat&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -565,7 +560,7 @@ INFO:numexpr.utils:NumExpr defaulting to 2 threads.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 1/1 [00:00&lt;00:00, 10.48it/s]
+Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 1/1 [00:00&lt;00:00,  5.02it/s]
 </pre></div></div>
 </div>
 <p>Here <code class="docutils literal notranslate"><span class="pre">decc_results</span></code> will give us a dictionary with the UUIDs (universally unique identifiers) for each of the Datasources the data has been assigned to. This tells us that the data has been processed and stored correctly.</p>
@@ -594,9 +589,9 @@ Processing: bsd.picarro.1minute.248m.dat: 100%|██████████| 1
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 defaultdict(dict,
-            {&#39;processed&#39;: {&#39;bsd.picarro.1minute.248m.dat&#39;: {&#39;ch4&#39;: &#39;a66929e7-d1c5-45e1-a234-d0d5eb75b4d5&#39;,
-               &#39;co2&#39;: &#39;d0c3f17d-8632-4341-80b7-a01584581ee0&#39;,
-               &#39;co&#39;: &#39;07985311-dfde-42a3-b961-127c1680b2cf&#39;}}})
+            {&#39;processed&#39;: {&#39;bsd.picarro.1minute.248m.min.dat&#39;: {&#39;ch4&#39;: &#39;e4333ee5-7ed9-4a81-9200-eff4f6418e9d&#39;,
+               &#39;co2&#39;: &#39;f3d6a9ee-0126-44bf-a783-dae213caa18f&#39;,
+               &#39;co&#39;: &#39;433a3871-b45f-4017-9212-0cb53e870a1d&#39;}}})
 </pre></div></div>
 </div>
 <p>We can now process the AGAGE data. The functions that process the AGAGE data expect data to have an accompanying precisions file. For each data file we create a tuple with the data filename and the precisions filename. A simpler method of uploading these file types is planned.</p>
@@ -636,14 +631,14 @@ Processing: capegrim-medusa.18.C:   0%|          | 0/1 [00:00&lt;?, ?it/s]
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/openghg/modules/_gcwerks.py:288: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider using pd.concat instead.  To get a de-fragmented frame, use `newframe = frame.copy()`
+/opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/openghg/modules/_gcwerks.py:288: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider using pd.concat instead.  To get a de-fragmented frame, use `newframe = frame.copy()`
   data[gas_name + &#34; integration_flag&#34;] = (data[column].str[1] != &#34;-&#34;).astype(int)
-/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/openghg/modules/_gcwerks.py:287: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider using pd.concat instead.  To get a de-fragmented frame, use `newframe = frame.copy()`
+/opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/openghg/modules/_gcwerks.py:287: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider using pd.concat instead.  To get a de-fragmented frame, use `newframe = frame.copy()`
   data[gas_name + &#34; status_flag&#34;] = (data[column].str[0] != &#34;-&#34;).astype(int)
-/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/openghg/modules/_gcwerks.py:317: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider using pd.concat instead.  To get a de-fragmented frame, use `newframe = frame.copy()`
+/opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/openghg/modules/_gcwerks.py:317: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider using pd.concat instead.  To get a de-fragmented frame, use `newframe = frame.copy()`
   data[sp + &#34; repeatability&#34;] = precision[precision_index].astype(float).reindex_like(data, method=&#34;pad&#34;)
-/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/openghg/modules/_gcwerks.py:320: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider using pd.concat instead.  To get a de-fragmented frame, use `newframe = frame.copy()`
-  data[&#34;new_time&#34;] = data.index - pd_Timedelta(seconds=metadata[&#34;sampling_period&#34;] / 2.0)
+/opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/openghg/modules/_gcwerks.py:320: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider using pd.concat instead.  To get a de-fragmented frame, use `newframe = frame.copy()`
+  data[&#34;new_time&#34;] = data.index - pd_Timedelta(seconds=int(metadata[&#34;sampling_period&#34;]) / 2.0)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -651,7 +646,7 @@ Processing: capegrim-medusa.18.C:   0%|          | 0/1 [00:00&lt;?, ?it/s]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:01&lt;00:00,  1.57s/it]
+Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:01&lt;00:00,  1.42s/it]
 </pre></div></div>
 </div>
 <p>When viewing <code class="docutils literal notranslate"><span class="pre">agage_results</span></code> there will be a large number of Datasource UUIDs shown due to the large number of gases in each data file</p>
@@ -671,62 +666,62 @@ Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 defaultdict(dict,
-            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;nf3_70m&#39;: &#39;d5809905-bad0-4aa7-baf2-38cb25c3d03b&#39;,
-               &#39;cf4_70m&#39;: &#39;367a3ec1-c525-4cb9-9b4e-927dec5b04be&#39;,
-               &#39;pfc116_70m&#39;: &#39;9a6e26aa-ea09-43ad-a3a6-725d5265726f&#39;,
-               &#39;pfc218_70m&#39;: &#39;2af69a5e-0b9b-4f9c-84c0-3dee876a6d51&#39;,
-               &#39;pfc318_70m&#39;: &#39;c13a6498-63bc-4fb8-a47d-746721d1f860&#39;,
-               &#39;c4f10_70m&#39;: &#39;0e3244b0-28bc-42cd-98b5-5c3df92ddf21&#39;,
-               &#39;c6f14_70m&#39;: &#39;767eda65-9e81-4da0-9ff5-2ba83b3cdfa0&#39;,
-               &#39;sf6_70m&#39;: &#39;89a3c4ae-beab-4800-92d6-3d5327f38a63&#39;,
-               &#39;so2f2_70m&#39;: &#39;545fd812-ef4a-4f37-afb4-50a65e84371e&#39;,
-               &#39;sf5cf3_70m&#39;: &#39;21f743f4-8d2e-4aff-83b4-f77cdc32e30b&#39;,
-               &#39;hfc23_70m&#39;: &#39;4186de33-1c90-4696-8665-0a76d71e5e84&#39;,
-               &#39;hfc32_70m&#39;: &#39;7c8be21e-9c4e-4a49-b9d3-fc3d42f3563d&#39;,
-               &#39;hfc125_70m&#39;: &#39;aa69d001-0fd8-431d-8015-2a376fe5abf2&#39;,
-               &#39;hfc134a_70m&#39;: &#39;e9f060fc-3ff8-4878-b81e-d787cab5e659&#39;,
-               &#39;hfc143a_70m&#39;: &#39;5e66fd59-787a-421d-9104-05c0bb25893b&#39;,
-               &#39;hfc152a_70m&#39;: &#39;e23a0808-9789-4595-9bc1-39f59131c9f2&#39;,
-               &#39;hfc227ea_70m&#39;: &#39;8bdf5262-b845-49e9-b8dc-22ac4618000e&#39;,
-               &#39;hfc236fa_70m&#39;: &#39;23683967-7866-4968-b3b7-7ac5c76fabde&#39;,
-               &#39;hfc245fa_70m&#39;: &#39;3f619c59-b226-4e9a-90ef-a09737f15904&#39;,
-               &#39;hfc365mfc_70m&#39;: &#39;601c8b30-bca0-4889-982f-d5424cdf8b8d&#39;,
-               &#39;hfc4310mee_70m&#39;: &#39;2a9026a7-6885-429f-8cbf-de4e59e179c2&#39;,
-               &#39;hcfc22_70m&#39;: &#39;98ac55ea-7583-4032-b762-857de79a379d&#39;,
-               &#39;hcfc124_70m&#39;: &#39;ad155346-1fb0-4d47-8504-6e7266e1ab48&#39;,
-               &#39;hcfc132b_70m&#39;: &#39;5b3bc1fd-0a67-4430-b895-d035835cb8d7&#39;,
-               &#39;hcfc133a_70m&#39;: &#39;4e0e3db2-adc8-497d-80fc-61eb992b6206&#39;,
-               &#39;hcfc141b_70m&#39;: &#39;6eacaeb0-8453-4d99-a8bd-8cf456e04093&#39;,
-               &#39;hcfc142b_70m&#39;: &#39;23869add-f851-45ac-8070-df38bfd130b3&#39;,
-               &#39;cfc11_70m&#39;: &#39;16728d16-961a-4ca4-9948-b036be59b376&#39;,
-               &#39;cfc12_70m&#39;: &#39;19f54246-a0b6-4ba6-bcc1-a2408f020ce0&#39;,
-               &#39;cfc13_70m&#39;: &#39;1c08784b-aa3e-4f05-85e6-7e2cd0ed1ed6&#39;,
-               &#39;cfc112_70m&#39;: &#39;6e99bcc1-3131-4f90-838f-b4fd9e98f3ff&#39;,
-               &#39;cfc113_70m&#39;: &#39;58db741e-92cb-4c6a-897c-952ad7643e3b&#39;,
-               &#39;cfc114_70m&#39;: &#39;c5fa7983-5046-4791-a073-b9f1294954f4&#39;,
-               &#39;cfc115_70m&#39;: &#39;9df7ff3e-f5a6-4ea6-a578-e956b42e2d5f&#39;,
-               &#39;h1211_70m&#39;: &#39;dd87df3c-7f23-40f9-bc55-f019457b79d6&#39;,
-               &#39;h1301_70m&#39;: &#39;2e91f466-4e46-4c93-a098-5a7674170938&#39;,
-               &#39;h2402_70m&#39;: &#39;72232db2-28f5-4aae-a16d-e17b4ce6c17b&#39;,
-               &#39;ch3cl_70m&#39;: &#39;235d7205-d651-4486-95aa-59a7abafb248&#39;,
-               &#39;ch3br_70m&#39;: &#39;bf2464f2-54cd-47c2-9f90-5081dfa4022a&#39;,
-               &#39;ch3i_70m&#39;: &#39;09d86c15-05c9-45fa-832e-47803c337d2a&#39;,
-               &#39;ch2cl2_70m&#39;: &#39;147b4393-05f1-4abb-9a80-36f1ec79ad1d&#39;,
-               &#39;chcl3_70m&#39;: &#39;c10777c8-ea32-40f1-a41b-8f0594059c2e&#39;,
-               &#39;ccl4_70m&#39;: &#39;edaa60c2-26e5-4d71-8c66-3d719445d0b9&#39;,
-               &#39;ch2br2_70m&#39;: &#39;6c6379fd-6a74-4367-9a6c-e0a56e2990dc&#39;,
-               &#39;chbr3_70m&#39;: &#39;2bce8326-52ec-444a-a859-934eb97cd425&#39;,
-               &#39;ch3ccl3_70m&#39;: &#39;d920956b-fe0e-4f53-b2ae-922ebc7bc182&#39;,
-               &#39;tce_70m&#39;: &#39;6c44bc7e-a41b-4b65-bd89-564f214b3815&#39;,
-               &#39;pce_70m&#39;: &#39;644b3790-2cb9-4f92-80ab-fe2417704ab6&#39;,
-               &#39;ethyne_70m&#39;: &#39;ae147bd5-920b-4945-b9f8-b0f63eede68b&#39;,
-               &#39;ethane_70m&#39;: &#39;04a9a7e6-e2fe-4ae4-8fb8-9112cce3a79e&#39;,
-               &#39;propane_70m&#39;: &#39;a0ddde08-f113-45ad-96ce-73efcd46ff84&#39;,
-               &#39;cpropane_70m&#39;: &#39;b3687d23-a588-42c5-8672-825fd8149b47&#39;,
-               &#39;benzene_70m&#39;: &#39;3ccb86d4-e6f1-4b74-ad75-343146c477ed&#39;,
-               &#39;toluene_70m&#39;: &#39;55ffd63c-1cdc-4260-9c68-835f41624b74&#39;,
-               &#39;cos_70m&#39;: &#39;7624b79d-8631-4983-bc12-ff53e862d304&#39;,
-               &#39;desflurane_70m&#39;: &#39;fb28cfd3-a432-4ef9-a57e-0ce4b62b144c&#39;}}})
+            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;nf3_70m&#39;: &#39;95c50107-1eae-4cfd-9ce3-0bc841772a64&#39;,
+               &#39;cf4_70m&#39;: &#39;c8a2e129-d11d-47eb-b4e3-27545b295692&#39;,
+               &#39;pfc116_70m&#39;: &#39;6496a72f-ee7d-460b-93a1-e25c171c5580&#39;,
+               &#39;pfc218_70m&#39;: &#39;4ae5ab5b-c5e8-43de-8170-643dda2ed4d1&#39;,
+               &#39;pfc318_70m&#39;: &#39;89fabd47-66c1-4151-bff2-47ec9c2e59d7&#39;,
+               &#39;c4f10_70m&#39;: &#39;cf148896-cc39-4599-af84-28015a87a719&#39;,
+               &#39;c6f14_70m&#39;: &#39;f8c0cb84-2384-417e-8192-1d0fdfe40993&#39;,
+               &#39;sf6_70m&#39;: &#39;548d8a9e-4e89-45d0-ab04-10f3abf13382&#39;,
+               &#39;so2f2_70m&#39;: &#39;492ac68a-832b-426a-acf8-251af6476eef&#39;,
+               &#39;sf5cf3_70m&#39;: &#39;ff148321-f307-40db-a710-7e2d1a9ebe03&#39;,
+               &#39;hfc23_70m&#39;: &#39;cdaaed5d-8bb7-4a85-b5b1-9a8080b0ca4b&#39;,
+               &#39;hfc32_70m&#39;: &#39;17bc3556-1e58-4774-886f-543a0a00f121&#39;,
+               &#39;hfc125_70m&#39;: &#39;2f732d89-f63b-402c-9bed-83a2c20be5e1&#39;,
+               &#39;hfc134a_70m&#39;: &#39;34f22a62-7288-4920-b692-34ae86c36258&#39;,
+               &#39;hfc143a_70m&#39;: &#39;fbd426ef-7105-4e9d-bf18-a8bdb4469c1d&#39;,
+               &#39;hfc152a_70m&#39;: &#39;1349aaa9-958d-4303-b916-b9398e1b356d&#39;,
+               &#39;hfc227ea_70m&#39;: &#39;946e0997-7f3a-436c-9e26-881baf0007af&#39;,
+               &#39;hfc236fa_70m&#39;: &#39;20245c47-86e9-4dc3-b92a-58479f7d16ec&#39;,
+               &#39;hfc245fa_70m&#39;: &#39;9b112edb-b2a1-47b5-a441-76449fa8b0f3&#39;,
+               &#39;hfc365mfc_70m&#39;: &#39;82f1f6e9-efc8-4193-8dbd-19cf614cc0ba&#39;,
+               &#39;hfc4310mee_70m&#39;: &#39;097215e9-3a07-400c-a862-4b4b8b4df78f&#39;,
+               &#39;hcfc22_70m&#39;: &#39;d7c525f5-1361-4aa4-983d-4b052abf0934&#39;,
+               &#39;hcfc124_70m&#39;: &#39;5b751380-28e6-4d3b-8d7e-797affdbdfd2&#39;,
+               &#39;hcfc132b_70m&#39;: &#39;fa111a76-e474-4c05-be70-3a5063b78e91&#39;,
+               &#39;hcfc133a_70m&#39;: &#39;00c417bb-9ad8-46f1-a283-d12d626e4b46&#39;,
+               &#39;hcfc141b_70m&#39;: &#39;963ade06-4a6f-48f5-8288-ad95187cdd97&#39;,
+               &#39;hcfc142b_70m&#39;: &#39;6094c65a-9862-4d5e-89a6-b6a733acb512&#39;,
+               &#39;cfc11_70m&#39;: &#39;7efc3f53-2190-4983-a7d1-8a8db3906217&#39;,
+               &#39;cfc12_70m&#39;: &#39;7b0e5481-df34-4b28-a2ed-3114c29c5306&#39;,
+               &#39;cfc13_70m&#39;: &#39;3b439fe5-485d-4a70-a48b-e0cf7e97a01b&#39;,
+               &#39;cfc112_70m&#39;: &#39;d80a0aa3-3de8-4b04-b80c-6f1e7bd93ce7&#39;,
+               &#39;cfc113_70m&#39;: &#39;945ca989-04fa-4a2b-95a1-546f757e9f48&#39;,
+               &#39;cfc114_70m&#39;: &#39;788d1177-1030-4491-9400-bdc4322de94a&#39;,
+               &#39;cfc115_70m&#39;: &#39;a6082471-5f4a-4338-96e9-9d28c6d5e548&#39;,
+               &#39;h1211_70m&#39;: &#39;c0f95609-87f8-4d19-8f82-3b727b59006a&#39;,
+               &#39;h1301_70m&#39;: &#39;ed436147-d9ea-4908-94dc-a3a639643bc1&#39;,
+               &#39;h2402_70m&#39;: &#39;52e3231a-f7db-4386-825c-499c8531be60&#39;,
+               &#39;ch3cl_70m&#39;: &#39;f88c446a-ce85-4e5b-9fae-3a16d3578523&#39;,
+               &#39;ch3br_70m&#39;: &#39;4926b4bc-c275-4c64-9704-0bf815507e05&#39;,
+               &#39;ch3i_70m&#39;: &#39;04960c6a-e1d2-4936-af22-92ce06f773bb&#39;,
+               &#39;ch2cl2_70m&#39;: &#39;2be29359-7bb8-4de0-a290-4c2a925c190e&#39;,
+               &#39;chcl3_70m&#39;: &#39;dde79f94-bad0-4283-8153-33fe32f2151b&#39;,
+               &#39;ccl4_70m&#39;: &#39;569ef99c-438a-43d3-afbe-c0adc02ca856&#39;,
+               &#39;ch2br2_70m&#39;: &#39;4757887a-3994-4754-9da4-2930d24c7147&#39;,
+               &#39;chbr3_70m&#39;: &#39;f440b542-50b8-443a-8b8f-3dc39d19f01e&#39;,
+               &#39;ch3ccl3_70m&#39;: &#39;3bb25263-422f-4677-a588-3662353e09b9&#39;,
+               &#39;tce_70m&#39;: &#39;231bc313-e70a-4a2c-8085-79c66598bd13&#39;,
+               &#39;pce_70m&#39;: &#39;1e7604d5-c15a-4cd2-865c-85e2718a4dc4&#39;,
+               &#39;ethyne_70m&#39;: &#39;6fa84cf7-242c-4f55-ab24-f475c58a8233&#39;,
+               &#39;ethane_70m&#39;: &#39;79cc6ff8-b71d-4cf2-bc35-720f67e8c649&#39;,
+               &#39;propane_70m&#39;: &#39;ef8bf7ac-8aba-4df9-a197-ad8231b08ad7&#39;,
+               &#39;cpropane_70m&#39;: &#39;a437493d-d346-4c76-9aa9-91fcd331a806&#39;,
+               &#39;benzene_70m&#39;: &#39;4d2c6b88-2f5e-4a80-9247-c9bc54125552&#39;,
+               &#39;toluene_70m&#39;: &#39;13eb7b4c-ee94-480a-ae5e-56381fc22f3b&#39;,
+               &#39;cos_70m&#39;: &#39;865cc147-3f56-4e07-9246-b9d11c2a153f&#39;,
+               &#39;desflurane_70m&#39;: &#39;b924ffa8-d01c-43bf-abab-db9489736136&#39;}}})
 </pre></div></div>
 </div>
 </section>
@@ -758,7 +753,7 @@ defaultdict(dict,
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;bsd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;AGAGE&quot;</span><span class="p">)</span>
+<span></span><span class="n">data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;bsd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;AGAGE&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;248m&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -779,13 +774,13 @@ defaultdict(dict,
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 ObsData(data=&lt;xarray.Dataset&gt;
-Dimensions:                    (time: 105)
+Dimensions:                    (time: 142)
 Coordinates:
-  * time                       (time) datetime64[ns] 2014-01-30T10:52:30 ... ...
+  * time                       (time) datetime64[ns] 2014-01-30T11:12:30 ... ...
 Data variables:
-    mf                         (time) float64 204.6 200.8 201.5 ... 196.9 196.3
-    mf_variability             (time) float64 6.232 5.934 5.176 ... 6.031 6.879
-    mf_number_of_observations  (time) float64 26.0 26.0 25.0 ... 26.0 26.0 25.0
+    mf                         (time) float64 202.4 203.2 205.1 ... 114.5 114.2
+    mf_variability             (time) float64 5.265 6.307 8.518 ... 7.339 5.405
+    mf_number_of_observations  (time) float64 26.0 26.0 25.0 ... 23.0 24.0 23.0
 Attributes: (12/22)
     data_owner:           Simon O&#39;Doherty
     data_owner_email:     s.odoherty@bristol.ac.uk
@@ -796,10 +791,10 @@ Attributes: (12/22)
     ...                   ...
     sampling_period:      60
     inlet:                248m
-    port:                 8
+    port:                 9
     type:                 air
     network:              decc
-    scale:                WMO-X2014A, metadata={&#39;data_owner&#39;: &#34;Simon O&#39;Doherty&#34;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;inlet_height_magl&#39;: &#39;248m&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;Conditions of use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;Source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;File created&#39;: &#39;2021-07-13 16:00:30.170879+00:00&#39;, &#39;Processed by&#39;: &#39;OpenGHG_Cloud&#39;, &#39;species&#39;: &#39;co&#39;, &#39;station_longitude&#39;: -1.15033, &#39;station_latitude&#39;: 54.35858, &#39;station_long_name&#39;: &#39;Bilsdale, UK&#39;, &#39;station_height_masl&#39;: 380.0, &#39;site&#39;: &#39;bsd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: 60, &#39;inlet&#39;: &#39;248m&#39;, &#39;port&#39;: &#39;8&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;})
+    scale:                WMO-X2014A, metadata={&#39;data_owner&#39;: &#34;Simon O&#39;Doherty&#34;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;inlet_height_magl&#39;: &#39;248m&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;Conditions of use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;Source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;File created&#39;: &#39;2021-07-15 10:56:38.900177+00:00&#39;, &#39;Processed by&#39;: &#39;OpenGHG_Cloud&#39;, &#39;species&#39;: &#39;co&#39;, &#39;station_longitude&#39;: -1.15033, &#39;station_latitude&#39;: 54.35858, &#39;station_long_name&#39;: &#39;Bilsdale, UK&#39;, &#39;station_height_masl&#39;: 380.0, &#39;site&#39;: &#39;bsd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;60&#39;, &#39;inlet&#39;: &#39;248m&#39;, &#39;port&#39;: &#39;9&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;})
 </pre></div></div>
 </div>
 <p>First we tell <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> that we are plotting inside a Jupyter notebook, this ensures a plot with controls is created.</p>
@@ -1818,7 +1813,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='e8c4dba8-6df0-4aed-a12d-942c06290b7d'></div></div>
+<div id='9e2a2c5c-f8db-44fc-96ea-3792abbb73d2'></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
@@ -1826,7 +1821,7 @@ if (IPython.notebook.kernel !== null) {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f268c973410&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f34e3c8dc50&gt;]
 </pre></div></div>
 </div>
 </section>
@@ -1988,7 +1983,7 @@ if (IPython.notebook.kernel !== null) {
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 13, 2021.
+        Last updated on Jul 15, 2021.
       </span>
 
     </p>

@@ -1,0 +1,420 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Fn setup &mdash; OpenGHG 0+untagged.3.ge59fb20 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="../_static/custom.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation instructions</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index_devel.html">Development</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">Documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index_devapi.html">Developer API documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenGHG</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Fn setup</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="fn-setup">
+<h1>Fn setup<a class="headerlink" href="#fn-setup" title="Permalink to this headline">¶</a></h1>
+<p>This guide will help you get a basic Fn server setup and ready to be given functions for invocation. In future tutorials
+we will cover getting Fn setup using Kubernetes.</p>
+<section id="server">
+<h2>Server<a class="headerlink" href="#server" title="Permalink to this headline">¶</a></h2>
+<p>In this tutorial we’ll be using a virtual machine cloud instance on the Oracle cloud, but any cloud provider
+will work. Although we’ll use a CentOS 8 image on our VM any Docker capable image should work, though setup steps will difference
+from those given here.</p>
+</section>
+<section id="installing-docker">
+<h2>Installing Docker<a class="headerlink" href="#installing-docker" title="Permalink to this headline">¶</a></h2>
+<p>We’ll install Docker from their repos for CentOS. For the complete
+installation instructions please see the <a class="reference external" href="https://docs.docker.com/engine/install/centos/">Docker documentation</a>
+but we will summarise the steps below.</p>
+<p>First set up the repository</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo yum install -y yum-utils
+
+sudo yum-config-manager --add-repo <span class="se">\</span>
+    https://download.docker.com/linux/centos/docker-ce.repo
+</pre></div>
+</div>
+<p>Then we can install Docker Engine and containerd</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo yum install -y docker-ce docker-ce-cli containerd.io
+</pre></div>
+</div>
+<p>Note that you may have to accept the GPG key, please check that it matches the one given in the
+<a class="reference external" href="https://docs.docker.com/engine/install/centos/">installation instructions</a>.</p>
+<p>Next we must start the docker services</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo systemctl start docker
+</pre></div>
+</div>
+<p>Then check Docker is working correctly</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo docker run hello-world
+</pre></div>
+</div>
+<p>As Fn does not currently work with rootless docker we need to add our current user to the <code class="docutils literal notranslate"><span class="pre">docker</span></code> group.
+Note that this does come with security implications which
+are <em class="xref py py-obj">outlined here</em>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo usermod -aG docker &lt;username&gt;
+</pre></div>
+</div>
+</section>
+<section id="install-fn">
+<h2>Install Fn<a class="headerlink" href="#install-fn" title="Permalink to this headline">¶</a></h2>
+<p>We can now install Fn</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -LSs https://raw.githubusercontent.com/fnproject/cli/master/install <span class="p">|</span> sh
+</pre></div>
+</div>
+<p>Then start Fn to make sure everything runs correctly. On first start some images will be downloaded.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn start
+</pre></div>
+</div>
+</section>
+<section id="setup-nginx-proxy">
+<h2>Setup NGINX proxy<a class="headerlink" href="#setup-nginx-proxy" title="Permalink to this headline">¶</a></h2>
+<p>So that we’re not exposing Fn directly to the internet we’ll use nginx as a reverse-proxy. First install nginx
+using</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo yum -y install nginx
+</pre></div>
+</div>
+<p>Next we create a server config file for our reverse proxy in <code class="docutils literal notranslate"><span class="pre">/etc/nginx/conf.d/fn_proxy.conf</span></code>.</p>
+<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>    <span class="k">server</span> <span class="p">{</span>
+<span class="linenos"> 2</span>        <span class="kn">listen</span> <span class="mi">80</span> <span class="s">default_server</span><span class="p">;</span>
+<span class="linenos"> 3</span>        <span class="kn">listen</span> <span class="s">[::]:80</span> <span class="s">default_server</span><span class="p">;</span>
+<span class="linenos"> 4</span>        <span class="kn">server_name</span> <span class="s">fn.openghg.org</span><span class="p">;</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span>        <span class="kn">location</span> <span class="s">/</span> <span class="p">{}</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>        <span class="kn">location</span> <span class="s">/t</span> <span class="p">{</span>
+<span class="linenos"> 9</span>                <span class="kn">proxy_pass</span> <span class="s">http://127.0.0.1:8080/t/openghg</span><span class="p">;</span>
+<span class="linenos">10</span>                <span class="kn">proxy_set_header</span> <span class="s">Host</span> <span class="nv">$host</span><span class="p">;</span>
+<span class="linenos">11</span>                <span class="kn">proxy_set_header</span> <span class="s">X-Real-IP</span> <span class="nv">$remote_addr</span><span class="p">;</span>
+<span class="linenos">12</span>                <span class="kn">proxy_set_header</span> <span class="s">X-Forwarded-For</span> <span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+<span class="linenos">13</span>                <span class="kn">proxy_set_header</span> <span class="s">X-Forwarded-Proto</span> <span class="s">https</span><span class="p">;</span>
+<span class="linenos">14</span>        <span class="p">}</span>
+<span class="linenos">15</span>    <span class="p">}</span>
+</pre></div>
+</div>
+<p>For Acquire we want</p>
+<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>    <span class="k">server</span> <span class="p">{</span>
+<span class="linenos"> 2</span>        <span class="kn">listen</span> <span class="mi">80</span> <span class="s">default_server</span><span class="p">;</span>
+<span class="linenos"> 3</span>        <span class="kn">listen</span> <span class="s">[::]:80</span> <span class="s">default_server</span><span class="p">;</span>
+<span class="linenos"> 4</span>        <span class="kn">server_name</span> <span class="s">acquire.openghg.org</span><span class="p">;</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span>        <span class="kn">location</span> <span class="s">/</span> <span class="p">{</span>
+<span class="linenos"> 7</span>        <span class="p">}</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span>        <span class="kn">location</span> <span class="s">/t</span> <span class="p">{</span>
+<span class="linenos">10</span>            <span class="kn">proxy_pass</span> <span class="s">http://127.0.0.1:8080</span><span class="p">;</span>
+<span class="linenos">11</span>            <span class="kn">proxy_set_header</span> <span class="s">Host</span> <span class="nv">$host</span><span class="p">;</span>
+<span class="linenos">12</span>            <span class="kn">proxy_set_header</span> <span class="s">X-Real-IP</span> <span class="nv">$remote_addr</span><span class="p">;</span>
+<span class="linenos">13</span>            <span class="kn">proxy_set_header</span> <span class="s">X-Forwarded-For</span> <span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+<span class="linenos">14</span>            <span class="kn">proxy_set_header</span> <span class="s">X-Forwarded-Proto</span> <span class="s">https</span><span class="p">;</span>
+<span class="linenos">15</span>        <span class="p">}</span>
+<span class="linenos">16</span>    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Then we want to disable the default config by setting <code class="docutils literal notranslate"><span class="pre">/etc/nginx/nginx.conf</span></code>.
+It might be worth copying up your default <code class="docutils literal notranslate"><span class="pre">nginx.conf</span></code> to <code class="docutils literal notranslate"><span class="pre">nginx.conf.bak</span></code> before editing
+for easy roll-back and comparison.</p>
+<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>    <span class="k">user</span> <span class="s">nginx</span><span class="p">;</span>
+<span class="linenos"> 2</span>    <span class="k">worker_processes</span> <span class="s">auto</span><span class="p">;</span>
+<span class="linenos"> 3</span>    <span class="k">error_log</span> <span class="s">/var/log/nginx/error.log</span><span class="p">;</span>
+<span class="linenos"> 4</span>    <span class="k">pid</span> <span class="s">/run/nginx.pid</span><span class="p">;</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span>    <span class="k">include</span> <span class="n">/usr/share/nginx/modules/*.conf</span>;
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>    <span class="k">events</span> <span class="p">{</span>
+<span class="linenos"> 9</span>        <span class="kn">worker_connections</span> <span class="mi">1024</span><span class="p">;</span>
+<span class="linenos">10</span>    <span class="p">}</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span>    <span class="k">http</span> <span class="p">{</span>
+<span class="linenos">13</span>        <span class="kn">log_format</span>  <span class="s">main</span>  <span class="s">&#39;</span><span class="nv">$remote_addr</span> <span class="s">-</span> <span class="nv">$remote_user</span> <span class="s">[</span><span class="nv">$time_local]</span> <span class="s">&quot;</span><span class="nv">$request&quot;</span> <span class="s">&#39;</span>
+<span class="linenos">14</span>                        <span class="s">&#39;</span><span class="nv">$status</span> <span class="nv">$body_bytes_sent</span> <span class="s">&quot;</span><span class="nv">$http_referer&quot;</span> <span class="s">&#39;</span>
+<span class="linenos">15</span>                        <span class="s">&#39;&quot;</span><span class="nv">$http_user_agent&quot;</span> <span class="s">&quot;</span><span class="nv">$http_x_forwarded_for&quot;&#39;</span><span class="p">;</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span>        <span class="kn">access_log</span>  <span class="s">/var/log/nginx/access.log</span>  <span class="s">main</span><span class="p">;</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span>        <span class="kn">sendfile</span>            <span class="no">on</span><span class="p">;</span>
+<span class="linenos">20</span>        <span class="kn">tcp_nopush</span>          <span class="no">on</span><span class="p">;</span>
+<span class="linenos">21</span>        <span class="kn">tcp_nodelay</span>         <span class="no">on</span><span class="p">;</span>
+<span class="linenos">22</span>        <span class="kn">keepalive_timeout</span>   <span class="mi">65</span><span class="p">;</span>
+<span class="linenos">23</span>        <span class="kn">types_hash_max_size</span> <span class="mi">2048</span><span class="p">;</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>        <span class="kn">include</span>             <span class="s">/etc/nginx/mime.types</span><span class="p">;</span>
+<span class="linenos">26</span>        <span class="kn">default_type</span>        <span class="s">application/octet-stream</span><span class="p">;</span>
+<span class="linenos">27</span>        <span class="kn">include</span> <span class="s">/etc/nginx/conf.d/*.conf</span><span class="p">;</span>
+<span class="linenos">28</span>    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Then we can check that our configuration setup is valid by doing</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo nginx -t
+</pre></div>
+</div>
+<p>Then we start and enable nginx</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo systemctl start nginx
+sudo systemctl <span class="nb">enable</span> nginx
+</pre></div>
+</div>
+</section>
+<section id="setup-firewall-rules">
+<h2>Setup Firewall Rules<a class="headerlink" href="#setup-firewall-rules" title="Permalink to this headline">¶</a></h2>
+<p>First we enable and then start the <code class="docutils literal notranslate"><span class="pre">firewalld</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo systemctl <span class="nb">enable</span> firewalld
+sudo systemctl start firewalld
+</pre></div>
+</div>
+<p>To allow access from the outside world we need to setup rules to allow <code class="docutils literal notranslate"><span class="pre">ssh</span></code>, <code class="docutils literal notranslate"><span class="pre">http</span></code> and <code class="docutils literal notranslate"><span class="pre">https</span></code> traffic.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>ssh
+sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>ssh --permanent
+sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>https
+sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>https --permanent
+sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>http
+sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>http --permanent
+</pre></div>
+</div>
+<p>Note that we perform the command and then the same command again with the <code class="docutils literal notranslate"><span class="pre">--permanent</span></code> argument to add
+the rule first to the current session and then to the permanent rule-set.</p>
+<p>We also need to tell SELinux to allow HTTP worker_connections</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo setsebool -P httpd_can_network_connect <span class="m">1</span>
+</pre></div>
+</div>
+</section>
+<section id="deploy-fn-functions">
+<h2>Deploy Fn Functions<a class="headerlink" href="#deploy-fn-functions" title="Permalink to this headline">¶</a></h2>
+<p>We now want to deploy our functions. We’ll first need to make sure we’ve got <code class="docutils literal notranslate"><span class="pre">git</span></code> and <code class="docutils literal notranslate"><span class="pre">python</span></code> installed.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo yum install python38 git
+</pre></div>
+</div>
+<p>Next clone the <code class="docutils literal notranslate"><span class="pre">openghg</span></code> repository</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/openghg/openghg.git
+</pre></div>
+</div>
+<p>Then move into the <code class="docutils literal notranslate"><span class="pre">openghg/docker</span></code> folder and run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 build_deploy.py --build-base
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">--build-base</span></code> argument tells the build script to build the base image. In subsequent deployments we won’t need to run this
+step unless our dependencies change.</p>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020 OpenGHG development team.
+      <span class="lastupdated">
+        Last updated on Jul 15, 2021.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

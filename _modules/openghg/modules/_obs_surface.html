@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._obs_surface &mdash; OpenGHG 0+untagged.3.g6a64624 documentation</title>
+  <title>openghg.modules._obs_surface &mdash; OpenGHG 0+untagged.3.ge59fb20 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
 
           
             
-            <img src="../../../_static/images/openghg_logo_v1.png" class="logo" alt="Logo"/>
+            <img src="../../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -174,6 +174,7 @@
 <span></span><span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">BaseModule</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
 <span class="c1"># import traceback</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ObsSurface&quot;</span><span class="p">]</span>
@@ -287,9 +288,7 @@
                 <span class="c1"># try:</span>
                 <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="n">overwrite</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
-                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
                 <span class="n">progress_bar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -302,7 +301,7 @@
                         <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
                         <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
                         <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
-                        <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span>
+                        <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="n">data_obj</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
@@ -312,7 +311,7 @@
                         <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
                         <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
                         <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
-                        <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span>
+                        <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
                     <span class="p">)</span>
 
                 <span class="c1"># Extract the metadata for each set of measurements to perform a Datasource lookup</span>
@@ -354,21 +353,20 @@
             <span class="n">site</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
             <span class="n">network</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span>
             <span class="n">inlet</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+            <span class="n">sampling_period</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span>
 
-            <span class="c1"># TODO - remove this once further checks for inlet processing</span>
-            <span class="c1"># are in place</span>
+            <span class="c1"># TODO - remove these once further checks for metadata inputs are in place</span>
             <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No valid inlet height.&quot;</span><span class="p">)</span>
 
+            <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No valid sampling period.&quot;</span><span class="p">)</span>
+
             <span class="n">species</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
 
-            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_uuid</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
-
-            <span class="c1"># If we get an empty dict set as False</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
-                <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
-
-            <span class="n">lookup_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+            <span class="n">lookup_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_uuid</span><span class="p">(</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">lookup_results</span></div>
 
@@ -387,53 +385,53 @@
             <span class="n">network</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span>
             <span class="n">inlet</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
             <span class="n">species</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+            <span class="n">sampling_period</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span>
 
-            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_uuid</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
+            <span class="c1"># TODO - remove this check when improved input sanitisation is in place</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">((</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">sampling_period</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please ensure site, network, inlet, species and sampling_period are not None&quot;</span><span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_uuid</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">result</span> <span class="o">!=</span> <span class="n">uid</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mismatch between assigned uuid and stored Datasource uuid.&quot;</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_uuid</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_uuid</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span></div>
 
-<div class="viewcode-block" id="ObsSurface.lookup_uuid"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.lookup_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">lookup_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<div class="viewcode-block" id="ObsSurface.lookup_uuid"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.lookup_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">lookup_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Perform a lookup for the UUID of a Datasource</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            site: Site code</span>
 <span class="sd">            network: Network name</span>
-<span class="sd">            Inlet: Inlet height</span>
-<span class="sd">            Species: Species name</span>
+<span class="sd">            inlet: Inlet height</span>
+<span class="sd">            species: Species name</span>
+<span class="sd">            sampling_period: Sampling period in seconds</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            str or dict: UUID or empty dict if no entry</span>
+<span class="sd">            str or bool: UUID if exists else None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="n">species</span><span class="p">]</span></div>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="n">sampling_period</span><span class="p">]</span>
 
-<div class="viewcode-block" id="ObsSurface.set_uuid"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.set_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">set_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">uuid</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">uuid</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="ObsSurface.set_uuid"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.set_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">set_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Record a UUID of a Datasource in the datasource table</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            site: Site code</span>
 <span class="sd">            network: Network name</span>
-<span class="sd">            Inlet: Inlet height</span>
-<span class="sd">            Species: Species name</span>
+<span class="sd">            inlet: Inlet height</span>
+<span class="sd">            species: Species name</span>
+<span class="sd">            sampling_period: Sampling period in seconds</span>
 <span class="sd">            uuid: UUID of Datasource</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="n">uuid</span></div>
-
-<div class="viewcode-block" id="ObsSurface.save_datsource_info"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.save_datsource_info">[docs]</a>    <span class="k">def</span> <span class="nf">save_datsource_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datasource_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Save the datasource information to</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            datasource_data: Dictionary of datasource data to add</span>
-<span class="sd">            to the Datasource table</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="n">sampling_period</span><span class="p">]</span> <span class="o">=</span> <span class="n">uuid</span></div>
 
 <div class="viewcode-block" id="ObsSurface.delete"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Delete a Datasource with the given UUID</span>
@@ -480,7 +478,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 13, 2021.
+        Last updated on Jul 15, 2021.
       </span>
 
     </p>
