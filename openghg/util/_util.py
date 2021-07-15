@@ -1,11 +1,16 @@
 """ Utility functions that are used by multiple modules
 
 """
-from typing import Dict, Set, List, Union, Tuple
+from typing import Any, Dict, Set, List, Union, Tuple, Sequence, Optional, TypeVar
 from collections.abc import Iterable
+from pathlib import Path
+
+from openghg.modules import BaseModule
+
+
+T = TypeVar("T", bound="BaseModule")
 
 __all__ = [
-    "create_uuid",
     "unanimous",
     "load_object",
     "get_datapath",
@@ -19,13 +24,7 @@ __all__ = [
 ]
 
 
-def create_uuid():
-    from uuid import uuid4
-
-    return uuid4()
-
-
-def unanimous(seq):
+def unanimous(seq: Dict) -> bool:
     """Checks that all values in an iterable object
     are the same
 
@@ -44,7 +43,7 @@ def unanimous(seq):
         return all(i == first for i in it)
 
 
-def load_object(class_name):
+def load_object(class_name: str) -> Any:
     """Load an object of type class_name
 
     Args:
@@ -71,7 +70,7 @@ def load_object(class_name):
     return target_class()
 
 
-def get_datapath(filename, directory=None):
+def get_datapath(filename: str, directory: Optional[str] = None) -> Path:
     """Returns the correct path to JSON files used for assigning attributes
 
     Args:
@@ -89,7 +88,7 @@ def get_datapath(filename, directory=None):
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
-def load_json(filename):
+def load_json(filename: str) -> Dict:
     """Returns a dictionary deserialised from JSON. This function only
     works for JSON files in the openghg/data directory.
 
@@ -108,13 +107,15 @@ def load_json(filename):
     return data
 
 
-def read_header(filepath, comment_char="#"):
+def read_header(filepath: Union[str, Path], comment_char: Optional[str] = "#") -> List:
     """Reads the header lines denoted by the comment_char
 
     Args:
-        filepath (str or Path): Path to file
-        comment_char (str, default="#"): Character that denotes a comment line
+        filepath: Path to file
+        comment_char: Character that denotes a comment line
         at the start of a file
+    Returns:
+        list: List of lines in the header
     """
     comment_char = str(comment_char)
 
@@ -130,11 +131,11 @@ def read_header(filepath, comment_char="#"):
     return header
 
 
-def valid_site(site):
+def valid_site(site: str) -> bool:
     """Check if the passed site is a valid one
 
     Args:
-        site (str): Three letter site code
+        site: Three letter site code
     Returns:
         bool: True if site is valid
     """
@@ -143,11 +144,13 @@ def valid_site(site):
     return site.upper() in site_data
 
 
-def is_number(s):
+def is_number(s: str) -> bool:
     """Is it a number?
 
     Args:
-        s (str): String which may be a number
+        s: String which may be a number
+    Returns:
+        bool
     """
     try:
         float(s)

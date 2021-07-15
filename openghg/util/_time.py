@@ -65,27 +65,6 @@ def timestamp_epoch() -> Timestamp:
     return timestamp_tzaware(Timestamp("1970-1-1 00:00:00"))
 
 
-def get_datetime(year, month, day, hour=None, minute=None, second=None):
-    """Returns a timezone aware datetime object
-
-    Args:
-        year (int): Year
-        month (int): Month of year
-        day (int): Day of month
-        hour (int, default=None): Hour of day
-        minute (int, default=None): Minute of hour
-        second (int, default=None): Second of minute
-    Returns:
-        datetime: Timezone aware datetime object
-    """
-    from datetime import datetime
-    from Acquire.ObjectStore import datetime_to_datetime
-
-    date = datetime(year=year, month=month, day=day)
-
-    return datetime_to_datetime(date)
-
-
 def daterange_overlap(daterange_a, daterange_b):
     """Check if daterange_a is within daterange_b.
 
@@ -201,10 +180,13 @@ def combine_dateranges(dateranges: List[str]) -> List[str]:
     if len(dateranges) == 1:
         return dateranges
 
-    intervals = [split_daterange_str(x) for x in dateranges]
-    sorted_by_lower_bound = sorted(intervals, key=lambda tup: tup[0])
+    def sort_key(tup: Tuple) -> Timestamp:
+        return tup[0]
 
-    combined = []
+    intervals = [split_daterange_str(x) for x in dateranges]
+    sorted_by_lower_bound = sorted(intervals, key=sort_key)
+
+    combined: List[Timestamp] = []
 
     for higher in sorted_by_lower_bound:
         if not combined:
@@ -264,7 +246,7 @@ def valid_daterange(daterange: str) -> bool:
     return True
 
 
-def closest_daterange(to_compare: str, dateranges: Union[str, List]) -> str:
+def closest_daterange(to_compare: str, dateranges: Union[str, List[str]]) -> str:
     """Finds the closest daterange in a list of dateranges
 
     Args:
@@ -397,7 +379,7 @@ def daterange_contains(container: str, contained: str) -> bool:
     start_a, end_a = split_daterange_str(container)
     start_b, end_b = split_daterange_str(contained)
 
-    return start_a <= start_b and end_b <= end_a
+    return bool(start_a <= start_b and end_b <= end_a)
 
 
 def trim_daterange(to_trim: str, overlapping: str) -> str:
