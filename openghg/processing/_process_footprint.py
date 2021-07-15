@@ -435,14 +435,15 @@ def add_timeseries(combined_dataset: Dataset, flux_dict: Dict):
 
     # TODO: Extend to include multiple sources
     # TODO: Improve ability to merge high time resolution footprints (e.g. species as co2)
+    # What do we expect flux_dict to look like?
     for key, flux_ds in flux_dict.items():
         if key != "high_time_res":
-            #flux_reindex = flux_ds.reindex_like(combined_dataset, 'ffill')
-            #combined_dataset['mf_mod'] = DataArray((combined_dataset.fp * flux_reindex.flux).sum(["lat", "lon"]), coords={'time': combined_dataset.time})
+            # flux_reindex = flux_ds.reindex_like(combined_dataset, 'ffill')
+            # combined_dataset['mf_mod'] = DataArray((combined_dataset.fp * flux_reindex.flux).sum(["lat", "lon"]), coords={'time': combined_dataset.time})
             mf_mod = timeseries_integrated(combined_dataset, flux_ds)
             name = "mf_mod"
         else:
-            #print("Unable to create modelled mole fraction for high time resolution datasets yet.")
+            # print("Unable to create modelled mole fraction for high time resolution datasets yet.")
             mf_mod = timeseries_HiTRes(combined_dataset, flux_ds)
             name = "mf_mod_high_res"
         
@@ -454,20 +455,62 @@ def add_timeseries(combined_dataset: Dataset, flux_dict: Dict):
 def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset):
     """
     Calculate modelled mole fraction timeseries using integrated footprint data.
-    """
 
+    Args:
+        combined_dataset [Dataset]:
+            output created during footprint_data_merge
+        flux_ds [Dataset]:
+            Dataset containing flux values
+
+    Returns:
+        DataArray :
+            Modelled mole fraction timeseries, dimensions = (time)
+
+    TODO: Also allow flux_mod to be returned as an option? Include flags if so.
+    """
     flux_reindex = flux_ds.reindex_like(combined_dataset, 'ffill')
-    timeseries = (combined_dataset.fp * flux_reindex.flux).sum(["lat", "lon"])
+    flux_mod = combined_dataset.fp * flux_reindex.flux
+    timeseries = flux_mod.sum(["lat", "lon"])
     #combined_dataset['mf_mod'] = DataArray((combined_dataset.fp * flux_reindex.flux).sum(["lat", "lon"]), coords={'time': combined_dataset.time})
 
     return timeseries
 
 
-def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset, time_resolution: Optional[str] = "2H",
+def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset, 
+                      time_resolution: Optional[str] = "2H",
                       output_TS: Optional[bool] = True, output_fpXflux: Optional[bool] = False):
     """
     Calculate modelled mole fraction timeseries using high time resolution 
     footprint data and emissions data.
+
+   Args:
+        combined_dataset [Dataset]:
+            output created during footprint_data_merge
+        flux_ds [Dataset]:
+            Dataset containing flux values
+        time_resolution [str]: 
+            Time resolution of both the sampling and the hourly back footprints.
+            This should be < 24H and should divide exactly into 24 
+            e.g. 1,2,3,4,6,8,12.
+            Default = "2H"
+        output_TS [bool]:
+            Whether to output the modelled mole fraction timeseries DataArray.
+            Default = True
+        output_fpXflux [bool]:
+            Whether to output the modelled flux map DataArray used to create
+            the timeseries.
+            Default = False
+        
+    Returns:
+        DataArray / DataArray :
+            Modelled mole fraction timeseries, dimensions = (time)
+            Modelled flux map, dimensions = (lat, lon, time)
+        
+        If one of output_TS and output_fpXflux are True:
+            DataArray is returned for the respective output
+        
+        If both output_TS and output_fpXflux are both True:
+            Both DataArrays are returned.
 
     TODO: Using pure dask arrays (based on Hannah's original code)
     but would be good to update this to add more pre-indexing usig xarray and/or
@@ -479,10 +522,13 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset, time_resoluti
 
     fp_HiTRes = combined_dataset.fp_HiTRes
 
-    # Calculate time resolution from flux or fp data?
-    time_resolution
-
-    # resample fp to time resolution 
+    # TODO: May want to update this so that resolution of the sampling
+    # doesn't have to match resolution of the high frequency footprints
+    # At the moment it does because of the indexing being used 
+    # (rather than selecting on a dimension) - which can be *very* slow
+    # but could be done differently (indexing on a combination of time and H_back)
+    
+    # Resample fp timeseries to match time resolution
     fp_HiTRes = fp_HiTRes.resample(time=time_resolution).ffill()
 
     # create time array to loop through, with the required resolution
@@ -496,16 +542,53 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset, time_resoluti
     nlon = len(lon)
     nh_back = len(fp_HiTRes["H_back"])
 
-    # extract array to use in numba loop
-    fp_HiTRes = da.array(fp_HiTRes)
+    # Calculate time resolution for both the flux and fooprint data
+    nanosecond_to_hour = 1/(1e9*60.*60.)
+    flux_res_H = int(flux_ds.time.diff(dim="time").values.mean() * nanosecond_to_hour)
+    fp_HiTRes_freq_H = int(fp_HiTRes["H_back"].diff(dim="H_back").values.mean())
+
+    # Extract the time resolution number in hours
+    if time_resolution:
+        try:
+            num = int(time_resolution)
+        except (ValueError, TypeError):
+            num = int(time_resolution[0])
+    else:
+        # If not specified derive from high resolution flux or footprint (freq < 24H)
+        if flux_res_H <= 24:
+            num = flux_res_H
+        else:
+            num = fp_HiTRes_freq_H
+        time_resolution = num + "H"
+
+    # Only allow for time resolution < 24 hours
+    if num > 24:
+        raise ValueError(f"High frequency resolution must be <= 24 hours. Current: {time_resolution}")
+    elif 24%num != 0 or 24%num != 0.0:
+        raise ValueError(f"High frequency resolution resolution must exactly divide into 24 hours. Current: {time_resolution}")
 
     # Define full range of emissions needed for this calculation
-    date_start_back = time_array[0] - np.timedelta64(24, 'h')
+    date_start = time_array[0]
+    date_start_back = date_start - np.timedelta64(24, 'h')
     date_end = time_array[-1]
+    start_month = int(date_start.dt.month) # Won't 
 
-    flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
+    # Create low frequency flux data (monthly)
     flux_ds_low_freq = flux_ds.resample({"time":"1MS"}).mean().sel(time=slice(date_start_back, date_end))
     flux_ds_low_freq = flux_ds_low_freq.transpose(*("lat", "lon", "time"))
+
+    # Select and align high frequency flux data
+    flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
+    if flux_res_H != num and flux_res_H <= 24:
+        flux_ds_high_freq = flux_ds_high_freq.resample({"time":time_resolution}).mean()
+        flux_ds_high_freq = flux_ds_high_freq.transpose(*("lat", "lon", "time"))
+    elif flux_res_H > 24:
+        flux_ds_high_freq = flux_ds_low_freq
+
+    # TODO: Add check to make sure time values are exactly aligned based on date range
+
+    # Extract array to use in numba loop
+    fp_HiTRes = da.array(fp_HiTRes)
 
     # Set up a numpy array to calculate the product of the footprint (H matrix) with the fluxes
     if output_fpXflux:
@@ -514,15 +597,12 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset, time_resoluti
     if output_TS:
         timeseries = da.zeros(ntime)
 
-    num = int(time_resolution[0])
-
-    ### iterate through the time coord to get the total mf at each time step using the H back coord
+    # Iterate through the time coord to get the total mf at each time step using the H back coord
     # at each release time we disaggregate the particles backwards over the previous 24hrs
     # The final value then contains the 29-day integrated residual footprint
     for tt, time in enumerate(time_array):
-        #tt_low = time.astype(object).month - 1
-        #tt_low = time.dt.month.values - 1
-        tt_low = 0 # Has already been indexed above so may expect this only contains one entry?
+        ## TODO: Need to improve this to work for looping over to a new year
+        tt_low = time.dt.month.values - (start_month-1) - 1
         
         # get 4 dimensional chunk of high time res footprint for this timestep
         # units : mol/mol/mol/m2/s
@@ -537,10 +617,14 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset, time_resoluti
         flux_low_freq = da.array(flux_ds_low_freq.flux)
 
         # Define high and low frequency fluxes based on inputs
+        # Allow for variable frequency within 24 hours
         #flux_high_freq = flux_high_freq[:,:,tt+1:tt+13]
-        res_index = int(24/num) # Allow for variable frequency, 24 hours should be divisible
-        flux_high_freq = flux_high_freq[:,:,tt+1:tt+1+res_index]
         flux_low_freq = flux_low_freq[:,:,tt_low:tt_low+1]
+        if flux_res_H <= 24:
+            resolution_index = int(24/num)
+            flux_high_freq = flux_high_freq[:,:,tt+1:tt+1+resolution_index]
+        else:
+            flux_high_freq = flux_high_freq[:,:,tt_low:tt_low+1]
 
         # Multiply the HiTRes footprint with the HiTRes emissions to give mf
         # Multiply residual footprint by low frequency emissions data to give residual mf
@@ -551,12 +635,10 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset, time_resoluti
 
         # append the residual emissions
         fpXflux_time  = np.dstack((fpXflux_time, fpXflux_residual))
-        #fpXflux_time = xr.concat([fpXflux_time, fpXflux_residual], dim="time_back")
         
         if output_fpXflux:
             # Sum over time (H back) to give the total mf at this timestep
             fpXflux[:,:,tt] = fpXflux_time.sum(axis=2)
-            #fpXflux[:,:,tt] = fpXflux_time.sum(dim="time_back").values
             
         if output_TS:
             # work out timeseries by summing over lat, lon (24 hrs)
