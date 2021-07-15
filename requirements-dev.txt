@@ -23,6 +23,7 @@ pytest-tornasync
 pytest-cov
 requests-mock
 # For mypy
+mypy==0.910
 types-paramiko
 types-PyYAML
 types-requests
