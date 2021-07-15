@@ -3,84 +3,59 @@ __all__ = ["Process"]
 from Acquire.Client import Wallet
 from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
 from pathlib import Path
+from typing import Dict, List, Union, Optional
 
 
 class Process:
-    """ Process a datafile at a given PAR
-
+    """Upload data to the cloud platform for processing and storage
+    in the object store.
     """
 
-    def __init__(self, service_url=None):
-        """ Process a datafile using the passed user account
+    def __init__(self, service_url: Optional[str] = None):
+        """Process a datafile using the passed user account
 
-            service_url = "https://openghg.acquire-aaai.com/t"
+        service_url = "https://fn.openghg.org/t"
 
-            Args:
-                service_url: URL of service
+        Args:
+            service_url: URL of service
         """
         if service_url:
             self._service_url = service_url
         else:
-            self._service_url = "https://openghg.acquire-aaai.com/t"
+            self._service_url = "https://fn.openghg.org/t"
 
         wallet = Wallet()
-        self._service = wallet.get_service(service_url=f"{self._service_url}/hugs")
+        self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
 
-    def process_folder(
-        self,
-        user,
-        folder_path,
-        data_type,
-        overwrite=False,
-        extension="dat",
-        openghg_url=None,
-        storage_url=None,
-    ):
-        """ Process the passed directory of data files
-
-            Note: this does function does not recursively find files.
-
-            Args:
-                user (User): Authenticated Acquire User
-                folder_path (str, pathlib.Path): Path of folder containing files to be processed
-                data_type (str): Type of data to be processed (CRDS, GC etc)
-                openghg_url (str): URL of OpenGHG service. Currently used for testing
-                This may be removed in the future.
-                storage_url (str): URL of storage service. Currently used for testing
-                This may be removed in the future.
-        """
-        raise NotImplementedError("This function has been removed, please use process_files.")
-
-    # Find a better way to get this storage url in here, currently used for testing
     def process_files(
         self,
         user,
-        files,
-        data_type,
-        source_name=None,
-        overwrite=False,
-        openghg_url=None,
-        storage_url=None,
-        datasource=None,
-        site=None,
-        instrument=None,
-    ):
-        """ Process the passed file(s)
+        files: Union[str, List],
+        data_type: str,
+        site: str,
+        network: str,
+        instrument: Optional[str] = None,
+        overwrite: Optional[bool] = False,
+        openghg_url: Optional[str] = None,
+        storage_url: Optional[str] = None,
+    ) -> Dict:
+        """Process the passed file(s)
 
-            Args:
-                user (User): Authenticated Acquire User
-                files (str, list): Path of files to be processed
-                data_type (str): Type of data to be processed (CRDS, GC etc)
-                openghg_url (str): URL of OpenGHG service. Currently used for testing
-                datasource (str): Datasource name or UUID
-                This may be removed in the future.
-                storage_url (str): URL of storage service. Currently used for testing
-                This may be removed in the future.
-                site (str, default=None): Name of site, three letter code or long name
-                instrument (str, default=None): If no instrument name is passed we will attempt
-                to find it from the filename.
-            Returns:
-                dict: UUIDs of Datasources storing data of processed files keyed by filename
+        Args:
+            user: Authenticated Acquire User
+            files (str, list): Path of files to be processed
+            data_type: Type of data to be processed (CRDS, GCWERKS etc)
+            site: Site name
+            network: Network name
+            instrument: If no instrument name is passed we will attempt
+            to find it from the filename.
+            openghg_url: URL of OpenGHG service. Currently used for testing
+            This may be removed in the future.
+            storage_url: URL of storage service. Currently used for testing
+            This may be removed in the future.
+            site: Name of site, three letter code or long name
+        Returns:
+            dict: UUIDs of Datasources storing data of processed files keyed by filename
         """
         data_type = data_type.upper()
 
@@ -90,11 +65,9 @@ class Process:
         if not isinstance(files, list):
             files = [files]
 
-        if data_type.upper() == "GC":
+        if data_type in ("GCWERKS", "GC"):
             if not all(isinstance(item, tuple) for item in files):
-                return TypeError(
-                    "If data type is GC, a list of tuples for data and precision filenames must be passed"
-                )
+                raise TypeError("If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed")
 
             files = [(Path(f), Path(p)) for f, p in files]
         else:
@@ -106,29 +79,24 @@ class Process:
         if openghg_url is None:
             openghg_url = self._service_url + "/openghg"
 
-        # # Take the filename without the file extension
-        # source_name = [os.path.splitext((filepath.name).split("/")[-1])[0] for filepath in files]
-
         openghg = Service(service_url=openghg_url)
         creds = StorageCreds(user=user, service_url=storage_url)
-        drive = Drive(creds=creds, name="test_drive")
+        drive = Drive(creds=creds, name="openghg_drive")
         auth = Authorisation(resource="process", user=user)
 
-        # Here we'll need special cases for different data types. As GC requires
+        # Here we'll need special cases for different data types. As GCWERKS requires
         # both the data file and precision data and they need to be kept together
         # for use in processing.
         # We can maybe reconsider the way this is done if there ends up being a lot of test
         # cases and this gets a bit clunky
+
+        # TODO - this should also just upload all the files at once and get them processed
         results = {}
         for file in files:
-            if data_type == "GC":
-                if source_name is None:
-                    source_name = file[0].stem
+            if data_type in ("GCWERKS", "GC"):
 
-                if site is None:
-                    site = source_name.split(".")[0]
-                    if "-" in site and data_type == "GC":
-                        site = site.split("-")[0]
+                if "-" in site:
+                    site = site.split("-")[0]
 
                 filemeta = drive.upload(file[0])
                 par = PAR(location=filemeta.location(), user=user)
@@ -142,12 +110,6 @@ class Process:
                     "authorisation": auth.to_data(),
                     "par": {"data": par.to_data(), "precision": prec_par.to_data()},
                     "par_secret": {"data": par_secret, "precision": prec_par_secret},
-                    "data_type": data_type,
-                    "datasource": datasource,
-                    "source_name": source_name,
-                    "overwrite": overwrite,
-                    "site": site,
-                    "instrument": instrument,
                 }
             else:
                 filemeta = drive.upload(file)
@@ -158,18 +120,29 @@ class Process:
                     "authorisation": auth.to_data(),
                     "par": {"data": par.to_data()},
                     "par_secret": {"data": par_secret},
-                    "data_type": data_type,
-                    "datasource": datasource,
-                    "source_name": source_name,
-                    "overwrite": overwrite,
                 }
+
+            all_types = {
+                "data_type": data_type,
+                "overwrite": overwrite,
+                "site": site,
+                "network": network,
+            }
+
+            args.update(all_types)
 
             # If we try to upload many files we don't want it to fail if a single
             # file contains overlapping data
-            try:
-                response = self._service.call_function(function="process", args=args)
+            response = self._service.call_function(function="process.process", args=args)
+
+            if "Error" in response:
+                if data_type in ("GCWERKS", "GC"):
+                    filename = file[0].name
+                else:
+                    filename = file.name
+
+                results[filename] = response["Error"]
+            elif "results" in response:
                 results.update(response["results"])
-            except ValueError as err:
-                results[file.name] = err
 
         return results

@@ -28,7 +28,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Do some macOS specific installs
+    - name: Do some macOS specific installs for Python 3.9
       run: |
         brew install c-blosc hdf5
       if: matrix.python-version == 3.9 && matrix.operating-system == 'macos-latest'
@@ -42,7 +42,7 @@ jobs:
         path: ${{ steps.pip-cache.outputs.dir }}
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
-          ${{ runner.os }}-pip-cache
+          ${{ runner.os }}-pip-
     - name: Lint with flake8
       run: |
         python -m pip install --upgrade pip==20.2.4 wheel
@@ -54,7 +54,7 @@ jobs:
         pip install .
     - name: 'Clone Acquire for services folder required for tests'
       run: |
-        git clone -b testStore https://github.com/gareth-j/acquire.git ../acquire
+        git clone -b devel https://github.com/gareth-j/acquire.git ../acquire
         pip install -r ../acquire/requirements.txt
         pip install oci retry
     - name: Create mock cdsapi config file
@@ -75,20 +75,20 @@ jobs:
           shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM")
         done
         bash codecov || echo "Codecov did not collect coverage reports"
-      if: matrix.python-version == 3.8 && matrix.operating-system == 'ubuntu-latest'
+      if: matrix.python-version == 3.7 && matrix.operating-system == 'ubuntu-latest'
     - name: Install pandoc and build the documentation
       run: |
         sudo apt-get install -yq pandoc
+        pip install -r requirements-doc.txt
         cd doc
         make
       if: matrix.python-version == 3.7 && matrix.operating-system == 'ubuntu-latest'
     - name: Deploy to GitHub pages
-      uses: JamesIves/github-pages-deploy-action@164583b9e44b4fc5910e78feb607ea7c98d3c7b9
+      uses: JamesIves/github-pages-deploy-action@5dc1d5a192aeb5ab5b7d5a77b7d36aea4a7f5c92
       with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH: gh-pages 
-        FOLDER: "doc/build/html"
-        CLEAN: true 
+        branch: gh-pages
+        folder: "doc/build/html"
+        clean: true 
       if: matrix.python-version == 3.7 && matrix.operating-system == 'ubuntu-latest'
       
         

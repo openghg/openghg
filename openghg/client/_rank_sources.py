@@ -1,97 +1,111 @@
-__all__ = ["RankSources"]
-
-import copy
+from typing import Dict, List, Optional, Union
+from openghg.util import valid_site, create_daterange_str, InvalidSiteError
+# from pyvis.network import Network
+# import matplotlib.cm as cm
+# import matplotlib
 from Acquire.Client import Wallet
+
+__all__ = ["RankSources"]
 
 
 class RankSources:
-    """
-    This class is used to select the primary datasources for species from different sites
-    """
-    def __init__(self, service_url=None):
+    def __init__(self, service_url: Optional[str] = None):
         wallet = Wallet()
 
         if service_url is None:
-            service_url = "https://openghg.acquire-aaai.com/t"
+            service_url = "https://fn.openghg.org/t"
 
-        self._service = wallet.get_service(service_url=f"{service_url}/hugs")
+        self._service = wallet.get_service(service_url=f"{service_url}/openghg")
 
-        self._before_ranking = {}
+    def get_sources(self, site: str, species: str) -> Dict:
+        """Get the datasources for this site and species to allow a ranking to be set
 
-    def get_sources(self, site, species):
-        """ Get the datasources for this site and species to allow a ranking to be set
-
-            Args:
-                site (str): Three letter site code
-                species (str): Species name
-            Returns:
-                dict: Dictionary of datasource metadata
+        Args:
+            site: Three letter site code
+            species: Species name
+        Returns:
+            dict: Dictionary of datasource metadata
         """
-        from openghg.util import valid_site
-
-        if self._service is None:
-            raise PermissionError("Cannot use a null service")
-
         if not valid_site(site):
-            # raise InvalidSiteError(f"{site} is not a valid site code")
-            raise ValueError(f"{site} is not a valid site code")
+            raise InvalidSiteError(f"{site} is not a valid site code")
 
         args = {"site": site, "species": species}
 
-        response = self._service.call_function(function="get_sources", args=args)
+        response = self._service.call_function(function="rank.get_sources", args=args)
 
-        self._before_ranking = copy.deepcopy(response)
+        if not response:
+            raise ValueError(f"No sources found for {species} at {site}")
 
-        self._key_uuids = {key: response[key]["uuid"] for key in response}
+        self._user_info = response["user_info"]
+        self._key_lookup = response["key_lookup"]
 
-        return response
+        self._lookup_data = {"site": site, "species": species}
+        self._needs_update = False
 
-    def rank_simply(self, key, start_date, end_date, data_type):
-        """ Simply y
+        return self._user_info
 
-            Args:
-                key (str): Key such as co_bsd_248m
-                start_date (str): Start date
-                end_date ()
-            Returns:
-                None
+    def get_specific_source(self, key: str) -> str:
+        """Return the ranking data of a specific key
+
+        Args:
+            key: Key
+        Returns:
+            dict: Dictionary of ranking data
         """
-        pass
+        if self._needs_update:
+            site = self._lookup_data["site"]
+            species = self._lookup_data["species"]
+            _ = self.get_sources(site=site, species=species)
 
-    def rank_sources(self, updated_rankings):
-        """ Assign the precendence of sources for each.
-            This function expects a dictionary of the form
+        return self._user_info[key]["rank_data"]
 
-            This function expects a dictionary of the form
+    def set_rank(
+        self,
+        key: str,
+        rank: Union[int, str],
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        overwrite: Optional[bool] = False,
+        dateranges: Optional[List] = None,
+    ) -> None:
+        """Set the rank data for the
 
-            {'site_string': {'rank': [daterange_str, ...], 'daterange': 'start_end', 'uuid': uuid}, 
-
-            Args:
-                updated_ranking (dict): Dictionary of ranking
-            Returns:
-                None
+        Args:
+            key: Key of ranking data from the original dict
+            return by get_sources.
+            rank: Number between 1 and 9
+            start_date: Start date
+            end_date: End date
+        Returns:
+            None
         """
-        if updated_rankings == self._before_ranking:
-            return
+        if all((start_date, end_date, dateranges)):
+            raise ValueError("Either a start and end date must be passed or a list of dateranges")
 
-        args = {"ranking": updated_rankings}
+        uuid = self._key_lookup[key]
 
-        self._service.call_function(function="rank_sources", args=args)
+        if dateranges is None:
+            dateranges = create_daterange_str(start=start_date, end=end_date)
 
-    def create_daterange(self, start, end):
-        """ Create a JSON serialisable daterange string for use in ranking dict
+        args = {}
+        args["rank"] = rank
+        args["uuid"] = uuid
+        args["dateranges"] = dateranges
+        args["overwrite"] = overwrite
 
-            Args:
-                start (datetime): Start of daterange
-                end (datetime): End of daterange
-            Returns:
-                str: Serialisable daterange string
+        self._service.call_function(function="rank.set_rank", args=args)
+        self._needs_update = True
+
+    def clear_rank(self, key: str) -> None:
+        """ Clear the ranking data for a Datasource
+
+        Args:
+            key: Key for specific source
+        Returns:
+            None
         """
-        from Acquire.ObjectStore import datetime_to_string
-        from pandas import Timestamp
+        uuid = self._key_lookup[key]
 
-        if isinstance(start, str) and isinstance(end, str):
-            start = Timestamp(start).to_pydatetime()
-            end = Timestamp(end).to_pydatetime()
+        args = {"uuid": uuid}
 
-        return "".join([datetime_to_string(start), "_", datetime_to_string(end)])
+        self._service.call_function(function="rank.clear_rank", args=args)

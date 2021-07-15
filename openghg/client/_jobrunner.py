@@ -11,11 +11,13 @@ class JobRunner:
     """
 
     def __init__(self, service_url):
+        raise NotImplementedError
+
         from Acquire.Client import Wallet
 
         wallet = Wallet()
 
-        self._service = wallet.get_service(service_url=f"{service_url}/hugs")
+        self._service = wallet.get_service(service_url=f"{service_url}/openghg")
         self._service_url = service_url
 
     def create_job(
@@ -111,7 +113,7 @@ class JobRunner:
         uploaded_files = {"app": {}, "data": {}}
         # These probably won't be very big so don't check their size
         for f in data_files["app"]:
-            file_meta = drive.upload(f, dir="app")
+            file_meta = drive.upload(f, directory="app")
             uploaded_files["app"][f] = file_meta
 
         # We might not have any data files to upload
@@ -120,9 +122,9 @@ class JobRunner:
                 filesize = os.path.getsize(f)
 
                 if filesize < chunk_limit:
-                    file_meta = drive.upload(f, dir="data")
+                    file_meta = drive.upload(f, directory="data")
                 else:
-                    file_meta = drive.chunk_upload(f, dir="data")
+                    file_meta = drive.chunk_upload(f, directory="data")
 
                 uploaded_files["data"][f] = file_meta
         except KeyError:

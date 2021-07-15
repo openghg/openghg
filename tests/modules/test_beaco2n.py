@@ -1,18 +1,14 @@
 from openghg.modules import BEACO2N
 from pandas import Timestamp
-from pathlib import Path
 import pytest
-
-
-def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.parent.joinpath(f"data/proc_test_data/{data_type}/{filename}")
+from helpers import get_datapath
 
 
 def test_read_file():
     beacon = BEACO2N()
-    filepath = get_datapath(filename="Charlton_Community_Center.csv", data_type="BEACO2N") 
+    filepath = get_datapath(filename="Charlton_Community_Center.csv", data_type="BEACO2N")
 
-    result = beacon.read_file(data_filepath=filepath)
+    result = beacon.read_file(data_filepath=filepath, sampling_period=1200)
 
     pm_data = result["pm"]["data"]
     co2_data = result["co2"]["data"]
@@ -32,8 +28,22 @@ def test_read_file():
     co2_data["co2"][0] == 410.4
     co2_data["co2_qc"][0] == 2
 
-    assert pm_metadata == {'units': 'ug/m3', 'site': 'CHARLTONCOMMUNITYCENTER', 'species': 'pm', 'inlet': 'NA', 'network': 'beaco2n'}
-    assert co2_metadata == {'units': 'ppm', 'site': 'CHARLTONCOMMUNITYCENTER', 'species': 'co2', 'inlet': 'NA', 'network': 'beaco2n'}
+    assert pm_metadata == {
+        "units": "ug/m3",
+        "site": "CHARLTONCOMMUNITYCENTER",
+        "species": "pm",
+        "inlet": "NA",
+        "network": "beaco2n",
+        "sampling_period": "1200",
+    }
+    assert co2_metadata == {
+        "units": "ppm",
+        "site": "CHARLTONCOMMUNITYCENTER",
+        "species": "co2",
+        "inlet": "NA",
+        "network": "beaco2n",
+        "sampling_period": "1200",
+    }
 
     assert pm_attrs == {
         "deployed": "2017-01-24",
@@ -73,4 +83,3 @@ def test_incorrect_site_raises():
 
     with pytest.raises(ValueError):
         beacon.read_file(data_filepath=filepath)
-

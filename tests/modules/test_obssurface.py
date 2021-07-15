@@ -1,46 +1,33 @@
 import pytest
 from pandas import Timestamp
-from pathlib import Path
 
 from openghg.modules import Datasource, ObsSurface
 from openghg.objectstore import get_local_bucket, exists
-
-
-@pytest.fixture(scope="session")
-def clear_store():
-    get_local_bucket(empty=True)
-
-
-def get_datapath(filename, data_type):
-    """Get the path of a file in the tests directory
-
-    Returns:
-        pathlib.Path
-    """
-    return Path(__file__).resolve().parent.parent.joinpath("data", "proc_test_data", data_type, filename)
+from openghg.util import create_daterange_str
+from helpers import get_datapath
 
 
 def test_read_CRDS():
     get_local_bucket(empty=True)
 
-    filepath = get_datapath(filename="bsd.picarro.1minute.248m.dat", data_type="CRDS")
+    filepath = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
 
-    keys = results["processed"]["bsd.picarro.1minute.248m.dat"].keys()
+    keys = results["processed"]["bsd.picarro.1minute.248m.min.dat"].keys()
 
     assert sorted(keys) == ["ch4", "co", "co2"]
 
     # Load up the assigned Datasources and check they contain the correct data
-    data = results["processed"]["bsd.picarro.1minute.248m.dat"]
+    data = results["processed"]["bsd.picarro.1minute.248m.min.dat"]
 
     ch4_data = Datasource.load(uuid=data["ch4"]).data()
-    ch4_data = ch4_data["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"]
+    ch4_data = ch4_data["2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00"]
 
-    assert ch4_data.time[0] == Timestamp("2014-01-30T10:52:30")
-    assert ch4_data["ch4"][0] == 1960.24
-    assert ch4_data["ch4"][-1] == 1952.24
-    assert ch4_data["ch4_variability"][-1] == 0.674
-    assert ch4_data["ch4_number_of_observations"][-1] == 25.0
+    assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")
+    assert ch4_data["ch4"][0] == 1959.55
+    assert ch4_data["ch4"][-1] == 1962.8
+    assert ch4_data["ch4_variability"][-1] == 1.034
+    assert ch4_data["ch4_number_of_observations"][-1] == 26.0
 
     obs = ObsSurface.load()
     uuid_one = obs.datasources()[0]
@@ -48,10 +35,17 @@ def test_read_CRDS():
 
     data_keys = list(datasource.data().keys())
 
-    assert data_keys == [
-        "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00",
-        "2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00",
+    expected_keys = [
+        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
+        "2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
+        "2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00",
+        "2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00",
+        "2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00",
     ]
+
+    assert data_keys == expected_keys
 
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.future.dat", data_type="CRDS")
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
@@ -60,17 +54,23 @@ def test_read_CRDS():
     datasource = Datasource.load(uuid=uuid_one)
     data_keys = sorted(list(datasource.data().keys()))
 
-    assert data_keys == [
-        "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00",
-        "2018-01-30-13:52:30+00:00_2018-01-30-14:20:30+00:00",
+    new_expected_keys = [
+        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
+        "2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
+        "2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00",
+        "2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00",
+        "2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00",
         "2023-01-30-13:56:30+00:00_2023-01-30-14:20:30+00:00",
     ]
 
-    table = obs._datasource_table
+    assert data_keys == new_expected_keys
 
-    assert table["bsd"]["decc"]["248m"]["ch4"]
-    assert table["bsd"]["decc"]["248m"]["co2"]
-    assert table["bsd"]["decc"]["248m"]["co"]
+    table = obs._datasource_table
+    assert table["bsd"]["decc"]["ch4"]["248m"]
+    assert table["bsd"]["decc"]["co2"]["248m"]
+    assert table["bsd"]["decc"]["co"]["248m"]
 
 
 def test_read_GC():
@@ -191,7 +191,7 @@ def test_read_GC():
         "units": "ppt",
         "scale": "SIO-05",
         "inlet": "70m",
-        "sampling_period": 1200,
+        "sampling_period": "1200",
     }
 
     # # Now test that if we add more data it adds it to the same Datasource
@@ -218,18 +218,20 @@ def test_read_GC():
     data_filepath = get_datapath(filename="trinidadhead.01.C", data_type="GC")
     precision_filepath = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
 
-    ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="THD", instrument="gcmd", network="AGAGE")
+    ObsSurface.read_file(
+        filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="THD", instrument="gcmd", network="AGAGE"
+    )
 
     obs = ObsSurface.load()
     table = obs._datasource_table
 
-    assert table["cgo"]["agage"]["70m"]["nf3"]
-    assert table["cgo"]["agage"]["70m"]["hfc236fa"]
-    assert table["cgo"]["agage"]["70m"]["h1211"]
+    assert table["cgo"]["agage"]["nf3"]["70m"]
+    assert table["cgo"]["agage"]["hfc236fa"]["70m"]
+    assert table["cgo"]["agage"]["h1211"]["70m"]
 
-    assert table["thd"]["agage"]["10m"]["cfc11"]
-    assert table["thd"]["agage"]["10m"]["n2o"]
-    assert table["thd"]["agage"]["10m"]["ccl4"]
+    assert table["thd"]["agage"]["cfc11"]["10m"]
+    assert table["thd"]["agage"]["n2o"]["10m"]
+    assert table["thd"]["agage"]["ccl4"]["10m"]
 
 
 def test_read_cranfield():
@@ -263,7 +265,7 @@ def test_read_icos():
 
     data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+    results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS", sampling_period=60)
 
     uuid = results["processed"]["tta.co2.1minute.222m.min.dat"]["co2"]
 
@@ -299,7 +301,7 @@ def test_read_icos():
         "station_height_masl": 300.0,
         "site": "tta",
         "inlet": "222m",
-        "time_resolution": "1minute",
+        "sampling_period": "60",
         "network": "ICOS",
     }
 
@@ -334,7 +336,14 @@ def test_read_noaa_raw():
 
     co_data = Datasource.load(uuid=uuid, shallow=False).data()
 
-    assert len(co_data.keys()) == 16
+    assert sorted(list(co_data.keys())) == [
+        "1990-06-29-05:00:00+00:00_1990-07-10-21:28:00+00:00",
+        "2009-06-13-16:32:00+00:00_2009-12-03-00:30:00+00:00",
+        "2010-01-10-00:13:00+00:00_2010-12-09-16:05:00+00:00",
+        "2011-01-27-04:55:00+00:00_2011-11-11-14:45:00+00:00",
+        "2016-12-03-12:37:00+00:00_2016-12-18-05:30:00+00:00",
+        "2017-01-27-19:10:00+00:00_2017-07-15-04:15:00+00:00",
+    ]
 
     co_data = co_data["1990-06-29-05:00:00+00:00_1990-07-10-21:28:00+00:00"]
 
@@ -359,14 +368,25 @@ def test_read_noaa_obspack():
 
     ch4_data = Datasource.load(uuid=uuid, shallow=False).data()
 
-    data = ch4_data["1998-09-08-22:10:00+00:00_1998-09-08-22:10:00+00:00"]
+    assert sorted(list(ch4_data.keys())) == [
+        "1993-06-17-00:12:30+00:00_1993-11-20-21:50:00+00:00",
+        "1994-01-02-22:10:00+00:00_1994-12-24-22:15:00+00:00",
+        "1995-02-06-12:00:00+00:00_1995-11-08-19:55:00+00:00",
+        "1996-01-21-22:10:00+00:00_1996-12-01-20:00:00+00:00",
+        "1997-02-12-19:00:00+00:00_1997-12-20-20:15:00+00:00",
+        "1998-01-01-23:10:00+00:00_1998-12-31-19:50:00+00:00",
+        "1999-01-14-22:15:00+00:00_1999-12-31-23:35:00+00:00",
+        "2000-03-05-00:00:00+00:00_2000-11-04-22:30:00+00:00",
+        "2001-01-05-21:45:00+00:00_2001-12-06-12:00:00+00:00",
+        "2002-01-12-12:00:00+00:00_2002-01-12-12:00:00+00:00",
+    ]
 
-    assert len(ch4_data) == 34
+    data = ch4_data["1998-01-01-23:10:00+00:00_1998-12-31-19:50:00+00:00"]
 
-    assert data.time[0] == Timestamp("1998-09-08T22:10:00")
-    assert data["value"][0] == pytest.approx(1.84641e-06)
+    assert data.time[0] == Timestamp("1998-01-01T23:10:00")
+    assert data["value"][0] == pytest.approx(1.83337e-06)
     assert data["nvalue"][0] == 2.0
-    assert data["value_std_dev"][0] == pytest.approx(8.34386e-10)
+    assert data["value_std_dev"][0] == pytest.approx(2.093036e-09)
 
 
 def test_read_thames_barrier():
@@ -374,7 +394,9 @@ def test_read_thames_barrier():
 
     data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER", site="TMB", network="LGHG")
+    results = ObsSurface.read_file(
+        filepath=data_filepath, data_type="THAMESBARRIER", site="TMB", network="LGHG", sampling_period=3600
+    )
 
     expected_keys = sorted(["CH4", "CO2", "CO"])
 
@@ -402,12 +424,12 @@ def test_upload_same_file_twice_raises():
 
     data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
 
-    ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+    ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS", sampling_period=60)
 
-    # assert not res["error"] 
+    # assert not res["error"]
 
     with pytest.raises(ValueError):
-        ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+        ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS", sampling_period=60)
 
     # assert "tta.co2.1minute.222m.min.dat" in res["error"]
 
@@ -464,7 +486,9 @@ def test_add_new_data_correct_datasource():
     data_filepath = get_datapath(filename="capegrim-medusa.06.C", data_type="GC")
     precision_filepath = get_datapath(filename="capegrim-medusa.06.precisions.C", data_type="GC")
 
-    new_results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
+    new_results = ObsSurface.read_file(
+        filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE"
+    )
 
     second_results = new_results["processed"]["capegrim-medusa.06.C"]
 
@@ -474,3 +498,147 @@ def test_add_new_data_correct_datasource():
 
     for key in shared_keys:
         assert first_results[key] == second_results[key]
+
+
+def test_set_rank():
+    o = ObsSurface.load()
+
+    o._rank_data.clear()
+
+    test_uid = "test-uid-123"
+
+    daterange_str = create_daterange_str(start="2001-01-01", end="2005-01-01")
+    o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
+
+    assert o._rank_data == {"test-uid-123": {"2001-01-01-00:00:00+00:00_2005-01-01-00:00:00+00:00": 1}}
+
+    daterange_str = create_daterange_str(start="2007-01-01", end="2009-01-01")
+    o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
+
+    assert o._rank_data["test-uid-123"] == {
+        "2001-01-01-00:00:00+00:00_2005-01-01-00:00:00+00:00": 1,
+        "2007-01-01-00:00:00+00:00_2009-01-01-00:00:00+00:00": 1,
+    }
+
+    # Make sure we can't set another rank for the same daterange
+    with pytest.raises(ValueError):
+        o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str)
+
+    daterange_str = create_daterange_str(start="2008-01-01", end="2009-01-01")
+
+    with pytest.raises(ValueError):
+        o.set_rank(uuid=test_uid, rank=3, date_range=daterange_str)
+
+    daterange_str = create_daterange_str(start="2007-01-01", end="2015-01-01")
+    o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
+
+    assert o._rank_data["test-uid-123"] == {
+        "2001-01-01-00:00:00+00:00_2005-01-01-00:00:00+00:00": 1,
+        "2007-01-01-00:00:00+00:00_2015-01-01-00:00:00+00:00": 1,
+    }
+
+
+def test_set_rank_overwrite():
+    o = ObsSurface.load()
+
+    o._rank_data.clear()
+
+    test_uid = "test-uid-123"
+
+    daterange_str = create_daterange_str(start="2007-01-01", end="2015-01-01")
+    o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
+    assert o._rank_data["test-uid-123"] == {"2007-01-01-00:00:00+00:00_2015-01-01-00:00:00+00:00": 1}
+
+    daterange_str = create_daterange_str(start="2008-01-01", end="2009-01-01")
+    o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str, overwrite=True)
+
+    expected_ranking = {
+        "2007-01-01-00:00:00+00:00_2007-12-31-23:59:59+00:00": 1,
+        "2008-01-01-00:00:00+00:00_2008-12-31-23:59:59+00:00": 2,
+        "2009-01-01-00:00:01+00:00_2015-01-01-00:00:00+00:00": 1,
+    }
+
+    assert o._rank_data["test-uid-123"] == expected_ranking
+
+    daterange_str = create_daterange_str(start="1994-01-01", end="2023-01-01")
+    o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str, overwrite=True)
+
+    assert o._rank_data["test-uid-123"] == {"1994-01-01-00:00:00+00:00_2023-01-01-00:00:00+00:00": 2}
+
+    o._rank_data.clear()
+
+    daterange_str = create_daterange_str(start="2001-01-01", end="2021-01-01")
+    o.set_rank(uuid=test_uid, rank=1, date_range=daterange_str)
+
+    assert o._rank_data["test-uid-123"] == {"2001-01-01-00:00:00+00:00_2021-01-01-00:00:00+00:00": 1}
+
+    daterange_str = create_daterange_str(start="2007-01-01", end="2009-01-01")
+    o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str, overwrite=True)
+
+    daterange_str = create_daterange_str(start="2015-01-01", end="2016-01-01")
+    o.set_rank(uuid=test_uid, rank=2, date_range=daterange_str, overwrite=True)
+
+    expected = {
+        "2001-01-01-00:00:00+00:00_2006-12-31-23:59:59+00:00": 1,
+        "2007-01-01-00:00:00+00:00_2008-12-31-23:59:59+00:00": 2,
+        "2009-01-01-00:00:01+00:00_2014-12-31-23:59:59+00:00": 1,
+        "2015-01-01-00:00:00+00:00_2015-12-31-23:59:59+00:00": 2,
+        "2016-01-01-00:00:01+00:00_2021-01-01-00:00:00+00:00": 1,
+    }
+
+    assert o._rank_data["test-uid-123"] == expected
+
+
+def test_rank_overlapping_dateranges():
+    dateranges = ["2014-01-01_2099-06-06", "2014-06-07_2015-09-09", "2015-09-10_2019-01-06"]
+
+    o = ObsSurface.load()
+    o._rank_data.clear()
+
+    test_uid = "test-uid-123"
+
+    o.set_rank(uuid=test_uid, rank=1, date_range=dateranges)
+
+    with pytest.raises(ValueError):
+        o.set_rank(uuid=test_uid, rank=2, date_range=dateranges)
+
+
+def test_rank_same_daterange_doesnt_change():
+    o = ObsSurface.load()
+    o._rank_data.clear()
+
+    test_uid = "test-uid-123"
+
+    o.set_rank(uuid=test_uid, rank=1, date_range="2012-01-01_2012-06-01")
+
+    assert o._rank_data == {"test-uid-123": {"2012-01-01-00:00:00+00:00_2012-06-01-00:00:00+00:00": 1}}
+
+    o.set_rank(uuid=test_uid, rank=1, date_range="2012-01-01_2012-06-01")
+
+    assert o._rank_data == {"test-uid-123": {"2012-01-01-00:00:00+00:00_2012-06-01-00:00:00+00:00": 1}}
+
+
+def test_rank_daterange_start_overlap_overwrite():
+    o = ObsSurface.load()
+    o._rank_data.clear()
+
+    test_uid = "test-uid-123"
+
+    o.set_rank(uuid=test_uid, rank=1, date_range="2012-01-01_2013-01-01")
+
+    assert o._rank_data == {"test-uid-123": {"2012-01-01-00:00:00+00:00_2013-01-01-00:00:00+00:00": 1}}
+
+    o.set_rank(uuid=test_uid, rank=2, date_range="2012-01-01_2012-06-01", overwrite=True)
+
+    assert o._rank_data == {
+        "test-uid-123": {
+            "2012-06-01-00:00:01+00:00_2013-01-01-00:00:00+00:00": 1,
+            "2012-01-01-00:00:00+00:00_2012-06-01-00:00:00+00:00": 2,
+        }
+    }
+
+    o.set_rank(uuid=test_uid, rank=1, date_range="2012-01-01_2013-01-01", overwrite=True)
+
+    expected = {"test-uid-123": {"2012-01-01-00:00:00+00:00_2013-01-01-00:00:00+00:00": 1}}
+
+    assert o._rank_data == expected

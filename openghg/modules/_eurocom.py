@@ -49,6 +49,9 @@ class EUROCOM:
         if site is None:
             site = data_filepath.stem.split("_")[0]
 
+        if sampling_period is None:
+            sampling_period = "NOT_SET"
+
         # This should return xarray Datasets
         gas_data = self.read_data(data_filepath=data_filepath, site=site)
 
@@ -57,7 +60,7 @@ class EUROCOM:
 
         return gas_data
 
-    def read_data(self, data_filepath: Path, site: str, height: Optional[str] = None) -> Dict:
+    def read_data(self, data_filepath: Path, site: str, sampling_period: str, height: Optional[str] = None) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -157,6 +160,7 @@ class EUROCOM:
         metadata["inlet_height"] = site_attributes["inlet_height_m"]
         metadata["calibration_scale"] = calibration_scale
         metadata["network"] = "EUROCOM"
+        metadata["sampling_period"] = str(sampling_period)
 
         combined_data[species] = {
             "metadata": metadata,

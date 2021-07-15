@@ -248,7 +248,7 @@ class GCWERKS:
         metadata = {"instrument": instrument, "site": site, "network": network}
 
         extracted_sampling_period = self.get_precision(instrument)
-        metadata["sampling_period"] = extracted_sampling_period
+        metadata["sampling_period"] = str(extracted_sampling_period)
 
         if sampling_period is not None:
             # Check input sampling_period can be interpreted
@@ -317,7 +317,7 @@ class GCWERKS:
             data[sp + " repeatability"] = precision[precision_index].astype(float).reindex_like(data, method="pad")
 
         # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
-        data["new_time"] = data.index - pd_Timedelta(seconds=metadata["sampling_period"] / 2.0)
+        data["new_time"] = data.index - pd_Timedelta(seconds=int(metadata["sampling_period"]) / 2.0)
 
         data = data.set_index("new_time", inplace=False, drop=True)
         data.index.name = "time"

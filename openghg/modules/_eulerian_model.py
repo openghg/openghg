@@ -12,6 +12,7 @@ __all__ = ["EulerianModel"]
 # ...
 # setup (included as option for now)
 
+
 class EulerianModel(BaseModule):
     """This class is used to process Eulerian model data"""
 
@@ -57,7 +58,7 @@ class EulerianModel(BaseModule):
             setup: Additional setup details for run
             overwrite: Should this data overwrite currently stored data.
         """
-        # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format. 
+        # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
         # May need to split out into multiple modules (like with ObsSurface) or into separate processing functions as needed.
 
         from collections import defaultdict
@@ -83,7 +84,12 @@ class EulerianModel(BaseModule):
         em_data = open_dataset(filepath)
 
         # Check necessary 4D coordinates are present and rename if necessary (for consitency)
-        check_coords = {"time": ["time"], "lat": ["lat", "latitude"], "lon": ["lon", "longitude"], "lev": ["lev", "level", "layer", "sigma_level"]}
+        check_coords = {
+            "time": ["time"],
+            "lat": ["lat", "latitude"],
+            "lon": ["lon", "longitude"],
+            "lev": ["lev", "level", "layer", "sigma_level"],
+        }
         for name, coord_options in check_coords.items():
             for coord in coord_options:
                 if coord in em_data.coords:
@@ -97,7 +103,7 @@ class EulerianModel(BaseModule):
         attrs = em_data.attrs
 
         # author_name = "OpenGHG Cloud"
-        # em_data.attrs["author"] = author_name 
+        # em_data.attrs["author"] = author_name
 
         metadata = {}
         metadata.update(attrs)
@@ -132,10 +138,6 @@ class EulerianModel(BaseModule):
 
         date = str(pd_Timestamp(start_date).date())
 
-        print("Writing start date and end date to metadata")
-        print(date, start_date, end_date)
-        print(type(date), type(start_date), type(end_date))
-
         metadata["date"] = date
         metadata["start_date"] = start_date
         metadata["end_date"] = end_date
@@ -161,7 +163,9 @@ class EulerianModel(BaseModule):
         lookup_results = em_store.datasource_lookup(metadata=keyed_metadata)
 
         data_type = "eulerian_model"
-        datasource_uuids = assign_data(data_dict=model_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type)
+        datasource_uuids = assign_data(
+            data_dict=model_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type
+        )
 
         em_store.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
 

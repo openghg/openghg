@@ -1,29 +1,12 @@
 import logging
-import os
-from pathlib import Path
-
-import pytest
 
 from openghg.modules import CRDS, GCWERKS, ObsSurface
 from openghg.objectstore import get_local_bucket
 from openghg.processing import recombine_datasets, search
+from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
-
-
-@pytest.fixture(scope="session")
-def data_path():
-    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.C"
-
-
-@pytest.fixture(scope="session")
-def precision_path():
-    return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + "../data/proc_test_data/GC/capegrim-medusa.18.precisions.C"
-
-
-def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 
 def test_recombination_CRDS():
@@ -40,14 +23,13 @@ def test_recombination_CRDS():
 
     ch4_data_read = gas_data["ch4"]["data"]
 
-    gas_name = "ch4"
+    species = "ch4"
     site = "hfd"
+    inlet = "100m"
 
-    result = search(species=gas_name, site=site)
+    result = search(species=species, site=site, inlet=inlet)
 
-    uid = next(iter(result))
-
-    keys = result[uid]["keys"]
+    keys = result.keys(site=site, species=species, inlet=inlet)
 
     ch4_data_recombined = recombine_datasets(keys=keys)
 
@@ -71,13 +53,12 @@ def test_recombination_GC():
 
     toluene_data = data["toluene_70m"]["data"]
 
-    gas_name = "toluene"
+    species = "toluene"
     site = "CGO"
+    inlet = "70m"
 
-    results = search(species=gas_name, site=site)
-
-    uid = next(iter(results))
-    keys = results[uid]["keys"]
+    result = search(species=species, site=site, inlet=inlet)
+    keys = result.keys(site=site, species=species, inlet=inlet)
 
     toluene_data_recombined = recombine_datasets(keys=keys)
 
