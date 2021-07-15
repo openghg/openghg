@@ -79,7 +79,7 @@ jobs:
     - name: Install pandoc and build the documentation
       run: |
         sudo apt-get install -yq pandoc
-        pip install requirements-doc.txt
+        pip install -r requirements-doc.txt
         cd doc
         make
       if: matrix.python-version == 3.7 && matrix.operating-system == 'ubuntu-latest'
