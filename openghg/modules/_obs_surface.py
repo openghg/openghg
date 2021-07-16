@@ -13,28 +13,6 @@ class ObsSurface(BaseModule):
     _root = "ObsSurface"
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
 
-    # We don't currently need to add anything here
-    # def __init__(self):
-    #     super().__init__()
-
-    def save(self, bucket: Optional[Dict] = None) -> None:
-        """Save the object to the object store
-
-        Args:
-            bucket: Bucket for data
-        Returns:
-            None
-        """
-        from openghg.objectstore import get_bucket, set_object_from_json
-
-        if bucket is None:
-            bucket = get_bucket()
-
-        obs_key = f"{ObsSurface._root}/uuid/{ObsSurface._uuid}"
-
-        self._stored = True
-        set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
-
     @staticmethod
     def read_file(
         filepath: Union[str, Path, list],

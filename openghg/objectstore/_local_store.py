@@ -7,29 +7,32 @@ from Acquire.ObjectStore import ObjectStoreError
 import pyvis
 from collections import defaultdict
 from uuid import uuid4
+from typing import Dict, List, Optional, Union
 
 rlock = threading.RLock()
 
-__all__ = ["delete_object", 
-            "get_hugs_local_path", 
-            "get_all_object_names", 
-            "get_object_names", 
-            "get_bucket", 
-            "get_local_bucket", 
-            "get_object", 
-            "set_object", 
-            "set_object_from_json", 
-            "set_object_from_file", 
-            "get_object_from_json", 
-            "exists", 
-            "visualise_store"]
+__all__ = [
+    "delete_object",
+    "get_openghg_local_path",
+    "get_all_object_names",
+    "get_object_names",
+    "get_bucket",
+    "get_local_bucket",
+    "get_object",
+    "set_object",
+    "set_object_from_json",
+    "set_object_from_file",
+    "get_object_from_json",
+    "exists",
+    "visualise_store",
+]
 
 
-def get_hugs_local_path():
-    """ Returns the path to the local OpenGHG object store bucket
+def get_openghg_local_path() -> Path:
+    """Returns the path to the local OpenGHG object store bucket
 
-        Returns:
-            pathlib.Path
+    Returns:
+        pathlib.Path: Path of object store
     """
     env_path = os.getenv("OPENGHG_PATH")
 
@@ -37,18 +40,17 @@ def get_hugs_local_path():
         return Path(env_path)
     else:
         raise ValueError("No environment variable OPENGHG_PATH found, please set to use the local object store")
-    # return Path("/tmp/hugs_local")
 
 
-def get_all_object_names(bucket, prefix=None, without_prefix=False):
-    """ Returns the names of all objects in the passed bucket
+def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_prefix: bool = False) -> List:
+    """Returns the names of all objects in the passed bucket
 
-        Args:
-            bucket (str): Bucket path
-            prefix (str, default=None): Prefix for keys
-            withot_prefix (bool, default=False)
-        Returns:
-            list: List of object names
+    Args:
+        bucket: Bucket path
+        prefix: Prefix for keys
+        without_prefix: If True don't use prefix
+    Returns:
+        list: List of object names
     """
     root = bucket
 
@@ -92,13 +94,13 @@ def get_all_object_names(bucket, prefix=None, without_prefix=False):
 
 
 def delete_object(bucket, key):
-    """ Remove object at key in bucket
+    """Remove object at key in bucket
 
-        Args:
-            bucket (str): Bucket path
-            key (str): Key to data in bucket
-        Returns:
-            None
+    Args:
+        bucket (str): Bucket path
+        key (str): Key to data in bucket
+    Returns:
+        None
     """
     key = f"{bucket}/{key}._data"
     try:
@@ -108,24 +110,24 @@ def delete_object(bucket, key):
 
 
 def get_object_names(bucket, prefix=None):
-    """ List all the keys in the object store
+    """List all the keys in the object store
 
-        Args:
-            bucket (str): Bucket containing data
-        Returns:
-            list: List of keys in object store
+    Args:
+        bucket (str): Bucket containing data
+    Returns:
+        list: List of keys in object store
     """
     return get_all_object_names(bucket=bucket, prefix=prefix)
 
 
 def get_object(bucket, key):
-    """ Gets the object at key in the passed bucket
+    """Gets the object at key in the passed bucket
 
-        Args:
-            bucket (str): Bucket containing data
-            key (str): Key for data in bucket
-        Returns:
-            Object: Object from store
+    Args:
+        bucket (str): Bucket containing data
+        key (str): Key for data in bucket
+    Returns:
+        Object: Object from store
     """
     with rlock:
         filepath = Path(f"{bucket}/{key}._data")
@@ -137,38 +139,38 @@ def get_object(bucket, key):
 
 
 def set_object(bucket, key, data):
-    """ Store data in bucket at key
+    """Store data in bucket at key
 
-        Args:
-            bucket (str): Bucket path
-            key (str): Key to store data in bucket
-            data (str): Data in string form
-        Returns:
-            None
+    Args:
+        bucket (str): Bucket path
+        key (str): Key to store data in bucket
+        data (str): Data in string form
+    Returns:
+        None
     """
     filename = f"{bucket}/{key}._data"
 
     with rlock:
         try:
-            with open(filename, 'wb') as f:
+            with open(filename, "wb") as f:
                 f.write(data)
         except FileNotFoundError:
             dir = "/".join(filename.split("/")[0:-1])
             os.makedirs(dir, exist_ok=True)
 
-            with open(filename, 'wb') as f:
+            with open(filename, "wb") as f:
                 f.write(data)
 
 
 def set_object_from_json(bucket, key, data):
-    """ Set JSON data in the object store 
+    """Set JSON data in the object store
 
-        Args:
-            bucket (str): Bucket for data storage
-            key (str): Key for data in bucket
-            data (str): JSON serialised data string
-        Returns:
-            None
+    Args:
+        bucket (str): Bucket for data storage
+        key (str): Key for data in bucket
+        data (str): JSON serialised data string
+    Returns:
+        None
     """
     data = json.dumps(data).encode("utf-8")
 
@@ -176,54 +178,55 @@ def set_object_from_json(bucket, key, data):
 
 
 def set_object_from_file(bucket, key, filename):
-    """ Set the contents of file at filename to key in bucket
+    """Set the contents of file at filename to key in bucket
 
-        Args:
-            bucket (str): Bucket path
-            key (str): Key to for data
-            filename (str, pathlib.Path): Filename/path
-        Returns:
-            None
+    Args:
+        bucket (str): Bucket path
+        key (str): Key to for data
+        filename (str, pathlib.Path): Filename/path
+    Returns:
+        None
     """
     set_object(bucket=bucket, key=key, data=open(filename, "rb").read())
 
 
-def get_object_from_json(bucket, key):
-    """ Removes the daterange from the passed key and uses the reduced
-        key to get an object from the object store.
+def get_object_from_json(bucket: str, key: str) -> Dict[str, Union[str, Dict]]:
+    """Removes the daterange from the passed key and uses the reduced
+    key to get an object from the object store.
 
-        Args:
-            bucket (str): Bucket containing data
-            key (str): Key for data in bucket
-        Returns:
-            Object: Object created from data
+    Args:
+        bucket: Bucket containing data
+        key: Key for data in bucket
+    Returns:
+        dict: Dictionary
     """
-    data = get_object(bucket, key).decode("utf-8")
+    data: Union[str, bytes] = get_object(bucket, key).decode("utf-8")
+    data_dict: Dict = json.loads(data)
 
-    return json.loads(data)
+    return data_dict
 
 
-def exists(bucket, key):
-    """ Checks if there is an object in the object store with the given key
+def exists(bucket: str, key: str) -> bool:
+    """Checks if there is an object in the object store with the given key
 
-        Args:
-            bucket (dict): Bucket containing data
-            key (str): Prefix for key in object store
-        Returns:
-            bool: True if key exists in store
+    Args:
+        bucket (dict): Bucket containing data
+        key (str): Prefix for key in object store
+    Returns:
+        bool: True if key exists in store
     """
     names = get_all_object_names(bucket, prefix=key)
 
     return len(names) > 0
 
 
-def get_bucket():
+def get_bucket() -> str:
     """Find and return a new bucket in the object store called
-        'bucket_name'. If 'create_if_needed' is True
-        then the bucket will be created if it doesn't exist. Otherwise,
-        if the bucket does not exist then an exception will be raised.
+    'bucket_name'. If 'create_if_needed' is True
+    then the bucket will be created if it doesn't exist. Otherwise,
+    if the bucket does not exist then an exception will be raised.
     """
-    bucket_path = get_hugs_local_path()
+    bucket_path = get_openghg_local_path()
 
     if not bucket_path.exists():
         bucket_path.mkdir(parents=True)
@@ -232,17 +235,17 @@ def get_bucket():
 
 
 def get_local_bucket(empty=False):
-    """ Creates and returns a local bucket that's created in the
-        /tmp/hugs_test directory
+    """Creates and returns a local bucket that's created in the
+    /tmp/hugs_test directory
 
-        Args:
-            empty (bool, default=False): If True return an empty bucket
-        Returns:
-            str: Path to local bucket
+    Args:
+        empty (bool, default=False): If True return an empty bucket
+    Returns:
+        str: Path to local bucket
     """
     import shutil
 
-    local_buckets_dir = get_hugs_local_path()
+    local_buckets_dir = get_openghg_local_path()
 
     if local_buckets_dir.exists():
         if empty is True:
@@ -255,10 +258,10 @@ def get_local_bucket(empty=False):
 
 
 def query_store():
-    """ Create a dictionary that can be used to visualise the object store 
+    """Create a dictionary that can be used to visualise the object store
 
-        Returns:
-            dict: Dictionary for data to be shown in force graph 
+    Returns:
+        dict: Dictionary for data to be shown in force graph
     """
     from collections import defaultdict
     from openghg.modules import Datasource, ObsSurface
@@ -272,20 +275,24 @@ def query_store():
 
     for d in datasources:
         metadata = d.metadata()
-        result = {"site": metadata["site"], "species": metadata["species"], 
-                    "instrument": metadata.get("instrument", "Unknown"), "network": metadata.get("network", "Unknown")}
+        result = {
+            "site": metadata["site"],
+            "species": metadata["species"],
+            "instrument": metadata.get("instrument", "Unknown"),
+            "network": metadata.get("network", "Unknown"),
+        }
         data[d.uuid()] = result
 
     return data
 
 
 def visualise_store() -> pyvis.network.Network:
-    """ View the object store using a pyvis force graph.
+    """View the object store using a pyvis force graph.
 
-        This function should only be called from within a notebook
+    This function should only be called from within a notebook
 
-        Returns:
-            pyvis.network.Network
+    Returns:
+        pyvis.network.Network
     """
     data = query_store()
 
@@ -312,7 +319,7 @@ def visualise_store() -> pyvis.network.Network:
         net.add_node(network, label=network_name, color="#59a14f", value=2500)
         net.add_edge(source=0, to=network)
 
-        # Then we want a subnode for each site  
+        # Then we want a subnode for each site
         for site, data in sites.items():
             # Don't want to use a site here as a site might be in multiple networks
             site_name = site.upper()

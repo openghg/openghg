@@ -17,7 +17,7 @@ def get_obs_surface(
     instrument: Optional[str] = None,
     calibration_scale: Optional[str] = None,
     keep_missing: Optional[bool] = False,
-) -> List[ObsData]:
+) -> ObsData:
     """This is the equivalent of the get_obs function from the ACRG repository.
 
     Usage and return values are the same whilst implementation may differ.

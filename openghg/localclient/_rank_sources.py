@@ -54,7 +54,7 @@ class RankSources:
 
         return self._user_info
 
-    def get_specific_source(self, key: str) -> str:
+    def get_specific_source(self, key: str) -> Dict:
         """Return the ranking data of a specific key
 
         Args:
@@ -67,7 +67,8 @@ class RankSources:
             species = self._lookup_data["species"]
             _ = self.get_sources(site=site, species=species)
 
-        return self._user_info[key]["rank_data"]
+        rank_data: Dict[str, Union[str, Dict]] = self._user_info[key]["rank_data"]
+        return rank_data
 
     def set_rank(
         self,
