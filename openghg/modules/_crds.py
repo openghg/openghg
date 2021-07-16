@@ -1,7 +1,7 @@
 from openghg.util import load_json
 from pandas import DataFrame, Timedelta
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 
 __all__ = ["CRDS"]
@@ -50,6 +50,7 @@ class CRDS:
             data_filepath=data_filepath,
             site=site,
             network=network,
+            inlet=inlet,
             instrument=instrument,
             sampling_period=sampling_period,
             measurement_type=measurement_type,
@@ -88,11 +89,11 @@ class CRDS:
         import warnings
         from openghg.util import clean_string, valid_site
 
-        split_fname = data_filepath.stem.split(".")
+        split_fname: List[str] = data_filepath.stem.split(".")
 
         # Do some checks to see if we've got different data passed in to that read from the file
-        site_fname = clean_string(split_fname[0])
-        inlet_fname = clean_string(split_fname[3])
+        site_fname: str = clean_string(split_fname[0])
+        inlet_fname: str = clean_string(split_fname[3])
 
         site = site.lower()
 
@@ -279,7 +280,7 @@ class CRDS:
             self._crds_params = data["CRDS"]
 
         try:
-            attributes = self._crds_params[site.upper()]["global_attributes"]
+            attributes: Dict = self._crds_params[site.upper()]["global_attributes"]
         except KeyError:
             raise ValueError(f"Unable to read attributes for site: {site}")
 
@@ -303,7 +304,7 @@ class CRDS:
         # Slice the dataframe
         head_row = data.head(1)
 
-        gases = {}
+        gases: Dict[str, int] = {}
         # Loop over the gases and find each unique value
         for column in head_row.columns:
             s = head_row[column][0]

@@ -1,7 +1,9 @@
+from typing import Union
+
 __all__ = ["clean_string"]
 
 
-def clean_string(to_clean: str) -> str:
+def clean_string(to_clean: str) -> Union[str, None]:
     """Returns a lowercase string with only alphanumeric
     characters.
 

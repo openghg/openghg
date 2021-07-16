@@ -1,5 +1,6 @@
-from typing import Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Union
 from pathlib import Path
+from pandas import DataFrame
 
 __all__ = ["BEACO2N"]
 
@@ -69,7 +70,7 @@ class BEACO2N:
         measurement_types = ["pm", "co2"]
         units = {"pm": "ug/m3", "co2": "ppm"}
 
-        gas_data = defaultdict(dict)
+        gas_data: DefaultDict[str, Dict[str, Union[DataFrame, Dict]]] = defaultdict(dict)
         for mt in measurement_types:
             m_data = data[[mt, f"{mt}_qc"]]
             m_data = m_data.dropna(axis="rows", how="any").to_xarray()
