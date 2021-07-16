@@ -15,17 +15,18 @@ class TestService:
         self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
 
     def test(self) -> str:
-        """ Test connectivity to the OpenGHG Cloud Platform
+        """Test connectivity to the OpenGHG Cloud Platform
 
-            Returns:
-                str: Timestamp of connection
+        Returns:
+            str: Timestamp of connection
         """
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
         response = self._service.call_function(function="testing.test_connection", args={})
+        to_return: str = response["results"]
 
-        return response["results"]
+        return to_return
 
     def service(self):
         return self._service

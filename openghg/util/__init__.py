@@ -11,7 +11,6 @@ from ._util import (
     valid_site,
     is_number,
     to_lowercase,
-    to_defaultdict,
     pairwise,
 )
 

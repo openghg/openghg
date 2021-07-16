@@ -1,14 +1,10 @@
 """ Utility functions that are used by multiple modules
 
 """
-from typing import Any, Dict, Set, List, Union, Tuple, Sequence, Optional, TypeVar
+from typing import Any, Dict, Set, List, Union, Tuple, Optional, Iterator
 from collections.abc import Iterable
 from pathlib import Path
 
-from openghg.modules import BaseModule
-
-
-T = TypeVar("T", bound="BaseModule")
 
 __all__ = [
     "unanimous",
@@ -19,7 +15,6 @@ __all__ = [
     "valid_site",
     "is_number",
     "to_lowercase",
-    "to_defaultdict",
     "pairwise",
 ]
 
@@ -102,7 +97,7 @@ def load_json(filename: str) -> Dict:
     path = get_datapath(filename)
 
     with open(path, "r") as f:
-        data = load(f)
+        data: Dict[str, Any] = load(f)
 
     return data
 
@@ -181,28 +176,7 @@ def to_lowercase(d: Union[Dict, List, Tuple, Set, str]) -> Union[Dict, List, Tup
         return d
 
 
-def to_defaultdict(to_parse: Dict) -> Dict:
-    """Create a defaultdict from a dictionary
-
-    Args:
-        to_parse: Dictionary to parse
-    Returns:
-        collections.defaultdict: Nested defaultdict
-    """
-    from collections import defaultdict
-
-    def nested_dict():
-        return defaultdict(nested_dict)
-
-    def recurse_convert(d):
-        if not isinstance(d, dict):
-            return d
-        return defaultdict(nested_dict, {k: recurse_convert(v) for k, v in d.items()})
-
-    return recurse_convert(to_parse)
-
-
-def pairwise(iterable: Iterable) -> Tuple[Iterable, Iterable]:
+def pairwise(iterable: Iterable) -> Iterator[Tuple[str, str]]:
     """Return a zip of an iterable where a is the iterable
     and b is the iterable advanced one step.
 
