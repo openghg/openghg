@@ -90,6 +90,8 @@ class METStore(BaseModule):
                     data = next(iter(datasource.data().values()))
                     return METData(data=data, metadata=datasource.metadata())
 
+        return None
+
     def _store(self, met_data) -> None:
         """Store MET data within a Datasource
 

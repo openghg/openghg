@@ -10,7 +10,7 @@ def clean_string(to_clean: str) -> Union[str, None]:
     Args:
         to_clean: String to clean
     Returns:
-        str: Clean string
+        str or None: Clean string
     """
     import re
 

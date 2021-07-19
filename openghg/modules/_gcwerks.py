@@ -1,6 +1,7 @@
-from typing import Dict, List, Optional, Union, Tuple
+from typing import DefaultDict, Dict, List, Optional, Union, Tuple
 from pathlib import Path
 from pandas import DataFrame
+from xarray import Dataset
 
 __all__ = ["GCWERKS"]
 
@@ -25,9 +26,7 @@ class GCWERKS:
             except KeyError:
                 pass
 
-    def find_files(
-        self, data_path: Union[str, Path], skip_str: Optional[Union[str, List[str]]] = "sf6"
-    ) -> List[Tuple[Path, Path]]:
+    def find_files(self, data_path: Union[str, Path], skip_str: Union[str, List[str]] = "sf6") -> List[Tuple[Path, Path]]:
         """A helper file to find GCWERKS data and precisions file in a given folder.
         It searches for .C files of the format macehead.19.C, looks for a precisions file
         named macehead.19.precions.C and if it exists creates a tuple for these files.
@@ -98,6 +97,7 @@ class GCWERKS:
         from openghg.util import valid_site, clean_string
 
         data_filepath = Path(data_filepath)
+        precision_filepath = Path(precision_filepath)
 
         site = clean_string(site)
         network = clean_string(network)
@@ -123,6 +123,8 @@ class GCWERKS:
                     f"Mismatch between instrument passed as argument {instrument} and instrument read from filename {fname_instrument}"
                 )
 
+        instrument = str(instrument)
+
         gas_data = self.read_data(
             data_filepath=data_filepath,
             precision_filepath=precision_filepath,
@@ -138,13 +140,13 @@ class GCWERKS:
         return gas_data
 
     def check_site(self, filepath: Path, site_code: str) -> str:
-        """ Check if the site passed in matches that in the filename
+        """Check if the site passed in matches that in the filename
 
-            Args:
-                filepath: Path to data file
-                site: Site code
-            Returns:
-                str: Site code
+        Args:
+            filepath: Path to data file
+            site: Site code
+        Returns:
+            str: Site code
         """
         from re import findall
 
@@ -164,7 +166,7 @@ class GCWERKS:
 
         return site_code
 
-    def check_instrument(self, filepath: Path, should_raise: Optional[bool] = False) -> Union[str, None]:
+    def check_instrument(self, filepath: Path, should_raise: bool = False) -> Union[str, None]:
         """Ensure we have the correct instrument or translate an instrument
         suffix to an instrument name.
 
@@ -176,7 +178,7 @@ class GCWERKS:
         """
         from re import findall
 
-        instrument = findall(r"[\w']+", str(filepath.name))[1].lower()
+        instrument: str = findall(r"[\w']+", str(filepath.name))[1].lower()
         try:
             if instrument in self._gc_params["instruments"]:
                 return instrument
@@ -245,7 +247,7 @@ class GCWERKS:
         data.index.name = "Datetime"
 
         # This metadata will be added to when species are split and attributes are written
-        metadata = {"instrument": instrument, "site": site, "network": network}
+        metadata: Dict[str, str] = {"instrument": instrument, "site": site, "network": network}
 
         extracted_sampling_period = self.get_precision(instrument)
         metadata["sampling_period"] = str(extracted_sampling_period)
@@ -387,6 +389,7 @@ class GCWERKS:
         Returns:
             dict: Dataframe of gas data and metadata
         """
+        from collections import defaultdict
         from fnmatch import fnmatch
         from openghg.util import compliant_string
 
@@ -400,7 +403,7 @@ class GCWERKS:
                 "Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module"
             )
 
-        combined_data = {}
+        combined_data: DefaultDict[str, Dict] = defaultdict(dict)
 
         for spec in species:
             # Skip this species if the data is all NaNs
@@ -476,14 +479,13 @@ class GCWERKS:
                 # use the species and inlet as a key
                 data_key = f"{comp_species}_{inlet_label}"
 
-                combined_data[data_key] = {}
                 combined_data[data_key]["metadata"] = spec_metadata
                 combined_data[data_key]["data"] = spec_data
                 combined_data[data_key]["attributes"] = attributes
 
         return combined_data
 
-    def get_precision(self, instrument: str) -> int:
+    def get_precision(self, instrument: str) -> str:
         """Process the suffix from the filename to get the correct instrument name
         then retrieve the precision of that instrument.
 
@@ -494,7 +496,7 @@ class GCWERKS:
         """
         instrument = instrument.lower()
         try:
-            sampling_period = self._gc_params["sampling_period"][instrument]
+            sampling_period = str(self._gc_params["sampling_period"][instrument])
         except KeyError:
             raise ValueError(
                 f"Invalid instrument: {instrument}\nPlease select one of {self._gc_params['sampling_period'].keys()}\n"
@@ -525,34 +527,19 @@ class GCWERKS:
 
         return mapping_dict
 
-    def get_site_code(self, site: str) -> str:
-        """Get the site code
-
-        Args:
-            site: Name of site
-        Returns:
-            str: Site code
-        """
-        try:
-            site_code = self._site_codes["name_code"][site.lower()]
-        except KeyError:
-            raise KeyError(f"Site: {site} not recognized")
-
-        return site_code
-
-    def get_site_attributes(self, site: str, inlet: str, instrument: str) -> Dict:
+    def get_site_attributes(self, site: str, inlet: str, instrument: str) -> Dict[str, str]:
         """Gets the site specific attributes for writing to Datsets
 
-                Args:
-                    site: Site code
-                    inlet: Inlet (example: 108m)
-                Returns:
-                    dict: Dictionary of attributes
+        Args:
+            site: Site code
+            inlet: Inlet (example: 108m)
+        Returns:
+            dict: Dictionary of attributes
         """
         site = site.upper()
         instrument = instrument.lower()
 
-        attributes = self._gc_params["sites"][site]["global_attributes"]
+        attributes: Dict[str, str] = self._gc_params["sites"][site]["global_attributes"]
 
         attributes["inlet_height_magl"] = inlet
         try:

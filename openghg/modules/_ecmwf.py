@@ -40,9 +40,9 @@ def retrieve_met(site: str, network: str, years: Union[str, List[str]], variable
     # Get the area to retrieve data for
     ecmwf_area = _get_ecmwf_area(site_lat=latitude, site_long=longitude)
     # Calculate the pressure at measurement height(s)
-    measure_pressure = _get_site_pressure(inlet_height, site_height)
+    measure_pressure = _get_site_pressure(inlet_height=inlet_height, site_height=site_height)
     # Calculate the ERA5 pressure levels required
-    ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure)
+    ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure=measure_pressure)
 
     if not isinstance(years, list):
         years = [years]
@@ -142,10 +142,11 @@ def _two_closest_values(diff: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarry: Numpy array of two closes values
     """
-    return np.argpartition(np.abs(diff), 2)[:2]
+    closest_values: np.ndarray = np.argpartition(np.abs(diff), 2)[:2]
+    return closest_values
 
 
-def _get_site_loc(site: str, network: str) -> Tuple[str]:
+def _get_site_loc(site: str, network: str) -> Tuple[str, str, str, str]:
     """Extract site location data from site attributes file.
 
     Args:
@@ -163,10 +164,10 @@ def _get_site_loc(site: str, network: str) -> Tuple[str]:
     try:
         site_data = site_info[site][network]
 
-        latitude = site_data["latitude"]
-        longitute = site_data["longitude"]
-        inlet_height = site_data["height_name"]
-        site_height = site_data["height_station_masl"]
+        latitude = str(site_data["latitude"])
+        longitute = str(site_data["longitude"])
+        inlet_height = str(site_data["height_name"])
+        site_height = str(site_data["height_station_masl"])
     except KeyError as e:
         raise KeyError(f"Incorrect site or network : {e}")
 
@@ -196,7 +197,7 @@ def _get_ecmwf_area(site_lat: str, site_long: str) -> List:
     ]
 
 
-def _get_site_pressure(inlet_height: List, site_height: float) -> List[float]:
+def _get_site_pressure(inlet_height: Union[str, List], site_height: Union[str, float]) -> List[float]:
     """Calculate the pressure levels required
 
     Args:
@@ -206,6 +207,9 @@ def _get_site_pressure(inlet_height: List, site_height: float) -> List[float]:
         list: List of pressures
     """
     import re
+
+    if not isinstance(inlet_height, list):
+        inlet_height = [inlet_height]
 
     measured_pressure = []
     for h in inlet_height:
@@ -222,7 +226,7 @@ def _get_site_pressure(inlet_height: List, site_height: float) -> List[float]:
     return measured_pressure
 
 
-def _altitude_to_ecmwf_pressure(measure_pressure: np.ndarray) -> List:
+def _altitude_to_ecmwf_pressure(measure_pressure: List[Union[float]]) -> List[str]:
     """Find out what pressure levels are required from ERA5.
 
     Args:
@@ -247,4 +251,6 @@ def _altitude_to_ecmwf_pressure(measure_pressure: np.ndarray) -> List:
 
     desired_era5_pressure = era5_pressure_levels[np.unique(ecwmf_pressure_indices).astype(int)]
 
-    return desired_era5_pressure.astype(str).tolist()
+    pressure_levels: List = desired_era5_pressure.astype(str).tolist()
+
+    return pressure_levels

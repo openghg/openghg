@@ -1,6 +1,6 @@
 from openghg.modules import BaseModule
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Union
 
 # import traceback
 
@@ -77,7 +77,7 @@ class ObsSurface(BaseModule):
         obs = ObsSurface.load()
 
         # Create a progress bar object using the filepaths, iterate over this below
-        results = defaultdict(dict)
+        results: DefaultDict[str, Dict] = defaultdict(dict)
 
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
             for fp in filepath:
@@ -218,10 +218,7 @@ class ObsSurface(BaseModule):
         """
         uuid = self._datasource_table[site][network][species][inlet][sampling_period]
 
-        if uuid:
-            return uuid
-        else:
-            return False
+        return uuid if uuid else False
 
     def set_uuid(self, site: str, network: str, inlet: str, species: str, sampling_period: int, uuid: str) -> None:
         """Record a UUID of a Datasource in the datasource table

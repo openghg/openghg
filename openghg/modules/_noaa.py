@@ -76,7 +76,7 @@ class NOAA(BaseModule):
         sampling_period: str,
         measurement_type: str,
         instrument: Optional[str] = None,
-    ):
+    ) -> Dict[str, Dict]:
         """Read NOAA ObsPack NetCDF files
 
         Args:
@@ -105,12 +105,12 @@ class NOAA(BaseModule):
         # orig_attrs = obspack_ds.attrs
 
         # Want to find and drop any duplicate time values for the original dataset
-        # Using xarray directly we have to do in a slightly convoluted way as this is not well built 
+        # Using xarray directly we have to do in a slightly convoluted way as this is not well built
         # into the xarray workflow yet - https://github.com/pydata/xarray/pull/5239
         # - can use da.drop_duplicates() but only on one variable at a time and not on the whole Dataset
         # This method keeps attributes for each of the variables including units
 
-        # The dimension within the original dataset is called "obs" and has no associated coordinates 
+        # The dimension within the original dataset is called "obs" and has no associated coordinates
         # Extract time from original Dataset (dimension is "obs")
         time = obspack_ds.time
 
@@ -149,7 +149,7 @@ class NOAA(BaseModule):
 
         # TODO: Do we have a standard format for "units" attribute associated
         # with each data variable?
-        # At the moment the NOAA data included e.g. "mol mol-1", "micromol mol-1" 
+        # At the moment the NOAA data included e.g. "mol mol-1", "micromol mol-1"
         # but should this be updated to 1.0 or 1e-6
 
         try:
@@ -181,8 +181,7 @@ class NOAA(BaseModule):
         if instrument is not None:
             metadata["instrument"] = instrument
 
-        data = {}
-        data[species] = {"data": processed_ds, "metadata": metadata}
+        data = {species: {"data": processed_ds, "metadata": metadata}}
 
         # TODO - how do we want to handle the CF compliance for the ObsPack files?
         # GJ - 2021-04-14

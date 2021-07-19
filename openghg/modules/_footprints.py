@@ -1,7 +1,8 @@
 from openghg.modules import BaseModule
-from typing import Dict, Optional, Union
+from typing import DefaultDict, Dict, List, Optional, Union
 from pathlib import Path
 from pandas import Timestamp
+from xarray import Dataset
 
 __all__ = ["FOOTPRINTS"]
 
@@ -26,7 +27,7 @@ class FOOTPRINTS(BaseModule):
         overwrite: Optional[bool] = False,
         high_res: Optional[bool] = False,
         # model_params: Optional[Dict] = None,
-    ) -> Dict:
+    ) -> Dict[str, str]:
         """Reads footprint data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 
@@ -63,7 +64,7 @@ class FOOTPRINTS(BaseModule):
 
         # Need to read the metadata from the footprint and then store it
         # Do we need to chunk the footprint / will a Datasource store it correctly?
-        metadata = {}
+        metadata: Dict[str, Union[str, float, List[float]]] = {}
 
         metadata["data_type"] = "footprint"
         metadata["site"] = site
@@ -114,7 +115,7 @@ class FOOTPRINTS(BaseModule):
         # more than one footprint at a time
         key = "_".join((site, domain, model, height))
 
-        footprint_data = defaultdict(dict)
+        footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
         footprint_data[key]["data"] = fp_data
         footprint_data[key]["metadata"] = metadata
 
@@ -124,7 +125,7 @@ class FOOTPRINTS(BaseModule):
         lookup_results = fp.datasource_lookup(metadata=keyed_metadata)
 
         data_type = "footprint"
-        datasource_uuids = assign_data(
+        datasource_uuids: Dict[str, str] = assign_data(
             data_dict=footprint_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type
         )
 
@@ -137,7 +138,7 @@ class FOOTPRINTS(BaseModule):
 
         return datasource_uuids
 
-    def lookup_uuid(self, site: str, domain: str, model: str, height: str) -> Union[str, Dict]:
+    def lookup_uuid(self, site: str, domain: str, model: str, height: str) -> Union[str, bool]:
         """Perform a lookup for the UUID of a Datasource
 
         Args:
@@ -146,9 +147,11 @@ class FOOTPRINTS(BaseModule):
             model: Model name
             height: Height
         Returns:
-            str or dict: UUID or empty dict if no entry
+            str or dict: UUID or False if no entry
         """
-        return self._datasource_table[site][domain][model][height]
+        uuid = self._datasource_table[site][domain][model][height]
+
+        return uuid if uuid else False
 
     def set_uuid(self, site: str, domain: str, model: str, height: str, uuid: str) -> None:
         """Record a UUID of a Datasource in the datasource table
@@ -243,6 +246,6 @@ class FOOTPRINTS(BaseModule):
         """"""
         raise NotImplementedError()
 
-    def _get_metdata():
+    def _get_metdata(self):
         """This retrieves the metadata for this footprint"""
         raise NotImplementedError()

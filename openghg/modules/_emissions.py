@@ -1,6 +1,7 @@
 from openghg.modules import BaseModule
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Any, DefaultDict, Dict, Optional, Union
+from xarray import Dataset
 
 __all__ = ["Emissions"]
 
@@ -108,7 +109,7 @@ class Emissions(BaseModule):
 
         key = "_".join((species, source, domain, date))
 
-        emissions_data = defaultdict(dict)
+        emissions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
         emissions_data[key]["data"] = em_data
         emissions_data[key]["metadata"] = metadata
 
@@ -128,7 +129,7 @@ class Emissions(BaseModule):
 
         return datasource_uuids
 
-    def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, Dict]:
+    def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, bool]:
         """Perform a lookup for the UUID of a Datasource
 
         Args:
@@ -137,9 +138,11 @@ class Emissions(BaseModule):
             model: Model name
             height: Height
         Returns:
-            str or dict: UUID or empty dict if no entry
+            str or dict: UUID or False if no entry
         """
-        return self._datasource_table[species][source][domain][date]
+        uuid = self._datasource_table[species][source][domain][date]
+
+        return uuid if uuid else False
 
     def set_uuid(self, species: str, source: str, domain: str, date: str, uuid: str) -> None:
         """Record a UUID of a Datasource in the datasource table
@@ -155,7 +158,7 @@ class Emissions(BaseModule):
         """
         self._datasource_table[species][source][domain][date] = uuid
 
-    def datasource_lookup(self, metadata: Dict) -> Dict:
+    def datasource_lookup(self, metadata: Dict) -> Dict[str, Union[str, bool]]:
         """Find the Datasource we should assign the data to
 
         Args:
@@ -174,12 +177,7 @@ class Emissions(BaseModule):
             domain = data["domain"]
             date = data["date"]
 
-            result = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
-
-            if not result:
-                result = False
-
-            lookup_results[key] = result
+            lookup_results[key] = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
 
         return lookup_results
 
