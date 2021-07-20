@@ -40,7 +40,7 @@ class THAMESBARRIER(BaseModule):
         """
         from openghg.processing import assign_attributes
         from pandas import read_csv as pd_read_csv
-        from openghg.util import clean_string, compliant_string
+        from openghg.util import clean_string, clean_string
 
         if sampling_period is None:
             sampling_period = "NOT_SET"
@@ -82,7 +82,7 @@ class THAMESBARRIER(BaseModule):
 
             # All attributes stored in the metadata?
             metadata = {
-                "species": compliant_string(species),
+                "species": clean_string(species),
                 "site": site,
                 "inlet": clean_string(self._tb_params["inlet"]),
                 "network": "LGHG",

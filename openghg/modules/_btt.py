@@ -64,7 +64,7 @@ class BTT(BaseModule):
         """
         from pandas import read_csv, Timestamp, to_timedelta, isnull
         from numpy import nan as np_nan
-        from openghg.util import compliant_string
+        from openghg.util import clean_string
 
         # Rename these columns
         rename_dict = {"co2.cal": "CO2", "ch4.cal.ppb": "CH4"}
@@ -104,7 +104,7 @@ class BTT(BaseModule):
             site_attributes["sampling_period"] = sampling_period
 
             # TODO - add in better metadata reading
-            metadata = {"species": compliant_string(species), "sampling_period": str(sampling_period)}
+            metadata = {"species": clean_string(species), "sampling_period": str(sampling_period)}
 
             combined_data[species] = {
                 "metadata": metadata,

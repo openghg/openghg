@@ -1,4 +1,4 @@
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Union, TypedDict
 from xarray import Dataset
 
 __all__ = ["assign_attributes", "get_attributes"]
@@ -57,7 +57,7 @@ def get_attributes(
     scale: Optional[str] = None,
     sampling_period: Optional[int] = None,
     date_range: Optional[List[str]] = None,
-) -> Dict:
+) -> Dataset:
     """
     This function writes attributes to an xarray.Dataset so that they conform with
     the CF Convention v1.7
@@ -97,18 +97,20 @@ def get_attributes(
             (e.g. ["1900-01-01", "2010-01-01"])
     """
     from pandas import Timestamp as pd_Timestamp
-    from openghg.util import compliant_string, load_json
+    from openghg.util import clean_string, load_json
 
     # from numpy import unique as np_unique
 
     if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
 
+    variable_names: List[str] = [str(var) for var in ds.variables]
     # Current CF Conventions (v1.7) demand that valid variable names
     # begin with a letter and be composed of letters, digits and underscores
     # Here variable names are also made lowercase to enable easier matching below
-    to_underscores = {var: var.lower().replace(" ", "_") for var in ds.variables}
-    ds = ds.rename(to_underscores)
+    to_underscores: Dict[str, str] = {var: var.lower().replace(" ", "_") for var in variable_names}
+    # TODO - for some reason mypy doesn't see the dict as a mapping type for rename here
+    ds = ds.rename(to_underscores)  # type: ignore
 
     species_attrs = load_json(filename="species_attributes.json")
     attributes_data = load_json("attributes.json")
@@ -121,7 +123,9 @@ def get_attributes(
     species_upper = species.upper()
     species_lower = species.lower()
 
-    matched_keys = [var for var in ds.variables if species_lower in var]
+    # Best way to do this?
+    # List of strings from ds.variables instead?
+    matched_keys = [str(var) for var in variable_names if species_lower in str(var)]
 
     # If we don't have any variables to rename, raise an error
     if not matched_keys:
@@ -132,11 +136,11 @@ def get_attributes(
         try:
             species_label = species_translator[species_upper]["chem"]
         except KeyError:
-            species_label = compliant_string(species_lower)
+            species_label = clean_string(species_lower)
 
         species_rename[var] = var.replace(species_lower, species_label)
 
-    ds = ds.rename(species_rename)
+    ds = ds.rename(species_rename)  # type: ignore
 
     # Global attributes
     global_attributes_default = {
@@ -180,12 +184,12 @@ def get_attributes(
 
     ancillary_variables = []
 
-    matched_keys = [var for var in ds.variables if species_lower in var.lower()]
+    matched_keys = [var for var in variable_names if species_lower in var.lower()]
 
     # Write units as attributes to variables containing any of these
     match_words = ["variability", "repeatability", "stdev", "count"]
 
-    for key in ds.variables:
+    for key in variable_names:
         key = key.lower()
 
         if species_label.lower() in key:
@@ -224,7 +228,7 @@ def get_attributes(
 
     # Add quality flag attributes
     # NOTE - I've removed the whitespace before status_flag and integration_flag here
-    quality_flags = [key for key in ds.variables if "status_flag" in key]
+    quality_flags = [key for key in variable_names if "status_flag" in key]
 
     # Not getting long_name for c2f6
 
@@ -241,7 +245,7 @@ def get_attributes(
         }
 
     # Add integration flag attributes
-    integration_flags = [key for key in ds.variables if "integration_flag" in key]
+    integration_flags = [key for key in variable_names if "integration_flag" in key]
 
     for key in integration_flags:
         ds[key] = ds[key].astype(int)
@@ -267,7 +271,7 @@ def get_attributes(
 
     ds.time.encoding = {"units": f"seconds since {str(first_year)}-01-01 00:00:00"}
 
-    time_attributes = {}
+    time_attributes: Dict[str, Union[str, int]] = {}
     time_attributes["label"] = "left"
     time_attributes["standard_name"] = "time"
     time_attributes["comment"] = (

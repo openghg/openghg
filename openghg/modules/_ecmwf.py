@@ -1,4 +1,4 @@
-import cdsapi
+import cdsapi  # type: ignore
 from dataclasses import dataclass
 import numpy as np
 from typing import Dict, List, Tuple, Union, Optional
@@ -116,7 +116,7 @@ def _download_data(url: str) -> xr.Dataset:
 
     retry_strategy = Retry(
         total=3, status_forcelist=retriable_status_codes, allowed_methods=["HEAD", "GET", "OPTIONS"], backoff_factor=1
-    )
+    )  # type: ignore
 
     adapter = HTTPAdapter(max_retries=retry_strategy)
 

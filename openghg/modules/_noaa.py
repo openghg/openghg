@@ -246,7 +246,7 @@ class NOAA(BaseModule):
         Returns:
             dict: Dictionary containing attributes, data and metadata keys
         """
-        from openghg.util import compliant_string, read_header
+        from openghg.util import clean_string, read_header
         from pandas import read_csv, Timestamp
 
         header = read_header(filepath=data_filepath)
@@ -351,7 +351,7 @@ class NOAA(BaseModule):
         site_attributes["instrument"] = self._noaa_params["instrument"][species.upper()]
 
         metadata = {}
-        metadata["species"] = compliant_string(species)
+        metadata["species"] = clean_string(species)
         metadata["site"] = site
         metadata["measurement_type"] = measurement_type
         metadata["network"] = "NOAA"

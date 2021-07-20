@@ -3,7 +3,7 @@
 
 """
 from openghg.dataobjects import SearchResults
-from typing import Dict, Union
+from typing import DefaultDict, Dict, Union
 
 __all__ = ["search"]
 
@@ -33,6 +33,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     from collections import defaultdict
     from copy import deepcopy
     from itertools import chain as iter_chain
+    from openghg.dataobjects import ObsData
 
     from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions, EulerianModel
     from openghg.util import (
@@ -99,7 +100,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     # For the time being this will return a dict until we know how best to represent
     # the footprint and emissions results in a SearchResult object
     if data_type in {"emissions", "footprint", "eulerian_model"}:
-        sources = defaultdict(dict)
+        sources: DefaultDict[str, Dict] = defaultdict(dict)
         for datasource in datasources:
             if datasource.search_metadata(**search_kwargs):
                 uid = datasource.uuid()
@@ -250,7 +251,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
                 inlet_sampling_period = inlet_metadata["sampling_period"]
 
                 # Then we want to retrieve the correct metadata for those inlets
-                results = search(
+                results: ObsData = search(
                     site=site,
                     species=sp,
                     inlet=chosen_inlet,

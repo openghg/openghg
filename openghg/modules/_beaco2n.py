@@ -30,7 +30,7 @@ class BEACO2N:
         from numpy import nan as np_nan
         from openghg.util import load_json
         from collections import defaultdict
-        from openghg.util import compliant_string
+        from openghg.util import clean_string
 
         if sampling_period is None:
             sampling_period = "NOT_SET"
@@ -78,7 +78,7 @@ class BEACO2N:
             species_metadata = {
                 "units": units[mt],
                 "site": site_name,
-                "species": compliant_string(mt),
+                "species": clean_string(mt),
                 "inlet": "NA",
                 "network": "beaco2n",
                 "sampling_period": str(sampling_period),

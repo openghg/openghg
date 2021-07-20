@@ -135,7 +135,7 @@ class SearchResults:
 
     def retrieve(
         self, site: Optional[str] = None, species: Optional[str] = None, inlet: Optional[str] = None
-    ) -> Union[Dict, ObsData]:
+    ) -> Union[Dict[str, ObsData], ObsData]:
         """Retrieve some or all of the data found in the object store.
 
         Args:
@@ -149,6 +149,9 @@ class SearchResults:
         inlet = clean_string(inlet)
 
         if self.ranked_data:
+            if all((site, species, inlet)):
+                return self._create_obsdata(site=site, species=species, inlet=inlet)
+
             results = {}
             if site is not None and species is not None:
                 try:
@@ -182,13 +185,13 @@ class SearchResults:
                 for sp in species:
                     key = "_".join((a_site, sp))
                     results[key] = self._create_obsdata(site=a_site, species=sp)
+
+            return results
         else:
             if not all((species, site, inlet)):
                 raise ValueError("Please pass site, species and inlet.")
 
             return self._create_obsdata(site=site, species=species, inlet=inlet)
-
-        return results
 
     def _create_obsdata(self, site: str, species: str, inlet: Optional[str] = None) -> ObsData:
         """Creates an ObsData object for return to the user

@@ -391,7 +391,7 @@ class GCWERKS:
         """
         from collections import defaultdict
         from fnmatch import fnmatch
-        from openghg.util import compliant_string
+        from openghg.util import clean_string
 
         # Read inlets from the parameters
         expected_inlets = self.get_inlets(site_code=site)
@@ -414,7 +414,7 @@ class GCWERKS:
             for inlet, inlet_label in expected_inlets.items():
                 # Create a copy of metadata for local modification
                 spec_metadata = metadata.copy()
-                spec_metadata["species"] = compliant_string(spec)
+                spec_metadata["species"] = clean_string(spec)
                 spec_metadata["units"] = units[spec]
                 spec_metadata["scale"] = scale[spec]
 
@@ -464,7 +464,7 @@ class GCWERKS:
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
                 # A cleaned species label
-                comp_species = compliant_string(spec)
+                comp_species = clean_string(spec)
 
                 # Rename variables so they have lowercase and alphanumeric names
                 to_rename = {}

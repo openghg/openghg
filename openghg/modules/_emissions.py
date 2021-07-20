@@ -82,7 +82,7 @@ class Emissions(BaseModule):
                 attrs[key] = value
 
         author_name = "OpenGHG Cloud"
-        em_data.attrs["author"] = author_name 
+        em_data.attrs["author"] = author_name
 
         metadata = {}
         metadata.update(attrs)
@@ -118,7 +118,9 @@ class Emissions(BaseModule):
         lookup_results = em_store.datasource_lookup(metadata=keyed_metadata)
 
         data_type = "emissions"
-        datasource_uuids = assign_data(data_dict=emissions_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type)
+        datasource_uuids = assign_data(
+            data_dict=emissions_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type
+        )
 
         em_store.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
 
@@ -166,7 +168,7 @@ class Emissions(BaseModule):
         Returns:
             dict: Dictionary of datasource information
         """
-        # TODO - I'll leave this as a function for now as the way we read emissions may 
+        # TODO - I'll leave this as a function for now as the way we read emissions may
         # change in the near future
         # GJ - 2021-04-20
         lookup_results = {}

@@ -59,8 +59,8 @@ def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_pref
 
     root_len = len(bucket) + 1
 
-    if without_prefix:
-        prefix_len = len(prefix)
+    if without_prefix is not None:
+        prefix_len = len(str(prefix))
 
     subdir_names = glob.glob(f"{root}*")
 
