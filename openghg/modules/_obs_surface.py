@@ -31,7 +31,7 @@ class ObsSurface(BaseModule):
 
         Args:
             filepath: Filepath(s)
-            data_type: Data type, for example CRDS, GCWERKS, ICOS
+            data_type: Data type, for example CRDS, GCWERKS
             site: Site code/name
             network: Network name
             inlet: Inlet height. If processing multiple files pass None, OpenGHG will attempt to
