@@ -56,7 +56,7 @@ class EUROCOM:
         gas_data = self.read_data(data_filepath=data_filepath, sampling_period=sampling_period, site=site)
 
         # Assign attributes to the xarray Datasets here data here makes it a lot easier to test
-        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=self._sampling_period)
+        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=sampling_period)
 
         return gas_data
 

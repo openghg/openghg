@@ -12,7 +12,7 @@ class Emissions(BaseModule):
     _root = "Emissions"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
 
-    def save(self, bucket: Optional[Dict] = None) -> None:
+    def save(self) -> None:
         """Save the object to the object store
 
         Args:
@@ -22,8 +22,7 @@ class Emissions(BaseModule):
         """
         from openghg.objectstore import get_bucket, set_object_from_json
 
-        if bucket is None:
-            bucket = get_bucket()
+        bucket = get_bucket()
 
         obs_key = f"{Emissions._root}/uuid/{Emissions._uuid}"
 
@@ -39,7 +38,7 @@ class Emissions(BaseModule):
         date: str,
         high_time_resolution: Optional[bool] = False,
         period: Optional[str] = None,
-        overwrite: Optional[bool] = False,
+        overwrite: bool = False,
     ):
         """Read emissions file
 

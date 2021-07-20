@@ -123,7 +123,9 @@ def get_obs_surface(
         ds_resampled.attrs["averaged_period_str"] = average
 
         # For some variables, need a different type of resampling
-        for var in data.variables:
+        data_variables: List[str] = [str(v) for v in data.variables]
+
+        for var in data_variables:
             if "repeatability" in var:
                 ds_resampled[var] = (
                     np.sqrt((data[var] ** 2).resample(time=average).sum()) / data[var].resample(time=average).count()
@@ -153,9 +155,10 @@ def get_obs_surface(
         data = ds_resampled
 
     # Rename variables
-    rename = {}
+    rename: Dict[str, str] = {}
 
-    for var in data.variables:
+    data_variables = [str(v) for v in data.variables]
+    for var in data_variables:
         if var.lower() == species.lower():
             rename[var] = "mf"
         if "repeatability" in var:
@@ -169,7 +172,7 @@ def get_obs_surface(
         if "integration_flag" in var:
             rename[var] = "integration_flag"
 
-    data = data.rename_vars(rename)
+    data = data.rename_vars(rename) # type: ignore
 
     data.attrs["species"] = species
 

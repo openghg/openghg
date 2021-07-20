@@ -1,7 +1,7 @@
 """ Utility functions that are used by multiple modules
 
 """
-from typing import Any, Dict, Set, List, Union, Tuple, Optional, Iterator
+from typing import Any, Dict, Set, List, Union, Tuple, Optional, Iterator, overload
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -153,6 +153,20 @@ def is_number(s: str) -> bool:
     except ValueError:
         return False
 
+@overload
+def to_lowercase(d: Dict) -> Dict: ...
+
+@overload
+def to_lowercase(d: List) -> List: ...
+
+@overload
+def to_lowercase(d: Tuple) -> Tuple: ...
+
+@overload
+def to_lowercase(d: Set) -> Set: ...
+
+@overload
+def to_lowercase(d: str) -> str: ...
 
 def to_lowercase(d: Union[Dict, List, Tuple, Set, str]) -> Union[Dict, List, Tuple, Set, str]:
     """Convert an object to lowercase. All keys and values in a dictionary will be converted

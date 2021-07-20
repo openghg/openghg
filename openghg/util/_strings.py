@@ -1,9 +1,15 @@
-from typing import Union
+from typing import Union, Optional, overload
 
 __all__ = ["clean_string"]
 
+@overload
+def clean_string(to_clean: str) -> str: ...
 
-def clean_string(to_clean: str) -> Union[str, None]:
+@overload
+def clean_string(to_clean: None) -> None: ...
+
+
+def clean_string(to_clean: Optional[str]) -> Union[str, None]:
     """Returns a lowercase string with only alphanumeric
     characters.
 
@@ -15,7 +21,7 @@ def clean_string(to_clean: str) -> Union[str, None]:
     import re
 
     if to_clean is None:
-        return
+        raise TypeError("Cannot clean NoneType")
 
     try:
         # Removes all whitespace

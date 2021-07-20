@@ -15,7 +15,7 @@ class METStore(BaseModule):
     _root = "METStore"
     _uuid = "9fcabd0c-9b68-4ab4-a116-bc30a4472d67"
 
-    def save(self, bucket: Optional[Dict] = None) -> None:
+    def save(self) -> None:
         """Save the object to the object store
 
         Args:
@@ -25,8 +25,7 @@ class METStore(BaseModule):
         """
         from openghg.objectstore import get_bucket, set_object_from_json
 
-        if bucket is None:
-            bucket = get_bucket()
+        bucket = get_bucket()
 
         obs_key = f"{METStore._root}/uuid/{METStore._uuid}"
 

@@ -74,10 +74,10 @@ class RankSources:
         self,
         key: str,
         rank: Union[int, str],
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
-        overwrite: Optional[bool] = False,
-        dateranges: Optional[List] = None,
+        start_date: str = None,
+        end_date: str = None,
+        overwrite: bool = False,
+        dateranges: Union[str, List] = None,
     ) -> None:
         """Set the rank data for the
 

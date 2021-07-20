@@ -103,8 +103,10 @@ class GCWERKS:
         network = clean_string(network)
         # We don't currently do anything with inlet here as it's always read from data
         # or taken from process_gcwerks_parameters.json
-        inlet = clean_string(inlet)
-        instrument = clean_string(instrument)
+        if inlet is not None:
+            inlet = clean_string(inlet)
+        if instrument is not None:
+            instrument = clean_string(instrument)
 
         if not valid_site(site):
             raise ValueError(f"Invalid site {site} passed.")
@@ -253,17 +255,9 @@ class GCWERKS:
         metadata["sampling_period"] = str(extracted_sampling_period)
 
         if sampling_period is not None:
-            # Check input sampling_period can be interpreted
-            if isinstance(sampling_period, str):
-                input_sampling_period = pd_Timedelta(sampling_period)
-            else:
-                raise TypeError(
-                    "Sampling period must be a string including the unit using pandas frequency aliases like '1H' or '1min')"
-                )
-
             # Compare input to definition within json file
             file_sampling_period = pd_Timedelta(seconds=extracted_sampling_period)
-            comparison_seconds = abs(input_sampling_period - file_sampling_period).total_seconds()
+            comparison_seconds = abs(sampling_period - file_sampling_period).total_seconds()
             tolerance_seconds = 1
 
             if comparison_seconds > tolerance_seconds:

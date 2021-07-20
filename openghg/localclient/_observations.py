@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Union
 from pandas import Timestamp
 from openghg.dataobjects import ObsData
 from openghg.processing import get_obs_surface as proc_get_obs_surface
@@ -9,14 +9,14 @@ __all__ = ["get_obs_surface"]
 def get_obs_surface(
     site: str,
     species: str,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    inlet: Optional[str] = None,
-    average: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
-    calibration_scale: Optional[str] = None,
-    keep_missing: Optional[bool] = False,
+    inlet: str,
+    start_date: Union[str, Timestamp] = None,
+    end_date: Union[str, Timestamp] = None,
+    average: str = None,
+    network: str = None,
+    instrument: str = None,
+    calibration_scale: str = None,
+    keep_missing: bool = False,
 ) -> ObsData:
     """This is the equivalent of the get_obs function from the ACRG repository.
 

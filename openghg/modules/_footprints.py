@@ -23,9 +23,9 @@ class FOOTPRINTS(BaseModule):
         metmodel: Optional[str] = None,
         species: Optional[str] = None,
         network: Optional[str] = None,
-        retrieve_met: Optional[bool] = False,
-        overwrite: Optional[bool] = False,
-        high_res: Optional[bool] = False,
+        retrieve_met: bool = False,
+        overwrite: bool = False,
+        high_res: bool = False,
         # model_params: Optional[Dict] = None,
     ) -> Dict[str, str]:
         """Reads footprint data files and returns the UUIDS of the Datasources
@@ -48,6 +48,8 @@ class FOOTPRINTS(BaseModule):
         from openghg.util import hash_file, timestamp_tzaware, timestamp_now, clean_string
         from openghg.processing import assign_data
 
+        filepath = Path(filepath)
+
         site = clean_string(site)
         network = clean_string(network)
         height = clean_string(height)
@@ -59,7 +61,6 @@ class FOOTPRINTS(BaseModule):
         if file_hash in fp._file_hashes and not overwrite:
             raise ValueError(f"This file has been uploaded previously with the filename : {fp._file_hashes[file_hash]}.")
 
-        filepath = Path(filepath)
         fp_data = open_dataset(filepath)
 
         # Need to read the metadata from the footprint and then store it

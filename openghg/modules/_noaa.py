@@ -22,7 +22,7 @@ class NOAA(BaseModule):
         site: str,
         inlet: str,
         measurement_type: str,
-        network: Optional[str] = "NOAA",
+        network: str = "NOAA",
         instrument: Optional[str] = None,
         sampling_period: Optional[str] = None,
     ) -> Dict:
@@ -175,7 +175,7 @@ class NOAA(BaseModule):
         metadata["network"] = network
         metadata["measurement_type"] = measurement_type
         metadata["species"] = species
-        metadata["sampling_period"] = str(sampling_period)
+        metadata["sampling_period"] = sampling_period
         metadata["units"] = units
 
         if instrument is not None:
@@ -232,7 +232,7 @@ class NOAA(BaseModule):
         return gas_data
 
     def read_raw_data(
-        self, data_filepath: Path, species: str, inlet: str, sampling_period: str, measurement_type: Optional[str] = "flask"
+        self, data_filepath: Path, species: str, inlet: str, sampling_period: str, measurement_type: str = "flask"
     ) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
@@ -356,7 +356,7 @@ class NOAA(BaseModule):
         metadata["measurement_type"] = measurement_type
         metadata["network"] = "NOAA"
         metadata["inlet"] = inlet
-        metadata["sampling_period"] = str(sampling_period)
+        metadata["sampling_period"] = sampling_period
 
         combined_data[species.lower()] = {
             "metadata": metadata,

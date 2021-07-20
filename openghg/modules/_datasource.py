@@ -1,5 +1,5 @@
 from pandas import DataFrame, Timestamp
-from typing import DefaultDict, Dict, List, Optional, Tuple, Union
+from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Union
 from xarray import Dataset
 
 dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
@@ -155,8 +155,8 @@ class Datasource:
         """
         from openghg.util import to_lowercase
 
-        metadata = to_lowercase(metadata)
-        self._metadata.update(metadata)
+        lowercased: Dict = to_lowercase(metadata)
+        self._metadata.update(lowercased)
 
     def add_emissions_data(self, data: Dataset) -> None:
         """Add flux data to this Datasource
@@ -357,7 +357,7 @@ class Datasource:
             with open(tmp_path, "wb") as f:
                 f.write(data)
 
-            ds = load_dataset(tmp_path)
+            ds: Dataset = load_dataset(tmp_path)
 
             return ds
 

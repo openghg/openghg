@@ -120,7 +120,7 @@ class BaseModule:
 
         return cls.from_data(data=data)
 
-    def save(cls, bucket: Optional[Dict] = None) -> None:
+    def save(cls) -> None:
         """Save the object to the object store
 
         Args:
@@ -130,8 +130,7 @@ class BaseModule:
         """
         from openghg.objectstore import get_bucket, set_object_from_json
 
-        if bucket is None:
-            bucket = get_bucket()
+        bucket = get_bucket()
 
         obs_key = f"{cls._root}/uuid/{cls._uuid}"
 
@@ -271,7 +270,7 @@ class BaseModule:
                             continue
                         # If the ranks are the same we just want to combine the dateranges
                         elif rank == existing_rank:
-                            to_combine = (new_daterange, existing_daterange)
+                            to_combine = [new_daterange, existing_daterange]
                             combined = combine_dateranges(dateranges=to_combine)[0]
                             to_update.append((existing_daterange, combined))
                         else:

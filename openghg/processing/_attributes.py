@@ -1,4 +1,4 @@
-from typing import Dict, Optional, List, Union, TypedDict
+from typing import Dict, Optional, List, Union
 from xarray import Dataset
 
 __all__ = ["assign_attributes", "get_attributes"]
@@ -8,7 +8,7 @@ def assign_attributes(
     data: Dict,
     site: str,
     network: Optional[str] = None,
-    sampling_period: Optional[int] = None,
+    sampling_period: Optional[str] = None,
 ) -> Dict:
     """Assign attributes to the data we've processed. This ensures that the xarray Datasets produced
     as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
@@ -55,7 +55,7 @@ def get_attributes(
     global_attributes: Optional[Dict] = None,
     units: Optional[str] = None,
     scale: Optional[str] = None,
-    sampling_period: Optional[int] = None,
+    sampling_period: Optional[str] = None,
     date_range: Optional[List[str]] = None,
 ) -> Dataset:
     """
@@ -91,7 +91,7 @@ def get_attributes(
             unless this is specified. Options are in units_interpret
         scale: Calibration scale for species.
         sampling_period: Number of seconds for which air
-            sample is taken. Only for time variable attribute
+            sample is taken. Only for time variable attribute.
         date_range: Start and end date for output
             If you only want an end date, just put a very early start date
             (e.g. ["1900-01-01", "2010-01-01"])
@@ -164,7 +164,7 @@ def get_attributes(
         global_attributes["Calibration_scale"] = scale
 
     # Update the Dataset attributes
-    ds.attrs.update(global_attributes)
+    ds.attrs.update(global_attributes)  # type: ignore
 
     # Add some site attributes
     site_attributes = _site_info_attributes(site.upper(), network)

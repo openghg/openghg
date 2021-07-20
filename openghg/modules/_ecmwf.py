@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import numpy as np
 from typing import Dict, List, Tuple, Union, Optional
 import requests
-import xarray as xr
+from xarray import open_dataset, Dataset
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
@@ -14,7 +14,7 @@ __all__ = ["retrieve_met", "METData"]
 
 @dataclass(frozen=True)
 class METData:
-    data: xr.Dataset
+    data: Dataset
     metadata: Dict
 
 
@@ -93,7 +93,7 @@ def retrieve_met(site: str, network: str, years: Union[str, List[str]], variable
     return METData(data=dataset, metadata=metadata)
 
 
-def _download_data(url: str) -> xr.Dataset:
+def _download_data(url: str) -> Dataset:
     """Retrieve data from the passed URL. This is used to retrieve data from
     the Copernicus data store.
 
@@ -127,7 +127,7 @@ def _download_data(url: str) -> xr.Dataset:
     data = http.get(url, timeout=timeout).content
 
     try:
-        dataset = xr.open_dataset(data)
+        dataset: Dataset = open_dataset(data)
     except ValueError:
         raise ValueError("Invalid data returned, cannot create dataset.")
 

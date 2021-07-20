@@ -9,7 +9,7 @@ __all__ = ["search"]
 
 
 def search(**kwargs) -> Union[Dict, SearchResults]:
-    """Search for observations data. Any keyword arguments may be passed to the 
+    """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
 
@@ -44,7 +44,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
         closest_daterange,
         find_daterange_gaps,
         split_daterange_str,
-    )  
+    )
 
     # Get a copy of kwargs as we make some modifications below
     kwargs_copy = deepcopy(kwargs)
@@ -82,10 +82,10 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     if data_type not in valid_data_types:
         raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
 
-    # Here we want to load in the ObsSurface module for now
-    if data_type == "timeseries":
-        obj = ObsSurface.load()
-    elif data_type == "footprint":
+    # Assume we want timeseries data
+    obj: Union[ObsSurface, FOOTPRINTS, Emissions, EulerianModel] = ObsSurface.load()
+
+    if data_type == "footprint":
         obj = FOOTPRINTS.load()
     elif data_type == "emissions":
         obj = Emissions.load()
@@ -251,7 +251,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
                 inlet_sampling_period = inlet_metadata["sampling_period"]
 
                 # Then we want to retrieve the correct metadata for those inlets
-                results: ObsData = search(
+                results: SearchResults = search(
                     site=site,
                     species=sp,
                     inlet=chosen_inlet,
@@ -259,7 +259,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
                     sampling_period=inlet_sampling_period,
                     start_date=gap_start,
                     end_date=gap_end,
-                )
+                )  # type: ignore
 
                 if not results:
                     continue

@@ -80,9 +80,9 @@ def single_site_footprint(
         footprint_site = site_modifier
 
     # Get the footprint data
-    footprint_results = search(
+    footprint_results: Dict = search(
         site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
-    )
+    ) # type: ignore
 
     try:
         fp_site_key = list(footprint_results.keys())[0]
@@ -205,9 +205,7 @@ def footprints_data_merge(
     )
 
 
-def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: Optional[str] = "ffill", tolerance: Optional[str] = None
-) -> Dataset:
+def combine_datasets(dataset_A: Dataset, dataset_B: Dataset, method: str = "ffill", tolerance: Optional[float] = None) -> Dataset:
     """Merges two datasets and re-indexes to the first dataset.
 
         If "fp" variable is found within the combined dataset,
@@ -228,9 +226,9 @@ def combine_datasets(
     if indexes_match(dataset_A, dataset_B):
         dataset_B_temp = dataset_B
     else:
-        dataset_B_temp = dataset_B.reindex_like(dataset_A, method, tolerance=tolerance)
+        dataset_B_temp = dataset_B.reindex_like(other=dataset_A, method=method, tolerance=tolerance)  # type: ignore
 
-    merged_ds = dataset_A.merge(dataset_B_temp)
+    merged_ds = dataset_A.merge(other=dataset_B_temp)
 
     if "fp" in merged_ds:
         if all(k in merged_ds.fp.dims for k in ("lat", "long")):
@@ -396,7 +394,7 @@ def get_flux(
     if end_date is None:
         end_date = timestamp_now()
 
-    results = search(
+    results: Dict = search(
         species=species,
         source=sources,
         domain=domain,
@@ -404,7 +402,7 @@ def get_flux(
         start_date=start_date,
         end_date=end_date,
         data_type="emissions",
-    )
+    ) # type: ignore
 
     # TODO - more than one emissions file
     try:

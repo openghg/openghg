@@ -1,5 +1,5 @@
 from . import client, jobs, localclient, modules, objectstore, processing, service, util
-from ._version import get_versions
+from ._version import get_versions # type: ignore
 
 __all__ = ["client", "jobs", "localclient", "modules", "objectstore", "processing", "service", "util"]
 

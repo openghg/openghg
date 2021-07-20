@@ -1,12 +1,12 @@
 """ Segment the data into Datasources
 
 """
-from typing import Dict, Optional
+from typing import Dict
 
 __all__ = ["get_split_frequency", "assign_data"]
 
 
-def assign_data(data_dict: Dict, lookup_results: Dict, overwrite: bool, data_type: Optional[str] = "timeseries") -> Dict[str, str]:
+def assign_data(data_dict: Dict, lookup_results: Dict, overwrite: bool, data_type: str = "timeseries") -> Dict[str, str]:
     """Assign data to a Datasource. This will either create a new Datasource
     Create or get an existing Datasource for each gas in the file
 

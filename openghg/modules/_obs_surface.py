@@ -19,11 +19,11 @@ class ObsSurface(BaseModule):
         data_type: str,
         site: str,
         network: str,
-        inlet: Optional[str] = None,
-        instrument: Optional[str] = None,
-        sampling_period: Optional[str] = None,
-        measurement_type: Optional[str] = "insitu",
-        overwrite: Optional[bool] = False,
+        inlet: str = None,
+        instrument: str = None,
+        sampling_period: str = None,
+        measurement_type: str = "insitu",
+        overwrite: bool = False,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -37,7 +37,7 @@ class ObsSurface(BaseModule):
             inlet: Inlet height. If processing multiple files pass None, OpenGHG will attempt to
             read inlets from data.
             instrument: Instrument name
-            sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period)
+            sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
             overwrite: Overwrite previously uploaded data
         Returns:
@@ -46,6 +46,7 @@ class ObsSurface(BaseModule):
         from collections import defaultdict
         import logging
         from pathlib import Path
+        from pandas import Timedelta
         import sys
         from tqdm import tqdm
         from openghg.util import load_object, hash_file, clean_string
@@ -70,6 +71,10 @@ class ObsSurface(BaseModule):
         inlet = clean_string(inlet)
         instrument = clean_string(instrument)
         sampling_period = clean_string(sampling_period)
+
+        # If we have a sampling period passed we want the number of seconds
+        if sampling_period is not None:
+            sampling_period_seconds = str(Timedelta(sampling_period).total_seconds())
 
         # Load the data processing object
         data_obj = load_object(class_name=data_type)
@@ -105,7 +110,7 @@ class ObsSurface(BaseModule):
                         network=network,
                         inlet=inlet,
                         instrument=instrument,
-                        sampling_period=sampling_period,
+                        sampling_period=sampling_period_seconds,
                         measurement_type=measurement_type,
                     )
                 else:
@@ -115,7 +120,7 @@ class ObsSurface(BaseModule):
                         network=network,
                         inlet=inlet,
                         instrument=instrument,
-                        sampling_period=sampling_period,
+                        sampling_period=sampling_period_seconds,
                         measurement_type=measurement_type,
                     )
 

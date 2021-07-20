@@ -8,7 +8,7 @@ __all__ = ["CRDS"]
 
 
 class CRDS:
-    """ Class for processing CRDS data """
+    """Class for processing CRDS data"""
 
     def __init__(self):
         data = load_json(filename="process_gcwerks_parameters.json")
@@ -150,18 +150,10 @@ class CRDS:
             metadata["network"] = network
 
         if sampling_period is not None:
-            # Check input sampling_period can be interpreted
-            if isinstance(sampling_period, str):
-                input_sampling_period = Timedelta(sampling_period)
-            else:
-                raise TypeError(
-                    "Sampling period must be a string including the unit " "(using pandas frequency aliases like '1H' or '1min')"
-                )
-
             # Compare against value extracted from the file name
             file_sampling_period = Timedelta(seconds=metadata["sampling_period"])
 
-            comparison_seconds = abs(input_sampling_period - file_sampling_period).total_seconds()
+            comparison_seconds = abs(sampling_period - file_sampling_period).total_seconds()
             tolerance_seconds = 1
 
             if comparison_seconds > tolerance_seconds:

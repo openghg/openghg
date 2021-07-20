@@ -20,7 +20,7 @@ class EulerianModel(BaseModule):
     _root = "EulerianModel"
     _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
 
-    def save(self, bucket: Optional[Dict] = None) -> None:
+    def save(self) -> None:
         """Save the object to the object store
 
         Args:
@@ -30,8 +30,7 @@ class EulerianModel(BaseModule):
         """
         from openghg.objectstore import get_bucket, set_object_from_json
 
-        if bucket is None:
-            bucket = get_bucket()
+        bucket = get_bucket()
 
         obs_key = f"{EulerianModel._root}/uuid/{EulerianModel._uuid}"
 
@@ -46,7 +45,7 @@ class EulerianModel(BaseModule):
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         setup: Optional[str] = None,
-        overwrite: Optional[bool] = False,
+        overwrite: bool = False,
     ):
         """Read Eulerian model output
 

@@ -22,7 +22,7 @@ class THAMESBARRIER(BaseModule):
     def read_file(
         self,
         data_filepath: Union[str, Path],
-        site: Optional[str] = "TMB",
+        site: str = "TMB",
         network: Optional[str] = "LGHG",
         inlet: Optional[str] = None,
         instrument: Optional[str] = None,
@@ -86,7 +86,7 @@ class THAMESBARRIER(BaseModule):
                 "site": site,
                 "inlet": clean_string(self._tb_params["inlet"]),
                 "network": "LGHG",
-                "sampling_period": str(sampling_period)
+                "sampling_period": sampling_period
             }
             metadata.update(site_attributes)
 
