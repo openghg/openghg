@@ -304,9 +304,9 @@ def align_datasets(
     # Get the period of measurements in time
     obs_attributes = obs_data.attrs
     if "averaged_period" in obs_attributes:
-        obs_data_period_s = obs_attributes["averaged_period"]
+        obs_data_period_s = float(obs_attributes["averaged_period"])
     elif "sampling_period" in obs_attributes:
-        obs_data_period_s = obs_attributes["sampling_period"]
+        obs_data_period_s = float(obs_attributes["sampling_period"])
     else:
         # Attempt to derive sampling period from frequency of data
         obs_data_period_s = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9).astype("int64")
@@ -344,16 +344,23 @@ def align_datasets(
     # Only non satellite datasets with different periods need to be resampled
     timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
     tolerance = 1e-9  # seconds
+    
     if timeperiod_diff_s >= tolerance:
         base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
 
-        if (obs_data_timeperiod >= footprint_data_timeperiod) or resample_to == "obs":
+        if resample_to == "coarsest":
+            if obs_data_timeperiod >= footprint_data_timeperiod:
+                resample_to = "obs"
+            elif obs_data_timeperiod < footprint_data_timeperiod:
+                resample_to = "footprint"
+
+        if resample_to == "obs":
 
             resample_period = str(round(obs_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
 
             footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
 
-        elif obs_data_timeperiod < footprint_data_timeperiod or resample_to == "footprint":
+        elif resample_to == "footprint":
 
             resample_period = str(round(footprint_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
 
@@ -512,8 +519,8 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
         If both output_TS and output_fpXflux are both True:
             Both DataArrays are returned.
 
-    TODO: Using pure dask arrays (based on Hannah's original code)
-    but would be good to update this to add more pre-indexing usig xarray and/or
+    TODO: Currently using pure dask arrays (based on Hannah's original code)
+    but would be good to update this to add more pre-indexing using xarray and/or
     use dask as part of datasets.
     """
     import numpy as np
