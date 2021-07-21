@@ -1,5 +1,7 @@
 __all__ = ["JobCreator"]
 
+# type: ignore
+
 
 class JobCreator:
     """ Create a job to be run on a HPC cluster

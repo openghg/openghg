@@ -271,7 +271,7 @@ def test_from_data(data):
     assert metadata["sampling_period"] == "60"
     assert metadata["inlet"] == "248m"
 
-    assert d_2.data_keys() == d.data_keys()
+    assert sorted(d_2.data_keys()) == sorted(d.data_keys())
     assert d_2.metadata() == d.metadata()
 
 
