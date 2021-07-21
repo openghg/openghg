@@ -99,21 +99,17 @@ def get_attributes(
     from pandas import Timestamp as pd_Timestamp
     from openghg.util import clean_string, load_json
 
-    # from numpy import unique as np_unique
-
     if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
-
-    variable_names: List[str] = [str(var) for var in ds.variables]
-
-    print(ds.variables.keys(), variable_names)
 
     # Current CF Conventions (v1.7) demand that valid variable names
     # begin with a letter and be composed of letters, digits and underscores
     # Here variable names are also made lowercase to enable easier matching below
-    to_underscores: Dict[str, str] = {var: var.lower().replace(" ", "_") for var in variable_names}
+    to_underscores: Dict[str, str] = {str(var): str(var).lower().replace(" ", "_") for var in ds.variables}
     # TODO - for some reason mypy doesn't see the dict as a mapping type for rename here
     ds = ds.rename(to_underscores)  # type: ignore
+
+    variable_names = [str(v) for v in ds.variables]
 
     species_attrs = load_json(filename="species_attributes.json")
     attributes_data = load_json("attributes.json")
@@ -187,7 +183,7 @@ def get_attributes(
 
     ancillary_variables = []
 
-    matched_keys = [var for var in variable_names if species_lower in var.lower()]
+    # matched_keys = [var for var in ds.variables if species_lower in var.lower()]
 
     # Write units as attributes to variables containing any of these
     match_words = ["variability", "repeatability", "stdev", "count"]

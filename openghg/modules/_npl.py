@@ -62,7 +62,8 @@ class NPL(BaseModule):
         from datetime import datetime
         from openghg.util import clean_string
 
-        def parser(date: str) -> Union[datetime, NaT]:
+        # mypy doesn't like NaT or NaNs - look into this
+        def parser(date: str):  # type: ignore
             try:
                 return datetime.strptime(str(date), "%d/%m/%Y %H:%M")
             except ValueError:

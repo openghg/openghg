@@ -112,7 +112,7 @@ class CRDS:
             inlet = inlet_fname
 
         # Function to parse the datetime format found in the datafile
-        def parse_date(date: str) -> Union[datetime, NaT]:
+        def parse_date(date: str):  # type: ignore
             try:
                 return datetime.strptime(date, "%y%m%d %H%M%S")
             except ValueError:
