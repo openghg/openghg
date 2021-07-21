@@ -1,4 +1,4 @@
-from typing import Dict, Optional, List, Union
+from typing import cast, Any, Dict, Optional, List, Union
 from xarray import Dataset
 
 __all__ = ["assign_attributes", "get_attributes"]
@@ -7,8 +7,8 @@ __all__ = ["assign_attributes", "get_attributes"]
 def assign_attributes(
     data: Dict,
     site: str,
-    network: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    network: str = None,
+    sampling_period: str = None,
 ) -> Dict:
     """Assign attributes to the data we've processed. This ensures that the xarray Datasets produced
     as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
@@ -31,7 +31,7 @@ def assign_attributes(
         scale = data[key].get("metadata", {}).get("scale")
 
         if sampling_period is None:
-            sampling_period = data[key].get("metadata", {}).get("sampling_period")
+            sampling_period = str(data[key].get("metadata", {}).get("sampling_period"))
 
         data[key]["data"] = get_attributes(
             ds=data[key]["data"],
@@ -51,12 +51,12 @@ def get_attributes(
     ds: Dataset,
     species: str,
     site: str,
-    network: Optional[str] = None,
-    global_attributes: Optional[Dict] = None,
-    units: Optional[str] = None,
-    scale: Optional[str] = None,
-    sampling_period: Optional[str] = None,
-    date_range: Optional[List[str]] = None,
+    network: str = None,
+    global_attributes: Dict[str, str] = None,
+    units: str = None,
+    scale: str = None,
+    sampling_period: str = None,
+    date_range: List[str] = None,
 ) -> Dataset:
     """
     This function writes attributes to an xarray.Dataset so that they conform with
@@ -91,7 +91,7 @@ def get_attributes(
             unless this is specified. Options are in units_interpret
         scale: Calibration scale for species.
         sampling_period: Number of seconds for which air
-            sample is taken. Only for time variable attribute.
+            sample is taken. Only for time variable attribute
         date_range: Start and end date for output
             If you only want an end date, just put a very early start date
             (e.g. ["1900-01-01", "2010-01-01"])
@@ -99,17 +99,21 @@ def get_attributes(
     from pandas import Timestamp as pd_Timestamp
     from openghg.util import clean_string, load_json
 
+    # from numpy import unique as np_unique
+
     if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
 
     # Current CF Conventions (v1.7) demand that valid variable names
     # begin with a letter and be composed of letters, digits and underscores
     # Here variable names are also made lowercase to enable easier matching below
-    to_underscores: Dict[str, str] = {str(var): str(var).lower().replace(" ", "_") for var in ds.variables}
-    # TODO - for some reason mypy doesn't see the dict as a mapping type for rename here
-    ds = ds.rename(to_underscores)  # type: ignore
 
-    variable_names = [str(v) for v in ds.variables]
+    # TODO - could I just cast ds.variables as as type for mypy instead of doing this?
+    # variable_names = [str(v) for v in ds.variables]
+    # Is this better?
+    variable_names = cast(Dict[str, Any], ds.variables)
+    to_underscores = {var: var.lower().replace(" ", "_") for var in variable_names}
+    ds = ds.rename(to_underscores)  # type: ignore
 
     species_attrs = load_json(filename="species_attributes.json")
     attributes_data = load_json("attributes.json")
@@ -122,8 +126,7 @@ def get_attributes(
     species_upper = species.upper()
     species_lower = species.lower()
 
-    # Best way to do this?
-    # List of strings from ds.variables instead?
+    variable_names = cast(Dict[str, Any], ds.variables)
     matched_keys = [var for var in variable_names if species_lower in var]
 
     # If we don't have any variables to rename, raise an error
@@ -148,8 +151,9 @@ def get_attributes(
         "Conventions": "CF-1.6",
     }
 
-    if global_attributes:
-        global_attributes.update(global_attributes_default)
+    if global_attributes is not None:
+        # TODO - for some reason mypy doesn't see a Dict[str,str] as a valid Mapping[Hashable, Any] type
+        global_attributes.update(global_attributes_default)  # type: ignore
     else:
         global_attributes = global_attributes_default
 
@@ -183,7 +187,8 @@ def get_attributes(
 
     ancillary_variables = []
 
-    # matched_keys = [var for var in ds.variables if species_lower in var.lower()]
+    variable_names = cast(Dict[str, Any], ds.variables)
+    matched_keys = [var for var in variable_names if species_lower in var.lower()]
 
     # Write units as attributes to variables containing any of these
     match_words = ["variability", "repeatability", "stdev", "count"]
@@ -227,6 +232,7 @@ def get_attributes(
 
     # Add quality flag attributes
     # NOTE - I've removed the whitespace before status_flag and integration_flag here
+    variable_names = cast(Dict[str, Any], ds.variables)
     quality_flags = [key for key in variable_names if "status_flag" in key]
 
     # Not getting long_name for c2f6
@@ -243,6 +249,7 @@ def get_attributes(
             "long_name": f"{long_name} status_flag",
         }
 
+    variable_names = cast(Dict[str, Any], ds.variables)
     # Add integration flag attributes
     integration_flags = [key for key in variable_names if "integration_flag" in key]
 
@@ -270,7 +277,7 @@ def get_attributes(
 
     ds.time.encoding = {"units": f"seconds since {str(first_year)}-01-01 00:00:00"}
 
-    time_attributes: Dict[str, Union[str, int]] = {}
+    time_attributes: Dict[str, str] = {}
     time_attributes["label"] = "left"
     time_attributes["standard_name"] = "time"
     time_attributes["comment"] = (

@@ -47,6 +47,8 @@ class NOAA(BaseModule):
         if sampling_period is None:
             sampling_period = "NOT_SET"
 
+        sampling_period = str(sampling_period)
+
         file_extension = Path(data_filepath).suffix
 
         if file_extension == ".nc":
