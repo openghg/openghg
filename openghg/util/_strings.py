@@ -21,7 +21,7 @@ def clean_string(to_clean: Optional[str]) -> Union[str, None]:
     import re
 
     if to_clean is None:
-        raise TypeError("Cannot clean NoneType")
+        return
 
     try:
         # Removes all whitespace

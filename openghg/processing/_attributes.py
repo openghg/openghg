@@ -105,6 +105,9 @@ def get_attributes(
         raise TypeError("This function only accepts xarray Datasets")
 
     variable_names: List[str] = [str(var) for var in ds.variables]
+
+    print(ds.variables.keys(), variable_names)
+
     # Current CF Conventions (v1.7) demand that valid variable names
     # begin with a letter and be composed of letters, digits and underscores
     # Here variable names are also made lowercase to enable easier matching below
@@ -125,7 +128,7 @@ def get_attributes(
 
     # Best way to do this?
     # List of strings from ds.variables instead?
-    matched_keys = [str(var) for var in variable_names if species_lower in str(var)]
+    matched_keys = [var for var in variable_names if species_lower in var]
 
     # If we don't have any variables to rename, raise an error
     if not matched_keys:

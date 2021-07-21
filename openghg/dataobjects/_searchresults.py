@@ -7,8 +7,6 @@ from openghg.client import Retrieve
 
 __all__ = ["SearchResults"]
 
-T = TypeVar("T", bound="SearchResults")
-
 
 @dataclass
 class SearchResults:
@@ -18,6 +16,7 @@ class SearchResults:
         results: Search results
         ranked_data: True if results are ranked, else False
     """
+    T = TypeVar("T", bound="SearchResults")
 
     results: Dict
     ranked_data: bool

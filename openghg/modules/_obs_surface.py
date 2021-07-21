@@ -75,6 +75,8 @@ class ObsSurface(BaseModule):
         # If we have a sampling period passed we want the number of seconds
         if sampling_period is not None:
             sampling_period_seconds = str(Timedelta(sampling_period).total_seconds())
+        else:
+            sampling_period_seconds = None
 
         # Load the data processing object
         data_obj = load_object(class_name=data_type)

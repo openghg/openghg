@@ -2,7 +2,7 @@
     the object store
 
 """
-from openghg.dataobjects import SearchResults
+
 from typing import DefaultDict, Dict, Union
 
 __all__ = ["search"]
@@ -11,7 +11,7 @@ __all__ = ["search"]
 # TODO
 # GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user
 # facing interfaces to a more general search function, this would also make it easier to enforce types
-def search(**kwargs) -> Union[Dict, SearchResults]:  # type: ignore
+def search(**kwargs):  # type: ignore
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
@@ -47,6 +47,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:  # type: ignore
         find_daterange_gaps,
         split_daterange_str,
     )
+    from openghg.dataobjects import SearchResults
 
     # Get a copy of kwargs as we make some modifications below
     kwargs_copy = deepcopy(kwargs)
