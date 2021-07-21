@@ -82,7 +82,7 @@ def single_site_footprint(
     # Get the footprint data
     footprint_results: Dict = search(
         site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
-    ) # type: ignore
+    )  # type: ignore
 
     try:
         fp_site_key = list(footprint_results.keys())[0]
@@ -402,7 +402,7 @@ def get_flux(
         start_date=start_date,
         end_date=end_date,
         data_type="emissions",
-    ) # type: ignore
+    )  # type: ignore
 
     # TODO - more than one emissions file
     try:
@@ -423,7 +423,7 @@ def get_flux(
     return em_ds
 
 
-def add_timeseries(combined_dataset: Dataset, flux_dict: Dict):
+def add_timeseries(combined_dataset: Dataset, flux_dict: Dict) -> Dataset:
     """
     Add timeseries mole fraction values in footprint_data_merge
 
@@ -433,7 +433,6 @@ def add_timeseries(combined_dataset: Dataset, flux_dict: Dict):
         flux_dict [dict]:
             Dictionary containing flux datasets
     """
-
     # TODO: Extend to include multiple sources
     # TODO: Add ability to merge high time resolution footprints (e.g. species as co2)
     for key, flux_ds in flux_dict.items():

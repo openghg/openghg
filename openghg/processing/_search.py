@@ -8,7 +8,10 @@ from typing import DefaultDict, Dict, Union
 __all__ = ["search"]
 
 
-def search(**kwargs) -> Union[Dict, SearchResults]:
+# TODO
+# GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user
+# facing interfaces to a more general search function, this would also make it easier to enforce types
+def search(**kwargs) -> Union[Dict, SearchResults]:  # type: ignore
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
@@ -33,7 +36,6 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     from collections import defaultdict
     from copy import deepcopy
     from itertools import chain as iter_chain
-    from openghg.dataobjects import ObsData
 
     from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions, EulerianModel
     from openghg.util import (
@@ -104,8 +106,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
         for datasource in datasources:
             if datasource.search_metadata(**search_kwargs):
                 uid = datasource.uuid()
-                data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-                sources[uid]["keys"] = data_keys
+                sources[uid]["keys"] = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
                 sources[uid]["metadata"] = datasource.metadata()
 
         return sources
@@ -118,9 +119,9 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     if {"site", "inlet", "species"} <= search_kwargs.keys() or skip_ranking is True:
         specific_sources = aDict()
         for datasource in matching_sources.values():
-            data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+            specific_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
 
-            if not data_keys:
+            if not specific_keys:
                 continue
 
             metadata = datasource.metadata()
@@ -129,7 +130,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
             species = metadata["species"]
             inlet = metadata["inlet"]
 
-            specific_sources[site][species][inlet]["keys"] = data_keys
+            specific_sources[site][species][inlet]["keys"] = specific_keys
             specific_sources[site][species][inlet]["metadata"] = metadata
 
         return SearchResults(results=specific_sources.to_dict(), ranked_data=False)
@@ -186,7 +187,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
 
     # We just want some rank_metadata to go along with the final data scheme
     # Can key a key of date - inlet
-    data_keys = aDict()
+    data_keys: Dict = aDict()
     for site, species in highest_ranked.items():
         for sp, data in species.items():
             # data_keys[site][sp]["keys"] = []
@@ -272,7 +273,8 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
             # Remove any duplicate keys
             data_keys[site][sp]["keys"] = list(set(data_keys[site][sp]["keys"]))
 
-    dict_data_keys = data_keys.to_dict()
+    # TODO - create a stub for addict
+    dict_data_keys = data_keys.to_dict()  # type: ignore
 
     return SearchResults(results=dict_data_keys, ranked_data=True)
 
@@ -385,26 +387,3 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
 #                     keys[key]["metadata"] = datasource.metadata()
 
 #     return keys
-
-
-def _strip_dates_keys(keys):
-    """Strips the date from a key, could this data just be read from JSON instead?
-    Read dates covered from the Datasource?
-
-    Args:
-        keys (list): List of keys containing data
-        data/uuid/<uuid>/<version>/2019-03-01-04:14:30+00:00_2019-05-31-20:44:30+00:00
-    Returns:
-        str: Daterange string
-    """
-    if not isinstance(keys, list):
-        keys = [keys]
-
-    keys.sort()
-    start_key = keys[0]
-    end_key = keys[-1]
-    # Get the first and last dates from the keys in the search results
-    start_date = start_key.split("/")[-1].split("_")[0].replace("+00:00", "")
-    end_date = end_key.split("/")[-1].split("_")[-1].replace("+00:00", "")
-
-    return "_".join([start_date, end_date])

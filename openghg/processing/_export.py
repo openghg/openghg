@@ -6,7 +6,7 @@
 __all__ = ["get_ceda_file"]
 
 
-def get_ceda_file(
+def get_ceda_file( # type: ignore
     filepath=None,
     site=None,
     instrument=None,

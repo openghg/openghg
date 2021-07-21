@@ -6,6 +6,7 @@ from pathlib import Path
 from openghg.jobs import SSHConnect
 from openghg.util import get_datapath
 
+# type: ignore
 
 def run_job(username, hostname, password, job_data, known_host=False):
     """ Set a job to run on a HPC service

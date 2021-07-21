@@ -2,6 +2,7 @@ import os
 
 from Acquire.Client import PAR
 
+# type: ignore
 
 class JobDrive:
     """" This is used to upload files to the cloud drive for use in a

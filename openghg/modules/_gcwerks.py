@@ -9,7 +9,7 @@ __all__ = ["GCWERKS"]
 class GCWERKS:
     """Class for processing GCWERKS data"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         from openghg.util import load_json
 
         # Load site data
@@ -229,7 +229,7 @@ class GCWERKS:
         header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
         # Create a function to parse the datetime in the data file
-        def parser(date):
+        def parser(date: str) -> datetime:
             return datetime.strptime(date, "%Y %m %d %H %M")
 
         # Read the data in and automatically create a datetime column from the 5 columns
@@ -343,7 +343,7 @@ class GCWERKS:
         from datetime import datetime
 
         # Function for parsing datetime
-        def prec_date_parser(date):
+        def prec_date_parser(date: str) -> datetime:
             return datetime.strptime(date, "%y%m%d")
 
         # Read precision species

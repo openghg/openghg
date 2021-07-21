@@ -39,7 +39,7 @@ class Emissions(BaseModule):
         high_time_resolution: Optional[bool] = False,
         period: Optional[str] = None,
         overwrite: bool = False,
-    ):
+    ) -> Dict:
         """Read emissions file
 
         Args:

@@ -65,7 +65,7 @@ def timestamp_epoch() -> Timestamp:
     return timestamp_tzaware(Timestamp("1970-1-1 00:00:00"))
 
 
-def daterange_overlap(daterange_a, daterange_b):
+def daterange_overlap(daterange_a: str, daterange_b: str) -> bool:
     """Check if daterange_a is within daterange_b.
 
     Args:
@@ -77,18 +77,18 @@ def daterange_overlap(daterange_a, daterange_b):
     """
     from pandas import Timestamp
 
-    daterange_a = daterange_a.split("_")
-    daterange_b = daterange_b.split("_")
+    split_a = daterange_a.split("_")
+    split_b = daterange_b.split("_")
 
-    start_a = Timestamp(ts_input=daterange_a[0], tz="UTC")
-    end_a = Timestamp(ts_input=daterange_a[1], tz="UTC")
+    start_a = Timestamp(ts_input=split_a[0], tz="UTC")
+    end_a = Timestamp(ts_input=split_a[1], tz="UTC")
 
-    start_b = Timestamp(ts_input=daterange_b[0], tz="UTC")
-    end_b = Timestamp(ts_input=daterange_b[1], tz="UTC")
+    start_b = Timestamp(ts_input=split_b[0], tz="UTC")
+    end_b = Timestamp(ts_input=split_b[1], tz="UTC")
 
     # For this logic see
     # https://stackoverflow.com/a/325964
-    return start_a <= end_b and end_a >= start_b
+    return bool(start_a <= end_b and end_a >= start_b)
 
 
 def create_daterange(start: Timestamp, end: Timestamp, freq: Optional[str] = "D") -> DatetimeIndex:
@@ -151,7 +151,7 @@ def daterange_from_str(daterange_str: str, freq: Optional[str] = "D") -> Datetim
     return date_range(start=start, end=end, freq=freq)
 
 
-def daterange_to_str(daterange):
+def daterange_to_str(daterange: DatetimeIndex) -> str:
     """Takes a pandas DatetimeIndex created by pandas date_range converts it to a
     string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00
 

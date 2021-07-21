@@ -258,7 +258,7 @@ class ObsSurface(BaseModule):
         # iterate over these keys and delete them
         datasource = Datasource.load(uuid=uuid)
 
-        data_keys = datasource.data_keys(return_all=True)
+        data_keys = datasource.raw_keys()
 
         for version in data_keys:
             key_data = data_keys[version]["keys"]

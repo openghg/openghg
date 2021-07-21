@@ -1,4 +1,5 @@
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
+from openghg.dataobjects import SearchResults
 from Acquire.Client import Wallet
 
 
@@ -25,7 +26,7 @@ class Search:
         end_date: str = None,
         skip_ranking: bool = False,
         data_type: str = "timeseries",
-    ):
+    ) -> Union[SearchResults, Dict]:
         """Search for surface observations data in the object store
 
         Args:
@@ -38,8 +39,6 @@ class Search:
         Returns:
             SearchResults:  SearchResults object
         """
-        from openghg.dataobjects import SearchResults
-
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
@@ -68,7 +67,7 @@ class Search:
         args["skip_ranking"] = str(skip_ranking)
         args["data_type"] = str(data_type)
 
-        response = self._service.call_function(function="search.search", args=args)
+        response: Dict = self._service.call_function(function="search.search", args=args)
 
         try:
             results_data = response["results"]

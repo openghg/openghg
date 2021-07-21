@@ -25,5 +25,5 @@ class FootprintData(_BaseData):
     scales: str
     units: str
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Data: {self.data}\nMetadata : {self.metadata}"

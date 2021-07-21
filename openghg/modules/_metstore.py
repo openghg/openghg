@@ -1,6 +1,6 @@
 from openghg.modules import BaseModule
 from pandas import Timestamp
-from typing import Dict, List, Tuple, Optional, Union
+from typing import List, Tuple, Union
 
 from openghg.modules import METData
 
@@ -58,7 +58,7 @@ class METStore(BaseModule):
         start_date = Timestamp(f"{years[0]}-1-1")
         end_date = Timestamp(f"{years[-1]}-12-31")
 
-        result = store.search(search_terms=[site, network], start_date=start_date, end_date=end_date)
+        result = store.search(site=site, network=network, start_date=start_date, end_date=end_date)
 
         # Retrieve from the Copernicus store
         if result is None:
@@ -69,35 +69,43 @@ class METStore(BaseModule):
         return result
 
     def search(
-        self, search_terms: Union[str, List, Tuple], start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]
+        self, site: str, network: str, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]
     ) -> Union[METData, None]:
         """Search the stored MET data
 
         Args:
-            search_terms: Search term(s)
+            site: Site code
+            network: Network name
+            start_date: Start date
+            end_date: End date
+
         Returns:
             METData or None: METData object if found else None
         """
         from openghg.modules import Datasource, METData
 
-        datasources = [Datasource.load(uuid=uuid, shallow=True) for uuid in self._datasource_uuids]
+        datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in self._datasource_uuids)
 
         # We should only get one datasource here currently
         for datasource in datasources:
-            if datasource.search_metadata(search_terms=search_terms, find_all=True):
+            if datasource.search_metadata(site=site, network=network, find_all=True):
                 if datasource.in_daterange(start_date=start_date, end_date=end_date):
                     data = next(iter(datasource.data().values()))
                     return METData(data=data, metadata=datasource.metadata())
 
         return None
 
-    def _store(self, met_data) -> None:
+    def _store(self, met_data: METData) -> None:
         """Store MET data within a Datasource
 
         Here we do some processing on the request JSON to
         make the metadata more easily searchable and of a similar
         format to Datasources used in other modules of OpenGHG.
 
+        Args:
+            met_data: Dataset
+        Returns:
+            None
         """
         from openghg.modules import Datasource
 

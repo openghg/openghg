@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from ._basedata import _BaseData
 from collections import abc
+from typing import Any, Iterator
+from ._basedata import _BaseData
 
 __all__ = ["ObsData"]
 
@@ -19,7 +20,7 @@ class ObsData(_BaseData, abc.Mapping):
     # as key:value pairs.
     # TODO: May also want to check other expected keys within the legacy 
     # dictionary format and add them below
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: str) -> Any:
         """
         Returns the data attribute (xarray Dataset) when the site name is 
         specified.
@@ -34,14 +35,14 @@ class ObsData(_BaseData, abc.Mapping):
         else:
             raise KeyError(f"Site '{key}' does not match to expected site '{site}'")
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """
         Returns site code as the key for the dictionary as would be expected.
         """
         site = self.metadata["site"]
         return iter([site])
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         Returns number of key values (fixed at 1 at present)
         """

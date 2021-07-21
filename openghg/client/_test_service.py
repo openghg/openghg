@@ -27,6 +27,3 @@ class TestService:
         to_return: str = response["results"]
 
         return to_return
-
-    def service(self):
-        return self._service

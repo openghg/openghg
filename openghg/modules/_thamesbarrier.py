@@ -8,7 +8,7 @@ __all__ = ["THAMESBARRIER"]
 class THAMESBARRIER(BaseModule):
     """Class for processing Thames Barrier data"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         from openghg.util import load_json
 
         # Holds parameters used for writing attributes to Datasets
@@ -40,7 +40,7 @@ class THAMESBARRIER(BaseModule):
         """
         from openghg.processing import assign_attributes
         from pandas import read_csv as pd_read_csv
-        from openghg.util import clean_string, clean_string
+        from openghg.util import clean_string
 
         if sampling_period is None:
             sampling_period = "NOT_SET"

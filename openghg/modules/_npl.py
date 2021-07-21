@@ -1,5 +1,5 @@
 from openghg.modules import BaseModule
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 from pathlib import Path
 
 __all__ = ["NPL"]
@@ -8,11 +8,8 @@ __all__ = ["NPL"]
 class NPL(BaseModule):
     """Class for processing National Physical Laboratory (NPL) data"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         from openghg.util import load_json
-
-        # Sampling period of  data in seconds
-        self._sampling_period = "NA"
 
         data = load_json(filename="attributes.json")
         self._params = data["NPL"]
@@ -20,12 +17,12 @@ class NPL(BaseModule):
     def read_file(
         self,
         data_filepath: Union[str, Path],
-        site: Optional[str] = "NPL",
-        network: Optional[str] = "LGHG",
-        inlet: Optional[str] = None,
-        instrument: Optional[str] = None,
-        sampling_period: Optional[str] = None,
-        measurement_type: Optional[str] = None,
+        site: str = "NPL",
+        network: str = "LGHG",
+        inlet: str = None,
+        instrument: str = None,
+        sampling_period: str = None,
+        measurement_type: str = None,
     ) -> Dict:
         """Reads NPL data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -65,7 +62,7 @@ class NPL(BaseModule):
         from datetime import datetime
         from openghg.util import clean_string
 
-        def parser(date):
+        def parser(date: str) -> Union[datetime, NaT]:
             try:
                 return datetime.strptime(str(date), "%d/%m/%Y %H:%M")
             except ValueError:

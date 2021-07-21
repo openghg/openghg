@@ -1,5 +1,5 @@
 from openghg.modules import BaseModule
-from typing import DefaultDict, Dict, List, Optional, Union
+from typing import DefaultDict, Dict, List, Optional, Union, NoReturn
 from pathlib import Path
 from pandas import Timestamp
 from xarray import Dataset
@@ -237,16 +237,16 @@ class FOOTPRINTS(BaseModule):
 
     def search(
         self, site: str, network: str, start_date: Optional[Union[str, Timestamp]], end_date: Optional[Union[str, Timestamp]]
-    ):
+    ) -> NoReturn:
         """Search for a footprint from a specific site and network, return a dictionary of data
         so the user can choose
         """
         raise NotImplementedError()
 
-    def retrieve(self, uuid, dates):
+    def retrieve(self, uuid: str, dates: str) -> NoReturn:
         """"""
         raise NotImplementedError()
 
-    def _get_metdata(self):
+    def _get_metdata(self) -> NoReturn:
         """This retrieves the metadata for this footprint"""
         raise NotImplementedError()

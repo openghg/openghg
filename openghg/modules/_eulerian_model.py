@@ -46,7 +46,7 @@ class EulerianModel(BaseModule):
         end_date: Optional[str] = None,
         setup: Optional[str] = None,
         overwrite: bool = False,
-    ):
+    ) -> Dict:
         """Read Eulerian model output
 
         Args:

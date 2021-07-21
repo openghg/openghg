@@ -2,15 +2,15 @@ __all__ = ["JobRunner"]
 
 
 class JobRunner:
-    """ An interface to the the jobrunner service on the OpenGHG platform.
+    """An interface to the the jobrunner service on the OpenGHG platform.
 
-        This class is used to run jobs on both local and cloud based HPC clusters
+    This class is used to run jobs on both local and cloud based HPC clusters
 
-        Args:
-            service_url (str): URL of service
+    Args:
+        service_url (str): URL of service
     """
 
-    def __init__(self, service_url):
+    def __init__(self, service_url):  # type: ignore
         raise NotImplementedError
 
         from Acquire.Client import Wallet
@@ -20,45 +20,45 @@ class JobRunner:
         self._service = wallet.get_service(service_url=f"{service_url}/openghg")
         self._service_url = service_url
 
-    def create_job(
+    def create_job(  # type: ignore
         self,
         auth_user,
         requirements,
         key_password,
         data_files,
-        hugs_url=None,
+        openghg_url=None,
         storage_url=None,
-    ):
-        """ Create a job
+    ):  # type: ignore
+        """Create a job
 
-            Args:
-                auth_user (Acquire.User): Authenticated Acquire user
+        Args:
+            auth_user (Acquire.User): Authenticated Acquire user
 
-                The following keys are required:
-                    "hostname", "username", "name", "run_command", "partition", "n_nodes", "n_tasks_per_node",
-                    "n_cpus_per_task", "memory_req", "job_duration"
-                where partition must be one of:
-                    "cpu_test", "dcv", "gpu", "gpu_veryshort", "hmem", "serial", "test", "veryshort"
+            The following keys are required:
+                "hostname", "username", "name", "run_command", "partition", "n_nodes", "n_tasks_per_node",
+                "n_cpus_per_task", "memory_req", "job_duration"
+            where partition must be one of:
+                "cpu_test", "dcv", "gpu", "gpu_veryshort", "hmem", "serial", "test", "veryshort"
 
-                Example:
-                    requirements = {"hostname": hostname, "username": username, "name": "test_job,
-                                    "n_nodes": 2,"n_tasks_per_node": 2,
-                                    "n_cpus_per_task": 2, "memory": "128G", ...}
+            Example:
+                requirements = {"hostname": hostname, "username": username, "name": "test_job,
+                                "n_nodes": 2,"n_tasks_per_node": 2,
+                                "n_cpus_per_task": 2, "memory": "128G", ...}
 
-                requirements (dict): Dictionary containing job details and requested resources
-                key_password (str): Password for private key used to access the HPC
-                data_files (dict): Data file(s) to be uploaded to the cloud drive to
-                run the simulation. Simulation code files should be given in the "app" key and data
-                files in the "data" key
+            requirements (dict): Dictionary containing job details and requested resources
+            key_password (str): Password for private key used to access the HPC
+            data_files (dict): Data file(s) to be uploaded to the cloud drive to
+            run the simulation. Simulation code files should be given in the "app" key and data
+            files in the "data" key
 
-                TODO - having to pass in a password and get it through to Paramiko seems
-                long winded, is there a better way to do this?
+            TODO - having to pass in a password and get it through to Paramiko seems
+            long winded, is there a better way to do this?
 
-                hugs_url (str): URL of OpenGHG service
-                storage_url (str): URL of storage service
-            Returns:
-                dict: Dictionary containing information regarding job running on resource
-                This will contain the PAR for access for data upload and download.
+            openghg_url (str): URL of OpenGHG service
+            storage_url (str): URL of storage service
+        Returns:
+            dict: Dictionary containing information regarding job running on resource
+            This will contain the PAR for access for data upload and download.
         """
         from Acquire.Client import (
             Drive,
@@ -79,8 +79,8 @@ class JobRunner:
         if storage_url is None:
             storage_url = self._service_url + "/storage"
 
-        if hugs_url is None:
-            hugs_url = self._service_url + "/hugs"
+        if openghg_url is None:
+            openghg_url = self._service_url + "/openghg"
 
         if not isinstance(data_files["app"], list):
             data_files["app"] = [data_files["app"]]
@@ -92,7 +92,7 @@ class JobRunner:
             pass
 
         # Get an authorisaton to pass to the service
-        openghg = Service(service_url=hugs_url)
+        openghg = Service(service_url=openghg_url)
         # Credentials to create the cloud storage drive
         creds = StorageCreds(user=auth_user, service_url=storage_url)
 
@@ -170,9 +170,7 @@ class JobRunner:
         args["requirements"] = requirements
         args["key_password"] = encrypted_password
 
-        function_response = self._service.call_function(
-            function="job_runner", args=args
-        )
+        function_response = self._service.call_function(function="job_runner", args=args)
 
         response = {}
         response["function_response"] = function_response
@@ -181,6 +179,3 @@ class JobRunner:
         response["upload_data"] = uploaded_files
 
         return response
-
-    def service(self):
-        return self._service

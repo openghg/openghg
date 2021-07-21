@@ -1,10 +1,12 @@
 from pandas import DataFrame, Timestamp
-from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Union
+from typing import DefaultDict, Dict, List, Optional, Tuple, Union, TypeVar, Type
 from xarray import Dataset
 
 dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
 
 __all___ = ["Datasource"]
+
+T = TypeVar("T", bound="Datasource")
 
 
 class Datasource:
@@ -16,7 +18,7 @@ class Datasource:
     _datavalues_root = "values"
     _data_root = "data"
 
-    def __init__(self):
+    def __init__(self) -> None:
         from Acquire.ObjectStore import get_datetime_now
         from collections import defaultdict
         from uuid import uuid4
@@ -34,11 +36,11 @@ class Datasource:
         # This dictionary stored the keys for each version of data uploaded
         # data_key = d._data_keys["latest"]["keys"][date_key]
         self._data_keys: dataKeyType = defaultdict(dict)
-        self._data_type: str = None
+        self._data_type: str = "timeseries"
         # Hold information regarding the versions of the data
         # Currently unused
         self._latest_version: str = "latest"
-        self._versions = {}
+        self._versions: Dict[str, List] = {}
 
     def start_date(self) -> Timestamp:
         """Returns the starting datetime for the data in this Datasource
@@ -287,7 +289,7 @@ class Datasource:
         return daterange_str
 
     @staticmethod
-    def exists(datasource_id: str, bucket: Optional[str] = None):
+    def exists(datasource_id: str, bucket: Optional[str] = None) -> bool:
         """Check if a datasource with this ID is already stored in the object store
 
         Args:
@@ -316,7 +318,7 @@ class Datasource:
         """
         from Acquire.ObjectStore import datetime_to_string
 
-        data: Dict[str, Union[str, Dict]] = {}
+        data: Dict[str, Union[str, Dict, bool]] = {}
         data["UUID"] = self._uuid
         data["creation_datetime"] = datetime_to_string(self._creation_datetime)
         data["metadata"] = self._metadata
@@ -361,8 +363,8 @@ class Datasource:
 
             return ds
 
-    @staticmethod
-    def from_data(bucket: str, data: Dict, shallow: bool):
+    @classmethod
+    def from_data(cls: Type[T], bucket: str, data: Dict, shallow: bool) -> T:
         """Construct a Datasource from JSON
 
         Args:
@@ -374,7 +376,7 @@ class Datasource:
         """
         from Acquire.ObjectStore import string_to_datetime
 
-        d = Datasource()
+        d = cls()
         d._uuid = data["UUID"]
         d._creation_datetime = string_to_datetime(data["creation_datetime"])
         d._metadata = data["metadata"]
@@ -453,16 +455,14 @@ class Datasource:
 
         set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
 
-    @staticmethod
-    def load(bucket: Optional[str] = None, uuid: Optional[str] = None, key: Optional[str] = None, shallow: bool = False):
+    @classmethod
+    def load(cls: Type[T], bucket: str = None, uuid: str = None, key: str = None, shallow: bool = False) -> T:
         """Load a Datasource from the object store either by name or UUID
-
-        uuid or name must be passed to the function
 
         Args:
             bucket: Bucket to store object
             uuid: UID of Datasource
-            name: Name of Datasource
+            key: Key of Datasource
             shallow: Only load JSON data, do not read Datasets from object store.
             This will speed up creation of the Datasource object.
         Returns:
@@ -481,7 +481,9 @@ class Datasource:
 
         data = get_object_from_json(bucket=bucket, key=key)
 
-        return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
+        datasource = cls.from_data(bucket=bucket, data=data, shallow=shallow)
+
+        return datasource
 
     def data(self) -> Dict:
         """Get the data stored in this Datasource
@@ -575,7 +577,7 @@ class Datasource:
 
         results = {}
 
-        def search_recurse(term, data):
+        def search_recurse(term: str, data: Dict) -> None :
             for v in data.values():
                 if v == term:
                     results[term] = True
@@ -592,7 +594,7 @@ class Datasource:
         else:
             return len(results) > 0
 
-    def search_metadata(self, find_all: Optional[bool] = True, **kwargs) -> bool:
+    def search_metadata(self, find_all: Optional[bool] = True, **kwargs: str) -> bool:
         """Search the metadata for any available keyword
 
         Args:
@@ -786,7 +788,7 @@ class Datasource:
         return self._data_type
 
     def raw_keys(self) -> dataKeyType:
-        """ Returns the raw keys dictionary
+        """Returns the raw keys dictionary
 
         Returns:
             dict: Dictionary of keys

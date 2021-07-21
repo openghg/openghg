@@ -1,5 +1,5 @@
 from openghg.modules import BaseModule
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, NoReturn
 from pathlib import Path
 
 # flake8: noqa
@@ -19,7 +19,7 @@ class TEMPLATE(BaseModule):
     # Use uuid.uuid4() to create a unique fixed UUID for this object
     _uuid = "CHANGEME"
 
-    def __init__(self):
+    def __init__(self) -> None:
         raise NotImplementedError
 
     

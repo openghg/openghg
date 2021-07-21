@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Union, TypeVar, Type
+from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
 from openghg.dataobjects import ObsData
 from openghg.processing import recombine_datasets
 from openghg.util import clean_string
@@ -24,7 +24,7 @@ class SearchResults:
     # Local or cloud service to be used
     cloud: bool = False
 
-    def __str__(self):
+    def __str__(self) -> str:
         if not self.results:
             return "No results"
 
@@ -40,13 +40,13 @@ class SearchResults:
 
         return "\n".join(print_strs)
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.results)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.results)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         yield from self.results
 
     def to_data(self) -> Dict:

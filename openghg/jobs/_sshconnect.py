@@ -5,6 +5,7 @@ import paramiko
 # See this for tests
 # https://pypi.org/project/mock-ssh-server/
 
+# type: ignore
 
 class SSHConnect:
     """ Use Paramiko to connect to an SSH server

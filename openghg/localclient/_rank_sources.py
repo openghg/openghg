@@ -4,16 +4,16 @@ from openghg.util import valid_site, create_daterange_str, InvalidSiteError
 # from pyvis.network import Network
 # import matplotlib.cm as cm
 # import matplotlib
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 __all__ = ["RankSources"]
 
 
 class RankSources:
-    def __init__(self):
-        self._lookup_data = {}
-        self._key_lookup = {}
-        self._user_info = {}
+    def __init__(self) -> None:
+        self._lookup_data: Dict = {}
+        self._key_lookup: Dict = {}
+        self._user_info: Dict = {}
         self._needs_update = True
 
     def get_sources(self, site: str, species: str) -> Dict:
@@ -40,7 +40,7 @@ class RankSources:
         if not matching_sources:
             return {}
 
-        def name_str(d):
+        def name_str(d: Datasource) -> str:
             return "_".join([d.species(), d.inlet(), d.instrument()])
 
         self._user_info = {

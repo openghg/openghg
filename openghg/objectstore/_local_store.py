@@ -5,7 +5,6 @@ from pathlib import Path
 import threading
 from Acquire.ObjectStore import ObjectStoreError
 import pyvis
-from collections import defaultdict
 from uuid import uuid4
 from typing import Dict, List, Optional, Union
 
@@ -93,12 +92,12 @@ def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_pref
     return object_names
 
 
-def delete_object(bucket, key):
+def delete_object(bucket: str, key: str) -> None:
     """Remove object at key in bucket
 
     Args:
-        bucket (str): Bucket path
-        key (str): Key to data in bucket
+        bucket: Bucket path
+        key: Key to data in bucket
     Returns:
         None
     """
@@ -109,23 +108,23 @@ def delete_object(bucket, key):
         pass
 
 
-def get_object_names(bucket, prefix=None):
+def get_object_names(bucket: str, prefix: str = None) -> List[str]:
     """List all the keys in the object store
 
     Args:
-        bucket (str): Bucket containing data
+        bucket: Bucket containing data
     Returns:
         list: List of keys in object store
     """
     return get_all_object_names(bucket=bucket, prefix=prefix)
 
 
-def get_object(bucket, key):
+def get_object(bucket: str, key: str) -> bytes:
     """Gets the object at key in the passed bucket
 
     Args:
-        bucket (str): Bucket containing data
-        key (str): Key for data in bucket
+        bucket: Bucket containing data
+        key: Key for data in bucket
     Returns:
         Object: Object from store
     """
@@ -138,13 +137,13 @@ def get_object(bucket, key):
             raise ObjectStoreError(f"No object at key '{key}'")
 
 
-def set_object(bucket, key, data):
+def set_object(bucket: str, key: str, data: bytes) -> None:
     """Store data in bucket at key
 
     Args:
-        bucket (str): Bucket path
-        key (str): Key to store data in bucket
-        data (str): Data in string form
+        bucket: Bucket path
+        key: Key to store data in bucket
+        data: Data in string form
     Returns:
         None
     """
@@ -162,27 +161,27 @@ def set_object(bucket, key, data):
                 f.write(data)
 
 
-def set_object_from_json(bucket, key, data):
+def set_object_from_json(bucket: str, key: str, data: Union[str, Dict]) -> None:
     """Set JSON data in the object store
 
     Args:
-        bucket (str): Bucket for data storage
-        key (str): Key for data in bucket
-        data (str): JSON serialised data string
+        bucket: Bucket for data storage
+        key: Key for data in bucket
+        data: JSON serialised data string
     Returns:
         None
     """
-    data = json.dumps(data).encode("utf-8")
+    data_bytes = json.dumps(data).encode("utf-8")
 
-    set_object(bucket=bucket, key=key, data=data)
+    set_object(bucket=bucket, key=key, data=data_bytes)
 
 
-def set_object_from_file(bucket, key, filename):
+def set_object_from_file(bucket: str, key: str, filename: Union[str, Path]) -> None:
     """Set the contents of file at filename to key in bucket
 
     Args:
-        bucket (str): Bucket path
-        key (str): Key to for data
+        bucket: Bucket path
+        key: Key to for data
         filename (str, pathlib.Path): Filename/path
     Returns:
         None
@@ -210,12 +209,12 @@ def exists(bucket: str, key: str) -> bool:
     """Checks if there is an object in the object store with the given key
 
     Args:
-        bucket (dict): Bucket containing data
-        key (str): Prefix for key in object store
+        bucket: Bucket containing data
+        key: Prefix for key in object store
     Returns:
         bool: True if key exists in store
     """
-    names = get_all_object_names(bucket, prefix=key)
+    names = get_all_object_names(bucket=bucket, prefix=key)
 
     return len(names) > 0
 
@@ -234,12 +233,11 @@ def get_bucket() -> str:
     return str(bucket_path)
 
 
-def get_local_bucket(empty=False):
-    """Creates and returns a local bucket that's created in the
-    /tmp/hugs_test directory
+def get_local_bucket(empty: bool = False) -> str:
+    """Creates and returns a local bucket
 
     Args:
-        empty (bool, default=False): If True return an empty bucket
+        empty: If True return an empty bucket
     Returns:
         str: Path to local bucket
     """
@@ -257,13 +255,12 @@ def get_local_bucket(empty=False):
     return str(local_buckets_dir)
 
 
-def query_store():
+def query_store() -> Dict:
     """Create a dictionary that can be used to visualise the object store
 
     Returns:
         dict: Dictionary for data to be shown in force graph
     """
-    from collections import defaultdict
     from openghg.modules import Datasource, ObsSurface
 
     obs = ObsSurface.load()
@@ -271,7 +268,7 @@ def query_store():
     datasource_uuids = obs.datasources()
     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
-    data = defaultdict(dict)
+    data = {}
 
     for d in datasources:
         metadata = d.metadata()
@@ -294,6 +291,8 @@ def visualise_store() -> pyvis.network.Network:
     Returns:
         pyvis.network.Network
     """
+    from addict import aDict
+
     data = query_store()
 
     net = pyvis.network.Network("800px", "100%", notebook=True, heading="OpenGHG Object Store")
@@ -302,11 +301,7 @@ def visualise_store() -> pyvis.network.Network:
     # Create the ObsSurface node
     net.add_node(0, label="ObsSurface", color="#4e79a7", value=5000)
 
-    # We want to created a nested dictionary
-    def nested_dict():
-        return defaultdict(nested_dict)
-
-    network_split = nested_dict()
+    network_split = aDict()
 
     for key, value in data.items():
         # Iterate over Datasources to select the networks

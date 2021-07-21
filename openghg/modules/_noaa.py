@@ -8,7 +8,7 @@ __all__ = ["NOAA"]
 class NOAA(BaseModule):
     """Class for processing NOAA data"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         from openghg.util import load_json
 
         # Holds parameters used for writing attributes to Datasets
@@ -253,7 +253,7 @@ class NOAA(BaseModule):
 
         column_names = header[-1][14:].split()
 
-        def date_parser(year, month, day, hour, minute, second):
+        def date_parser(year: str, month: str, day: str, hour: str, minute: str, second: str) -> Timestamp:
             return Timestamp(year, month, day, hour, minute, second)
 
         date_parsing = {"time": ["sample_year", "sample_month", "sample_day", "sample_hour", "sample_minute", "sample_seconds"]}

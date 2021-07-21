@@ -13,7 +13,7 @@ class BaseModule:
     _root = "root"
     _uuid = "root_uuid"
 
-    def __init__(self):
+    def __init__(self) -> None:
         from openghg.util import timestamp_now
         from addict import Dict as aDict
 
@@ -23,13 +23,13 @@ class BaseModule:
         # Use an addict Dict here for easy nested data storage
         self._datasource_table = aDict()
         # Keyed by Datasource UUID
-        self._datasource_uuids = {}
+        self._datasource_uuids: Dict[str, str] = {}
         # Hashes of previously uploaded files
-        self._file_hashes = {}
+        self._file_hashes: Dict[str, str] = {}
         # Keyed by UUID
         self._rank_data = aDict()
 
-    def is_null(self):
+    def is_null(self) -> bool:
         return not self.datasources
 
     @classmethod

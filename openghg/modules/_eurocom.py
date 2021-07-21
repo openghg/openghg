@@ -12,7 +12,7 @@ class EUROCOM:
     ICOS data processing is done by the ICOS module
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         from openghg.util import load_json
 
         self._eurocom_params = {}
@@ -92,7 +92,7 @@ class EUROCOM:
         n_skip = len(header) - 1
         species = "co2"
 
-        def date_parser(year, month, day, hour, minute):
+        def date_parser(year: str, month: str, day: str, hour: str, minute: str) -> Timestamp:
             return Timestamp(year=year, month=month, day=day, hour=hour, minute=minute)
 
         datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}

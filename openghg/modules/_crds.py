@@ -10,7 +10,7 @@ __all__ = ["CRDS"]
 class CRDS:
     """Class for processing CRDS data"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         data = load_json(filename="process_gcwerks_parameters.json")
         # Holds parameters used for writing attributes to Datasets
         self._crds_params = data["CRDS"]
@@ -112,7 +112,7 @@ class CRDS:
             inlet = inlet_fname
 
         # Function to parse the datetime format found in the datafile
-        def parse_date(date):
+        def parse_date(date: str) -> Union[datetime, NaT]:
             try:
                 return datetime.strptime(date, "%y%m%d %H%M%S")
             except ValueError:

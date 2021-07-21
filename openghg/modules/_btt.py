@@ -6,10 +6,9 @@ __all__ = ["BTT"]
 
 
 class BTT(BaseModule):
-    """Class for processing the BT Tower (BTT) data.
-    """
+    """Class for processing the BT Tower (BTT) data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         from openghg.util import load_json
 
         data = load_json(filename="attributes.json")
@@ -74,7 +73,7 @@ class BTT(BaseModule):
         species_sd = {"CO2": "co2.sd.ppm", "CH4": "ch4.sd.ppb"}
 
         sampling_period = self._params["sampling_period"]
-        sampling_period_seconds = str(int(sampling_period)) + 's'
+        sampling_period_seconds = str(int(sampling_period)) + "s"
 
         data = read_csv(data_filepath)
         data["time"] = Timestamp("2019-01-01 00:00") + to_timedelta(data["DOY"] - 1, unit="D")
