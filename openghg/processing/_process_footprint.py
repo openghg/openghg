@@ -80,9 +80,14 @@ def single_site_footprint(
         footprint_site = site_modifier
 
     # Get the footprint data
-    footprint_results = search(
-        site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
-    )
+    if species is not None:
+        footprint_results = search(
+            site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date, species=species, data_type="footprint"
+        )
+    else:
+       footprint_results = search(
+            site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
+        )
 
     try:
         fp_site_key = list(footprint_results.keys())[0]
@@ -450,9 +455,9 @@ def add_timeseries(combined_dataset: Dataset, flux_dict: Dict):
             mf_mod = timeseries_integrated(combined_dataset, flux_ds)
             name = "mf_mod"
         else:
-            # print("Unable to create modelled mole fraction for high time resolution datasets yet.")
             mf_mod = timeseries_HiTRes(combined_dataset, flux_ds)
             name = "mf_mod_high_res"
+            # TODO: May want to reindex afterwards? But can be expensive operation.
         
         combined_dataset[name] = DataArray(mf_mod, coords={'time': combined_dataset.time})
 
@@ -484,7 +489,7 @@ def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset):
 
 
 def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset, 
-                      time_resolution: Optional[str] = "2H",
+                      time_resolution: Optional[str] = None,
                       output_TS: Optional[bool] = True, output_fpXflux: Optional[bool] = False):
     """
     Calculate modelled mole fraction timeseries using high time resolution 
@@ -497,9 +502,10 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
             Dataset containing flux values
         time_resolution [str]: 
             Time resolution of both the sampling and the hourly back footprints.
-            This should be < 24H and should divide exactly into 24 
-            e.g. 1,2,3,4,6,8,12.
-            Default = "2H"
+            This should be <= 24H and should divide exactly into 24 
+            e.g. "1H", "2H", "3H", "4H", "6H", "8H", "12H", "24H".
+            If not specified, will be derived from the flux and hour back period.
+            Default = None
         output_TS [bool]:
             Whether to output the modelled mole fraction timeseries DataArray.
             Default = True
@@ -526,17 +532,59 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
     import numpy as np
     import xarray as xr
     import dask.array as da
+    from tqdm import tqdm
+    from pandas import date_range
+    from math import gcd
 
     fp_HiTRes = combined_dataset.fp_HiTRes
+
+    # Calculate time resolution for both the flux and footprint data
+    nanosecond_to_hour = 1/(1e9*60.*60.)
+    flux_res_H = int(flux_ds.time.diff(dim="time").values.mean() * nanosecond_to_hour)
+    
+    fp_HiTRes_time_H = int(fp_HiTRes.time.diff(dim="time").values.mean() * nanosecond_to_hour)
+    fp_HiTRes_Hback_H = int(fp_HiTRes["H_back"].diff(dim="H_back").values.mean())
+
+    # Extract the time resolution number in hours
+    if time_resolution:
+        try:
+            time_res_H = int(time_resolution)
+        except (ValueError, TypeError):
+            time_res_H = int(time_resolution[0])
+    else:
+        # If not specified derive from time on combined dataset
+        time_res_H = fp_HiTRes_time_H
+        time_resolution = f"{time_res_H}H"
+
+    # Resample fp timeseries to match time resolution
+    if fp_HiTRes_time_H != time_res_H:
+        fp_HiTRes = fp_HiTRes.resample(time=time_resolution).ffill()
+    
+    # Make sure the dimensions match the expected order for indexing
+    fp_HiTRes = fp_HiTRes.transpose(*("lat", "lon", "time", "H_back"))
+
+    # TODO: May want to update this to always match to H_back rather
+    # than allowing this to match to flux OR H_back
+    # if flux_res_H > fp_HiTRes_Hback_H:
+    #     hf_res_H = flux_res_H
+    # else:
+    #     hf_res_H = fp_HiTRes_Hback_H
+    hf_res_H = fp_HiTRes_Hback_H
+
+    # Find the greatest common denominator between time and high frequency components.
+    # This is needed to make sure suitable flux frequency is used when selecting.
+    highest_res_H = gcd(time_res_H, hf_res_H)
+    # if time_res_H >= hf_res_H:
+    #     highest_res_H = hf_res_H    
+    # else:
+    #     highest_res_H = time_res_H
+    highest_resolution = f"{highest_res_H}H"
 
     # TODO: May want to update this so that resolution of the sampling
     # doesn't have to match resolution of the high frequency footprints
     # At the moment it does because of the indexing being used 
     # (rather than selecting on a dimension) - which can be *very* slow
     # but could be done differently (indexing on a combination of time and H_back)
-    
-    # Resample fp timeseries to match time resolution
-    fp_HiTRes = fp_HiTRes.resample(time=time_resolution).ffill()
 
     # create time array to loop through, with the required resolution
     # fp_HiTRes.time is the release time of particles into the model
@@ -549,36 +597,32 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
     nlon = len(lon)
     nh_back = len(fp_HiTRes["H_back"])
 
-    # Calculate time resolution for both the flux and fooprint data
-    nanosecond_to_hour = 1/(1e9*60.*60.)
-    flux_res_H = int(flux_ds.time.diff(dim="time").values.mean() * nanosecond_to_hour)
-    fp_HiTRes_freq_H = int(fp_HiTRes["H_back"].diff(dim="H_back").values.mean())
-
-    # Extract the time resolution number in hours
-    if time_resolution:
-        try:
-            num = int(time_resolution)
-        except (ValueError, TypeError):
-            num = int(time_resolution[0])
-    else:
-        # If not specified derive from high resolution flux or footprint (freq < 24H)
-        if flux_res_H <= 24:
-            num = flux_res_H
-        else:
-            num = fp_HiTRes_freq_H
-        time_resolution = num + "H"
-
-    # Only allow for time resolution < 24 hours
-    if num > 24:
-        raise ValueError(f"High frequency resolution must be <= 24 hours. Current: {time_resolution}")
-    elif 24%num != 0 or 24%num != 0.0:
-        raise ValueError(f"High frequency resolution resolution must exactly divide into 24 hours. Current: {time_resolution}")
+    # Only allow for high frequency resolution < 24 hours
+    if hf_res_H > 24:
+        raise ValueError(f"High frequency resolution must be <= 24 hours. Current: {hf_res_H}H")
+    elif 24%hf_res_H != 0 or 24%hf_res_H != 0.0:
+        raise ValueError(f"High frequency resolution must exactly divide into 24 hours. Current: {hf_res_H}H")
 
     # Define full range of emissions needed for this calculation
     date_start = time_array[0]
     date_start_back = date_start - np.timedelta64(24, 'h')
-    date_end = time_array[-1]
-    start_month = int(date_start.dt.month) # Won't 
+    date_end = time_array[-1] + np.timedelta64(1, 's')
+    start_month = int(date_start.dt.month) # Won't work if we go from Dec-Jan?
+
+    # Create time for highest resolution to match to flux
+    full_dates = date_range(date_start_back.values, date_end.values, freq=highest_resolution, closed="left").to_numpy()
+    # time_h_back = []
+    # for time in time_array:
+    #     dates = [time.values - np.timedelta64(int(i), 'h') for i in np.arange(0, 25, hf_res_H)]
+    #     time_h_back.extend(dates)
+    # time_h_back = xr.DataArray(time_h_back)
+    # time_h_back = np.unique(time_h_back)
+
+    # Define full range of emissions needed for this calculation
+    # date_start = time_array[0]
+    # date_start_back = time_h_back[0]
+    # date_end = time_array[-1] + np.timedelta64(1, 's')
+    # start_month = int(date_start.dt.month) # Won't work if we go from Dec-Jan?
 
     # Create low frequency flux data (monthly)
     flux_ds_low_freq = flux_ds.resample({"time":"1MS"}).mean().sel(time=slice(date_start_back, date_end))
@@ -586,11 +630,23 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
 
     # Select and align high frequency flux data
     flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
-    if flux_res_H != num and flux_res_H <= 24:
-        flux_ds_high_freq = flux_ds_high_freq.resample({"time":time_resolution}).mean()
-        flux_ds_high_freq = flux_ds_high_freq.transpose(*("lat", "lon", "time"))
+    if flux_res_H <= 24:
+        base = date_start_back.dt.hour.data + date_start_back.dt.minute.data/60. + date_start_back.dt.second.data/3600.
+        if flux_res_H <= highest_res_H:
+            # Downsample flux to match to footprint frequency
+            flux_ds_high_freq = flux_ds_high_freq.resample({"time":highest_resolution}, base=base).mean()     
+        elif flux_res_H > highest_res_H:
+            # Upsample flux to match footprint frequency and forward fill
+            flux_ds_high_freq = flux_ds_high_freq.resample({"time":highest_resolution}, base=base).ffill()     
+        # Reindex to match to correct values
+        flux_ds_high_freq = flux_ds_high_freq.reindex({"time":full_dates}, method="ffill")
     elif flux_res_H > 24:
         flux_ds_high_freq = flux_ds_low_freq
+    flux_ds_high_freq = flux_ds_high_freq.transpose(*("lat", "lon", "time"))
+
+    # Make sure that fp_HiTRes frequency is regular
+    # fp_dates = date_range(date_start, date_end, freq=time_resolution, closed="right").to_numpy()
+    # fp_HiTRes = fp_HiTRes.reindex({"time":fp_dates}, method="ffill")
 
     # TODO: Add check to make sure time values are exactly aligned based on date range
 
@@ -607,31 +663,49 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
     # Iterate through the time coord to get the total mf at each time step using the H back coord
     # at each release time we disaggregate the particles backwards over the previous 24hrs
     # The final value then contains the 29-day integrated residual footprint
-    for tt, time in enumerate(time_array):
+    print("Calculating modelled timeseries comparison:")
+    iters = tqdm(time_array)
+    for tt, time in enumerate(iters):
         ## TODO: Need to improve this to work for looping over to a new year
         tt_low = time.dt.month.values - (start_month-1) - 1
         
         # get 4 dimensional chunk of high time res footprint for this timestep
         # units : mol/mol/mol/m2/s
         # reverse the time coordinate to be chronological, and resample
-        fp_time   = fp_HiTRes[:,:,tt,::-num]
+        # fp_time   = fp_HiTRes[:,:,tt,::-time_res_H]
+        # fp_time   = fp_HiTRes[:,:,tt,::-hf_res_H]
+        # fp_time   = fp_HiTRes[:,:,tt,::-highest_res_H]
+        fp_time   = fp_HiTRes[:,:,tt,::-1]
 
         fp_high_freq = fp_time[:,:,1:]
         fp_residual = fp_time[:,:,0:1]
 
         # convert to array to use in numba loop
-        flux_high_freq = da.array(flux_ds_high_freq.flux)
-        flux_low_freq = da.array(flux_ds_low_freq.flux)
+        # flux_high_freq = da.array(flux_ds_high_freq.flux)
+        # flux_low_freq = da.array(flux_ds_low_freq.flux)
+        flux_high_freq = flux_ds_high_freq.flux
+        flux_low_freq = flux_ds_low_freq.flux
 
         # Define high and low frequency fluxes based on inputs
         # Allow for variable frequency within 24 hours
-        #flux_high_freq = flux_high_freq[:,:,tt+1:tt+13]
+        # flux_high_freq = flux_high_freq[:,:,tt+1:tt+13]
         flux_low_freq = flux_low_freq[:,:,tt_low:tt_low+1]
         if flux_res_H <= 24:
-            resolution_index = int(24/num)
-            flux_high_freq = flux_high_freq[:,:,tt+1:tt+1+resolution_index]
+            #resolution_index = int(24/time_res_H)
+            tt_start = tt*int(time_res_H/highest_res_H) + 1
+            tt_end = tt_start + int(24/highest_res_H)
+            selection = int(hf_res_H/highest_res_H)
+            flux_high_freq = flux_high_freq[...,tt_start:tt_end]
+            if selection > 1:
+                print("selection>1",selection)
+                flux_high_freq = flux_high_freq[...,::-selection]
+                flux_high_freq = flux_high_freq[...,::-1]               
         else:
             flux_high_freq = flux_high_freq[:,:,tt_low:tt_low+1]
+
+        # convert to array to use in numba loop
+        flux_high_freq = da.array(flux_high_freq)
+        flux_low_freq = da.array(flux_low_freq)
 
         # Multiply the HiTRes footprint with the HiTRes emissions to give mf
         # Multiply residual footprint by low frequency emissions data to give residual mf
