@@ -11,7 +11,7 @@ import xarray as xr
 
 from openghg.modules import CRDS, Datasource
 from openghg.objectstore import get_local_bucket, get_object_names
-from openghg.util import create_daterange_str
+from openghg.util import create_daterange_str, timestamp_tzaware
 from helpers import get_datapath
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
@@ -271,7 +271,7 @@ def test_from_data(data):
     assert metadata["sampling_period"] == "60"
     assert metadata["inlet"] == "248m"
 
-    assert d_2.data_keys() == d.data_keys()
+    assert sorted(d_2.data_keys()) == sorted(d.data_keys())
     assert d_2.metadata() == d.metadata()
 
 
@@ -416,8 +416,6 @@ def test_in_daterange(data):
     d.add_data(metadata=metadata, data=data, data_type="timeseries")
     d.save()
 
-
-
     expected_keys = [
         "data/uuid/test-id-123/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
         "data/uuid/test-id-123/v1/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
@@ -458,3 +456,44 @@ def test_shallow_then_load_data(data):
     ch4_data = ds_data["2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00"]
 
     assert ch4_data.time[0] == pd.Timestamp("2014-01-30-11:12:30")
+
+
+def test_key_date_compare():
+    d = Datasource()
+
+    keys = {
+        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00": "data/uuid/test-uid/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00": "data/uuid/test-uid/v1/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00": "data/uuid/test-uid/v1/2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
+        "2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00": "data/uuid/test-uid/v1/2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
+        "2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00": "data/uuid/test-uid/v1/2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00",
+        "2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00": "data/uuid/test-uid/v1/2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00",
+        "2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00": "data/uuid/test-uid/v1/2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00",
+    }
+
+    start = timestamp_tzaware("2014-01-01")
+    end = timestamp_tzaware("2018-01-01")
+
+    in_date = d.key_date_compare(keys=keys, start_date=start, end_date=end)
+
+    expected = [
+        "data/uuid/test-uid/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "data/uuid/test-uid/v1/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "data/uuid/test-uid/v1/2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
+        "data/uuid/test-uid/v1/2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
+    ]
+
+    assert in_date == expected
+
+    start = timestamp_tzaware("2053-01-01")
+    end = timestamp_tzaware("2092-01-01")
+
+    in_date = d.key_date_compare(keys=keys, start_date=start, end_date=end)
+
+    assert not in_date
+
+    error_key = {"2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00_2014-11-30-11:23:30+00:00": "broken"}
+
+    with pytest.raises(ValueError):
+        in_date = d.key_date_compare(keys=error_key, start_date=start, end_date=end)
+

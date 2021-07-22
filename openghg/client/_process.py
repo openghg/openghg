@@ -1,7 +1,8 @@
 __all__ = ["Process"]
 
 from Acquire.Client import Wallet
-from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
+from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds, User
+
 from pathlib import Path
 from typing import Dict, List, Union, Optional
 
@@ -29,13 +30,13 @@ class Process:
 
     def process_files(
         self,
-        user,
+        user: User,
         files: Union[str, List],
         data_type: str,
         site: str,
         network: str,
         instrument: Optional[str] = None,
-        overwrite: Optional[bool] = False,
+        overwrite: bool = False,
         openghg_url: Optional[str] = None,
         storage_url: Optional[str] = None,
     ) -> Dict:

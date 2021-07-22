@@ -44,6 +44,3 @@ class Retrieve:
         datasets = {key: open_dataset(data) for key, data in response_data.items()}
 
         return datasets
-
-    def service(self):
-        return self._service

@@ -2,7 +2,7 @@ import sys as _sys
 
 from ._local_store import (
     delete_object,
-    get_hugs_local_path,
+    get_openghg_local_path,
     get_all_object_names,
     get_object_names,
     get_bucket,

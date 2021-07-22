@@ -2,14 +2,17 @@
     the object store
 
 """
-from openghg.dataobjects import SearchResults
-from typing import Dict, Union
+
+from typing import DefaultDict, Dict, Union
 
 __all__ = ["search"]
 
 
-def search(**kwargs) -> Union[Dict, SearchResults]:
-    """Search for observations data. Any keyword arguments may be passed to the 
+# TODO
+# GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user
+# facing interfaces to a more general search function, this would also make it easier to enforce types
+def search(**kwargs):  # type: ignore
+    """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
 
@@ -43,7 +46,8 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
         closest_daterange,
         find_daterange_gaps,
         split_daterange_str,
-    )  
+    )
+    from openghg.dataobjects import SearchResults
 
     # Get a copy of kwargs as we make some modifications below
     kwargs_copy = deepcopy(kwargs)
@@ -81,10 +85,10 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     if data_type not in valid_data_types:
         raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
 
-    # Here we want to load in the ObsSurface module for now
-    if data_type == "timeseries":
-        obj = ObsSurface.load()
-    elif data_type == "footprint":
+    # Assume we want timeseries data
+    obj: Union[ObsSurface, FOOTPRINTS, Emissions, EulerianModel] = ObsSurface.load()
+
+    if data_type == "footprint":
         obj = FOOTPRINTS.load()
     elif data_type == "emissions":
         obj = Emissions.load()
@@ -99,12 +103,11 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     # For the time being this will return a dict until we know how best to represent
     # the footprint and emissions results in a SearchResult object
     if data_type in {"emissions", "footprint", "eulerian_model"}:
-        sources = defaultdict(dict)
+        sources: DefaultDict[str, Dict] = defaultdict(dict)
         for datasource in datasources:
             if datasource.search_metadata(**search_kwargs):
                 uid = datasource.uuid()
-                data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-                sources[uid]["keys"] = data_keys
+                sources[uid]["keys"] = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
                 sources[uid]["metadata"] = datasource.metadata()
 
         return sources
@@ -117,9 +120,9 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
     if {"site", "inlet", "species"} <= search_kwargs.keys() or skip_ranking is True:
         specific_sources = aDict()
         for datasource in matching_sources.values():
-            data_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+            specific_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
 
-            if not data_keys:
+            if not specific_keys:
                 continue
 
             metadata = datasource.metadata()
@@ -128,7 +131,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
             species = metadata["species"]
             inlet = metadata["inlet"]
 
-            specific_sources[site][species][inlet]["keys"] = data_keys
+            specific_sources[site][species][inlet]["keys"] = specific_keys
             specific_sources[site][species][inlet]["metadata"] = metadata
 
         return SearchResults(results=specific_sources.to_dict(), ranked_data=False)
@@ -185,7 +188,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
 
     # We just want some rank_metadata to go along with the final data scheme
     # Can key a key of date - inlet
-    data_keys = aDict()
+    data_keys: Dict = aDict()
     for site, species in highest_ranked.items():
         for sp, data in species.items():
             # data_keys[site][sp]["keys"] = []
@@ -250,7 +253,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
                 inlet_sampling_period = inlet_metadata["sampling_period"]
 
                 # Then we want to retrieve the correct metadata for those inlets
-                results = search(
+                results: SearchResults = search(
                     site=site,
                     species=sp,
                     inlet=chosen_inlet,
@@ -258,7 +261,7 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
                     sampling_period=inlet_sampling_period,
                     start_date=gap_start,
                     end_date=gap_end,
-                )
+                )  # type: ignore
 
                 if not results:
                     continue
@@ -271,7 +274,8 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
             # Remove any duplicate keys
             data_keys[site][sp]["keys"] = list(set(data_keys[site][sp]["keys"]))
 
-    dict_data_keys = data_keys.to_dict()
+    # TODO - create a stub for addict
+    dict_data_keys = data_keys.to_dict()  # type: ignore
 
     return SearchResults(results=dict_data_keys, ranked_data=True)
 
@@ -384,26 +388,3 @@ def search(**kwargs) -> Union[Dict, SearchResults]:
 #                     keys[key]["metadata"] = datasource.metadata()
 
 #     return keys
-
-
-def _strip_dates_keys(keys):
-    """Strips the date from a key, could this data just be read from JSON instead?
-    Read dates covered from the Datasource?
-
-    Args:
-        keys (list): List of keys containing data
-        data/uuid/<uuid>/<version>/2019-03-01-04:14:30+00:00_2019-05-31-20:44:30+00:00
-    Returns:
-        str: Daterange string
-    """
-    if not isinstance(keys, list):
-        keys = [keys]
-
-    keys.sort()
-    start_key = keys[0]
-    end_key = keys[-1]
-    # Get the first and last dates from the keys in the search results
-    start_date = start_key.split("/")[-1].split("_")[0].replace("+00:00", "")
-    end_date = end_key.split("/")[-1].split("_")[-1].replace("+00:00", "")
-
-    return "_".join([start_date, end_date])

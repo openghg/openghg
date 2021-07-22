@@ -1,8 +1,12 @@
 from pandas import DataFrame, Timestamp
-from typing import Dict, List, Optional, Tuple, Union
+from typing import DefaultDict, Dict, List, Optional, Tuple, Union, TypeVar, Type
 from xarray import Dataset
 
+dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
+
 __all___ = ["Datasource"]
+
+T = TypeVar("T", bound="Datasource")
 
 
 class Datasource:
@@ -14,28 +18,29 @@ class Datasource:
     _datavalues_root = "values"
     _data_root = "data"
 
-    def __init__(self):
+    def __init__(self) -> None:
         from Acquire.ObjectStore import get_datetime_now
         from collections import defaultdict
         from uuid import uuid4
 
-        self._uuid = str(uuid4())
+        self._uuid: str = str(uuid4())
         self._creation_datetime = get_datetime_now()
-        self._metadata = {}
+        self._metadata: Dict[str, str] = {}
         # Dictionary keyed by daterange of data in each Dataset
-        self._data = {}
+        self._data: Dict[str, Dataset] = {}
 
         self._start_date = None
         self._end_date = None
 
         self._stored = False
         # This dictionary stored the keys for each version of data uploaded
-        self._data_keys = defaultdict(dict)
-        self._data_type = None
+        # data_key = d._data_keys["latest"]["keys"][date_key]
+        self._data_keys: dataKeyType = defaultdict(dict)
+        self._data_type: str = "timeseries"
         # Hold information regarding the versions of the data
         # Currently unused
-        self._latest_version = None
-        self._versions = {}
+        self._latest_version: str = "latest"
+        self._versions: Dict[str, List] = {}
 
     def start_date(self) -> Timestamp:
         """Returns the starting datetime for the data in this Datasource
@@ -65,49 +70,6 @@ class Datasource:
         """
         value = str(value)
         self._metadata[key.lower()] = value.lower()
-
-    def add_data_dataframe(
-        self, metadata: Dict, data: DataFrame, data_type: Optional[str] = None, overwrite: Optional[bool] = False
-    ) -> None:
-        """Add data to this Datasource and segment the data by size.
-        The data is stored as a tuple of the data and the daterange it covers.
-
-        Args:
-            metadata: Metadata on the data for this Datasource
-            data: Measurement data
-            data_type: Placeholder for combination of this fn
-            with add_footprint_data in the future
-            overwrite: Overwrite existing data
-            None
-        """
-        from pandas import Grouper
-        from openghg.processing import get_split_frequency
-
-        # Ensure metadata values are all lowercase
-        metadata = {k: v.lower() for k, v in metadata.items()}
-        self._metadata.update(metadata)
-
-        if self._data:
-            # Exisiting data in Datsource
-            start_data, end_data = self.daterange()
-            # This is the data that we may want to add to the Datasource
-            start_new, end_new = self.get_dataframe_daterange(data)
-
-            # Check if there's overlap of data
-            if start_new >= start_data and end_new <= end_data and overwrite is False:
-                raise ValueError("The provided data overlaps dates covered by existing data")
-
-        # Need to check here if we've seen this data before
-        freq = get_split_frequency(data)
-        # Split into sections by splitting frequency
-        group = data.groupby(Grouper(freq=freq))
-        # Create a list tuples of the split dataframe and the daterange it covers
-        # As some (years, months, weeks) may be empty we don't want those dataframes
-        self._data = [(g, self.get_dataframe_daterange(g)) for _, g in group if len(g) > 0]
-        self.add_metadata_key(key="data_type", value="timeseries")
-        self._data_type = "timeseries"
-        # Use daterange() to update the recorded values
-        self.update_daterange()
 
     def add_data(self, metadata: Dict, data: Dataset, data_type: str, overwrite: Optional[bool] = False) -> None:
         """Add data to this Datasource and segment the data by size.
@@ -195,8 +157,8 @@ class Datasource:
         """
         from openghg.util import to_lowercase
 
-        metadata = to_lowercase(metadata)
-        self._metadata.update(metadata)
+        lowercased: Dict = to_lowercase(metadata)
+        self._metadata.update(lowercased)
 
     def add_emissions_data(self, data: Dataset) -> None:
         """Add flux data to this Datasource
@@ -322,12 +284,12 @@ class Datasource:
         start = str(start).replace(" ", "-")
         end = str(end).replace(" ", "-")
 
-        daterange_str = start + "_" + end
+        daterange_str: str = start + "_" + end
 
         return daterange_str
 
     @staticmethod
-    def exists(datasource_id: str, bucket: Optional[str] = None):
+    def exists(datasource_id: str, bucket: Optional[str] = None) -> bool:
         """Check if a datasource with this ID is already stored in the object store
 
         Args:
@@ -356,7 +318,7 @@ class Datasource:
         """
         from Acquire.ObjectStore import datetime_to_string
 
-        data = {}
+        data: Dict[str, Union[str, Dict, bool]] = {}
         data["UUID"] = self._uuid
         data["creation_datetime"] = datetime_to_string(self._creation_datetime)
         data["metadata"] = self._metadata
@@ -366,22 +328,6 @@ class Datasource:
         data["latest_version"] = self._latest_version
 
         return data
-
-    @staticmethod
-    def load_dataframe(bucket: str, key: str) -> DataFrame:
-        """Loads data from the object store for creation of a Datasource object
-
-        Args:
-            bucket: Bucket containing data
-            key: Key for data
-        Returns:
-            Pandas.Dataframe: Dataframe from stored HDF file
-        """
-        from openghg.objectstore import get_object
-
-        data = get_object(bucket, key)
-
-        return Datasource.hdf_to_dataframe(data)
 
     @staticmethod
     def load_dataset(bucket: str, key: str) -> Dataset:
@@ -413,90 +359,12 @@ class Datasource:
             with open(tmp_path, "wb") as f:
                 f.write(data)
 
-            ds = load_dataset(tmp_path)
+            ds: Dataset = load_dataset(tmp_path)
 
             return ds
 
-    # These functions don't work, placeholders for when it's possible to get
-    # an in memory NetCDF4 file
-    # def dataset_to_netcdf(data):
-    #     """ Write the passed dataset to a compressed in-memory NetCDF file
-    #     """
-    #     import netCDF4
-    #     import xarray
-
-    #     store = xarray.backends.NetCDF4DataStore(data)
-    #     nc4_ds = netCDF4.Dataset(store)
-    #     nc_buf = nc4_ds.close()
-
-    # def netcdf_to_dataset(data):
-    #     """ Converts the binary data in data to xarray.Dataset
-
-    #         Args:
-    #             data: Binary data
-    #         Returns:
-    #             xarray.Dataset: Dataset created from data
-    #     """
-    #     import netCDF4c
-    #     import xarray
-
-    #     nc4_ds = netCDF4.Dataset("in_memory.nc", memory=data)
-    #     store = xarray.backends.NetCDF4DataStore(nc4_ds)
-    #     return xarray.open_dataset(store)
-
-    # Modified from
-    # https://github.com/pandas-dev/pandas/issues/9246
-    @staticmethod
-    def dataframe_to_hdf(data: DataFrame) -> bytes:
-        """Writes this Datasource's data to a compressed in-memory HDF5 file
-
-        This function is partnered with hdf_to_dataframe()
-        which reads a datframe from the in-memory HDF5 bytes object
-
-        Args:
-            dataframe: Dataframe containing raw data
-        Returns:
-            bytes: HDF5 file as bytes object
-        """
-        from pandas import HDFStore
-
-        with HDFStore(
-            "write.hdf",
-            mode="w",
-            driver="H5FD_CORE",
-            driver_core_backing_store=0,
-            complevel=6,
-            complib="blosc:blosclz",
-        ) as out:
-
-            out["data"] = data
-            return out._handle.get_file_image()
-
-    @staticmethod
-    def hdf_to_dataframe(hdf_data: bytes) -> DataFrame:
-        """Reads a dataframe from the passed HDF5 bytes object buffer
-
-        This function is partnered with dataframe_to_hdf()
-        which writes a dataframe to an in-memory HDF5 file
-
-        Args:
-            data: Bytes object containing HDF5 file
-        Returns:
-            Pandas.Dataframe: Dataframe read from HDF5 file buffer
-        """
-        from pandas import HDFStore, read_hdf
-
-        with HDFStore(
-            "read.hdf",
-            mode="r",
-            driver="H5FD_CORE",
-            driver_core_backing_store=0,
-            driver_core_image=hdf_data,
-        ) as data:
-            return read_hdf(data)
-
-    @staticmethod
-    def from_data(bucket: str, data: Dict, shallow: bool):
+    @classmethod
+    def from_data(cls: Type[T], bucket: str, data: Dict, shallow: bool) -> T:
         """Construct a Datasource from JSON
 
         Args:
@@ -508,7 +376,7 @@ class Datasource:
         """
         from Acquire.ObjectStore import string_to_datetime
 
-        d = Datasource()
+        d = cls()
         d._uuid = data["UUID"]
         d._creation_datetime = string_to_datetime(data["creation_datetime"])
         d._metadata = data["metadata"]
@@ -587,18 +455,14 @@ class Datasource:
 
         set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
 
-    @staticmethod
-    def load(
-        bucket: Optional[str] = None, uuid: Optional[str] = None, key: Optional[str] = None, shallow: Optional[bool] = False
-    ):
+    @classmethod
+    def load(cls: Type[T], bucket: str = None, uuid: str = None, key: str = None, shallow: bool = False) -> T:
         """Load a Datasource from the object store either by name or UUID
-
-        uuid or name must be passed to the function
 
         Args:
             bucket: Bucket to store object
             uuid: UID of Datasource
-            name: Name of Datasource
+            key: Key of Datasource
             shallow: Only load JSON data, do not read Datasets from object store.
             This will speed up creation of the Datasource object.
         Returns:
@@ -617,9 +481,11 @@ class Datasource:
 
         data = get_object_from_json(bucket=bucket, key=key)
 
-        return Datasource.from_data(bucket=bucket, data=data, shallow=shallow)
+        datasource = cls.from_data(bucket=bucket, data=data, shallow=shallow)
 
-    def data(self) -> dict:
+        return datasource
+
+    def data(self) -> Dict:
         """Get the data stored in this Datasource
 
         Returns:
@@ -643,15 +509,16 @@ class Datasource:
             None
         """
         from openghg.util import split_daterange_str
+
         # If we've only shallow loaded (without the data)
         # this Datasource we use the latest data keys
         if not self._data:
-            keys = sorted(self._data_keys["latest"]["keys"])
+            date_keys = sorted(self._data_keys["latest"]["keys"])
         else:
-            keys = sorted(self._data.keys())
+            date_keys = sorted(self._data.keys())
 
-        start, _ = split_daterange_str(daterange_str=keys[0])
-        _, end = split_daterange_str(daterange_str=keys[-1])
+        start, _ = split_daterange_str(daterange_str=date_keys[0])
+        _, end = split_daterange_str(daterange_str=date_keys[-1])
 
         self._start_date = start
         self._end_date = end
@@ -661,7 +528,7 @@ class Datasource:
         of start, end datetime objects
 
         Returns:
-            tuple (Timestamp, Timestamp): Start, end Timestamps
+            tuple (Timestamp, Timestamp): Start, end timestamps
         """
         if self._start_date is None and self._data is not None:
             self.update_daterange()
@@ -710,7 +577,7 @@ class Datasource:
 
         results = {}
 
-        def search_recurse(term, data):
+        def search_recurse(term: str, data: Dict) -> None :
             for v in data.values():
                 if v == term:
                     results[term] = True
@@ -727,7 +594,7 @@ class Datasource:
         else:
             return len(results) > 0
 
-    def search_metadata(self, find_all: Optional[bool] = True, **kwargs) -> bool:
+    def search_metadata(self, find_all: Optional[bool] = True, **kwargs: str) -> bool:
         """Search the metadata for any available keyword
 
         Args:
@@ -795,7 +662,7 @@ class Datasource:
         start_date = timestamp_tzaware(start_date)
         end_date = timestamp_tzaware(end_date)
 
-        return (start_date <= self._end_date) and (end_date >= self._start_date)
+        return bool((start_date <= self._end_date) and (end_date >= self._start_date))
 
     def keys_in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> List[str]:
         """Return the keys for data between the two passed dates
@@ -834,7 +701,7 @@ class Datasource:
 
         return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
 
-    def key_date_compare(self, keys: List[str], start_date: Timestamp, end_date: Timestamp) -> List:
+    def key_date_compare(self, keys: Dict[str, str], start_date: Timestamp, end_date: Timestamp) -> List:
         """Returns the keys in the key list that are between the given dates
 
         Args:
@@ -847,7 +714,7 @@ class Datasource:
         from openghg.util import timestamp_tzaware
 
         in_date = []
-        for key in keys:
+        for key, data_key in keys.items():
             end_key = key.split("/")[-1]
             dates = end_key.split("_")
 
@@ -860,7 +727,7 @@ class Datasource:
             # For this logic see
             # https://stackoverflow.com/a/325964
             if (start_key <= end_date) and (end_key >= start_date):
-                in_date.append(keys[key])
+                in_date.append(data_key)
 
         return in_date
 
@@ -920,7 +787,15 @@ class Datasource:
         """
         return self._data_type
 
-    def data_keys(self, version: Optional[str] = "latest", return_all: Optional[bool] = False) -> List:
+    def raw_keys(self) -> dataKeyType:
+        """Returns the raw keys dictionary
+
+        Returns:
+            dict: Dictionary of keys
+        """
+        return self._data_keys
+
+    def data_keys(self, version: str = "latest") -> List:
         """Returns the object store keys where data related
         to this Datasource is stored
 
@@ -930,11 +805,8 @@ class Datasource:
         Returns:
             list: List of data keys
         """
-        if return_all:
-            return self._data_keys
-
         try:
-            keys = [v for k, v in self._data_keys[version]["keys"].items()]
+            keys = list(self._data_keys[version]["keys"].values())
         except KeyError:
             raise KeyError(f"Invalid version, valid versions {list(self._data_keys.keys())}")
 

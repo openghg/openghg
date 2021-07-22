@@ -12,7 +12,7 @@ class EUROCOM:
     ICOS data processing is done by the ICOS module
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         from openghg.util import load_json
 
         self._eurocom_params = {}
@@ -25,11 +25,11 @@ class EUROCOM:
     def read_file(
         self,
         data_filepath: Union[str, Path],
-        site: Optional[str] = None,
+        site: str,
+        sampling_period: str,
         network: Optional[str] = None,
         inlet: Optional[str] = None,
         instrument: Optional[str] = None,
-        sampling_period: Optional[str] = None,
         measurement_type: Optional[str] = None,
     ) -> Dict:
         """Reads EUROCOM data files and returns the UUIDS of the Datasources
@@ -53,10 +53,10 @@ class EUROCOM:
             sampling_period = "NOT_SET"
 
         # This should return xarray Datasets
-        gas_data = self.read_data(data_filepath=data_filepath, site=site)
+        gas_data = self.read_data(data_filepath=data_filepath, sampling_period=sampling_period, site=site)
 
         # Assign attributes to the xarray Datasets here data here makes it a lot easier to test
-        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=self._sampling_period)
+        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=sampling_period)
 
         return gas_data
 
@@ -80,8 +80,9 @@ class EUROCOM:
 
         filename = data_filepath.name
         inlet_height = filename.split("_")[1]
+
         if "m" not in inlet_height:
-            inlet_height = None
+            inlet_height = "NA"
 
         # This dictionary is used to store the gas data and its associated metadata
         combined_data = {}
@@ -91,7 +92,7 @@ class EUROCOM:
         n_skip = len(header) - 1
         species = "co2"
 
-        def date_parser(year, month, day, hour, minute):
+        def date_parser(year: str, month: str, day: str, hour: str, minute: str) -> Timestamp:
             return Timestamp(year=year, month=month, day=day, hour=hour, minute=minute)
 
         datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
@@ -180,9 +181,9 @@ class EUROCOM:
         """
         site = site.upper()
 
-        attributes = self._eurocom_params["global_attributes"]
+        attributes: Dict = self._eurocom_params["global_attributes"]
 
-        if inlet is None:
+        if inlet == "NA":
             if site in self._eurocom_params["intake_height"]:
                 inlet = self._eurocom_params["intake_height"][site]
                 attributes["inlet_height_m"] = str(inlet)

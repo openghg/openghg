@@ -3,7 +3,6 @@
 """
 
 from ._util import (
-    create_uuid,
     get_datapath,
     load_json,
     load_object,
@@ -12,14 +11,11 @@ from ._util import (
     valid_site,
     is_number,
     to_lowercase,
-    to_defaultdict,
     pairwise,
 )
 
 from ._hashing import hash_string, hash_file
 from ._strings import clean_string
-
-from ._compliance import compliant_string
 
 from ._time import (
     timestamp_tzaware,

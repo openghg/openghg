@@ -1,5 +1,6 @@
-from typing import Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Union
 from pathlib import Path
+from pandas import DataFrame
 
 __all__ = ["BEACO2N"]
 
@@ -29,7 +30,7 @@ class BEACO2N:
         from numpy import nan as np_nan
         from openghg.util import load_json
         from collections import defaultdict
-        from openghg.util import compliant_string
+        from openghg.util import clean_string
 
         if sampling_period is None:
             sampling_period = "NOT_SET"
@@ -69,7 +70,7 @@ class BEACO2N:
         measurement_types = ["pm", "co2"]
         units = {"pm": "ug/m3", "co2": "ppm"}
 
-        gas_data = defaultdict(dict)
+        gas_data: DefaultDict[str, Dict[str, Union[DataFrame, Dict]]] = defaultdict(dict)
         for mt in measurement_types:
             m_data = data[[mt, f"{mt}_qc"]]
             m_data = m_data.dropna(axis="rows", how="any").to_xarray()
@@ -77,7 +78,7 @@ class BEACO2N:
             species_metadata = {
                 "units": units[mt],
                 "site": site_name,
-                "species": compliant_string(mt),
+                "species": clean_string(mt),
                 "inlet": "NA",
                 "network": "beaco2n",
                 "sampling_period": str(sampling_period),

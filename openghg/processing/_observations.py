@@ -40,7 +40,7 @@ def get_obs_surface(
     import numpy as np
     from xarray import concat as xr_concat
     from openghg.processing import search, recombine_datasets
-    from openghg.util import compliant_string, load_json, timestamp_tzaware
+    from openghg.util import clean_string, load_json, timestamp_tzaware
 
     site_info = load_json(filename="acrg_site_info.json")
     site = site.upper()
@@ -49,7 +49,7 @@ def get_obs_surface(
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
     # Find the correct synonym for the passed species
-    species = compliant_string(synonyms(species))
+    species = clean_string(synonyms(species))
 
     # Get the observation data
     obs_results = search(
@@ -65,7 +65,9 @@ def get_obs_surface(
     # if len(obs_results) > 1:
     #     raise ValueError("More than one search result found for the passed argument. Please be more specific with your search terms.")
 
-    obs_data = obs_results.retrieve(site=site, species=species, inlet=inlet)
+    # TODO - for some reason mypy doesn't pick up the ObsData being returned here, look into this
+    # GJ - 2021-07-19
+    obs_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet) # type: ignore
     data = obs_data.data
 
     # Slice the data to only cover the dates we're interested in
@@ -121,7 +123,9 @@ def get_obs_surface(
         ds_resampled.attrs["averaged_period_str"] = average
 
         # For some variables, need a different type of resampling
-        for var in data.variables:
+        data_variables: List[str] = [str(v) for v in data.variables]
+
+        for var in data_variables:
             if "repeatability" in var:
                 ds_resampled[var] = (
                     np.sqrt((data[var] ** 2).resample(time=average).sum()) / data[var].resample(time=average).count()
@@ -151,9 +155,10 @@ def get_obs_surface(
         data = ds_resampled
 
     # Rename variables
-    rename = {}
+    rename: Dict[str, str] = {}
 
-    for var in data.variables:
+    data_variables = [str(v) for v in data.variables]
+    for var in data_variables:
         if var.lower() == species.lower():
             rename[var] = "mf"
         if "repeatability" in var:
@@ -167,7 +172,7 @@ def get_obs_surface(
         if "integration_flag" in var:
             rename[var] = "integration_flag"
 
-    data = data.rename_vars(rename)
+    data = data.rename_vars(rename) # type: ignore
 
     data.attrs["species"] = species
 
@@ -232,8 +237,7 @@ def synonyms(species: str) -> str:
                 break
 
     if matched_strings:
-        updated_species = matched_strings[0]
-
+        updated_species = str(matched_strings[0])
         return updated_species
     else:
         raise ValueError(f"Unable to find synonym for species {species}")

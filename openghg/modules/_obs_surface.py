@@ -1,6 +1,6 @@
 from openghg.modules import BaseModule
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import DefaultDict, Dict, Union
 
 # import traceback
 
@@ -13,39 +13,17 @@ class ObsSurface(BaseModule):
     _root = "ObsSurface"
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
 
-    # We don't currently need to add anything here
-    # def __init__(self):
-    #     super().__init__()
-
-    def save(self, bucket: Optional[Dict] = None) -> None:
-        """Save the object to the object store
-
-        Args:
-            bucket: Bucket for data
-        Returns:
-            None
-        """
-        from openghg.objectstore import get_bucket, set_object_from_json
-
-        if bucket is None:
-            bucket = get_bucket()
-
-        obs_key = f"{ObsSurface._root}/uuid/{ObsSurface._uuid}"
-
-        self._stored = True
-        set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
-
     @staticmethod
     def read_file(
         filepath: Union[str, Path, list],
         data_type: str,
         site: str,
         network: str,
-        inlet: Optional[str] = None,
-        instrument: Optional[str] = None,
-        sampling_period: Optional[str] = None,
-        measurement_type: Optional[str] = "insitu",
-        overwrite: Optional[bool] = False,
+        inlet: str = None,
+        instrument: str = None,
+        sampling_period: str = None,
+        measurement_type: str = "insitu",
+        overwrite: bool = False,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -59,7 +37,7 @@ class ObsSurface(BaseModule):
             inlet: Inlet height. If processing multiple files pass None, OpenGHG will attempt to
             read inlets from data.
             instrument: Instrument name
-            sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period)
+            sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
             overwrite: Overwrite previously uploaded data
         Returns:
@@ -68,6 +46,7 @@ class ObsSurface(BaseModule):
         from collections import defaultdict
         import logging
         from pathlib import Path
+        from pandas import Timedelta
         import sys
         from tqdm import tqdm
         from openghg.util import load_object, hash_file, clean_string
@@ -93,13 +72,18 @@ class ObsSurface(BaseModule):
         instrument = clean_string(instrument)
         sampling_period = clean_string(sampling_period)
 
+        sampling_period_seconds: Union[str, None] = None
+        # If we have a sampling period passed we want the number of seconds
+        if sampling_period is not None:
+            sampling_period_seconds = str(Timedelta(sampling_period).total_seconds())
+
         # Load the data processing object
         data_obj = load_object(class_name=data_type)
 
         obs = ObsSurface.load()
 
         # Create a progress bar object using the filepaths, iterate over this below
-        results = defaultdict(dict)
+        results: DefaultDict[str, Dict] = defaultdict(dict)
 
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
             for fp in filepath:
@@ -127,7 +111,7 @@ class ObsSurface(BaseModule):
                         network=network,
                         inlet=inlet,
                         instrument=instrument,
-                        sampling_period=sampling_period,
+                        sampling_period=sampling_period_seconds,
                         measurement_type=measurement_type,
                     )
                 else:
@@ -137,7 +121,7 @@ class ObsSurface(BaseModule):
                         network=network,
                         inlet=inlet,
                         instrument=instrument,
-                        sampling_period=sampling_period,
+                        sampling_period=sampling_period_seconds,
                         measurement_type=measurement_type,
                     )
 
@@ -240,10 +224,7 @@ class ObsSurface(BaseModule):
         """
         uuid = self._datasource_table[site][network][species][inlet][sampling_period]
 
-        if uuid:
-            return uuid
-        else:
-            return False
+        return uuid if uuid else False
 
     def set_uuid(self, site: str, network: str, inlet: str, species: str, sampling_period: int, uuid: str) -> None:
         """Record a UUID of a Datasource in the datasource table
@@ -278,7 +259,7 @@ class ObsSurface(BaseModule):
         # iterate over these keys and delete them
         datasource = Datasource.load(uuid=uuid)
 
-        data_keys = datasource.data_keys(return_all=True)
+        data_keys = datasource.raw_keys()
 
         for version in data_keys:
             key_data = data_keys[version]["keys"]
