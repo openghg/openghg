@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.processing._attributes &mdash; OpenGHG 0+untagged.3.g4f04dbc documentation</title>
+  <title>openghg.processing._attributes &mdash; OpenGHG 0+untagged.3.g29b03ba documentation</title>
   
 
   
@@ -171,7 +171,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for openghg.processing._attributes</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">cast</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;assign_attributes&quot;</span><span class="p">,</span> <span class="s2">&quot;get_attributes&quot;</span><span class="p">]</span>
@@ -180,8 +180,8 @@
 <div class="viewcode-block" id="assign_attributes"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.assign_attributes">[docs]</a><span class="k">def</span> <span class="nf">assign_attributes</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Assign attributes to the data we&#39;ve processed. This ensures that the xarray Datasets produced</span>
 <span class="sd">    as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata</span>
@@ -204,7 +204,7 @@
         <span class="n">scale</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scale&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">sampling_period</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">)</span>
+            <span class="n">sampling_period</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">))</span>
 
         <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_attributes</span><span class="p">(</span>
             <span class="n">ds</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">],</span>
@@ -224,13 +224,13 @@
     <span class="n">ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">global_attributes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">units</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">date_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">global_attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">scale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">date_range</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function writes attributes to an xarray.Dataset so that they conform with</span>
 <span class="sd">    the CF Convention v1.7</span>
@@ -270,7 +270,7 @@
 <span class="sd">            (e.g. [&quot;1900-01-01&quot;, &quot;2010-01-01&quot;])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span> <span class="k">as</span> <span class="n">pd_Timestamp</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">compliant_string</span><span class="p">,</span> <span class="n">load_json</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_json</span>
 
     <span class="c1"># from numpy import unique as np_unique</span>
 
@@ -280,8 +280,13 @@
     <span class="c1"># Current CF Conventions (v1.7) demand that valid variable names</span>
     <span class="c1"># begin with a letter and be composed of letters, digits and underscores</span>
     <span class="c1"># Here variable names are also made lowercase to enable easier matching below</span>
-    <span class="n">to_underscores</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="n">var</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">}</span>
-    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">to_underscores</span><span class="p">)</span>
+
+    <span class="c1"># TODO - could I just cast ds.variables as as type for mypy instead of doing this?</span>
+    <span class="c1"># variable_names = [str(v) for v in ds.variables]</span>
+    <span class="c1"># Is this better?</span>
+    <span class="n">variable_names</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
+    <span class="n">to_underscores</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="n">var</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variable_names</span><span class="p">}</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">to_underscores</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
     <span class="n">species_attrs</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;species_attributes.json&quot;</span><span class="p">)</span>
     <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
@@ -294,7 +299,8 @@
     <span class="n">species_upper</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
     <span class="n">species_lower</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
-    <span class="n">matched_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span> <span class="k">if</span> <span class="n">species_lower</span> <span class="ow">in</span> <span class="n">var</span><span class="p">]</span>
+    <span class="n">variable_names</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
+    <span class="n">matched_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variable_names</span> <span class="k">if</span> <span class="n">species_lower</span> <span class="ow">in</span> <span class="n">var</span><span class="p">]</span>
 
     <span class="c1"># If we don&#39;t have any variables to rename, raise an error</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">matched_keys</span><span class="p">:</span>
@@ -305,11 +311,11 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">species_label</span> <span class="o">=</span> <span class="n">species_translator</span><span class="p">[</span><span class="n">species_upper</span><span class="p">][</span><span class="s2">&quot;chem&quot;</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="n">species_label</span> <span class="o">=</span> <span class="n">compliant_string</span><span class="p">(</span><span class="n">species_lower</span><span class="p">)</span>
+            <span class="n">species_label</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">species_lower</span><span class="p">)</span>
 
         <span class="n">species_rename</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">species_lower</span><span class="p">,</span> <span class="n">species_label</span><span class="p">)</span>
 
-    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">species_rename</span><span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">species_rename</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># Global attributes</span>
     <span class="n">global_attributes_default</span> <span class="o">=</span> <span class="p">{</span>
@@ -318,8 +324,9 @@
         <span class="s2">&quot;Conventions&quot;</span><span class="p">:</span> <span class="s2">&quot;CF-1.6&quot;</span><span class="p">,</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="n">global_attributes</span><span class="p">:</span>
-        <span class="n">global_attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">global_attributes_default</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">global_attributes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># TODO - for some reason mypy doesn&#39;t see a Dict[str,str] as a valid Mapping[Hashable, Any] type</span>
+        <span class="n">global_attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">global_attributes_default</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">global_attributes</span> <span class="o">=</span> <span class="n">global_attributes_default</span>
 
@@ -333,7 +340,7 @@
         <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;Calibration_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale</span>
 
     <span class="c1"># Update the Dataset attributes</span>
-    <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">global_attributes</span><span class="p">)</span>
+    <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">global_attributes</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># Add some site attributes</span>
     <span class="n">site_attributes</span> <span class="o">=</span> <span class="n">_site_info_attributes</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">network</span><span class="p">)</span>
@@ -353,12 +360,13 @@
 
     <span class="n">ancillary_variables</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="n">matched_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span> <span class="k">if</span> <span class="n">species_lower</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+    <span class="n">variable_names</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
+    <span class="n">matched_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variable_names</span> <span class="k">if</span> <span class="n">species_lower</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
 
     <span class="c1"># Write units as attributes to variables containing any of these</span>
     <span class="n">match_words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;variability&quot;</span><span class="p">,</span> <span class="s2">&quot;repeatability&quot;</span><span class="p">,</span> <span class="s2">&quot;stdev&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">]</span>
 
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">variable_names</span><span class="p">:</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">species_label</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
@@ -397,7 +405,8 @@
 
     <span class="c1"># Add quality flag attributes</span>
     <span class="c1"># NOTE - I&#39;ve removed the whitespace before status_flag and integration_flag here</span>
-    <span class="n">quality_flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span> <span class="k">if</span> <span class="s2">&quot;status_flag&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">]</span>
+    <span class="n">variable_names</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
+    <span class="n">quality_flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">variable_names</span> <span class="k">if</span> <span class="s2">&quot;status_flag&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">]</span>
 
     <span class="c1"># Not getting long_name for c2f6</span>
 
@@ -413,8 +422,9 @@
             <span class="s2">&quot;long_name&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">long_name</span><span class="si">}</span><span class="s2"> status_flag&quot;</span><span class="p">,</span>
         <span class="p">}</span>
 
+    <span class="n">variable_names</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span>
     <span class="c1"># Add integration flag attributes</span>
-    <span class="n">integration_flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">variables</span> <span class="k">if</span> <span class="s2">&quot;integration_flag&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">]</span>
+    <span class="n">integration_flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">variable_names</span> <span class="k">if</span> <span class="s2">&quot;integration_flag&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">integration_flags</span><span class="p">:</span>
         <span class="n">ds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
@@ -440,7 +450,7 @@
 
     <span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;seconds since </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">first_year</span><span class="p">)</span><span class="si">}</span><span class="s2">-01-01 00:00:00&quot;</span><span class="p">}</span>
 
-    <span class="n">time_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">time_attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">time_attributes</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;left&quot;</span>
     <span class="n">time_attributes</span><span class="p">[</span><span class="s2">&quot;standard_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span>
     <span class="n">time_attributes</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -514,7 +524,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 20, 2021.
+        Last updated on Jul 22, 2021.
       </span>
 
     </p>

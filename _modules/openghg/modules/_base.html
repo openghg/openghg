@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.3.g4f04dbc documentation</title>
+  <title>openghg.modules._base &mdash; OpenGHG 0+untagged.3.g29b03ba documentation</title>
   
 
   
@@ -183,7 +183,10 @@
 
 
 <div class="viewcode-block" id="BaseModule"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule">[docs]</a><span class="k">class</span> <span class="nc">BaseModule</span><span class="p">:</span>
-<div class="viewcode-block" id="BaseModule.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">_root</span> <span class="o">=</span> <span class="s2">&quot;root&quot;</span>
+    <span class="n">_uuid</span> <span class="o">=</span> <span class="s2">&quot;root_uuid&quot;</span>
+
+<div class="viewcode-block" id="BaseModule.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">timestamp_now</span>
         <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">Dict</span> <span class="k">as</span> <span class="n">aDict</span>
 
@@ -193,13 +196,13 @@
         <span class="c1"># Use an addict Dict here for easy nested data storage</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">()</span>
         <span class="c1"># Keyed by Datasource UUID</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># Hashes of previously uploaded files</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># Keyed by UUID</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">()</span></div>
 
-    <span class="k">def</span> <span class="nf">is_null</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">is_null</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasources</span>
 
 <div class="viewcode-block" id="BaseModule.exists"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.exists">[docs]</a>    <span class="nd">@classmethod</span>
@@ -219,27 +222,24 @@
 
         <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">_uuid</span><span class="si">}</span><span class="s2">&quot;</span>
 
-        <span class="k">return</span> <span class="n">exists</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span></div>
+        <span class="n">does_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">exists</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">does_exist</span></div>
 
 <div class="viewcode-block" id="BaseModule.from_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.from_data">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Create an object from data</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: JSON data</span>
-<span class="sd">            bucket: Bucket for data storage</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            cls: Class object of cls type</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">string_to_datetime</span>
-        <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_bucket</span>
         <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">Dict</span> <span class="k">as</span> <span class="n">aDict</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to create object with empty dictionary&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">bucket</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">()</span>
 
         <span class="n">c</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
         <span class="n">c</span><span class="o">.</span><span class="n">_creation_datetime</span> <span class="o">=</span> <span class="n">string_to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;creation_datetime&quot;</span><span class="p">])</span>
@@ -291,7 +291,24 @@
         <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">_uuid</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">get_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseModule.save"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Save the object to the object store</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            bucket: Bucket for data</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_bucket</span><span class="p">,</span> <span class="n">set_object_from_json</span>
+
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">()</span>
+
+        <span class="n">obs_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">_uuid</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_stored</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">set_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">obs_key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">cls</span><span class="o">.</span><span class="n">to_data</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="BaseModule.uuid"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.uuid">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">uuid</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -426,7 +443,7 @@
                             <span class="k">continue</span>
                         <span class="c1"># If the ranks are the same we just want to combine the dateranges</span>
                         <span class="k">elif</span> <span class="n">rank</span> <span class="o">==</span> <span class="n">existing_rank</span><span class="p">:</span>
-                            <span class="n">to_combine</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_daterange</span><span class="p">,</span> <span class="n">existing_daterange</span><span class="p">)</span>
+                            <span class="n">to_combine</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_daterange</span><span class="p">,</span> <span class="n">existing_daterange</span><span class="p">]</span>
                             <span class="n">combined</span> <span class="o">=</span> <span class="n">combine_dateranges</span><span class="p">(</span><span class="n">dateranges</span><span class="o">=</span><span class="n">to_combine</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                             <span class="n">to_update</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">existing_daterange</span><span class="p">,</span> <span class="n">combined</span><span class="p">))</span>
                         <span class="k">else</span><span class="p">:</span>
@@ -508,7 +525,8 @@
 <span class="sd">            Returns:</span>
 <span class="sd">                dict: Dictionary of rank data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+        <span class="n">rank_dict</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">rank_dict</span></div>
 
 <div class="viewcode-block" id="BaseModule.clear_datasources"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.BaseModule.clear_datasources">[docs]</a>    <span class="k">def</span> <span class="nf">clear_datasources</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Remove all Datasources from the object</span>
@@ -532,7 +550,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 20, 2021.
+        Last updated on Jul 22, 2021.
       </span>
 
     </p>

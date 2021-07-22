@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.3.g4f04dbc documentation</title>
+  <title>openghg.modules._datasource &mdash; OpenGHG 0+untagged.3.g29b03ba documentation</title>
   
 
   
@@ -172,10 +172,14 @@
             
   <h1>Source code for openghg.modules._datasource</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Timestamp</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Type</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
+<span class="n">dataKeyType</span> <span class="o">=</span> <span class="n">DefaultDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]</span>
+
 <span class="n">__all___</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Datasource&quot;</span><span class="p">]</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s2">&quot;Datasource&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Datasource"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource">[docs]</a><span class="k">class</span> <span class="nc">Datasource</span><span class="p">:</span>
@@ -187,28 +191,29 @@
     <span class="n">_datavalues_root</span> <span class="o">=</span> <span class="s2">&quot;values&quot;</span>
     <span class="n">_data_root</span> <span class="o">=</span> <span class="s2">&quot;data&quot;</span>
 
-<div class="viewcode-block" id="Datasource.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Datasource.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">get_datetime_now</span>
         <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
         <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid4</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid4</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_creation_datetime</span> <span class="o">=</span> <span class="n">get_datetime_now</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># Dictionary keyed by daterange of data in each Dataset</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_stored</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="c1"># This dictionary stored the keys for each version of data uploaded</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># data_key = d._data_keys[&quot;latest&quot;][&quot;keys&quot;][date_key]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span><span class="p">:</span> <span class="n">dataKeyType</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;timeseries&quot;</span>
         <span class="c1"># Hold information regarding the versions of the data</span>
         <span class="c1"># Currently unused</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_latest_version</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span> <span class="o">=</span> <span class="p">{}</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_latest_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 <div class="viewcode-block" id="Datasource.start_date"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.start_date">[docs]</a>    <span class="k">def</span> <span class="nf">start_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Timestamp</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns the starting datetime for the data in this Datasource</span>
@@ -238,49 +243,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="Datasource.add_data_dataframe"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.add_data_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">add_data_dataframe</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Add data to this Datasource and segment the data by size.</span>
-<span class="sd">        The data is stored as a tuple of the data and the daterange it covers.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            metadata: Metadata on the data for this Datasource</span>
-<span class="sd">            data: Measurement data</span>
-<span class="sd">            data_type: Placeholder for combination of this fn</span>
-<span class="sd">            with add_footprint_data in the future</span>
-<span class="sd">            overwrite: Overwrite existing data</span>
-<span class="sd">            None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Grouper</span>
-        <span class="kn">from</span> <span class="nn">openghg.processing</span> <span class="kn">import</span> <span class="n">get_split_frequency</span>
-
-        <span class="c1"># Ensure metadata values are all lowercase</span>
-        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span>
-            <span class="c1"># Exisiting data in Datsource</span>
-            <span class="n">start_data</span><span class="p">,</span> <span class="n">end_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">daterange</span><span class="p">()</span>
-            <span class="c1"># This is the data that we may want to add to the Datasource</span>
-            <span class="n">start_new</span><span class="p">,</span> <span class="n">end_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataframe_daterange</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-            <span class="c1"># Check if there&#39;s overlap of data</span>
-            <span class="k">if</span> <span class="n">start_new</span> <span class="o">&gt;=</span> <span class="n">start_data</span> <span class="ow">and</span> <span class="n">end_new</span> <span class="o">&lt;=</span> <span class="n">end_data</span> <span class="ow">and</span> <span class="n">overwrite</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The provided data overlaps dates covered by existing data&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Need to check here if we&#39;ve seen this data before</span>
-        <span class="n">freq</span> <span class="o">=</span> <span class="n">get_split_frequency</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="c1"># Split into sections by splitting frequency</span>
-        <span class="n">group</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">Grouper</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">))</span>
-        <span class="c1"># Create a list tuples of the split dataframe and the daterange it covers</span>
-        <span class="c1"># As some (years, months, weeks) may be empty we don&#39;t want those dataframes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">[(</span><span class="n">g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dataframe_daterange</span><span class="p">(</span><span class="n">g</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">group</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_metadata_key</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;data_type&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;timeseries&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span> <span class="o">=</span> <span class="s2">&quot;timeseries&quot;</span>
-        <span class="c1"># Use daterange() to update the recorded values</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_daterange</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Datasource.add_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.add_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Add data to this Datasource and segment the data by size.</span>
@@ -368,8 +330,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">to_lowercase</span>
 
-        <span class="n">metadata</span> <span class="o">=</span> <span class="n">to_lowercase</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span></div>
+        <span class="n">lowercased</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">to_lowercase</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lowercased</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Datasource.add_emissions_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.add_emissions_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_emissions_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Add flux data to this Datasource</span>
@@ -495,12 +457,12 @@
         <span class="n">start</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
         <span class="n">end</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">end</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
-        <span class="n">daterange_str</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">end</span>
+        <span class="n">daterange_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">end</span>
 
         <span class="k">return</span> <span class="n">daterange_str</span>
 
 <div class="viewcode-block" id="Datasource.exists"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.exists">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="n">datasource_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="n">datasource_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Check if a datasource with this ID is already stored in the object store</span>
 
 <span class="sd">        Args:</span>
@@ -529,7 +491,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">datetime_to_string</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">data</span><span class="p">[</span><span class="s2">&quot;UUID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span>
         <span class="n">data</span><span class="p">[</span><span class="s2">&quot;creation_datetime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime_to_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_creation_datetime</span><span class="p">)</span>
         <span class="n">data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span>
@@ -539,22 +501,6 @@
         <span class="n">data</span><span class="p">[</span><span class="s2">&quot;latest_version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latest_version</span>
 
         <span class="k">return</span> <span class="n">data</span></div>
-
-<div class="viewcode-block" id="Datasource.load_dataframe"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.load_dataframe">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">load_dataframe</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Loads data from the object store for creation of a Datasource object</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            bucket: Bucket containing data</span>
-<span class="sd">            key: Key for data</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            Pandas.Dataframe: Dataframe from stored HDF file</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_object</span>
-
-        <span class="n">data</span> <span class="o">=</span> <span class="n">get_object</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">hdf_to_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Datasource.load_dataset"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.load_dataset">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
@@ -586,90 +532,12 @@
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
+            <span class="n">ds</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">ds</span></div>
 
-    <span class="c1"># These functions don&#39;t work, placeholders for when it&#39;s possible to get</span>
-    <span class="c1"># an in memory NetCDF4 file</span>
-    <span class="c1"># def dataset_to_netcdf(data):</span>
-    <span class="c1">#     &quot;&quot;&quot; Write the passed dataset to a compressed in-memory NetCDF file</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     import netCDF4</span>
-    <span class="c1">#     import xarray</span>
-
-    <span class="c1">#     store = xarray.backends.NetCDF4DataStore(data)</span>
-    <span class="c1">#     nc4_ds = netCDF4.Dataset(store)</span>
-    <span class="c1">#     nc_buf = nc4_ds.close()</span>
-
-    <span class="c1"># def netcdf_to_dataset(data):</span>
-    <span class="c1">#     &quot;&quot;&quot; Converts the binary data in data to xarray.Dataset</span>
-
-    <span class="c1">#         Args:</span>
-    <span class="c1">#             data: Binary data</span>
-    <span class="c1">#         Returns:</span>
-    <span class="c1">#             xarray.Dataset: Dataset created from data</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     import netCDF4c</span>
-    <span class="c1">#     import xarray</span>
-
-    <span class="c1">#     nc4_ds = netCDF4.Dataset(&quot;in_memory.nc&quot;, memory=data)</span>
-    <span class="c1">#     store = xarray.backends.NetCDF4DataStore(nc4_ds)</span>
-    <span class="c1">#     return xarray.open_dataset(store)</span>
-
-    <span class="c1"># Modified from</span>
-    <span class="c1"># https://github.com/pandas-dev/pandas/issues/9246</span>
-<div class="viewcode-block" id="Datasource.dataframe_to_hdf"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.dataframe_to_hdf">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">dataframe_to_hdf</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Writes this Datasource&#39;s data to a compressed in-memory HDF5 file</span>
-
-<span class="sd">        This function is partnered with hdf_to_dataframe()</span>
-<span class="sd">        which reads a datframe from the in-memory HDF5 bytes object</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            dataframe: Dataframe containing raw data</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            bytes: HDF5 file as bytes object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">HDFStore</span>
-
-        <span class="k">with</span> <span class="n">HDFStore</span><span class="p">(</span>
-            <span class="s2">&quot;write.hdf&quot;</span><span class="p">,</span>
-            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
-            <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;H5FD_CORE&quot;</span><span class="p">,</span>
-            <span class="n">driver_core_backing_store</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">complevel</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
-            <span class="n">complib</span><span class="o">=</span><span class="s2">&quot;blosc:blosclz&quot;</span><span class="p">,</span>
-        <span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
-
-            <span class="n">out</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
-            <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">_handle</span><span class="o">.</span><span class="n">get_file_image</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="Datasource.hdf_to_dataframe"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.hdf_to_dataframe">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">hdf_to_dataframe</span><span class="p">(</span><span class="n">hdf_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Reads a dataframe from the passed HDF5 bytes object buffer</span>
-
-<span class="sd">        This function is partnered with dataframe_to_hdf()</span>
-<span class="sd">        which writes a dataframe to an in-memory HDF5 file</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            data: Bytes object containing HDF5 file</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            Pandas.Dataframe: Dataframe read from HDF5 file buffer</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">HDFStore</span><span class="p">,</span> <span class="n">read_hdf</span>
-
-        <span class="k">with</span> <span class="n">HDFStore</span><span class="p">(</span>
-            <span class="s2">&quot;read.hdf&quot;</span><span class="p">,</span>
-            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
-            <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;H5FD_CORE&quot;</span><span class="p">,</span>
-            <span class="n">driver_core_backing_store</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">driver_core_image</span><span class="o">=</span><span class="n">hdf_data</span><span class="p">,</span>
-        <span class="p">)</span> <span class="k">as</span> <span class="n">data</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">read_hdf</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Datasource.from_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.from_data">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">shallow</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<div class="viewcode-block" id="Datasource.from_data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.from_data">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">shallow</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Construct a Datasource from JSON</span>
 
 <span class="sd">        Args:</span>
@@ -681,7 +549,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">string_to_datetime</span>
 
-        <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">()</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
         <span class="n">d</span><span class="o">.</span><span class="n">_uuid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;UUID&quot;</span><span class="p">]</span>
         <span class="n">d</span><span class="o">.</span><span class="n">_creation_datetime</span> <span class="o">=</span> <span class="n">string_to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;creation_datetime&quot;</span><span class="p">])</span>
         <span class="n">d</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
@@ -760,18 +628,14 @@
 
         <span class="n">set_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">datasource_key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">to_data</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="Datasource.load"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.load">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span>
-        <span class="n">bucket</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">shallow</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">):</span>
+<div class="viewcode-block" id="Datasource.load"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.load">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">shallow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Load a Datasource from the object store either by name or UUID</span>
-
-<span class="sd">        uuid or name must be passed to the function</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            bucket: Bucket to store object</span>
 <span class="sd">            uuid: UID of Datasource</span>
-<span class="sd">            name: Name of Datasource</span>
+<span class="sd">            key: Key of Datasource</span>
 <span class="sd">            shallow: Only load JSON data, do not read Datasets from object store.</span>
 <span class="sd">            This will speed up creation of the Datasource object.</span>
 <span class="sd">        Returns:</span>
@@ -790,9 +654,11 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">get_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="n">shallow</span><span class="p">)</span></div>
+        <span class="n">datasource</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="n">shallow</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Datasource.data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datasource</span></div>
+
+<div class="viewcode-block" id="Datasource.data"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Get the data stored in this Datasource</span>
 
 <span class="sd">        Returns:</span>
@@ -816,15 +682,16 @@
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">split_daterange_str</span>
+
         <span class="c1"># If we&#39;ve only shallow loaded (without the data)</span>
         <span class="c1"># this Datasource we use the latest data keys</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span>
-            <span class="n">keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span><span class="p">[</span><span class="s2">&quot;latest&quot;</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">])</span>
+            <span class="n">date_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span><span class="p">[</span><span class="s2">&quot;latest&quot;</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">date_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
-        <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">daterange_str</span><span class="o">=</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">daterange_str</span><span class="o">=</span><span class="n">keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">daterange_str</span><span class="o">=</span><span class="n">date_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">daterange_str</span><span class="o">=</span><span class="n">date_keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="o">=</span> <span class="n">start</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="o">=</span> <span class="n">end</span></div>
@@ -834,7 +701,7 @@
 <span class="sd">        of start, end datetime objects</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            tuple (Timestamp, Timestamp): Start, end Timestamps</span>
+<span class="sd">            tuple (Timestamp, Timestamp): Start, end timestamps</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_daterange</span><span class="p">()</span>
@@ -883,7 +750,7 @@
 
         <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">def</span> <span class="nf">search_recurse</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">search_recurse</span><span class="p">(</span><span class="n">term</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="p">:</span>
             <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="n">term</span><span class="p">:</span>
                     <span class="n">results</span><span class="p">[</span><span class="n">term</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
@@ -900,7 +767,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
-<div class="viewcode-block" id="Datasource.search_metadata"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.search_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">search_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">find_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="Datasource.search_metadata"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.search_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">search_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">find_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Search the metadata for any available keyword</span>
 
 <span class="sd">        Args:</span>
@@ -968,7 +835,7 @@
         <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
         <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="n">start_date</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">end_date</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">((</span><span class="n">start_date</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">end_date</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Datasource.keys_in_daterange"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.keys_in_daterange">[docs]</a>    <span class="k">def</span> <span class="nf">keys_in_daterange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">],</span> <span class="n">end_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Return the keys for data between the two passed dates</span>
@@ -1007,7 +874,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_date_compare</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">data_keys</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Datasource.key_date_compare"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.key_date_compare">[docs]</a>    <span class="k">def</span> <span class="nf">key_date_compare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">start_date</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+<div class="viewcode-block" id="Datasource.key_date_compare"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.key_date_compare">[docs]</a>    <span class="k">def</span> <span class="nf">key_date_compare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">start_date</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns the keys in the key list that are between the given dates</span>
 
 <span class="sd">        Args:</span>
@@ -1020,7 +887,7 @@
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">timestamp_tzaware</span>
 
         <span class="n">in_date</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data_key</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">end_key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">dates</span> <span class="o">=</span> <span class="n">end_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
 
@@ -1033,7 +900,7 @@
             <span class="c1"># For this logic see</span>
             <span class="c1"># https://stackoverflow.com/a/325964</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">start_key</span> <span class="o">&lt;=</span> <span class="n">end_date</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">end_key</span> <span class="o">&gt;=</span> <span class="n">start_date</span><span class="p">):</span>
-                <span class="n">in_date</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="n">in_date</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_key</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">in_date</span></div>
 
@@ -1093,7 +960,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_type</span></div>
 
-<div class="viewcode-block" id="Datasource.data_keys"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.data_keys">[docs]</a>    <span class="k">def</span> <span class="nf">data_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">,</span> <span class="n">return_all</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+<div class="viewcode-block" id="Datasource.raw_keys"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.raw_keys">[docs]</a>    <span class="k">def</span> <span class="nf">raw_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dataKeyType</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the raw keys dictionary</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span></div>
+
+<div class="viewcode-block" id="Datasource.data_keys"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.Datasource.data_keys">[docs]</a>    <span class="k">def</span> <span class="nf">data_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns the object store keys where data related</span>
 <span class="sd">        to this Datasource is stored</span>
 
@@ -1103,11 +978,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            list: List of data keys</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">return_all</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span>
-
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span><span class="p">[</span><span class="n">version</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span><span class="p">[</span><span class="n">version</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid version, valid versions </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -1142,7 +1014,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 20, 2021.
+        Last updated on Jul 22, 2021.
       </span>
 
     </p>

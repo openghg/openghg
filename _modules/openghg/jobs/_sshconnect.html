@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.jobs._sshconnect &mdash; OpenGHG 0+untagged.3.g4f04dbc documentation</title>
+  <title>openghg.jobs._sshconnect &mdash; OpenGHG 0+untagged.3.g29b03ba documentation</title>
   
 
   
@@ -178,11 +178,13 @@
 <span class="c1"># See this for tests</span>
 <span class="c1"># https://pypi.org/project/mock-ssh-server/</span>
 
+<span class="c1"># type: ignore</span>
+
 
 <div class="viewcode-block" id="SSHConnect"><a class="viewcode-back" href="../../../api/api_jobs.html#openghg.jobs.SSHConnect">[docs]</a><span class="k">class</span> <span class="nc">SSHConnect</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Use Paramiko to connect to an SSH server</span>
+    <span class="sd">&quot;&quot;&quot;Use Paramiko to connect to an SSH server</span>
 
-<span class="sd">        This class can be used as a context manager</span>
+<span class="sd">    This class can be used as a context manager</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -199,33 +201,31 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="SSHConnect.close"><a class="viewcode-back" href="../../../api/api_jobs.html#openghg.jobs.SSHConnect.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Calls close on the paramiko SSHClient instance used</span>
-<span class="sd">            the SSH connection</span>
+        <span class="sd">&quot;&quot;&quot;Calls close on the paramiko SSHClient instance used</span>
+<span class="sd">        the SSH connection</span>
 
-<span class="sd">            Returns:</span>
-<span class="sd">                None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">return</span></div>
 
-<div class="viewcode-block" id="SSHConnect.connect"><a class="viewcode-back" href="../../../api/api_jobs.html#openghg.jobs.SSHConnect.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">keypath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">known_host</span><span class="o">=</span><span class="kc">False</span>
-    <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Use Paramiko to connect the hostname</span>
+<div class="viewcode-block" id="SSHConnect.connect"><a class="viewcode-back" href="../../../api/api_jobs.html#openghg.jobs.SSHConnect.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">hostname</span><span class="p">,</span> <span class="n">keypath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">known_host</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use Paramiko to connect the hostname</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                user (str): Username for login</span>
-<span class="sd">                hostname (str): Hostname of server. This can also be an IP address</span>
-<span class="sd">                key_path (Path or str, default=None): Path to private key to use for authentication.</span>
-<span class="sd">                By default Paramiko will attempt to use any “id_rsa”, “id_dsa” or “id_ecdsa” key</span>
-<span class="sd">                discoverable in ~/.ssh/</span>
-<span class="sd">                passsword (str, default=None): Password used for authentication or for unlocking a</span>
-<span class="sd">                password protected</span>
-<span class="sd">                private key</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                None</span>
+<span class="sd">        Args:</span>
+<span class="sd">            user (str): Username for login</span>
+<span class="sd">            hostname (str): Hostname of server. This can also be an IP address</span>
+<span class="sd">            key_path (Path or str, default=None): Path to private key to use for authentication.</span>
+<span class="sd">            By default Paramiko will attempt to use any “id_rsa”, “id_dsa” or “id_ecdsa” key</span>
+<span class="sd">            discoverable in ~/.ssh/</span>
+<span class="sd">            passsword (str, default=None): Password used for authentication or for unlocking a</span>
+<span class="sd">            password protected</span>
+<span class="sd">            private key</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">paramiko</span><span class="o">.</span><span class="n">SSHClient</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">load_system_host_keys</span><span class="p">()</span>
@@ -244,12 +244,12 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="SSHConnect.run_command"><a class="viewcode-back" href="../../../api/api_jobs.html#openghg.jobs.SSHConnect.run_command">[docs]</a>    <span class="k">def</span> <span class="nf">run_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">commands</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Run commands on the remote server</span>
+        <span class="sd">&quot;&quot;&quot;Run commands on the remote server</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                commands (str, list): Command(s) to be run on the remote server</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                list: List of tuples of stdin, stdout and stderr for each command</span>
+<span class="sd">        Args:</span>
+<span class="sd">            commands (str, list): Command(s) to be run on the remote server</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of tuples of stdin, stdout and stderr for each command</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">responses</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -268,14 +268,14 @@
         <span class="k">return</span> <span class="n">responses</span></div>
 
 <div class="viewcode-block" id="SSHConnect.write_files"><a class="viewcode-back" href="../../../api/api_jobs.html#openghg.jobs.SSHConnect.write_files">[docs]</a>    <span class="k">def</span> <span class="nf">write_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">remote_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Write the job script to the remote server</span>
+        <span class="sd">&quot;&quot;&quot;Write the job script to the remote server</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                files (list): List of paths of files to transfer</span>
-<span class="sd">                path (str, default=None): Path to write script, if not passed the script</span>
-<span class="sd">                will be written to the user&#39;s home directory</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                None</span>
+<span class="sd">        Args:</span>
+<span class="sd">            files (list): List of paths of files to transfer</span>
+<span class="sd">            path (str, default=None): Path to write script, if not passed the script</span>
+<span class="sd">            will be written to the user&#39;s home directory</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sftp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">open_sftp</span><span class="p">()</span>
 
@@ -316,7 +316,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 20, 2021.
+        Last updated on Jul 22, 2021.
       </span>
 
     </p>

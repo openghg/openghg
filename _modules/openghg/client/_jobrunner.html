@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.client._jobrunner &mdash; OpenGHG 0+untagged.3.g4f04dbc documentation</title>
+  <title>openghg.client._jobrunner &mdash; OpenGHG 0+untagged.3.g29b03ba documentation</title>
   
 
   
@@ -175,15 +175,15 @@
 
 
 <div class="viewcode-block" id="JobRunner"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.JobRunner">[docs]</a><span class="k">class</span> <span class="nc">JobRunner</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; An interface to the the jobrunner service on the OpenGHG platform.</span>
+    <span class="sd">&quot;&quot;&quot;An interface to the the jobrunner service on the OpenGHG platform.</span>
 
-<span class="sd">        This class is used to run jobs on both local and cloud based HPC clusters</span>
+<span class="sd">    This class is used to run jobs on both local and cloud based HPC clusters</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            service_url (str): URL of service</span>
+<span class="sd">    Args:</span>
+<span class="sd">        service_url (str): URL of service</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="JobRunner.__init__"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.JobRunner.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service_url</span><span class="p">):</span>
+<div class="viewcode-block" id="JobRunner.__init__"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.JobRunner.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service_url</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
         <span class="kn">from</span> <span class="nn">Acquire.Client</span> <span class="kn">import</span> <span class="n">Wallet</span>
@@ -193,45 +193,45 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_service</span> <span class="o">=</span> <span class="n">wallet</span><span class="o">.</span><span class="n">get_service</span><span class="p">(</span><span class="n">service_url</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">service_url</span><span class="si">}</span><span class="s2">/openghg&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_service_url</span> <span class="o">=</span> <span class="n">service_url</span></div>
 
-<div class="viewcode-block" id="JobRunner.create_job"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.JobRunner.create_job">[docs]</a>    <span class="k">def</span> <span class="nf">create_job</span><span class="p">(</span>
+<div class="viewcode-block" id="JobRunner.create_job"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.JobRunner.create_job">[docs]</a>    <span class="k">def</span> <span class="nf">create_job</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">auth_user</span><span class="p">,</span>
         <span class="n">requirements</span><span class="p">,</span>
         <span class="n">key_password</span><span class="p">,</span>
         <span class="n">data_files</span><span class="p">,</span>
-        <span class="n">hugs_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">openghg_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">storage_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Create a job</span>
+    <span class="p">):</span>  <span class="c1"># type: ignore</span>
+        <span class="sd">&quot;&quot;&quot;Create a job</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                auth_user (Acquire.User): Authenticated Acquire user</span>
+<span class="sd">        Args:</span>
+<span class="sd">            auth_user (Acquire.User): Authenticated Acquire user</span>
 
-<span class="sd">                The following keys are required:</span>
-<span class="sd">                    &quot;hostname&quot;, &quot;username&quot;, &quot;name&quot;, &quot;run_command&quot;, &quot;partition&quot;, &quot;n_nodes&quot;, &quot;n_tasks_per_node&quot;,</span>
-<span class="sd">                    &quot;n_cpus_per_task&quot;, &quot;memory_req&quot;, &quot;job_duration&quot;</span>
-<span class="sd">                where partition must be one of:</span>
-<span class="sd">                    &quot;cpu_test&quot;, &quot;dcv&quot;, &quot;gpu&quot;, &quot;gpu_veryshort&quot;, &quot;hmem&quot;, &quot;serial&quot;, &quot;test&quot;, &quot;veryshort&quot;</span>
+<span class="sd">            The following keys are required:</span>
+<span class="sd">                &quot;hostname&quot;, &quot;username&quot;, &quot;name&quot;, &quot;run_command&quot;, &quot;partition&quot;, &quot;n_nodes&quot;, &quot;n_tasks_per_node&quot;,</span>
+<span class="sd">                &quot;n_cpus_per_task&quot;, &quot;memory_req&quot;, &quot;job_duration&quot;</span>
+<span class="sd">            where partition must be one of:</span>
+<span class="sd">                &quot;cpu_test&quot;, &quot;dcv&quot;, &quot;gpu&quot;, &quot;gpu_veryshort&quot;, &quot;hmem&quot;, &quot;serial&quot;, &quot;test&quot;, &quot;veryshort&quot;</span>
 
-<span class="sd">                Example:</span>
-<span class="sd">                    requirements = {&quot;hostname&quot;: hostname, &quot;username&quot;: username, &quot;name&quot;: &quot;test_job,</span>
-<span class="sd">                                    &quot;n_nodes&quot;: 2,&quot;n_tasks_per_node&quot;: 2,</span>
-<span class="sd">                                    &quot;n_cpus_per_task&quot;: 2, &quot;memory&quot;: &quot;128G&quot;, ...}</span>
+<span class="sd">            Example:</span>
+<span class="sd">                requirements = {&quot;hostname&quot;: hostname, &quot;username&quot;: username, &quot;name&quot;: &quot;test_job,</span>
+<span class="sd">                                &quot;n_nodes&quot;: 2,&quot;n_tasks_per_node&quot;: 2,</span>
+<span class="sd">                                &quot;n_cpus_per_task&quot;: 2, &quot;memory&quot;: &quot;128G&quot;, ...}</span>
 
-<span class="sd">                requirements (dict): Dictionary containing job details and requested resources</span>
-<span class="sd">                key_password (str): Password for private key used to access the HPC</span>
-<span class="sd">                data_files (dict): Data file(s) to be uploaded to the cloud drive to</span>
-<span class="sd">                run the simulation. Simulation code files should be given in the &quot;app&quot; key and data</span>
-<span class="sd">                files in the &quot;data&quot; key</span>
+<span class="sd">            requirements (dict): Dictionary containing job details and requested resources</span>
+<span class="sd">            key_password (str): Password for private key used to access the HPC</span>
+<span class="sd">            data_files (dict): Data file(s) to be uploaded to the cloud drive to</span>
+<span class="sd">            run the simulation. Simulation code files should be given in the &quot;app&quot; key and data</span>
+<span class="sd">            files in the &quot;data&quot; key</span>
 
-<span class="sd">                TODO - having to pass in a password and get it through to Paramiko seems</span>
-<span class="sd">                long winded, is there a better way to do this?</span>
+<span class="sd">            TODO - having to pass in a password and get it through to Paramiko seems</span>
+<span class="sd">            long winded, is there a better way to do this?</span>
 
-<span class="sd">                hugs_url (str): URL of OpenGHG service</span>
-<span class="sd">                storage_url (str): URL of storage service</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                dict: Dictionary containing information regarding job running on resource</span>
-<span class="sd">                This will contain the PAR for access for data upload and download.</span>
+<span class="sd">            openghg_url (str): URL of OpenGHG service</span>
+<span class="sd">            storage_url (str): URL of storage service</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary containing information regarding job running on resource</span>
+<span class="sd">            This will contain the PAR for access for data upload and download.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">Acquire.Client</span> <span class="kn">import</span> <span class="p">(</span>
             <span class="n">Drive</span><span class="p">,</span>
@@ -252,8 +252,8 @@
         <span class="k">if</span> <span class="n">storage_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">storage_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service_url</span> <span class="o">+</span> <span class="s2">&quot;/storage&quot;</span>
 
-        <span class="k">if</span> <span class="n">hugs_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">hugs_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service_url</span> <span class="o">+</span> <span class="s2">&quot;/hugs&quot;</span>
+        <span class="k">if</span> <span class="n">openghg_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">openghg_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service_url</span> <span class="o">+</span> <span class="s2">&quot;/openghg&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_files</span><span class="p">[</span><span class="s2">&quot;app&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">data_files</span><span class="p">[</span><span class="s2">&quot;app&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_files</span><span class="p">[</span><span class="s2">&quot;app&quot;</span><span class="p">]]</span>
@@ -265,7 +265,7 @@
             <span class="k">pass</span>
 
         <span class="c1"># Get an authorisaton to pass to the service</span>
-        <span class="n">openghg</span> <span class="o">=</span> <span class="n">Service</span><span class="p">(</span><span class="n">service_url</span><span class="o">=</span><span class="n">hugs_url</span><span class="p">)</span>
+        <span class="n">openghg</span> <span class="o">=</span> <span class="n">Service</span><span class="p">(</span><span class="n">service_url</span><span class="o">=</span><span class="n">openghg_url</span><span class="p">)</span>
         <span class="c1"># Credentials to create the cloud storage drive</span>
         <span class="n">creds</span> <span class="o">=</span> <span class="n">StorageCreds</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">auth_user</span><span class="p">,</span> <span class="n">service_url</span><span class="o">=</span><span class="n">storage_url</span><span class="p">)</span>
 
@@ -343,9 +343,7 @@
         <span class="n">args</span><span class="p">[</span><span class="s2">&quot;requirements&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">requirements</span>
         <span class="n">args</span><span class="p">[</span><span class="s2">&quot;key_password&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">encrypted_password</span>
 
-        <span class="n">function_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span>
-            <span class="n">function</span><span class="o">=</span><span class="s2">&quot;job_runner&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span>
-        <span class="p">)</span>
+        <span class="n">function_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s2">&quot;job_runner&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
 
         <span class="n">response</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">response</span><span class="p">[</span><span class="s2">&quot;function_response&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">function_response</span>
@@ -353,10 +351,7 @@
         <span class="n">response</span><span class="p">[</span><span class="s2">&quot;par_secret&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">par_secret</span>
         <span class="n">response</span><span class="p">[</span><span class="s2">&quot;upload_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uploaded_files</span>
 
-        <span class="k">return</span> <span class="n">response</span></div>
-
-    <span class="k">def</span> <span class="nf">service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span></div>
+        <span class="k">return</span> <span class="n">response</span></div></div>
 </pre></div>
 
            </div>
@@ -370,7 +365,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 20, 2021.
+        Last updated on Jul 22, 2021.
       </span>
 
     </p>

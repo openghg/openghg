@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.objectstore._local_store &mdash; OpenGHG 0+untagged.3.g4f04dbc documentation</title>
+  <title>openghg.objectstore._local_store &mdash; OpenGHG 0+untagged.3.g29b03ba documentation</title>
   
 
   
@@ -178,31 +178,33 @@
 <span class="kn">import</span> <span class="nn">threading</span>
 <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">ObjectStoreError</span>
 <span class="kn">import</span> <span class="nn">pyvis</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="n">rlock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;delete_object&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;get_hugs_local_path&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;get_all_object_names&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;get_object_names&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;get_bucket&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;get_local_bucket&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;get_object&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;set_object&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;set_object_from_json&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;set_object_from_file&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;get_object_from_json&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;exists&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;visualise_store&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;delete_object&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_openghg_local_path&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_all_object_names&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_object_names&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_bucket&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_local_bucket&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_object&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;set_object&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;set_object_from_json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;set_object_from_file&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_object_from_json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;exists&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;visualise_store&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">get_hugs_local_path</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot; Returns the path to the local OpenGHG object store bucket</span>
+<span class="k">def</span> <span class="nf">get_openghg_local_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns the path to the local OpenGHG object store bucket</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            pathlib.Path</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pathlib.Path: Path of object store</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">env_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">)</span>
 
@@ -210,18 +212,17 @@
         <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">env_path</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No environment variable OPENGHG_PATH found, please set to use the local object store&quot;</span><span class="p">)</span>
-    <span class="c1"># return Path(&quot;/tmp/hugs_local&quot;)</span>
 
 
-<span class="k">def</span> <span class="nf">get_all_object_names</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">without_prefix</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Returns the names of all objects in the passed bucket</span>
+<span class="k">def</span> <span class="nf">get_all_object_names</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">without_prefix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns the names of all objects in the passed bucket</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            bucket (str): Bucket path</span>
-<span class="sd">            prefix (str, default=None): Prefix for keys</span>
-<span class="sd">            withot_prefix (bool, default=False)</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            list: List of object names</span>
+<span class="sd">    Args:</span>
+<span class="sd">        bucket: Bucket path</span>
+<span class="sd">        prefix: Prefix for keys</span>
+<span class="sd">        without_prefix: If True don&#39;t use prefix</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List of object names</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">bucket</span>
 
@@ -230,8 +231,8 @@
 
     <span class="n">root_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bucket</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 
-    <span class="k">if</span> <span class="n">without_prefix</span><span class="p">:</span>
-        <span class="n">prefix_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">without_prefix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">prefix_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span>
 
     <span class="n">subdir_names</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">root</span><span class="si">}</span><span class="s2">*&quot;</span><span class="p">)</span>
 
@@ -264,14 +265,14 @@
     <span class="k">return</span> <span class="n">object_names</span>
 
 
-<span class="k">def</span> <span class="nf">delete_object</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Remove object at key in bucket</span>
+<span class="k">def</span> <span class="nf">delete_object</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Remove object at key in bucket</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            bucket (str): Bucket path</span>
-<span class="sd">            key (str): Key to data in bucket</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
+<span class="sd">    Args:</span>
+<span class="sd">        bucket: Bucket path</span>
+<span class="sd">        key: Key to data in bucket</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bucket</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">._data&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -280,25 +281,25 @@
         <span class="k">pass</span>
 
 
-<span class="k">def</span> <span class="nf">get_object_names</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; List all the keys in the object store</span>
+<span class="k">def</span> <span class="nf">get_object_names</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;List all the keys in the object store</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            bucket (str): Bucket containing data</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            list: List of keys in object store</span>
+<span class="sd">    Args:</span>
+<span class="sd">        bucket: Bucket containing data</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List of keys in object store</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">get_all_object_names</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Gets the object at key in the passed bucket</span>
+<span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Gets the object at key in the passed bucket</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            bucket (str): Bucket containing data</span>
-<span class="sd">            key (str): Key for data in bucket</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            Object: Object from store</span>
+<span class="sd">    Args:</span>
+<span class="sd">        bucket: Bucket containing data</span>
+<span class="sd">        key: Key for data in bucket</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Object: Object from store</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="n">rlock</span><span class="p">:</span>
         <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bucket</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">._data&quot;</span><span class="p">)</span>
@@ -309,94 +310,95 @@
             <span class="k">raise</span> <span class="n">ObjectStoreError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No object at key &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">set_object</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Store data in bucket at key</span>
+<span class="k">def</span> <span class="nf">set_object</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Store data in bucket at key</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            bucket (str): Bucket path</span>
-<span class="sd">            key (str): Key to store data in bucket</span>
-<span class="sd">            data (str): Data in string form</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
+<span class="sd">    Args:</span>
+<span class="sd">        bucket: Bucket path</span>
+<span class="sd">        key: Key to store data in bucket</span>
+<span class="sd">        data: Data in string form</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bucket</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">._data&quot;</span>
 
     <span class="k">with</span> <span class="n">rlock</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
             <span class="nb">dir</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">set_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Set JSON data in the object store </span>
+<span class="k">def</span> <span class="nf">set_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Set JSON data in the object store</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            bucket (str): Bucket for data storage</span>
-<span class="sd">            key (str): Key for data in bucket</span>
-<span class="sd">            data (str): JSON serialised data string</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
+<span class="sd">    Args:</span>
+<span class="sd">        bucket: Bucket for data storage</span>
+<span class="sd">        key: Key for data in bucket</span>
+<span class="sd">        data: JSON serialised data string</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">data_bytes</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
 
-    <span class="n">set_object</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">set_object</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data_bytes</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">set_object_from_file</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Set the contents of file at filename to key in bucket</span>
+<span class="k">def</span> <span class="nf">set_object_from_file</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Set the contents of file at filename to key in bucket</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            bucket (str): Bucket path</span>
-<span class="sd">            key (str): Key to for data</span>
-<span class="sd">            filename (str, pathlib.Path): Filename/path</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
+<span class="sd">    Args:</span>
+<span class="sd">        bucket: Bucket path</span>
+<span class="sd">        key: Key to for data</span>
+<span class="sd">        filename (str, pathlib.Path): Filename/path</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">set_object</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
 
-<span class="k">def</span> <span class="nf">get_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Removes the daterange from the passed key and uses the reduced</span>
-<span class="sd">        key to get an object from the object store.</span>
+<span class="k">def</span> <span class="nf">get_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Removes the daterange from the passed key and uses the reduced</span>
+<span class="sd">    key to get an object from the object store.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            bucket (str): Bucket containing data</span>
-<span class="sd">            key (str): Key for data in bucket</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            Object: Object created from data</span>
+<span class="sd">    Args:</span>
+<span class="sd">        bucket: Bucket containing data</span>
+<span class="sd">        key: Key for data in bucket</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">get_object</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_object</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data_dict</span>
 
 
-<span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Checks if there is an object in the object store with the given key</span>
+<span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Checks if there is an object in the object store with the given key</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            bucket (dict): Bucket containing data</span>
-<span class="sd">            key (str): Prefix for key in object store</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            bool: True if key exists in store</span>
+<span class="sd">    Args:</span>
+<span class="sd">        bucket: Bucket containing data</span>
+<span class="sd">        key: Prefix for key in object store</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if key exists in store</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="n">get_all_object_names</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">get_all_object_names</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
 
 
-<div class="viewcode-block" id="get_bucket"><a class="viewcode-back" href="../../../api/api_objectstore.html#openghg.objectstore.get_bucket">[docs]</a><span class="k">def</span> <span class="nf">get_bucket</span><span class="p">():</span>
+<div class="viewcode-block" id="get_bucket"><a class="viewcode-back" href="../../../api/api_objectstore.html#openghg.objectstore.get_bucket">[docs]</a><span class="k">def</span> <span class="nf">get_bucket</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Find and return a new bucket in the object store called</span>
-<span class="sd">        &#39;bucket_name&#39;. If &#39;create_if_needed&#39; is True</span>
-<span class="sd">        then the bucket will be created if it doesn&#39;t exist. Otherwise,</span>
-<span class="sd">        if the bucket does not exist then an exception will be raised.</span>
+<span class="sd">    &#39;bucket_name&#39;. If &#39;create_if_needed&#39; is True</span>
+<span class="sd">    then the bucket will be created if it doesn&#39;t exist. Otherwise,</span>
+<span class="sd">    if the bucket does not exist then an exception will be raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">bucket_path</span> <span class="o">=</span> <span class="n">get_hugs_local_path</span><span class="p">()</span>
+    <span class="n">bucket_path</span> <span class="o">=</span> <span class="n">get_openghg_local_path</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bucket_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="n">bucket_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -404,18 +406,17 @@
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">bucket_path</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">get_local_bucket</span><span class="p">(</span><span class="n">empty</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Creates and returns a local bucket that&#39;s created in the</span>
-<span class="sd">        /tmp/hugs_test directory</span>
+<span class="k">def</span> <span class="nf">get_local_bucket</span><span class="p">(</span><span class="n">empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Creates and returns a local bucket</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            empty (bool, default=False): If True return an empty bucket</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            str: Path to local bucket</span>
+<span class="sd">    Args:</span>
+<span class="sd">        empty: If True return an empty bucket</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Path to local bucket</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">shutil</span>
 
-    <span class="n">local_buckets_dir</span> <span class="o">=</span> <span class="n">get_hugs_local_path</span><span class="p">()</span>
+    <span class="n">local_buckets_dir</span> <span class="o">=</span> <span class="n">get_openghg_local_path</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">local_buckets_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -427,13 +428,12 @@
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">local_buckets_dir</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">query_store</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot; Create a dictionary that can be used to visualise the object store </span>
+<span class="k">def</span> <span class="nf">query_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create a dictionary that can be used to visualise the object store</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            dict: Dictionary for data to be shown in force graph </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary for data to be shown in force graph</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
     <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">Datasource</span><span class="p">,</span> <span class="n">ObsSurface</span>
 
     <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
@@ -441,25 +441,31 @@
     <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">datasources</span><span class="p">()</span>
     <span class="n">datasources</span> <span class="o">=</span> <span class="p">(</span><span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">datasource_uuids</span><span class="p">)</span>
 
-    <span class="n">data</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datasources</span><span class="p">:</span>
         <span class="n">metadata</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">],</span> <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">],</span> 
-                    <span class="s2">&quot;instrument&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;instrument&quot;</span><span class="p">,</span> <span class="s2">&quot;Unknown&quot;</span><span class="p">),</span> <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;network&quot;</span><span class="p">,</span> <span class="s2">&quot;Unknown&quot;</span><span class="p">)}</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;instrument&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;instrument&quot;</span><span class="p">,</span> <span class="s2">&quot;Unknown&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;network&quot;</span><span class="p">,</span> <span class="s2">&quot;Unknown&quot;</span><span class="p">),</span>
+        <span class="p">}</span>
         <span class="n">data</span><span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">uuid</span><span class="p">()]</span> <span class="o">=</span> <span class="n">result</span>
 
     <span class="k">return</span> <span class="n">data</span>
 
 
 <span class="k">def</span> <span class="nf">visualise_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">pyvis</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">Network</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; View the object store using a pyvis force graph.</span>
+    <span class="sd">&quot;&quot;&quot;View the object store using a pyvis force graph.</span>
 
-<span class="sd">        This function should only be called from within a notebook</span>
+<span class="sd">    This function should only be called from within a notebook</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            pyvis.network.Network</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pyvis.network.Network</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">aDict</span>
+
     <span class="n">data</span> <span class="o">=</span> <span class="n">query_store</span><span class="p">()</span>
 
     <span class="n">net</span> <span class="o">=</span> <span class="n">pyvis</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">Network</span><span class="p">(</span><span class="s2">&quot;800px&quot;</span><span class="p">,</span> <span class="s2">&quot;100%&quot;</span><span class="p">,</span> <span class="n">notebook</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">heading</span><span class="o">=</span><span class="s2">&quot;OpenGHG Object Store&quot;</span><span class="p">)</span>
@@ -468,11 +474,7 @@
     <span class="c1"># Create the ObsSurface node</span>
     <span class="n">net</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;ObsSurface&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#4e79a7&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
 
-    <span class="c1"># We want to created a nested dictionary</span>
-    <span class="k">def</span> <span class="nf">nested_dict</span><span class="p">():</span>
-        <span class="k">return</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">nested_dict</span><span class="p">)</span>
-
-    <span class="n">network_split</span> <span class="o">=</span> <span class="n">nested_dict</span><span class="p">()</span>
+    <span class="n">network_split</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="c1"># Iterate over Datasources to select the networks</span>
@@ -485,7 +487,7 @@
         <span class="n">net</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">network_name</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#59a14f&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">2500</span><span class="p">)</span>
         <span class="n">net</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">to</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>
 
-        <span class="c1"># Then we want a subnode for each site  </span>
+        <span class="c1"># Then we want a subnode for each site</span>
         <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">sites</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># Don&#39;t want to use a site here as a site might be in multiple networks</span>
             <span class="n">site_name</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
@@ -517,7 +519,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 20, 2021.
+        Last updated on Jul 22, 2021.
       </span>
 
     </p>

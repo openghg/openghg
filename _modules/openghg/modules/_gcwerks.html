@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._gcwerks &mdash; OpenGHG 0+untagged.3.g4f04dbc documentation</title>
+  <title>openghg.modules._gcwerks &mdash; OpenGHG 0+untagged.3.g29b03ba documentation</title>
   
 
   
@@ -171,7 +171,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for openghg.modules._gcwerks</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
 
@@ -181,7 +181,7 @@
 <div class="viewcode-block" id="GCWERKS"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS">[docs]</a><span class="k">class</span> <span class="nc">GCWERKS</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class for processing GCWERKS data&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="GCWERKS.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GCWERKS.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
 
         <span class="c1"># Load site data</span>
@@ -198,9 +198,7 @@
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="GCWERKS.find_files"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.find_files">[docs]</a>    <span class="k">def</span> <span class="nf">find_files</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">data_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">skip_str</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="s2">&quot;sf6&quot;</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]:</span>
+<div class="viewcode-block" id="GCWERKS.find_files"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.find_files">[docs]</a>    <span class="k">def</span> <span class="nf">find_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">skip_str</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;sf6&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;A helper file to find GCWERKS data and precisions file in a given folder.</span>
 <span class="sd">        It searches for .C files of the format macehead.19.C, looks for a precisions file</span>
 <span class="sd">        named macehead.19.precions.C and if it exists creates a tuple for these files.</span>
@@ -271,13 +269,16 @@
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">valid_site</span><span class="p">,</span> <span class="n">clean_string</span>
 
         <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
+        <span class="n">precision_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">precision_filepath</span><span class="p">)</span>
 
         <span class="n">site</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
         <span class="n">network</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
         <span class="c1"># We don&#39;t currently do anything with inlet here as it&#39;s always read from data</span>
         <span class="c1"># or taken from process_gcwerks_parameters.json</span>
-        <span class="n">inlet</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
-        <span class="n">instrument</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">instrument</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">inlet</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">instrument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">instrument</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">instrument</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_site</span><span class="p">(</span><span class="n">site</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid site </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> passed.&quot;</span><span class="p">)</span>
@@ -296,6 +297,8 @@
                     <span class="sa">f</span><span class="s2">&quot;Mismatch between instrument passed as argument </span><span class="si">{</span><span class="n">instrument</span><span class="si">}</span><span class="s2"> and instrument read from filename </span><span class="si">{</span><span class="n">fname_instrument</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
 
+        <span class="n">instrument</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">instrument</span><span class="p">)</span>
+
         <span class="n">gas_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span>
             <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span>
             <span class="n">precision_filepath</span><span class="o">=</span><span class="n">precision_filepath</span><span class="p">,</span>
@@ -311,13 +314,13 @@
         <span class="k">return</span> <span class="n">gas_data</span></div>
 
 <div class="viewcode-block" id="GCWERKS.check_site"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.check_site">[docs]</a>    <span class="k">def</span> <span class="nf">check_site</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">site_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Check if the site passed in matches that in the filename</span>
+        <span class="sd">&quot;&quot;&quot;Check if the site passed in matches that in the filename</span>
 
-<span class="sd">            Args:</span>
-<span class="sd">                filepath: Path to data file</span>
-<span class="sd">                site: Site code</span>
-<span class="sd">            Returns:</span>
-<span class="sd">                str: Site code</span>
+<span class="sd">        Args:</span>
+<span class="sd">            filepath: Path to data file</span>
+<span class="sd">            site: Site code</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Site code</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">re</span> <span class="kn">import</span> <span class="n">findall</span>
 
@@ -337,7 +340,7 @@
 
         <span class="k">return</span> <span class="n">site_code</span></div>
 
-<div class="viewcode-block" id="GCWERKS.check_instrument"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.check_instrument">[docs]</a>    <span class="k">def</span> <span class="nf">check_instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">should_raise</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<div class="viewcode-block" id="GCWERKS.check_instrument"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.check_instrument">[docs]</a>    <span class="k">def</span> <span class="nf">check_instrument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">should_raise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Ensure we have the correct instrument or translate an instrument</span>
 <span class="sd">        suffix to an instrument name.</span>
 
@@ -349,7 +352,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">re</span> <span class="kn">import</span> <span class="n">findall</span>
 
-        <span class="n">instrument</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[\w&#39;]+&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filepath</span><span class="o">.</span><span class="n">name</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[\w&#39;]+&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filepath</span><span class="o">.</span><span class="n">name</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">instrument</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="s2">&quot;instruments&quot;</span><span class="p">]:</span>
                 <span class="k">return</span> <span class="n">instrument</span>
@@ -398,7 +401,7 @@
         <span class="n">header</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">)</span>
 
         <span class="c1"># Create a function to parse the datetime in the data file</span>
-        <span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">date</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="s2">&quot;%Y %m </span><span class="si">%d</span><span class="s2"> %H %M&quot;</span><span class="p">)</span>
 
         <span class="c1"># Read the data in and automatically create a datetime column from the 5 columns</span>
@@ -418,23 +421,15 @@
         <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Datetime&quot;</span>
 
         <span class="c1"># This metadata will be added to when species are split and attributes are written</span>
-        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;instrument&quot;</span><span class="p">:</span> <span class="n">instrument</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">}</span>
+        <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;instrument&quot;</span><span class="p">:</span> <span class="n">instrument</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">}</span>
 
         <span class="n">extracted_sampling_period</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_precision</span><span class="p">(</span><span class="n">instrument</span><span class="p">)</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">extracted_sampling_period</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Check input sampling_period can be interpreted</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">input_sampling_period</span> <span class="o">=</span> <span class="n">pd_Timedelta</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="s2">&quot;Sampling period must be a string including the unit using pandas frequency aliases like &#39;1H&#39; or &#39;1min&#39;)&quot;</span>
-                <span class="p">)</span>
-
             <span class="c1"># Compare input to definition within json file</span>
             <span class="n">file_sampling_period</span> <span class="o">=</span> <span class="n">pd_Timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">extracted_sampling_period</span><span class="p">)</span>
-            <span class="n">comparison_seconds</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">input_sampling_period</span> <span class="o">-</span> <span class="n">file_sampling_period</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+            <span class="n">comparison_seconds</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sampling_period</span> <span class="o">-</span> <span class="n">file_sampling_period</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
             <span class="n">tolerance_seconds</span> <span class="o">=</span> <span class="mi">1</span>
 
             <span class="k">if</span> <span class="n">comparison_seconds</span> <span class="o">&gt;</span> <span class="n">tolerance_seconds</span><span class="p">:</span>
@@ -520,7 +515,7 @@
         <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
         <span class="c1"># Function for parsing datetime</span>
-        <span class="k">def</span> <span class="nf">prec_date_parser</span><span class="p">(</span><span class="n">date</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">prec_date_parser</span><span class="p">(</span><span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="s2">&quot;%y%m</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># Read precision species</span>
@@ -560,8 +555,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dataframe of gas data and metadata</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
         <span class="kn">from</span> <span class="nn">fnmatch</span> <span class="kn">import</span> <span class="n">fnmatch</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">compliant_string</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span>
 
         <span class="c1"># Read inlets from the parameters</span>
         <span class="n">expected_inlets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_inlets</span><span class="p">(</span><span class="n">site_code</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
@@ -573,7 +569,7 @@
                 <span class="s2">&quot;Unable to read inlets from data, please ensure this data is of the GC type expected by this processing module&quot;</span>
             <span class="p">)</span>
 
-        <span class="n">combined_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">combined_data</span><span class="p">:</span> <span class="n">DefaultDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">species</span><span class="p">:</span>
             <span class="c1"># Skip this species if the data is all NaNs</span>
@@ -584,7 +580,7 @@
             <span class="k">for</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">inlet_label</span> <span class="ow">in</span> <span class="n">expected_inlets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="c1"># Create a copy of metadata for local modification</span>
                 <span class="n">spec_metadata</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">compliant_string</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+                <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
                 <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span>
                 <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span>
 
@@ -634,7 +630,7 @@
                 <span class="c1"># We want an xarray Dataset</span>
                 <span class="n">spec_data</span> <span class="o">=</span> <span class="n">spec_data</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
                 <span class="c1"># A cleaned species label</span>
-                <span class="n">comp_species</span> <span class="o">=</span> <span class="n">compliant_string</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+                <span class="n">comp_species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
 
                 <span class="c1"># Rename variables so they have lowercase and alphanumeric names</span>
                 <span class="n">to_rename</span> <span class="o">=</span> <span class="p">{}</span>
@@ -649,14 +645,13 @@
                 <span class="c1"># use the species and inlet as a key</span>
                 <span class="n">data_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">comp_species</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">inlet_label</span><span class="si">}</span><span class="s2">&quot;</span>
 
-                <span class="n">combined_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="n">combined_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spec_metadata</span>
                 <span class="n">combined_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spec_data</span>
                 <span class="n">combined_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">][</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span>
 
         <span class="k">return</span> <span class="n">combined_data</span></div>
 
-<div class="viewcode-block" id="GCWERKS.get_precision"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_precision">[docs]</a>    <span class="k">def</span> <span class="nf">get_precision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="viewcode-block" id="GCWERKS.get_precision"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_precision">[docs]</a>    <span class="k">def</span> <span class="nf">get_precision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Process the suffix from the filename to get the correct instrument name</span>
 <span class="sd">        then retrieve the precision of that instrument.</span>
 
@@ -667,7 +662,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">instrument</span> <span class="o">=</span> <span class="n">instrument</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">sampling_period</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">][</span><span class="n">instrument</span><span class="p">]</span>
+            <span class="n">sampling_period</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">][</span><span class="n">instrument</span><span class="p">])</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Invalid instrument: </span><span class="si">{</span><span class="n">instrument</span><span class="si">}</span><span class="se">\n</span><span class="s2">Please select one of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="s1">&#39;sampling_period&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -698,34 +693,19 @@
 
         <span class="k">return</span> <span class="n">mapping_dict</span></div>
 
-<div class="viewcode-block" id="GCWERKS.get_site_code"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_site_code">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get the site code</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            site: Name of site</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            str: Site code</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">site_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_site_codes</span><span class="p">[</span><span class="s2">&quot;name_code&quot;</span><span class="p">][</span><span class="n">site</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> not recognized&quot;</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">site_code</span></div>
-
-<div class="viewcode-block" id="GCWERKS.get_site_attributes"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_site_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="GCWERKS.get_site_attributes"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.GCWERKS.get_site_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">get_site_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Gets the site specific attributes for writing to Datsets</span>
 
-<span class="sd">                Args:</span>
-<span class="sd">                    site: Site code</span>
-<span class="sd">                    inlet: Inlet (example: 108m)</span>
-<span class="sd">                Returns:</span>
-<span class="sd">                    dict: Dictionary of attributes</span>
+<span class="sd">        Args:</span>
+<span class="sd">            site: Site code</span>
+<span class="sd">            inlet: Inlet (example: 108m)</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of attributes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="n">instrument</span> <span class="o">=</span> <span class="n">instrument</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
-        <span class="n">attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="s2">&quot;sites&quot;</span><span class="p">][</span><span class="n">site</span><span class="p">][</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
+        <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gc_params</span><span class="p">[</span><span class="s2">&quot;sites&quot;</span><span class="p">][</span><span class="n">site</span><span class="p">][</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
 
         <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
         <span class="k">try</span><span class="p">:</span>
@@ -748,7 +728,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 20, 2021.
+        Last updated on Jul 22, 2021.
       </span>
 
     </p>

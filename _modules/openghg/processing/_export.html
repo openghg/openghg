@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.processing._export &mdash; OpenGHG 0+untagged.3.g4f04dbc documentation</title>
+  <title>openghg.processing._export &mdash; OpenGHG 0+untagged.3.g29b03ba documentation</title>
   
 
   
@@ -179,7 +179,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_ceda_file&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="get_ceda_file"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.get_ceda_file">[docs]</a><span class="k">def</span> <span class="nf">get_ceda_file</span><span class="p">(</span>
+<div class="viewcode-block" id="get_ceda_file"><a class="viewcode-back" href="../../../api/api_processing.html#openghg.processing.get_ceda_file">[docs]</a><span class="k">def</span> <span class="nf">get_ceda_file</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
     <span class="n">filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">site</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -187,19 +187,19 @@
     <span class="n">write_yaml</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">date_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Creates a JSON (with a yaml extension for CEDA reasons) object</span>
-<span class="sd">        for export for a CEDA upload</span>
+    <span class="sd">&quot;&quot;&quot;Creates a JSON (with a yaml extension for CEDA reasons) object</span>
+<span class="sd">    for export for a CEDA upload</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            filepath (str or Path, default=None): Path for file output. If file not passed a</span>
-<span class="sd">            dictionary is returned</span>
-<span class="sd">            site (str, default=None): Three letter site code (such as BSD for Bilsdale)</span>
-<span class="sd">            instrument (str, default=None): Name of instrument</span>
-<span class="sd">            height (str, default=None): Height of instrument</span>
-<span class="sd">            write_yaml (bool, default=False): If True write to YAML, otherwise JSON file is written</span>
-<span class="sd">            date_range (tuple, default=None): Start, end Python datetime objects</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            dict: Dictionary for upload to CEDA</span>
+<span class="sd">    Args:</span>
+<span class="sd">        filepath (str or Path, default=None): Path for file output. If file not passed a</span>
+<span class="sd">        dictionary is returned</span>
+<span class="sd">        site (str, default=None): Three letter site code (such as BSD for Bilsdale)</span>
+<span class="sd">        instrument (str, default=None): Name of instrument</span>
+<span class="sd">        height (str, default=None): Height of instrument</span>
+<span class="sd">        write_yaml (bool, default=False): If True write to YAML, otherwise JSON file is written</span>
+<span class="sd">        date_range (tuple, default=None): Start, end Python datetime objects</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary for upload to CEDA</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">json</span>
@@ -360,7 +360,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 20, 2021.
+        Last updated on Jul 22, 2021.
       </span>
 
     </p>

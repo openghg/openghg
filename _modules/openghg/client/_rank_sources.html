@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.client._rank_sources &mdash; OpenGHG 0+untagged.3.g4f04dbc documentation</title>
+  <title>openghg.client._rank_sources &mdash; OpenGHG 0+untagged.3.g29b03ba documentation</title>
   
 
   
@@ -173,6 +173,7 @@
   <h1>Source code for openghg.client._rank_sources</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">valid_site</span><span class="p">,</span> <span class="n">create_daterange_str</span><span class="p">,</span> <span class="n">InvalidSiteError</span>
+
 <span class="c1"># from pyvis.network import Network</span>
 <span class="c1"># import matplotlib.cm as cm</span>
 <span class="c1"># import matplotlib</span>
@@ -209,8 +210,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No sources found for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_user_info</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;user_info&quot;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_key_lookup</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;key_lookup&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_user_info</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;user_info&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_key_lookup</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;key_lookup&quot;</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span> <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_needs_update</span> <span class="o">=</span> <span class="kc">False</span>
@@ -230,7 +231,9 @@
             <span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_data</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
             <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sources</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_info</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;rank_data&quot;</span><span class="p">]</span></div>
+        <span class="n">rank_data</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_info</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;rank_data&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">rank_data</span></div>
 
 <div class="viewcode-block" id="RankSources.set_rank"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.RankSources.set_rank">[docs]</a>    <span class="k">def</span> <span class="nf">set_rank</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -238,8 +241,8 @@
         <span class="n">rank</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
         <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">overwrite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">dateranges</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">dateranges</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Set the rank data for the</span>
 
@@ -260,7 +263,7 @@
         <span class="k">if</span> <span class="n">dateranges</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dateranges</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
 
-        <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">args</span><span class="p">[</span><span class="s2">&quot;rank&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank</span>
         <span class="n">args</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uuid</span>
         <span class="n">args</span><span class="p">[</span><span class="s2">&quot;dateranges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dateranges</span>
@@ -270,7 +273,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_needs_update</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="RankSources.clear_rank"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.RankSources.clear_rank">[docs]</a>    <span class="k">def</span> <span class="nf">clear_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Clear the ranking data for a Datasource</span>
+        <span class="sd">&quot;&quot;&quot;Clear the ranking data for a Datasource</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Key for specific source</span>
@@ -295,7 +298,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 20, 2021.
+        Last updated on Jul 22, 2021.
       </span>
 
     </p>

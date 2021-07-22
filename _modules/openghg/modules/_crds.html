@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._crds &mdash; OpenGHG 0+untagged.3.g4f04dbc documentation</title>
+  <title>openghg.modules._crds &mdash; OpenGHG 0+untagged.3.g29b03ba documentation</title>
   
 
   
@@ -174,16 +174,16 @@
 <span></span><span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
 <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Timedelta</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CRDS&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="CRDS"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS">[docs]</a><span class="k">class</span> <span class="nc">CRDS</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Class for processing CRDS data &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Class for processing CRDS data&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="CRDS.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CRDS.__init__"><a class="viewcode-back" href="../../../api/devapi_modules.html#openghg.modules.CRDS.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">)</span>
         <span class="c1"># Holds parameters used for writing attributes to Datasets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;CRDS&quot;</span><span class="p">]</span></div>
@@ -223,6 +223,7 @@
             <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span>
             <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
             <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
+            <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
             <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
             <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
             <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
@@ -261,11 +262,11 @@
         <span class="kn">import</span> <span class="nn">warnings</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">valid_site</span>
 
-        <span class="n">split_fname</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">split_fname</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Do some checks to see if we&#39;ve got different data passed in to that read from the file</span>
-        <span class="n">site_fname</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">split_fname</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">inlet_fname</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">split_fname</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">site_fname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">split_fname</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">inlet_fname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">split_fname</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
 
         <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
@@ -284,7 +285,7 @@
             <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet_fname</span>
 
         <span class="c1"># Function to parse the datetime format found in the datafile</span>
-        <span class="k">def</span> <span class="nf">parse_date</span><span class="p">(</span><span class="n">date</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">parse_date</span><span class="p">(</span><span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="s2">&quot;%y%m</span><span class="si">%d</span><span class="s2"> %H%M%S&quot;</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
@@ -322,18 +323,10 @@
             <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
 
         <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Check input sampling_period can be interpreted</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">input_sampling_period</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="s2">&quot;Sampling period must be a string including the unit &quot;</span> <span class="s2">&quot;(using pandas frequency aliases like &#39;1H&#39; or &#39;1min&#39;)&quot;</span>
-                <span class="p">)</span>
-
             <span class="c1"># Compare against value extracted from the file name</span>
             <span class="n">file_sampling_period</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">])</span>
 
-            <span class="n">comparison_seconds</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">input_sampling_period</span> <span class="o">-</span> <span class="n">file_sampling_period</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+            <span class="n">comparison_seconds</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sampling_period</span> <span class="o">-</span> <span class="n">file_sampling_period</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
             <span class="n">tolerance_seconds</span> <span class="o">=</span> <span class="mi">1</span>
 
             <span class="k">if</span> <span class="n">comparison_seconds</span> <span class="o">&gt;</span> <span class="n">tolerance_seconds</span><span class="p">:</span>
@@ -452,7 +445,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;CRDS&quot;</span><span class="p">]</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()][</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
+            <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crds_params</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()][</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to read attributes for site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -476,7 +469,7 @@
         <span class="c1"># Slice the dataframe</span>
         <span class="n">head_row</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="n">gases</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">gases</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># Loop over the gases and find each unique value</span>
         <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">head_row</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">head_row</span><span class="p">[</span><span class="n">column</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -504,7 +497,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 20, 2021.
+        Last updated on Jul 22, 2021.
       </span>
 
     </p>

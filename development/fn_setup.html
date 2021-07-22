@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Fn setup &mdash; OpenGHG 0+untagged.3.g4f04dbc documentation</title>
+  <title>Fn setup &mdash; OpenGHG 0+untagged.3.g29b03ba documentation</title>
   
 
   
@@ -241,9 +241,14 @@ are <em class="xref py py-obj">outlined here</em>.</p>
 <section id="install-fn">
 <h2>Install Fn<a class="headerlink" href="#install-fn" title="Permalink to this headline">¶</a></h2>
 <p>We can now install Fn</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -LSs https://raw.githubusercontent.com/fnproject/cli/master/install <span class="p">|</span> sh
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://raw.githubusercontent.com/fnproject/cli/master/install
+<span class="nb">echo</span> a02456b8c8aba8b727d35f704cbca9234e40d2731f200b94abeceb9467973a13 install <span class="p">|</span> sha256sum -c
+<span class="c1"># This should have returned install: OK</span>
+<span class="c1"># If not check the bash script</span>
+bash install
 </pre></div>
 </div>
+<p>Note: if</p>
 <p>Then start Fn to make sure everything runs correctly. On first start some images will be downloaded.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn start
 </pre></div>
@@ -390,7 +395,7 @@ step unless our dependencies change.</p>
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Jul 20, 2021.
+        Last updated on Jul 22, 2021.
       </span>
 
     </p>
