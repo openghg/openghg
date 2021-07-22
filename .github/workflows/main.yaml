@@ -50,6 +50,7 @@ jobs:
         flake8 openghg/ --count --statistics
     - name: Run mypy
       run: |
+        pip install mypy==0.910
         mypy openghg/
     - name: Install openghg
       run: |
