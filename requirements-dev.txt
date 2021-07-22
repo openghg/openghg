@@ -10,11 +10,11 @@ numpy
 pandas
 paramiko
 pyvis
-requests
+requests >= 2.25
 scipy
 tqdm
 xarray >= 0.18.2
-urllib3 >= 1.26.3
+urllib3 >= 1.26.5
 # Required for testing
 fdk
 flake8

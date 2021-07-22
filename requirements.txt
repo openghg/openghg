@@ -10,7 +10,7 @@ numpy
 pandas
 paramiko
 pyvis
-requests
+requests >= 2.25
 scipy
 tqdm
 xarray >= 0.18.2
