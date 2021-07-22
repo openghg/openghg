@@ -55,6 +55,7 @@ jobs:
     - name: Run mypy
       run: |
         mypy --python-version ${{ matrix.python-version }} openghg/
+      if: matrix.python-version == 3.8 || matrix.python-version == 3.9
     - name: 'Clone Acquire for services folder required for tests'
       run: |
         git clone -b devel https://github.com/gareth-j/acquire.git ../acquire

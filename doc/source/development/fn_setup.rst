@@ -65,7 +65,13 @@ We can now install Fn
 
 .. code-block:: bash
 
-    curl -LSs https://raw.githubusercontent.com/fnproject/cli/master/install | sh
+    wget https://raw.githubusercontent.com/fnproject/cli/master/install
+    echo a02456b8c8aba8b727d35f704cbca9234e40d2731f200b94abeceb9467973a13 install | sha256sum -c
+    # This should have returned install: OK
+    # If not check the bash script
+    bash install
+
+Note: if 
 
 Then start Fn to make sure everything runs correctly. On first start some images will be downloaded.
 
