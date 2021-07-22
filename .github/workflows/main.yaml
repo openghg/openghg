@@ -48,14 +48,13 @@ jobs:
         python -m pip install --upgrade pip==20.2.4 wheel
         pip install flake8
         flake8 openghg/ --count --statistics
-    - name: Run mypy
-      run: |
-        pip install mypy==0.910
-        mypy openghg/
     - name: Install openghg
       run: |
         pip install -r requirements-dev.txt
         pip install .
+    - name: Run mypy
+      run: |
+        mypy openghg/
     - name: 'Clone Acquire for services folder required for tests'
       run: |
         git clone -b devel https://github.com/gareth-j/acquire.git ../acquire
