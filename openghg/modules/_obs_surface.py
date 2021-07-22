@@ -1,6 +1,6 @@
 from openghg.modules import BaseModule
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
+from typing import DefaultDict, Dict, Union
 
 # import traceback
 

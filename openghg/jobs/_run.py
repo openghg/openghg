@@ -8,16 +8,17 @@ from openghg.util import get_datapath
 
 # type: ignore
 
-def run_job(username, hostname, password, job_data, known_host=False):
-    """ Set a job to run on a HPC service
 
-        Args:
-            username (str): Username for HPC cluster
-            hostname (str): Hostname of HPC cluster
-            password (str): Password to unlock private key used to access cluster
-            job_data (dict): Data to run job
-        Returns:
-            dict: Dictionary of responses to commands executing when running the job
+def run_job(username, hostname, password, job_data, known_host=False):
+    """Set a job to run on a HPC service
+
+    Args:
+        username (str): Username for HPC cluster
+        hostname (str): Hostname of HPC cluster
+        password (str): Password to unlock private key used to access cluster
+        job_data (dict): Data to run job
+    Returns:
+        dict: Dictionary of responses to commands executing when running the job
     """
     # Maybe this can be passed in / read from JSON depending on the service selected
     bc4_partitions = [
@@ -108,7 +109,11 @@ def run_job(username, hostname, password, job_data, known_host=False):
         keypath = "/home/fnuser/.ssh/runner_key"
 
         sc.connect(
-            username=username, hostname=hostname, keypath=keypath, password=password, known_host=known_host,
+            username=username,
+            hostname=hostname,
+            keypath=keypath,
+            password=password,
+            known_host=known_host,
         )
         # sc.write_files(files=files, remote_dir="first_job")
         sc.write_files(files=files, remote_dir=job_name)

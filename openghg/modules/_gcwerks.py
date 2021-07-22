@@ -1,7 +1,6 @@
 from typing import DefaultDict, Dict, List, Optional, Union, Tuple
 from pathlib import Path
 from pandas import DataFrame
-from xarray import Dataset
 
 __all__ = ["GCWERKS"]
 

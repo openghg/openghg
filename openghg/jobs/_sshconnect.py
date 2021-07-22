@@ -7,10 +7,11 @@ import paramiko
 
 # type: ignore
 
-class SSHConnect:
-    """ Use Paramiko to connect to an SSH server
 
-        This class can be used as a context manager
+class SSHConnect:
+    """Use Paramiko to connect to an SSH server
+
+    This class can be used as a context manager
     """
 
     def __enter__(self):
@@ -27,33 +28,31 @@ class SSHConnect:
         self._client = None
 
     def close(self):
-        """ Calls close on the paramiko SSHClient instance used
-            the SSH connection
+        """Calls close on the paramiko SSHClient instance used
+        the SSH connection
 
-            Returns:
-                None
+        Returns:
+            None
         """
         try:
             self._client.close()
         except AttributeError:
             return
 
-    def connect(
-        self, username, hostname, keypath=None, password=None, known_host=False
-    ):
-        """ Use Paramiko to connect the hostname
+    def connect(self, username, hostname, keypath=None, password=None, known_host=False):
+        """Use Paramiko to connect the hostname
 
-            Args:
-                user (str): Username for login
-                hostname (str): Hostname of server. This can also be an IP address
-                key_path (Path or str, default=None): Path to private key to use for authentication.
-                By default Paramiko will attempt to use any “id_rsa”, “id_dsa” or “id_ecdsa” key
-                discoverable in ~/.ssh/
-                passsword (str, default=None): Password used for authentication or for unlocking a
-                password protected
-                private key
-            Returns:
-                None
+        Args:
+            user (str): Username for login
+            hostname (str): Hostname of server. This can also be an IP address
+            key_path (Path or str, default=None): Path to private key to use for authentication.
+            By default Paramiko will attempt to use any “id_rsa”, “id_dsa” or “id_ecdsa” key
+            discoverable in ~/.ssh/
+            passsword (str, default=None): Password used for authentication or for unlocking a
+            password protected
+            private key
+        Returns:
+            None
         """
         self._client = paramiko.SSHClient()
         self._client.load_system_host_keys()
@@ -72,12 +71,12 @@ class SSHConnect:
         )
 
     def run_command(self, commands):
-        """ Run commands on the remote server
+        """Run commands on the remote server
 
-            Args:
-                commands (str, list): Command(s) to be run on the remote server
-            Returns:
-                list: List of tuples of stdin, stdout and stderr for each command
+        Args:
+            commands (str, list): Command(s) to be run on the remote server
+        Returns:
+            list: List of tuples of stdin, stdout and stderr for each command
         """
         responses = {}
 
@@ -96,14 +95,14 @@ class SSHConnect:
         return responses
 
     def write_files(self, files, remote_dir=None):
-        """ Write the job script to the remote server
+        """Write the job script to the remote server
 
-            Args:
-                files (list): List of paths of files to transfer
-                path (str, default=None): Path to write script, if not passed the script
-                will be written to the user's home directory
-            Returns:
-                None
+        Args:
+            files (list): List of paths of files to transfer
+            path (str, default=None): Path to write script, if not passed the script
+            will be written to the user's home directory
+        Returns:
+            None
         """
         sftp = self._client.open_sftp()
 

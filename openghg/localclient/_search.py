@@ -1,7 +1,6 @@
 from typing import List
 
 from openghg.processing import search as search_fn
-from openghg.processing import recombine_datasets
 from openghg.dataobjects import SearchResults
 
 __all__ = ["Search"]

@@ -1,5 +1,6 @@
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Union
 from openghg.util import valid_site, create_daterange_str, InvalidSiteError
+
 # from pyvis.network import Network
 # import matplotlib.cm as cm
 # import matplotlib
@@ -99,7 +100,7 @@ class RankSources:
         self._needs_update = True
 
     def clear_rank(self, key: str) -> None:
-        """ Clear the ranking data for a Datasource
+        """Clear the ranking data for a Datasource
 
         Args:
             key: Key for specific source

@@ -1,6 +1,6 @@
 from openghg.modules import BaseModule
 from pandas import Timestamp
-from typing import List, Tuple, Union
+from typing import List, Union
 
 from openghg.modules import METData
 

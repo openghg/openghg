@@ -1,4 +1,4 @@
-from typing import cast, Any, Dict, Optional, List, Union
+from typing import cast, Any, Dict, Optional, List
 from xarray import Dataset
 
 __all__ = ["assign_attributes", "get_attributes"]

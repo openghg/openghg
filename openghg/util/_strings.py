@@ -2,11 +2,15 @@ from typing import Union, Optional, overload
 
 __all__ = ["clean_string"]
 
-@overload
-def clean_string(to_clean: str) -> str: ...
 
 @overload
-def clean_string(to_clean: None) -> None: ...
+def clean_string(to_clean: str) -> str:
+    ...
+
+
+@overload
+def clean_string(to_clean: None) -> None:
+    ...
 
 
 def clean_string(to_clean: Optional[str]) -> Union[str, None]:
