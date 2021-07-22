@@ -17,7 +17,6 @@ parser.add_argument("--no-cleanup", dest="cleanup", action="store_false", defaul
 args = parser.parse_args()
 
 # We want the latest requirements file for OpenGHG
-shutil.copy("../../requirements.txt", "requirements.txt")
 shutil.copy("../../requirements-server.txt", "requirements-server.txt")
 # A tag for the image
 tag_str = ":".join(("openghg/openghg-base", args.tag))
@@ -28,5 +27,4 @@ if args.push:
     subprocess.check_call(["docker", "push", tag_str])
 
 if args.cleanup:
-    os.remove("requirements.txt")
     os.remove("requirements-server.txt")

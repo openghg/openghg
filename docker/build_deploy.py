@@ -7,7 +7,6 @@ import subprocess
 def cleanup():
     shutil.rmtree("openghg")
     shutil.rmtree("openghg_services")
-    os.remove("requirements.txt")
     os.remove("requirements-server.txt")
 
 
@@ -38,7 +37,6 @@ args = parser.parse_args()
 try:
     shutil.copytree("../openghg", "openghg")
     shutil.copytree("../services", "openghg_services")
-    shutil.copy("../requirements.txt", "requirements.txt")
     shutil.copy("../requirements-server.txt", "requirements-server.txt")
 except FileExistsError:
     pass
