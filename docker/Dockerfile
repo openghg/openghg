@@ -8,7 +8,7 @@ ADD openghg /python/openghg
 RUN python3 -m compileall /python/openghg/*
 
 # Copy in the service files
-RUN mkdir /python/openghg_service
+RUN mkdir /python/openghg_services
 ADD openghg_services /python/openghg_services
 RUN python3 -m compileall /python/openghg_services/*.py
 
