@@ -15,13 +15,13 @@ def single_site_footprint(
     height: str,
     network: str,
     domain: str,
+    species: str,
     start_date: Union[str, Timestamp],
     end_date: Union[str, Timestamp],
-    resample_to: Optional[str] = "coarsest",
+    resample_to: str = "coarsest",
     site_modifier: Optional[str] = None,
     platform: Optional[str] = None,
     instrument: Optional[str] = None,
-    species: Optional[Union[str, List]] = None,
 ) -> Dataset:
     """Creates a Dataset for a single site's measurement data and footprints
 
@@ -40,7 +40,7 @@ def single_site_footprint(
                        site="DJI", site_modifier = "DJI-SAM" - station called DJI, footprint site called DJI-SAM
         platform: Observation platform used to decide whether to resample
         instrument:
-        species:
+        species: Species type
     Returns:
         xarray.Dataset
     """
@@ -68,7 +68,7 @@ def single_site_footprint(
 
     # Save the observation data units
     try:
-        units = float(obs_data.mf.attrs["units"])
+        units: Union[float, None] = float(obs_data.mf.attrs["units"])
     except KeyError:
         units = None
     except AttributeError:
@@ -81,11 +81,11 @@ def single_site_footprint(
 
     # Get the footprint data
     if species is not None:
-        footprint_results = search(
+        footprint_results: Dict = search(
             site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date, species=species, data_type="footprint"
         )
     else:
-       footprint_results = search(
+       footprint_results: Dict = search(
             site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
         )
 
@@ -107,7 +107,7 @@ def single_site_footprint(
     # Transpose to keep time in the last dimension position in case it has been moved in resample
     combined_dataset = combined_dataset.transpose(..., "time")
 
-    if units:
+    if units is not None:
         combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset.fp / units))})
         # if HiTRes:
         #     combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes / units))})
@@ -120,13 +120,13 @@ def footprints_data_merge(
     height: str,
     network: str,
     domain: str,
+    species: str,
     start_date: Union[str, Timestamp],
     end_date: Union[str, Timestamp],
-    resample_to: Optional[str] = "coarsest",
+    resample_to: str = "coarsest",
     site_modifier: Optional[str] = None,
     platform: Optional[str] = None,
     instrument: Optional[str] = None,
-    species: Optional[Union[str, List]] = None,
     load_flux: Optional[bool] = True,
     flux_sources: Optional[Union[str, List]] = None,
     load_bc: Optional[bool] = True,
@@ -179,6 +179,9 @@ def footprints_data_merge(
     # So here we iterate over the emissions types and get the fluxes
     flux_dict = {}
     if load_flux:
+        if flux_sources is None:
+            raise ValueError("If you want to load flux you must pass a flux source")
+
         flux_dict["standard"] = get_flux(
             species=species,
             domain=domain,
@@ -207,9 +210,7 @@ def footprints_data_merge(
     )
 
 
-def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: Optional[str] = "ffill", tolerance: Optional[str] = None
-) -> Dataset:
+def combine_datasets(dataset_A: Dataset, dataset_B: Dataset, method: str = "ffill", tolerance: Optional[float] = None) -> Dataset:
     """Merges two datasets and re-indexes to the first dataset.
 
         If "fp" variable is found within the combined dataset,
@@ -230,9 +231,9 @@ def combine_datasets(
     if indexes_match(dataset_A, dataset_B):
         dataset_B_temp = dataset_B
     else:
-        dataset_B_temp = dataset_B.reindex_like(dataset_A, method, tolerance=tolerance)
+        dataset_B_temp = dataset_B.reindex_like(other=dataset_A, method=method, tolerance=tolerance)  # type: ignore
 
-    merged_ds = dataset_A.merge(dataset_B_temp)
+    merged_ds = dataset_A.merge(other=dataset_B_temp)
 
     if "fp" in merged_ds:
         if all(k in merged_ds.fp.dims for k in ("lat", "long")):
@@ -405,7 +406,7 @@ def get_flux(
     if end_date is None:
         end_date = timestamp_now()
 
-    results = search(
+    results: Dict = search(
         species=species,
         source=sources,
         domain=domain,
@@ -413,7 +414,7 @@ def get_flux(
         start_date=start_date,
         end_date=end_date,
         data_type="emissions",
-    )
+    )  # type: ignore
 
     # TODO - more than one emissions file
     try:
@@ -434,7 +435,7 @@ def get_flux(
     return em_ds
 
 
-def add_timeseries(combined_dataset: Dataset, flux_dict: Dict):
+def add_timeseries(combined_dataset: Dataset, flux_dict: Dict) -> Dataset:
     """
     Add timeseries mole fraction values in footprint_data_merge
 
@@ -444,7 +445,6 @@ def add_timeseries(combined_dataset: Dataset, flux_dict: Dict):
         flux_dict [dict]:
             Dictionary containing flux datasets
     """
-
     # TODO: Extend to include multiple sources
     # TODO: Improve ability to merge high time resolution footprints (e.g. species as co2)
     # What do we expect flux_dict to look like?

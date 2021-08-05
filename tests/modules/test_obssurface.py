@@ -259,57 +259,6 @@ def test_read_cranfield():
     assert ch4_data["ch4 variability"][0] == pytest.approx(75.50218)
     assert ch4_data["ch4 variability"][-1] == pytest.approx(6.48413)
 
-
-def test_read_icos():
-    get_local_bucket(empty=True)
-
-    data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
-
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS", sampling_period=60)
-
-    uuid = results["processed"]["tta.co2.1minute.222m.min.dat"]["co2"]
-
-    data = Datasource.load(uuid=uuid, shallow=False).data()
-
-    assert sorted(list(data.keys())) == sorted(
-        ["2011-03-30-08:52:00+00:00_2011-04-10-16:06:00+00:00", "2013-01-09-17:49:00+00:00_2013-01-17-18:06:00+00:00"]
-    )
-
-    co2_data = data["2011-03-30-08:52:00+00:00_2011-04-10-16:06:00+00:00"]
-
-    assert co2_data.time[0] == Timestamp("2011-03-30T08:52:00")
-    assert co2_data.time[-1] == Timestamp("2011-04-10T16:06:00")
-    assert co2_data["co2"][0] == pytest.approx(401.645)
-    assert co2_data["co2"][-1] == pytest.approx(391.443)
-    assert co2_data["co2_variability"][0] == pytest.approx(0.087)
-    assert co2_data["co2_variability"][-1] == pytest.approx(0.048)
-    assert co2_data["co2_number_of_observations"][0] == 13
-    assert co2_data["co2_number_of_observations"][-1] == 13
-
-    del co2_data.attrs["File created"]
-
-    assert co2_data.attrs == {
-        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "Source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
-        "Processed by": "OpenGHG_Cloud",
-        "species": "co2",
-        "Calibration_scale": "unknown",
-        "station_longitude": -2.98598,
-        "station_latitude": 56.55511,
-        "station_long_name": "Angus Tower, UK",
-        "station_height_masl": 300.0,
-        "site": "tta",
-        "inlet": "222m",
-        "sampling_period": "60",
-        "network": "ICOS",
-    }
-
-    obs = ObsSurface.load()
-
-    assert obs._datasource_uuids[uuid] == "co2"
-
-
 def test_read_beaco2n():
     data_filepath = get_datapath(filename="Charlton_Community_Center.csv", data_type="BEACO2N")
 
@@ -422,14 +371,14 @@ def test_read_thames_barrier():
 def test_upload_same_file_twice_raises():
     get_local_bucket(empty=True)
 
-    data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
+    data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
-    ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS", sampling_period=60)
+    ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60)
 
     # assert not res["error"]
 
     with pytest.raises(ValueError):
-        ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS", sampling_period=60)
+        ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60)
 
     # assert "tta.co2.1minute.222m.min.dat" in res["error"]
 
@@ -437,9 +386,9 @@ def test_upload_same_file_twice_raises():
 def test_delete_Datasource():
     bucket = get_local_bucket(empty=True)
 
-    data_filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
+    data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
-    ObsSurface.read_file(filepath=data_filepath, data_type="ICOS", site="tta", network="ICOS")
+    ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60)
 
     obs = ObsSurface.load()
 
@@ -448,11 +397,6 @@ def test_delete_Datasource():
     uuid = datasources[0]
 
     datasource = Datasource.load(uuid=uuid)
-
-    data = datasource.data()["2011-03-30-08:52:00+00:00_2011-04-10-16:06:00+00:00"]
-
-    assert data["co2"][0] == pytest.approx(401.645)
-    assert data.time[0] == Timestamp("2011-03-30T08:52:00")
 
     data_keys = datasource.data_keys()
 

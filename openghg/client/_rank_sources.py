@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional, Union
 from openghg.util import valid_site, create_daterange_str, InvalidSiteError
+
 # from pyvis.network import Network
 # import matplotlib.cm as cm
 # import matplotlib
@@ -36,8 +37,8 @@ class RankSources:
         if not response:
             raise ValueError(f"No sources found for {species} at {site}")
 
-        self._user_info = response["user_info"]
-        self._key_lookup = response["key_lookup"]
+        self._user_info: Dict = response["user_info"]
+        self._key_lookup: Dict = response["key_lookup"]
 
         self._lookup_data = {"site": site, "species": species}
         self._needs_update = False
@@ -57,7 +58,9 @@ class RankSources:
             species = self._lookup_data["species"]
             _ = self.get_sources(site=site, species=species)
 
-        return self._user_info[key]["rank_data"]
+        rank_data: str = self._user_info[key]["rank_data"]
+
+        return rank_data
 
     def set_rank(
         self,
@@ -65,8 +68,8 @@ class RankSources:
         rank: Union[int, str],
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
-        overwrite: Optional[bool] = False,
-        dateranges: Optional[List] = None,
+        overwrite: bool = False,
+        dateranges: Optional[Union[List, str]] = None,
     ) -> None:
         """Set the rank data for the
 
@@ -87,7 +90,7 @@ class RankSources:
         if dateranges is None:
             dateranges = create_daterange_str(start=start_date, end=end_date)
 
-        args = {}
+        args: Dict[str, Union[str, int, List]] = {}
         args["rank"] = rank
         args["uuid"] = uuid
         args["dateranges"] = dateranges
@@ -97,7 +100,7 @@ class RankSources:
         self._needs_update = True
 
     def clear_rank(self, key: str) -> None:
-        """ Clear the ranking data for a Datasource
+        """Clear the ranking data for a Datasource
 
         Args:
             key: Key for specific source

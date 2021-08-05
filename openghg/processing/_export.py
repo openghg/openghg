@@ -6,7 +6,7 @@
 __all__ = ["get_ceda_file"]
 
 
-def get_ceda_file(
+def get_ceda_file(  # type: ignore
     filepath=None,
     site=None,
     instrument=None,
@@ -14,19 +14,19 @@ def get_ceda_file(
     write_yaml=False,
     date_range=None,
 ):
-    """ Creates a JSON (with a yaml extension for CEDA reasons) object
-        for export for a CEDA upload
+    """Creates a JSON (with a yaml extension for CEDA reasons) object
+    for export for a CEDA upload
 
-        Args:
-            filepath (str or Path, default=None): Path for file output. If file not passed a
-            dictionary is returned
-            site (str, default=None): Three letter site code (such as BSD for Bilsdale)
-            instrument (str, default=None): Name of instrument
-            height (str, default=None): Height of instrument
-            write_yaml (bool, default=False): If True write to YAML, otherwise JSON file is written
-            date_range (tuple, default=None): Start, end Python datetime objects
-        Returns:
-            dict: Dictionary for upload to CEDA
+    Args:
+        filepath (str or Path, default=None): Path for file output. If file not passed a
+        dictionary is returned
+        site (str, default=None): Three letter site code (such as BSD for Bilsdale)
+        instrument (str, default=None): Name of instrument
+        height (str, default=None): Height of instrument
+        write_yaml (bool, default=False): If True write to YAML, otherwise JSON file is written
+        date_range (tuple, default=None): Start, end Python datetime objects
+    Returns:
+        dict: Dictionary for upload to CEDA
 
     """
     import json

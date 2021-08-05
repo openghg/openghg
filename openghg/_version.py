@@ -10,6 +10,8 @@
 
 # Modified to add branch and repository keys to git_pieces_from_vcs
 
+# type: ignore
+
 """Git implementation of _version.py."""
 
 import errno

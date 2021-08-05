@@ -10,7 +10,10 @@ T = TypeVar("T", bound="BaseModule")
 
 
 class BaseModule:
-    def __init__(self):
+    _root = "root"
+    _uuid = "root_uuid"
+
+    def __init__(self) -> None:
         from openghg.util import timestamp_now
         from addict import Dict as aDict
 
@@ -20,13 +23,13 @@ class BaseModule:
         # Use an addict Dict here for easy nested data storage
         self._datasource_table = aDict()
         # Keyed by Datasource UUID
-        self._datasource_uuids = {}
+        self._datasource_uuids: Dict[str, str] = {}
         # Hashes of previously uploaded files
-        self._file_hashes = {}
+        self._file_hashes: Dict[str, str] = {}
         # Keyed by UUID
         self._rank_data = aDict()
 
-    def is_null(self):
+    def is_null(self) -> bool:
         return not self.datasources
 
     @classmethod
@@ -46,27 +49,24 @@ class BaseModule:
 
         key = f"{cls._root}/uuid/{cls._uuid}"
 
-        return exists(bucket=bucket, key=key)
+        does_exist: bool = exists(bucket=bucket, key=key)
+
+        return does_exist
 
     @classmethod
-    def from_data(cls: Type[T], data: str, bucket: Optional[Dict] = None) -> T:
+    def from_data(cls: Type[T], data: Dict) -> T:
         """Create an object from data
 
         Args:
             data: JSON data
-            bucket: Bucket for data storage
         Returns:
             cls: Class object of cls type
         """
         from Acquire.ObjectStore import string_to_datetime
-        from openghg.objectstore import get_bucket
         from addict import Dict as aDict
 
         if not data:
             raise ValueError("Unable to create object with empty dictionary")
-
-        if bucket is None:
-            bucket = get_bucket()
 
         c = cls()
         c._creation_datetime = string_to_datetime(data["creation_datetime"])
@@ -118,7 +118,24 @@ class BaseModule:
         key = f"{cls._root}/uuid/{cls._uuid}"
         data = get_object_from_json(bucket=bucket, key=key)
 
-        return cls.from_data(data=data, bucket=bucket)
+        return cls.from_data(data=data)
+
+    def save(cls) -> None:
+        """Save the object to the object store
+
+        Args:
+            bucket: Bucket for data
+        Returns:
+            None
+        """
+        from openghg.objectstore import get_bucket, set_object_from_json
+
+        bucket = get_bucket()
+
+        obs_key = f"{cls._root}/uuid/{cls._uuid}"
+
+        cls._stored = True
+        set_object_from_json(bucket=bucket, key=obs_key, data=cls.to_data())
 
     @classmethod
     def uuid(cls: Type[T]) -> str:
@@ -253,7 +270,7 @@ class BaseModule:
                             continue
                         # If the ranks are the same we just want to combine the dateranges
                         elif rank == existing_rank:
-                            to_combine = (new_daterange, existing_daterange)
+                            to_combine = [new_daterange, existing_daterange]
                             combined = combine_dateranges(dateranges=to_combine)[0]
                             to_update.append((existing_daterange, combined))
                         else:
@@ -335,7 +352,8 @@ class BaseModule:
             Returns:
                 dict: Dictionary of rank data
         """
-        return self._rank_data.to_dict()
+        rank_dict: Dict = self._rank_data.to_dict()
+        return rank_dict
 
     def clear_datasources(self: T) -> None:
         """Remove all Datasources from the object

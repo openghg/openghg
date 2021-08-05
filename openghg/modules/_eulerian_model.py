@@ -1,6 +1,7 @@
 from openghg.modules import BaseModule
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Union
+from xarray import Dataset
 
 __all__ = ["EulerianModel"]
 
@@ -19,7 +20,7 @@ class EulerianModel(BaseModule):
     _root = "EulerianModel"
     _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
 
-    def save(self, bucket: Optional[Dict] = None) -> None:
+    def save(self) -> None:
         """Save the object to the object store
 
         Args:
@@ -29,8 +30,7 @@ class EulerianModel(BaseModule):
         """
         from openghg.objectstore import get_bucket, set_object_from_json
 
-        if bucket is None:
-            bucket = get_bucket()
+        bucket = get_bucket()
 
         obs_key = f"{EulerianModel._root}/uuid/{EulerianModel._uuid}"
 
@@ -45,8 +45,8 @@ class EulerianModel(BaseModule):
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         setup: Optional[str] = None,
-        overwrite: Optional[bool] = False,
-    ):
+        overwrite: bool = False,
+    ) -> Dict:
         """Read Eulerian model output
 
         Args:
@@ -154,7 +154,7 @@ class EulerianModel(BaseModule):
 
         key = "_".join((model, species, date))
 
-        model_data = defaultdict(dict)
+        model_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
         model_data[key]["data"] = em_data
         model_data[key]["metadata"] = metadata
 
@@ -176,7 +176,7 @@ class EulerianModel(BaseModule):
 
         return datasource_uuids
 
-    def lookup_uuid(self, model: str, species: str, date: str) -> Union[str, Dict]:
+    def lookup_uuid(self, model: str, species: str, date: str) -> Union[str, bool]:
         """Perform a lookup for the UUID of a Datasource
 
         Args:
@@ -184,9 +184,11 @@ class EulerianModel(BaseModule):
             species: Species name
             date: Start date associated with model run
         Returns:
-            str or dict: UUID or empty dict if no entry
+            str or bool: UUID or False if no entry
         """
-        return self._datasource_table[model][species][date]
+        uuid = self._datasource_table[model][species][date]
+
+        return uuid if uuid else False
 
     def set_uuid(self, model: str, species: str, date: str, uuid: str) -> None:
         """Record a UUID of a Datasource in the datasource table
@@ -201,7 +203,7 @@ class EulerianModel(BaseModule):
         """
         self._datasource_table[model][species][date] = uuid
 
-    def datasource_lookup(self, metadata: Dict) -> Dict:
+    def datasource_lookup(self, metadata: Dict) -> Dict[str, Union[str, bool]]:
         """Find the Datasource we should assign the data to
 
         Args:
@@ -219,16 +221,9 @@ class EulerianModel(BaseModule):
             species = data["species"]
             date = data["date"]
 
-            result = self.lookup_uuid(model=model, species=species, date=date)
-
-            if not result:
-                result = False
-
-            lookup_results[key] = result
+            lookup_results[key] = self.lookup_uuid(model=model, species=species, date=date)
 
         return lookup_results
-
-        pass
 
     def add_datasources(self, datasource_uuids: Dict, metadata: Dict) -> None:
         """Add the passed list of Datasources to the current list

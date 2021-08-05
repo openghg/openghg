@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import List
 
 from openghg.processing import search as search_fn
-from openghg.processing import recombine_datasets
+from openghg.dataobjects import SearchResults
 
 __all__ = ["Search"]
 
@@ -9,18 +9,18 @@ __all__ = ["Search"]
 class Search:
     """Used to search and download data from the object store"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         raise NotImplementedError()
 
     def search(
         self,
-        species: Optional[str] = None,
-        locations: Optional[str] = None,
-        inlet: Optional[str] = None,
-        instrument: Optional[str] = None,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
-    ):
+        species: str = None,
+        locations: str = None,
+        inlet: str = None,
+        instrument: str = None,
+        start_date: str = None,
+        end_date: str = None,
+    ) -> None:
         """This is just a wrapper for the search function that allows easy access through LocalClient
 
         Args:
@@ -43,9 +43,7 @@ class Search:
 
         self._results = results
 
-        return results
-
-    def retrieve(self, selected_keys):
+    def retrieve(self, selected_keys: List) -> SearchResults:
         """Downloads the selected keys and returns a dictionary of
         xarray Datasets
 
@@ -54,17 +52,4 @@ class Search:
         Returns:
             defaultdict(dict): Dictionary of Datasets
         """
-        if not isinstance(selected_keys, list):
-            selected_keys = [selected_keys]
-
-        results = {}
-
-        for key in selected_keys:
-            try:
-                data_keys = self._results[key]["keys"]
-                # Retrieve the data from the object store and combine into a NetCDF
-                results[key] = recombine_datasets(data_keys, sort=True)
-            except KeyError:
-                raise KeyError(f"Invalid key {key} passed for retrieval. Please check it is correct and try again.")
-
-        return results
+        return SearchResults(results={}, ranked_data=False, cloud=False)

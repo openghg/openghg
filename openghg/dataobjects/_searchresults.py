@@ -1,13 +1,11 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Union, TypeVar, Type
+from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
 from openghg.dataobjects import ObsData
 from openghg.processing import recombine_datasets
 from openghg.util import clean_string
 from openghg.client import Retrieve
 
 __all__ = ["SearchResults"]
-
-T = TypeVar("T", bound="SearchResults")
 
 
 @dataclass
@@ -18,13 +16,14 @@ class SearchResults:
         results: Search results
         ranked_data: True if results are ranked, else False
     """
+    T = TypeVar("T", bound="SearchResults")
 
     results: Dict
     ranked_data: bool
     # Local or cloud service to be used
     cloud: bool = False
 
-    def __str__(self):
+    def __str__(self) -> str:
         if not self.results:
             return "No results"
 
@@ -40,13 +39,13 @@ class SearchResults:
 
         return "\n".join(print_strs)
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.results)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.results)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         yield from self.results
 
     def to_data(self) -> Dict:
@@ -58,7 +57,7 @@ class SearchResults:
         return {"results": self.results, "ranked_data": self.ranked_data, "cloud": self.cloud}
 
     @classmethod
-    def from_data(cls: Type[T], data: Dict) -> Type[T]:
+    def from_data(cls: Type[T], data: Dict) -> T:
         """Create a SearchResults object from a dictionary
 
         Args:
@@ -76,7 +75,7 @@ class SearchResults:
         """
         return self.results
 
-    def keys(self, site: str, species: str, inlet: Optional[str] = None) -> List:
+    def keys(self, site: str, species: str, inlet: Optional[str] = None) -> List[str]:
         """Return the data keys for the specified site and species.
         This is intended mainly for use in the search function when filling
         gaps of unranked dateranges.
@@ -96,7 +95,7 @@ class SearchResults:
 
         try:
             if self.ranked_data:
-                keys = self.results[site][species]["keys"]
+                keys: List = self.results[site][species]["keys"]
             else:
                 keys = self.results[site][species][inlet]["keys"]
         except KeyError:
@@ -104,7 +103,7 @@ class SearchResults:
 
         return keys
 
-    def metadata(self, site: str, species: str, inlet: Optional[str] = None) -> List:
+    def metadata(self, site: str, species: str, inlet: Optional[str] = None) -> Dict:
         """Return the metadata for the specified site and species
 
         Args:
@@ -112,7 +111,7 @@ class SearchResults:
             species: Species name
             inlet: Inlet height, required for unranked data
         Returns:
-            list: List of keys
+            dict: Dictionary of metadata
         """
         site = site.lower()
         species = species.lower()
@@ -125,7 +124,7 @@ class SearchResults:
 
         try:
             if self.ranked_data:
-                metadata = self.results[site][species]["metadata"]
+                metadata: Dict = self.results[site][species]["metadata"]
             else:
                 metadata = self.results[site][species][inlet]["metadata"]
         except KeyError:
@@ -133,9 +132,7 @@ class SearchResults:
 
         return metadata
 
-    def retrieve(
-        self, site: Optional[str] = None, species: Optional[str] = None, inlet: Optional[str] = None
-    ) -> Union[Dict, ObsData]:
+    def retrieve(self, site: str = None, species: str = None, inlet: str = None) -> Union[Dict[str, ObsData], ObsData]:
         """Retrieve some or all of the data found in the object store.
 
         Args:
@@ -149,6 +146,13 @@ class SearchResults:
         inlet = clean_string(inlet)
 
         if self.ranked_data:
+            if all((site, species, inlet)):
+                # TODO - how to do this in a cleaner way?
+                site = str(site)
+                species = str(species)
+                inlet = str(inlet)
+                return self._create_obsdata(site=site, species=species, inlet=inlet)
+
             results = {}
             if site is not None and species is not None:
                 try:
@@ -178,19 +182,22 @@ class SearchResults:
 
                 return results
 
-            for a_site, species in self.results.items():
-                for sp in species:
+            for a_site, species_list in self.results.items():
+                for sp in species_list:
                     key = "_".join((a_site, sp))
                     results[key] = self._create_obsdata(site=a_site, species=sp)
+
+            return results
         else:
             if not all((species, site, inlet)):
                 raise ValueError("Please pass site, species and inlet.")
-
+            # TODO - how to do this in a cleaner way?
+            site = str(site)
+            species = str(species)
+            inlet = str(inlet)
             return self._create_obsdata(site=site, species=species, inlet=inlet)
 
-        return results
-
-    def _create_obsdata(self, site: str, species: str, inlet: Optional[str] = None) -> ObsData:
+    def _create_obsdata(self, site: str, species: str, inlet: str = None) -> ObsData:
         """Creates an ObsData object for return to the user
 
         Args:

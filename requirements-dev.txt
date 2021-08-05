@@ -1,4 +1,4 @@
-Acquire @ git+git://github.com/gareth-j/acquire@devel#egg=Acquire
+# Acquire @ git+git://github.com/gareth-j/acquire@devel#egg=Acquire
 addict
 cdsapi
 # cfchecker @ git+git://github.com/gareth-j/cf-checker@removeBasestring#egg=cfchecker
@@ -10,11 +10,11 @@ numpy
 pandas
 paramiko
 pyvis
-requests
+requests >= 2.25
 scipy
 tqdm
 xarray >= 0.18.2
-urllib3 >= 1.26.3
+urllib3 >= 1.26.5
 # Required for testing
 fdk
 flake8
@@ -22,3 +22,8 @@ pytest
 pytest-tornasync
 pytest-cov
 requests-mock
+# For mypy
+mypy==0.910
+types-paramiko
+types-PyYAML
+types-requests

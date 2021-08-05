@@ -8,7 +8,7 @@ __all__ = ["THAMESBARRIER"]
 class THAMESBARRIER(BaseModule):
     """Class for processing Thames Barrier data"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         from openghg.util import load_json
 
         # Holds parameters used for writing attributes to Datasets
@@ -22,7 +22,7 @@ class THAMESBARRIER(BaseModule):
     def read_file(
         self,
         data_filepath: Union[str, Path],
-        site: Optional[str] = "TMB",
+        site: str = "TMB",
         network: Optional[str] = "LGHG",
         inlet: Optional[str] = None,
         instrument: Optional[str] = None,
@@ -40,7 +40,7 @@ class THAMESBARRIER(BaseModule):
         """
         from openghg.processing import assign_attributes
         from pandas import read_csv as pd_read_csv
-        from openghg.util import clean_string, compliant_string
+        from openghg.util import clean_string
 
         if sampling_period is None:
             sampling_period = "NOT_SET"
@@ -82,11 +82,11 @@ class THAMESBARRIER(BaseModule):
 
             # All attributes stored in the metadata?
             metadata = {
-                "species": compliant_string(species),
+                "species": clean_string(species),
                 "site": site,
                 "inlet": clean_string(self._tb_params["inlet"]),
                 "network": "LGHG",
-                "sampling_period": str(sampling_period)
+                "sampling_period": sampling_period
             }
             metadata.update(site_attributes)
 
