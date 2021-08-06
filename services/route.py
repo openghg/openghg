@@ -49,27 +49,31 @@ def route(function_name: str, data: Dict) -> Dict:
         return {"Error": traceback.format_exc()}
 
 
-async def handle_invocation(ctx: InvokeContext, data: BytesIO) -> Response:
+async def handle_invocation(ctx: InvokeContext, data: BytesIO) -> Dict:
     """The endpoint for the function. This handles the POST request and passes it through
     to the handler
+
+    Note: this handler should only be used for testing purposes. All function calls
+    in a production system should go though Acquire so that data is encrypted in transit.
 
     Args:
         ctx: Invoke context. This is passed by Fn to the function
         data: Data passed to the function by the user
     Returns:
-        Response: Fn FDK response object containing function call data
-        and data returned from function call
+        dict: Dictionary of return data
     """
     import traceback
+    from json import loads
 
     try:
-        data = data.getvalue()
+        data = loads(data.getvalue())
     except Exception:
         return {"Error": traceback.format_exc()}
-        # return Response(ctx=ctx, response_data=error_str)
 
-    returned_data = route(data=data)
-    # headers = {"Content-Type": "application/octet-stream"}
+    function = data["function"]
+    args = data["args"]
 
-    # return Response(ctx=ctx, response_data=returned_data, headers=headers)
-    return returned_data
+    return_data = route(function_name=function, data=args)
+    return_data["WARNING"] = ("This function should only be used for testing purposes. Functions should be routed through Acquire.")
+
+    return return_data
