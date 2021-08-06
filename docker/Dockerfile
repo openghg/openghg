@@ -16,4 +16,4 @@ ENV PYTHONPATH=/python
 # Become the $FN_USER so that nothing runs as root
 USER $FN_USER
 
-ENTRYPOINT ["/python/bin/fdk", "/function/route.py", "route"]
+ENTRYPOINT ["/python/bin/fdk", "/function/route.py", "handle_invocation"]

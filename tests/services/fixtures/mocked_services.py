@@ -114,7 +114,7 @@ class MockedRequests:
         else:
             raise ValueError("Cannot recognise service from '%s'" % url)
 
-        result = func(None, data)
+        result = func(data)
 
         pop_testing_objstore()
 

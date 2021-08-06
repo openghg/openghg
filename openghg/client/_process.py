@@ -68,7 +68,9 @@ class Process:
 
         if data_type in ("GCWERKS", "GC"):
             if not all(isinstance(item, tuple) for item in files):
-                raise TypeError("If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed")
+                raise TypeError(
+                    "If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed"
+                )
 
             files = [(Path(f), Path(p)) for f, p in files]
         else:
