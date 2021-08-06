@@ -1,9 +1,7 @@
 from io import BytesIO
-from fdk.response import Response
 from fdk.context import InvokeContext
 from importlib import import_module
 from typing import Dict
-
 import traceback
 
 
