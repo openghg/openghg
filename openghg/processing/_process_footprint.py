@@ -6,6 +6,7 @@ from pandas import Timestamp
 from xarray import Dataset, DataArray
 from typing import List, Optional, Tuple, Union, Dict
 from openghg.dataobjects import FootprintData
+from openghg.processing import get_flux
 
 __all__ = ["single_site_footprint", "footprints_data_merge"]
 
@@ -44,7 +45,7 @@ def single_site_footprint(
     Returns:
         xarray.Dataset
     """
-    from openghg.processing import get_obs_surface, recombine_datasets, search
+    from openghg.processing import get_obs_surface, get_footprint, recombine_datasets, search
     from openghg.util import timestamp_tzaware
 
     start_date = timestamp_tzaware(start_date)
@@ -74,23 +75,34 @@ def single_site_footprint(
     except AttributeError:
         raise AttributeError("Unable to read mf attribute from observation data.")
 
-    footprint_site = site
+    # footprint_site = site
+    # # If the site for the footprint has a different name pass that in
+    # if site_modifier:
+    #     footprint_site = site_modifier
+
+    # # Get the footprint data
+    # footprint_results: Dict = search(
+    #     site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
+    # )  # type: ignore
+
+    # try:
+    #     fp_site_key = list(footprint_results.keys())[0]
+    # except IndexError:
+    #     raise ValueError(f"Unable to find any footprint data for {site} at a height of {height} in the {network} network.")
+
+    # footprint_keys = footprint_results[fp_site_key]["keys"]
+    # footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
+
     # If the site for the footprint has a different name pass that in
     if site_modifier:
         footprint_site = site_modifier
+    else:
+        footprint_site = site
 
-    # Get the footprint data
-    footprint_results: Dict = search(
-        site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
-    )  # type: ignore
-
-    try:
-        fp_site_key = list(footprint_results.keys())[0]
-    except IndexError:
-        raise ValueError(f"Unable to find any footprint data for {site} at a height of {height} in the {network} network.")
-
-    footprint_keys = footprint_results[fp_site_key]["keys"]
-    footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
+    footprint = get_footprint(site=footprint_site, domain=domain, height=height, 
+                              start_date=start_date, end_date=end_date, 
+                              species=species)
+    footprint_data = footprint # Extract dataset
 
     # Align the two Datasets
     aligned_obs, aligned_footprint = align_datasets(
@@ -361,66 +373,6 @@ def align_datasets(
             obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
 
     return obs_data, footprint_data
-
-
-def get_flux(
-    species: Union[str, List[str]],
-    sources: Union[str, List[str]],
-    domain: Union[str, List[str]],
-    start_date: Optional[Timestamp] = None,
-    end_date: Optional[Timestamp] = None,
-    time_resolution: Optional[str] = "standard",
-) -> Dataset:
-    """
-    The flux function reads in all flux files for the domain and species as an xarray Dataset.
-    Note that at present ALL flux data is read in per species per domain or by emissions name.
-    To be consistent with the footprints, fluxes should be in mol/m2/s.
-
-    Args:
-        species: Species name
-        sources: Source name
-        domain: Domain e.g. EUROPE
-        start_date: Start date
-        end_date: End date
-        time_resolution: One of ["standard", "high"]
-    Returns:
-        xarray.Dataset: combined dataset of all matching flux files
-    """
-    from openghg.processing import search, recombine_datasets
-    from openghg.util import timestamp_epoch, timestamp_now
-
-    if start_date is None:
-        start_date = timestamp_epoch()
-    if end_date is None:
-        end_date = timestamp_now()
-
-    results: Dict = search(
-        species=species,
-        source=sources,
-        domain=domain,
-        time_resolution=time_resolution,
-        start_date=start_date,
-        end_date=end_date,
-        data_type="emissions",
-    )  # type: ignore
-
-    # TODO - more than one emissions file
-    try:
-        em_key = list(results.keys())[0]
-    except IndexError:
-        raise ValueError(f"Unable to find any footprint data for {domain} for {species}.")
-
-    data_keys = results[em_key]["keys"]
-    em_ds = recombine_datasets(keys=data_keys, sort=False)
-
-    # Check for level coordinate. If one level, assume surface and drop
-    if "lev" in em_ds.coords:
-        if len(em_ds.lev) > 1:
-            raise ValueError("Error: More than one flux level")
-
-        return em_ds.drop_vars(names="lev")
-
-    return em_ds
 
 
 def add_timeseries(combined_dataset: Dataset, flux_dict: Dict) -> Dataset:
