@@ -402,7 +402,7 @@ def get_footprint(
             site=site, domain=domain, height=height, start_date=start_date, end_date=end_date, species=species, data_type="footprint"
         ) # type: ignore
     else:
-       results: Dict = search(
+        results: Dict = search(
             site=site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
         ) # type: ignore
 
