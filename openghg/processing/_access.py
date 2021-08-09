@@ -398,11 +398,11 @@ def get_footprint(
 
     # Get the footprint data
     if species is not None:
-        results: Dict = search(
+        results = search(
             site=site, domain=domain, height=height, start_date=start_date, end_date=end_date, species=species, data_type="footprint"
         ) # type: ignore
     else:
-        results: Dict = search(
+        results = search(
             site=site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
         ) # type: ignore
 
