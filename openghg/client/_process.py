@@ -1,7 +1,7 @@
 __all__ = ["Process"]
 
 from Acquire.Client import Wallet
-from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds, User
+from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
 from openghg.client import create_user
 
 from pathlib import Path
