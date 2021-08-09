@@ -1,7 +1,6 @@
 __all__ = ["Process"]
 
-from Acquire.Client import Wallet
-from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds
+from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds, Wallet, User
 from openghg.client import create_user
 
 from pathlib import Path
@@ -35,10 +34,11 @@ class Process:
         data_type: str,
         site: str,
         network: str,
-        instrument: Optional[str] = None,
+        user: User = None,
+        instrument: str = None,
         overwrite: bool = False,
-        openghg_url: Optional[str] = None,
-        storage_url: Optional[str] = None,
+        storage_url: str = None,
+        openghg_url: str = None,
     ) -> Dict:
         """Process the passed file(s)
 
@@ -82,8 +82,9 @@ class Process:
         if openghg_url is None:
             openghg_url = self._service_url + "/openghg"
 
-        # Can I just create a user that Acquire will accept for now?
-        user = create_user()
+        if user is None:
+            # Can I just create a user that Acquire will accept for now?
+            user = create_user()
 
         openghg = Service(service_url=openghg_url)
         creds = StorageCreds(user=user, service_url=storage_url)
