@@ -2,6 +2,7 @@ __all__ = ["Process"]
 
 from Acquire.Client import Wallet
 from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds, User
+from openghg.client import create_user
 
 from pathlib import Path
 from typing import Dict, List, Union, Optional
@@ -30,7 +31,6 @@ class Process:
 
     def process_files(
         self,
-        user: User,
         files: Union[str, List],
         data_type: str,
         site: str,
@@ -81,6 +81,9 @@ class Process:
 
         if openghg_url is None:
             openghg_url = self._service_url + "/openghg"
+
+        # Can I just create a user that Acquire will accept for now?
+        user = create_user()
 
         openghg = Service(service_url=openghg_url)
         creds = StorageCreds(user=user, service_url=storage_url)
