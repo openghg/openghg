@@ -67,6 +67,7 @@ jobs:
     - name: Test with pytest
       env:
         OPENGHG_PATH: /tmp/openghg_store
+        ACQUIRE_HOST: localhost
       run: |
         pytest --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
