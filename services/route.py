@@ -1,5 +1,6 @@
 from io import BytesIO
 from fdk.context import InvokeContext
+from fdk.response import Response
 from importlib import import_module
 from typing import Dict
 import traceback
@@ -30,8 +31,6 @@ def route(function_name: str, data: Dict) -> Dict:
                 "Incorrect function format, please pass function name of type <service_file>.<service_fn>"
             )
 
-        # TODO - This needs to be fixed so the import of services works in the Docker image
-
         # Here we import the module and function, which have the same name
         try:
             module = import_module(module_name)
@@ -47,7 +46,7 @@ def route(function_name: str, data: Dict) -> Dict:
         return {"Error": traceback.format_exc()}
 
 
-async def handle_invocation(ctx: InvokeContext, data: BytesIO) -> Dict:
+async def handle_invocation(ctx: InvokeContext, data: BytesIO) -> Response:
     """The endpoint for the function. This handles the POST request and passes it through
     to the handler
 
@@ -60,19 +59,16 @@ async def handle_invocation(ctx: InvokeContext, data: BytesIO) -> Dict:
     Returns:
         dict: Dictionary of return data
     """
-    import traceback
-    from json import loads
     from Acquire.Service import handle_call
+    from traceback import format_tb
 
     try:
-        data = loads(data.getvalue())
+        data = data.getvalue()
     except Exception:
-        return {"Error": traceback.format_exc()}
+        error_str = str(format_tb())
+        return Response(ctx=ctx, response_data=error_str)
 
-    function = data["function"]
-    args = data["args"]
+    returned_data = handle_call(data=data, routing_function=route)
+    headers = {"Content-Type": "application/octet-stream"}
 
-    return_data = route(function_name=function, data=args)
-    return_data["WARNING"] = ("This function should only be used for testing purposes. Functions should be routed through Acquire.")
-
-    return return_data
+    return Response(ctx=ctx, response_data=returned_data, headers=headers)

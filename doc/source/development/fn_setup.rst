@@ -281,3 +281,9 @@ Then move into the ``openghg/docker`` folder and run
 The ``--build-base`` argument tells the build script to build the base image. In subsequent deployments we won't need to run this
 step unless our dependencies change.
 
+If you want to build the Docker images without using the cache you can pass the ``--nocache`` argument to ``build_deploy.py`` like so:
+
+.. code-block:: bash
+
+    python3 build_deploy.py --build-base --nocache
+
