@@ -4,7 +4,7 @@ from pandas import Timestamp
 from dataclasses import dataclass
 from openghg.dataobjects import ObsData
 
-__all__ = ["get_obs_surface", "synonyms", "scale_convert", "get_flux"]
+__all__ = ["get_obs_surface", "get_footprint", "get_flux", "synonyms", "scale_convert"]
 
 
 def get_obs_surface(
@@ -295,6 +295,7 @@ def scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
 
     return data
 
+
 def get_flux(
     species: Union[str, List[str]],
     sources: Union[str, List[str]],
@@ -315,14 +316,15 @@ def get_flux(
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
+
     Returns:
         xarray.Dataset: combined dataset of all matching flux files
 
     TODO: Update this to output to a FluxData class?
     TODO: Update inputs to just accept a string and extract one flux file at a time?
     As it stands, this only extracts one flux at a time but is set up to be extended
-    to to extract multiple. So this functionality would need to be wrapped up in
-    another function call instead.
+    to to extract multiple. So if this is removed from this function the functionality
+    itself would need to be wrapped up in another function call.
     """
     from openghg.processing import search, recombine_datasets
     from openghg.util import timestamp_epoch, timestamp_now
@@ -342,7 +344,7 @@ def get_flux(
         data_type="emissions",
     )  # type: ignore
 
-    # TODO - more than one emissions file
+    # TODO - more than one emissions file (but see above)
     try:
         em_key = list(results.keys())[0]
     except IndexError:
@@ -387,7 +389,10 @@ def get_footprint(
                  e.g. for high time resolution (co2) or is a short-lived species.
 
     Returns:
-        ObsData: ObsData object
+        xarray.Dataset: Dataset containing the footprint files within the date 
+        range
+
+    TODO: Update this to output to a FootprintData class?
     """
     from openghg.processing import recombine_datasets, search
 
@@ -408,8 +413,9 @@ def get_footprint(
             raise ValueError(f"Unable to find any footprint data for {site} at a height of {height} for species {species}.")
         else:
             raise ValueError(f"Unable to find any footprint data for {site} at a height of {height}.")
-        
+   
     keys = results[fp_site_key]["keys"]
-    fp_ds = recombine_datasets(keys=keys, sort=False)
+    # fp_ds = recombine_datasets(keys=keys, sort=False) # Why did this have sort=False before?
+    fp_ds = recombine_datasets(keys=keys, sort=True)
 
     return fp_ds

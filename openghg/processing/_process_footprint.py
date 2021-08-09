@@ -44,7 +44,7 @@ def single_site_footprint(
     Returns:
         xarray.Dataset
     """
-    from openghg.processing import get_obs_surface, get_footprint, recombine_datasets, search
+    from openghg.processing import get_obs_surface, get_footprint
     from openghg.util import timestamp_tzaware
 
     start_date = timestamp_tzaware(start_date)
@@ -74,25 +74,7 @@ def single_site_footprint(
     except AttributeError:
         raise AttributeError("Unable to read mf attribute from observation data.")
 
-    # footprint_site = site
-    # # If the site for the footprint has a different name pass that in
-    # if site_modifier:
-    #     footprint_site = site_modifier
-
-    # # Get the footprint data
-    # footprint_results: Dict = search(
-    #     site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
-    # )  # type: ignore
-
-    # try:
-    #     fp_site_key = list(footprint_results.keys())[0]
-    # except IndexError:
-    #     raise ValueError(f"Unable to find any footprint data for {site} at a height of {height} in the {network} network.")
-
-    # footprint_keys = footprint_results[fp_site_key]["keys"]
-    # footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
-
-    # If the site for the footprint has a different name pass that in
+    # If the site for the footprint has a different name, pass that in
     if site_modifier:
         footprint_site = site_modifier
     else:
@@ -101,15 +83,17 @@ def single_site_footprint(
     # Try to find appropriate footprint file first with and then without species name
     try:
         footprint = get_footprint(site=footprint_site, domain=domain, height=height, 
-                                start_date=start_date, end_date=end_date, 
-                                species=species)
+                                  start_date=start_date, end_date=end_date, 
+                                  species=species)
     except ValueError:
         footprint = get_footprint(site=footprint_site, domain=domain, height=height, 
-                                start_date=start_date, end_date=end_date)
+                                  start_date=start_date, end_date=end_date)
 
     # TODO: Add checks for particular species e.g. co2 and short-lived species 
-    # should have a specific footprint available rather than the generic one
+    # which should have a specific footprint available rather than the generic one
 
+    # TODO: Update this line if/when output of get_footprint becomes FootprintData 
+    # rather than direct Dataset object
     footprint_data = footprint # Extract dataset
 
     # Align the two Datasets
