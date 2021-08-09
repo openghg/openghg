@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Fn setup &mdash; OpenGHG 0+untagged.3.gb71f367 documentation</title>
+  <title>Fn setup &mdash; OpenGHG 0+untagged.3.ge376154 documentation</title>
   
 
   
@@ -241,11 +241,11 @@ are <em class="xref py py-obj">outlined here</em>.</p>
 <section id="install-fn">
 <h2>Install Fn<a class="headerlink" href="#install-fn" title="Permalink to this headline">¶</a></h2>
 <p>We can now install Fn</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://raw.githubusercontent.com/fnproject/cli/master/install
-<span class="nb">echo</span> a02456b8c8aba8b727d35f704cbca9234e40d2731f200b94abeceb9467973a13 install <span class="p">|</span> sha256sum -c
-<span class="c1"># This should have returned install: OK</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget -O install_fn.sh https://raw.githubusercontent.com/fnproject/cli/master/install
+<span class="nb">echo</span> a02456b8c8aba8b727d35f704cbca9234e40d2731f200b94abeceb9467973a13 install_fn.sh <span class="p">|</span> sha256sum -c
+<span class="c1"># This should have returned install_fn.sh: OK</span>
 <span class="c1"># If not check the bash script</span>
-bash install
+bash install_fn.sh
 </pre></div>
 </div>
 <p>Note: if</p>
@@ -363,6 +363,40 @@ the rule first to the current session and then to the permanent rule-set.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo setsebool -P httpd_can_network_connect <span class="m">1</span>
 </pre></div>
 </div>
+<p>On a CentOS 8 VM on the Oracle Cloud you may need to modify some <em class="xref py py-obj">iptables</em> rules to allow any connections to be made to your
+server.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo iptables -L INPUT --line-numbers
+
+Chain INPUT <span class="o">(</span>policy ACCEPT<span class="o">)</span>
+num  target     prot opt <span class="nb">source</span>               destination
+<span class="m">1</span>    ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
+<span class="m">2</span>    ACCEPT     icmp --  anywhere             anywhere
+<span class="m">3</span>    ACCEPT     all  --  anywhere             anywhere
+<span class="m">4</span>    ACCEPT     tcp  --  anywhere             anywhere             state NEW tcp dpt:ssh
+<span class="m">5</span>    REJECT     all  --  anywhere             anywhere             reject-with icmp-host-prohibited
+</pre></div>
+</div>
+<p>You may need to remove the 5th rule in this set</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo iptables -D INPUT <span class="m">5</span>
+</pre></div>
+</div>
+</section>
+<section id="get-a-letsencrypt-certificate-with-certbot">
+<h2>Get a LetsEncrypt certificate with Certbot<a class="headerlink" href="#get-a-letsencrypt-certificate-with-certbot" title="Permalink to this headline">¶</a></h2>
+<p>To get a LetsEncrypt certificate for https we’ll use Certbot. First, make sure you’ve setup the subdomain for the
+server and pointed it at the IP address of the server. Then follow the commands below.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo dnf install epel-release
+sudo dnf install certbot python3-certbot-nginx
+</pre></div>
+</div>
+<p>Then we can setup get the certificate using <code class="docutils literal notranslate"><span class="pre">certbot</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo certbot --nginx -d fn.openghg.org
+</pre></div>
+</div>
+<p>As <code class="docutils literal notranslate"><span class="pre">certbot</span></code> will update our our <em class="xref py py-obj">nginx</em> configuration files we need to do</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo systemctl restart nginx
+</pre></div>
+</div>
 </section>
 <section id="deploy-fn-functions">
 <h2>Deploy Fn Functions<a class="headerlink" href="#deploy-fn-functions" title="Permalink to this headline">¶</a></h2>
@@ -380,6 +414,10 @@ the rule first to the current session and then to the permanent rule-set.</p>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">--build-base</span></code> argument tells the build script to build the base image. In subsequent deployments we won’t need to run this
 step unless our dependencies change.</p>
+<p>If you want to build the Docker images without using the cache you can pass the <code class="docutils literal notranslate"><span class="pre">--nocache</span></code> argument to <code class="docutils literal notranslate"><span class="pre">build_deploy.py</span></code> like so:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 build_deploy.py --build-base --nocache
+</pre></div>
+</div>
 </section>
 </section>
 

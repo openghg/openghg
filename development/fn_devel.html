@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Fn Development &mdash; OpenGHG 0+untagged.3.gb71f367 documentation</title>
+  <title>Fn Development &mdash; OpenGHG 0+untagged.3.ge376154 documentation</title>
   
 
   
@@ -419,12 +419,12 @@ to create a second image, called <code class="docutils literal notranslate"><spa
 that makes building the image easier and a Dockerfile.</p>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span> <span class="s">fnproject/python:3.8.5-dev</span> <span class="k">as</span> <span class="s">build-stage</span>
 
-<span class="k">ADD</span> requirements.txt requirements-server.txt ./
+<span class="k">ADD</span> requirements-server.txt ./
 
 <span class="k">RUN</span> apt-get update <span class="o">&amp;&amp;</span> apt-get install git -y
 <span class="c"># pip 20.2.4 is the version before the new resolver was introduced</span>
 <span class="k">RUN</span> pip3 install <span class="nv">pip</span><span class="o">==</span><span class="m">20</span>.2.4 wheel setuptools <span class="o">&amp;&amp;</span> <span class="se">\</span>
-    pip3 install --target /python/ -r requirements.txt -r requirements-server.txt
+    pip3 install --target /python/ -r requirements-server.txt
 
 <span class="k">FROM</span> <span class="s">fnproject/python:3.8.5</span>
 
@@ -461,7 +461,7 @@ code into <code class="docutils literal notranslate"><span class="pre">/python</
 <span class="k">RUN</span> python3 -m compileall /python/openghg/*
 
 <span class="c"># Copy in the service files</span>
-<span class="k">RUN</span> mkdir /python/openghg_service
+<span class="k">RUN</span> mkdir /python/openghg_services
 <span class="k">ADD</span> openghg_services /python/openghg_services
 <span class="k">RUN</span> python3 -m compileall /python/openghg_services/*.py
 
@@ -469,14 +469,14 @@ code into <code class="docutils literal notranslate"><span class="pre">/python</
 <span class="c"># Become the $FN_USER so that nothing runs as root</span>
 <span class="k">USER</span><span class="s"> $FN_USER</span>
 
-<span class="k">ENTRYPOINT</span> <span class="p">[</span><span class="s2">&quot;/python/bin/fdk&quot;</span><span class="p">,</span> <span class="s2">&quot;/function/route.py&quot;</span><span class="p">,</span> <span class="s2">&quot;route&quot;</span><span class="p">]</span>
+<span class="k">ENTRYPOINT</span> <span class="p">[</span><span class="s2">&quot;/python/bin/fdk&quot;</span><span class="p">,</span> <span class="s2">&quot;/function/route.py&quot;</span><span class="p">,</span> <span class="s2">&quot;handle_invocation&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>We have also modified <code class="docutils literal notranslate"><span class="pre">func.yaml</span></code> to increase the amount of memory available to this function to 2048 MB / 2 GB. If you notice functions failing unexpectedly
 it may be worth trying changing this value.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">schema_version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">20180708</span>
 <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">openghg</span>
-<span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0.82</span>
+<span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0.0.99</span>
 <span class="nt">runtime</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">docker</span>
 <span class="nt">memory</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2048</span>
 <span class="nt">triggers</span><span class="p">:</span>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.client._process &mdash; OpenGHG 0+untagged.3.gb71f367 documentation</title>
+  <title>openghg.client._process &mdash; OpenGHG 0+untagged.3.ge376154 documentation</title>
   
 
   
@@ -241,7 +241,9 @@
 
         <span class="k">if</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;GCWERKS&quot;</span><span class="p">,</span> <span class="s2">&quot;GC&quot;</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">files</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed&quot;</span>
+                <span class="p">)</span>
 
             <span class="n">files</span> <span class="o">=</span> <span class="p">[(</span><span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
