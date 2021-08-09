@@ -58,7 +58,7 @@ jobs:
       if: matrix.python-version == 3.8 || matrix.python-version == 3.9
     - name: 'Clone Acquire for services folder required for tests'
       run: |
-        git clone -b devel https://github.com/gareth-j/acquire.git ../acquire
+        git clone -b devel https://github.com/openghg/acquire.git ../acquire
         pip install -r ../acquire/requirements.txt
         pip install oci retry
     - name: Create mock cdsapi config file
