@@ -32,8 +32,16 @@ def test_read_footprint():
     footprint_keys = footprint_results[fp_site_key]["keys"]
     footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
 
-    assert list(footprint_data.coords.keys()) == ["time", "lon", "lat", "lev", "height", "lat_high", "lon_high"]
-    assert list(footprint_data.dims) == ["height", "index", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
+    footprint_coords = list(footprint_data.coords.keys())
+    footprint_dims = footprint_data.dims
+
+    # Sorting to allow comparison - coords / dims can be stored in different orders 
+    # depending on how the Dataset has been manipulated
+    footprint_coords.sort()
+    footprint_dims.sort()
+
+    assert footprint_coords == ['height', 'lat', 'lat_high', 'lev', 'lon', 'lon_high', 'time']
+    assert footprint_dims == ['height', 'index', 'lat', 'lat_high', 'lev', 'lon', 'lon_high', 'time']
 
     assert (
         footprint_data.attrs["heights"]
