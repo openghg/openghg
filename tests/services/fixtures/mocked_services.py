@@ -10,9 +10,9 @@ import Acquire
 import Acquire.Stubs
 import pytest
 
+from Acquire.Service import create_handler
 from access.route import route as access_functions
 from accounting.route import route as accounting_functions
-from admin.handler import create_handler
 from compute.route import route as compute_functions
 from identity.route import route as identity_functions
 from registry.route import route as registry_functions

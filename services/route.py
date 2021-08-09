@@ -62,6 +62,7 @@ async def handle_invocation(ctx: InvokeContext, data: BytesIO) -> Dict:
     """
     import traceback
     from json import loads
+    from Acquire.Service import handle_call
 
     try:
         data = loads(data.getvalue())
