@@ -33,7 +33,7 @@ def test_read_footprint():
     footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
 
     footprint_coords = list(footprint_data.coords.keys())
-    footprint_dims = footprint_data.dims
+    footprint_dims = list(footprint_data.dims)
 
     # Sorting to allow comparison - coords / dims can be stored in different orders 
     # depending on how the Dataset has been manipulated
