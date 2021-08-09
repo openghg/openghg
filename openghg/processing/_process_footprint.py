@@ -94,7 +94,7 @@ def single_site_footprint(
 
     # TODO: Update this line if/when output of get_footprint becomes FootprintData 
     # rather than direct Dataset object
-    footprint_data = footprint # Extract dataset
+    footprint_data = footprint  # Extract dataset
 
     # Align the two Datasets
     aligned_obs, aligned_footprint = align_datasets(
