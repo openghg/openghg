@@ -6,7 +6,6 @@ from pandas import Timestamp
 from xarray import Dataset, DataArray
 from typing import List, Optional, Tuple, Union, Dict
 from openghg.dataobjects import FootprintData
-from openghg.processing import get_flux
 
 __all__ = ["single_site_footprint", "footprints_data_merge"]
 
@@ -99,9 +98,18 @@ def single_site_footprint(
     else:
         footprint_site = site
 
-    footprint = get_footprint(site=footprint_site, domain=domain, height=height, 
-                              start_date=start_date, end_date=end_date, 
-                              species=species)
+    # Try to find appropriate footprint file first with and then without species name
+    try:
+        footprint = get_footprint(site=footprint_site, domain=domain, height=height, 
+                                start_date=start_date, end_date=end_date, 
+                                species=species)
+    except ValueError:
+        footprint = get_footprint(site=footprint_site, domain=domain, height=height, 
+                                start_date=start_date, end_date=end_date)
+
+    # TODO: Add checks for particular species e.g. co2 and short-lived species 
+    # should have a specific footprint available rather than the generic one
+
     footprint_data = footprint # Extract dataset
 
     # Align the two Datasets
@@ -168,6 +176,8 @@ def footprints_data_merge(
     Returns:
         dict: Dictionary footprint data objects
     """
+    from openghg.processing import get_flux
+
     # First get the site data
     combined_dataset = single_site_footprint(
         site=site,
@@ -317,9 +327,9 @@ def align_datasets(
     # Get the period of measurements in time
     obs_attributes = obs_data.attrs
     if "averaged_period" in obs_attributes:
-        obs_data_period_s = obs_attributes["averaged_period"]
+        obs_data_period_s = int(obs_attributes["averaged_period"])
     elif "sampling_period" in obs_attributes:
-        obs_data_period_s = obs_attributes["sampling_period"]
+        obs_data_period_s = int(obs_attributes["sampling_period"])
     else:
         # Attempt to derive sampling period from frequency of data
         obs_data_period_s = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9).astype("int64")

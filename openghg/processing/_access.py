@@ -392,16 +392,24 @@ def get_footprint(
     from openghg.processing import recombine_datasets, search
 
     # Get the footprint data
-    results: Dict = search(
-        site=site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
-    )  # type: ignore
+    if species is not None:
+        results: Dict = search(
+            site=site, domain=domain, height=height, start_date=start_date, end_date=end_date, species=species, data_type="footprint"
+        ) # type: ignore
+    else:
+       results: Dict = search(
+            site=site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
+        ) # type: ignore
 
     try:
         fp_site_key = list(results.keys())[0]
     except IndexError:
-        raise ValueError(f"Unable to find any footprint data for {site} at a height of {height} in the {network} network.")
-
+        if species is not None:
+            raise ValueError(f"Unable to find any footprint data for {site} at a height of {height} for species {species}.")
+        else:
+            raise ValueError(f"Unable to find any footprint data for {site} at a height of {height}.")
+        
     keys = results[fp_site_key]["keys"]
-    footprint_data = recombine_datasets(keys=keys, sort=False)
+    fp_ds = recombine_datasets(keys=keys, sort=False)
 
-    return footprint_data
+    return fp_ds
