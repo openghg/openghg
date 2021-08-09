@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.client._process &mdash; OpenGHG 0+untagged.3.ge376154 documentation</title>
+  <title>openghg.client._process &mdash; OpenGHG 0+untagged.3.g4ae6513 documentation</title>
   
 
   
@@ -173,8 +173,8 @@
   <h1>Source code for openghg.client._process</h1><div class="highlight"><pre>
 <span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Process&quot;</span><span class="p">]</span>
 
-<span class="kn">from</span> <span class="nn">Acquire.Client</span> <span class="kn">import</span> <span class="n">Wallet</span>
-<span class="kn">from</span> <span class="nn">Acquire.Client</span> <span class="kn">import</span> <span class="n">Drive</span><span class="p">,</span> <span class="n">Service</span><span class="p">,</span> <span class="n">PAR</span><span class="p">,</span> <span class="n">Authorisation</span><span class="p">,</span> <span class="n">StorageCreds</span><span class="p">,</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">Acquire.Client</span> <span class="kn">import</span> <span class="n">Drive</span><span class="p">,</span> <span class="n">Service</span><span class="p">,</span> <span class="n">PAR</span><span class="p">,</span> <span class="n">Authorisation</span><span class="p">,</span> <span class="n">StorageCreds</span><span class="p">,</span> <span class="n">Wallet</span><span class="p">,</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">create_user</span>
 
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
@@ -203,15 +203,15 @@
 
 <div class="viewcode-block" id="Process.process_files"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.Process.process_files">[docs]</a>    <span class="k">def</span> <span class="nf">process_files</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">user</span><span class="p">:</span> <span class="n">User</span><span class="p">,</span>
         <span class="n">files</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">],</span>
         <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">openghg_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">storage_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">storage_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">openghg_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Process the passed file(s)</span>
 
@@ -254,6 +254,10 @@
 
         <span class="k">if</span> <span class="n">openghg_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">openghg_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service_url</span> <span class="o">+</span> <span class="s2">&quot;/openghg&quot;</span>
+
+        <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Can I just create a user that Acquire will accept for now?</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">create_user</span><span class="p">()</span>
 
         <span class="n">openghg</span> <span class="o">=</span> <span class="n">Service</span><span class="p">(</span><span class="n">service_url</span><span class="o">=</span><span class="n">openghg_url</span><span class="p">)</span>
         <span class="n">creds</span> <span class="o">=</span> <span class="n">StorageCreds</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">service_url</span><span class="o">=</span><span class="n">storage_url</span><span class="p">)</span>

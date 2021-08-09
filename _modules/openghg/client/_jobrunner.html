@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.client._jobrunner &mdash; OpenGHG 0+untagged.3.ge376154 documentation</title>
+  <title>openghg.client._jobrunner &mdash; OpenGHG 0+untagged.3.g4ae6513 documentation</title>
   
 
   
@@ -245,6 +245,9 @@
         <span class="kn">from</span> <span class="nn">Acquire.ObjectStore</span> <span class="kn">import</span> <span class="n">create_uuid</span>
         <span class="kn">import</span> <span class="nn">datetime</span>
         <span class="kn">import</span> <span class="nn">os</span>
+
+        <span class="c1"># TODO - This needs looking at again</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="s2">&quot;Cannot use a null service&quot;</span><span class="p">)</span>
