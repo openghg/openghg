@@ -13,6 +13,7 @@ ADD openghg_services /python/openghg_services
 RUN python3 -m compileall /python/openghg_services/*.py
 
 ENV PYTHONPATH=/python
+ENV OPENGHG_CLOUD=1
 # Become the $FN_USER so that nothing runs as root
 USER $FN_USER
 
