@@ -102,7 +102,7 @@ Next we create a server config file for our reverse proxy in ``/etc/nginx/conf.d
             location / {}
 
             location /t {
-                    proxy_pass http://127.0.0.1:8080/t/openghg;
+                    proxy_pass http://localhost:8080/t/openghg;
                     proxy_set_header Host $host;
                     proxy_set_header X-Real-IP $remote_addr;
                     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -110,29 +110,6 @@ Next we create a server config file for our reverse proxy in ``/etc/nginx/conf.d
             }
         }
 
-
-For Acquire we want
-
-.. code-block:: nginx
-    :linenos:
-
-        server {
-            listen 80 default_server;
-            listen [::]:80 default_server;
-            server_name acquire.openghg.org;
-
-            location / {
-            }
-
-            location /t {
-                proxy_pass http://127.0.0.1:8080;
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto https;
-            }
-        }
-   
 
 Then we want to disable the default config by setting ``/etc/nginx/nginx.conf``.
 It might be worth copying up your default ``nginx.conf`` to ``nginx.conf.bak`` before editing
@@ -256,6 +233,14 @@ As ``certbot`` will update our our `nginx` configuration files we need to do
 .. code-block:: bash
 
     sudo systemctl restart nginx
+
+We can also set ``certbot`` to renew our certificates automatically using the following command
+
+.. code-block:: bash
+
+    SLEEPTIME=$(awk 'BEGIN{srand(); print int(rand()*(3600+1))}'); echo "0 0,12 * * * root sleep $SLEEPTIME && certbot renew -q" | sudo tee -a /etc/crontab > /dev/null
+
+This adds a cron job to ``/etc/crontab``.
 
 Deploy Fn Functions
 -------------------
