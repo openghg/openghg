@@ -10,7 +10,7 @@ __all__ = ["get_obs_surface", "scale_convert"]
 def get_obs_surface(
     site: str,
     species: str,
-    inlet: str,
+    inlet: Optional[str] = None,
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
     average: Optional[str] = None,
