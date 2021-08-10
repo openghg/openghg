@@ -9,7 +9,6 @@ if cloud_env is not None:
         exists,
         get_abs_filepaths,
         get_bucket,
-        get_object,
         get_object_from_json,
         get_md5,
         get_md5_bytes,
@@ -17,7 +16,6 @@ if cloud_env is not None:
         get_local_bucket,
         set_object_from_json,
         set_object_from_file,
-        get_object_names,
         hash_files,
     )
 else:
@@ -37,10 +35,3 @@ else:
         query_store,
         visualise_store,
     )
-
-
-if _sys.version_info.major < 3:
-    raise ImportError("openghg requires Python 3.7 minimum")
-
-if _sys.version_info.minor < 7:
-    raise ImportError("openghg requires Python 3.7 minimum")
