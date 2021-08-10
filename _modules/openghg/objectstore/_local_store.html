@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.objectstore._local_store &mdash; OpenGHG 0+untagged.3.g4ae6513 documentation</title>
+  <title>openghg.objectstore._local_store &mdash; OpenGHG 0+untagged.3.gb8b43a2 documentation</title>
   
 
   
@@ -208,7 +208,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">env_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">env_path</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">env_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">env_path</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No environment variable OPENGHG_PATH found, please set to use the local object store&quot;</span><span class="p">)</span>
@@ -519,7 +519,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Aug 09, 2021.
+        Last updated on Aug 10, 2021.
       </span>
 
     </p>
