@@ -1,6 +1,6 @@
 schema_version: 20180708
 name: openghg
-version: 0.0.82
+version: 0.0.85
 runtime: docker
 memory: 2048
 triggers:
