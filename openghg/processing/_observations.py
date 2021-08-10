@@ -18,7 +18,7 @@ def get_obs_surface(
     instrument: Optional[str] = None,
     calibration_scale: Optional[str] = None,
     keep_missing: Optional[bool] = False,
-) -> ObsData:
+) -> Union[ObsData, None]:
     """Get measurements from one site.
 
     Args:
@@ -62,12 +62,14 @@ def get_obs_surface(
         find_all=True,
     )
 
-    # if len(obs_results) > 1:
-    #     raise ValueError("More than one search result found for the passed argument. Please be more specific with your search terms.")
+    if not obs_results:
+        print(f"No data found for {species.upper()} at {site}")
+        return
+        # raise ValueError(f"No data found for {species} at {site}")
 
     # TODO - for some reason mypy doesn't pick up the ObsData being returned here, look into this
     # GJ - 2021-07-19
-    obs_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet) # type: ignore
+    obs_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
     data = obs_data.data
 
     # Slice the data to only cover the dates we're interested in
@@ -128,7 +130,8 @@ def get_obs_surface(
         for var in data_variables:
             if "repeatability" in var:
                 ds_resampled[var] = (
-                    np.sqrt((data[var] ** 2).resample(time=average).sum()) / data[var].resample(time=average).count()
+                    np.sqrt((data[var] ** 2).resample(time=average).sum())
+                    / data[var].resample(time=average).count()
                 )
 
             # Copy over some attributes
@@ -139,13 +142,17 @@ def get_obs_surface(
                 ds_resampled[var].attrs["units"] = data[var].attrs["units"]
 
         # Create a new variability variable, containing the standard deviation within the resampling period
-        ds_resampled[f"{species}_variability"] = data[species].resample(time=average).std(skipna=False, keep_attrs=True)
+        ds_resampled[f"{species}_variability"] = (
+            data[species].resample(time=average).std(skipna=False, keep_attrs=True)
+        )
         # If there are any periods where only one measurement was resampled, just use the median variability
         ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
             f"{species}_variability"
         ].median()
         # Create attributes for variability variable
-        ds_resampled[f"{species}_variability"].attrs["long_name"] = f"{data[species].attrs['long_name']}_variability"
+        ds_resampled[f"{species}_variability"].attrs[
+            "long_name"
+        ] = f"{data[species].attrs['long_name']}_variability"
         ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
 
         # Resampling may introduce NaNs, so remove, if not keep_missing
@@ -172,7 +179,7 @@ def get_obs_surface(
         if "integration_flag" in var:
             rename[var] = "integration_flag"
 
-    data = data.rename_vars(rename) # type: ignore
+    data = data.rename_vars(rename)  # type: ignore
 
     data.attrs["species"] = species
 
