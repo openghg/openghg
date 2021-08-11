@@ -11,7 +11,7 @@ class FootprintData(_BaseData):
     """This class is used to return observations data from the get_footprint function
 
     Args:
-        data: Dictionary of xarray Dataframes
+        data: xarray Dataframe
         metadata: Dictionary of metadata including model run parameters
         flux: Dictionary of flux data
         bc: Boundary conditions dictionary
