@@ -115,12 +115,12 @@ def test_read_footprint():
 
     assert footprint_data.attrs == expected_attrs
 
-    footprint_data["fp_low"].max().values == 0.43350983
-    footprint_data["fp_high"].max().values == 0.11853027
-    footprint_data["pressure"].max().values == 1011.92
+    footprint_data["fp_low"].max().values == pytest.approx(0.43350983)
+    footprint_data["fp_high"].max().values == pytest.approx(0.11853027)
+    footprint_data["pressure"].max().values == pytest.approx(1011.92)
     footprint_data["fp_low"].min().values == 0.0
     footprint_data["fp_high"].min().values == 0.0
-    footprint_data["pressure"].min().values == 1011.92
+    footprint_data["pressure"].min().values == pytest.approx(1011.92)
 
 
 def test_read_same_footprint_twice_raises():
