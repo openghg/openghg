@@ -1,3 +1,4 @@
+from ._user import create_user
 from ._jobrunner import JobRunner
 from ._process import Process
 from ._retrieve import Retrieve
