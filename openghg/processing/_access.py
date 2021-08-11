@@ -62,7 +62,7 @@ def get_obs_surface(
     )
 
     if not obs_results:
-        return ObsData(data={}, metadata={})
+        raise ValueError(f"Unable to find results for {species} at {site}")
 
     # TODO - for some reason mypy doesn't pick up the ObsData being returned here, look into this
     # GJ - 2021-07-19
@@ -209,9 +209,9 @@ def get_obs_surface(
 
 
 def get_flux(
-    species: Union[str, List[str]],
+    species: str,
     sources: Union[str, List[str]],
-    domain: Union[str, List[str]],
+    domain: str,
     start_date: Optional[Timestamp] = None,
     end_date: Optional[Timestamp] = None,
     time_resolution: Optional[str] = "standard",
@@ -256,7 +256,7 @@ def get_flux(
     )  # type: ignore
 
     if not results:
-        FluxData(data={}, metadata={}, flux={}, bc={}, species=species, scales=None, units=None)
+        raise ValueError(f"Unable to find flux data for {species} from {sources}")
 
     # TODO - more than one emissions file (but see above)
     try:
@@ -275,6 +275,9 @@ def get_flux(
             raise ValueError("Error: More than one flux level")
 
         em_ds = em_ds.drop_vars(names="lev")
+
+    if species is None:
+        species = metadata.get("species", "NA")
 
     return FluxData(
         data=em_ds, metadata=metadata, flux={}, bc={}, species=species, scales="FIXME", units="FIXME"
@@ -352,7 +355,9 @@ def get_footprint(
     if species is None:
         species = metadata.get("species", "NA")
 
-    return FootprintData(data=fp_ds, metadata=metadata, flux={}, bc={}, species=species, scales="FIXME", units="FIXME")
+    return FootprintData(
+        data=fp_ds, metadata=metadata, flux={}, bc={}, species=species, scales="FIXME", units="FIXME"
+    )
 
 
 def _synonyms(species: str) -> str:
