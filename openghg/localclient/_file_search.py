@@ -7,21 +7,23 @@ This is created to find data files on the Blue Pebble system using the
 expected file naming scheme.
 
 This is adapted from acrg_obs.process_gcwerks and makes use of a copy
-of the process_gcwerks_parameters.json file (also in this folder).
+of the process_gcwerks_parameters.json file.
 
 @author: rt17603
 """
 
 from pathlib import Path
 import glob
-import json
+from openghg.util import load_json
 from os.path import join
 
 # Read site info file
-info_file = "process_gcwerks_parameters.json"
-with open(info_file) as sf:
-    params = json.load(sf)
 
+# import json
+# info_file = "../data/process_gcwerks_parameters.json"
+# with open(info_file) as sf:
+#     params = json.load(sf)
+params = load_json(filename="process_gcwerks_parameters_bp1.json")
 
 def find_gc_files(site, instrument):
     '''
@@ -116,11 +118,11 @@ def site_all():
     and DECC networks which are loaded as standard into our 
     object store.
     
-    This is split into three data types (based on the necessary processing):
+    This is split into two data types (based on the necessary processing):
         - GCWERKS
         - CRDS
     
-    To find the data files and then to load the data details are needed
+    To find the data files and then to load the data, details are needed
     for:
         - site
         - network
@@ -226,6 +228,9 @@ def find_all_files():
                                "data_type":data_type,
                                "site": data["site"],
                                "network":data["network"]}
+            
+            if "instrument" in param:
+                read_input_dict["instrument"] = param["instrument"]
             
             data_files.append(read_input_dict)
     
