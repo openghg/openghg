@@ -3,11 +3,11 @@
 from pathlib import Path
 from typing import List
 
-__all__ = ["get_datapath", "glob_files"]
+__all__ = ["get_datapath", "get_emissions_datapath", "get_footprint_datapath", "glob_files"]
 
 
 def get_datapath(filename: str, data_type: str) -> Path:
-    """ Return the full path of a test data file. This function is
+    """Return the full path of a test data file. This function is
     widely used in test functions
 
     Args:
@@ -18,11 +18,25 @@ def get_datapath(filename: str, data_type: str) -> Path:
     """
     data_type = data_type.upper()
 
-    return Path(__file__).resolve(strict=True).parent.parent.joinpath(f"data/proc_test_data/{data_type}/{filename}")
+    return (
+        Path(__file__)
+        .resolve(strict=True)
+        .parent.parent.joinpath(f"data/proc_test_data/{data_type}/{filename}")
+    )
+
+
+def get_emissions_datapath(filename: str) -> Path:
+    """Return the path to the emissions test data file"""
+    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/emissions/{filename}")
+
+
+def get_footprint_datapath(filename: str) -> Path:
+    """Return the path to the footprint test data file"""
+    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/footprints/{filename}")
 
 
 def glob_files(search_str: str, data_type: str) -> List:
-    """ Returns the list of files 
+    """Returns the list of files
 
     Args:
         search_str: String to find at start of filename
@@ -31,9 +45,13 @@ def glob_files(search_str: str, data_type: str) -> List:
         list: List of files found
     """
     data_type = data_type.upper()
-    globule = Path(__file__).resolve(strict=True).parent.parent.joinpath(f"data/proc_test_data/{data_type}/").glob(f"{search_str}*")
+    globule = (
+        Path(__file__)
+        .resolve(strict=True)
+        .parent.parent.joinpath(f"data/proc_test_data/{data_type}/")
+        .glob(f"{search_str}*")
+    )
 
     files = [str(g) for g in globule]
 
     return files
-

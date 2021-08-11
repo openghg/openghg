@@ -8,7 +8,9 @@ from openghg.objectstore import get_local_bucket
 
 
 def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+    return (
+        Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+    )
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -21,7 +23,14 @@ def read_data():
     cgo_prec = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
     ObsSurface.read_file(filepath=hfd_filepath, data_type="CRDS", site="hfd", network="DECC", inlet="100m")
-    ObsSurface.read_file(filepath=(cgo_data, cgo_prec), data_type="GCWERKS", site="CGO", network="AGAGE", instrument="medusa", inlet="75m")
+    ObsSurface.read_file(
+        filepath=(cgo_data, cgo_prec),
+        data_type="GCWERKS",
+        site="CGO",
+        network="AGAGE",
+        instrument="medusa",
+        inlet="75m",
+    )
 
 
 def test_get_observations_few_args():
@@ -80,7 +89,9 @@ def test_get_observations_with_average():
     assert data["mf"][0] == pytest.approx(414.21)
     assert data["mf"][-1] == pytest.approx(411.08)
 
-    result_with_missing = get_obs_surface(site="hfd", species="co2", average="2h", inlet="100m", keep_missing=True)
+    result_with_missing = get_obs_surface(
+        site="hfd", species="co2", average="2h", inlet="100m", keep_missing=True
+    )
 
     data_missing = result_with_missing.data
 
@@ -88,7 +99,9 @@ def test_get_observations_with_average():
 
 
 def test_get_observations_datetime_selection():
-    results = get_obs_surface(site="hfd", species="co2", inlet="100m", start_date="2001-01-01", end_date="2015-01-01")
+    results = get_obs_surface(
+        site="hfd", species="co2", inlet="100m", start_date="2001-01-01", end_date="2015-01-01"
+    )
 
     data = results.data
 
@@ -128,6 +141,7 @@ def test_gcwerks_retrieval():
         "scale": "SIO-05",
         "inlet": "70m",
         "sampling_period": "1200",
+        "data_type": "timeseries",
     }
 
     assert metadata == expected_metadata
@@ -149,7 +163,9 @@ def test_get_observations_fixed_dates():
     start_date = "2015-01-01"
     end_date = "2015-05-31"
 
-    results = get_obs_surface(site="hfd", species="co2", inlet="100m", start_date=start_date, end_date=end_date)
+    results = get_obs_surface(
+        site="hfd", species="co2", inlet="100m", start_date=start_date, end_date=end_date
+    )
 
     assert results.data.time[0] == Timestamp("2015-01-01T18:25:30")
     assert results.data.time[-1] == Timestamp("2015-05-07T00:28:30")
@@ -157,13 +173,9 @@ def test_get_observations_fixed_dates():
     start_date = Timestamp("2016-01-01")
     end_date = Timestamp("2016-08-01")
 
-    results = get_obs_surface(site="hfd", species="co2", inlet="100m", start_date=start_date, end_date=end_date)
+    results = get_obs_surface(
+        site="hfd", species="co2", inlet="100m", start_date=start_date, end_date=end_date
+    )
 
     assert results.data.time[0] == Timestamp("2016-01-01T18:25:30")
     assert results.data.time[-1] == Timestamp("2016-05-07T00:28:30")
-
-
-
-
-
-    

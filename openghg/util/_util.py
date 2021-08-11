@@ -16,6 +16,7 @@ __all__ = [
     "is_number",
     "to_lowercase",
     "pairwise",
+    "multiple_inlets",
 ]
 
 
@@ -137,6 +138,30 @@ def valid_site(site: str) -> bool:
     site_data = load_json("acrg_site_info.json")
 
     return site.upper() in site_data
+
+
+def multiple_inlets(site: str) -> bool:
+    """Check if the passed site has more than one inlet
+
+    Args:
+        site: Three letter site code
+    Returns:
+        bool: True if multiple inlets
+    """
+    site_data = load_json("acrg_site_info.json")
+
+    site = site.upper()
+    network = next(iter(site_data[site]))
+
+    try:
+        heights = set(site_data[network]["height"])
+    except KeyError:
+        try:
+            heights = set(site_data[network]["height_name"])
+        except KeyError:
+            return True
+
+    return len(heights) > 1
 
 
 def is_number(s: str) -> bool:

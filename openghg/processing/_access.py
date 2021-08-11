@@ -1,16 +1,15 @@
 from xarray import Dataset
 from typing import Dict, List, Optional, Union
 from pandas import Timestamp
-from dataclasses import dataclass
-from openghg.dataobjects import ObsData
+from openghg.dataobjects import ObsData, FootprintData, FluxData
 
-__all__ = ["get_obs_surface", "scale_convert"]
+__all__ = ["get_obs_surface", "get_footprint", "get_flux"]
 
 
 def get_obs_surface(
     site: str,
     species: str,
-    inlet: str,
+    inlet: str = None,
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
     average: Optional[str] = None,
@@ -49,7 +48,7 @@ def get_obs_surface(
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
     # Find the correct synonym for the passed species
-    species = clean_string(synonyms(species))
+    species = clean_string(_synonyms(species))
 
     # Get the observation data
     obs_results = search(
@@ -62,13 +61,13 @@ def get_obs_surface(
         find_all=True,
     )
 
-    # if len(obs_results) > 1:
-    #     raise ValueError("More than one search result found for the passed argument. Please be more specific with your search terms.")
+    if not obs_results:
+        raise ValueError(f"Unable to find results for {species} at {site}")
 
     # TODO - for some reason mypy doesn't pick up the ObsData being returned here, look into this
     # GJ - 2021-07-19
-    obs_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet) # type: ignore
-    data = obs_data.data
+    retrieved_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
+    data = retrieved_data.data
 
     # Slice the data to only cover the dates we're interested in
     data = data.loc[dict(time=slice(start_date, end_date))]
@@ -128,7 +127,8 @@ def get_obs_surface(
         for var in data_variables:
             if "repeatability" in var:
                 ds_resampled[var] = (
-                    np.sqrt((data[var] ** 2).resample(time=average).sum()) / data[var].resample(time=average).count()
+                    np.sqrt((data[var] ** 2).resample(time=average).sum())
+                    / data[var].resample(time=average).count()
                 )
 
             # Copy over some attributes
@@ -139,13 +139,17 @@ def get_obs_surface(
                 ds_resampled[var].attrs["units"] = data[var].attrs["units"]
 
         # Create a new variability variable, containing the standard deviation within the resampling period
-        ds_resampled[f"{species}_variability"] = data[species].resample(time=average).std(skipna=False, keep_attrs=True)
+        ds_resampled[f"{species}_variability"] = (
+            data[species].resample(time=average).std(skipna=False, keep_attrs=True)
+        )
         # If there are any periods where only one measurement was resampled, just use the median variability
         ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
             f"{species}_variability"
         ].median()
         # Create attributes for variability variable
-        ds_resampled[f"{species}_variability"].attrs["long_name"] = f"{data[species].attrs['long_name']}_variability"
+        ds_resampled[f"{species}_variability"].attrs[
+            "long_name"
+        ] = f"{data[species].attrs['long_name']}_variability"
         ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
 
         # Resampling may introduce NaNs, so remove, if not keep_missing
@@ -172,7 +176,7 @@ def get_obs_surface(
         if "integration_flag" in var:
             rename[var] = "integration_flag"
 
-    data = data.rename_vars(rename) # type: ignore
+    data = data.rename_vars(rename)  # type: ignore
 
     data.attrs["species"] = species
 
@@ -180,10 +184,12 @@ def get_obs_surface(
         data.attrs["scale"] = data.attrs.pop("Calibration_scale")
 
     if calibration_scale is not None:
-        data = scale_convert(data, species, calibration_scale)
+        data = _scale_convert(data, species, calibration_scale)
 
-    metadata = data.attrs
-    obs_data = ObsData(data=data, metadata=data.attrs)
+    metadata = retrieved_data.metadata
+    metadata.update(data.attrs)
+
+    obs_data = ObsData(data=data, metadata=metadata)
 
     # It doesn't make sense to do this now as we've only got a single Dataset
     # # Now check if the units match for each of the observation Datasets
@@ -204,7 +210,159 @@ def get_obs_surface(
     return obs_data
 
 
-def synonyms(species: str) -> str:
+def get_flux(
+    species: str,
+    sources: Union[str, List[str]],
+    domain: str,
+    start_date: Optional[Timestamp] = None,
+    end_date: Optional[Timestamp] = None,
+    time_resolution: Optional[str] = "standard",
+) -> FluxData:
+    """
+    The flux function reads in all flux files for the domain and species as an xarray Dataset.
+    Note that at present ALL flux data is read in per species per domain or by emissions name.
+    To be consistent with the footprints, fluxes should be in mol/m2/s.
+
+    Args:
+        species: Species name
+        sources: Source name
+        domain: Domain e.g. EUROPE
+        start_date: Start date
+        end_date: End date
+        time_resolution: One of ["standard", "high"]
+    Returns:
+        FluxData: FluxData object
+
+    TODO: Update this to output to a FluxData class?
+    TODO: Update inputs to just accept a string and extract one flux file at a time?
+    As it stands, this only extracts one flux at a time but is set up to be extended
+    to to extract multiple. So if this is removed from this function the functionality
+    itself would need to be wrapped up in another function call.
+    """
+    from openghg.processing import search, recombine_datasets
+    from openghg.util import timestamp_epoch, timestamp_now
+
+    if start_date is None:
+        start_date = timestamp_epoch()
+    if end_date is None:
+        end_date = timestamp_now()
+
+    results: Dict = search(
+        species=species,
+        source=sources,
+        domain=domain,
+        time_resolution=time_resolution,
+        start_date=start_date,
+        end_date=end_date,
+        data_type="emissions",
+    )  # type: ignore
+
+    if not results:
+        raise ValueError(f"Unable to find flux data for {species} from {sources}")
+
+    # TODO - more than one emissions file (but see above)
+    try:
+        em_key = list(results.keys())[0]
+    except IndexError:
+        raise ValueError(f"Unable to find any footprint data for {domain} for {species}.")
+
+    data_keys = results[em_key]["keys"]
+    metadata = results[em_key]["metadata"]
+
+    em_ds = recombine_datasets(keys=data_keys, sort=False)
+
+    # Check for level coordinate. If one level, assume surface and drop
+    if "lev" in em_ds.coords:
+        if len(em_ds.lev) > 1:
+            raise ValueError("Error: More than one flux level")
+
+        em_ds = em_ds.drop_vars(names="lev")
+
+    if species is None:
+        species = metadata.get("species", "NA")
+
+    return FluxData(
+        data=em_ds, metadata=metadata, flux={}, bc={}, species=species, scales="FIXME", units="FIXME"
+    )
+
+
+def get_footprint(
+    site: str,
+    domain: str,
+    height: str,
+    model: str = None,
+    start_date: Timestamp = None,
+    end_date: Timestamp = None,
+    species: str = None,
+) -> FootprintData:
+    """
+    Get footprint from one site.
+
+    Args:
+        site: The name of the site given in the footprint. This often matches
+              to the site name but  if the same site footprints are run with a
+              different met and they are named slightly differently from the obs
+              file. E.g. site="DJI", site_modifier = "DJI-SAM" -
+              station called DJI, footprint site called DJI-SAM
+        domain : Domain name for the footprint
+        height: Height of inlet in metres
+        start_date: Output start date in a format that Pandas can interpret
+        end_date: Output end date in a format that Pandas can interpret
+        species: Species identifier e.g. "co2" for carbon dioxide. Only needed
+                 if species needs a modified footprint from the typical 30-day
+                 footprint appropriate for a long-lived species (like methane)
+                 e.g. for high time resolution (co2) or is a short-lived species.
+    Returns:
+        FootprintData: FootprintData dataclass
+    """
+    from openghg.processing import recombine_datasets, search
+    from openghg.dataobjects import FootprintData
+
+    results = search(
+        site=site,
+        domain=domain,
+        height=height,
+        start_date=start_date,
+        end_date=end_date,
+        species=species,
+        data_type="footprint",
+    )  # type: ignore
+    # Get the footprint data
+    # if species is not None:
+    # else:
+    #     results = search(
+    #         site=site,
+    #         domain=domain,
+    #         height=height,
+    #         start_date=start_date,
+    #         end_date=end_date,
+    #         data_type="footprint",
+    #     )  # type: ignore
+
+    try:
+        fp_site_key = list(results.keys())[0]
+    except IndexError:
+        if species is not None:
+            raise ValueError(
+                f"Unable to find any footprint data for {site} at a height of {height} for species {species}."
+            )
+        else:
+            raise ValueError(f"Unable to find any footprint data for {site} at a height of {height}.")
+
+    keys = results[fp_site_key]["keys"]
+    metadata = results[fp_site_key]["metadata"]
+    # fp_ds = recombine_datasets(keys=keys, sort=False) # Why did this have sort=False before?
+    fp_ds = recombine_datasets(keys=keys, sort=True)
+
+    if species is None:
+        species = metadata.get("species", "NA")
+
+    return FootprintData(
+        data=fp_ds, metadata=metadata, flux={}, bc={}, species=species, scales="FIXME", units="FIXME"
+    )
+
+
+def _synonyms(species: str) -> str:
     """
     Check to see if there are other names that we should be using for
     a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc-11,
@@ -215,6 +373,7 @@ def synonyms(species: str) -> str:
     Returns:
         str: Matched species string
     """
+
     from openghg.util import load_json
 
     # Load in the species data
@@ -243,7 +402,7 @@ def synonyms(species: str) -> str:
         raise ValueError(f"Unable to find synonym for species {species}")
 
 
-def scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
+def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
     """Convert to a new calibration scale
 
     Args:
