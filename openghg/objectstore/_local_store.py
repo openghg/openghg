@@ -35,7 +35,7 @@ def get_openghg_local_path() -> Path:
     """
     env_path = os.getenv("OPENGHG_PATH")
 
-    if env_path:
+    if env_path is not None:
         return Path(env_path)
     else:
         raise ValueError(

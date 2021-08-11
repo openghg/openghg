@@ -32,8 +32,8 @@ def test_read_footprint():
     footprint_keys = footprint_results[fp_site_key]["keys"]
     footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
 
-    assert list(footprint_data.coords.keys()) == ["time", "lon", "lat", "lev", "height", "lat_high", "lon_high"]
-    assert list(footprint_data.dims) == ["height", "index", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
+    assert sorted(list(footprint_data.coords.keys())) == sorted(["time", "lon", "lat", "lev", "height", "lat_high", "lon_high"])
+    assert sorted(list(footprint_data.dims)) == sorted(["height", "index", "lat", "lat_high", "lev", "lon", "lon_high", "time"])
 
     assert (
         footprint_data.attrs["heights"]
@@ -107,12 +107,12 @@ def test_read_footprint():
 
     assert footprint_data.attrs == expected_attrs
 
-    footprint_data["fp_low"].max().values == 0.43350983
-    footprint_data["fp_high"].max().values == 0.11853027
-    footprint_data["pressure"].max().values == 1011.92
+    footprint_data["fp_low"].max().values == pytest.approx(0.43350983)
+    footprint_data["fp_high"].max().values == pytest.approx(0.11853027)
+    footprint_data["pressure"].max().values == pytest.approx(1011.92)
     footprint_data["fp_low"].min().values == 0.0
     footprint_data["fp_high"].min().values == 0.0
-    footprint_data["pressure"].min().values == 1011.92
+    footprint_data["pressure"].min().values == pytest.approx(1011.92)
 
 
 def test_read_same_footprint_twice_raises():
