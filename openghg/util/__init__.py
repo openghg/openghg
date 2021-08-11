@@ -12,6 +12,7 @@ from ._util import (
     is_number,
     to_lowercase,
     pairwise,
+    multiple_inlets,
 )
 
 from ._hashing import hash_string, hash_file

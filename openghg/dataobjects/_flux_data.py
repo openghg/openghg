@@ -3,12 +3,12 @@ from typing import Dict
 
 from ._basedata import _BaseData
 
-__all__ = ["FootprintData"]
+__all__ = ["FluxData"]
 
 
 @dataclass(frozen=True)
-class FootprintData(_BaseData):
-    """This class is used to return observations data from the get_footprint function
+class FluxData(_BaseData):
+    """This class is used to return observations data from the get_flux function
 
     Args:
         data: xarray Dataframe

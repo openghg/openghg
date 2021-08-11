@@ -191,7 +191,7 @@ class SearchResults:
         else:
             if not all((species, site, inlet)):
                 raise ValueError("Please pass site, species and inlet.")
-            # TODO - how to do this in a cleaner way?
+            # TODO - how to do this in a cleaner way for mypy?
             site = str(site)
             species = str(species)
             inlet = str(inlet)
