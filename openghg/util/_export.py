@@ -33,5 +33,6 @@ def to_dashboard(
     if filename is not None:
         with open(filename, "w") as f:
             dump(obj=to_export, fp=f)
+        return None
     else:
         return to_export
