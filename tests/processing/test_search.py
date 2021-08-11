@@ -1,15 +1,8 @@
 import pytest
 
-from openghg.modules import ObsSurface
 from openghg.processing import search
-from openghg.objectstore import get_local_bucket
 from openghg.util import timestamp_tzaware
 from pandas import Timestamp
-
-from helpers import get_datapath
-
-
-
 
 
 def test_specific_keyword_search():
@@ -193,7 +186,13 @@ def test_search_find_any_unranked():
     end = timestamp_tzaware("2015-1-1")
 
     results = search(
-        find_all=False, species=species, site=sites, start_date=start, end_date=end, inlet=inlet, instrument=instrument
+        find_all=False,
+        species=species,
+        site=sites,
+        start_date=start,
+        end_date=end,
+        inlet=inlet,
+        instrument=instrument,
     )
 
     raw_results = results.raw()
@@ -287,7 +286,13 @@ def test_search_find_any():
     end = timestamp_tzaware("2015-1-1")
 
     results = search(
-        find_all=False, species=species, site=sites, start_date=start, end_date=end, inlet=inlet, instrument=instrument
+        find_all=False,
+        species=species,
+        site=sites,
+        start_date=start,
+        end_date=end,
+        inlet=inlet,
+        instrument=instrument,
     )
 
     # print(results)

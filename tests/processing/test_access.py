@@ -26,8 +26,21 @@ def test_get_obs_surface():
     assert not time.equals(averaged_time)
 
 
+def test_no_inlet_no_ranked_data_raises():
+    with pytest.raises(ValueError):
+        get_obs_surface(site="bsd", species="co2")
+
+
 def test_get_obs_surface_no_inlet_ranking():
-    assert False
+    obsdata = get_obs_surface(site="bsd", species="ch4")
+
+    assert obsdata.data
+    assert obsdata.metadata["rank_metadata"] == {
+        "2015-01-01-00:00:00+00:00_2015-11-01-00:00:00+00:00": "248m",
+        "2014-09-02-00:00:00+00:00_2014-11-01-00:00:00+00:00": "108m",
+        "2016-09-02-00:00:00+00:00_2018-11-01-00:00:00+00:00": "108m",
+        "2019-01-02-00:00:00+00:00_2021-01-01-00:00:00+00:00": "42m",
+    }
 
 
 def test_averaging_incorrect_period_raises():

@@ -9,7 +9,7 @@ __all__ = ["get_obs_surface", "get_footprint", "get_flux"]
 def get_obs_surface(
     site: str,
     species: str,
-    inlet: str,
+    inlet: str = None,
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
     average: Optional[str] = None,
@@ -66,8 +66,8 @@ def get_obs_surface(
 
     # TODO - for some reason mypy doesn't pick up the ObsData being returned here, look into this
     # GJ - 2021-07-19
-    obs_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
-    data = obs_data.data
+    retrieved_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
+    data = retrieved_data.data
 
     # Slice the data to only cover the dates we're interested in
     data = data.loc[dict(time=slice(start_date, end_date))]
@@ -186,8 +186,10 @@ def get_obs_surface(
     if calibration_scale is not None:
         data = _scale_convert(data, species, calibration_scale)
 
-    metadata = data.attrs
-    obs_data = ObsData(data=data, metadata=data.attrs)
+    metadata = retrieved_data.metadata
+    metadata.update(data.attrs)
+
+    obs_data = ObsData(data=data, metadata=metadata)
 
     # It doesn't make sense to do this now as we've only got a single Dataset
     # # Now check if the units match for each of the observation Datasets
