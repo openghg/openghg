@@ -73,6 +73,9 @@ class JobRunner:
         import datetime
         import os
 
+        # TODO - This needs looking at again
+        raise NotImplementedError
+
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 

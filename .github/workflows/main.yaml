@@ -40,7 +40,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ steps.pip-cache.outputs.dir }}
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-dev.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
     - name: Lint with flake8
@@ -58,7 +58,7 @@ jobs:
       if: matrix.python-version == 3.8 || matrix.python-version == 3.9
     - name: 'Clone Acquire for services folder required for tests'
       run: |
-        git clone -b devel https://github.com/gareth-j/acquire.git ../acquire
+        git clone -b devel https://github.com/openghg/acquire.git ../acquire
         pip install -r ../acquire/requirements.txt
         pip install oci retry
     - name: Create mock cdsapi config file
@@ -67,6 +67,7 @@ jobs:
     - name: Test with pytest
       env:
         OPENGHG_PATH: /tmp/openghg_store
+        ACQUIRE_HOST: localhost
       run: |
         pytest --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov

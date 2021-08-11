@@ -23,7 +23,8 @@ class TestService:
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
-        response = self._service.call_function(function="testing.test_connection", args={})
+        args = {"test": "test"}
+        response = self._service.call_function(function="testing.test_connection", args=args)
         to_return: str = response["results"]
 
         return to_return
