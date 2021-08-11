@@ -305,9 +305,9 @@ def align_datasets(
     # Get the period of measurements in time
     obs_attributes = obs_data.attrs
     if "averaged_period" in obs_attributes:
-        obs_data_period_s = obs_attributes["averaged_period"]
+        obs_data_period_s = int(obs_attributes["averaged_period"])
     elif "sampling_period" in obs_attributes:
-        obs_data_period_s = obs_attributes["sampling_period"]
+        obs_data_period_s = int(obs_attributes["sampling_period"])
     else:
         # Attempt to derive sampling period from frequency of data
         obs_data_period_s = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9).astype("int64")
