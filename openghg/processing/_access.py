@@ -1,8 +1,7 @@
 from xarray import Dataset
 from typing import Dict, List, Optional, Union
 from pandas import Timestamp
-from dataclasses import dataclass
-from openghg.dataobjects import ObsData
+from openghg.dataobjects import ObsData, FootprintData, FluxData
 
 __all__ = ["get_obs_surface", "get_footprint", "get_flux", "synonyms", "scale_convert"]
 
@@ -62,12 +61,12 @@ def get_obs_surface(
         find_all=True,
     )
 
-    # if len(obs_results) > 1:
-    #     raise ValueError("More than one search result found for the passed argument. Please be more specific with your search terms.")
+    if not obs_results:
+        return ObsData(data={}, metadata={})
 
     # TODO - for some reason mypy doesn't pick up the ObsData being returned here, look into this
     # GJ - 2021-07-19
-    obs_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet) # type: ignore
+    obs_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
     data = obs_data.data
 
     # Slice the data to only cover the dates we're interested in
@@ -128,7 +127,8 @@ def get_obs_surface(
         for var in data_variables:
             if "repeatability" in var:
                 ds_resampled[var] = (
-                    np.sqrt((data[var] ** 2).resample(time=average).sum()) / data[var].resample(time=average).count()
+                    np.sqrt((data[var] ** 2).resample(time=average).sum())
+                    / data[var].resample(time=average).count()
                 )
 
             # Copy over some attributes
@@ -139,13 +139,17 @@ def get_obs_surface(
                 ds_resampled[var].attrs["units"] = data[var].attrs["units"]
 
         # Create a new variability variable, containing the standard deviation within the resampling period
-        ds_resampled[f"{species}_variability"] = data[species].resample(time=average).std(skipna=False, keep_attrs=True)
+        ds_resampled[f"{species}_variability"] = (
+            data[species].resample(time=average).std(skipna=False, keep_attrs=True)
+        )
         # If there are any periods where only one measurement was resampled, just use the median variability
         ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
             f"{species}_variability"
         ].median()
         # Create attributes for variability variable
-        ds_resampled[f"{species}_variability"].attrs["long_name"] = f"{data[species].attrs['long_name']}_variability"
+        ds_resampled[f"{species}_variability"].attrs[
+            "long_name"
+        ] = f"{data[species].attrs['long_name']}_variability"
         ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
 
         # Resampling may introduce NaNs, so remove, if not keep_missing
@@ -172,7 +176,7 @@ def get_obs_surface(
         if "integration_flag" in var:
             rename[var] = "integration_flag"
 
-    data = data.rename_vars(rename) # type: ignore
+    data = data.rename_vars(rename)  # type: ignore
 
     data.attrs["species"] = species
 
@@ -303,7 +307,7 @@ def get_flux(
     start_date: Optional[Timestamp] = None,
     end_date: Optional[Timestamp] = None,
     time_resolution: Optional[str] = "standard",
-) -> Dataset:
+) -> FluxData:
     """
     The flux function reads in all flux files for the domain and species as an xarray Dataset.
     Note that at present ALL flux data is read in per species per domain or by emissions name.
@@ -316,9 +320,8 @@ def get_flux(
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
-
     Returns:
-        xarray.Dataset: combined dataset of all matching flux files
+        FluxData: FluxData object
 
     TODO: Update this to output to a FluxData class?
     TODO: Update inputs to just accept a string and extract one flux file at a time?
@@ -360,7 +363,8 @@ def get_flux(
 
         return em_ds.drop_vars(names="lev")
 
-    return em_ds
+    return FluxData(data=em_ds, metadata={})
+
 
 def get_footprint(
     site: str,
@@ -369,15 +373,15 @@ def get_footprint(
     start_date: Optional[Timestamp] = None,
     end_date: Optional[Timestamp] = None,
     species: Optional[str] = None,
-) -> Dataset:
+) -> FootprintData:
     """
     Get footprint from one site.
 
     Args:
         site: The name of the site given in the footprint. This often matches
-              to the site name but  if the same site footprints are run with a 
-              different met and they are named slightly differently from the obs 
-              file. E.g. site="DJI", site_modifier = "DJI-SAM" - 
+              to the site name but  if the same site footprints are run with a
+              different met and they are named slightly differently from the obs
+              file. E.g. site="DJI", site_modifier = "DJI-SAM" -
               station called DJI, footprint site called DJI-SAM
         domain : Domain name for the footprint
         height: Height of inlet in metres
@@ -387,35 +391,46 @@ def get_footprint(
                  if species needs a modified footprint from the typical 30-day
                  footprint appropriate for a long-lived species (like methane)
                  e.g. for high time resolution (co2) or is a short-lived species.
-
     Returns:
-        xarray.Dataset: Dataset containing the footprint files within the date 
-        range
-
-    TODO: Update this to output to a FootprintData class?
+        FootprintData: FootprintData dataclass
     """
     from openghg.processing import recombine_datasets, search
+    from openghg.dataobjects import FootprintData
 
+    results = search(
+        site=site,
+        domain=domain,
+        height=height,
+        start_date=start_date,
+        end_date=end_date,
+        species=species,
+        data_type="footprint",
+    )  # type: ignore
     # Get the footprint data
-    if species is not None:
-        results = search(
-            site=site, domain=domain, height=height, start_date=start_date, end_date=end_date, species=species, data_type="footprint"
-        ) # type: ignore
-    else:
-        results = search(
-            site=site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
-        ) # type: ignore
+    # if species is not None:
+    # else:
+    #     results = search(
+    #         site=site,
+    #         domain=domain,
+    #         height=height,
+    #         start_date=start_date,
+    #         end_date=end_date,
+    #         data_type="footprint",
+    #     )  # type: ignore
 
     try:
         fp_site_key = list(results.keys())[0]
     except IndexError:
         if species is not None:
-            raise ValueError(f"Unable to find any footprint data for {site} at a height of {height} for species {species}.")
+            raise ValueError(
+                f"Unable to find any footprint data for {site} at a height of {height} for species {species}."
+            )
         else:
             raise ValueError(f"Unable to find any footprint data for {site} at a height of {height}.")
-   
+
     keys = results[fp_site_key]["keys"]
+    metadata = results[fp_site_key]["metadata"]
     # fp_ds = recombine_datasets(keys=keys, sort=False) # Why did this have sort=False before?
     fp_ds = recombine_datasets(keys=keys, sort=True)
 
-    return fp_ds
+    return FootprintData(data=fp_ds, metadata=metadata, flux={}, bc={})
