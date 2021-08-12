@@ -1,32 +1,57 @@
-__all__ = ["Search"]
-
-import json
-import warnings
-import xarray
+from typing import Dict, List, Optional, Union
+from openghg.dataobjects import SearchResults
 from Acquire.Client import Wallet
-from Acquire.ObjectStore import string_to_datetime, datetime_to_string
+
+
+__all__ = ["Search"]
 
 
 class Search:
-    def __init__(self, service_url=None):
-        if service_url:
+    def __init__(self, service_url: Optional[str] = None):
+        if service_url is not None:
             self._service_url = service_url
         else:
-            self._service_url = "https://openghg.acquire-aaai.com/t"
+            self._service_url = "https://fn.openghg.org/t"
 
         wallet = Wallet()
-        self._service = wallet.get_service(service_url=f"{self._service_url}/hugs")
+        self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
 
-    def search(self, locations, species=None, inlet=None, instrument=None, start_datetime=None, end_datetime=None):
-        """ Document me!
+    def search(
+        self,
+        species: Union[str, List] = None,
+        site: Union[str, List] = None,
+        inlet: Union[str, List] = None,
+        instrument: Union[str, List] = None,
+        start_date: str = None,
+        end_date: str = None,
+        skip_ranking: bool = False,
+        data_type: str = "timeseries",
+    ) -> Union[SearchResults, Dict]:
+        """Search for surface observations data in the object store
 
+        Args:
+            species: Species
+            site: Three letter site code
+            inlet: Inlet height
+            instrument: Instrument name
+            start_date: Start date
+            end_date: End date
+        Returns:
+            SearchResults:  SearchResults object
         """
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
+        if not any((species, site, inlet, instrument)):
+            raise ValueError("We must have at least one of  species, site, inlet or instrument")
+
         args = {}
-        args["species"] = species
-        args["locations"] = locations
+
+        if species is not None:
+            args["species"] = species
+
+        if site is not None:
+            args["site"] = site
 
         if inlet is not None:
             args["inlet"] = inlet
@@ -34,67 +59,19 @@ class Search:
         if instrument is not None:
             args["instrument"] = instrument
 
-        if start_datetime:
-            args["start_datetime"] = datetime_to_string(start_datetime)
-        if end_datetime:
-            args["end_datetime"] = datetime_to_string(end_datetime)
+        if start_date is not None:
+            args["start_date"] = start_date
+        if end_date is not None:
+            args["end_date"] = end_date
 
-        response = self._service.call_function(function="search", args=args)["results"]
+        args["skip_ranking"] = str(skip_ranking)
+        args["data_type"] = str(data_type)
 
-        self._results = response
+        response: Dict = self._service.call_function(function="search.search", args=args)
 
-        return response
-
-    def results(self):
-        """ Return the results in an easy to read format when printed to screen
-
-            Returns:    
-                dict: Dictionary of results
-        """
-        return {
-            key: f"Daterange : {self._results[key]['start_date']} - {self._results[key]['end_date']}"
-            for key in self._results
-        }
-
-    def download(self, selected_keys):
-        """ Downloads the selected keys and returns a dictionary of
-            xarray Datasets
-
-            Args:
-                keys (str, list): Key(s) from search results to download
-            Returns:
-                defaultdict(dict): Dictionary of Datasets
-        """
-        if not isinstance(selected_keys, list):
-            selected_keys = [selected_keys]
-
-        # Create a Retrieve object to interact with the object store
-        # Select the keys we want to download
-        download_keys = {key: self._results[key]["keys"] for key in selected_keys}
-
-        args = {"keys": download_keys, "return_type": "json"}
-        response = self._service.call_function(function="retrieve", args=args)
-        result_data = response["results"]
-
-        # datasets = defaultdict(dict)
-        datasets = []
-        # TODO - find a better way of doing this, returning compressed binary data would be far better
-        for key, dateranges in result_data.items():
-            for daterange in dateranges:
-                serialised_data = json.loads(result_data[key][daterange])
-
-                # We need to convert the datetime string back to datetime objects here
-                datetime_data = serialised_data["coords"]["time"]["data"]
-                for i, _ in enumerate(datetime_data):
-                    datetime_data[i] = string_to_datetime(datetime_data[i])
-
-                # TODO - catch FutureWarnings here that may affect run when used within voila
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    # datasets[key][daterange] = xarray.Dataset.from_dict(serialised_data)
-                    datasets.append(xarray.Dataset.from_dict(serialised_data))
-
-        return datasets
-
-    def service(self):
-        return self._service
+        try:
+            results_data = response["results"]
+            search_results = SearchResults.from_data(results_data)
+            return search_results
+        except KeyError:
+            return response

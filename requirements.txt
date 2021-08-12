@@ -1,28 +1,17 @@
-Acquire @ git+git://github.com/gareth-j/acquire@testStore#egg=Acquire
-backports-datetime-fromisoformat
-bqplot==0.11.9
-cachetools
+Acquire @ git+git://github.com/gareth-j/acquire@devel#egg=Acquire
+addict
 cdsapi
 # cfchecker @ git+git://github.com/gareth-j/cf-checker@removeBasestring#egg=cfchecker
-cryptography
-ipyleaflet
-ipyvuetify
-ipywidgets
 lazy_import
 matplotlib
 netcdf4
+numexpr
 numpy
 pandas
 paramiko
-pyotp
-pytz
 pyvis
-PyYAML
-qrcode[pil]
-requests
+requests >= 2.25
 scipy
-tables
-tblib
 tqdm
-voila
-xarray
+xarray >= 0.18.2
+urllib3 >= 1.26.3

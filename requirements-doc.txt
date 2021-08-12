@@ -1,0 +1,7 @@
+notebook
+nbsphinx
+Jinja2==2.11.3
+sphinx
+sphinx-issues
+sphinx_rtd_theme
+sphinxcontrib-programoutput

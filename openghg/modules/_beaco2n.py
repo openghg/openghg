@@ -1,26 +1,39 @@
-from typing import Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Union
 from pathlib import Path
+from pandas import DataFrame
 
 __all__ = ["BEACO2N"]
 
 
 class BEACO2N:
-    """ Read BEACO2N data files
+    """Read BEACO2N data files"""
 
-    """
-    def read_file(self, data_filepath: Union[str, Path], site: Optional[str] = None, **kwargs) -> Dict:
-        """ Read BEACO2N data files
+    def read_file(
+        self,
+        data_filepath: Union[str, Path],
+        site: Optional[str] = None,
+        network: Optional[str] = None,
+        inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
+        measurement_type: Optional[str] = None,
+    ) -> Dict:
+        """Read BEACO2N data files
 
-            Args:
-                filepath: Data filepath
-                site: Site name
-            Returns:
-                dict: Dictionary of data
+        Args:
+            filepath: Data filepath
+            site: Site name
+        Returns:
+            dict: Dictionary of data
         """
         import pandas as pd
         from numpy import nan as np_nan
         from openghg.util import load_json
         from collections import defaultdict
+        from openghg.util import clean_string
+
+        if sampling_period is None:
+            sampling_period = "NOT_SET"
 
         datetime_columns = {"time": ["datetime"]}
         rename_cols = {"PM_ug/m3": "pm", "PM_ug/m3_QC_level": "pm_qc", "co2_ppm": "co2", "co2_ppm_QC_level": "co2_qc"}
@@ -57,17 +70,24 @@ class BEACO2N:
         measurement_types = ["pm", "co2"]
         units = {"pm": "ug/m3", "co2": "ppm"}
 
-        gas_data = defaultdict(dict)
+        gas_data: DefaultDict[str, Dict[str, Union[DataFrame, Dict]]] = defaultdict(dict)
         for mt in measurement_types:
             m_data = data[[mt, f"{mt}_qc"]]
             m_data = m_data.dropna(axis="rows", how="any").to_xarray()
 
-            species_metadata = {"units": units[mt]}
+            species_metadata = {
+                "units": units[mt],
+                "site": site_name,
+                "species": clean_string(mt),
+                "inlet": "NA",
+                "network": "beaco2n",
+                "sampling_period": str(sampling_period),
+            }
 
             gas_data[mt]["data"] = m_data
             gas_data[mt]["metadata"] = species_metadata
             gas_data[mt]["attributes"] = site_metadata
 
-        # TODO - add CF Compliant attributes? 
+        # TODO - add CF Compliant attributes?
 
         return gas_data

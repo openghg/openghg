@@ -23,7 +23,7 @@ def test_crds_attributes():
 
     filepath = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
 
-    combined = crds.read_data(data_filepath=filepath, site="tac", network="DECC")
+    combined = crds.read_file(data_filepath=filepath, site="tac", network="DECC")
 
     combined_attributes = assign_attributes(data=combined, site="tac")
 
@@ -57,7 +57,7 @@ def test_crds_attributes():
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
-        "Processed by": "auto@hugs-cloud.com",
+        'Processed by': 'OpenGHG_Cloud',
         "station_longitude": 1.13872,
         "station_latitude": 52.51775,
         "station_long_name": "Tacolneston Tower, UK",
@@ -76,6 +76,7 @@ def test_crds_attributes():
         "label": "left",
         "standard_name": "time",
         "comment": "Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.",
+        "sampling_period_seconds": "60",
     }
 
     assert ch4_data.time.attrs == time_attributes
@@ -86,24 +87,24 @@ def test_crds_attributes():
         "long_name": "mole_fraction_of_methane_in_air",
         "units": "1e-9",
     }
-    assert ch4_data["ch4_stdev"].attrs == {
-        "long_name": "mole_fraction_of_methane_in_air_stdev",
+    assert ch4_data["ch4_variability"].attrs == {
+        "long_name": "mole_fraction_of_methane_in_air_variability",
         "units": "1e-9",
     }
-    assert ch4_data["ch4_n_meas"].attrs == {
-        "long_name": "mole_fraction_of_methane_in_air_n_meas"
+    assert ch4_data["ch4_number_of_observations"].attrs == {
+        "long_name": "mole_fraction_of_methane_in_air_number_of_observations"
     }
 
     assert co2_data["co2"].attrs == {
         "long_name": "mole_fraction_of_carbon_dioxide_in_air",
         "units": "1e-6",
     }
-    assert co2_data["co2_stdev"].attrs == {
-        "long_name": "mole_fraction_of_carbon_dioxide_in_air_stdev",
+    assert co2_data["co2_variability"].attrs == {
+        "long_name": "mole_fraction_of_carbon_dioxide_in_air_variability",
         "units": "1e-6",
     }
-    assert co2_data["co2_n_meas"].attrs == {
-        "long_name": "mole_fraction_of_carbon_dioxide_in_air_n_meas"
+    assert co2_data["co2_number_of_observations"].attrs == {
+        "long_name": "mole_fraction_of_carbon_dioxide_in_air_number_of_observations"
     }
 
     # with tempfile.TemporaryDirectory() as tmpdir:

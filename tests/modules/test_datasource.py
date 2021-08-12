@@ -2,15 +2,17 @@ import datetime
 import os
 import uuid
 from pathlib import Path
+from addict import Dict as aDict
 
 import numpy as np
 import pandas as pd
 import pytest
-import xarray
+import xarray as xr
 
 from openghg.modules import CRDS, Datasource
 from openghg.objectstore import get_local_bucket, get_object_names
-from openghg.util import create_daterange_str
+from openghg.util import create_daterange_str, timestamp_tzaware
+from helpers import get_datapath
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
@@ -18,14 +20,12 @@ mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
 # Disable this for long strings below - Line break occurred before a binary operator (W503)
 # flake8: noqa: W503
 
-def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
 
 @pytest.fixture(scope="session")
 def data():
     crds = CRDS()
 
-    filename = "bsd.picarro.1minute.248m.dat"
+    filename = "bsd.picarro.1minute.248m.min.dat"
     filepath = get_datapath(filename=filename, data_type="CRDS")
 
     combined_data = crds.read_data(data_filepath=filepath, site="bsd", network="DECC")
@@ -35,7 +35,7 @@ def data():
 
 @pytest.fixture
 def datasource():
-    return Datasource(name="test_name",)
+    return Datasource()
 
 
 @pytest.fixture
@@ -55,31 +55,40 @@ def mock_uuid2(monkeypatch):
 
 
 def test_add_data(data):
-    d = Datasource(name="test")
+    d = Datasource()
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    assert ch4_data["ch4"][0] == pytest.approx(1960.24)
-    assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
-    assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
+    assert ch4_data["ch4"][0] == pytest.approx(1959.55)
+    assert ch4_data["ch4_variability"][0] == pytest.approx(0.79)
+    assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(26.0)
 
-    d.add_data(metadata=metadata, data=ch4_data)
+    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
+    d.save()
+    bucket = get_local_bucket()
 
-    date_key = "2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"
+    data_chunks = [Datasource.load_dataset(bucket=bucket, key=k) for k in d.data_keys()]
 
-    assert d._data[date_key]["ch4"].equals(ch4_data["ch4"])
-    assert d._data[date_key]["ch4 stdev"].equals(ch4_data["ch4 stdev"])
-    assert d._data[date_key]["ch4 n_meas"].equals(ch4_data["ch4 n_meas"])
+    # Now read it out and make sure it's what we expect
+    combined = xr.concat(data_chunks, dim="time")
 
-    datasource_metadata = d.metadata()
+    assert combined.equals(ch4_data)
 
-    assert datasource_metadata["data_type"] == "timeseries"
-    assert datasource_metadata["inlet"] == "248m"
-    assert datasource_metadata["instrument"] == "picarro"
-    assert datasource_metadata["port"] == "8"
-    assert datasource_metadata["site"] == "bsd"
-    assert datasource_metadata["species"] == "ch4"
+    expected_metadata = {
+        "site": "bsd",
+        "instrument": "picarro",
+        "sampling_period": "60",
+        "inlet": "248m",
+        "port": "9",
+        "type": "air",
+        "network": "decc",
+        "species": "ch4",
+        "scale": "wmo-x2004a",
+        "data_type": "timeseries",
+    }
+
+    assert d.metadata() == expected_metadata
 
 
 def test_versioning(data):
@@ -87,7 +96,7 @@ def test_versioning(data):
     # Then add the full data, check versioning works correctly
     metadata = {"foo": "bar"}
 
-    d = Datasource(name="foo")
+    d = Datasource()
     # Fix the UUID for the tests
     d._uuid = "4b91f73e-3d57-47e4-aa13-cb28c35d3b3d"
 
@@ -97,34 +106,36 @@ def test_versioning(data):
     v2 = ch4_data.head(30)
     v3 = ch4_data.head(40)
 
-    d.add_data(metadata=metadata, data=v1)
+    d.add_data(metadata=metadata, data=v1, data_type="timeseries")
 
     d.save()
 
-    d.add_data(metadata=metadata, data=v2)
+    d.add_data(metadata=metadata, data=v2, data_type="timeseries")
 
     d.save()
 
-    d.add_data(metadata=metadata, data=v3)
+    d.add_data(metadata=metadata, data=v3, data_type="timeseries")
 
     d.save()
 
     keys = d.versions()
 
-    
-
-    assert (
-        keys["v1"]["keys"]["2014-01-30-10:52:30+00:00_2014-01-30-12:20:30+00:00"]
-        == "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2014-01-30-10:52:30+00:00_2014-01-30-12:20:30+00:00"
-    )
-
-    assert list(keys["v2"]["keys"].values()) == [
-        "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2014-01-30-10:52:30+00:00_2014-01-30-13:12:30+00:00"
-    ]
-
-    assert list(keys["v3"]["keys"].values()) == [
-        "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2014-01-30-10:52:30+00:00_2014-01-30-13:22:30+00:00"
-    ]
+    assert keys["v1"]["keys"] == {
+        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00",
+    }
+    assert keys["v2"]["keys"] == {
+        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-11-30-11:17:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2015-01-30-11:12:30+00:00_2015-11-30-11:17:30+00:00",
+    }
+    assert keys["v3"]["keys"] == {
+        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-11-30-11:17:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2015-01-30-11:12:30+00:00_2015-11-30-11:17:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "2016-04-02-06:52:30+00:00_2016-04-02-06:55:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2016-04-02-06:52:30+00:00_2016-04-02-06:55:30+00:00",
+    }
 
     assert keys["v3"]["keys"] == keys["latest"]["keys"]
 
@@ -138,7 +149,7 @@ def test_get_dataframe_daterange():
         columns=list("ABCD"),
     )
 
-    d = Datasource(name="test")
+    d = Datasource()
 
     start, end = d.get_dataframe_daterange(random_data)
 
@@ -149,8 +160,8 @@ def test_get_dataframe_daterange():
 def test_save(mock_uuid2):
     bucket = get_local_bucket()
 
-    datasource = Datasource(name="test_name")
-    datasource.add_metadata(key="data_type", value="timeseries")
+    datasource = Datasource()
+    datasource.add_metadata_key(key="data_type", value="timeseries")
     datasource.save(bucket)
 
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
@@ -170,10 +181,10 @@ def test_save_footprint():
     filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
     filepath = os.path.join(dir_path, test_data, filename)
 
-    data = xarray.open_dataset(filepath)
+    data = xr.open_dataset(filepath)
 
-    datasource = Datasource(name="test_name")
-    datasource.add_data(metadata=metadata, data=data, data_type="footprint")
+    datasource = Datasource()
+    datasource.add_data(data=data, metadata=metadata, data_type="footprint")
     datasource.save()
 
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
@@ -189,17 +200,29 @@ def test_save_footprint():
     assert float(data.pressure[2].values) == pytest.approx(1009.940)
     assert float(data.pressure[-1].values) == pytest.approx(1021.303)
 
+    assert datasource_2._data_type == "footprint"
 
-def test_add_metadata(datasource):
-    datasource.add_metadata(key="foo", value=123)
-    datasource.add_metadata(key="bar", value=456)
+
+def test_add_metadata_key(datasource):
+    datasource.add_metadata_key(key="foo", value=123)
+    datasource.add_metadata_key(key="bar", value=456)
 
     assert datasource._metadata["foo"] == "123"
     assert datasource._metadata["bar"] == "456"
 
 
+def test_add_metadata_lowercases_correctly(datasource):
+    metadata = {"AAA": {"INLETS": {"inlet_A": "158m", "inlet_b": "12m"}, "some_metadata": {"OWNER": "foo", "eMAIL": "this@that"}}}
+
+    datasource.add_metadata(metadata=metadata)
+
+    assert datasource.metadata() == {
+        "aaa": {"inlets": {"inlet_a": "158m", "inlet_b": "12m"}, "some_metadata": {"owner": "foo", "email": "this@that"}}
+    }
+
+
 def test_exists():
-    d = Datasource(name="testing")
+    d = Datasource()
     d.save()
 
     exists = Datasource.exists(datasource_id=d.uuid())
@@ -208,36 +231,32 @@ def test_exists():
 
 
 def test_to_data(data):
-    d = Datasource(name="testing_123")
+    d = Datasource()
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
-
-    assert ch4_data["ch4"][0] == pytest.approx(1960.24)
-    assert ch4_data["ch4 stdev"][0] == pytest.approx(0.236)
-    assert ch4_data["ch4 n_meas"][0] == pytest.approx(26.0)
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
 
     obj_data = d.to_data()
 
     metadata = obj_data["metadata"]
-    assert obj_data["name"] == "testing_123"
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
-    assert metadata["time_resolution"] == "1_minute"
+    assert metadata["sampling_period"] == "60"
     assert metadata["inlet"] == "248m"
     assert metadata["data_type"] == "timeseries"
     assert len(obj_data["data_keys"]) == 0
 
 
 def test_from_data(data):
-    d = Datasource(name="testing_123")
+    d = Datasource()
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
+    d.save()
 
     obj_data = d.to_data()
 
@@ -249,14 +268,15 @@ def test_from_data(data):
     metadata = d_2.metadata()
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
-    assert metadata["time_resolution"] == "1_minute"
+    assert metadata["sampling_period"] == "60"
     assert metadata["inlet"] == "248m"
 
-    assert d_2.to_data() == d.to_data()
+    assert sorted(d_2.data_keys()) == sorted(d.data_keys())
+    assert d_2.metadata() == d.metadata()
 
 
 def test_incorrect_datatype_raises(data):
-    d = Datasource(name="testing_123")
+    d = Datasource()
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -268,23 +288,23 @@ def test_incorrect_datatype_raises(data):
 def test_update_daterange_replacement(data):
     metadata = {"foo": "bar"}
 
-    d = Datasource(name="foo")
+    d = Datasource()
 
     ch4_data = data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=ch4_data)
+    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
 
-    assert d._start_datetime == pd.Timestamp("2014-01-30 10:52:30+00:00")
-    assert d._end_datetime == pd.Timestamp("2014-01-30 14:20:30+00:00")
+    assert d._start_date == pd.Timestamp("2014-01-30 11:12:30+00:00")
+    assert d._end_date == pd.Timestamp("2020-12-01 22:31:30+00:00")
 
     ch4_short = ch4_data.head(40)
 
     d._data = None
 
-    d.add_data(metadata=metadata, data=ch4_short, overwrite=True)
+    d.add_data(metadata=metadata, data=ch4_short, data_type="timeseries")
 
-    assert d._start_datetime == pd.Timestamp("2014-01-30 10:52:30+00:00")
-    assert d._end_datetime == pd.Timestamp("2014-01-30 13:22:30+00:00")
+    assert d._start_date == pd.Timestamp("2014-01-30 11:12:30+00:00")
+    assert d._end_date == pd.Timestamp("2016-04-02 06:55:30+00:00")
 
 
 def test_load_dataset():
@@ -293,11 +313,11 @@ def test_load_dataset():
     test_data = "../data/emissions"
     filepath = os.path.join(dir_path, test_data, filename)
 
-    ds = xarray.load_dataset(filepath)
+    ds = xr.load_dataset(filepath)
 
     metadata = {"some": "metadata"}
 
-    d = Datasource("dataset_test")
+    d = Datasource()
 
     d.add_data(metadata=metadata, data=ds, data_type="footprint")
 
@@ -315,24 +335,66 @@ def test_load_dataset():
 
 
 def test_search_metadata():
-    d = Datasource(name="test_search")
+    d = Datasource()
 
     d._metadata = {"unladen": "swallow", "spam": "eggs"}
 
-    assert d.search_metadata("swallow") == True
-    assert d.search_metadata("eggs") == True
-    assert d.search_metadata("eggs") == True
-    assert d.search_metadata("Swallow") == True
+    assert d.search_metadata(unladen="swallow") == True
+    assert d.search_metadata(spam="eggs") == True
+    assert d.search_metadata(unladen="Swallow") == True
 
-    assert d.search_metadata("beans") == False
-    assert d.search_metadata("flamingo") == False
+    assert d.search_metadata(giraffe="beans") == False
+    assert d.search_metadata(bird="flamingo") == False
+
+
+def test_dated_metadata_search():
+    d = Datasource()
+
+    start = pd.Timestamp("2001-01-01-00:00:00", tz="UTC")
+    end = pd.Timestamp("2001-03-01-00:00:00", tz="UTC")
+
+    d._start_date = start
+    d._end_date = end
+
+    d._metadata = {"inlet": "100m", "instrument": "violin", "site": "timbuktu"}
+
+    assert d.search_metadata(inlet="100m", instrument="violin") == True
+
+    assert (
+        d.search_metadata(
+            search_terms=["100m", "violin"], start_date=pd.Timestamp("2015-01-01"), end_date=pd.Timestamp("2021-01-01")
+        )
+        == False
+    )
+    assert (
+        d.search_metadata(
+            inlet="100m", instrument="violin", start_date=pd.Timestamp("2001-01-01"), end_date=pd.Timestamp("2002-01-01")
+        )
+        == True
+    )
+
 
 def test_search_metadata_find_all():
-    d = Datasource(name="test_search")
+    d = Datasource()
 
     d._metadata = {"inlet": "100m", "instrument": "violin", "car": "toyota"}
 
-    result = d.search_metadata(search_terms=["100m", "violin", "toyota"], find_all=True)
+    result = d.search_metadata(inlet="100m", instrument="violin", car="toyota", find_all=True)
+
+    assert result is True
+
+    result = d.search_metadata(inlet="100m", instrument="violin", car="subaru", find_all=True)
+
+    assert result is False
+
+
+@pytest.mark.skip(reason="We don't currently have recursive search functionality")
+def test_search_metadata_finds_recursively():
+    d = Datasource()
+
+    d._metadata = {"car": "toyota", "inlets": {"inlet_a": "45m", "inlet_b": "3580m"}}
+
+    result = d.search_metadata(search_terms=["45m", "3580m", "toyota"], find_all=True)
 
     assert result is True
 
@@ -340,98 +402,9 @@ def test_search_metadata_find_all():
 
     assert result is False
 
-def test_set_rank():
-    d = Datasource()    
+    result = d.search_metadata(search_terms=["100m", "violin", "toyota", "swallow"], find_all=False)
 
-    daterange = "2027-08-01-00:00:00_2027-12-01-00:00:00"
-
-    d.set_rank(rank=1, daterange=daterange)
-
-    assert d._rank[1] == ['2027-08-01-00:00:00_2027-12-01-00:00:00']
-
-def test_set_incorrect_rank_raises():
-    d = Datasource()    
-
-    daterange = "2027-08-01-00:00:00_2027-12-01-00:00:00"
-
-    with pytest.raises(ValueError):
-        d.set_rank(rank=42, daterange=daterange)
-
-def test_setting_overlapping_dateranges():
-    d = Datasource()    
-
-    daterange = "2027-08-01-00:00:00_2027-12-01-00:00:00"
-
-    d.set_rank(rank=1, daterange=daterange)
-    
-    assert d._rank[1] == ['2027-08-01-00:00:00_2027-12-01-00:00:00']
-
-    daterange_two = "2027-11-01-00:00:00_2028-06-01-00:00:00"
-
-    d.set_rank(rank=1, daterange=daterange_two)
-    
-    assert d._rank[1] == ['2027-08-01-00:00:00+00:00_2028-06-01-00:00:00+00:00']
-
-def test_combining_single_dateranges_returns():
-    d = Datasource()
-
-    daterange = "2027-08-01-00:00:00_2027-12-01-00:00:00"
-
-    combined = d.combine_dateranges(dateranges=[daterange])
-
-    assert combined[0] == daterange
-
-def test_combining_overlapping_dateranges():
-    d = Datasource()
-
-    daterange_1 = "2001-01-01-00:00:00_2001-03-01-00:00:00"
-    daterange_2 = "2001-02-01-00:00:00_2001-06-01-00:00:00"
-
-    dateranges = [daterange_1, daterange_2]
-
-    combined = d.combine_dateranges(dateranges=dateranges)
-
-    assert combined == ['2001-01-01-00:00:00+00:00_2001-06-01-00:00:00+00:00']
-
-    daterange_1 = "2001-01-01-00:00:00_2001-03-01-00:00:00"
-    daterange_2 = "2001-02-01-00:00:00_2001-06-01-00:00:00"
-    daterange_3 = "2001-05-01-00:00:00_2001-08-01-00:00:00"
-    daterange_4 = "2004-05-01-00:00:00_2004-08-01-00:00:00"
-    daterange_5 = "2004-04-01-00:00:00_2004-09-01-00:00:00"
-    daterange_6 = "2007-04-01-00:00:00_2007-09-01-00:00:00"
-
-    dateranges = [daterange_1, daterange_2, daterange_3, daterange_4, daterange_5, daterange_6]
-
-    combined = d.combine_dateranges(dateranges=dateranges)
-
-    assert combined == ['2001-01-01-00:00:00+00:00_2001-08-01-00:00:00+00:00', 
-                        '2004-04-01-00:00:00+00:00_2004-09-01-00:00:00+00:00', 
-                        '2007-04-01-00:00:00+00:00_2007-09-01-00:00:00+00:00']
-
-def test_combining_no_overlap():
-    d = Datasource()
-    daterange_1 = "2001-01-01-00:00:00_2001-03-01-00:00:00"
-    daterange_2 = "2011-02-01-00:00:00_2011-06-01-00:00:00"
-
-    dateranges = [daterange_1, daterange_2]
-
-    combined = d.combine_dateranges(dateranges=dateranges)
-
-    assert combined == ['2001-01-01-00:00:00+00:00_2001-03-01-00:00:00+00:00', '2011-02-01-00:00:00+00:00_2011-06-01-00:00:00+00:00']
-
-def test_split_daterange_str():
-    d = Datasource()
-
-    start_true = pd.Timestamp("2001-01-01-00:00:00", tz="UTC")
-    end_true = pd.Timestamp("2001-03-01-00:00:00", tz="UTC")
-
-    daterange_1 = "2001-01-01-00:00:00_2001-03-01-00:00:00"
-
-
-    start, end = d.split_datrange_str(daterange_str=daterange_1)
-
-    assert start_true == start
-    assert end_true == end
+    assert result is True
 
 
 def test_in_daterange(data):
@@ -439,21 +412,29 @@ def test_in_daterange(data):
     data = data["ch4"]["data"]
 
     d = Datasource()
-    d.add_data(metadata=metadata, data=data)
+    d._uuid = "test-id-123"
+    d.add_data(metadata=metadata, data=data, data_type="timeseries")
     d.save()
+
+    expected_keys = [
+        "data/uuid/test-id-123/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "data/uuid/test-id-123/v1/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "data/uuid/test-id-123/v1/2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
+        "data/uuid/test-id-123/v1/2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
+        "data/uuid/test-id-123/v1/2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00",
+        "data/uuid/test-id-123/v1/2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00",
+        "data/uuid/test-id-123/v1/2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00",
+    ]
+
+    assert d.data_keys() == expected_keys
 
     start = pd.Timestamp("2014-1-1")
     end = pd.Timestamp("2014-2-1")
-
     daterange = create_daterange_str(start=start, end=end)
 
-    d._data_keys["latest"]["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"] = ['data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00']
-    d._data_keys["latest"]["2015-01-30-10:52:30+00:00_2016-01-30-14:20:30+00:00"] = ['data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2015-01-30-10:52:30+00:00_2016-01-30-14:20:30+00:00']
-    d._data_keys["latest"]["2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00"] = ['data/uuid/ace2bb89-7618-4104-9404-a329c2bcd318/v1/2016-01-31-10:52:30+00:00_2017-01-30-14:20:30+00:00']
+    dated_keys = d.keys_in_daterange_str(daterange=daterange)
 
-    keys = d.keys_in_daterange(daterange=daterange)
-
-    assert keys[0].split("/")[-1] == '2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00'
+    assert dated_keys[0].split("/")[-1] == "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00"
 
 
 def test_shallow_then_load_data(data):
@@ -461,17 +442,58 @@ def test_shallow_then_load_data(data):
     data = data["ch4"]["data"]
 
     d = Datasource()
-    d.add_data(metadata=metadata, data=data)
+    d.add_data(metadata=metadata, data=data, data_type="timeseries")
     d.save()
 
     new_d = Datasource.load(uuid=d.uuid(), shallow=True)
 
-    assert not new_d._data 
+    assert not new_d._data
 
     ds_data = new_d.data()
 
     assert ds_data
 
-    ch4_data = ds_data["2014-01-30-10:52:30+00:00_2014-01-30-14:20:30+00:00"]
+    ch4_data = ds_data["2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00"]
 
-    assert ch4_data.time[0] == pd.Timestamp("2014-01-30T10:52:30")
+    assert ch4_data.time[0] == pd.Timestamp("2014-01-30-11:12:30")
+
+
+def test_key_date_compare():
+    d = Datasource()
+
+    keys = {
+        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00": "data/uuid/test-uid/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00": "data/uuid/test-uid/v1/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00": "data/uuid/test-uid/v1/2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
+        "2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00": "data/uuid/test-uid/v1/2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
+        "2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00": "data/uuid/test-uid/v1/2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00",
+        "2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00": "data/uuid/test-uid/v1/2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00",
+        "2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00": "data/uuid/test-uid/v1/2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00",
+    }
+
+    start = timestamp_tzaware("2014-01-01")
+    end = timestamp_tzaware("2018-01-01")
+
+    in_date = d.key_date_compare(keys=keys, start_date=start, end_date=end)
+
+    expected = [
+        "data/uuid/test-uid/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "data/uuid/test-uid/v1/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "data/uuid/test-uid/v1/2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
+        "data/uuid/test-uid/v1/2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
+    ]
+
+    assert in_date == expected
+
+    start = timestamp_tzaware("2053-01-01")
+    end = timestamp_tzaware("2092-01-01")
+
+    in_date = d.key_date_compare(keys=keys, start_date=start, end_date=end)
+
+    assert not in_date
+
+    error_key = {"2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00_2014-11-30-11:23:30+00:00": "broken"}
+
+    with pytest.raises(ValueError):
+        in_date = d.key_date_compare(keys=error_key, start_date=start, end_date=end)
+

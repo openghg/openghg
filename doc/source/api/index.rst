@@ -52,8 +52,8 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
 ``OPENGHG_PATH`` environment variable.
 
 
-:func:`~openghg.localclient.get_single_site`
-    Search for observations in the object store using a site, species and date range.
+:func:`~openghg.localclient.get_obs_surface`
+    Search for surface observations in the object store using a site, species and date range.
 
 :func:`~openghg.localclient.process_files`
     Process files for storage in the object store
@@ -88,7 +88,7 @@ This submodule contains functions that are widely used in the processing functio
 :func:`~openghg.processing.get_ceda_file`
     Create a file that contains the correct attributes for uploading to the `CEDA archive <http://archive.ceda.ac.uk/>`_
 
-:func:`~openghg.processing.recombine_sections`
+:func:`~openghg.processing.recombine_datasets`
     Recombine separate NetCDF files into a single file sorted by date
 
 :func:`~openghg.processing.search`

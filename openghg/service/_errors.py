@@ -1,7 +1,7 @@
 from Acquire.Service import ServiceError as _ServiceError
 
-__all__ = ["HugsServiceError"]
+__all__ = ["OpenGHGServiceError"]
 
 
-class HugsServiceError(_ServiceError):
+class OpenGHGServiceError(_ServiceError):
     pass
