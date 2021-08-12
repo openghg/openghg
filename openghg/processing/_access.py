@@ -62,23 +62,12 @@ def get_obs_surface(
     )
 
     if not obs_results:
-<<<<<<< HEAD:openghg/processing/_observations.py
-        print(f"No data found for {species.upper()} at {site}")
-        return
-        # raise ValueError(f"No data found for {species} at {site}")
-
-    # TODO - for some reason mypy doesn't pick up the ObsData being returned here, look into this
-    # GJ - 2021-07-19
-    obs_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
-    data = obs_data.data
-=======
         raise ValueError(f"Unable to find results for {species} at {site}")
 
     # TODO - for some reason mypy doesn't pick up the ObsData being returned here, look into this
     # GJ - 2021-07-19
     retrieved_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
     data = retrieved_data.data
->>>>>>> devel:openghg/processing/_access.py
 
     # Slice the data to only cover the dates we're interested in
     data = data.loc[dict(time=slice(start_date, end_date))]
