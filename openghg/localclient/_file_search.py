@@ -3,8 +3,10 @@ from openghg.util import load_json
 from os.path import join
 from typing import List, Dict, Tuple
 
+from openghg.modules import ObsSurface
 
-__all__ = ["find_all_files"]
+
+__all__ = ["find_files", "process_files"]
 
 
 def find_gc_files(site: str, instrument: str, data_folder: str = None) -> List[Tuple[str, str]]:
@@ -19,7 +21,7 @@ def find_gc_files(site: str, instrument: str, data_folder: str = None) -> List[T
             List of tuple pairs for data file and associated
             GCWERKS precision data file.
     """
-    params = load_json(filename="process_gcwerks_parameters.json")
+    params = load_json(filename="process_gcwerks_parameters_bp1.json")
 
     try:
         site_gcwerks = params["GC"][site]["gcwerks_site_name"]
@@ -174,7 +176,7 @@ def site_all() -> Dict:
     return instrument_details
 
 
-def find_all_files(data_folders: Dict) -> List[Dict]:
+def find_files(data_folders: Dict) -> List[Dict]:
     """
     Finds all the filenames for sites within the AGAGE and
     DECC networks which are loaded as standard into our
@@ -222,3 +224,58 @@ def find_all_files(data_folders: Dict) -> List[Dict]:
                 data_files.append(read_input_dict)
 
     return data_files
+
+
+def process_files(data_folders: Dict) -> List[str]:
+    file_param_sets = find_all_files(data_folders=data_folders)
+
+    results = []
+    for param_set in file_param_sets:
+        result = ObsSurface.read_file(**param_set) 
+
+        results.append(result)
+
+###
+
+# from pathlib import Path
+# data_directory = Path("/work/chxmr/shared/obs_raw/")
+
+# def find_gc_files(sitename, instrument,
+#                   data_directory = Path("/work/chxmr/shared/obs_raw/")):
+#     '''
+#     DEPRECATED IN FAVOUR OF OPTION ABOVE - this is independent of json
+#     file
+#     Args:
+#         sitename (str) - match to name within file for now e.g. "macehead"
+#         instrument (str) - one of "GCMD, "GCMS" or "medusa"
+#     Returns:
+#         list(tuple):
+#             List of tuple pairs for data file and associated
+#             GCWERKS precision data file.
+#     '''
+#     if instrument == "GCMD":
+#         data_directory = data_directory / "AGAGE_GCWerks/data/"
+#         suffixes = ["", "-md"]
+#     elif instrument == "GCMS" or instrument == "medusa":
+#         data_directory = data_directory / "AGAGE_GCWerks/data-gcms/"
+#         if instrument == "GCMS":
+#             suffixes = ["", "-gcms"]
+#         else:
+#             suffixes = ["-medusa"]
+
+#     for suffix in suffixes:
+
+#         search_str = str(data_directory / f"{sitename}{suffix}.??.C")
+#         data_files = glob.glob(search_str)
+#         ##data_files = list(data_directory.glob(f"{sitename}{suffix}.??.C"))
+
+#         if len(data_files) > 0:
+#             break
+
+#     precision_files = [data_file[0:-2] + ".precisions.C" \
+#                             for data_file in data_files]
+
+#     data_tuples = [(data_file, precision_file)
+#                   for data_file, precision_file in zip(data_files,precision_files)]
+
+#     return data_tuples
