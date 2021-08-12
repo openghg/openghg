@@ -9,7 +9,7 @@ __all__ = ["get_obs_surface"]
 def get_obs_surface(
     site: str,
     species: str,
-    inlet: str,
+    inlet: str = None,
     start_date: Union[str, Timestamp] = None,
     end_date: Union[str, Timestamp] = None,
     average: str = None,
