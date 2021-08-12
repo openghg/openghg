@@ -1,30 +1,13 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 22 13:42:42 2021
-
-This is created to find data files on the Blue Pebble system using the
-expected file naming scheme.
-
-This is adapted from acrg_obs.process_gcwerks and makes use of a copy
-of the process_gcwerks_parameters.json file.
-
-@author: rt17603
-"""
 import glob
 from openghg.util import load_json
 from os.path import join
-
-# Read site info file
-
-# import json
-# info_file = "../data/process_gcwerks_parameters.json"
-# with open(info_file) as sf:
-#     params = json.load(sf)
-params = load_json(filename="process_gcwerks_parameters_bp1.json")
+from typing import List, Dict, Tuple
 
 
-def find_gc_files(site, instrument):
+__all__ = ["find_all_files"]
+
+
+def find_gc_files(site: str, instrument: str, data_folder: str = None) -> List[Tuple[str, str]]:
     """
     Find files from GC instruments.
 
@@ -36,11 +19,16 @@ def find_gc_files(site, instrument):
             List of tuple pairs for data file and associated
             GCWERKS precision data file.
     """
+    params = load_json(filename="process_gcwerks_parameters.json")
 
     try:
         site_gcwerks = params["GC"][site]["gcwerks_site_name"]
         instrument_gcwerks = params["GC"]["instruments"][instrument]
-        data_folder = params["GC"]["directory"][instrument]
+
+        if data_folder is not None:
+            data_folder = data_folder[instrument]
+        else:
+            data_folder = params["GC"]["directory"][instrument]
 
         suffixes = params["GC"]["instruments_suffix"][instrument]
     except KeyError:
@@ -67,7 +55,7 @@ def find_gc_files(site, instrument):
     return data_tuples
 
 
-def find_crds_files(site):
+def find_crds_files(site: str, data_folder: str = None) -> List:
     """
     Find files from CRDS instruments.
 
@@ -77,13 +65,15 @@ def find_crds_files(site):
         list:
             List of data file names for that site
     """
+    params = load_json(filename="process_gcwerks_parameters_bp1.json")
 
     try:
         # Get directories and site strings
         params_crds = params["CRDS"]
         site_string = params_crds[site]["gcwerks_site_name"]
 
-        data_folder = params_crds["directory"].replace("%site", site_string)
+        if data_folder is None:
+            data_folder = params_crds["directory"].replace("%site", site_string)
     except KeyError:
         print("Unable to extract data files")
         print(f"site {site} not found within json parameters file for CRDS instrument")
@@ -97,7 +87,7 @@ def find_crds_files(site):
     return data_files
 
 
-def data_type_function():
+def data_type_function() -> Dict:
     """
     Defines functions for finding files related to each data type.
     Includes "GCWERKS", "CRDS" and "ICOS" at present.
@@ -107,12 +97,10 @@ def data_type_function():
             Dictionary of read file functions for each data type
 
     """
-    data_type_dict = {"GCWERKS": find_gc_files, "CRDS": find_crds_files}
-
-    return data_type_dict
+    return {"GCWERKS": find_gc_files, "CRDS": find_crds_files}
 
 
-def site_all():
+def site_all() -> Dict:
     """
     Defines inputs needed to find the files for sites within the AGAGE
     and DECC networks which are loaded as standard into our
@@ -186,7 +174,7 @@ def site_all():
     return instrument_details
 
 
-def find_all_files():
+def find_all_files(data_folders: Dict) -> List[Dict]:
     """
     Finds all the filenames for sites within the AGAGE and
     DECC networks which are loaded as standard into our
@@ -200,27 +188,25 @@ def find_all_files():
      - "network"
 
     Returns:
-        list (dict) :
-            List of each input as a dictionary in the form
-            appropriate to pass to the read_file() function.
-
+        list (dict) : List of each input as a dictionary in the form
+        appropriate to pass to the read_file() function.
     """
     all_instrument_details = site_all()
     find_functions = data_type_function()
 
-    data_types = list(all_instrument_details.keys())
-
     data_files = []
-    for data_type in data_types:
+    for data_type in all_instrument_details:
         data_details = all_instrument_details[data_type]
         fn_find = find_functions[data_type]
+        data_folder = data_folders[data_type]
+
         for data in data_details:
             # Find all expected parameters in function and extract matching
             # parameters from the inputs
             input_param = fn_find.__code__.co_varnames[: fn_find.__code__.co_argcount]
             param = {key: value for key, value in data.items() if key in input_param}
 
-            files = fn_find(**param)
+            files = fn_find(**param, data_folder=data_folder)
 
             read_input_dict = {
                 "filepath": files,
@@ -232,52 +218,7 @@ def find_all_files():
             if "instrument" in param:
                 read_input_dict["instrument"] = param["instrument"]
 
-            data_files.append(read_input_dict)
+            if files:
+                data_files.append(read_input_dict)
 
     return data_files
-
-
-###
-
-# from pathlib import Path
-# data_directory = Path("/work/chxmr/shared/obs_raw/")
-
-# def find_gc_files(sitename, instrument,
-#                   data_directory = Path("/work/chxmr/shared/obs_raw/")):
-#     '''
-#     DEPRECATED IN FAVOUR OF OPTION ABOVE - this is independent of json
-#     file
-#     Args:
-#         sitename (str) - match to name within file for now e.g. "macehead"
-#         instrument (str) - one of "GCMD, "GCMS" or "medusa"
-#     Returns:
-#         list(tuple):
-#             List of tuple pairs for data file and associated
-#             GCWERKS precision data file.
-#     '''
-#     if instrument == "GCMD":
-#         data_directory = data_directory / "AGAGE_GCWerks/data/"
-#         suffixes = ["", "-md"]
-#     elif instrument == "GCMS" or instrument == "medusa":
-#         data_directory = data_directory / "AGAGE_GCWerks/data-gcms/"
-#         if instrument == "GCMS":
-#             suffixes = ["", "-gcms"]
-#         else:
-#             suffixes = ["-medusa"]
-
-#     for suffix in suffixes:
-
-#         search_str = str(data_directory / f"{sitename}{suffix}.??.C")
-#         data_files = glob.glob(search_str)
-#         ##data_files = list(data_directory.glob(f"{sitename}{suffix}.??.C"))
-
-#         if len(data_files) > 0:
-#             break
-
-#     precision_files = [data_file[0:-2] + ".precisions.C" \
-#                             for data_file in data_files]
-
-#     data_tuples = [(data_file, precision_file)
-#                   for data_file, precision_file in zip(data_files,precision_files)]
-
-#     return data_tuples
