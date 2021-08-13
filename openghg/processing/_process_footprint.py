@@ -5,7 +5,8 @@ footprints_data_merge
 from pandas import Timestamp
 from xarray import Dataset, DataArray
 from typing import List, Optional, Tuple, Union, Dict
-from openghg.dataobjects import FootprintData
+from openghg.dataobjects import FootprintData, FluxData
+
 
 __all__ = ["single_site_footprint", "footprints_data_merge"]
 
@@ -218,7 +219,7 @@ def footprints_data_merge(
 
     # Calculate model time series, if required
     if calc_timeseries:
-        combined_dataset = add_timeseries(combined_dataset, flux_dict)
+        combined_dataset = add_timeseries(combined_dataset=combined_dataset, flux_dict=flux_dict)
 
     return FootprintData(
         data=combined_dataset,
@@ -399,7 +400,7 @@ def align_datasets(
     return obs_data, footprint_data
 
 
-def add_timeseries(combined_dataset: Dataset, flux_dict: Dict) -> Dataset:
+def add_timeseries(combined_dataset: Dataset, flux_dict: Dict[str, FluxData]) -> Dataset:
     """
     Add timeseries mole fraction values in footprint_data_merge
 
@@ -411,9 +412,11 @@ def add_timeseries(combined_dataset: Dataset, flux_dict: Dict) -> Dataset:
     """
     # TODO: Extend to include multiple sources
     # TODO: Add ability to merge high time resolution footprints (e.g. species as co2)
-    for key, flux_ds in flux_dict.items():
+    for key, flux_data in flux_dict.items():
+        flux_ds = flux_data.data
         if key != "high_time_res":
             flux_reindex = flux_ds.reindex_like(combined_dataset, "ffill")
+
             combined_dataset["mf_mod"] = DataArray(
                 (combined_dataset.fp * flux_reindex.flux).sum(["lat", "lon"]),
                 coords={"time": combined_dataset.time},
