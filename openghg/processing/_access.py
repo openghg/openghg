@@ -61,8 +61,6 @@ def get_obs_surface(
         find_all=True,
     )
 
-    print(site, species, inlet)
-
     if not obs_results:
         raise ValueError(f"Unable to find results for {species} at {site}")
 
