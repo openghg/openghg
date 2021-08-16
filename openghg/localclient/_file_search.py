@@ -175,6 +175,7 @@ def site_all() -> Dict:
 
     return instrument_details
 
+
 def find_files(data_folders: Dict) -> List[Dict]:
     """
     Finds all the filenames for sites within the AGAGE and
@@ -226,14 +227,13 @@ def find_files(data_folders: Dict) -> List[Dict]:
 
 
 def process_files(data_folders: Dict) -> List[str]:
-    file_param_sets = find_files(data_folders=data_folders)
+    file_param_sets = find_all_files(data_folders=data_folders)
 
     results = []
     for param_set in file_param_sets:
-        result = ObsSurface.read_file(**param_set)
+        result = ObsSurface.read_file(**param_set) 
 
         results.append(result)
-
 
 ###
 
