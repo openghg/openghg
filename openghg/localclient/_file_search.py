@@ -33,9 +33,10 @@ def find_gc_files(site: str, instrument: str, data_folder: str = None) -> List[T
             data_folder = params["GC"]["directory"][instrument]
 
         suffixes = params["GC"]["instruments_suffix"][instrument]
-    except KeyError:
+    except KeyError as e:
         print("Unable to extract data files")
         print(f"Instrument {instrument} or site {site} not found within json parameters file")
+        print(e)
         return []
 
     for suffix in suffixes:
@@ -227,13 +228,28 @@ def find_files(data_folders: Dict) -> List[Dict]:
 
 
 def process_files(data_folders: Dict) -> List[str]:
-    file_param_sets = find_all_files(data_folders=data_folders)
+    """ Find and process data files.
+
+    Args:
+        data_folders: Dictionary such as
+
+        data_folders = {
+            "CRDS": /path/to/CRDS,
+            "GCWERKS": {"GCMD": /path/to/GCMD,
+                        "GCMS": /path/to/GCMS,
+                        "medusa": /path/to/GCMD },
+        }
+    Returns:
+        list: List of processing results
+    """
+    file_param_sets = find_files(data_folders=data_folders)
 
     results = []
     for param_set in file_param_sets:
-        result = ObsSurface.read_file(**param_set) 
+        result = ObsSurface.read_file(**param_set)
 
         results.append(result)
+
 
 ###
 
