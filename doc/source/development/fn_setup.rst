@@ -65,11 +65,11 @@ We can now install Fn
 
 .. code-block:: bash
 
-    wget https://raw.githubusercontent.com/fnproject/cli/master/install
-    echo a02456b8c8aba8b727d35f704cbca9234e40d2731f200b94abeceb9467973a13 install | sha256sum -c
-    # This should have returned install: OK
+    wget -O install_fn.sh https://raw.githubusercontent.com/fnproject/cli/master/install
+    echo a02456b8c8aba8b727d35f704cbca9234e40d2731f200b94abeceb9467973a13 install_fn.sh | sha256sum -c
+    # This should have returned install_fn.sh: OK
     # If not check the bash script
-    bash install
+    bash install_fn.sh
 
 Note: if 
 
@@ -102,7 +102,7 @@ Next we create a server config file for our reverse proxy in ``/etc/nginx/conf.d
             location / {}
 
             location /t {
-                    proxy_pass http://127.0.0.1:8080/t/openghg;
+                    proxy_pass http://localhost:8080/t/openghg;
                     proxy_set_header Host $host;
                     proxy_set_header X-Real-IP $remote_addr;
                     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -110,29 +110,6 @@ Next we create a server config file for our reverse proxy in ``/etc/nginx/conf.d
             }
         }
 
-
-For Acquire we want
-
-.. code-block:: nginx
-    :linenos:
-
-        server {
-            listen 80 default_server;
-            listen [::]:80 default_server;
-            server_name acquire.openghg.org;
-
-            location / {
-            }
-
-            location /t {
-                proxy_pass http://127.0.0.1:8080;
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto https;
-            }
-        }
-   
 
 Then we want to disable the default config by setting ``/etc/nginx/nginx.conf``.
 It might be worth copying up your default ``nginx.conf`` to ``nginx.conf.bak`` before editing
@@ -213,6 +190,58 @@ We also need to tell SELinux to allow HTTP worker_connections
 
     sudo setsebool -P httpd_can_network_connect 1
 
+On a CentOS 8 VM on the Oracle Cloud you may need to modify some `iptables` rules to allow any connections to be made to your 
+server.
+
+.. code-block:: bash
+
+    sudo iptables -L INPUT --line-numbers
+
+    Chain INPUT (policy ACCEPT)
+    num  target     prot opt source               destination         
+    1    ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
+    2    ACCEPT     icmp --  anywhere             anywhere            
+    3    ACCEPT     all  --  anywhere             anywhere            
+    4    ACCEPT     tcp  --  anywhere             anywhere             state NEW tcp dpt:ssh
+    5    REJECT     all  --  anywhere             anywhere             reject-with icmp-host-prohibited
+
+You may need to remove the 5th rule in this set
+
+.. code-block:: bash
+
+    sudo iptables -D INPUT 5
+
+Get a LetsEncrypt certificate with Certbot
+------------------------------------------
+
+To get a LetsEncrypt certificate for https we'll use Certbot. First, make sure you've setup the subdomain for the
+server and pointed it at the IP address of the server. Then follow the commands below.
+
+.. code-block:: bash
+
+    sudo dnf install epel-release
+    sudo dnf install certbot python3-certbot-nginx
+
+Then we can setup get the certificate using ``certbot``
+
+.. code-block:: bash
+
+    sudo certbot --nginx -d fn.openghg.org
+
+As ``certbot`` will update our our `nginx` configuration files we need to do
+
+.. code-block:: bash
+
+    sudo systemctl restart nginx
+
+We can also set ``certbot`` to renew our certificates automatically using the following command
+
+.. code-block:: bash
+
+    SLEEPTIME=$(awk 'BEGIN{srand(); print int(rand()*(3600+1))}'); echo "0 0,12 * * * root sleep $SLEEPTIME && certbot renew -q" | sudo tee -a /etc/crontab > /dev/null
+
+This adds a cron job to ``/etc/crontab``.
+
 Deploy Fn Functions
 -------------------
 
@@ -236,4 +265,10 @@ Then move into the ``openghg/docker`` folder and run
 
 The ``--build-base`` argument tells the build script to build the base image. In subsequent deployments we won't need to run this
 step unless our dependencies change.
+
+If you want to build the Docker images without using the cache you can pass the ``--nocache`` argument to ``build_deploy.py`` like so:
+
+.. code-block:: bash
+
+    python3 build_deploy.py --build-base --nocache
 

@@ -46,6 +46,7 @@ def search(**kwargs):  # type: ignore
         closest_daterange,
         find_daterange_gaps,
         split_daterange_str,
+        multiple_inlets
     )
     from openghg.dataobjects import SearchResults
 
@@ -114,6 +115,12 @@ def search(**kwargs):  # type: ignore
 
     # Find the Datasources that contain matching metadata
     matching_sources = {d.uuid(): d for d in datasources if d.search_metadata(**search_kwargs)}
+
+    # Check if this site only has one inlet, if so skip ranking
+    if "site" in search_kwargs:
+        site = search_kwargs["site"]
+        if not isinstance(site, list) and not multiple_inlets(site=site):
+            skip_ranking = True
 
     # If we have the site, inlet and instrument then just return the data
     # TODO - should instrument be added here

@@ -1,19 +1,15 @@
-from pathlib import Path
 import pytest
 
 from openghg.modules import FOOTPRINTS
 from openghg.processing import search, recombine_datasets
 from openghg.objectstore import get_local_bucket
-
-
-def get_datapath(filename):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/footprints/{filename}")
+from helpers import get_footprint_datapath
 
 
 def test_read_footprint():
     get_local_bucket(empty=True)
 
-    datapath = get_datapath("footprint_test.nc")
+    datapath = get_footprint_datapath("footprint_test.nc")
     # model_params = {"simulation_params": "123"}
 
     site = "TMB"
@@ -22,7 +18,9 @@ def test_read_footprint():
     domain = "EUROPE"
     model = "test_model"
 
-    FOOTPRINTS.read_file(filepath=datapath, site=site, model=model, network=network, height=height, domain=domain)
+    FOOTPRINTS.read_file(
+        filepath=datapath, site=site, model=model, network=network, height=height, domain=domain
+    )
 
     # Get the footprint data
     footprint_results = search(site=site, domain=domain, data_type="footprint")
@@ -32,8 +30,16 @@ def test_read_footprint():
     footprint_keys = footprint_results[fp_site_key]["keys"]
     footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
 
-    assert list(footprint_data.coords.keys()) == ["time", "lon", "lat", "lev", "height", "lat_high", "lon_high"]
-    assert list(footprint_data.dims) == ["height", "index", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
+    footprint_coords = list(footprint_data.coords.keys())
+    footprint_dims = list(footprint_data.dims)
+
+    # Sorting to allow comparison - coords / dims can be stored in different orders
+    # depending on how the Dataset has been manipulated
+    footprint_coords.sort()
+    footprint_dims.sort()
+
+    assert footprint_coords == ["height", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
+    assert footprint_dims == ["height", "index", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
 
     assert (
         footprint_data.attrs["heights"]
@@ -107,16 +113,16 @@ def test_read_footprint():
 
     assert footprint_data.attrs == expected_attrs
 
-    footprint_data["fp_low"].max().values == 0.43350983
-    footprint_data["fp_high"].max().values == 0.11853027
-    footprint_data["pressure"].max().values == 1011.92
+    footprint_data["fp_low"].max().values == pytest.approx(0.43350983)
+    footprint_data["fp_high"].max().values == pytest.approx(0.11853027)
+    footprint_data["pressure"].max().values == pytest.approx(1011.92)
     footprint_data["fp_low"].min().values == 0.0
     footprint_data["fp_high"].min().values == 0.0
-    footprint_data["pressure"].min().values == 1011.92
+    footprint_data["pressure"].min().values == pytest.approx(1011.92)
 
 
 def test_read_same_footprint_twice_raises():
-    datapath = get_datapath("footprint_test.nc")
+    datapath = get_footprint_datapath("footprint_test.nc")
 
     with pytest.raises(ValueError):
         FOOTPRINTS.read_file(
