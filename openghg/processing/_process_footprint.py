@@ -607,7 +607,9 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
     date_start = time_array[0]
     date_start_back = date_start - np.timedelta64(24, 'h')
     date_end = time_array[-1] + np.timedelta64(1, 's')
-    start_month = int(date_start.dt.month) # Won't work if we go from Dec-Jan?
+    
+    start = {dd: getattr(np.datetime64(time_array[0], 'h').astype(object), dd)
+             for dd in ['month', 'year']}
 
     # Create times for matching to the flux
     full_dates = date_range(date_start_back.values, date_end.values, freq=highest_resolution, closed="left").to_numpy()
@@ -654,8 +656,11 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
     print("Calculating modelled timeseries comparison:")
     iters = tqdm(time_array)
     for tt, time in enumerate(iters):
-        # TODO: Need to improve this to work for looping over to a new year
-        tt_low = time.dt.month.values - (start_month - 1) - 1
+        
+        # Get correct index for low resolution data based on start and current date
+        current = {dd: getattr(np.datetime64(time, 'h').astype(object), dd)
+                   for dd in ['month', 'year']}
+        tt_low = current['month'] - start['month'] + 12*(current['year']-start['year'])
 
         # get 4 dimensional chunk of high time res footprint for this timestep
         # units : mol/mol/mol/m2/s
