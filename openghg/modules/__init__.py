@@ -8,7 +8,6 @@ from ._crds import CRDS
 from ._datasource import Datasource
 from ._eurocom import EUROCOM
 from ._gcwerks import GCWERKS
-from ._icos import ICOS
 from ._noaa import NOAA
 from ._thamesbarrier import THAMESBARRIER
 from ._obs_surface import ObsSurface
@@ -19,3 +18,4 @@ from ._btt import BTT
 from ._npl import NPL
 from ._footprints import FOOTPRINTS
 from ._emissions import Emissions
+from ._eulerian_model import EulerianModel

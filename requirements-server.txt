@@ -1,1 +1,18 @@
+Acquire @ git+git://github.com/openghg/acquire@devel#egg=Acquire
+addict
+cdsapi
 fdk
+# cfchecker @ git+git://github.com/gareth-j/cf-checker@removeBasestring#egg=cfchecker
+lazy_import
+matplotlib
+netcdf4
+numexpr
+numpy
+pandas
+paramiko
+pyvis
+requests >= 2.25
+scipy
+tqdm
+xarray >= 0.18.2
+urllib3 >= 1.26.3

@@ -4,33 +4,30 @@ import pandas as pd
 import pytest
 
 from openghg.modules import GCWERKS as GCWERKS
+from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
 
-def get_datapath(filename):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/GC/{filename}")
-
-
 @pytest.fixture(scope="session")
 def cgo_path():
-    return get_datapath(filename="capegrim-medusa.18.C")
+    return get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
 
 
 @pytest.fixture(scope="session")
 def cgo_prec_path():
-    return get_datapath(filename="capegrim-medusa.18.precisions.C")
+    return get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
 
 @pytest.fixture(scope="session")
 def data_thd():
-    return get_datapath(filename="trinidadhead.01.C")
+    return get_datapath(filename="trinidadhead.01.C", data_type="GC")
 
 
 @pytest.fixture(scope="session")
 def prec_thd():
-    return get_datapath(filename="trinidadhead.01.precisions.C")
+    return get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
 
 
 def test_read_file_capegrim(cgo_path, cgo_prec_path):
@@ -87,7 +84,7 @@ def test_read_file_thd(data_thd, prec_thd):
         "units": "ppt",
         "scale": "SIO-05",
         "inlet": "10m",
-        "sampling_period": 75
+        "sampling_period": "75"
     }
 
     assert gas_data["ch3ccl3_10m"]["metadata"] == expected_metadata
@@ -177,7 +174,7 @@ def test_read_precision(cgo_prec_path):
 
 
 def test_no_precisions_species_raises(cgo_path):
-    missing_species_prec = get_datapath(filename="capegrim-medusa.18.precisions.broke.C")
+    missing_species_prec = get_datapath(filename="capegrim-medusa.18.precisions.broke.C", data_type="GC")
 
     gc = GCWERKS()
 
@@ -186,8 +183,8 @@ def test_no_precisions_species_raises(cgo_path):
 
 
 def test_read_ridgehill_window_inlet_all_NaNs():
-    data_path = get_datapath(filename="ridgehill-md.11.C")
-    prec_path = get_datapath(filename="ridgehill-md.11.precisions.C")
+    data_path = get_datapath(filename="ridgehill-md.11.C", data_type="GC")
+    prec_path = get_datapath(filename="ridgehill-md.11.precisions.C", data_type="GC")
 
     gc = GCWERKS()
     res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="RGL", instrument="gcmd", network="agage")
@@ -196,8 +193,8 @@ def test_read_ridgehill_window_inlet_all_NaNs():
 
 
 def test_read_thd_window_inlet():
-    data_path = get_datapath(filename="trinidadhead.01.window-inlet.C")
-    prec_path = get_datapath(filename="trinidadhead.01.precisions.C")
+    data_path = get_datapath(filename="trinidadhead.01.window-inlet.C", data_type="GC")
+    prec_path = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
 
     gc = GCWERKS()
     res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="agage")
@@ -210,7 +207,7 @@ def test_read_thd_window_inlet():
         "units": "ppb",
         "scale": "Tohoku",
         "inlet": "10m",
-        "sampling_period": 75
+        "sampling_period": "75"
     }
 
     metadata = res["ch4_10m"]["metadata"]
@@ -226,8 +223,8 @@ def test_read_thd_window_inlet():
 
 
 def test_read_shangdianzi_ASM_inlet():
-    data_path = get_datapath(filename="shangdianzi-medusa.18.C")
-    prec_path = get_datapath(filename="shangdianzi-medusa.18.precisions.C")
+    data_path = get_datapath(filename="shangdianzi-medusa.18.C", data_type="GC")
+    prec_path = get_datapath(filename="shangdianzi-medusa.18.precisions.C", data_type="GC")
 
     gc = GCWERKS()
     res = gc.read_file(data_filepath=data_path, precision_filepath=prec_path, site="sdz", instrument="medusa", network="agage")
@@ -240,7 +237,7 @@ def test_read_shangdianzi_ASM_inlet():
         "units": "ppt",
         "scale": "SIO-12",
         "inlet": "80m",
-        "sampling_period": 1200,
+        "sampling_period": "1200",
     }
 
     metadata = res["nf3_80m"]["metadata"]

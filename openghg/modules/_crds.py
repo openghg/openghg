@@ -1,16 +1,16 @@
 from openghg.util import load_json
 from pandas import DataFrame, Timedelta
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 
 __all__ = ["CRDS"]
 
 
 class CRDS:
-    """ Class for processing CRDS data """
+    """Class for processing CRDS data"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         data = load_json(filename="process_gcwerks_parameters.json")
         # Holds parameters used for writing attributes to Datasets
         self._crds_params = data["CRDS"]
@@ -50,6 +50,7 @@ class CRDS:
             data_filepath=data_filepath,
             site=site,
             network=network,
+            inlet=inlet,
             instrument=instrument,
             sampling_period=sampling_period,
             measurement_type=measurement_type,
@@ -88,11 +89,11 @@ class CRDS:
         import warnings
         from openghg.util import clean_string, valid_site
 
-        split_fname = data_filepath.stem.split(".")
+        split_fname: List[str] = data_filepath.stem.split(".")
 
         # Do some checks to see if we've got different data passed in to that read from the file
-        site_fname = clean_string(split_fname[0])
-        inlet_fname = clean_string(split_fname[3])
+        site_fname: str = clean_string(split_fname[0])
+        inlet_fname: str = clean_string(split_fname[3])
 
         site = site.lower()
 
@@ -111,7 +112,7 @@ class CRDS:
             inlet = inlet_fname
 
         # Function to parse the datetime format found in the datafile
-        def parse_date(date):
+        def parse_date(date: str):  # type: ignore
             try:
                 return datetime.strptime(date, "%y%m%d %H%M%S")
             except ValueError:
@@ -149,18 +150,10 @@ class CRDS:
             metadata["network"] = network
 
         if sampling_period is not None:
-            # Check input sampling_period can be interpreted
-            if isinstance(sampling_period, str):
-                input_sampling_period = Timedelta(sampling_period)
-            else:
-                raise TypeError(
-                    "Sampling period must be a string including the unit " "(using pandas frequency aliases like '1H' or '1min')"
-                )
-
             # Compare against value extracted from the file name
             file_sampling_period = Timedelta(seconds=metadata["sampling_period"])
 
-            comparison_seconds = abs(input_sampling_period - file_sampling_period).total_seconds()
+            comparison_seconds = abs(sampling_period - file_sampling_period).total_seconds()
             tolerance_seconds = 1
 
             if comparison_seconds > tolerance_seconds:
@@ -236,7 +229,7 @@ class CRDS:
         if len(split_filename) < 4:
             raise ValueError(
                 "Error reading metadata from filename. The expected format is \
-                {site}.{instrument}.{time resolution}.{height}.dat"
+                {site}.{instrument}.{sampling period}.{height}.dat"
             )
 
         site = split_filename[0]
@@ -251,12 +244,12 @@ class CRDS:
             # sampling_period = "1H"
             sampling_period = 60 * 60
         else:
-            raise ValueError("Unable to read time resolution from filename.")
+            raise ValueError("Unable to read sampling period from filename.")
 
         metadata = {}
         metadata["site"] = site
         metadata["instrument"] = instrument
-        metadata["sampling_period"] = sampling_period
+        metadata["sampling_period"] = str(sampling_period)
         metadata["inlet"] = inlet
         metadata["port"] = port
         metadata["type"] = type_meas
@@ -279,7 +272,7 @@ class CRDS:
             self._crds_params = data["CRDS"]
 
         try:
-            attributes = self._crds_params[site.upper()]["global_attributes"]
+            attributes: Dict = self._crds_params[site.upper()]["global_attributes"]
         except KeyError:
             raise ValueError(f"Unable to read attributes for site: {site}")
 
@@ -303,7 +296,7 @@ class CRDS:
         # Slice the dataframe
         head_row = data.head(1)
 
-        gases = {}
+        gases: Dict[str, int] = {}
         # Loop over the gases and find each unique value
         for column in head_row.columns:
             s = head_row[column][0]

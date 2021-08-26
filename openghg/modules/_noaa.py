@@ -8,7 +8,7 @@ __all__ = ["NOAA"]
 class NOAA(BaseModule):
     """Class for processing NOAA data"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         from openghg.util import load_json
 
         # Holds parameters used for writing attributes to Datasets
@@ -22,7 +22,7 @@ class NOAA(BaseModule):
         site: str,
         inlet: str,
         measurement_type: str,
-        network: Optional[str] = "NOAA",
+        network: str = "NOAA",
         instrument: Optional[str] = None,
         sampling_period: Optional[str] = None,
     ) -> Dict:
@@ -43,6 +43,11 @@ class NOAA(BaseModule):
 
         if inlet is None:
             raise ValueError("Inlet must be given for NOAA data processing. If flask data pass flask as inlet.")
+
+        if sampling_period is None:
+            sampling_period = "NOT_SET"
+
+        sampling_period = str(sampling_period)
 
         file_extension = Path(data_filepath).suffix
 
@@ -70,10 +75,10 @@ class NOAA(BaseModule):
         data_filepath: Union[str, Path],
         site: str,
         inlet: str,
+        sampling_period: str,
         measurement_type: str,
         instrument: Optional[str] = None,
-        sampling_period: Optional[str] = None,
-    ):
+    ) -> Dict[str, Dict]:
         """Read NOAA ObsPack NetCDF files
 
         Args:
@@ -102,12 +107,12 @@ class NOAA(BaseModule):
         # orig_attrs = obspack_ds.attrs
 
         # Want to find and drop any duplicate time values for the original dataset
-        # Using xarray directly we have to do in a slightly convoluted way as this is not well built 
+        # Using xarray directly we have to do in a slightly convoluted way as this is not well built
         # into the xarray workflow yet - https://github.com/pydata/xarray/pull/5239
         # - can use da.drop_duplicates() but only on one variable at a time and not on the whole Dataset
         # This method keeps attributes for each of the variables including units
 
-        # The dimension within the original dataset is called "obs" and has no associated coordinates 
+        # The dimension within the original dataset is called "obs" and has no associated coordinates
         # Extract time from original Dataset (dimension is "obs")
         time = obspack_ds.time
 
@@ -170,16 +175,13 @@ class NOAA(BaseModule):
         metadata["network"] = network
         metadata["measurement_type"] = measurement_type
         metadata["species"] = species
+        metadata["sampling_period"] = sampling_period
         metadata["units"] = units
 
         if instrument is not None:
             metadata["instrument"] = instrument
 
-        if sampling_period is not None:
-            metadata["sampling_period"] = sampling_period
-
-        data = {}
-        data[species] = {"data": processed_ds, "metadata": metadata}
+        data = {species: {"data": processed_ds, "metadata": metadata}}
 
         # TODO - how do we want to handle the CF compliance for the ObsPack files?
         # GJ - 2021-04-14
@@ -192,9 +194,9 @@ class NOAA(BaseModule):
         data_filepath: Union[str, Path],
         site: str,
         inlet: str,
+        sampling_period: str,
         measurement_type: str,
         instrument: Optional[str] = None,
-        sampling_period: Optional[str] = None,
     ) -> Dict:
         """Reads NOAA data files and returns a dictionary of processed
         data and metadata.
@@ -218,14 +220,20 @@ class NOAA(BaseModule):
         source_name = source_name.split("-")[0]
 
         gas_data = self.read_raw_data(
-            data_filepath=data_filepath, inlet=inlet, species=species, measurement_type=measurement_type
+            data_filepath=data_filepath,
+            inlet=inlet,
+            species=species,
+            measurement_type=measurement_type,
+            sampling_period=sampling_period,
         )
 
         gas_data = assign_attributes(data=gas_data, site=site, network="NOAA")
 
         return gas_data
 
-    def read_raw_data(self, data_filepath: Path, species: str, inlet: str, measurement_type: Optional[str] = "flask") -> Dict:
+    def read_raw_data(
+        self, data_filepath: Path, species: str, inlet: str, sampling_period: str, measurement_type: str = "flask"
+    ) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -238,14 +246,14 @@ class NOAA(BaseModule):
         Returns:
             dict: Dictionary containing attributes, data and metadata keys
         """
-        from openghg.util import compliant_string, read_header
+        from openghg.util import clean_string, read_header
         from pandas import read_csv, Timestamp
 
         header = read_header(filepath=data_filepath)
 
         column_names = header[-1][14:].split()
 
-        def date_parser(year, month, day, hour, minute, second):
+        def date_parser(year: str, month: str, day: str, hour: str, minute: str, second: str) -> Timestamp:
             return Timestamp(year, month, day, hour, minute, second)
 
         date_parsing = {"time": ["sample_year", "sample_month", "sample_day", "sample_hour", "sample_minute", "sample_seconds"]}
@@ -343,11 +351,12 @@ class NOAA(BaseModule):
         site_attributes["instrument"] = self._noaa_params["instrument"][species.upper()]
 
         metadata = {}
-        metadata["species"] = compliant_string(species)
+        metadata["species"] = clean_string(species)
         metadata["site"] = site
         metadata["measurement_type"] = measurement_type
         metadata["network"] = "NOAA"
         metadata["inlet"] = inlet
+        metadata["sampling_period"] = sampling_period
 
         combined_data[species.lower()] = {
             "metadata": metadata,
