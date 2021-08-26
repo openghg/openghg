@@ -144,24 +144,22 @@ class NOAA(BaseModule):
         species = clean_string(obspack_ds.attrs["dataset_parameter"])
         network = "NOAA"
 
-        # TODO: Do we have a standard format for "units" attribute associated
-        # with each data variable?
-        # At the moment the NOAA data included e.g. "mol mol-1", "micromol mol-1" 
-        # but should this be updated to 1.0 or 1e-6
-
         try:
             # Extract units attribute from value data variable
             units = processed_ds["value"].units
         except (KeyError, AttributeError):
             print("Unable to extract units from 'value' within input dataset")
         else:
-            # TODO: What would we want to include for "mol mol-1" here?
-            if units == "micromol mol-1":
-                units = "ppm"
+            if units == "mol mol-1":
+                units = "1"
+            elif units == "millimol mol-1":
+                units = "1e-3"
+            elif units == "micromol mol-1":
+                units = "1e-6"
             elif units == "nmol mol-1":
-                units = "ppb"
+                units = "1e-9"
             elif units == "pmol mol-1":
-                units = "ppt"
+                units = "1e-12"
             else:
                 print(f"Using unit {units} directly")
                 # raise ValueError(f"Did not recognise input units from file: {units}")
