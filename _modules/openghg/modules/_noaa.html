@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>openghg.modules._noaa &mdash; OpenGHG 0+untagged.3.g122f10b documentation</title>
+  <title>openghg.modules._noaa &mdash; OpenGHG 0+untagged.3.g0ad3486 documentation</title>
   
 
   
@@ -322,24 +322,22 @@
         <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;dataset_parameter&quot;</span><span class="p">])</span>
         <span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span>
 
-        <span class="c1"># TODO: Do we have a standard format for &quot;units&quot; attribute associated</span>
-        <span class="c1"># with each data variable?</span>
-        <span class="c1"># At the moment the NOAA data included e.g. &quot;mol mol-1&quot;, &quot;micromol mol-1&quot;</span>
-        <span class="c1"># but should this be updated to 1.0 or 1e-6</span>
-
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># Extract units attribute from value data variable</span>
             <span class="n">units</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unable to extract units from &#39;value&#39; within input dataset&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># TODO: What would we want to include for &quot;mol mol-1&quot; here?</span>
-            <span class="k">if</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;micromol mol-1&quot;</span><span class="p">:</span>
-                <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;ppm&quot;</span>
+            <span class="k">if</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;mol mol-1&quot;</span><span class="p">:</span>
+                <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+            <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;millimol mol-1&quot;</span><span class="p">:</span>
+                <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;1e-3&quot;</span>
+            <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;micromol mol-1&quot;</span><span class="p">:</span>
+                <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;1e-6&quot;</span>
             <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;nmol mol-1&quot;</span><span class="p">:</span>
-                <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;ppb&quot;</span>
+                <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;1e-9&quot;</span>
             <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;pmol mol-1&quot;</span><span class="p">:</span>
-                <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;ppt&quot;</span>
+                <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;1e-12&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using unit </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2"> directly&quot;</span><span class="p">)</span>
                 <span class="c1"># raise ValueError(f&quot;Did not recognise input units from file: {units}&quot;)</span>
@@ -553,7 +551,7 @@
     <p>
         &#169; Copyright 2020 OpenGHG development team.
       <span class="lastupdated">
-        Last updated on Aug 12, 2021.
+        Last updated on Aug 26, 2021.
       </span>
 
     </p>
