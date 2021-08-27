@@ -175,6 +175,7 @@ def footprints_data_merge(
         dict: Dictionary footprint data objects
     """
     from openghg.processing import get_flux
+    from pandas import Timedelta
 
     # First get the site data
     combined_dataset = single_site_footprint(
@@ -204,17 +205,28 @@ def footprints_data_merge(
             time_resolution=time_resolution,
             start_date=start_date,
             end_date=end_date,
-        )
+        ).data
 
         if time_resolution == "high":
+
+            # TODO: Check appropriate date range and file formats for other species
+            if species == "co2":
+                max_h_back = str(combined_dataset["H_back"][-1].values) + "H"
+                if isinstance(start_date, str):
+                    start_date = Timestamp(start_date)
+                
+                start_date_hr = start_date - Timedelta(max_h_back)
+            else:
+                start_date_hr = start_date
+
             flux_dict["high_time_res"] = get_flux(
                 species=species,
                 domain=domain,
                 sources=flux_sources,
                 time_resolution=time_resolution,
-                start_date=start_date,
+                start_date=start_date_hr,
                 end_date=end_date,
-            )
+            ).data
 
     # Calculate model time series, if required
     if calc_timeseries:
@@ -567,18 +579,22 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
     time_array = fp_HiTRes["time"]
     lat = fp_HiTRes["lat"]
     lon = fp_HiTRes["lon"]
+    hback = fp_HiTRes["H_back"]
 
     ntime = len(time_array)
     nlat = len(lat)
     nlon = len(lon)
-    nh_back = len(fp_HiTRes["H_back"])
+    nh_back = len(hback)
+
+    # Define maximum hour back
+    max_h_back = hback.values[-1]
 
     # Define full range of dates to select from the flux input
     date_start = time_array[0]
-    date_start_back = date_start - np.timedelta64(24, 'h')
+    date_start_back = date_start - np.timedelta64(max_h_back, 'h')
     date_end = time_array[-1] + np.timedelta64(1, 's')
     
-    start = {dd: getattr(np.datetime64(time_array[0], 'h').astype(object), dd)
+    start = {dd: getattr(np.datetime64(time_array[0].values, 'h').astype(object), dd)
              for dd in ['month', 'year']}
 
     # Create times for matching to the flux
@@ -624,7 +640,7 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
     # at each release time we disaggregate the particles backwards over the previous 24hrs
     # The final value then contains the 29-day integrated residual footprint
     print("Calculating modelled timeseries comparison:")
-    iters = tqdm(time_array)
+    iters = tqdm(time_array.values)
     for tt, time in enumerate(iters):
         
         # Get correct index for low resolution data based on start and current date
@@ -652,7 +668,7 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
             # This will depend on the various frequencies of the inputs
             # At present, highest_res_H matches the flux frequency
             tt_start = tt*int(time_res_H/highest_res_H) + 1
-            tt_end = tt_start + int(24/highest_res_H)
+            tt_end = tt_start + int(max_h_back/highest_res_H)
             selection = int(time_hf_res_H/highest_res_H)
 
             # Extract matching time range from whole flux array
