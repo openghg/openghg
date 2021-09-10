@@ -2,7 +2,7 @@ from pandas import Timestamp
 from xarray import Dataset
 from typing import Optional, Tuple, Union, List
 
-__all__ = ["indexes_match", "ModelScenario"]
+__all__ = ["indexes_match", "combine_datasets", "ModelScenario"]
 
 class ModelScenario():
     """
@@ -15,40 +15,7 @@ class ModelScenario():
         # Set keywords based on obs, footprint and flux input or otherwise
         # species, domain, ...
 
-    def combine_datasets(self, 
-        dataset_A: Dataset, dataset_B: Dataset, method: Optional[str] = "ffill", tolerance: Optional[str] = None) -> Dataset:
-        """Merges two datasets and re-indexes to the first dataset.
-
-            If "fp" variable is found within the combined dataset,
-            the "time" values where the "lat", "lon" dimensions didn't match are removed.
-
-        Args:
-            dataset_A: First dataset to merge
-            dataset_B: Second dataset to merge
-            method: One of None, nearest, ffill, bfill.
-                    See xarray.DataArray.reindex_like for list of options and meaning.
-                    Defaults to ffill (forward fill)
-            tolerance: Maximum allowed tolerance between matches.
-        Returns:
-            xarray.Dataset: Combined dataset indexed to dataset_A
-        """
-        import numpy as np
-
-        if indexes_match(dataset_A, dataset_B):
-            dataset_B_temp = dataset_B
-        else:
-            dataset_B_temp = dataset_B.reindex_like(dataset_A, method, tolerance=tolerance)
-
-        merged_ds = dataset_A.merge(dataset_B_temp)
-
-        if "fp" in merged_ds:
-            if all(k in merged_ds.fp.dims for k in ("lat", "long")):
-                flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
-                merged_ds = merged_ds[dict(time=flag[0])]
-
-        return merged_ds    
-
-    def check_data(self, need=["obs", "footprint"]):
+    def check_data_is_present(self, need=["obs", "footprint"]):
         """
         Check whether correct data types have been included. This should
         be used by functions to check whether they can perform the requested 
@@ -77,29 +44,64 @@ class ModelScenario():
             raise ValueError(f"Missing necessary {' and '.join(missing)} data")
 
     def align_obs_footprint(self, 
-                            resample_to: Optional[str] = "coarsest",
-                            platform: Optional[str] = None) -> Tuple:
+                                resample_to: Optional[str] = "coarsest",
+                                platform: Optional[str] = None) -> Tuple:
         """
+        Slice and resample obs and footprint data to align along time
 
+        This slices the date to the smallest time frame
+        spanned by both the footprint and obs, then resamples the data
+        using the mean to the one with coarsest median resolution
+        starting from the sliced start date.
+
+        Args:
+            obs_data: Observations Dataset
+            footprint_data: Footprint Dataset
+            resample_to: Overrides resampling to coarsest time resolution, can be one of ["coarsest", "footprint", "obs"]
+            platform: Observation platform used to decide whether to resample
+        
+        Returns:
+            tuple: Two xarray.Dataset with aligned time dimensions
         """
         import numpy as np
         from pandas import Timedelta
 
-        self.check_data(need=["obs", "footprint"])
+        self.check_data_is_present(need=["obs", "footprint"])
 
         obs_data = self.obs.data
         footprint_data = self.footprint.data
 
         if platform is not None:
             platform = platform.lower()
-            if platform in ("satellite", "flask"):
+            # Do not apply resampling for "satellite" (but have re-included "flask" for now)
+            if platform == "satellite":
                 return obs_data, footprint_data
 
-        # This gives us the period in ns
-        obs_data_period_ns = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]).astype("int64"))
-        footprint_data_period_ns = np.nanmedian((footprint_data.time.data[1:] - footprint_data.time.data[0:-1]).astype("int64"))
+        # Get the period of measurements in time
+        obs_attributes = obs_data.attrs
+        if "averaged_period" in obs_attributes:
+            obs_data_period_s = int(obs_attributes["averaged_period"])
+        elif "sampling_period" in obs_attributes:
+            obs_data_period_s = int(obs_attributes["sampling_period"])
+        else:
+            # Attempt to derive sampling period from frequency of data
+            obs_data_period_s = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9).astype(
+                "int64"
+            )
 
-        obs_data_timeperiod = Timedelta(obs_data_period_ns, unit="ns")
+            obs_data_period_s_min = np.diff(obs_data.time.data).min() / 1e9
+            obs_data_period_s_max = np.diff(obs_data.time.data).max() / 1e9
+
+            # Check if the periods differ by more than 1 second
+            if np.isclose(obs_data_period_s_min, obs_data_period_s_max, 1):
+                raise ValueError("Sample period can be not be derived from observations")
+
+        obs_data_timeperiod = Timedelta(seconds=obs_data_period_s)
+
+        # Derive the footprint period from the frequency of the data
+        footprint_data_period_ns = np.nanmedian(
+            (footprint_data.time.data[1:] - footprint_data.time.data[0:-1]).astype("int64")
+        )
         footprint_data_timeperiod = Timedelta(footprint_data_period_ns, unit="ns")
 
         # Here we want timezone naive Timestamps
@@ -120,32 +122,30 @@ class ModelScenario():
         footprint_data = footprint_data.sel(time=slice(start_slice, end_slice))
 
         # Only non satellite datasets with different periods need to be resampled
-        if not np.isclose(obs_data_period_ns, footprint_data_period_ns):
+        timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
+        tolerance = 1e-9  # seconds
+        if timeperiod_diff_s >= tolerance:
             base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
-            print("resample_to", resample_to)
-            if resample_to == "coarsest":
-                if obs_data_timeperiod >= footprint_data_timeperiod:
-                    resample_to = "obs"
-                elif obs_data_timeperiod < footprint_data_timeperiod:
-                    resample_to = "footprint"
 
-            if resample_to == "obs":
+            if (obs_data_timeperiod >= footprint_data_timeperiod) or resample_to == "obs":
 
                 resample_period = str(round(obs_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
+
                 footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
 
-            elif resample_to == "footprint":
+            elif obs_data_timeperiod < footprint_data_timeperiod or resample_to == "footprint":
 
                 resample_period = str(round(footprint_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
+
                 obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
 
         return obs_data, footprint_data
 
     def combine_obs_footprint(self,
-                            resample_to: Optional[str] = "obs",
-                            platform: Optional[str] = None,
-                            species: Optional[Union[str, List]] = None,
-                        ) -> Dataset:
+                                resample_to: Optional[str] = "obs",
+                                platform: Optional[str] = None,
+                                species: Optional[Union[str, List]] = None,
+                            ) -> Dataset:
         """
         """
         self.check_data(need=["obs", "footprint"])
@@ -164,7 +164,7 @@ class ModelScenario():
 
         # Align and merge the observation and footprint Datasets
         aligned_obs, aligned_footprint = self.align_obs_footprint(resample_to=resample_to, platform=platform)
-        combined_dataset = self.combine_datasets(dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance)
+        combined_dataset = combine_datasets(dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance)
 
         # Transpose to keep time in the last dimension position in case it has been moved in resample
         combined_dataset = combined_dataset.transpose(..., "time")
@@ -228,6 +228,39 @@ def indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
     return True
 
+
+def combine_datasets(
+    dataset_A: Dataset, dataset_B: Dataset, method: Optional[str] = "ffill", tolerance: Optional[str] = None) -> Dataset:
+    """Merges two datasets and re-indexes to the first dataset.
+
+        If "fp" variable is found within the combined dataset,
+        the "time" values where the "lat", "lon" dimensions didn't match are removed.
+
+    Args:
+        dataset_A: First dataset to merge
+        dataset_B: Second dataset to merge
+        method: One of None, nearest, ffill, bfill.
+                See xarray.DataArray.reindex_like for list of options and meaning.
+                Defaults to ffill (forward fill)
+        tolerance: Maximum allowed tolerance between matches.
+    Returns:
+        xarray.Dataset: Combined dataset indexed to dataset_A
+    """
+    import numpy as np
+
+    if indexes_match(dataset_A, dataset_B):
+        dataset_B_temp = dataset_B
+    else:
+        dataset_B_temp = dataset_B.reindex_like(dataset_A, method, tolerance=tolerance)
+
+    merged_ds = dataset_A.merge(dataset_B_temp)
+
+    if "fp" in merged_ds:
+        if all(k in merged_ds.fp.dims for k in ("lat", "long")):
+            flag = np.where(np.isfinite(merged_ds.fp.mean(dim=["lat", "lon"]).values))
+            merged_ds = merged_ds[dict(time=flag[0])]
+
+    return merged_ds
 
 # Blueprint from Issue #42 created for this
 
