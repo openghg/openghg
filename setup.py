@@ -6,20 +6,20 @@ with open("README.md", "r") as fh:
 
 files = ["openghg/*"]
 
-with open('requirements.txt') as f:
+with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
-with open('requirements-dev.txt') as f:
+with open("requirements-dev.txt") as f:
     dev_requirements = f.read().splitlines()
+
+with open("requirements-doc.txt") as f:
+    doc_requirements = f.read().splitlines()
 
 setuptools.setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     install_requires=requirements,
-    extras_require={
-        "dev": dev_requirements,
-        "docs": ["sphinx", "sphinx-rtd-theme"]
-    },
+    extras_require={"dev": dev_requirements, "docs": doc_requirements},
     name="openghg",
     author="Gareth Jones",
     author_email="g.m.jones@bristol.ac.uk",

@@ -14,6 +14,6 @@ def test_process_files():
 
     results = results["processed"]["hfd.picarro.1minute.100m.min.dat"]
 
-    assert results.get("error") is None
+    assert "error" not in results
     assert "ch4" in results
     assert "co2" in results

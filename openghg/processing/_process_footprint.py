@@ -3,8 +3,8 @@ This hopes to recreate the functionality of the ACRG repo function
 footprints_data_merge
 """
 from pandas import Timestamp
-from xarray import Dataset
-from typing import List, Optional, Tuple, Union
+from xarray import Dataset, DataArray
+from typing import List, Optional, Tuple, Union, Dict
 from openghg.dataobjects import FootprintData
 
 __all__ = ["single_site_footprint", "footprints_data_merge"]
@@ -15,13 +15,13 @@ def single_site_footprint(
     height: str,
     network: str,
     domain: str,
+    species: str,
     start_date: Union[str, Timestamp],
     end_date: Union[str, Timestamp],
-    resample_to: Optional[str] = "obs",
+    resample_to: str = "coarsest",
     site_modifier: Optional[str] = None,
     platform: Optional[str] = None,
     instrument: Optional[str] = None,
-    species: Optional[Union[str, List]] = None,
 ) -> Dataset:
     """Creates a Dataset for a single site's measurement data and footprints
 
@@ -38,22 +38,24 @@ def single_site_footprint(
                        This is useful for example if the same site footprints are run with a different met and
                        they are named slightly differently from the obs file. E.g.
                        site="DJI", site_modifier = "DJI-SAM" - station called DJI, footprint site called DJI-SAM
-        platform:
+        platform: Observation platform used to decide whether to resample
         instrument:
-        species:
+        species: Species type
     Returns:
         xarray.Dataset
     """
-    from openghg.processing import get_obs_surface, recombine_datasets, search
+    from openghg.processing import get_obs_surface, get_footprint
     from openghg.util import timestamp_tzaware
 
     start_date = timestamp_tzaware(start_date)
     end_date = timestamp_tzaware(end_date)
 
     resample_to = resample_to.lower()
-    resample_choices = ("obs", "footprint", "coarsen")
+    resample_choices = ("obs", "footprint", "coarsest")
     if resample_to not in resample_choices:
-        raise ValueError(f"Invalid resample choice {resample_to} past, please select from one of {resample_choices}")
+        raise ValueError(
+            f"Invalid resample choice {resample_to} past, please select from one of {resample_choices}"
+        )
 
     # As we're not processing any satellite data yet just set tolerance to None
     tolerance = None
@@ -61,48 +63,64 @@ def single_site_footprint(
 
     # Here we want to use get_obs_surface
     obs_results = get_obs_surface(
-        site=site, inlet=height, start_date=start_date, end_date=end_date, species=species, instrument=instrument
+        site=site,
+        inlet=height,
+        start_date=start_date,
+        end_date=end_date,
+        species=species,
+        instrument=instrument,
     )
 
     obs_data = obs_results.data
 
     # Save the observation data units
     try:
-        units = float(obs_data.mf.attrs["units"])
+        units: Union[float, None] = float(obs_data.mf.attrs["units"])
     except KeyError:
         units = None
     except AttributeError:
         raise AttributeError("Unable to read mf attribute from observation data.")
 
-    footprint_site = site
-    # If the site for the footprint has a different name pass that in
+    # If the site for the footprint has a different name, pass that in
     if site_modifier:
         footprint_site = site_modifier
+    else:
+        footprint_site = site
 
-    # Get the footprint data
-    footprint_results = search(
-        site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date, data_type="footprint"
-    )
-
+    # Try to find appropriate footprint file first with and then without species name
     try:
-        fp_site_key = list(footprint_results.keys())[0]
-    except IndexError:
-        raise ValueError(f"Unable to find any footprint data for {site} at a height of {height} in the {network} network.")
+        footprint = get_footprint(
+            site=footprint_site,
+            domain=domain,
+            height=height,
+            start_date=start_date,
+            end_date=end_date,
+            species=species,
+        )
+    except ValueError:
+        footprint = get_footprint(
+            site=footprint_site, domain=domain, height=height, start_date=start_date, end_date=end_date
+        )
 
-    footprint_keys = footprint_results[fp_site_key]["keys"]
-    footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
+    # TODO: Add checks for particular species e.g. co2 and short-lived species
+    # which should have a specific footprint available rather than the generic one
+
+    # Extract dataset
+    footprint_data = footprint.data
 
     # Align the two Datasets
     aligned_obs, aligned_footprint = align_datasets(
         obs_data=obs_data, footprint_data=footprint_data, platform=platform, resample_to=resample_to
     )
 
-    combined_dataset = combine_datasets(dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance)
+    combined_dataset = combine_datasets(
+        dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance
+    )
 
     # Transpose to keep time in the last dimension position in case it has been moved in resample
     combined_dataset = combined_dataset.transpose(..., "time")
 
-    if units:
+    if units is not None:
         combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset.fp / units))})
         # if HiTRes:
         #     combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes / units))})
@@ -115,15 +133,15 @@ def footprints_data_merge(
     height: str,
     network: str,
     domain: str,
+    species: str,
     start_date: Union[str, Timestamp],
     end_date: Union[str, Timestamp],
-    resample_to: Optional[str] = "obs",
+    resample_to: str = "coarsest",
     site_modifier: Optional[str] = None,
     platform: Optional[str] = None,
     instrument: Optional[str] = None,
-    species: Optional[Union[str, List]] = None,
     load_flux: Optional[bool] = True,
-    flux_sources: Optional[Union[str, List]] = None,
+    flux_sources: Union[str, List] = None,
     load_bc: Optional[bool] = True,
     calc_timeseries: Optional[bool] = True,
     calc_bc: Optional[bool] = True,
@@ -133,10 +151,31 @@ def footprints_data_merge(
     TODO - Should this be renamed?
 
     Args:
-        TODO
+        site: Three letter site code
+        height: Height of inlet in metres
+        network: Network name
+        domain: Domain name
+        start_date: Start date
+        end_date: End date
+        resample_to: Overrides resampling to coarsest time resolution, can be one of ["coarsest", "footprint", "obs"]
+        site_modifier: The name of the site given in the footprint.
+                This is useful for example if the same site footprints are run with a different met and
+                they are named slightly differently from the obs file. E.g.
+                site="DJI", site_modifier = "DJI-SAM" - station called DJI, footprint site called DJI-SAM
+        platform: Observation platform used to decide whether to resample
+        instrument: Instrument name
+        species: Species name
+        load_flux: Load flux
+        flux_sources: Flux source names
+        load_bc: Load boundary conditions (not currently implemented)
+        calc_timeseries: Calculate timeseries data (not currently implemented)
+        calc_bc: Calculate boundary conditions (not currently implemented)
+        time_resolution: One of ["standard", "high"]
     Returns:
         dict: Dictionary footprint data objects
     """
+    from openghg.processing import get_flux
+
     # First get the site data
     combined_dataset = single_site_footprint(
         site=site,
@@ -155,6 +194,9 @@ def footprints_data_merge(
     # So here we iterate over the emissions types and get the fluxes
     flux_dict = {}
     if load_flux:
+        if flux_sources is None:
+            raise ValueError("If you want to load flux you must pass a flux source")
+
         flux_dict["standard"] = get_flux(
             species=species,
             domain=domain,
@@ -174,13 +216,23 @@ def footprints_data_merge(
                 end_date=end_date,
             )
 
+    # Calculate model time series, if required
+    if calc_timeseries:
+        combined_dataset = add_timeseries(combined_dataset, flux_dict)
+
     return FootprintData(
-        data=combined_dataset, metadata={}, flux=flux_dict, bc={}, species=species, scales="scale", units="units"
+        data=combined_dataset,
+        metadata={},
+        flux=flux_dict,
+        bc={},
+        species=species,
+        scales="scale",
+        units="units",
     )
 
 
 def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: Optional[str] = "ffill", tolerance: Optional[str] = None
+    dataset_A: Dataset, dataset_B: Dataset, method: str = "ffill", tolerance: Optional[float] = None
 ) -> Dataset:
     """Merges two datasets and re-indexes to the first dataset.
 
@@ -202,9 +254,9 @@ def combine_datasets(
     if indexes_match(dataset_A, dataset_B):
         dataset_B_temp = dataset_B
     else:
-        dataset_B_temp = dataset_B.reindex_like(dataset_A, method, tolerance=tolerance)
+        dataset_B_temp = dataset_B.reindex_like(other=dataset_A, method=method, tolerance=tolerance)  # type: ignore
 
-    merged_ds = dataset_A.merge(dataset_B_temp)
+    merged_ds = dataset_A.merge(other=dataset_B_temp)
 
     if "fp" in merged_ds:
         if all(k in merged_ds.fp.dims for k in ("lat", "long")):
@@ -239,7 +291,11 @@ def indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
             rtol = 1e-5
 
         index_diff = np.sum(
-            ~np.isclose(dataset_A.indexes[index].values.astype(float), dataset_B.indexes[index].values.astype(float), rtol=rtol)
+            ~np.isclose(
+                dataset_A.indexes[index].values.astype(float),
+                dataset_B.indexes[index].values.astype(float),
+                rtol=rtol,
+            )
         )
 
         if not index_diff == 0:
@@ -274,25 +330,35 @@ def align_datasets(
 
     if platform is not None:
         platform = platform.lower()
-        if platform in ("satellite", "flask"):
+        # Do not apply resampling for "satellite" (but have re-included "flask" for now)
+        if platform == "satellite":
             return obs_data, footprint_data
 
-    # Get the frequency / period of measurements in time
-    # obs_data_period_ns = np.diff(obs_data.time.data).min().astype("int64")
-    # footprint_data_period_ns = np.diff(footprint_data.time.data).min().astype("int64")
+    # Get the period of measurements in time
+    obs_attributes = obs_data.attrs
+    if "averaged_period" in obs_attributes:
+        obs_data_period_s = int(obs_attributes["averaged_period"])
+    elif "sampling_period" in obs_attributes:
+        obs_data_period_s = int(obs_attributes["sampling_period"])
+    else:
+        # Attempt to derive sampling period from frequency of data
+        obs_data_period_s = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9).astype(
+            "int64"
+        )
 
-    # # Check if the periods differ
-    # if obs_data_period_ns != np.diff(obs_data.time.data).max().astype("int64"):
-    #     raise ValueError("Frequency of observations data not fixed")
+        obs_data_period_s_min = np.diff(obs_data.time.data).min() / 1e9
+        obs_data_period_s_max = np.diff(obs_data.time.data).max() / 1e9
 
-    # TODO - RT to check - will these time periods change or can we just do the above?
-    # This gets the median period / frequency between measurements in both Datasets
+        # Check if the periods differ by more than 1 second
+        if np.isclose(obs_data_period_s_min, obs_data_period_s_max, 1):
+            raise ValueError("Sample period can be not be derived from observations")
 
-    # This gives us the period in ns
-    obs_data_period_ns = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]).astype("int64"))
-    footprint_data_period_ns = np.nanmedian((footprint_data.time.data[1:] - footprint_data.time.data[0:-1]).astype("int64"))
+    obs_data_timeperiod = Timedelta(seconds=obs_data_period_s)
 
-    obs_data_timeperiod = Timedelta(obs_data_period_ns, unit="ns")
+    # Derive the footprint period from the frequency of the data
+    footprint_data_period_ns = np.nanmedian(
+        (footprint_data.time.data[1:] - footprint_data.time.data[0:-1]).astype("int64")
+    )
     footprint_data_timeperiod = Timedelta(footprint_data_period_ns, unit="ns")
 
     # Here we want timezone naive Timestamps
@@ -313,7 +379,9 @@ def align_datasets(
     footprint_data = footprint_data.sel(time=slice(start_slice, end_slice))
 
     # Only non satellite datasets with different periods need to be resampled
-    if not np.isclose(obs_data_period_ns, footprint_data_period_ns):
+    timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
+    tolerance = 1e-9  # seconds
+    if timeperiod_diff_s >= tolerance:
         base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
 
         if (obs_data_timeperiod >= footprint_data_timeperiod) or resample_to == "obs":
@@ -331,61 +399,26 @@ def align_datasets(
     return obs_data, footprint_data
 
 
-def get_flux(
-    species: Union[str, List[str]],
-    sources: Union[str, List[str]],
-    domain: Union[str, List[str]],
-    start_date: Optional[Timestamp] = None,
-    end_date: Optional[Timestamp] = None,
-    time_resolution: Optional[str] = "standard",
-) -> Dataset:
+def add_timeseries(combined_dataset: Dataset, flux_dict: Dict) -> Dataset:
     """
-    The flux function reads in all flux files for the domain and species as an xarray Dataset.
-    Note that at present ALL flux data is read in per species per domain or by emissions name.
-    To be consistent with the footprints, fluxes should be in mol/m2/s.
+    Add timeseries mole fraction values in footprint_data_merge
 
     Args:
-        species: Species name
-        sources: Source name
-        domain: Domain e.g. EUROPE
-        start_date: Start date
-        end_date: End date
-        time_resolution: One of ["standard", "high"]
-    Returns:
-        xarray.Dataset: combined dataset of all matching flux files
+        combined_dataset [Dataset]:
+            output created during footprint_data_merge
+        flux_dict [dict]:
+            Dictionary containing flux datasets
     """
-    from openghg.processing import search, recombine_datasets
-    from openghg.util import timestamp_epoch, timestamp_now
+    # TODO: Extend to include multiple sources
+    # TODO: Add ability to merge high time resolution footprints (e.g. species as co2)
+    for key, flux_ds in flux_dict.items():
+        if key != "high_time_res":
+            flux_reindex = flux_ds.reindex_like(combined_dataset, "ffill")
+            combined_dataset["mf_mod"] = DataArray(
+                (combined_dataset.fp * flux_reindex.flux).sum(["lat", "lon"]),
+                coords={"time": combined_dataset.time},
+            )
+        else:
+            print("Unable to create modelled mole fraction for high time resolution datasets yet.")
 
-    if start_date is None:
-        start_date = timestamp_epoch()
-    if end_date is None:
-        end_date = timestamp_now()
-
-    results = search(
-        species=species,
-        source=sources,
-        domain=domain,
-        time_resolution=time_resolution,
-        start_date=start_date,
-        end_date=end_date,
-        data_type="emissions",
-    )
-
-    # TODO - more than one emissions file
-    try:
-        em_key = list(results.keys())[0]
-    except IndexError:
-        raise ValueError(f"Unable to find any footprint data for {domain} for {species}.")
-
-    data_keys = results[em_key]["keys"]
-    em_ds = recombine_datasets(keys=data_keys, sort=False)
-
-    # Check for level coordinate. If one level, assume surface and drop
-    if "lev" in em_ds.coords:
-        if len(em_ds.lev) > 1:
-            raise ValueError("Error: More than one flux level")
-
-        return em_ds.drop_vars(names="lev")
-
-    return em_ds
+    return combined_dataset

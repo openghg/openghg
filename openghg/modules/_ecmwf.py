@@ -1,9 +1,9 @@
-import cdsapi
+import cdsapi  # type: ignore
 from dataclasses import dataclass
 import numpy as np
 from typing import Dict, List, Tuple, Union, Optional
 import requests
-import xarray as xr
+from xarray import open_dataset, Dataset
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
@@ -14,7 +14,7 @@ __all__ = ["retrieve_met", "METData"]
 
 @dataclass(frozen=True)
 class METData:
-    data: xr.Dataset
+    data: Dataset
     metadata: Dict
 
 
@@ -35,14 +35,14 @@ def retrieve_met(site: str, network: str, years: Union[str, List[str]], variable
     if variables is None:
         variables = ["u_component_of_wind", "v_component_of_wind"]
 
-    latitude, longitude, inlet_height, site_height = _get_site_loc(site=site, network=network)
+    latitude, longitude, site_height, inlet_heights = _get_site_data(site=site, network=network)
 
     # Get the area to retrieve data for
     ecmwf_area = _get_ecmwf_area(site_lat=latitude, site_long=longitude)
     # Calculate the pressure at measurement height(s)
-    measure_pressure = _get_site_pressure(inlet_height, site_height)
+    measure_pressure = _get_site_pressure(inlet_heights=inlet_heights, site_height=site_height)
     # Calculate the ERA5 pressure levels required
-    ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure)
+    ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure=measure_pressure)
 
     if not isinstance(years, list):
         years = [years]
@@ -93,7 +93,7 @@ def retrieve_met(site: str, network: str, years: Union[str, List[str]], variable
     return METData(data=dataset, metadata=metadata)
 
 
-def _download_data(url: str) -> xr.Dataset:
+def _download_data(url: str) -> Dataset:
     """Retrieve data from the passed URL. This is used to retrieve data from
     the Copernicus data store.
 
@@ -116,7 +116,7 @@ def _download_data(url: str) -> xr.Dataset:
 
     retry_strategy = Retry(
         total=3, status_forcelist=retriable_status_codes, allowed_methods=["HEAD", "GET", "OPTIONS"], backoff_factor=1
-    )
+    )  # type: ignore
 
     adapter = HTTPAdapter(max_retries=retry_strategy)
 
@@ -127,7 +127,7 @@ def _download_data(url: str) -> xr.Dataset:
     data = http.get(url, timeout=timeout).content
 
     try:
-        dataset = xr.open_dataset(data)
+        dataset: Dataset = open_dataset(data)
     except ValueError:
         raise ValueError("Invalid data returned, cannot create dataset.")
 
@@ -142,10 +142,11 @@ def _two_closest_values(diff: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarry: Numpy array of two closes values
     """
-    return np.argpartition(np.abs(diff), 2)[:2]
+    closest_values: np.ndarray = np.argpartition(np.abs(diff), 2)[:2]
+    return closest_values
 
 
-def _get_site_loc(site: str, network: str) -> Tuple[str]:
+def _get_site_data(site: str, network: str) -> Tuple[float, float, float, List]:
     """Extract site location data from site attributes file.
 
     Args:
@@ -162,18 +163,17 @@ def _get_site_loc(site: str, network: str) -> Tuple[str]:
 
     try:
         site_data = site_info[site][network]
-
-        latitude = site_data["latitude"]
-        longitute = site_data["longitude"]
-        inlet_height = site_data["height_name"]
-        site_height = site_data["height_station_masl"]
+        latitude = float(site_data["latitude"])
+        longitute = float(site_data["longitude"])
+        site_height = float(site_data["height_station_masl"])
+        inlet_heights = site_data["height_name"]
     except KeyError as e:
         raise KeyError(f"Incorrect site or network : {e}")
 
-    return latitude, longitute, inlet_height, site_height
+    return latitude, longitute, site_height, inlet_heights
 
 
-def _get_ecmwf_area(site_lat: str, site_long: str) -> List:
+def _get_ecmwf_area(site_lat: float, site_long: float) -> List:
     """Find out the area required from ERA5.
 
     Args:
@@ -196,7 +196,7 @@ def _get_ecmwf_area(site_lat: str, site_long: str) -> List:
     ]
 
 
-def _get_site_pressure(inlet_height: List, site_height: float) -> List[float]:
+def _get_site_pressure(inlet_heights: List, site_height: float) -> List[float]:
     """Calculate the pressure levels required
 
     Args:
@@ -207,8 +207,11 @@ def _get_site_pressure(inlet_height: List, site_height: float) -> List[float]:
     """
     import re
 
+    if not isinstance(inlet_heights, list):
+        inlet_heights = [inlet_heights]
+
     measured_pressure = []
-    for h in inlet_height:
+    for h in inlet_heights:
         try:
             # Extract the number from the inlet height str using regex
             inlet = float(re.findall(r"\d+(?:\.\d+)?", h)[0])
@@ -222,7 +225,7 @@ def _get_site_pressure(inlet_height: List, site_height: float) -> List[float]:
     return measured_pressure
 
 
-def _altitude_to_ecmwf_pressure(measure_pressure: np.ndarray) -> List:
+def _altitude_to_ecmwf_pressure(measure_pressure: List[float]) -> List[str]:
     """Find out what pressure levels are required from ERA5.
 
     Args:
@@ -247,4 +250,6 @@ def _altitude_to_ecmwf_pressure(measure_pressure: np.ndarray) -> List:
 
     desired_era5_pressure = era5_pressure_levels[np.unique(ecwmf_pressure_indices).astype(int)]
 
-    return desired_era5_pressure.astype(str).tolist()
+    pressure_levels: List = desired_era5_pressure.astype(str).tolist()
+
+    return pressure_levels

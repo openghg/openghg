@@ -1,6 +1,7 @@
 from openghg.modules import BaseModule
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Union
+from xarray import Dataset
 
 __all__ = ["Emissions"]
 
@@ -11,7 +12,7 @@ class Emissions(BaseModule):
     _root = "Emissions"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
 
-    def save(self, bucket: Optional[Dict] = None) -> None:
+    def save(self) -> None:
         """Save the object to the object store
 
         Args:
@@ -21,8 +22,7 @@ class Emissions(BaseModule):
         """
         from openghg.objectstore import get_bucket, set_object_from_json
 
-        if bucket is None:
-            bucket = get_bucket()
+        bucket = get_bucket()
 
         obs_key = f"{Emissions._root}/uuid/{Emissions._uuid}"
 
@@ -38,8 +38,8 @@ class Emissions(BaseModule):
         date: str,
         high_time_resolution: Optional[bool] = False,
         period: Optional[str] = None,
-        overwrite: Optional[bool] = False,
-    ):
+        overwrite: bool = False,
+    ) -> Dict:
         """Read emissions file
 
         Args:
@@ -81,7 +81,7 @@ class Emissions(BaseModule):
                 attrs[key] = value
 
         author_name = "OpenGHG Cloud"
-        em_data.attrs["author"] = author_name 
+        em_data.attrs["author"] = author_name
 
         metadata = {}
         metadata.update(attrs)
@@ -108,7 +108,7 @@ class Emissions(BaseModule):
 
         key = "_".join((species, source, domain, date))
 
-        emissions_data = defaultdict(dict)
+        emissions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
         emissions_data[key]["data"] = em_data
         emissions_data[key]["metadata"] = metadata
 
@@ -117,7 +117,9 @@ class Emissions(BaseModule):
         lookup_results = em_store.datasource_lookup(metadata=keyed_metadata)
 
         data_type = "emissions"
-        datasource_uuids = assign_data(data_dict=emissions_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type)
+        datasource_uuids = assign_data(
+            data_dict=emissions_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type
+        )
 
         em_store.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
 
@@ -128,7 +130,7 @@ class Emissions(BaseModule):
 
         return datasource_uuids
 
-    def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, Dict]:
+    def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, bool]:
         """Perform a lookup for the UUID of a Datasource
 
         Args:
@@ -137,9 +139,11 @@ class Emissions(BaseModule):
             model: Model name
             height: Height
         Returns:
-            str or dict: UUID or empty dict if no entry
+            str or dict: UUID or False if no entry
         """
-        return self._datasource_table[species][source][domain][date]
+        uuid = self._datasource_table[species][source][domain][date]
+
+        return uuid if uuid else False
 
     def set_uuid(self, species: str, source: str, domain: str, date: str, uuid: str) -> None:
         """Record a UUID of a Datasource in the datasource table
@@ -155,7 +159,7 @@ class Emissions(BaseModule):
         """
         self._datasource_table[species][source][domain][date] = uuid
 
-    def datasource_lookup(self, metadata: Dict) -> Dict:
+    def datasource_lookup(self, metadata: Dict) -> Dict[str, Union[str, bool]]:
         """Find the Datasource we should assign the data to
 
         Args:
@@ -163,7 +167,7 @@ class Emissions(BaseModule):
         Returns:
             dict: Dictionary of datasource information
         """
-        # TODO - I'll leave this as a function for now as the way we read emissions may 
+        # TODO - I'll leave this as a function for now as the way we read emissions may
         # change in the near future
         # GJ - 2021-04-20
         lookup_results = {}
@@ -174,12 +178,7 @@ class Emissions(BaseModule):
             domain = data["domain"]
             date = data["date"]
 
-            result = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
-
-            if not result:
-                result = False
-
-            lookup_results[key] = result
+            lookup_results[key] = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
 
         return lookup_results
 

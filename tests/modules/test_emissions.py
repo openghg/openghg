@@ -1,20 +1,16 @@
-from pathlib import Path
 import pytest
 
 from openghg.modules import Emissions
 from openghg.processing import search, recombine_datasets
 from openghg.objectstore import get_local_bucket
 from xarray import open_dataset
-
-
-def get_datapath(filename):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/emissions/{filename}")
+from helpers import get_emissions_datapath
 
 
 def test_read_file():
     get_local_bucket(empty=True)
 
-    test_datapath = get_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
+    test_datapath = get_emissions_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
 
     proc_results = Emissions.read_file(
         filepath=test_datapath, species="co2", source="gpp-cardamom", date="2012", domain="europe", high_time_resolution=False
@@ -69,7 +65,7 @@ def test_read_file():
 
 
 def test_read_same_file_twice_raises():
-    test_datapath = get_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
+    test_datapath = get_emissions_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
 
     with pytest.raises(ValueError):
         Emissions.read_file(

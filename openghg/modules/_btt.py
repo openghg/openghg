@@ -6,13 +6,10 @@ __all__ = ["BTT"]
 
 
 class BTT(BaseModule):
-    """Class for processing National Physical Laboratory (NPL) data"""
+    """Class for processing the BT Tower (BTT) data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         from openghg.util import load_json
-
-        # Sampling period of  data in seconds
-        self._sampling_period = "NA"
 
         data = load_json(filename="attributes.json")
         self._params = data["BTT"]
@@ -38,16 +35,22 @@ class BTT(BaseModule):
         """
         from openghg.processing import assign_attributes
 
+        # TODO: Decide what to do about inputs which aren't use anywhere
+        # at present - inlet, instrument, sampling_period, measurement_type
+
         data_filepath = Path(data_filepath)
 
         site = "BTT"
 
-        gas_data = self.read_data(data_filepath=data_filepath)
+        if sampling_period is None:
+            sampling_period = "NOT_SET"
+
+        gas_data = self.read_data(data_filepath=data_filepath, sampling_period=sampling_period)
         gas_data = assign_attributes(data=gas_data, site=site, network=network)
 
         return gas_data
 
-    def read_data(self, data_filepath: Path) -> Dict:
+    def read_data(self, data_filepath: Path, sampling_period: str) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -60,7 +63,7 @@ class BTT(BaseModule):
         """
         from pandas import read_csv, Timestamp, to_timedelta, isnull
         from numpy import nan as np_nan
-        from openghg.util import compliant_string
+        from openghg.util import clean_string
 
         # Rename these columns
         rename_dict = {"co2.cal": "CO2", "ch4.cal.ppb": "CH4"}
@@ -69,9 +72,12 @@ class BTT(BaseModule):
         # Take std-dev measurements from these columns for these species
         species_sd = {"CO2": "co2.sd.ppm", "CH4": "ch4.sd.ppb"}
 
+        sampling_period = self._params["sampling_period"]
+        sampling_period_seconds = str(int(sampling_period)) + "s"
+
         data = read_csv(data_filepath)
         data["time"] = Timestamp("2019-01-01 00:00") + to_timedelta(data["DOY"] - 1, unit="D")
-        data["time"] = data["time"].dt.round("30min")
+        data["time"] = data["time"].dt.round(sampling_period_seconds)
         data = data[~isnull(data.time)]
 
         data = data.rename(columns=rename_dict)
@@ -94,9 +100,10 @@ class BTT(BaseModule):
             site_attributes = self._params["global_attributes"]
             site_attributes["inlet_height_magl"] = self._params["inlet"]
             site_attributes["instrument"] = self._params["instrument"]
+            site_attributes["sampling_period"] = sampling_period
 
             # TODO - add in better metadata reading
-            metadata = {"species": compliant_string(species)}
+            metadata = {"species": clean_string(species), "sampling_period": str(sampling_period)}
 
             combined_data[species] = {
                 "metadata": metadata,
