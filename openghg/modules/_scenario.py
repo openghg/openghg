@@ -48,22 +48,47 @@ class ModelScenario():
 
         return merged_ds    
 
+    def check_data(self, need=["obs", "footprint"]):
+        """
+        Check whether correct data types have been included. This should
+        be used by functions to check whether they can perform the requested 
+        operation with the data types available.
+
+        Args:
+            need (list) : Names of objects needed for the function being called.
+            Should be one or more of "obs", "footprint", "flux"
+        
+        Returns:
+            None
+
+            Raises ValueError is necessary data is missing.
+        """
+        missing = []
+        for attr in need:
+            value = getattr(self, attr)
+            if value is None:
+                missing.append(attr)
+                
+                print(f"Must have {attr} data linked to this ModelScenario to run this function")
+                print(f"Add this using by setting the {attr} input, for example: ")
+                print("  ModelScenario.{attr} = {attr.capitalize()}Data")
+        
+        if missing:
+            raise ValueError(f"Missing necessary {' and '.join(missing)} data")
 
     def align_obs_footprint(self, 
                             resample_to: Optional[str] = "coarsest",
                             platform: Optional[str] = None) -> Tuple:
         """
+
         """
         import numpy as np
         from pandas import Timedelta
 
-        # TODO: Add this back in once we get a Footprint output like ObsData
-        #obs_data = self.obs.data
-        #footprint_data = self.footprint.data
+        self.check_data(need=["obs", "footprint"])
 
-        # At the moment these objects will be Datasets but will want to update this
-        obs_data = self.obs
-        footprint_data = self.footprint
+        obs_data = self.obs.data
+        footprint_data = self.footprint.data
 
         if platform is not None:
             platform = platform.lower()
@@ -123,8 +148,7 @@ class ModelScenario():
                         ) -> Dataset:
         """
         """
-        if self.obs is None or self.footprint is None:
-            raise ValueError("Observation and Footprint must be specified to merge these two datasets")
+        self.check_data(need=["obs", "footprint"])
 
         resample_to = resample_to.lower()
         resample_choices = ("obs", "footprint", "coarsest")
