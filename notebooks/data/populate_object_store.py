@@ -3,11 +3,11 @@ from openghg.modules import ObsSurface
 import os
 os.environ["OPENGHG_PATH"] = "/work/chxmr/objectStore"
 
-from openghg.localclient._file_search import find_all_files
+from openghg.localclient._file_search import find_files
 
 # Contains list of dictionaries to pass to the read_file() function for
 # loading all data files.
-all_inputs = find_all_files()
+all_inputs = find_files()
 print(f"Keys for each entry: {list(all_inputs[0].keys())}")
 inputs = [value for key, value in all_inputs[0].items() if key != "filepath"]
 print(f"Files to load for first entry ({inputs}):\n {all_inputs[0]['filepath']}")

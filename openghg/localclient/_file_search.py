@@ -198,7 +198,7 @@ def find_files(data_folders: Dict) -> List[Dict]:
     find_functions = data_type_function()
 
     data_files = []
-    for data_type in all_instrument_details:
+    for data_type in data_folders:
         data_details = all_instrument_details[data_type]
         fn_find = find_functions[data_type]
         data_folder = data_folders[data_type]
