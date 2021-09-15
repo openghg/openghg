@@ -291,7 +291,7 @@ def visualise_store() -> pyvis.network.Network:
     Returns:
         pyvis.network.Network
     """
-    from addict import aDict
+    from addict import Dict
 
     data = query_store()
 
@@ -301,7 +301,7 @@ def visualise_store() -> pyvis.network.Network:
     # Create the ObsSurface node
     net.add_node(0, label="ObsSurface", color="#4e79a7", value=5000)
 
-    network_split = aDict()
+    network_split = Dict()
 
     for key, value in data.items():
         # Iterate over Datasources to select the networks
