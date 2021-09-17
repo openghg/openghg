@@ -47,7 +47,7 @@ class NPL(BaseModule):
 
         return gas_data
 
-    def read_data(self, data_filepath: Path, sampling_period: str) -> Dict:
+    def read_data(self, data_filepath: Path, sampling_period: str, inlet: str = None) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -73,10 +73,15 @@ class NPL(BaseModule):
 
         # Drop the NaT/NaNs
         data = data.loc[data.index.dropna()]
-        # rename columns
+
+        # Rename columns
         rename_dict = {"Cal_CO2_dry": "CO2", "Cal_CH4_dry": "CH4"}
 
         data = data.rename(columns=rename_dict)
+        data.index.name = "time"
+
+        if inlet is None:
+            inlet = "NA"
 
         combined_data = {}
         for species in data.columns:
@@ -94,7 +99,14 @@ class NPL(BaseModule):
             site_attributes["inlet_height_magl"] = self._params["inlet"]
             site_attributes["instrument"] = self._params["instrument"]
 
-            metadata = {"species": clean_string(species), "sampling_period": str(sampling_period)}
+            metadata = {
+                "species": clean_string(species),
+                "sampling_period": str(sampling_period),
+                "site": "NPL",
+                "network": "LGHG",
+                "inlet": inlet,
+            }
+
             # TODO - add in better metadata reading
             combined_data[species] = {
                 "metadata": metadata,

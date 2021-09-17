@@ -6,7 +6,7 @@ from typing import List, Dict, Tuple
 from openghg.modules import ObsSurface
 
 
-__all__ = ["find_files", "process_files"]
+__all__ = ["find_files", "find_process_files"]
 
 
 def find_gc_files(site: str, instrument: str, data_folder: str = None) -> List[Tuple[str, str]]:
@@ -27,10 +27,11 @@ def find_gc_files(site: str, instrument: str, data_folder: str = None) -> List[T
         site_gcwerks = params["GC"][site]["gcwerks_site_name"]
         instrument_gcwerks = params["GC"]["instruments"][instrument]
 
-        if data_folder is not None:
-            data_folder = data_folder[instrument]
-        else:
+        if data_folder is None:
             data_folder = params["GC"]["directory"][instrument]
+            #
+        # else:
+        #     data_folder = data_folder # [instrument]
 
         suffixes = params["GC"]["instruments_suffix"][instrument]
     except KeyError:
@@ -226,14 +227,26 @@ def find_files(data_folders: Dict) -> List[Dict]:
     return data_files
 
 
-def process_files(data_folders: Dict) -> List[str]:
-    file_param_sets = find_all_files(data_folders=data_folders)
+def find_process_files(data_folders: Dict) -> List[Dict]:
+    """This searches the directories passed in the data_folders
+    dictionary, finds valid files and then processes them using the ObsSurface
+    module.
+
+    Args:
+        data_folders: Dictionary of data folders
+    Returns:
+        list: List of processed file details
+    """
+    file_param_sets = find_files(data_folders=data_folders)
 
     results = []
     for param_set in file_param_sets:
-        result = ObsSurface.read_file(**param_set) 
+        result = ObsSurface.read_file(**param_set)
 
         results.append(result)
+
+    return results
+
 
 ###
 

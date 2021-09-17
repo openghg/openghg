@@ -17,7 +17,7 @@ def get_obs_surface(
     instrument: Optional[str] = None,
     calibration_scale: Optional[str] = None,
     keep_missing: Optional[bool] = False,
-) -> Union[ObsData, None]:
+) -> ObsData:
     """Get measurements from one site.
 
     Args:
