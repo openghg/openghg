@@ -298,11 +298,11 @@ def visualise_store() -> pyvis.network.Network:
 
     data = query_store()
 
-    net = pyvis.network.Network("800px", "100%", notebook=True, heading="OpenGHG Object Store")
+    net = pyvis.network.Network("800px", "100%", notebook=True)
     net.force_atlas_2based()
 
     # Create the ObsSurface node
-    net.add_node(0, label="ObsSurface", color="#4e79a7", value=5000)
+    net.add_node(0, label="Surface Observations", color="#4e79a7", value=5000)
 
     network_split = aDict()
 

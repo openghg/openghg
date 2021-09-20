@@ -1,9 +1,18 @@
-from . import client, jobs, localclient, modules, objectstore, processing, service, util
+from . import client, jobs, localclient, modules, objectstore, plotting, processing, service, util
 import sys as _sys
 from ._version import get_versions  # type: ignore
 
-__all__ = ["client", "jobs", "localclient", "modules", "objectstore", "processing", "service", "util"]
-
+__all__ = [
+    "client",
+    "jobs",
+    "localclient",
+    "modules",
+    "objectstore",
+    "plotting",
+    "processing",
+    "service",
+    "util",
+]
 
 if _sys.version_info.major < 3:
     raise ImportError("openghg requires Python 3.7 minimum")
