@@ -25,8 +25,7 @@ def pytest_configure(config):
 
 
 def pytest_sessionstart(session):
-    """
-    Called after the Session object has been created and
+    """ Called after the Session object has been created and
     before performing collection and entering the run test loop.
     """
     # Save the old OpenGHG object store environment variable if there is one
@@ -37,12 +36,9 @@ def pytest_sessionstart(session):
 
     os.environ["OPENGHG_PATH"] = str(tempfile.TemporaryDirectory().name)
 
-    print("\n\n\n", os.environ["OPENGHG_PATH"], "\n\n\n")
-
 
 def pytest_sessionfinish(session, exitstatus):
-    """
-    Called after whole test run finished, right before
+    """ Called after whole test run finished, right before
     returning the exit status to the system.
     """
     temp_path = os.environ["OPENGHG_PATH"]
