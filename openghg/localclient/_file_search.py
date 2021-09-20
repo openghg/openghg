@@ -1,8 +1,8 @@
 import glob
-from openghg.util import load_json
 from os.path import join
 from typing import List, Dict, Tuple
 
+from openghg.util import load_json
 from openghg.modules import ObsSurface
 
 
@@ -21,7 +21,7 @@ def find_gc_files(site: str, instrument: str, data_folder: str = None) -> List[T
             List of tuple pairs for data file and associated
             GCWERKS precision data file.
     """
-    params = load_json(filename="process_gcwerks_parameters_bp1.json")
+    params = load_json(filename="process_gcwerks_parameters.json")
 
     try:
         site_gcwerks = params["GC"][site]["gcwerks_site_name"]
@@ -34,9 +34,10 @@ def find_gc_files(site: str, instrument: str, data_folder: str = None) -> List[T
         #     data_folder = data_folder # [instrument]
 
         suffixes = params["GC"]["instruments_suffix"][instrument]
-    except KeyError:
+    except KeyError as e:
         print("Unable to extract data files")
         print(f"Instrument {instrument} or site {site} not found within json parameters file")
+        print(e)
         return []
 
     for suffix in suffixes:
@@ -232,10 +233,19 @@ def find_process_files(data_folders: Dict) -> List[Dict]:
     dictionary, finds valid files and then processes them using the ObsSurface
     module.
 
+    Find and process data files.
+
     Args:
-        data_folders: Dictionary of data folders
+        data_folders: Dictionary such as
+
+        data_folders = {
+            "CRDS": /path/to/CRDS,
+            "GCWERKS": {"GCMD": /path/to/GCMD,
+                        "GCMS": /path/to/GCMS,
+                        "medusa": /path/to/GCMD },
+        }
     Returns:
-        list: List of processed file details
+        list: List of processing results
     """
     file_param_sets = find_files(data_folders=data_folders)
 
