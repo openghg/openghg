@@ -124,6 +124,7 @@ def site_all() -> Dict:
         dict :
             Associated data definitions for each data type.
     """
+    # TODO - pull some of this out to JSON? Can we make this a bit more intelligent?
     # GCWERKS needs both site and instrument to find the file name
     gc_werks_input = [
         # AGAGE Medusa
