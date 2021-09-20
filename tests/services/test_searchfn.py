@@ -25,12 +25,12 @@ def read_data(authenticated_user):
         storage_url="storage",
     )
 
-    bsd_files = glob_files(search_str="bsd.picarro.1minute", data_type="CRDS")
+    bsd_file = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
     hfd_files = glob_files(search_str="hfd.picarro.1minute", data_type="CRDS")
 
     process.process_files(
         user=authenticated_user,
-        files=bsd_files,
+        files=bsd_file,
         site="bsd",
         network="DECC",
         data_type="CRDS",
@@ -66,7 +66,7 @@ def test_search(read_data):
         "instrument": "picarro",
         "sampling_period": "60",
         "inlet": "248m",
-        "port": "8",
+        "port": "9",
         "type": "air",
         "network": "decc",
         "species": "co2",
