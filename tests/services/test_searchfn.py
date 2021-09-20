@@ -66,15 +66,13 @@ def test_search(read_data):
         "instrument": "picarro",
         "sampling_period": "60",
         "inlet": "248m",
-        "port": "8",
+        "port": "9",
         "type": "air",
         "network": "decc",
         "species": "co2",
         "scale": "wmo-x2007",
         "data_type": "timeseries",
     }
-
-    return
 
     results = search.search(site="hfd", species="co", skip_ranking=True)
 
