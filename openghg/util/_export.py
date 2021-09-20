@@ -22,10 +22,15 @@ def to_dashboard(
 
     to_export = {}
     for obs in data:
-        site_name = obs.metadata["site"]
+        site_name = str(obs.metadata["site"]).upper()
         dataset = obs.data
         df = dataset.to_dataframe()
         selected_df = df[selected_vars]
+        # TODO - fix dashboard so it isn't so fragile
+        # Make sure the variable names are uppercase as the dashboard expects
+        rename_dict = {k: k.upper() for k in selected_vars}
+        selected_df = selected_df.rename(columns=rename_dict)
+
         selected_df = selected_df.iloc[::downsample_n]
 
         to_export[site_name] = loads(selected_df.to_json())

@@ -21,7 +21,7 @@ def test_export_to_dashboard():
     for_export = to_dashboard(data=obs, selected_vars=["A"])
 
     assert for_export == {
-        "test_site": {
+        "TEST_SITE": {
             "A": {
                 "3660000": 0,
                 "435660000": 5,
@@ -54,4 +54,3 @@ def test_export_to_dashboard():
         assert tmp_path.exists()
         exported_data = json.loads(tmp_path.read_text())
         assert exported_data == for_export
-

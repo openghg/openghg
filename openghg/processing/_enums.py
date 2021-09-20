@@ -12,6 +12,8 @@ class DataTypes(Enum):
     CRANFIELD = "CRANFIELD"
     BEACO2N = "BEACO2N"
     FOOTPRINTS = "FOOTPRINTS"
+    NPL = "NPL"
+    BTT = "BTT"
 
 
 class ObsTypes(Enum):
