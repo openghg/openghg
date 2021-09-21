@@ -10,7 +10,51 @@ power and scalability of the cloud.
 
 For more information please see [our documentation](https://docs.openghg.org/).
 
-### Tutorials
+## Cloud
 
-For an introduction to the current state of the project please see our beginners tutorial. First you will need to [install OpenGHG](https://docs.openghg.org/install.html) and then open the Jupyter notebook based [tutorial](https://docs.openghg.org/tutorials/beginner_workflow/workflow.html).
+You can login to our [OpenGHG Cloud JupyterHub](https://hub.openghg.org) and use OpenGHG in the cloud. This will allow you to use the full power of OpenGHG from your local device. Once you're logged in please checkout [some of our tutorials](https://docs.openghg.org/tutorials/index.html) to help you get started.
+
+## Install locally
+
+To run OpenGHG locally you'll need Python 3.7 or later on Linux or MacOS, we don't currently support Windows.
+
+### Clone Acquire
+
+First we need to clone [Acquire](https://github.com/openghg/acquire) is required to be in the parent directory. To do this
+
+```
+$ git clone https://github.com/openghg/acquire.git
+```
+
+### Install OpenGHG
+
+Next, in the same directory do
+
+```
+$ git clone https://github.com/openghg/openghg.git
+$ cd openghg
+$ pip install .
+```
+
+### Run the tests
+
+Making sure you're in the `openghg` directory we need to install the developer requirements, this makes sure we have everything
+we need to run the tests.
+
+```
+$ pip install -r requirements-dev.txt
+```
+
+Then
+
+```
+$ pytest -v tests/
+```
+
+If all the tests pass then you're good to go. If they don't please [open an issue](https://github.com/openghg/openghg/issues/new) and let us
+know some details about your setup.
+
+## Documentation
+
+For further documentation and tutorials please visit [our documentation](https://docs.openghg.org/).
 
