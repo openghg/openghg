@@ -1,6 +1,6 @@
-=============
-Documentation
-=============
+========
+User API
+========
 
 This section of the documentation gives an overview of the public facing functions used in the Jupyter notebooks available at the
 OpenGHG hub. For developers documentation of the internal workings of the library are available in the developer API section.
@@ -63,16 +63,6 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
 
 :class:`~openghg.localclient.Search`
     Search for data within the object store (soon to be deprecated in favour of ``get_obs``
-
-
-objectstore
-===========
-
-Many of the functions in this submodule are only for internal use and will be renamed. 
-
-:func:`~openghg.objectstore.get_bucket`
-    Get a bucket (data container) for storing of data within the object store
-
 
 processing
 ==========

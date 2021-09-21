@@ -42,9 +42,13 @@ def pytest_sessionfinish(session, exitstatus):
     returning the exit status to the system.
     """
     temp_path = os.environ["OPENGHG_PATH"]
-    # Delete the testing object store
-    shutil.rmtree(temp_path)
     # Set the environment variable back
+    try:
+        # Delete the testing object store
+        shutil.rmtree(temp_path)
+    except FileNotFoundError:
+        pass
+
     try:
         os.environ["OPENGHG_PATH"] = os.environ["OPENGHG_PATH_BAK"]
         del os.environ["OPENGHG_PATH_BAK"]

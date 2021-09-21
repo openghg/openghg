@@ -7,7 +7,7 @@ __all__ = ["Emissions"]
 
 
 class Emissions(BaseModule):
-    """This class is used to process surface observation data"""
+    """This class is used to process emissions / flux data"""
 
     _root = "Emissions"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"

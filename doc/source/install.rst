@@ -48,7 +48,7 @@ of libraries can be installed without making changes to versions of libraries ne
 Clone and install
 -----------------
 
-OpenGHG is currently very early in its development process so the only way to install
+OpenGHG is currently early in its development process so the only way to install
 the library is by cloning the repository and installing manually using pip.
 
 .. code-block:: bash
