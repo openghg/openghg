@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>localclient API Detail &mdash; OpenGHG 0+untagged.3.g13b919a documentation</title>
+  <title>localclient API Detail &mdash; OpenGHG 0+untagged.3.ga0bd260 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -236,7 +236,7 @@ that data from that Datasource will be preferred when a user searches for data.<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.localclient.RankSources.set_rank">
-<span class="sig-name descname"><span class="pre">set_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dateranges</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.set_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.set_rank" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/openghg/localclient/_rank_sources.html#RankSources.set_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.localclient.RankSources.set_rank" title="Permalink to this definition"></a></dt>
 <dd><p>Set the rank data for the</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -246,6 +246,7 @@ that data from that Datasource will be preferred when a user searches for data.<
 <li><p><strong>rank</strong> – Number between 1 and 9</p></li>
 <li><p><strong>start_date</strong> – Start date</p></li>
 <li><p><strong>end_date</strong> – End date</p></li>
+<li><p><strong>overwrite</strong> – If True overwrite current ranking data</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -328,7 +329,7 @@ xarray Datasets</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020 OpenGHG development team.
-      <span class="lastupdated">Last updated on Sep 20, 2021.
+      <span class="lastupdated">Last updated on Sep 21, 2021.
       </span></p>
   </div>
 
