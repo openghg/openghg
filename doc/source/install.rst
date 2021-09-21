@@ -43,7 +43,7 @@ of libraries can be installed without making changes to versions of libraries ne
 
     python -m venv /path/to/env/openghg_env
     # Activate the environment
-    source /path/to/end/bin/activate
+    source /path/to/env/bin/activate
 
 Clone and install
 -----------------
@@ -61,4 +61,4 @@ the library is by cloning the repository and installing manually using pip.
 Developers
 ==========
 
-For developers please see the :doc:`development/python_devel`.
+For developers please see the :doc:`development/python_devel` documentation.
