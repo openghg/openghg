@@ -122,6 +122,10 @@ def search(**kwargs):  # type: ignore
         if not isinstance(site, list) and not multiple_inlets(site=site):
             skip_ranking = True
 
+    # If there isn't any ranking data, skip all the ranking functionality
+    if not obj._rank_data:
+        skip_ranking = True
+
     # If we have the site, inlet and instrument then just return the data
     # TODO - should instrument be added here
     if {"site", "inlet", "species"} <= search_kwargs.keys() or skip_ranking is True:

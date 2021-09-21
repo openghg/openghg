@@ -74,10 +74,9 @@ class RankSources:
         self,
         key: str,
         rank: Union[int, str],
-        start_date: str = None,
-        end_date: str = None,
+        start_date: str,
+        end_date: str,
         overwrite: bool = False,
-        dateranges: Union[str, List] = None,
     ) -> None:
         """Set the rank data for the
 
@@ -87,6 +86,7 @@ class RankSources:
             rank: Number between 1 and 9
             start_date: Start date
             end_date: End date
+            overwrite: If True overwrite current ranking data
         Returns:
             None
         """
@@ -94,13 +94,9 @@ class RankSources:
 
         uuid = self._key_lookup[key]
 
-        if all((start_date, end_date, dateranges)):
-            raise ValueError("Either a start and end date must be passed or a list of dateranges")
+        daterange = create_daterange_str(start=start_date, end=end_date)
 
-        if dateranges is None:
-            dateranges = create_daterange_str(start=start_date, end=end_date)
-
-        obs.set_rank(uuid=uuid, rank=rank, date_range=dateranges, overwrite=overwrite)
+        obs.set_rank(uuid=uuid, rank=rank, date_range=daterange, overwrite=overwrite)
 
         self._needs_update = True
 
