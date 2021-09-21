@@ -4,7 +4,7 @@ from openghg.util import valid_site, create_daterange_str, InvalidSiteError
 # from pyvis.network import Network
 # import matplotlib.cm as cm
 # import matplotlib
-from typing import Dict, List, Union
+from typing import Dict, Union
 
 __all__ = ["RankSources"]
 
