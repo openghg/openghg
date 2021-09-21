@@ -36,6 +36,16 @@ $ cd openghg
 $ pip install .
 ```
 
+### Set environment variable
+
+OpenGHG expects an environment variable `OPENGHG_PATH` to be set. This tells OpenGHG where to place the local object store.
+
+Please add the following line to your shell profile (`~/.bashrc`, `~/.profile`, ...).
+
+```
+OPENGHG_PATH=/your/selected/path
+```
+
 ### Run the tests
 
 Making sure you're in the `openghg` directory we need to install the developer requirements, this makes sure we have everything
