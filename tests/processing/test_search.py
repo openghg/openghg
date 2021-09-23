@@ -351,6 +351,16 @@ def test_search_incorrect_inlet_site_finds_nothing():
     assert not results
 
 
+def test_no_ranked_data_raises():
+    with pytest.raises(ValueError):
+        _ = search(site="tac", species="co2")
+
+    # Make sure this doesn't fail
+    res = search(site="tac", species="co2", inlet="100m")
+    
+    assert res
+
+
 @pytest.mark.skip(reason="Needs update for new ranking search")
 def test_search_nonsense_terms():
     species = ["spam", "eggs", "terry"]
