@@ -72,13 +72,10 @@ class BEACO2N:
 
         # Set all values below zero to NaN
         data[data < 0] = np_nan
-        print(data.columns)
         data = data.rename(columns=rename_cols)
 
         measurement_types = ["pm", "co2"]
         units = {"pm": "ug/m3", "co2": "ppm"}
-
-        print(data.columns)
 
         gas_data: DefaultDict[str, Dict[str, Union[DataFrame, Dict]]] = defaultdict(dict)
         for mt in measurement_types:
