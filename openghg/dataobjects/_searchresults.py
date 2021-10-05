@@ -1,3 +1,4 @@
+from addict import Dict as aDict
 from dataclasses import dataclass
 from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
 from openghg.dataobjects import ObsData
@@ -131,6 +132,22 @@ class SearchResults:
             raise KeyError(f"No metadata found for {species} at {site}")
 
         return metadata
+
+    def retrieve_all(self) -> Dict:
+        """ Retrieve all the data found during the serch
+
+            Returns:
+                dict: Dictionary of all data
+        """
+        data = aDict()
+
+        # Can we just traverse the dict without looping?
+        for site, species_data in self.results.items():
+            for species, inlet_data in species_data.items():
+                for inlet, keys in inlet_data.items():
+                    data[site][species][inlet] = self._create_obsdata(site=site, species=species, inlet=inlet)
+
+        return data
 
     def retrieve(self, site: str = None, species: str = None, inlet: str = None) -> Union[Dict[str, ObsData], ObsData]:
         """Retrieve some or all of the data found in the object store.
