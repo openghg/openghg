@@ -85,6 +85,10 @@ def to_dashboard(
                 df = dataset.to_dataframe()
                 # We just want the selected variables
                 to_extract = [c for c in df.columns if c in selected_vars]
+
+                if not to_extract:
+                    continue
+
                 df = df[to_extract]
                 # Make sure the variable names are uppercase as the dashboard expects
                 rename_dict = {k: k.lower() for k in selected_vars}
