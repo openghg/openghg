@@ -17,6 +17,7 @@ class SearchResults:
         results: Search results
         ranked_data: True if results are ranked, else False
     """
+
     T = TypeVar("T", bound="SearchResults")
 
     results: Dict
@@ -31,7 +32,9 @@ class SearchResults:
         print_strs = []
         for site, species in self.results.items():
             if self.ranked_data:
-                print_strs.append(f"Site: {site.upper()} \nSpecies found: {', '.join(self.results[site].keys())}")
+                print_strs.append(
+                    f"Site: {site.upper()} \nSpecies found: {', '.join(self.results[site].keys())}"
+                )
             else:
                 print_strs.append(f"Site: {site.upper()}")
                 print_strs.append("---------")
@@ -134,10 +137,10 @@ class SearchResults:
         return metadata
 
     def retrieve_all(self) -> Dict:
-        """ Retrieve all the data found during the serch
+        """Retrieve all the data found during the serch
 
-            Returns:
-                dict: Dictionary of all data
+        Returns:
+            dict: Dictionary of all data
         """
         data = aDict()
 
@@ -149,7 +152,9 @@ class SearchResults:
 
         return data
 
-    def retrieve(self, site: str = None, species: str = None, inlet: str = None) -> Union[Dict[str, ObsData], ObsData]:
+    def retrieve(
+        self, site: str = None, species: str = None, inlet: str = None
+    ) -> Union[Dict[str, ObsData], ObsData]:
         """Retrieve some or all of the data found in the object store.
 
         Args:
