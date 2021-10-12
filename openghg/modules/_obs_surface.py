@@ -44,16 +44,12 @@ class ObsSurface(BaseModule):
             dict: Dictionary of Datasource UUIDs
         """
         from collections import defaultdict
-        import logging
         from pathlib import Path
         from pandas import Timedelta
         import sys
         from tqdm import tqdm
         from openghg.util import load_object, hash_file, clean_string
         from openghg.processing import assign_data, DataTypes
-
-        # Suppress numexpr thread count info info warnings
-        logging.getLogger("numexpr").setLevel(logging.WARNING)
 
         if not isinstance(filepath, list):
             filepath = [filepath]
