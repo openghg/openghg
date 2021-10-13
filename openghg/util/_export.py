@@ -83,6 +83,9 @@ def to_dashboard(
                 dataset = data.data
                 metadata = data.metadata
                 df = dataset.to_dataframe()
+
+                rename_lower = {c: str(c).lower() for c in df.columns}
+                df = df.rename(columns=rename_lower)
                 # We just want the selected variables
                 to_extract = [c for c in df.columns if c in selected_vars]
 
@@ -90,9 +93,6 @@ def to_dashboard(
                     continue
 
                 df = df[to_extract]
-                # Make sure the variable names are uppercase as the dashboard expects
-                rename_dict = {k: k.lower() for k in selected_vars}
-                df = df.rename(columns=rename_dict)
                 # Downsample the data
                 df = df.iloc[::downsample_n]
 

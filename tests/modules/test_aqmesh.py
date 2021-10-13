@@ -16,7 +16,7 @@ def test_aqmesh_read():
 
     assert dataset.time[0] == Timestamp("2021-06-16T01:00:00")
     assert dataset.co2[0] == 413.76
-    assert dataset.time[-1] == Timestamp("2021-06-21T10:00:00")
+    assert dataset.time[-1] == Timestamp("2021-10-01")
     assert dataset.co2[1] == 415.11
 
     expected_metadata = {
@@ -36,5 +36,5 @@ def test_aqmesh_read():
         "sampling_period": "NA",
         "species": "co2",
     }
-    
+
     assert metadata == expected_metadata

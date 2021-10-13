@@ -83,6 +83,9 @@ def read_aqmesh(data_filepath: pathType, metadata_filepath: pathType) -> Dict:
     # This might change so we'll read it each time for now
     metadata = _parse_metadata(filepath=metadata_filepath)
 
+    # TODO - add in assignment of attributes
+    # assign_attributes
+
     site_data = aDict()
     for site, site_df in site_groups:
         site_name = site.replace(" ", "").lower()

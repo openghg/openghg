@@ -162,7 +162,6 @@ class ObsSurface(BaseModule):
     def read_multisite_aqmesh(
         data_filepath: pathType,
         metadata_filepath: pathType,
-        species: str,
         network: str = "aqmesh_glasgow",
         instrument: str = "aqmesh",
         sampling_period: str = "NA",
@@ -188,16 +187,12 @@ class ObsSurface(BaseModule):
         # Load the ObsSurface object for processing
         obs = ObsSurface.load()
         # Get a dict of data and metadata
-        processed_data = read_aqmesh(
-            data_filepath=data_filepath, metadata_filepath=metadata_filepath, species=species
-        )
+        processed_data = read_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
 
         results: resultsType = defaultdict(dict)
         for site, site_data in tqdm(processed_data.items()):
             metadata = site_data["metadata"]
             measurement_data = site_data["data"]
-
-            print(f"site : {site}\n")
 
             inlet = metadata["inlet"]
             species = metadata["species"]
@@ -220,14 +215,15 @@ class ObsSurface(BaseModule):
             lookup_result = {site: uuid}
 
             # Create Datasources, save them to the object store and get their UUIDs
-            datasource_uuids = assign_data(data_dict=combined, lookup_results=lookup_result, overwrite=overwrite)
+            datasource_uuids = assign_data(
+                data_dict=combined, lookup_results=lookup_result, overwrite=overwrite
+            )
 
             results[site] = datasource_uuids
 
             # TODO - fix add_datasources as well
             _metadata = {site: metadata}
 
-            print(_metadata)
             # Record the Datasources we've created / appended to
             obs.add_datasources(datasource_uuids=datasource_uuids, metadata=_metadata)
 
