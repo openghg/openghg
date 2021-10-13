@@ -158,42 +158,50 @@ class ObsSurface(BaseModule):
 
         return results
 
+    @staticmethod
     def read_multisite_aqmesh(
         data_filepath: pathType,
         metadata_filepath: pathType,
-        data_type: str,
-        network: str,
-        instrument: str = None,
-        sampling_period: str = None,
+        species: str,
+        network: str = "aqmesh_glasgow",
+        instrument: str = "aqmesh",
+        sampling_period: str = "NA",
         measurement_type: str = "insitu",
         overwrite: bool = False,
     ):
-        """ Read AQMesh data
+        """Read AQMesh data for the Glasgow network
 
-        This data is different in that it contains multiple sites in the same file
+        NOTE - temporary function until we know what kind of AQMesh data
+        we'll be processing in the future.
 
-        TODO - As very few sites have multiple sites in one file should we just
-        write the data to separate files and process them like that?
-
-        This breaks how we've done ObsSurface 
+        This data is different in that it contains multiple sites in the same file.
         """
         from openghg.modules import read_aqmesh
+        from openghg.processing import assign_data
         from openghg.util import hash_file
+        from collections import defaultdict
+        from tqdm import tqdm
 
         data_filepath = Path(data_filepath)
         metadata_filepath = Path(metadata_filepath)
 
+        # Load the ObsSurface object for processing
         obs = ObsSurface.load()
-
-        data = read_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
+        # Get a dict of data and metadata
+        processed_data = read_aqmesh(
+            data_filepath=data_filepath, metadata_filepath=metadata_filepath, species=species
+        )
 
         results: resultsType = defaultdict(dict)
-
-        for site, site_data in data.items():
+        for site, site_data in tqdm(processed_data.items()):
             metadata = site_data["metadata"]
             measurement_data = site_data["data"]
 
-            
+            print(f"site : {site}\n")
+
+            inlet = metadata["inlet"]
+            species = metadata["species"]
+
             file_hash = hash_file(filepath=data_filepath)
 
             if obs.seen_hash(file_hash=file_hash) and overwrite is False:
@@ -201,40 +209,35 @@ class ObsSurface(BaseModule):
                     f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
                 )
 
-            # Extract the metadata for each set of measurements to perform a Datasource lookup
-            metadata = {key: data["metadata"] for key, data in data.items()}
-
-            lookup_results = obs.datasource_lookup(metadata=metadata)
-
-            # Create Datasources, save them to the object store and get their UUIDs
-            datasource_uuids = assign_data(
-                data_dict=data, lookup_results=lookup_results, overwrite=overwrite
+            uuid = obs.lookup_uuid(
+                site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period
             )
 
-            results["processed"][data_filepath.name] = datasource_uuids
+            # Jump through these hoops until we can rework the data assignment functionality to split it out
+            # into more sensible functions
+            # TODO - fix the assign data function to avoid this kind of hoop jumping
+            combined = {site: {"data": measurement_data, "metadata": metadata}}
+            lookup_result = {site: uuid}
 
+            # Create Datasources, save them to the object store and get their UUIDs
+            datasource_uuids = assign_data(data_dict=combined, lookup_results=lookup_result, overwrite=overwrite)
+
+            results[site] = datasource_uuids
+
+            # TODO - fix add_datasources as well
+            _metadata = {site: metadata}
+
+            print(_metadata)
             # Record the Datasources we've created / appended to
-            obs.add_datasources(datasource_uuids, metadata)
+            obs.add_datasources(datasource_uuids=datasource_uuids, metadata=_metadata)
 
             # Store the hash as the key for easy searching, store the filename as well for
             # ease of checking by user
-            obs._file_hashes[file_hash] = data_filepath.name
-            # except Exception:
-            #     results["error"][data_filepath.name] = traceback.format_exc()
+            obs.set_hash(file_hash=file_hash, filename=data_filepath.name)
 
-            progress_bar.update(1)
+        obs.save()
 
-
-
-
-
-
-
-
-
-        
-
-
+        return results
 
     def datasource_lookup(self, metadata: Dict) -> Dict:
         """Find the Datasource we should assign the data to
@@ -375,4 +378,7 @@ class ObsSurface(BaseModule):
         del self._datasource_uuids[uuid]
 
     def seen_hash(self, file_hash: str) -> bool:
-        return filehash in self._file_hashes
+        return file_hash in self._file_hashes
+
+    def set_hash(self, file_hash: str, filename: str) -> None:
+        self._file_hashes[file_hash] = filename

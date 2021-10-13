@@ -28,6 +28,7 @@ def _parse_metadata(filepath: pathType) -> Dict:
         site_name = row["location_name"].replace(" ", "").lower()
         site_data = site_metadata[site_name]
 
+        site_data["site"] = site_name
         site_data["pod_id"] = row["pod_id_location"]
         site_data["start_date"] = is_date(row["start_date_UTC"])
         site_data["end_date"] = is_date(row["end_date_UTC"])
@@ -38,6 +39,10 @@ def _parse_metadata(filepath: pathType) -> Dict:
         site_data["in_ulez"] = row["ULEZ"]
         site_data["latitude"] = row["Latitude"]
         site_data["longitude"] = row["Longitude"]
+        site_data["inlet"] = row["Height"]
+        site_data["network"] = "aqmesh_glasgow"
+        site_data["sampling_period"] = "NA"
+
 
     return site_metadata.to_dict()
 
@@ -52,15 +57,12 @@ def read_aqmesh(data_filepath: pathType, metadata_filepath: pathType, species: s
         dict: Dictionary of data
     """
     from addict import Dict as aDict
-    from pandas import to_datetime, read_csv
+    from pandas import read_csv
 
     # use_cols = [date_UTC,co2_ppm,location_name,ratification_status]
     use_cols = [0, 1, 4, 6]
     datetime_cols = {"time": ["date_UTC"]}
     na_values = [-999, -999.0]
-
-    def date_parser(date):
-        return to_datetime(date, utc=True)
 
     df = read_csv(
         data_filepath,
@@ -68,10 +70,12 @@ def read_aqmesh(data_filepath: pathType, metadata_filepath: pathType, species: s
         usecols=use_cols,
         parse_dates=datetime_cols,
         na_values=na_values,
-        date_parser=date_parser,
     )
 
+    # Species is given in the data column
+    species = df.columns[0].split("_")[0]
     species_lower = species.lower()
+
     rename_cols = {f"{species_lower}_ppm": species_lower, "location_name": "site"}
     df = df.rename(columns=rename_cols)
     df = df.dropna(axis="rows", subset=[species_lower])
@@ -83,7 +87,10 @@ def read_aqmesh(data_filepath: pathType, metadata_filepath: pathType, species: s
     site_data = aDict()
     for site, site_df in site_groups:
         site_name = site.replace(" ", "").lower()
+        site_df = site_df.drop("site", axis="columns")
         site_data[site_name]["data"] = site_df.to_xarray()
         site_data[site_name]["metadata"] = metadata[site_name]
+        # Add in the species to the metadata
+        site_data[site_name]["metadata"]["species"] = species_lower
 
     return site_data.to_dict()
