@@ -43,16 +43,15 @@ def _parse_metadata(filepath: pathType) -> Dict:
         site_data["network"] = "aqmesh_glasgow"
         site_data["sampling_period"] = "NA"
 
-
     return site_metadata.to_dict()
 
 
-def read_aqmesh(data_filepath: pathType, metadata_filepath: pathType, species: str) -> Dict:
+def read_aqmesh(data_filepath: pathType, metadata_filepath: pathType) -> Dict:
     """Read AQMesh data files
 
     Args:
-        filepath: Data filepath
-        site: Site name
+        data_filepath: Data filepath
+        metadata_filepath: Metadata filepath
     Returns:
         dict: Dictionary of data
     """
