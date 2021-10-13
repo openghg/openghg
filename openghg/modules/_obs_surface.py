@@ -7,6 +7,7 @@ from typing import DefaultDict, Dict, Union
 __all__ = ["ObsSurface"]
 
 pathType = Union[str, Path, list]
+resultsType = DefaultDict[str, Dict]
 
 
 class ObsSurface(BaseModule):
@@ -20,13 +21,12 @@ class ObsSurface(BaseModule):
         filepath: pathType,
         data_type: str,
         network: str,
-        site: str = None,
+        site: str,
         inlet: str = None,
         instrument: str = None,
         sampling_period: str = None,
         measurement_type: str = "insitu",
         overwrite: bool = False,
-        single_site: bool = True,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -54,12 +54,6 @@ class ObsSurface(BaseModule):
         from tqdm import tqdm
         from openghg.util import load_object, hash_file, clean_string
         from openghg.processing import assign_data, DataTypes
-
-        if site is None and single_site:
-            raise ValueError("site must be passed if we are processing data from a single site.")
-
-        # if not single_site:
-        # _read_multisite()
 
         # Suppress numexpr thread count info info warnings
         logging.getLogger("numexpr").setLevel(logging.WARNING)
@@ -91,7 +85,7 @@ class ObsSurface(BaseModule):
 
         obs = ObsSurface.load()
 
-        results: DefaultDict[str, Dict] = defaultdict(dict)
+        results: resultsType = defaultdict(dict)
 
         # Create a progress bar object using the filepaths, iterate over this below
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
@@ -164,26 +158,81 @@ class ObsSurface(BaseModule):
 
         return results
 
-    def _read_multisite(
-        filepath: pathType,
+    def read_multisite_aqmesh(
+        data_filepath: pathType,
+        metadata_filepath: pathType,
         data_type: str,
         network: str,
-        site: str = None,
-        inlet: str = None,
         instrument: str = None,
         sampling_period: str = None,
         measurement_type: str = "insitu",
         overwrite: bool = False,
     ):
-        """ Read data from multiple sites
+        """ Read AQMesh data
 
-        Networks such as AQMesh 
-        
-        
+        This data is different in that it contains multiple sites in the same file
+
+        TODO - As very few sites have multiple sites in one file should we just
+        write the data to separate files and process them like that?
+
+        This breaks how we've done ObsSurface 
         """
-        # As very few sites have multiple sites in one file should I just
-        # write the data to separate files and process it like that?
-        raise NotImplementedError()
+        from openghg.modules import read_aqmesh
+        from openghg.util import hash_file
+
+        data_filepath = Path(data_filepath)
+        metadata_filepath = Path(metadata_filepath)
+
+        obs = ObsSurface.load()
+
+        data = read_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
+
+        results: resultsType = defaultdict(dict)
+
+        for site, site_data in data.items():
+            metadata = site_data["metadata"]
+            measurement_data = site_data["data"]
+
+            
+            file_hash = hash_file(filepath=data_filepath)
+
+            if obs.seen_hash(file_hash=file_hash) and overwrite is False:
+                raise ValueError(
+                    f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
+                )
+
+            # Extract the metadata for each set of measurements to perform a Datasource lookup
+            metadata = {key: data["metadata"] for key, data in data.items()}
+
+            lookup_results = obs.datasource_lookup(metadata=metadata)
+
+            # Create Datasources, save them to the object store and get their UUIDs
+            datasource_uuids = assign_data(
+                data_dict=data, lookup_results=lookup_results, overwrite=overwrite
+            )
+
+            results["processed"][data_filepath.name] = datasource_uuids
+
+            # Record the Datasources we've created / appended to
+            obs.add_datasources(datasource_uuids, metadata)
+
+            # Store the hash as the key for easy searching, store the filename as well for
+            # ease of checking by user
+            obs._file_hashes[file_hash] = data_filepath.name
+            # except Exception:
+            #     results["error"][data_filepath.name] = traceback.format_exc()
+
+            progress_bar.update(1)
+
+
+
+
+
+
+
+
+
+        
 
 
 
@@ -324,3 +373,6 @@ class ObsSurface(BaseModule):
         delete_object(bucket=bucket, key=key)
 
         del self._datasource_uuids[uuid]
+
+    def seen_hash(self, file_hash: str) -> bool:
+        return filehash in self._file_hashes
