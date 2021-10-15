@@ -106,6 +106,7 @@ def test_read_glasgow_no_valid_data():
 def test_incorrect_file_read_raises():
     filepath = get_datapath(filename="incorrect_format.csv", data_type="BEACO2N")
 
+
     beacon = BEACO2N()
     with pytest.raises(ValueError):
         beacon.read_file(data_filepath=filepath, site="test", network="test", inlet="test")
