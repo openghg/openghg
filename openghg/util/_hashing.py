@@ -30,7 +30,7 @@ def hash_file(filepath: Path) -> str:
     """
     import hashlib
 
-    # Lets read stuff in 64kb chunks
+    # Let's read stuff in 64kB chunks
     BUF_SIZE = 65536
     sha1 = hashlib.sha1()
 

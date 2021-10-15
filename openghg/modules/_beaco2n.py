@@ -39,6 +39,8 @@ class BEACO2N:
         use_cols = [1, 5, 6, 7, 8, 9, 10]
         na_values = [-999.0]
 
+        site = clean_string(site)
+
         try:
             data = pd.read_csv(
                 data_filepath,
@@ -95,7 +97,7 @@ class BEACO2N:
 
             species_metadata = {
                 "units": units[mt],
-                "site": clean_string(site),
+                "site": site,
                 "species": clean_string(mt),
                 "inlet": clean_string(inlet),
                 "network": "beaco2n",

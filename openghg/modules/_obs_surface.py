@@ -6,6 +6,9 @@ from typing import DefaultDict, Dict, Union
 
 __all__ = ["ObsSurface"]
 
+pathType = Union[str, Path, list]
+resultsType = DefaultDict[str, Dict]
+
 
 class ObsSurface(BaseModule):
     """This class is used to process surface observation data"""
@@ -15,10 +18,10 @@ class ObsSurface(BaseModule):
 
     @staticmethod
     def read_file(
-        filepath: Union[str, Path, list],
+        filepath: pathType,
         data_type: str,
-        site: str,
         network: str,
+        site: str,
         inlet: str = None,
         instrument: str = None,
         sampling_period: str = None,
@@ -78,9 +81,9 @@ class ObsSurface(BaseModule):
 
         obs = ObsSurface.load()
 
-        # Create a progress bar object using the filepaths, iterate over this below
-        results: DefaultDict[str, Dict] = defaultdict(dict)
+        results: resultsType = defaultdict(dict)
 
+        # Create a progress bar object using the filepaths, iterate over this below
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
             for fp in filepath:
                 if data_type == "GCWERKS":
@@ -95,7 +98,9 @@ class ObsSurface(BaseModule):
                 # try:
                 file_hash = hash_file(filepath=data_filepath)
                 if file_hash in obs._file_hashes and overwrite is False:
-                    raise ValueError(f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}.")
+                    raise ValueError(
+                        f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
+                    )
 
                 progress_bar.set_description(f"Processing: {data_filepath.name}")
 
@@ -127,7 +132,9 @@ class ObsSurface(BaseModule):
                 lookup_results = obs.datasource_lookup(metadata=metadata)
 
                 # Create Datasources, save them to the object store and get their UUIDs
-                datasource_uuids = assign_data(data_dict=data, lookup_results=lookup_results, overwrite=overwrite)
+                datasource_uuids = assign_data(
+                    data_dict=data, lookup_results=lookup_results, overwrite=overwrite
+                )
 
                 results["processed"][data_filepath.name] = datasource_uuids
 
@@ -143,6 +150,83 @@ class ObsSurface(BaseModule):
                 progress_bar.update(1)
 
         # Save this object back to the object store
+        obs.save()
+
+        return results
+
+    @staticmethod
+    def read_multisite_aqmesh(
+        data_filepath: pathType,
+        metadata_filepath: pathType,
+        network: str = "aqmesh_glasgow",
+        instrument: str = "aqmesh",
+        sampling_period: str = "NA",
+        measurement_type: str = "insitu",
+        overwrite: bool = False,
+    ):
+        """Read AQMesh data for the Glasgow network
+
+        NOTE - temporary function until we know what kind of AQMesh data
+        we'll be processing in the future.
+
+        This data is different in that it contains multiple sites in the same file.
+        """
+        from openghg.modules import read_aqmesh
+        from openghg.processing import assign_data
+        from openghg.util import hash_file
+        from collections import defaultdict
+        from tqdm import tqdm
+
+        data_filepath = Path(data_filepath)
+        metadata_filepath = Path(metadata_filepath)
+
+        # Load the ObsSurface object for processing
+        obs = ObsSurface.load()
+        # Get a dict of data and metadata
+        processed_data = read_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
+
+        results: resultsType = defaultdict(dict)
+        for site, site_data in tqdm(processed_data.items()):
+            metadata = site_data["metadata"]
+            measurement_data = site_data["data"]
+
+            inlet = metadata["inlet"]
+            species = metadata["species"]
+
+            file_hash = hash_file(filepath=data_filepath)
+
+            if obs.seen_hash(file_hash=file_hash) and overwrite is False:
+                raise ValueError(
+                    f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
+                )
+
+            uuid = obs.lookup_uuid(
+                site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period
+            )
+
+            # Jump through these hoops until we can rework the data assignment functionality to split it out
+            # into more sensible functions
+            # TODO - fix the assign data function to avoid this kind of hoop jumping
+            combined = {site: {"data": measurement_data, "metadata": metadata}}
+            lookup_result = {site: uuid}
+
+            # Create Datasources, save them to the object store and get their UUIDs
+            datasource_uuids = assign_data(
+                data_dict=combined, lookup_results=lookup_result, overwrite=overwrite
+            )
+
+            results[site] = datasource_uuids
+
+            # TODO - fix add_datasources as well
+            _metadata = {site: metadata}
+
+            # Record the Datasources we've created / appended to
+            obs.add_datasources(datasource_uuids=datasource_uuids, metadata=_metadata)
+
+            # Store the hash as the key for easy searching, store the filename as well for
+            # ease of checking by user
+            obs.set_hash(file_hash=file_hash, filename=data_filepath.name)
+
         obs.save()
 
         return results
@@ -196,17 +280,30 @@ class ObsSurface(BaseModule):
 
             # TODO - remove this check when improved input sanitisation is in place
             if not any((site, network, inlet, species, sampling_period)):
-                raise ValueError("Please ensure site, network, inlet, species and sampling_period are not None")
+                raise ValueError(
+                    "Please ensure site, network, inlet, species and sampling_period are not None"
+                )
 
-            result = self.lookup_uuid(site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period)
+            result = self.lookup_uuid(
+                site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period
+            )
 
             if result and result != uid:
                 raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
 
-            self.set_uuid(site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period, uuid=uid)
+            self.set_uuid(
+                site=site,
+                network=network,
+                inlet=inlet,
+                species=species,
+                sampling_period=sampling_period,
+                uuid=uid,
+            )
             self._datasource_uuids[uid] = key
 
-    def lookup_uuid(self, site: str, network: str, inlet: str, species: str, sampling_period: int) -> Union[str, bool]:
+    def lookup_uuid(
+        self, site: str, network: str, inlet: str, species: str, sampling_period: int
+    ) -> Union[str, bool]:
         """Perform a lookup for the UUID of a Datasource
 
         Args:
@@ -222,7 +319,9 @@ class ObsSurface(BaseModule):
 
         return uuid if uuid else False
 
-    def set_uuid(self, site: str, network: str, inlet: str, species: str, sampling_period: int, uuid: str) -> None:
+    def set_uuid(
+        self, site: str, network: str, inlet: str, species: str, sampling_period: int, uuid: str
+    ) -> None:
         """Record a UUID of a Datasource in the datasource table
 
         Args:
@@ -269,3 +368,9 @@ class ObsSurface(BaseModule):
         delete_object(bucket=bucket, key=key)
 
         del self._datasource_uuids[uuid]
+
+    def seen_hash(self, file_hash: str) -> bool:
+        return file_hash in self._file_hashes
+
+    def set_hash(self, file_hash: str, filename: str) -> None:
+        self._file_hashes[file_hash] = filename

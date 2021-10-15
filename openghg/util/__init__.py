@@ -36,6 +36,8 @@ from ._time import (
     split_encompassed_daterange,
     daterange_contains,
     sanitise_daterange,
+    is_nan, 
+    is_date
 )
 
 from ._errors import InvalidSiteError, UnknownDataError, FunctionError

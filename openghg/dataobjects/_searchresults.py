@@ -141,10 +141,10 @@ class SearchResults:
 
 
     def retrieve_all(self) -> Dict:
-        """ Retrieve all the data found during the serch
+        """Retrieve all the data found during the serch
 
-            Returns:
-                dict: Dictionary of all data
+        Returns:
+            dict: Dictionary of all data
         """
         data = aDict()
 
@@ -156,7 +156,9 @@ class SearchResults:
 
         return data
 
-    def retrieve(self, site: str = None, species: str = None, inlet: str = None) -> Union[Dict[str, ObsData], ObsData]:
+    def retrieve(
+        self, site: str = None, species: str = None, inlet: str = None
+    ) -> Union[Dict[str, ObsData], ObsData]:
         """Retrieve some or all of the data found in the object store.
 
         Args:

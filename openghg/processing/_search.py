@@ -116,11 +116,12 @@ def search(**kwargs):  # type: ignore
     # Find the Datasources that contain matching metadata
     matching_sources = {d.uuid(): d for d in datasources if d.search_metadata(**search_kwargs)}
 
+    # TODO - Update this as it only uses the ACRG repo JSON at the moment
     # Check if this site only has one inlet, if so skip ranking
-    if "site" in search_kwargs:
-        site = search_kwargs["site"]
-        if not isinstance(site, list) and not multiple_inlets(site=site):
-            skip_ranking = True
+    # if "site" in search_kwargs:
+    #     site = search_kwargs["site"]
+    #     if not isinstance(site, list) and not multiple_inlets(site=site):
+    #         skip_ranking = True
 
     # If there isn't any ranking data, skip all the ranking functionality
     if not obj._rank_data:
