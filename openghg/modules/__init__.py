@@ -19,3 +19,4 @@ from ._npl import NPL
 from ._footprints import FOOTPRINTS
 from ._emissions import Emissions
 from ._eulerian_model import EulerianModel
+from ._aqmesh import read_aqmesh
