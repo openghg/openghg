@@ -648,6 +648,7 @@ def test_read_multiside_aqmesh():
         "network": "aqmesh_glasgow",
         "sampling_period": "NA",
         "species": "co2",
+        "units": "ppm",
     }
 
     assert data.attrs == expected_attrs

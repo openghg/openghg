@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 from pathlib import Path
 
 __all__ = ["read_aqmesh"]
@@ -58,7 +58,6 @@ def read_aqmesh(data_filepath: pathType, metadata_filepath: pathType) -> Dict:
     from addict import Dict as aDict
     from pandas import read_csv
 
-    # use_cols = [date_UTC,co2_ppm,location_name,ratification_status]
     use_cols = [0, 1, 4, 6]
     datetime_cols = {"time": ["date_UTC"]}
     na_values = [-999, -999.0]
@@ -71,21 +70,25 @@ def read_aqmesh(data_filepath: pathType, metadata_filepath: pathType) -> Dict:
         na_values=na_values,
     )
 
-    # Species is given in the data column
-    species = df.columns[0].split("_")[0]
-    species_lower = species.lower()
-
-    rename_cols = {f"{species_lower}_ppm": species_lower, "location_name": "site"}
-    df = df.rename(columns=rename_cols)
-    df = df.dropna(axis="rows", subset=[species_lower])
-
-    site_groups = df.groupby(df["site"])
     # This might change so we'll read it each time for now
     metadata = _parse_metadata(filepath=metadata_filepath)
+
+    # Species is given in the data column
+    orig_species = df.columns[0]
+    species_split = orig_species.split("_")
+
+    species = species_split[0]
+    units = species_split[1]
+
+    species_lower = species.lower()
+    rename_cols = {orig_species: species_lower, "location_name": "site"}
+    df = df.rename(columns=rename_cols)
+    df = df.dropna(axis="rows", subset=[species_lower])
 
     # TODO - add in assignment of attributes
     # assign_attributes
 
+    site_groups = df.groupby(df["site"])
     site_data = aDict()
     for site, site_df in site_groups:
         site_name = site.replace(" ", "").lower()
@@ -94,5 +97,6 @@ def read_aqmesh(data_filepath: pathType, metadata_filepath: pathType) -> Dict:
         site_data[site_name]["metadata"] = metadata[site_name]
         # Add in the species to the metadata
         site_data[site_name]["metadata"]["species"] = species_lower
+        site_data[site_name]["metadata"]["units"] = units
 
     return site_data.to_dict()

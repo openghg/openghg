@@ -35,6 +35,7 @@ def test_aqmesh_read():
         "network": "aqmesh_glasgow",
         "sampling_period": "NA",
         "species": "co2",
+        "units": "ppm"
     }
 
     assert metadata == expected_metadata
