@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>openghg.modules._obs_surface &mdash; OpenGHG 0+untagged.2.geaafe20 documentation</title>
+  <title>openghg.modules._obs_surface &mdash; OpenGHG 0+untagged.3.g1fad6ca documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
@@ -90,6 +90,10 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ObsSurface&quot;</span><span class="p">]</span>
 
+<span class="n">pathType</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span>
+<span class="n">multiPathType</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span>
+<span class="n">resultsType</span> <span class="o">=</span> <span class="n">DefaultDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]</span>
+
 
 <div class="viewcode-block" id="ObsSurface"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface">[docs]</a><span class="k">class</span> <span class="nc">ObsSurface</span><span class="p">(</span><span class="n">BaseModule</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This class is used to process surface observation data&quot;&quot;&quot;</span>
@@ -99,10 +103,10 @@
 
 <div class="viewcode-block" id="ObsSurface.read_file"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.read_file">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
-        <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
+        <span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span><span class="p">,</span>
         <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -162,9 +166,9 @@
 
         <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 
-        <span class="c1"># Create a progress bar object using the filepaths, iterate over this below</span>
-        <span class="n">results</span><span class="p">:</span> <span class="n">DefaultDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">:</span> <span class="n">resultsType</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
 
+        <span class="c1"># Create a progress bar object using the filepaths, iterate over this below</span>
         <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">filepath</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span> <span class="k">as</span> <span class="n">progress_bar</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">filepath</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
@@ -179,7 +183,9 @@
                 <span class="c1"># try:</span>
                 <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="n">overwrite</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="p">)</span>
 
                 <span class="n">progress_bar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -211,7 +217,9 @@
                 <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
 
                 <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
-                <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span><span class="n">data_dict</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">)</span>
+                <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
+                    <span class="n">data_dict</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span>
+                <span class="p">)</span>
 
                 <span class="n">results</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">][</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_uuids</span>
 
@@ -227,6 +235,83 @@
                 <span class="n">progress_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Save this object back to the object store</span>
+        <span class="n">obs</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">results</span></div>
+
+<div class="viewcode-block" id="ObsSurface.read_multisite_aqmesh"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.read_multisite_aqmesh">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">read_multisite_aqmesh</span><span class="p">(</span>
+        <span class="n">data_filepath</span><span class="p">:</span> <span class="n">pathType</span><span class="p">,</span>
+        <span class="n">metadata_filepath</span><span class="p">:</span> <span class="n">pathType</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;aqmesh_glasgow&quot;</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;aqmesh&quot;</span><span class="p">,</span>
+        <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+        <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;insitu&quot;</span><span class="p">,</span>
+        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DefaultDict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read AQMesh data for the Glasgow network</span>
+
+<span class="sd">        NOTE - temporary function until we know what kind of AQMesh data</span>
+<span class="sd">        we&#39;ll be processing in the future.</span>
+
+<span class="sd">        This data is different in that it contains multiple sites in the same file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openghg.modules</span> <span class="kn">import</span> <span class="n">read_aqmesh</span>
+        <span class="kn">from</span> <span class="nn">openghg.processing</span> <span class="kn">import</span> <span class="n">assign_data</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">hash_file</span>
+        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+        <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+        <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
+        <span class="n">metadata_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">metadata_filepath</span><span class="p">)</span>
+
+        <span class="c1"># Load the ObsSurface object for processing</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="c1"># Get a dict of data and metadata</span>
+        <span class="n">processed_data</span> <span class="o">=</span> <span class="n">read_aqmesh</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">metadata_filepath</span><span class="o">=</span><span class="n">metadata_filepath</span><span class="p">)</span>
+
+        <span class="n">results</span><span class="p">:</span> <span class="n">resultsType</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">site_data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">processed_data</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">site_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+            <span class="n">measurement_data</span> <span class="o">=</span> <span class="n">site_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+
+            <span class="n">inlet</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+            <span class="n">species</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+
+            <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">obs</span><span class="o">.</span><span class="n">seen_hash</span><span class="p">(</span><span class="n">file_hash</span><span class="o">=</span><span class="n">file_hash</span><span class="p">)</span> <span class="ow">and</span> <span class="n">overwrite</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">uuid</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">lookup_uuid</span><span class="p">(</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Jump through these hoops until we can rework the data assignment functionality to split it out</span>
+            <span class="c1"># into more sensible functions</span>
+            <span class="c1"># TODO - fix the assign data function to avoid this kind of hoop jumping</span>
+            <span class="n">combined</span> <span class="o">=</span> <span class="p">{</span><span class="n">site</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">measurement_data</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">}}</span>
+            <span class="n">lookup_result</span> <span class="o">=</span> <span class="p">{</span><span class="n">site</span><span class="p">:</span> <span class="n">uuid</span><span class="p">}</span>
+
+            <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
+            <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
+                <span class="n">data_dict</span><span class="o">=</span><span class="n">combined</span><span class="p">,</span> <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_result</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span>
+            <span class="p">)</span>
+
+            <span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_uuids</span>
+
+            <span class="c1"># TODO - fix add_datasources as well</span>
+            <span class="n">_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">site</span><span class="p">:</span> <span class="n">metadata</span><span class="p">}</span>
+
+            <span class="c1"># Record the Datasources we&#39;ve created / appended to</span>
+            <span class="n">obs</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">datasource_uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">_metadata</span><span class="p">)</span>
+
+            <span class="c1"># Store the hash as the key for easy searching, store the filename as well for</span>
+            <span class="c1"># ease of checking by user</span>
+            <span class="n">obs</span><span class="o">.</span><span class="n">set_hash</span><span class="p">(</span><span class="n">file_hash</span><span class="o">=</span><span class="n">file_hash</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
         <span class="n">obs</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">results</span></div>
@@ -280,17 +365,30 @@
 
             <span class="c1"># TODO - remove this check when improved input sanitisation is in place</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">((</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">sampling_period</span><span class="p">)):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please ensure site, network, inlet, species and sampling_period are not None&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Please ensure site, network, inlet, species and sampling_period are not None&quot;</span>
+                <span class="p">)</span>
 
-            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_uuid</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_uuid</span><span class="p">(</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span>
+            <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">result</span> <span class="o">!=</span> <span class="n">uid</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mismatch between assigned uuid and stored Datasource uuid.&quot;</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_uuid</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_uuid</span><span class="p">(</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
+                <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+                <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+                <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
+                <span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span></div>
 
-<div class="viewcode-block" id="ObsSurface.lookup_uuid"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.lookup_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">lookup_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<div class="viewcode-block" id="ObsSurface.lookup_uuid"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.lookup_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">lookup_uuid</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Perform a lookup for the UUID of a Datasource</span>
 
 <span class="sd">        Args:</span>
@@ -306,7 +404,9 @@
 
         <span class="k">return</span> <span class="n">uuid</span> <span class="k">if</span> <span class="n">uuid</span> <span class="k">else</span> <span class="kc">False</span></div>
 
-<div class="viewcode-block" id="ObsSurface.set_uuid"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.set_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">set_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="ObsSurface.set_uuid"><a class="viewcode-back" href="../../../api/api_modules.html#openghg.modules.ObsSurface.set_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">set_uuid</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Record a UUID of a Datasource in the datasource table</span>
 
 <span class="sd">        Args:</span>
@@ -352,7 +452,13 @@
         <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Datasource</span><span class="o">.</span><span class="n">_datasource_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">delete_object</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
 
-        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span></div></div>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">seen_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span>
+
+    <span class="k">def</span> <span class="nf">set_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filename</span></div>
 </pre></div>
 
            </div>
