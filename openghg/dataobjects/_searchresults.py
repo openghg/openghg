@@ -139,7 +139,6 @@ class SearchResults:
 
         return metadata
 
-
     def retrieve_all(self) -> Dict:
         """Retrieve all the data found during the serch
 
@@ -154,7 +153,9 @@ class SearchResults:
                 for inlet, keys in inlet_data.items():
                     data[site][species][inlet] = self._create_obsdata(site=site, species=species, inlet=inlet)
 
-        return data
+        # TODO - update this once addict is stubbed
+        data_dict: Dict = data.to_dict()
+        return data_dict
 
     def retrieve(
         self, site: str = None, species: str = None, inlet: str = None

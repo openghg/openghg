@@ -43,7 +43,9 @@ def _parse_metadata(filepath: pathType) -> Dict:
         site_data["network"] = "aqmesh_glasgow"
         site_data["sampling_period"] = "NA"
 
-    return site_metadata.to_dict()
+    # TODO - I feel this is a bit clunky
+    dict_metadata: Dict = site_metadata.to_dict()
+    return dict_metadata
 
 
 def read_aqmesh(data_filepath: pathType, metadata_filepath: pathType) -> Dict:
@@ -99,4 +101,5 @@ def read_aqmesh(data_filepath: pathType, metadata_filepath: pathType) -> Dict:
         site_data[site_name]["metadata"]["species"] = species_lower
         site_data[site_name]["metadata"]["units"] = units
 
-    return site_data.to_dict()
+    site_dict: Dict = site_data.to_dict()
+    return site_dict

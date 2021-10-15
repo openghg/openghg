@@ -46,7 +46,6 @@ def search(**kwargs):  # type: ignore
         closest_daterange,
         find_daterange_gaps,
         split_daterange_str,
-        multiple_inlets
     )
     from openghg.dataobjects import SearchResults
 
@@ -245,7 +244,9 @@ def search(**kwargs):  # type: ignore
             # Get the dateranges that are covered by ranking information
             daterange_strs = list(iter_chain.from_iterable([m["dateranges"] for m in data["matching"]]))
             # Find the gaps in the ranking coverage
-            gap_dateranges = find_daterange_gaps(start_search=start_date, end_search=end_date, dateranges=daterange_strs)
+            gap_dateranges = find_daterange_gaps(
+                start_search=start_date, end_search=end_date, dateranges=daterange_strs
+            )
 
             # We want the dateranges and inlets for those dateranges
             inlet_dateranges = data_keys[site][sp]["rank_metadata"]

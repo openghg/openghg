@@ -6,7 +6,8 @@ from typing import DefaultDict, Dict, Union
 
 __all__ = ["ObsSurface"]
 
-pathType = Union[str, Path, list]
+pathType = Union[str, Path]
+multiPathType = Union[str, Path, list]
 resultsType = DefaultDict[str, Dict]
 
 
@@ -18,7 +19,7 @@ class ObsSurface(BaseModule):
 
     @staticmethod
     def read_file(
-        filepath: pathType,
+        filepath: multiPathType,
         data_type: str,
         network: str,
         site: str,
@@ -160,10 +161,10 @@ class ObsSurface(BaseModule):
         metadata_filepath: pathType,
         network: str = "aqmesh_glasgow",
         instrument: str = "aqmesh",
-        sampling_period: str = "NA",
+        sampling_period: int = 60,
         measurement_type: str = "insitu",
         overwrite: bool = False,
-    ):
+    ) -> DefaultDict:
         """Read AQMesh data for the Glasgow network
 
         NOTE - temporary function until we know what kind of AQMesh data

@@ -1,8 +1,7 @@
 from addict import Dict as aDict
 from typing import Dict, List, Union
 from json import loads, dump
-
-# from openghg.dataobjects import ObsData
+from openghg.dataobjects import ObsData
 
 
 __all__ = ["to_dashboard"]
@@ -79,9 +78,10 @@ def to_dashboard(
 
     for site, species_data in data.items():
         for species, inlet_data in species_data.items():
-            for inlet, data in inlet_data.items():
-                dataset = data.data
-                metadata = data.metadata
+            measurement_data: ObsData
+            for inlet, measurement_data in inlet_data.items():
+                dataset = measurement_data.data
+                metadata = measurement_data.metadata
                 df = dataset.to_dataframe()
 
                 rename_lower = {c: str(c).lower() for c in df.columns}
@@ -101,7 +101,7 @@ def to_dashboard(
                 site_data = to_export[network.lower()][species.lower()][site.lower()]
 
                 site_data["data"] = loads(df.to_json())
-                site_data["metadata"] = data.metadata
+                site_data["metadata"] = measurement_data.metadata
 
                 # We only want data from one inlet
                 break
@@ -111,4 +111,6 @@ def to_dashboard(
             dump(obj=to_export, fp=f)
         return None
     else:
-        return to_export
+        # TODO - remove this once addict is stubbed
+        export_dict: Dict = to_export.to_dict()
+        return export_dict
