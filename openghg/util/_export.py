@@ -74,6 +74,9 @@ def to_dashboard(
     """
     to_export = aDict()
 
+    if not isinstance(selected_vars, list):
+        selected_vars = [selected_vars]
+
     selected_vars = [str(c).lower() for c in selected_vars]
 
     for site, species_data in data.items():
@@ -105,6 +108,7 @@ def to_dashboard(
 
                 # We only want data from one inlet
                 break
+
 
     if filename is not None:
         with open(filename, "w") as f:
