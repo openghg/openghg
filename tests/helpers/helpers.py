@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import List
 
-__all__ = ["get_datapath", "get_emissions_datapath", "get_footprint_datapath", "glob_files"]
+__all__ = ["get_datapath", "get_emissions_datapath", "get_footprint_datapath", "glob_files", "get_datapath_mobile"]
 
 
 def get_datapath(filename: str, data_type: str) -> Path:
@@ -24,15 +24,21 @@ def get_datapath(filename: str, data_type: str) -> Path:
         .parent.parent.joinpath(f"data/proc_test_data/{data_type}/{filename}")
     )
 
+def get_mobile_datapath(filename: str) -> Path:
+    """Return the path to the emissions test data file"""
+    return get_datapath_base(data_type="mobile", filename=filename)
 
 def get_emissions_datapath(filename: str) -> Path:
     """Return the path to the emissions test data file"""
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/emissions/{filename}")
-
+    return get_datapath_base(data_type="emissions", filename=filename)
 
 def get_footprint_datapath(filename: str) -> Path:
     """Return the path to the footprint test data file"""
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/footprints/{filename}")
+    return get_datapath_base(data_type="footprints", filename=filename)
+
+def get_datapath_base(data_type: str, filename: str) -> Path:
+    """Return the path to the footprint test data file"""
+    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/{data_type}/{filename}")
 
 
 def glob_files(search_str: str, data_type: str) -> List:

@@ -42,4 +42,4 @@ from ._time import (
 
 from ._errors import InvalidSiteError, UnknownDataError, FunctionError
 from ._tutorial import bilsdale_datapaths
-from ._export import to_dashboard
+from ._export import to_dashboard, to_dashboard_mobile
