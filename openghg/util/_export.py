@@ -123,6 +123,8 @@ def to_dashboard_mobile(data: Dict, filename: Union[str, Path] = None) -> Union[
         Args:
             data: Data dictionary
             filename: Filename for export of JSON
+        Returns:
+            dict or None: Dictonary if no filename given
     """
     to_export = aDict()
 
@@ -138,13 +140,13 @@ def to_dashboard_mobile(data: Dict, filename: Union[str, Path] = None) -> Union[
         # see https://plotly.com/javascript/mapbox-density-heatmaps/
         plotly_structure = [{"type": 'densitymapbox', "lon": longitude, "lat": latitude, "z": ch4}]
 
-        
         to_export[species]["data"] = plotly_structure
         to_export[species]["metadata"] = metadata
 
     if filename is not None:
         with open(filename, "w") as f:
             dump(to_export, f)
+        return None
     else:
         to_return: Dict = to_export.to_dict()
         return to_return

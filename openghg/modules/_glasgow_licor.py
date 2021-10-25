@@ -2,9 +2,9 @@ __all__ = ["read_glasgow_licor"]
 
 from pandas import read_csv, to_datetime
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict
 from addict import Dict as aDict
-import json
+
 
 def read_glasgow_licor(filepath: Path) -> Dict:
     """ Read the Glasgow LICOR data from NPL
@@ -32,8 +32,5 @@ def read_glasgow_licor(filepath: Path) -> Dict:
     data["ch4"]["metadata"] = metadata
     data["ch4"]["data"] = ds
 
-    return data.to_dict()
-
-
-
-
+    to_return: Dict = data.to_dict()
+    return to_return

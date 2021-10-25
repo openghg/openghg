@@ -3,6 +3,7 @@ from openghg.modules import read_glasgow_licor
 from pandas import Timestamp
 import pytest
 
+
 def test_glasgow_licor_read():
     test_data = get_mobile_datapath(filename="glasgow_licor_sample.txt")
     data = read_glasgow_licor(filepath=test_data)

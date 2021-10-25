@@ -80,7 +80,7 @@ def test_to_dashboard_mobile_return_dict():
     exported = to_dashboard_mobile(data=data)
 
     exported_data = exported["ch4"]["data"][0]
-    
+
     assert exported_data["type"] == "densitymapbox"
 
     lon_data = exported_data["lon"]

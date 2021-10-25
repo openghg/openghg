@@ -1,13 +1,15 @@
-from openghg.modules import BaseModule
-from pathlib import Path
-from typing import Union, List, Dict
+# from openghg.modules import BaseModule
+# from pathlib import Path
+# from typing import Union
 
-pathType = Union[str, Path]
+# pathType = Union[str, Path]
 
-class ObsMobile(BaseModule):
-    def __init__(self):
-        self.something = []
 
-    @staticmethod
-    def read_file(filepath: pathType, network: str):
-        raise NotImplementedError
+# class ObsMobile(BaseModule):
+#     def __init__(self):
+#         self.something = []
+#         raise NotImplementedError
+
+#     @staticmethod
+#     def read_file(filepath: pathType, network: str):
+#         raise NotImplementedError
