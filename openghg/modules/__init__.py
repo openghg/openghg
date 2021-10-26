@@ -21,3 +21,4 @@ from ._emissions import Emissions
 from ._eulerian_model import EulerianModel
 from ._aqmesh import read_aqmesh
 from ._glasgow_licor import read_glasgow_licor
+from ._glasgow_picarro import GLASGOWPICARRO
