@@ -140,11 +140,7 @@ def to_dashboard_mobile(data: Dict, filename: Union[str, Path] = None) -> Union[
         longitude = spec_data["longitude"].values.tolist()
         ch4 = spec_data["ch4"].values.tolist()
 
-        # This is the structure expected by plotly
-        # see https://plotly.com/javascript/mapbox-density-heatmaps/
-        plotly_structure = [{"type": 'densitymapbox', "lon": longitude, "lat": latitude, "z": ch4}]
-
-        to_export[species]["data"] = plotly_structure
+        to_export[species]["data"] = {"lon": longitude, "lat": latitude, "z": ch4}
         to_export[species]["metadata"] = metadata
 
     if filename is not None:

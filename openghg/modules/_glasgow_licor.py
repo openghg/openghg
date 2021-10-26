@@ -21,7 +21,7 @@ def read_glasgow_licor(filepath: Path) -> Dict:
                     infer_datetime_format=True, index_col="time", usecols=use_cols)
 
     rename_cols = {"LAT": "latitude", "LON": "longitude", "Methane_Enhancement_Over_Background(ppb)": "ch4"}
-    df = df.dropna(axis="rows", how="all").rename(columns=rename_cols)
+    df = df.rename(columns=rename_cols).dropna(axis="rows", how="any")
     df.index = to_datetime(df.index)
 
     ds = df.to_xarray()
