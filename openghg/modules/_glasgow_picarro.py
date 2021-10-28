@@ -36,7 +36,8 @@ class GLASGOWPICARRO:
         rename_cols = {f" {s}_C": s for s in species}
         df = df.rename(columns=rename_cols)
 
-        site_name = "Glasgow Science Centre Tower"
+        site = "GST"
+        long_site_name = "Glasgow Science Centre Tower"
 
         gas_data = aDict()
         for s in species:
@@ -44,7 +45,7 @@ class GLASGOWPICARRO:
 
             gas_data[s]["metadata"] = {
                 "species": s,
-                "long_name": site_name,
+                "long_name": long_site_name,
                 "latitude": 55.859238,
                 "longitude": -4.296180,
                 "network": "npl_picarro",
