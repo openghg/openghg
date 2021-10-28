@@ -52,7 +52,7 @@ class GLASGOWPICARRO:
                 "inlet": "124m",
                 "sampling_period": "NA",
                 "site": site,
-                "instrument": instrument,
+                "instrument": "picarro",
             }
 
         # TODO - remove this once mypy stubs for addict are added
