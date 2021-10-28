@@ -109,7 +109,6 @@ def to_dashboard(
                 # We only want data from one inlet
                 break
 
-
     if filename is not None:
         with open(filename, "w") as f:
             dump(obj=to_export, fp=f)
