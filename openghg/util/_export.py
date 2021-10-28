@@ -110,7 +110,6 @@ def to_dashboard(
                 # We only want data from one inlet
                 break
 
-
     if filename is not None:
         with open(filename, "w") as f:
             dump(obj=to_export, fp=f)
@@ -121,14 +120,16 @@ def to_dashboard(
         return export_dict
 
 
-def to_dashboard_mobile(data: Dict, filename: Union[str, Path] = None) -> Union[Dict, None]:
-    """ Export the Glasgow LICOR data to JSON for the dashboard
+def to_dashboard_mobile(
+    data: Dict, filename: Union[str, Path] = None
+) -> Union[Dict, None]:
+    """Export the Glasgow LICOR data to JSON for the dashboard
 
-        Args:
-            data: Data dictionary
-            filename: Filename for export of JSON
-        Returns:
-            dict or None: Dictonary if no filename given
+    Args:
+        data: Data dictionary
+        filename: Filename for export of JSON
+    Returns:
+        dict or None: Dictonary if no filename given
     """
     to_export = aDict()
 
