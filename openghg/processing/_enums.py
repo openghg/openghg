@@ -15,6 +15,7 @@ class DataTypes(Enum):
     NPL = "NPL"
     BTT = "BTT"
     AQMESH = "AQMESH"
+    GLASGOWPICARRO = "GLASGOWPICARRO"
 
 
 class ObsTypes(Enum):

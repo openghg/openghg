@@ -1,10 +1,11 @@
 from addict import Dict as aDict
 from typing import Dict, List, Union
 from json import loads, dump
+from pathlib import Path
 from openghg.dataobjects import ObsData
 
 
-__all__ = ["to_dashboard"]
+__all__ = ["to_dashboard", "to_dashboard_mobile"]
 
 
 # def to_dashboard(
@@ -117,3 +118,36 @@ def to_dashboard(
         # TODO - remove this once addict is stubbed
         export_dict: Dict = to_export.to_dict()
         return export_dict
+
+
+def to_dashboard_mobile(
+    data: Dict, filename: Union[str, Path] = None
+) -> Union[Dict, None]:
+    """Export the Glasgow LICOR data to JSON for the dashboard
+
+    Args:
+        data: Data dictionary
+        filename: Filename for export of JSON
+    Returns:
+        dict or None: Dictonary if no filename given
+    """
+    to_export = aDict()
+
+    for species, species_data in data.items():
+        spec_data = species_data["data"]
+        metadata = species_data["metadata"]
+
+        latitude = spec_data["latitude"].values.tolist()
+        longitude = spec_data["longitude"].values.tolist()
+        ch4 = spec_data["ch4"].values.tolist()
+
+        to_export[species]["data"] = {"lon": longitude, "lat": latitude, "z": ch4}
+        to_export[species]["metadata"] = metadata
+
+    if filename is not None:
+        with open(filename, "w") as f:
+            dump(to_export, f)
+        return None
+    else:
+        to_return: Dict = to_export.to_dict()
+        return to_return
