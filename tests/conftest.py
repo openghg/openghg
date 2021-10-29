@@ -25,7 +25,7 @@ def pytest_configure(config):
 
 
 def pytest_sessionstart(session):
-    """ Called after the Session object has been created and
+    """Called after the Session object has been created and
     before performing collection and entering the run test loop.
     """
     # Save the old OpenGHG object store environment variable if there is one
@@ -38,10 +38,16 @@ def pytest_sessionstart(session):
 
 
 def pytest_sessionfinish(session, exitstatus):
-    """ Called after whole test run finished, right before
+    """Called after whole test run finished, right before
     returning the exit status to the system.
     """
     temp_path = os.environ["OPENGHG_PATH"]
+    # Delete the testing object store
+    try:
+        shutil.rmtree(temp_path)
+    except FileNotFoundError:
+        pass
+
     # Set the environment variable back
     try:
         # Delete the testing object store

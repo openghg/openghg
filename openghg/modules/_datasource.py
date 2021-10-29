@@ -113,7 +113,7 @@ class Datasource:
         from openghg.util import daterange_overlap
 
         # Group by year
-        year_group = list(data.groupby("time.year"))
+        year_group = data.groupby("time.year")
         year_data = [data for _, data in year_group if data]
 
         # Use a dictionary keyed with the daterange covered by each segment of data
