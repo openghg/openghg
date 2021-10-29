@@ -39,6 +39,8 @@ class GLASGOWPICARRO:
         site = "GST"
         long_site_name = "Glasgow Science Centre Tower"
 
+        units = {"ch4": "ppb", "co2": "ppm"}
+
         gas_data = aDict()
         for s in species:
             gas_data[s]["data"] = df[[s]].to_xarray()
@@ -53,6 +55,7 @@ class GLASGOWPICARRO:
                 "sampling_period": "NA",
                 "site": site,
                 "instrument": "picarro",
+                "units": units[s],
             }
 
         # TODO - remove this once mypy stubs for addict are added
