@@ -5,6 +5,7 @@ from pathlib import Path
 from openghg.modules import CRDS
 from openghg.objectstore import get_local_bucket
 from openghg.processing import assign_attributes
+
 # import tempfile
 # from cfchecker import CFChecker
 
@@ -13,15 +14,23 @@ from openghg.processing import assign_attributes
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
+
 def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+    return (
+        Path(__file__)
+        .resolve(strict=True)
+        .parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+    )
+
 
 def test_crds_attributes():
     get_local_bucket(empty=True)
 
     crds = CRDS()
 
-    filepath = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
+    filepath = get_datapath(
+        filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS"
+    )
 
     combined = crds.read_file(data_filepath=filepath, site="tac", network="DECC")
 
@@ -57,11 +66,12 @@ def test_crds_attributes():
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
-        'Processed by': 'OpenGHG_Cloud',
+        "Processed by": "OpenGHG_Cloud",
         "station_longitude": 1.13872,
         "station_latitude": 52.51775,
         "station_long_name": "Tacolneston Tower, UK",
         "station_height_masl": 50.0,
+        "long_name": "tacolneston",
     }
 
     assert ch4_attr == global_attributes

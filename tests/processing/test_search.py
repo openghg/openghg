@@ -26,6 +26,7 @@ def test_specific_keyword_search():
         "species": "co2",
         "scale": "wmo-x2007",
         "data_type": "timeseries",
+        "long_name": "bilsdale",
     }
 
     assert metadata == expected_metadata
@@ -58,6 +59,7 @@ def test_specific_keyword_search():
         "type": "air",
         "network": "decc",
         "scale": "WMO-X2007",
+        "long_name": "bilsdale",
     }
 
     assert ds.attrs == expected_attrs
@@ -141,6 +143,7 @@ def test_unranked_search_datetimes():
         "species": "co2",
         "scale": "wmo-x2007",
         "data_type": "timeseries",
+        "long_name": "bilsdale",
     }
 
     data_keys = results.keys(site="bsd", species="co2", inlet="248m")
@@ -168,7 +171,9 @@ def test_search_find_any_unranked():
     inlet = "248m"
     instrument = "picarro"
 
-    results = search(find_all=False, species=species, site=sites, inlet=inlet, instrument=instrument)
+    results = search(
+        find_all=False, species=species, site=sites, inlet=inlet, instrument=instrument
+    )
 
     raw_results = results.raw()
 
@@ -233,6 +238,7 @@ def test_ranked_bsd_search():
             "species": "ch4",
             "scale": "wmo-x2004a",
             "data_type": "timeseries",
+            "long_name": "bilsdale",
         },
         "108m": {
             "site": "bsd",
@@ -245,6 +251,7 @@ def test_ranked_bsd_search():
             "species": "ch4",
             "scale": "wmo-x2004a",
             "data_type": "timeseries",
+            "long_name": "bilsdale",
         },
         "42m": {
             "site": "bsd",
@@ -257,6 +264,7 @@ def test_ranked_bsd_search():
             "species": "ch4",
             "scale": "wmo-x2004a",
             "data_type": "timeseries",
+            "long_name": "bilsdale",
         },
     }
 
@@ -325,6 +333,7 @@ def test_search_find_any():
         "species": "ch4",
         "scale": "wmo-x2004a",
         "data_type": "timeseries",
+        "long_name": "bilsdale",
     }
 
     assert bsd_data["co2"]["42m"]["metadata"] == {
@@ -338,6 +347,7 @@ def test_search_find_any():
         "species": "co2",
         "scale": "wmo-x2007",
         "data_type": "timeseries",
+        "long_name": "bilsdale",
     }
 
 
@@ -357,7 +367,7 @@ def test_no_ranked_data_raises():
 
     # Make sure this doesn't fail
     res = search(site="tac", species="co2", inlet="100m")
-    
+
     assert res
 
 
