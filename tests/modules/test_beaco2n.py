@@ -80,24 +80,32 @@ def test_read_glasgow_valid_data():
     filepath = get_datapath(filename="175_BELLAHOUSTONACADEMY.csv", data_type="BEACO2N")
 
     result = beacon.read_file(
-        data_filepath=filepath, site="BELLAHOUSTONACADEMY", network="BEACO2N", inlet="99m"
+        data_filepath=filepath,
+        site="BELLAHOUSTONACADEMY",
+        network="BEACO2N",
+        inlet="99m",
     )
 
-    pm_data = result["pm"]["data"]
+    co2_data = result["co2"]["data"]
 
     assert sorted(list(result.keys())) == sorted(["pm", "co", "co2"])
 
-    assert pm_data.time[0] == Timestamp("2021-07-15T13:00:00")
-    assert pm_data.pm[0] == 7.2
-    assert isnan(pm_data.pm_qc[0])
+    assert co2_data.time[0] == Timestamp("2021-07-15T12:00:00")
+    assert co2_data.co2[0] == 410.7
+    assert isnan(co2_data.co2_qc[0])
 
 
 def test_read_glasgow_no_valid_data():
     beacon = BEACO2N()
-    filepath = get_datapath(filename="171_UNIVERSITYOFSTRATHCLYDE.csv", data_type="BEACO2N")
+    filepath = get_datapath(
+        filename="171_UNIVERSITYOFSTRATHCLYDE.csv", data_type="BEACO2N"
+    )
 
     result = beacon.read_file(
-        data_filepath=filepath, site="UNIVERSITYOFSTRATHCLYDE", network="BEACO2N", inlet="99m"
+        data_filepath=filepath,
+        site="UNIVERSITYOFSTRATHCLYDE",
+        network="BEACO2N",
+        inlet="99m",
     )
 
     assert not result
@@ -106,10 +114,11 @@ def test_read_glasgow_no_valid_data():
 def test_incorrect_file_read_raises():
     filepath = get_datapath(filename="incorrect_format.csv", data_type="BEACO2N")
 
-
     beacon = BEACO2N()
     with pytest.raises(ValueError):
-        beacon.read_file(data_filepath=filepath, site="test", network="test", inlet="test")
+        beacon.read_file(
+            data_filepath=filepath, site="test", network="test", inlet="test"
+        )
 
 
 def test_incorrect_site_raises():
@@ -118,4 +127,6 @@ def test_incorrect_site_raises():
     beacon = BEACO2N()
 
     with pytest.raises(ValueError):
-        beacon.read_file(data_filepath=filepath, site="test", network="test", inlet="test")
+        beacon.read_file(
+            data_filepath=filepath, site="test", network="test", inlet="test"
+        )
