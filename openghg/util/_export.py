@@ -54,7 +54,7 @@ __all__ = ["to_dashboard", "to_dashboard_mobile"]
 
 
 def to_dashboard(
-    data: Dict, selected_vars: List, downsample_n: int = 5, filename: str = None
+    data: Dict, selected_vars: List, downsample_n: int = 3, filename: str = None
 ) -> Union[Dict, None]:
     """Takes a Dataset produced by OpenGHG and outputs it into a JSON
     format readable by the OpenGHG dashboard or a related project.
@@ -97,8 +97,10 @@ def to_dashboard(
                     continue
 
                 df = df[to_extract]
+
                 # Downsample the data
-                df = df.iloc[::downsample_n]
+                if downsample_n > 1:
+                    df = df.iloc[::downsample_n]
 
                 network = metadata["network"]
 

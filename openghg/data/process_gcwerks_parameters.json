@@ -269,6 +269,13 @@
         "data_owner_email": "s.odoherty@bristol.ac.uk"
       }
     },
+    "KVH": {
+      "gcwerks_site_name": "loch lomond",
+      "global_attributes": {
+        "data_owner": "Simon O'Doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk"
+      }
+    },
     "RGL": {
       "gcwerks_site_name": "ridgehill",
       "global_attributes": {
