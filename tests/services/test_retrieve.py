@@ -15,7 +15,9 @@ def tempdir(tmpdir_factory):
 def crds(authenticated_user):
     get_local_bucket(empty=True)
     service_url = "openghg"
-    bsd_file = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+    bsd_file = get_datapath(
+        filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS"
+    )
     process = Process(service_url=service_url)
 
     process.process_files(
@@ -72,6 +74,7 @@ def test_retrieve(authenticated_user):
         "type": "air",
         "network": "decc",
         "scale": "WMO-X2007",
+        "long_name": "bilsdale",
     }
 
     assert ds["time"][0] == Timestamp("2014-01-30T11:12:30")

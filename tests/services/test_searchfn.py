@@ -25,7 +25,9 @@ def read_data(authenticated_user):
         storage_url="storage",
     )
 
-    bsd_file = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+    bsd_file = get_datapath(
+        filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS"
+    )
     hfd_files = glob_files(search_str="hfd.picarro.1minute", data_type="CRDS")
 
     process.process_files(
@@ -72,6 +74,7 @@ def test_search(read_data):
         "species": "co2",
         "scale": "wmo-x2007",
         "data_type": "timeseries",
+        "long_name": "bilsdale",
     }
 
     results = search.search(site="hfd", species="co", skip_ranking=True)
@@ -89,6 +92,7 @@ def test_search(read_data):
         "species": "co",
         "scale": "wmo-x2014a",
         "data_type": "timeseries",
+        "long_name": "heathfield",
     }
 
     assert raw_results["hfd"]["co"]["100m"]["metadata"] == {
@@ -102,6 +106,7 @@ def test_search(read_data):
         "species": "co",
         "scale": "wmo-x2014a",
         "data_type": "timeseries",
+        "long_name": "heathfield",
     }
 
     assert len(raw_results["hfd"]["co"]["50m"]["keys"]) == 3

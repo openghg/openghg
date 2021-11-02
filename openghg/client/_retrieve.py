@@ -39,8 +39,6 @@ class Retrieve:
 
         response = self._service.call_function(function="retrieve.retrieve", args=args)
 
-        print(response)
-
         response_data = response["results"]
 
         datasets = {key: open_dataset(data) for key, data in response_data.items()}
