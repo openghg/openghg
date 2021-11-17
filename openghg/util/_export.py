@@ -143,7 +143,7 @@ def to_dashboard_mobile(
         longitude = spec_data["longitude"].values.tolist()
         ch4 = spec_data["ch4"].values.tolist()
 
-        to_export[species]["data"] = {"lon": longitude, "lat": latitude, "z": ch4}
+        to_export[species]["data"] = {"lat": latitude, "lon": longitude, "z": ch4}
         to_export[species]["metadata"] = metadata
 
     if filename is not None:
