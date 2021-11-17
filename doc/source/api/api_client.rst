@@ -5,7 +5,7 @@ client API Detail
 Process
 =======
 
-The ``Process`` class is used to upload locally stored files to cloud for processing.
+The ``Process`` class is used upload data for processing by OpenGHG.
 
 .. autoclass:: openghg.client.Process
     :members:

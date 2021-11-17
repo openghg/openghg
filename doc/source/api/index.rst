@@ -32,18 +32,6 @@ Classes within the client module are used to interact with the cloud based OpenG
 :class:`~openghg.client.JobRunner`
     Run jobs on a local or cloud HPC cluster
 
-jobs
-====
-
-Classes within this module are used for running simulation jobs on high performace computing (HPC) clusters either locally
-or within the cloud based on a cluster as a service (CaaS) offering (see CitC).
-
-:class:`~openghg.jobs.SSHConnect`
-    Connect via SSH to a HPC cluster
-
-:class:`~openghg.jobs.JobDrive`
-    Create a cloud storage drive for use by the HPC job
-
 localclient
 ===========
 

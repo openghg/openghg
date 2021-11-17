@@ -1,9 +1,6 @@
 from typing import Dict, List, Optional, Union
 from openghg.util import valid_site, create_daterange_str, InvalidSiteError
 
-# from pyvis.network import Network
-# import matplotlib.cm as cm
-# import matplotlib
 from Acquire.Client import Wallet
 
 __all__ = ["RankSources"]

@@ -10,8 +10,8 @@ def assign_attributes(
     network: str = None,
     sampling_period: str = None,
 ) -> Dict:
-    """Assign attributes to the data we've processed. This ensures that the xarray Datasets produced
-    as CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
+    """Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
+    are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
     to the Datasource allowing more detailed searching of data.
 
     Args:
