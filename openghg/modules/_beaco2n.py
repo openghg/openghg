@@ -11,10 +11,10 @@ class BEACO2N:
     def read_file(
         self,
         data_filepath: Union[str, Path],
-        site: Optional[str] = None,
-        network: Optional[str] = None,
-        inlet: Optional[str] = None,
-        instrument: Optional[str] = None,
+        site: str,
+        network: str,
+        inlet: str,
+        instrument: Optional[str] = "shinyei",
         sampling_period: Optional[str] = None,
         measurement_type: Optional[str] = None,
     ) -> Dict:
@@ -27,7 +27,6 @@ class BEACO2N:
             dict: Dictionary of data
         """
         import pandas as pd
-        from numpy import nan as np_nan
         from openghg.util import load_json
         from collections import defaultdict
         from openghg.util import clean_string
@@ -35,51 +34,71 @@ class BEACO2N:
         if sampling_period is None:
             sampling_period = "NOT_SET"
 
-        datetime_columns = {"time": ["datetime"]}
-        rename_cols = {"PM_ug/m3": "pm", "PM_ug/m3_QC_level": "pm_qc", "co2_ppm": "co2", "co2_ppm_QC_level": "co2_qc"}
-        use_cols = [1, 5, 6, 7, 8]
-
         data_filepath = Path(data_filepath)
+        datetime_columns = {"time": ["datetime"]}
+        use_cols = [1, 5, 6, 7, 8, 9, 10]
+        na_values = [-999.0]
+
+        site = clean_string(site)
 
         try:
             data = pd.read_csv(
                 data_filepath,
                 index_col="time",
-                parse_dates=datetime_columns,
-                na_values=[-999.0, "1a"],
                 usecols=use_cols,
+                parse_dates=datetime_columns,
+                na_values=na_values,
             )
         except ValueError as e:
-            raise ValueError(f"Unable to read data file, please make sure it is in the standard BEACO2N format.\nError: {e}")
+            raise ValueError(
+                f"Unable to read data file, please make sure it is in the standard BEACO2N format.\nError: {e}"
+            )
 
         beaco2n_site_data = load_json("beaco2n_site_data.json")
 
-        site_name = data_filepath.stem.upper().replace(" ", "").replace("_", "")
-
         try:
-            site_metadata = beaco2n_site_data[site_name]
+            site_metadata = beaco2n_site_data[site.upper()]
         except KeyError:
-            raise ValueError(f"Site {site_name} not recognized.")
+            raise ValueError(f"Site {site} not recognized.")
 
         site_metadata["comment"] = "Retrieved from http://beacon.berkeley.edu/"
 
+        # Check which columns we have in the data and build the rename dict
+        possible_rename_cols = {
+            "PM_ug/m3": "pm",
+            "PM_ug/m3_QC_level": "pm_qc",
+            "co2_ppm": "co2",
+            "co2_ppm_QC_level": "co2_qc",
+            "co_ppm": "co",
+            "co_ppm_QC_level": "co_qc",
+        }
+        # Not all columns are in data from different sites, i.e. Glasgow has a CO column
+        rename_cols = {k: v for k, v in possible_rename_cols.items() if k in data}
         # Set all values below zero to NaN
-        data[data < 0] = np_nan
         data = data.rename(columns=rename_cols)
 
-        measurement_types = ["pm", "co2"]
-        units = {"pm": "ug/m3", "co2": "ppm"}
+        # Read the columns available and make sure we have them to iterate over
+        possible_measurement_types = ["pm", "co", "co2"]
+        measurement_types = [c for c in possible_measurement_types if c in data]
+
+        units = {"pm": "ug/m3", "co2": "ppm", "co": "ppm"}
 
         gas_data: DefaultDict[str, Dict[str, Union[DataFrame, Dict]]] = defaultdict(dict)
         for mt in measurement_types:
             m_data = data[[mt, f"{mt}_qc"]]
-            m_data = m_data.dropna(axis="rows", how="any").to_xarray()
+            m_data = m_data.dropna(axis="rows", subset=[mt])
+
+            # Some sites don't have data for each type, skip that type if all NaNs
+            if m_data.index.empty:
+                continue
+
+            m_data = m_data.to_xarray()
 
             species_metadata = {
                 "units": units[mt],
-                "site": site_name,
+                "site": site,
                 "species": clean_string(mt),
-                "inlet": "NA",
+                "inlet": clean_string(inlet),
                 "network": "beaco2n",
                 "sampling_period": str(sampling_period),
             }

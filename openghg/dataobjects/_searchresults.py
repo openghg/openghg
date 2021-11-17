@@ -1,3 +1,4 @@
+from addict import Dict as aDict
 from dataclasses import dataclass
 from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
 from openghg.dataobjects import ObsData
@@ -16,6 +17,7 @@ class SearchResults:
         results: Search results
         ranked_data: True if results are ranked, else False
     """
+
     T = TypeVar("T", bound="SearchResults")
 
     results: Dict
@@ -30,7 +32,9 @@ class SearchResults:
         print_strs = []
         for site, species in self.results.items():
             if self.ranked_data:
-                print_strs.append(f"Site: {site.upper()} \nSpecies found: {', '.join(self.results[site].keys())}")
+                print_strs.append(
+                    f"Site: {site.upper()} \nSpecies found: {', '.join(self.results[site].keys())}"
+                )
             else:
                 print_strs.append(f"Site: {site.upper()}")
                 print_strs.append("---------")
@@ -38,6 +42,9 @@ class SearchResults:
             print_strs.append("\n")
 
         return "\n".join(print_strs)
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def __bool__(self) -> bool:
         return bool(self.results)
@@ -132,7 +139,27 @@ class SearchResults:
 
         return metadata
 
-    def retrieve(self, site: str = None, species: str = None, inlet: str = None) -> Union[Dict[str, ObsData], ObsData]:
+    def retrieve_all(self) -> Dict:
+        """Retrieve all the data found during the serch
+
+        Returns:
+            dict: Dictionary of all data
+        """
+        data = aDict()
+
+        # Can we just traverse the dict without looping?
+        for site, species_data in self.results.items():
+            for species, inlet_data in species_data.items():
+                for inlet, keys in inlet_data.items():
+                    data[site][species][inlet] = self._create_obsdata(site=site, species=species, inlet=inlet)
+
+        # TODO - update this once addict is stubbed
+        data_dict: Dict = data.to_dict()
+        return data_dict
+
+    def retrieve(
+        self, site: str = None, species: str = None, inlet: str = None
+    ) -> Union[Dict[str, ObsData], ObsData]:
         """Retrieve some or all of the data found in the object store.
 
         Args:
@@ -189,8 +216,11 @@ class SearchResults:
 
             return results
         else:
+            # if len(self.results) == 1 and not all((species, inlet)):
+            #     raise ValueError("Please pass species and inlet")
             if not all((species, site, inlet)):
-                raise ValueError("Please pass site, species and inlet.")
+                raise ValueError("Please pass site, species and inlet")
+
             # TODO - how to do this in a cleaner way for mypy?
             site = str(site)
             species = str(species)

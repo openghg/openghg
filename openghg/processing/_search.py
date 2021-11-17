@@ -46,7 +46,6 @@ def search(**kwargs):  # type: ignore
         closest_daterange,
         find_daterange_gaps,
         split_daterange_str,
-        multiple_inlets
     )
     from openghg.dataobjects import SearchResults
 
@@ -116,11 +115,16 @@ def search(**kwargs):  # type: ignore
     # Find the Datasources that contain matching metadata
     matching_sources = {d.uuid(): d for d in datasources if d.search_metadata(**search_kwargs)}
 
+    # TODO - Update this as it only uses the ACRG repo JSON at the moment
     # Check if this site only has one inlet, if so skip ranking
-    if "site" in search_kwargs:
-        site = search_kwargs["site"]
-        if not isinstance(site, list) and not multiple_inlets(site=site):
-            skip_ranking = True
+    # if "site" in search_kwargs:
+    #     site = search_kwargs["site"]
+    #     if not isinstance(site, list) and not multiple_inlets(site=site):
+    #         skip_ranking = True
+
+    # If there isn't any ranking data, skip all the ranking functionality
+    if not obj._rank_data:
+        skip_ranking = True
 
     # If we have the site, inlet and instrument then just return the data
     # TODO - should instrument be added here
@@ -240,7 +244,9 @@ def search(**kwargs):  # type: ignore
             # Get the dateranges that are covered by ranking information
             daterange_strs = list(iter_chain.from_iterable([m["dateranges"] for m in data["matching"]]))
             # Find the gaps in the ranking coverage
-            gap_dateranges = find_daterange_gaps(start_search=start_date, end_search=end_date, dateranges=daterange_strs)
+            gap_dateranges = find_daterange_gaps(
+                start_search=start_date, end_search=end_date, dateranges=daterange_strs
+            )
 
             # We want the dateranges and inlets for those dateranges
             inlet_dateranges = data_keys[site][sp]["rank_metadata"]

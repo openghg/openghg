@@ -201,6 +201,7 @@ class CRDS:
             species_metadata["species"] = clean_string(species)
             species_metadata["inlet"] = inlet
             species_metadata["scale"] = scale
+            species_metadata["long_name"] = site_attributes["long_name"]
 
             combined_data[species] = {
                 "metadata": species_metadata,
@@ -272,12 +273,16 @@ class CRDS:
             self._crds_params = data["CRDS"]
 
         try:
-            attributes: Dict = self._crds_params[site.upper()]["global_attributes"]
+            site_attributes: Dict = self._crds_params[site.upper()]
+            global_attributes: Dict = site_attributes["global_attributes"]
         except KeyError:
             raise ValueError(f"Unable to read attributes for site: {site}")
 
+        attributes = global_attributes
+
         attributes["inlet_height_magl"] = inlet
         attributes["comment"] = self._crds_params["comment"]
+        attributes["long_name"] = site_attributes["gcwerks_site_name"]
 
         return attributes
 

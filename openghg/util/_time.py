@@ -19,6 +19,8 @@ __all__ = [
     "split_encompassed_daterange",
     "daterange_contains",
     "sanitise_daterange",
+    "is_nan",
+    "is_date",
 ]
 
 
@@ -500,3 +502,42 @@ def sanitise_daterange(daterange: str) -> str:
         raise ValueError("Invalid daterange, start after end date")
 
     return create_daterange_str(start=start, end=end)
+
+
+def is_date(date: str) -> str:
+    """ Check if the given value is a date, very limited,
+    needs work
+
+    Args:
+        date
+    Returns:
+        str
+    """
+    from pandas import Timestamp, isnull
+
+    try:
+        d = Timestamp(date)
+        if isnull(d):
+            return "NA"
+
+        return date
+    except ValueError:
+        return "NA"
+
+
+def is_nan(data: Union[int, float]) -> Union[str, float, int]:
+    """ Check if the given value is NaN, is so return an NA string
+
+        TODO - fix up, copied from web-scrape
+
+        Args:
+            data: Data to check
+        Returns:
+            Number or str
+    """
+    from math import isnan
+
+    if isnan(data):
+        return "NA"
+    else:
+        return round(data, 3)
