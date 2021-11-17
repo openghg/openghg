@@ -43,3 +43,7 @@ Recombination
 
 .. autofunction:: openghg.processing.assign_data
 
+.. autofunction:: openghg.processing.single_site_footprint
+
+.. autofunction:: openghg.processing.footprints_data_merge
+

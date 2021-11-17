@@ -340,13 +340,16 @@ We can then call the function using
 
 .. code-block:: bash
 
-curl -X POST -d '{"function" : "testconnection", "args": {}}' http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009
+    curl -X POST -d '{"function" : "testconnection", "args": {}}' http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009
+
+.. note::
+    Your endpoint URL will differ from the one above.
 
 And we should recieve a response such as
 
 .. code-block:: bash
 
-{'results': 'Function run at 2021-06-08 13:34:17.095579+00:00'}
+    {'results': 'Function run at 2021-06-08 13:34:17.095579+00:00'}
 
 Now we know our Dockerised function can be called and works correctly.
 
