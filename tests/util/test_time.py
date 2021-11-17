@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 from pandas import Timestamp
 from openghg.util import (
     create_daterange,
@@ -13,6 +14,8 @@ from openghg.util import (
     trim_daterange,
     split_encompassed_daterange,
     daterange_contains,
+    check_nan, 
+    check_date
 )
 
 
@@ -314,3 +317,24 @@ def test_daterange_contains():
     res = daterange_contains(container=container, contained=contained)
 
     assert not res
+
+
+def test_check_date():
+    date_str = "2021-01-01"
+
+    assert check_date(date=date_str) == date_str
+    assert check_date(date="this") == "NA"
+    assert check_date(date="1001") == "NA"
+
+    unix_timestamp_ms = 1636043284779
+
+    assert check_date(unix_timestamp_ms) == unix_timestamp_ms
+
+
+def test_check_nan():
+    assert check_nan(data=np.nan)
+    assert check_nan(data=123) == 123
+
+    with pytest.raises(TypeError):
+        check_nan(data="123") == "123"
+        assert check_nan(data=None)

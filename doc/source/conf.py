@@ -219,7 +219,10 @@ def setup(app):
 
         class AutoAutoSummary(Autosummary):
 
-            option_spec = {"methods": directives.unchanged, "attributes": directives.unchanged}
+            option_spec = {
+                "methods": directives.unchanged,
+                "attributes": directives.unchanged,
+            }
 
             required_arguments = 1
 
@@ -235,7 +238,9 @@ def setup(app):
                         continue
                     if documenter.objtype == typ:
                         items.append(name)
-                public = [x for x in items if x in include_public or not x.startswith("_")]
+                public = [
+                    x for x in items if x in include_public or not x.startswith("_")
+                ]
                 return public, items
 
             def run(self):
@@ -248,12 +253,16 @@ def setup(app):
                         _, methods = self.get_members(c, "method", ["__init__"])
 
                         self.content = [
-                            "~%s.%s" % (clazz, method) for method in methods if not method.startswith("_")
+                            "~%s.%s" % (clazz, method)
+                            for method in methods
+                            if not method.startswith("_")
                         ]
                     if "attributes" in self.options:
                         _, attribs = self.get_members(c, "attribute")
                         self.content = [
-                            "~%s.%s" % (clazz, attrib) for attrib in attribs if not attrib.startswith("_")
+                            "~%s.%s" % (clazz, attrib)
+                            for attrib in attribs
+                            if not attrib.startswith("_")
                         ]
                 finally:
                     return super(AutoAutoSummary, self).run()

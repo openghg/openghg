@@ -3,20 +3,14 @@
 """
 
 from ._util import (
-    get_datapath,
-    load_json,
-    load_object,
-    read_header,
     unanimous,
     valid_site,
-    is_number,
-    to_lowercase,
     pairwise,
     multiple_inlets,
 )
 
 from ._hashing import hash_string, hash_file
-from ._strings import clean_string
+from ._strings import clean_string, to_lowercase
 
 from ._time import (
     timestamp_tzaware,
@@ -36,10 +30,11 @@ from ._time import (
     split_encompassed_daterange,
     daterange_contains,
     sanitise_daterange,
-    is_nan, 
-    is_date
+    check_nan,
+    check_date,
 )
 
 from ._errors import InvalidSiteError, UnknownDataError, FunctionError
 from ._tutorial import bilsdale_datapaths
 from ._export import to_dashboard, to_dashboard_mobile
+from ._file import get_datapath, load_json, load_object, read_header
