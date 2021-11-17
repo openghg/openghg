@@ -122,7 +122,7 @@ def single_site_footprint(
     combined_dataset = combined_dataset.transpose(..., "time")
 
     if units is not None:
-        combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset.fp / units))})
+        combined_dataset["fp"].values = combined_dataset["fp"].values / units
         # if HiTRes:
         #     combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes / units))})
 
