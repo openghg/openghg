@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fn setup &mdash; OpenGHG 0+untagged.2.gab094d7 documentation</title>
+  <title>Fn setup &mdash; OpenGHG 0+untagged.2.g2371a36 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -240,11 +240,8 @@ sudo systemctl start firewalld
 </pre></div>
 </div>
 <p>To allow access from the outside world we need to setup rules to allow <code class="docutils literal notranslate"><span class="pre">ssh</span></code>, <code class="docutils literal notranslate"><span class="pre">http</span></code> and <code class="docutils literal notranslate"><span class="pre">https</span></code> traffic.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>ssh
-sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>ssh --permanent
-sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>https
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>ssh --permanent
 sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>https --permanent
-sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>http
 sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>http --permanent
 </pre></div>
 </div>
@@ -315,6 +312,9 @@ step unless our dependencies change.</p>
 </pre></div>
 </div>
 </section>
+<section id="manually-triggering-functions">
+<h2>Manually Triggering Functions<a class="headerlink" href="#manually-triggering-functions" title="Permalink to this headline"></a></h2>
+</section>
 </section>
 
 
@@ -326,7 +326,7 @@ step unless our dependencies change.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020 OpenGHG development team.
-      <span class="lastupdated">Last updated on Oct 15, 2021.
+      <span class="lastupdated">Last updated on Nov 17, 2021.
       </span></p>
   </div>
 
