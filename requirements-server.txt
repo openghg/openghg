@@ -1,4 +1,4 @@
-Acquire @ git+git://github.com/openghg/acquire@devel#egg=Acquire
+Acquire @ git+https://github.com/openghg/acquire@devel#egg=Acquire
 addict
 cdsapi
 fdk

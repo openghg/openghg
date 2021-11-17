@@ -33,15 +33,6 @@ def test_set_rank():
     assert specific_results == {"2001-01-01-00:00:00+00:00_2007-01-01-00:00:00+00:00": 1}
 
 
-def test_passed_dates_and_dateranges_raises():
-    r = RankSources()
-
-    r.get_sources(site="bsd", species="co2")
-
-    with pytest.raises(ValueError):
-        r.set_rank(key="co2_42m_picarro", rank=1, start_date="2001-01-01", end_date="2007-01-01", dateranges=["2021-01-01_2056-05-06"])
-
-
 def test_clear_rank():
     r = RankSources()
 

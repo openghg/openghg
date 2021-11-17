@@ -38,7 +38,9 @@ def get_openghg_local_path() -> Path:
     if env_path is not None:
         return Path(env_path)
     else:
-        raise ValueError("No environment variable OPENGHG_PATH found, please set to use the local object store")
+        raise ValueError(
+            "No environment variable OPENGHG_PATH found, please set to use the local object store"
+        )
 
 
 def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_prefix: bool = False) -> List:
@@ -277,6 +279,7 @@ def query_store() -> Dict:
             "species": metadata["species"],
             "instrument": metadata.get("instrument", "Unknown"),
             "network": metadata.get("network", "Unknown"),
+            "inlet": metadata.get("inlet", "Unknown"),
         }
         data[d.uuid()] = result
 
@@ -291,15 +294,15 @@ def visualise_store() -> pyvis.network.Network:
     Returns:
         pyvis.network.Network
     """
-    from addict import aDict
+    from addict import Dict as aDict
 
     data = query_store()
 
-    net = pyvis.network.Network("800px", "100%", notebook=True, heading="OpenGHG Object Store")
+    net = pyvis.network.Network("800px", "100%", notebook=True)
     net.force_atlas_2based()
 
     # Create the ObsSurface node
-    net.add_node(0, label="ObsSurface", color="#4e79a7", value=5000)
+    net.add_node(0, label="Surface Observations", color="#4e79a7", value=5000)
 
     network_split = aDict()
 
@@ -307,7 +310,8 @@ def visualise_store() -> pyvis.network.Network:
         # Iterate over Datasources to select the networks
         network = value["network"]
         site = value["site"]
-        network_split[network][site][key] = value
+        inlet = value["inlet"]
+        network_split[network][site][inlet][key] = value
 
     for network, sites in network_split.items():
         network_name = network.upper()
@@ -315,21 +319,29 @@ def visualise_store() -> pyvis.network.Network:
         net.add_edge(source=0, to=network)
 
         # Then we want a subnode for each site
-        for site, data in sites.items():
+        for site, site_data in sites.items():
             # Don't want to use a site here as a site might be in multiple networks
             site_name = site.upper()
             site_id = str(uuid4())
             net.add_node(site_id, label=site_name, color="#e15759", value=1000)
             net.add_edge(source=network, to=site_id)
 
-            # Now for each site create the datasource nodes
-            for uid, datasource in data.items():
-                species = datasource["species"]
-                instrument = datasource["instrument"].upper()
+            for inlet, inlet_data in site_data.items():
+                inlet_name = str(inlet).lower()
+                inlet_id = str(uuid4())
+                net.add_node(n_id=inlet_id, label=inlet_name, color="#808080", value=500)
+                net.add_edge(source=site_id, to=inlet_id)
 
-                label = f"{site.upper()} {species.upper()} {instrument}"
-                title = "\n".join([f"Site: {site.upper()}", f"Species : {species.upper()}", f"Instrument: {instrument}"])
-                net.add_node(uid, label=label, title=title, color="#f28e2b", value=100)
-                net.add_edge(source=site_id, to=uid)
+                # Now for each site create the datasource nodes
+                for uid, datasource in inlet_data.items():
+                    species = datasource["species"]
+                    instrument = datasource["instrument"].upper()
+
+                    label = f"{species.upper()} {instrument}"
+                    title = "\n".join(
+                        [f"Site: {site.upper()}", f"Species : {species.upper()}", f"Instrument: {instrument}"]
+                    )
+                    net.add_node(n_id=uid, label=label, title=title, color="#f28e2b", value=100)
+                    net.add_edge(source=inlet_id, to=uid)
 
     return net.show("openghg_objstore.html")
