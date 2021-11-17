@@ -26,7 +26,7 @@ help:
 	@echo "  latex     to make LaTeX files, you can set PAPER=a4 or PAPER=letter"
 
 clean:
-	find ./build/ ! -name '.nojekyll' -exec rm -rf {} +
+	find ./build ! -name '.nojekyll' -type f -exec rm -rf {} +
 	rm -rf source/generated source/api/generated
 
 html:
