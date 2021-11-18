@@ -475,7 +475,7 @@ def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset) -> Any:
 
 def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset, 
                       averaging: Optional[str] = None,
-                      output_TS: Optional[bool] = True, output_fpXflux: Optional[bool] = False) -> Union[Tuple[DataArray, DataArray], DataArray]:
+                      output_TS: Optional[bool] = True, output_fpXflux: Optional[bool] = False) -> Union[Tuple[Any, Any], Any, None]:
     """
     Calculate modelled mole fraction timeseries using high time resolution 
     footprint data and emissions data.
@@ -527,6 +527,7 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
     have no effect if the time frequency was already regular but this may
     not be what we want and may want to add extra code to remove any NaNs, if 
     they are introduced or to find a way to remove this requirement.
+    TODO: mypy doesn't recognised the DataArray output, assumes default which is as Any. See if we can fix this.
     """
     import numpy as np
     import dask.array as da
@@ -722,4 +723,6 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
     elif output_fpXflux:
         return fpXflux.compute()
     elif output_TS:
-        return timeseries.compute()   
+        return timeseries.compute() 
+
+    return None
