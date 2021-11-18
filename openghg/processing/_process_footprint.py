@@ -4,7 +4,7 @@ footprints_data_merge
 """
 from pandas import Timestamp
 from xarray import Dataset, DataArray
-from typing import List, Optional, Tuple, Union, Dict
+from typing import List, Optional, Tuple, Union, Dict, Any
 from openghg.dataobjects import FootprintData
 # from openghg.dataobjects import FluxData
 
@@ -448,7 +448,7 @@ def add_timeseries(combined_dataset: Dataset, flux_dict: Dict[str, Dataset]) -> 
     return combined_dataset
 
 
-def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset) -> Dataset:
+def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset) -> Any:
     """
     Calculate modelled mole fraction timeseries using integrated footprint data.
 
@@ -463,6 +463,7 @@ def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset) -> Datase
             Modelled mole fraction timeseries, dimensions = (time)
 
     TODO: Also allow flux_mod to be returned as an option? Include flags if so.
+    TODO: mypy doesn't recognised Dataset.sum() as another Dataset, assumes default which is as Any. See if we can fix this.
     """
     flux_reindex = flux_ds.reindex_like(combined_dataset, 'ffill')
     flux_mod = combined_dataset.fp * flux_reindex.flux
@@ -474,7 +475,7 @@ def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset) -> Datase
 
 def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset, 
                       averaging: Optional[str] = None,
-                      output_TS: Optional[bool] = True, output_fpXflux: Optional[bool] = False) -> Dataset:
+                      output_TS: Optional[bool] = True, output_fpXflux: Optional[bool] = False) -> Union[Tuple[DataArray, DataArray], DataArray]:
     """
     Calculate modelled mole fraction timeseries using high time resolution 
     footprint data and emissions data.
