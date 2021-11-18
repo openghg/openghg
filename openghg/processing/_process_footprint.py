@@ -433,22 +433,22 @@ def add_timeseries(combined_dataset: Dataset, flux_dict: Dict[str, Dataset]) -> 
     # TODO: Improve ability to merge high time resolution footprints (e.g. species as co2)
     # What do we expect flux_dict to look like?
     for key, flux_ds in flux_dict.items():
-        if key != "high_time_res":
+        if key == "high_time_res":
+            mf_mod: DataArray = timeseries_HiTRes(combined_dataset, flux_ds)
+            name = "mf_mod_high_res"
+            # TODO: May want to reindex afterwards? But can be expensive operation.
+        else:
             # flux_reindex = flux_ds.reindex_like(combined_dataset, 'ffill')
             # combined_dataset['mf_mod'] = DataArray((combined_dataset.fp * flux_reindex.flux).sum(["lat", "lon"]), coords={'time': combined_dataset.time})
             mf_mod = timeseries_integrated(combined_dataset, flux_ds)
-            name = "mf_mod"
-        else:
-            mf_mod = timeseries_HiTRes(combined_dataset, flux_ds)
-            name = "mf_mod_high_res"
-            # TODO: May want to reindex afterwards? But can be expensive operation.
+            name = "mf_mod"            
 
         combined_dataset[name] = DataArray(mf_mod, coords={'time': combined_dataset.time})
 
     return combined_dataset
 
 
-def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset) -> Any:
+def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset) -> DataArray:
     """
     Calculate modelled mole fraction timeseries using integrated footprint data.
 
@@ -463,11 +463,10 @@ def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset) -> Any:
             Modelled mole fraction timeseries, dimensions = (time)
 
     TODO: Also allow flux_mod to be returned as an option? Include flags if so.
-    TODO: mypy doesn't recognised Dataset.sum() as another Dataset, assumes default which is as Any. See if we can fix this.
     """
     flux_reindex = flux_ds.reindex_like(combined_dataset, 'ffill')
-    flux_mod = combined_dataset.fp * flux_reindex.flux
-    timeseries = flux_mod.sum(["lat", "lon"])
+    flux_mod: DataArray = combined_dataset.fp * flux_reindex.flux
+    timeseries: DataArray = flux_mod.sum(["lat", "lon"])
     # combined_dataset['mf_mod'] = DataArray((combined_dataset.fp * flux_reindex.flux).sum(["lat", "lon"]), coords={'time': combined_dataset.time})
 
     return timeseries
@@ -475,7 +474,7 @@ def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset) -> Any:
 
 def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset, 
                       averaging: Optional[str] = None,
-                      output_TS: Optional[bool] = True, output_fpXflux: Optional[bool] = False) -> Union[Tuple[Any, Any], Any, None]:
+                      output_TS: Optional[bool] = True, output_fpXflux: Optional[bool] = False) -> Any:
     """
     Calculate modelled mole fraction timeseries using high time resolution 
     footprint data and emissions data.
@@ -527,10 +526,10 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
     have no effect if the time frequency was already regular but this may
     not be what we want and may want to add extra code to remove any NaNs, if 
     they are introduced or to find a way to remove this requirement.
-    TODO: mypy doesn't recognised the DataArray output, assumes default which is as Any. See if we can fix this.
+    TODO: mypy having trouble with different types options and incompatible types, included as Any for now.
     """
     import numpy as np
-    import dask.array as da
+    import dask.array as da  # type: ignore
     from tqdm import tqdm
     from pandas import date_range
     from math import gcd
@@ -719,10 +718,14 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
                                coords={'time': time_array})
 
     if output_fpXflux and output_TS:
-        return timeseries.compute(), fpXflux.compute()
+        timeseries.compute()
+        fpXflux.compute()
+        return timeseries, fpXflux
     elif output_fpXflux:
-        return fpXflux.compute()
+        fpXflux.compute()
+        return fpXflux
     elif output_TS:
-        return timeseries.compute() 
+        timeseries.compute()
+        return timeseries
 
     return None
