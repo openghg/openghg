@@ -69,6 +69,11 @@ def test_co2_footprint_data_merge():
                                                 start_date=start_date, end_date=end_date, flux_sources=source,
                                                 species=species, load_flux=True, calc_timeseries=True,
                                                 time_resolution="high")
+
+    data = CombinedData_HiTRes.data
+
+    assert "mf_mod_high_res" in data
+    
     
     
 
