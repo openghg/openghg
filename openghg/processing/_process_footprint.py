@@ -497,7 +497,7 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
             Whether to output the modelled flux map DataArray used to create
             the timeseries.
             Default = False
-  
+
     Returns:
         DataArray / DataArray :
             Modelled mole fraction timeseries, dimensions = (time)
@@ -655,7 +655,7 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
         fp_time = fp_HiTRes[:, :, tt, ::-1]
 
         fp_high_freq = fp_time[:, :, 1:]
-        fp_residual = fp_time[:, :, 0:1] # First element (reversed) contains residual footprint
+        fp_residual = fp_time[:, :, 0:1]  # First element (reversed) contains residual footprint
 
         # Extract flux data from dataset
         flux_high_freq = flux_ds_high_freq.flux
@@ -681,7 +681,7 @@ def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset,
                 flux_high_freq = flux_high_freq[..., ::-selection]
                 flux_high_freq = flux_high_freq[..., ::-1]               
         else:
-            flux_high_freq = flux_high_freq[:, :, tt_low:tt_low+1]
+            flux_high_freq = flux_high_freq[:, :, tt_low:tt_low + 1]
 
         # convert to array to use in numba loop
         flux_high_freq = da.array(flux_high_freq)
