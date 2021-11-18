@@ -418,7 +418,7 @@ def align_datasets(
     return obs_data, footprint_data
 
 
-def add_timeseries(combined_dataset: Dataset, flux_dict: Dict[str, FluxData]) -> Dataset:
+def add_timeseries(combined_dataset: Dataset, flux_dict: Dict[str, Dataset]) -> Dataset:
     """
     Add timeseries mole fraction values in footprint_data_merge
 
@@ -447,7 +447,7 @@ def add_timeseries(combined_dataset: Dataset, flux_dict: Dict[str, FluxData]) ->
     return combined_dataset
 
 
-def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset):
+def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset) -> Dataset:
     """
     Calculate modelled mole fraction timeseries using integrated footprint data.
 
@@ -473,7 +473,7 @@ def timeseries_integrated(combined_dataset: Dataset, flux_ds: Dataset):
 
 def timeseries_HiTRes(combined_dataset: Dataset, flux_ds: Dataset, 
                       averaging: Optional[str] = None,
-                      output_TS: Optional[bool] = True, output_fpXflux: Optional[bool] = False):
+                      output_TS: Optional[bool] = True, output_fpXflux: Optional[bool] = False) -> Dataset:
     """
     Calculate modelled mole fraction timeseries using high time resolution 
     footprint data and emissions data.
