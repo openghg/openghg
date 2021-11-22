@@ -1,106 +1,267 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Beginner workflow &mdash; OpenGHG 0+untagged.3.ge81227d documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-        <script src="../../_static/custom.js"></script>
-    <script src="../../_static/js/theme.js"></script>
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Beginner workflow &#8212; OpenGHG 0+untagged.3.g3e3529e documentation</title>
+    
+  <link href="../../_static/css/theme.css" rel="stylesheet">
+  <link href="../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/blank.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+    
+  <link rel="preload" as="script" href="../../_static/js/index.be7d3bbb2ef33a8344ce.js">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Development" href="../../development/index_devel.html" />
-    <link rel="prev" title="Tutorials" href="../index.html" /> 
-</head>
+    <link rel="prev" title="Tutorials" href="../index.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en">
+    
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-            <a href="../../index.html">
-            <img src="../../_static/openghg_logo_v1.png" class="logo" alt="Logo"/>
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../features.html">Features</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation instructions</a></li>
-</ul>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Tutorials</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../index.html#tutorial-1-beginner-workflow">Tutorial 1 - Beginner workflow</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Beginner workflow</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#Check-installation">Check installation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Notebooks">Notebooks</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Set-an-environment-variable-for-the-OpenGHG-object-store">Set an environment variable for the OpenGHG object store</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#The-rest-of-tutorial-requires-updating,-the-cells-below-will-not-work.">The rest of tutorial requires updating, the cells below will not work.</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../development/index_devel.html">Development</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">Documentation</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/index_devapi.html">Developer API documentation</a></li>
-</ul>
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
 
-        </div>
-      </div>
-    </nav>
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">OpenGHG</a>
-      </nav>
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../index.html">
+<p class="title">OpenGHG</p>
+</a>
 
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Tutorials</a> &raquo;</li>
-      <li>Beginner workflow</li>
-      <li class="wy-breadcrumbs-aside">
-      </li>
-  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
-        <a href="../index.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../development/index_devel.html" class="btn btn-neutral float-right" title="Development" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    
   </div>
-  <hr/>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../features.html">
+  Features
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../install.html">
+  Installation instructions
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../index.html">
+  Tutorials
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../development/index_devel.html">
+  Development
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../api/index.html">
+  User API
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../api/index_devapi.html">
+  Developer API
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Beginner workflow
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   Beginner workflow
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Check-installation">
+     Check installation
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Notebooks">
+     Notebooks
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#1.-Setting-up-our-environment">
+       1. Setting up our environment
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Set-an-environment-variable-for-the-OpenGHG-object-store">
+     Set an environment variable for the OpenGHG object store
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#2.-Processing-data">
+       2. Processing data
+      </a>
+     </li>
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#A-note-on-Datasources">
+       A note on Datasources
+      </a>
+      <ul class="nav section-nav flex-column">
+       <li class="toc-h4 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#Note">
+         Note
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#3.-Visualising-the-object-store">
+       3. Visualising the object store
+      </a>
+      <ul class="nav section-nav flex-column">
+       <li class="toc-h4 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#id1">
+         Note
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#4.-Retrieving-data">
+       4. Retrieving data
+      </a>
+     </li>
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#5.-Ranking-data">
+       5. Ranking data
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#The-rest-of-tutorial-requires-updating,-the-cells-below-will-not-work.">
+   The rest of tutorial requires updating, the cells below will not work.
+  </a>
+ </li>
+</ul>
+
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
   
 <style>
 /* CSS for nbsphinx extension */
@@ -348,34 +509,12 @@ div.rendered_html tbody tr:nth-child(odd) {
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
 </style>
 <section id="Beginner-workflow">
-<h1>Beginner workflow<a class="headerlink" href="#Beginner-workflow" title="Permalink to this headline"></a></h1>
+<h1>Beginner workflow<a class="headerlink" href="#Beginner-workflow" title="Permalink to this headline">¶</a></h1>
 <p>This tutorial is a beginner workflow for processing data, visualising the object store and retrieving and visualising data.</p>
 <section id="Check-installation">
-<h2>Check installation<a class="headerlink" href="#Check-installation" title="Permalink to this headline"></a></h2>
+<h2>Check installation<a class="headerlink" href="#Check-installation" title="Permalink to this headline">¶</a></h2>
 <p>This tutorial assumes that you have installed <code class="docutils literal notranslate"><span class="pre">openghg</span></code>. To ensure install has been successful you can open an <code class="docutils literal notranslate"><span class="pre">ipython</span></code> console and import openghg</p>
 <p>In a terminal type</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ipython
@@ -390,10 +529,10 @@ div.rendered_html tbody tr:hover {
 <p>If you get an <code class="docutils literal notranslate"><span class="pre">ImportError</span></code> please go back to the install section of the documentation.</p>
 </section>
 <section id="Notebooks">
-<h2>Notebooks<a class="headerlink" href="#Notebooks" title="Permalink to this headline"></a></h2>
+<h2>Notebooks<a class="headerlink" href="#Notebooks" title="Permalink to this headline">¶</a></h2>
 <p>If you haven’t used Jupyter notebooks before please see <a class="reference external" href="https://realpython.com/jupyter-notebook-introduction/">this introduction</a>.</p>
 <section id="1.-Setting-up-our-environment">
-<h3>1. Setting up our environment<a class="headerlink" href="#1.-Setting-up-our-environment" title="Permalink to this headline"></a></h3>
+<h3>1. Setting up our environment<a class="headerlink" href="#1.-Setting-up-our-environment" title="Permalink to this headline">¶</a></h3>
 <p>First the notebook sets up the environment needed to create the object store at our desired location. By default this location is at <code class="docutils literal notranslate"><span class="pre">/tmp/openghg_store</span></code>. For the purposes of this tutorial this path is fine but as it is a temporary directory it may not survive a reboot of the computer.</p>
 <p>If you want to create an object store that survives a reboot you can change the path to anything you like. We recommened a path such as <code class="docutils literal notranslate"><span class="pre">~/openghg_store</span></code> which will create the object store in your home directory in a directory called <code class="docutils literal notranslate"><span class="pre">openghg_store</span></code>.</p>
 <div class="nbinput docutils container">
@@ -423,7 +562,7 @@ INFO:numexpr.utils:NumExpr defaulting to 2 threads.
 </section>
 </section>
 <section id="Set-an-environment-variable-for-the-OpenGHG-object-store">
-<h2>Set an environment variable for the OpenGHG object store<a class="headerlink" href="#Set-an-environment-variable-for-the-OpenGHG-object-store" title="Permalink to this headline"></a></h2>
+<h2>Set an environment variable for the OpenGHG object store<a class="headerlink" href="#Set-an-environment-variable-for-the-OpenGHG-object-store" title="Permalink to this headline">¶</a></h2>
 <p>Here we create a temporary directory but you can use any folder you like by setting a path in place of <code class="docutils literal notranslate"><span class="pre">tmp_dir.name</span></code>. The object store created by this notebook will only have a lifetime as long as the notebook, if you want to create a longer lived object store set a path below.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -437,7 +576,7 @@ INFO:numexpr.utils:NumExpr defaulting to 2 threads.
 </div>
 </div>
 <section id="2.-Processing-data">
-<h3>2. Processing data<a class="headerlink" href="#2.-Processing-data" title="Permalink to this headline"></a></h3>
+<h3>2. Processing data<a class="headerlink" href="#2.-Processing-data" title="Permalink to this headline">¶</a></h3>
 <p>First we want to process some files from our local directory</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -463,18 +602,18 @@ INFO:numexpr.utils:NumExpr defaulting to 2 threads.
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 1/1 [00:00&lt;00:00,  5.20it/s]
+Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 1/1 [00:00&lt;00:00,  5.11it/s]
 </pre></div></div>
 </div>
 <p>Here <code class="docutils literal notranslate"><span class="pre">decc_results</span></code> will give us a dictionary with the UUIDs (universally unique identifiers) for each of the Datasources the data has been assigned to. This tells us that the data has been processed and stored correctly.</p>
 </section>
 <section id="A-note-on-Datasources">
-<h3>A note on Datasources<a class="headerlink" href="#A-note-on-Datasources" title="Permalink to this headline"></a></h3>
+<h3>A note on Datasources<a class="headerlink" href="#A-note-on-Datasources" title="Permalink to this headline">¶</a></h3>
 <p>Datasources are objects that are stored in the object store (add link to object store notes) that hold the data and metadata associated with each measurement we upload to the platform.</p>
 <p>For example, if we upload a file that contains readings for three gas species from a single site at a specific inlet height OpenGHG will assign this data to three different Datasources, one for each species. Metadata such as the site, inlet height, species, network etc are stored alongside the measurements for easy searching.</p>
 <p>Datasources can also handle multiple versions of data from a single site, so if scales or other factors change multiple versions may be stored for easy future comparison.</p>
 <section id="Note">
-<h4>Note<a class="headerlink" href="#Note" title="Permalink to this headline"></a></h4>
+<h4>Note<a class="headerlink" href="#Note" title="Permalink to this headline">¶</a></h4>
 <p>When you run this notebook different UUIDs will be created for the Datasources. This is expected as each time a Datasource is created from scratch it is assigned a unique UUID.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -492,9 +631,9 @@ Processing: bsd.picarro.1minute.248m.min.dat: 100%|█████████�
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 defaultdict(dict,
-            {&#39;processed&#39;: {&#39;bsd.picarro.1minute.248m.min.dat&#39;: {&#39;ch4&#39;: &#39;42e4ca16-0ade-48b8-9eef-b817cc8f19f2&#39;,
-               &#39;co2&#39;: &#39;9bb0c6be-996c-4ed9-a34a-178c30aebe16&#39;,
-               &#39;co&#39;: &#39;76f57a8b-6445-4d12-b211-18ca7ae08d4c&#39;}}})
+            {&#39;processed&#39;: {&#39;bsd.picarro.1minute.248m.min.dat&#39;: {&#39;ch4&#39;: &#39;105b7477-05b5-4bab-bc57-4c60f8cf7db8&#39;,
+               &#39;co2&#39;: &#39;c4c2d364-ab3f-450a-8a02-f2f3eb9e4f1b&#39;,
+               &#39;co&#39;: &#39;b39dbf72-54bf-48de-bda3-57f320602acf&#39;}}})
 </pre></div></div>
 </div>
 <p>We can now process the AGAGE data. The functions that process the AGAGE data expect data to have an accompanying precisions file. For each data file we create a tuple with the data filename and the precisions filename. A simpler method of uploading these file types is planned.</p>
@@ -545,7 +684,7 @@ Processing: capegrim-medusa.18.C:   0%|          | 0/1 [00:00&lt;?, ?it/s]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:01&lt;00:00,  1.26s/it]
+Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:01&lt;00:00,  1.27s/it]
 </pre></div></div>
 </div>
 <p>When viewing <code class="docutils literal notranslate"><span class="pre">agage_results</span></code> there will be a large number of Datasource UUIDs shown due to the large number of gases in each data file</p>
@@ -565,72 +704,72 @@ Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 defaultdict(dict,
-            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;nf3_70m&#39;: &#39;3307eb7b-e30d-4605-89e3-75021cff1955&#39;,
-               &#39;cf4_70m&#39;: &#39;b35f885a-afed-437b-a267-929a7a012357&#39;,
-               &#39;pfc116_70m&#39;: &#39;74b20b26-8f30-459a-a120-4c7db9d1efe0&#39;,
-               &#39;pfc218_70m&#39;: &#39;9c8f28ea-0a2a-44c8-ae2a-ed0380f76a72&#39;,
-               &#39;pfc318_70m&#39;: &#39;51b5ccfe-0d1c-4685-b47e-2e487f1d47d9&#39;,
-               &#39;c4f10_70m&#39;: &#39;40f77861-65c9-4723-ad7c-fa5356af1d87&#39;,
-               &#39;c6f14_70m&#39;: &#39;3b63db60-fe36-41b5-afa7-9009d1a7ba66&#39;,
-               &#39;sf6_70m&#39;: &#39;de72c0ca-a0e8-4687-bb10-221be45d4fe1&#39;,
-               &#39;so2f2_70m&#39;: &#39;86b590ed-cd78-4589-a325-1d39c321d5b6&#39;,
-               &#39;sf5cf3_70m&#39;: &#39;dd6ba2d0-c73c-497b-8249-d304d5766df0&#39;,
-               &#39;hfc23_70m&#39;: &#39;a554e24a-59ba-4783-8a51-c1e70393cf9a&#39;,
-               &#39;hfc32_70m&#39;: &#39;0b97e5a0-058f-4d9e-91f1-1f564c5a3483&#39;,
-               &#39;hfc125_70m&#39;: &#39;2fcb4a40-733f-472b-8246-925f8ca0a6f2&#39;,
-               &#39;hfc134a_70m&#39;: &#39;92ed3f4e-5816-407d-8350-f84389a224a4&#39;,
-               &#39;hfc143a_70m&#39;: &#39;1e8be5fd-2e98-4fa0-a660-acb4c33c09e6&#39;,
-               &#39;hfc152a_70m&#39;: &#39;86845f14-874a-4461-89d3-575aa16940db&#39;,
-               &#39;hfc227ea_70m&#39;: &#39;49cea0ec-1528-469d-b27b-be9eea96d1b8&#39;,
-               &#39;hfc236fa_70m&#39;: &#39;7253acde-9145-4a71-8e80-21effecbe83f&#39;,
-               &#39;hfc245fa_70m&#39;: &#39;b5aa7478-03ad-4a85-b272-d337855e8a9f&#39;,
-               &#39;hfc365mfc_70m&#39;: &#39;705b93bd-7ffd-4044-bda0-69d39904646a&#39;,
-               &#39;hfc4310mee_70m&#39;: &#39;755132e8-b045-4dca-b3cd-bec23ae8a784&#39;,
-               &#39;hcfc22_70m&#39;: &#39;b50728ff-9a9f-4a9a-af92-2d7839425288&#39;,
-               &#39;hcfc124_70m&#39;: &#39;a9c49d1f-4d16-4ab0-8986-a17221c5f3b7&#39;,
-               &#39;hcfc132b_70m&#39;: &#39;911e2949-57af-4b84-890f-053ea7c6e6b7&#39;,
-               &#39;hcfc133a_70m&#39;: &#39;36a8d313-faf7-42e0-8b1b-271a0eef4bf3&#39;,
-               &#39;hcfc141b_70m&#39;: &#39;cd58323a-1c6b-41b0-ba06-db30fdef6005&#39;,
-               &#39;hcfc142b_70m&#39;: &#39;943f56e1-8bc9-45ef-bb91-8f5069af7987&#39;,
-               &#39;cfc11_70m&#39;: &#39;251e1ce7-1d57-48d8-be8e-33b8ec7c7d42&#39;,
-               &#39;cfc12_70m&#39;: &#39;8c9e51b7-c83e-4da1-8cc2-d300f11f5e47&#39;,
-               &#39;cfc13_70m&#39;: &#39;c072c4f2-876a-4351-9b90-38ab76e8beaf&#39;,
-               &#39;cfc112_70m&#39;: &#39;299b7757-5422-4eeb-9636-0ace8a02a15c&#39;,
-               &#39;cfc113_70m&#39;: &#39;f80d6251-ee70-4c42-b219-918ef15d9465&#39;,
-               &#39;cfc114_70m&#39;: &#39;976eb5ce-f2b0-4196-b245-7a0b026959aa&#39;,
-               &#39;cfc115_70m&#39;: &#39;ab1b993e-8907-46f1-ac2d-8d52311472f5&#39;,
-               &#39;h1211_70m&#39;: &#39;14565fd3-7b7c-4a2c-81ba-5e31a0f248af&#39;,
-               &#39;h1301_70m&#39;: &#39;2d93126a-26d7-426a-8ec3-81c6ba1a2344&#39;,
-               &#39;h2402_70m&#39;: &#39;b028c9b6-a508-4a43-bdf2-ecd12bd89f55&#39;,
-               &#39;ch3cl_70m&#39;: &#39;b121aeaf-995c-422c-a821-a43b95134c84&#39;,
-               &#39;ch3br_70m&#39;: &#39;b2b2a453-a8ce-4cf2-a8e2-eddbcc854e15&#39;,
-               &#39;ch3i_70m&#39;: &#39;30137702-8b6f-4725-9e8c-30625194512f&#39;,
-               &#39;ch2cl2_70m&#39;: &#39;f9916f9d-c6e6-44e6-a85a-6ec647d6cd17&#39;,
-               &#39;chcl3_70m&#39;: &#39;00b0b5cc-cfe6-4f21-83d8-4a7450358e09&#39;,
-               &#39;ccl4_70m&#39;: &#39;bfc8b6b1-fa7e-41fa-aeec-10695fa39ecd&#39;,
-               &#39;ch2br2_70m&#39;: &#39;8dcc5f06-6a34-4dd5-a817-aede085e7c60&#39;,
-               &#39;chbr3_70m&#39;: &#39;5ba4e97c-ff70-48b0-8bed-c50ba7f04dcc&#39;,
-               &#39;ch3ccl3_70m&#39;: &#39;b63335d8-d769-4a76-b855-662f550110b6&#39;,
-               &#39;tce_70m&#39;: &#39;79aca3d8-7380-48e7-8687-9268e12cfbb8&#39;,
-               &#39;pce_70m&#39;: &#39;009a1b8e-d94d-4685-bc65-b8b61bedcf68&#39;,
-               &#39;ethyne_70m&#39;: &#39;4043d3d4-970a-430f-bcf3-6e274588a4fb&#39;,
-               &#39;ethane_70m&#39;: &#39;3a7b861a-77d1-4576-aea4-55cb000d43c0&#39;,
-               &#39;propane_70m&#39;: &#39;4b590eb5-6bdd-4772-88cc-d829e96d74e8&#39;,
-               &#39;cpropane_70m&#39;: &#39;cfab0724-c5dc-44de-a871-c27518945631&#39;,
-               &#39;benzene_70m&#39;: &#39;31fdfdea-efad-44ec-be5b-ee1f1355895e&#39;,
-               &#39;toluene_70m&#39;: &#39;0503ae30-d2c8-4865-be77-eecc742c0218&#39;,
-               &#39;cos_70m&#39;: &#39;434d0fbf-dc90-4727-91e9-ea574bce18f8&#39;,
-               &#39;desflurane_70m&#39;: &#39;d3a7d498-aec0-4dc3-ac81-b512a6e46be9&#39;}}})
+            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;nf3_70m&#39;: &#39;ef6c4d0c-cd8e-48d4-9560-e20e40495ed8&#39;,
+               &#39;cf4_70m&#39;: &#39;cba21854-ab12-4dfe-8d24-5f9d3a71d45d&#39;,
+               &#39;pfc116_70m&#39;: &#39;36cfa570-ad84-43f6-a94d-09f9468a2850&#39;,
+               &#39;pfc218_70m&#39;: &#39;1773be4a-8b71-4e90-b15d-45bd872c96be&#39;,
+               &#39;pfc318_70m&#39;: &#39;f6ef7948-25d3-4297-bc09-f7a0d647195b&#39;,
+               &#39;c4f10_70m&#39;: &#39;560659c6-2e50-4a14-9b72-ccb27823b072&#39;,
+               &#39;c6f14_70m&#39;: &#39;ae6200d7-6137-401b-a6a0-b2806a60f525&#39;,
+               &#39;sf6_70m&#39;: &#39;351985d7-8401-42d0-a6fb-8a366f47b7b0&#39;,
+               &#39;so2f2_70m&#39;: &#39;3b96c78f-b68f-477c-a437-51dcf5e4bed4&#39;,
+               &#39;sf5cf3_70m&#39;: &#39;702f41c1-c6da-4774-ac1b-d0b6aa5b038b&#39;,
+               &#39;hfc23_70m&#39;: &#39;ac40d478-781f-4c4a-896e-4509b4e1e8ad&#39;,
+               &#39;hfc32_70m&#39;: &#39;c971d632-1dfb-4090-9939-994c9c797163&#39;,
+               &#39;hfc125_70m&#39;: &#39;c95bf576-972a-45c0-b773-4837e5a618ac&#39;,
+               &#39;hfc134a_70m&#39;: &#39;87f2abc0-af8c-4855-b778-f80a06a788de&#39;,
+               &#39;hfc143a_70m&#39;: &#39;1174a407-64cc-4b36-a20c-1ff46ceea35e&#39;,
+               &#39;hfc152a_70m&#39;: &#39;d309c386-9508-4c67-8553-c3abd5880045&#39;,
+               &#39;hfc227ea_70m&#39;: &#39;4220e548-0cf1-47b2-bbcb-e19567239ba3&#39;,
+               &#39;hfc236fa_70m&#39;: &#39;ebfeb09c-4a39-418e-8f74-b7cbe9cc2624&#39;,
+               &#39;hfc245fa_70m&#39;: &#39;61e4fdab-f2ad-47af-aea1-27f1f9c8e2fe&#39;,
+               &#39;hfc365mfc_70m&#39;: &#39;765b98bb-72b3-48e5-bbf7-07d58e3338b6&#39;,
+               &#39;hfc4310mee_70m&#39;: &#39;99415df1-06e3-4cd9-be03-cb12d4e15f3d&#39;,
+               &#39;hcfc22_70m&#39;: &#39;18f56c06-ca0a-4fa2-9dc4-4d1a9cc39eec&#39;,
+               &#39;hcfc124_70m&#39;: &#39;ab168550-aace-4114-88b7-f1a7ad47d48a&#39;,
+               &#39;hcfc132b_70m&#39;: &#39;1180aeba-83eb-4e57-a444-2c9c11a289b6&#39;,
+               &#39;hcfc133a_70m&#39;: &#39;7d377721-72bf-4ed1-be0e-98ac6709b2a1&#39;,
+               &#39;hcfc141b_70m&#39;: &#39;004e3a1e-04fa-46cd-8328-210243c5974e&#39;,
+               &#39;hcfc142b_70m&#39;: &#39;31627c23-3dbd-4fce-ac78-3c36c768066f&#39;,
+               &#39;cfc11_70m&#39;: &#39;66111db0-99c0-46b2-ab98-49036af21b12&#39;,
+               &#39;cfc12_70m&#39;: &#39;8bd3a55e-106f-4e69-abba-0aaf35595486&#39;,
+               &#39;cfc13_70m&#39;: &#39;a2c02822-076b-4787-b785-9e87275727e0&#39;,
+               &#39;cfc112_70m&#39;: &#39;e2e599c0-ac4a-49f4-b0fa-f9fc9ac9df59&#39;,
+               &#39;cfc113_70m&#39;: &#39;b3e3beef-7661-4c44-8c8c-de56137fed80&#39;,
+               &#39;cfc114_70m&#39;: &#39;e652b3fc-095d-4c37-a510-cea73f3f4d31&#39;,
+               &#39;cfc115_70m&#39;: &#39;2f678f24-f5dc-492c-b03e-ac6f1a66c550&#39;,
+               &#39;h1211_70m&#39;: &#39;72413f97-0c8f-4d7d-a863-f1b69fd49998&#39;,
+               &#39;h1301_70m&#39;: &#39;e923addc-50b9-47e7-9125-7d19e37cc75a&#39;,
+               &#39;h2402_70m&#39;: &#39;3803c032-f747-4958-bda3-2dc28e868ce4&#39;,
+               &#39;ch3cl_70m&#39;: &#39;8d9f2b93-269c-404f-a47d-eaf9ee7ea623&#39;,
+               &#39;ch3br_70m&#39;: &#39;9a5a8a4e-ba44-4f4e-b58b-350573038747&#39;,
+               &#39;ch3i_70m&#39;: &#39;47f8a050-24b2-4de4-84a8-538d04124b2d&#39;,
+               &#39;ch2cl2_70m&#39;: &#39;9d54b9df-c20f-4bbc-bb60-c3fe6bc2474b&#39;,
+               &#39;chcl3_70m&#39;: &#39;838d5f7d-b2da-4e9e-90b6-949a38cabcf3&#39;,
+               &#39;ccl4_70m&#39;: &#39;bca65403-1800-4c9d-bdd2-223d540b173c&#39;,
+               &#39;ch2br2_70m&#39;: &#39;41522a6d-3765-401a-8cdf-4b824f1668a2&#39;,
+               &#39;chbr3_70m&#39;: &#39;2eff197c-19c8-4c40-bb79-eeee217982b3&#39;,
+               &#39;ch3ccl3_70m&#39;: &#39;c2674e84-b0dc-430d-917c-332726f9db40&#39;,
+               &#39;tce_70m&#39;: &#39;cd1db8e5-f922-428a-956e-54882d8bb276&#39;,
+               &#39;pce_70m&#39;: &#39;ce6af7e0-2547-4497-9cc9-0348b3e3f92c&#39;,
+               &#39;ethyne_70m&#39;: &#39;2bbabf1f-d214-4ea1-8bac-ecc68dfd5569&#39;,
+               &#39;ethane_70m&#39;: &#39;1e21dca0-670e-4ddd-9f07-c81321ac822e&#39;,
+               &#39;propane_70m&#39;: &#39;1305a0e5-69e6-4092-b314-ed2d892456ee&#39;,
+               &#39;cpropane_70m&#39;: &#39;21bc9f1d-7d5d-4fac-8297-555d9a084b89&#39;,
+               &#39;benzene_70m&#39;: &#39;72dcf8f6-941c-4430-bfa4-dd7e497e8dbd&#39;,
+               &#39;toluene_70m&#39;: &#39;821bcaad-db51-46a1-a44b-c0f792ec222f&#39;,
+               &#39;cos_70m&#39;: &#39;b15633be-5689-4e19-a87e-f96e2517b401&#39;,
+               &#39;desflurane_70m&#39;: &#39;8925cbb2-1c31-4715-bb41-9efcfda99a17&#39;}}})
 </pre></div></div>
 </div>
 </section>
 </section>
 <section id="3.-Visualising-the-object-store">
-<h3>3. Visualising the object store<a class="headerlink" href="#3.-Visualising-the-object-store" title="Permalink to this headline"></a></h3>
+<h3>3. Visualising the object store<a class="headerlink" href="#3.-Visualising-the-object-store" title="Permalink to this headline">¶</a></h3>
 <p>Now that we have a simple object store created we can view the objects within it in a simple force graph model. To do this we use the <code class="docutils literal notranslate"><span class="pre">view_store</span></code> function from the <code class="docutils literal notranslate"><span class="pre">objectstore</span></code> submodule. Note that the cell may take a few moments to load as the force graph is created.</p>
 <p>In the force graph the central blue node is the <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> node. Associated with this node are all the data processed by it. The next node in the topology are networks, shown in green. In the graph you will see <code class="docutils literal notranslate"><span class="pre">DECC</span></code> and <code class="docutils literal notranslate"><span class="pre">AGAGE</span></code> nodes. From these you’ll see site nodes in red and then individual datasources in orange.</p>
 <section id="id1">
-<h4>Note<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h4>
+<h4>Note<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
 <p>The object store visualisation created by this function is commented out here and won’t be visible in the documentation but can be uncommented and run when you use the notebook version.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -645,7 +784,7 @@ defaultdict(dict,
 </section>
 </section>
 <section id="4.-Retrieving-data">
-<h3>4. Retrieving data<a class="headerlink" href="#4.-Retrieving-data" title="Permalink to this headline"></a></h3>
+<h3>4. Retrieving data<a class="headerlink" href="#4.-Retrieving-data" title="Permalink to this headline">¶</a></h3>
 <p>To retrieve data from the object store we can use the <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code> function from the <code class="docutils literal notranslate"><span class="pre">localclient</span></code> submodule. This allows us to retrieve and view the data stored.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -693,7 +832,7 @@ Attributes: (12/23)
     port:                 9
     type:                 air
     network:              decc
-    scale:                WMO-X2014A, metadata={&#39;site&#39;: &#39;bsd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;60&#39;, &#39;inlet&#39;: &#39;248m&#39;, &#39;port&#39;: &#39;9&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;species&#39;: &#39;co&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;, &#39;long_name&#39;: &#39;bilsdale&#39;, &#39;data_type&#39;: &#39;timeseries&#39;, &#39;data_owner&#39;: &#34;Simon O&#39;Doherty&#34;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;inlet_height_magl&#39;: &#39;248m&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;Conditions of use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;Source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;File created&#39;: &#39;2021-11-22 14:23:35.479964+00:00&#39;, &#39;Processed by&#39;: &#39;OpenGHG_Cloud&#39;, &#39;station_longitude&#39;: -1.15033, &#39;station_latitude&#39;: 54.35858, &#39;station_long_name&#39;: &#39;Bilsdale, UK&#39;, &#39;station_height_masl&#39;: 380.0})
+    scale:                WMO-X2014A, metadata={&#39;site&#39;: &#39;bsd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;60&#39;, &#39;inlet&#39;: &#39;248m&#39;, &#39;port&#39;: &#39;9&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;species&#39;: &#39;co&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;, &#39;long_name&#39;: &#39;bilsdale&#39;, &#39;data_type&#39;: &#39;timeseries&#39;, &#39;data_owner&#39;: &#34;Simon O&#39;Doherty&#34;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;inlet_height_magl&#39;: &#39;248m&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;Conditions of use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;Source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;File created&#39;: &#39;2021-11-22 16:11:18.969243+00:00&#39;, &#39;Processed by&#39;: &#39;OpenGHG_Cloud&#39;, &#39;station_longitude&#39;: -1.15033, &#39;station_latitude&#39;: 54.35858, &#39;station_long_name&#39;: &#39;Bilsdale, UK&#39;, &#39;station_height_masl&#39;: 380.0})
 </pre></div></div>
 </div>
 <p>First we tell <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> that we are plotting inside a Jupyter notebook, this ensures a plot with controls is created.</p>
@@ -1685,7 +1824,7 @@ if (IPython.notebook.kernel !== null) {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area rendered_html docutils container">
-<div id='97094557-fc82-445a-83fe-66009b6d48bb'></div></div>
+<div id='c20952ff-58de-46d6-9bcd-69d7fb80befc'></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
@@ -1693,19 +1832,19 @@ if (IPython.notebook.kernel !== null) {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f40312ecdc0&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7fdd3465e370&gt;]
 </pre></div></div>
 </div>
 </section>
 <section id="5.-Ranking-data">
-<h3>5. Ranking data<a class="headerlink" href="#5.-Ranking-data" title="Permalink to this headline"></a></h3>
+<h3>5. Ranking data<a class="headerlink" href="#5.-Ranking-data" title="Permalink to this headline">¶</a></h3>
 <p>The dates that the data from Heathfield retrieved above overlap. If we want to easily retrieve the highest quality data from Heathfield over a range of dates we don’t want to have to repeatedly check which was the correct inlet/instrument for a given daterange. This problem is solved using ranking.</p>
 <p>A given inlet on a specific instrument at a site can be given a rank for a daterange. To do this we use the <code class="docutils literal notranslate"><span class="pre">RankSources</span></code> class from the <code class="docutils literal notranslate"><span class="pre">localclient</span></code> submodule.</p>
 </section>
 </section>
 </section>
 <section id="The-rest-of-tutorial-requires-updating,-the-cells-below-will-not-work.">
-<h1>The rest of tutorial requires updating, the cells below will not work.<a class="headerlink" href="#The-rest-of-tutorial-requires-updating,-the-cells-below-will-not-work." title="Permalink to this headline"></a></h1>
+<h1>The rest of tutorial requires updating, the cells below will not work.<a class="headerlink" href="#The-rest-of-tutorial-requires-updating,-the-cells-below-will-not-work." title="Permalink to this headline">¶</a></h1>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
@@ -1840,33 +1979,50 @@ if (IPython.notebook.kernel !== null) {
 </section>
 
 
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../index.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../development/index_devel.html" class="btn btn-neutral float-right" title="Development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2020 OpenGHG development team.
-      <span class="lastupdated">Last updated on Nov 22, 2021.
-      </span></p>
-  </div>
-
-   
-
-</footer>
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'> 
+    <a class='left-prev' id="prev-link" href="../index.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Tutorials</p>
         </div>
-      </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
+    </a>
+    <a class='right-next' id="next-link" href="../../development/index_devel.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Development</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+              
+          </main>
+          
 
-</body>
+      </div>
+    </div>
+  
+  <script src="../../_static/js/index.be7d3bbb2ef33a8344ce.js"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2021 OpenGHG development team.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
 </html>
