@@ -80,14 +80,13 @@ class BEACO2N:
         # Read the columns available and make sure we have them to iterate over
         possible_measurement_types = ["pm", "co", "co2"]
         measurement_types = [c for c in possible_measurement_types if c in data]
-        # Drop NaNs only in the data columns - check the QC columns
-        data = data.dropna(axis="rows", subset=measurement_types)
 
         units = {"pm": "ug/m3", "co2": "ppm", "co": "ppm"}
 
         gas_data: DefaultDict[str, Dict[str, Union[DataFrame, Dict]]] = defaultdict(dict)
         for mt in measurement_types:
             m_data = data[[mt, f"{mt}_qc"]]
+            m_data = m_data.dropna(axis="rows", subset=[mt])
 
             # Some sites don't have data for each type, skip that type if all NaNs
             if m_data.index.empty:

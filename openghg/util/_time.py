@@ -19,8 +19,8 @@ __all__ = [
     "split_encompassed_daterange",
     "daterange_contains",
     "sanitise_daterange",
-    "is_nan",
-    "is_date",
+    "check_nan",
+    "check_date",
 ]
 
 
@@ -93,7 +93,9 @@ def daterange_overlap(daterange_a: str, daterange_b: str) -> bool:
     return bool(start_a <= end_b and end_a >= start_b)
 
 
-def create_daterange(start: Timestamp, end: Timestamp, freq: Optional[str] = "D") -> DatetimeIndex:
+def create_daterange(
+    start: Timestamp, end: Timestamp, freq: Optional[str] = "D"
+) -> DatetimeIndex:
     """Create a minute aligned daterange
 
     Args:
@@ -113,7 +115,9 @@ def create_daterange(start: Timestamp, end: Timestamp, freq: Optional[str] = "D"
     return date_range(start=start, end=end, freq=freq)
 
 
-def create_daterange_str(start: Union[str, Timestamp], end: Union[str, Timestamp]) -> str:
+def create_daterange_str(
+    start: Union[str, Timestamp], end: Union[str, Timestamp]
+) -> str:
     """Convert the passed datetimes into a daterange string
     for use in searches and Datasource interactions
 
@@ -297,7 +301,9 @@ def closest_daterange(to_compare: str, dateranges: Union[str, List[str]]) -> str
         return closest_daterange_end
 
 
-def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, dateranges: List) -> List[str]:
+def find_daterange_gaps(
+    start_search: Timestamp, end_search: Timestamp, dateranges: List
+) -> List[str]:
     """Given a start and end date and a list of dateranges find the gaps.
 
     For example given a list of dateranges
@@ -370,7 +376,7 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
 
 
 def daterange_contains(container: str, contained: str) -> bool:
-    """Check if container contains contained
+    """Check if the daterange container contains the daterange contained
 
     Args:
         container: Daterange
@@ -385,7 +391,7 @@ def daterange_contains(container: str, contained: str) -> bool:
 
 
 def trim_daterange(to_trim: str, overlapping: str) -> str:
-    """Trims a daterange
+    """Removes overlapping dates from to_trim
 
     Args:
         to_trim: Daterange to trim down. Dates that overlap
@@ -504,14 +510,16 @@ def sanitise_daterange(daterange: str) -> str:
     return create_daterange_str(start=start, end=end)
 
 
-def is_date(date: str) -> str:
-    """ Check if the given value is a date, very limited,
-    needs work
+def check_date(date: str) -> str:
+    """Check if a date string can be converted to a pd.Timestamp
+    and returns NA if not.
+
+    Returns a string that can be JSON serialised.
 
     Args:
-        date
+        date: String to test
     Returns:
-        str
+        str: Returns NA if not a date, otherwise date string
     """
     from pandas import Timestamp, isnull
 
@@ -525,15 +533,15 @@ def is_date(date: str) -> str:
         return "NA"
 
 
-def is_nan(data: Union[int, float]) -> Union[str, float, int]:
-    """ Check if the given value is NaN, is so return an NA string
+def check_nan(data: Union[int, float]) -> Union[str, float, int]:
+    """Check if a number is Nan.
 
-        TODO - fix up, copied from web-scrape
+    Returns a string that can be JSON serialised.
 
-        Args:
-            data: Data to check
-        Returns:
-            Number or str
+    Args:
+        data: Number
+    Returns:
+        str, float, int: Returns NA if not a number else number
     """
     from math import isnan
 

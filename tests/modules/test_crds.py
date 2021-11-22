@@ -19,8 +19,13 @@ mpl_logger.setLevel(logging.WARNING)
 
 #     return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
 
+
 def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+    return (
+        Path(__file__)
+        .resolve(strict=True)
+        .parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -29,7 +34,9 @@ def hfd_filepath():
 
 
 def test_read_file():
-    hfd_filepath = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
+    hfd_filepath = get_datapath(
+        filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS"
+    )
 
     crds = CRDS()
 
@@ -75,13 +82,23 @@ def test_get_site_attributes():
 
     attrs = crds.get_site_attributes(site="bsd", inlet="108m")
 
-    assert attrs == {'data_owner': "Simon O'Doherty", 'data_owner_email': 's.odoherty@bristol.ac.uk', 
-                    'inlet_height_magl': '108m', 'comment': 'Cavity ring-down measurements. Output from GCWerks'}
+    assert attrs == {
+        "data_owner": "Simon O'Doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk",
+        "inlet_height_magl": "108m",
+        "comment": "Cavity ring-down measurements. Output from GCWerks",
+        "long_name": "bilsdale",
+    }
 
     attrs = crds.get_site_attributes(site="tac", inlet="50m")
 
-    assert attrs == {'data_owner': "Simon O'Doherty", 'data_owner_email': 's.odoherty@bristol.ac.uk', 
-                    'inlet_height_magl': '50m', 'comment': 'Cavity ring-down measurements. Output from GCWerks'}
+    assert attrs == {
+        "data_owner": "Simon O'Doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk",
+        "inlet_height_magl": "50m",
+        "comment": "Cavity ring-down measurements. Output from GCWerks",
+        "long_name": "tacolneston",
+    }
 
 
 def test_get_site_attributes_unknown_site_raises():

@@ -36,12 +36,7 @@ class Search:
         Returns:
             dict: List of keys of Datasources matching the search parameters
         """
-        # if not all(**kwargs):
-        #     raise ValueError("One argument must be passed")
-
-        results = search_fn()
-
-        self._results = results
+        self._results = search_fn()
 
     def retrieve(self, selected_keys: List) -> SearchResults:
         """Downloads the selected keys and returns a dictionary of

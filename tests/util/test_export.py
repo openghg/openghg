@@ -27,6 +27,7 @@ def test_export_to_dashboard():
     data = {"site_a": {"species_a": {"inlet_a": obs}}}
 
     for_export = to_dashboard(data=data, selected_vars=["A"])
+
     expected_export = {
         "beaco2n": {
             "species_a": {
@@ -34,25 +35,39 @@ def test_export_to_dashboard():
                     "data": {
                         "a": {
                             "3660000": 0,
-                            "435660000": 5,
-                            "867660000": 10,
+                            "262860000": 3,
+                            "522060000": 6,
+                            "781260000": 9,
+                            "1040460000": 12,
                             "1299660000": 15,
-                            "1731660000": 20,
-                            "2163660000": 25,
+                            "1558860000": 18,
+                            "1818060000": 21,
+                            "2077260000": 24,
+                            "2336460000": 27,
                             "2595660000": 30,
-                            "3027660000": 35,
-                            "3459660000": 40,
+                            "2854860000": 33,
+                            "3114060000": 36,
+                            "3373260000": 39,
+                            "3632460000": 42,
                             "3891660000": 45,
-                            "4323660000": 50,
-                            "4755660000": 55,
+                            "4150860000": 48,
+                            "4410060000": 51,
+                            "4669260000": 54,
+                            "4928460000": 57,
                             "5187660000": 60,
-                            "5619660000": 65,
-                            "6051660000": 70,
+                            "5446860000": 63,
+                            "5706060000": 66,
+                            "5965260000": 69,
+                            "6224460000": 72,
                             "6483660000": 75,
-                            "6915660000": 80,
-                            "7347660000": 85,
+                            "6742860000": 78,
+                            "7002060000": 81,
+                            "7261260000": 84,
+                            "7520460000": 87,
                             "7779660000": 90,
-                            "8211660000": 95,
+                            "8038860000": 93,
+                            "8298060000": 96,
+                            "8557260000": 99,
                         }
                     },
                     "metadata": {"network": "BEACO2N", "site": "test_site"},
@@ -79,9 +94,7 @@ def test_to_dashboard_mobile_return_dict():
 
     exported = to_dashboard_mobile(data=data)
 
-    exported_data = exported["ch4"]["data"][0]
-
-    assert exported_data["type"] == "densitymapbox"
+    exported_data = exported["ch4"]["data"]
 
     lon_data = exported_data["lon"]
     lat_data = exported_data["lat"]
@@ -90,5 +103,7 @@ def test_to_dashboard_mobile_return_dict():
     assert lon_data[:2] == [-4.2321, -4.23209667]
     assert lat_data[:2] == [55.82689833, 55.82698]
     assert ch4_data[:2] == [13.43, 21.05]
-    assert exported["ch4"]["metadata"] == {'units': 'ppb', 'notes': 'measurement value is methane enhancement over background'}
-
+    assert exported["ch4"]["metadata"] == {
+        "units": "ppb",
+        "notes": "measurement value is methane enhancement over background",
+    }

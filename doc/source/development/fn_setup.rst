@@ -174,11 +174,8 @@ To allow access from the outside world we need to setup rules to allow ``ssh``, 
 
 .. code-block:: bash
 
-    sudo firewall-cmd --zone=public --add-service=ssh
     sudo firewall-cmd --zone=public --add-service=ssh --permanent 
-    sudo firewall-cmd --zone=public --add-service=https
     sudo firewall-cmd --zone=public --add-service=https --permanent 
-    sudo firewall-cmd --zone=public --add-service=http
     sudo firewall-cmd --zone=public --add-service=http --permanent 
 
 Note that we perform the command and then the same command again with the ``--permanent`` argument to add
@@ -271,4 +268,9 @@ If you want to build the Docker images without using the cache you can pass the 
 .. code-block:: bash
 
     python3 build_deploy.py --build-base --nocache
+
+Manually Triggering Functions
+-----------------------------
+
+
 
