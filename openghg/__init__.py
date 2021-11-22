@@ -1,4 +1,4 @@
-from . import client, jobs, localclient, modules, objectstore, plotting, processing, service, util
+from . import client, jobs, localclient, modules, objectstore, plotting, retrieve, service, util
 import sys as _sys
 from ._version import get_versions  # type: ignore
 
@@ -9,7 +9,7 @@ __all__ = [
     "modules",
     "objectstore",
     "plotting",
-    "processing",
+    "retrieve",
     "service",
     "util",
 ]

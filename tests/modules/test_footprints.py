@@ -1,7 +1,7 @@
 import pytest
 
-from openghg.modules import FOOTPRINTS
-from openghg.processing import search, recombine_datasets
+from openghg.store.footprints import Footprints
+from openghg.retrieve import search, recombine_datasets
 from openghg.objectstore import get_local_bucket
 from helpers import get_footprint_datapath
 
@@ -18,12 +18,12 @@ def test_read_footprint():
     domain = "EUROPE"
     model = "test_model"
 
-    FOOTPRINTS.read_file(
+    Footprints.read_file(
         filepath=datapath, site=site, model=model, network=network, height=height, domain=domain
     )
 
-    # Get the footprint data
-    footprint_results = search(site=site, domain=domain, data_type="footprint")
+    # Get the footprints data
+    footprint_results = search(site=site, domain=domain, data_type="footprints")
 
     fp_site_key = list(footprint_results.keys())[0]
 
@@ -96,7 +96,7 @@ def test_read_footprint():
 
     expected_attrs = {
         "author": "OpenGHG Cloud",
-        "data_type": "footprint",
+        "data_type": "footprints",
         "site": "tmb",
         "network": "lghg",
         "height": "10m",
@@ -159,7 +159,7 @@ def test_datasource_add_lookup():
 
     fake_metadata = {
         "tmb_lghg_10m_europe": {
-            "data_type": "footprint",
+            "data_type": "footprints",
             "site": "tmb",
             "height": "10m",
             "domain": "europe",
@@ -184,7 +184,7 @@ def test_wrong_uuid_raises():
 
     fake_metadata = {
         "tmb_lghg_10m_europe": {
-            "data_type": "footprint",
+            "data_type": "footprints",
             "site": "tmb",
             "height": "10m",
             "domain": "europe",

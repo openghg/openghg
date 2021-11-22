@@ -2,7 +2,7 @@ from addict import Dict as aDict
 from dataclasses import dataclass
 from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
 from openghg.dataobjects import ObsData
-from openghg.processing import recombine_datasets
+from openghg.store import recombine_datasets
 from openghg.util import clean_string
 from openghg.client import Retrieve
 

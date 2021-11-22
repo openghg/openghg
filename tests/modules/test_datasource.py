@@ -185,7 +185,7 @@ def test_save_footprint():
     data = xr.open_dataset(filepath)
 
     datasource = Datasource()
-    datasource.add_data(data=data, metadata=metadata, data_type="footprint")
+    datasource.add_data(data=data, metadata=metadata, data_type="footprints")
     datasource.save()
 
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
@@ -201,7 +201,7 @@ def test_save_footprint():
     assert float(data.pressure[2].values) == pytest.approx(1009.940)
     assert float(data.pressure[-1].values) == pytest.approx(1021.303)
 
-    assert datasource_2._data_type == "footprint"
+    assert datasource_2._data_type == "footprints"
 
 
 def test_add_metadata_key(datasource):
@@ -328,7 +328,7 @@ def test_load_dataset():
 
     d = Datasource()
 
-    d.add_data(metadata=metadata, data=ds, data_type="footprint")
+    d.add_data(metadata=metadata, data=ds, data_type="footprints")
 
     d.save()
 

@@ -1,7 +1,7 @@
 import pytest
 from pandas import Timestamp
 
-from openghg.processing import get_obs_surface, get_flux, get_footprint
+from openghg.retrieve import get_obs_surface, get_flux, get_footprint
 
 
 def test_get_obs_surface():

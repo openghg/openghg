@@ -1,4 +1,5 @@
-from openghg.modules import Datasource, ObsSurface
+from openghg.store.base import Datasource
+from openghg.store import ObsSurface
 from openghg.util import valid_site, create_daterange_str, InvalidSiteError
 
 # from pyvis.network import Network

@@ -48,13 +48,13 @@ THAMESBARRIER
     :private-members:
 
 
-BaseModule
+BaseStore
 ==========
 
 The base module handles the base functionality required of all the processing or data storage classes.
 These include the saving, loading and retrieval of the object from its JSON storage format in the object store.
 
-.. autoclass:: openghg.modules.BaseModule
+.. autoclass:: openghg.modules.BaseStore
     :members:
     :private-members:
 

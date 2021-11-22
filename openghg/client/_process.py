@@ -8,7 +8,7 @@ from typing import Dict, List, Union, Optional
 
 
 class Process:
-    """Upload data to the cloud platform for processing and storage
+    """Upload data to the cloud platform for retrieve and storage
     in the object store.
     """
 
@@ -93,7 +93,7 @@ class Process:
 
         # Here we'll need special cases for different data types. As GCWERKS requires
         # both the data file and precision data and they need to be kept together
-        # for use in processing.
+        # for use in retrieve.
         # We can maybe reconsider the way this is done if there ends up being a lot of test
         # cases and this gets a bit clunky
 

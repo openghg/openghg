@@ -263,7 +263,8 @@ def query_store() -> Dict:
     Returns:
         dict: Dictionary for data to be shown in force graph
     """
-    from openghg.modules import Datasource, ObsSurface
+    from openghg.store.base import Datasource
+    from openghg.store import ObsSurface
 
     obs = ObsSurface.load()
 

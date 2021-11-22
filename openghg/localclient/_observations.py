@@ -1,7 +1,7 @@
 from typing import Union
 from pandas import Timestamp
 from openghg.dataobjects import ObsData
-from openghg.processing import get_obs_surface as proc_get_obs_surface
+from openghg.retrieve import get_obs_surface as proc_get_obs_surface
 
 __all__ = ["get_obs_surface"]
 

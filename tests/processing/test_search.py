@@ -1,6 +1,6 @@
 import pytest
 
-from openghg.processing import search
+from openghg.retrieve import search
 from openghg.util import timestamp_tzaware
 from pandas import Timestamp
 

@@ -4,7 +4,7 @@ from pathlib import Path
 
 from openghg.modules import CRDS
 from openghg.objectstore import get_local_bucket
-from openghg.processing import assign_attributes
+from openghg.retrieve import assign_attributes
 
 # import tempfile
 # from cfchecker import CFChecker
@@ -142,7 +142,7 @@ def test_crds_attributes():
 # TODO - expand these tests
 
 # def test_old_new_attrs():
-#     # from openghg.processing import acrg_attributes
+#     # from openghg.retrieve import acrg_attributes
 #     from acrg_obs.utils import attributes
 
 #     _ = get_local_bucket(empty=True)

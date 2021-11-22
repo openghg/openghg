@@ -1,7 +1,7 @@
 import pytest
 
 from openghg.modules import Emissions
-from openghg.processing import search, recombine_datasets
+from openghg.retrieve import search, recombine_datasets
 from openghg.objectstore import get_local_bucket
 from xarray import open_dataset
 from helpers import get_emissions_datapath

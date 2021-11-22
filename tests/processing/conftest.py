@@ -1,6 +1,8 @@
 import pytest
 from openghg.objectstore import get_local_bucket
-from openghg.modules import ObsSurface, Emissions, FOOTPRINTS
+from openghg.store import ObsSurface
+from openghg.store.emissions import Emissions
+from openghg.store.footprints import Footprints
 from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
 
 

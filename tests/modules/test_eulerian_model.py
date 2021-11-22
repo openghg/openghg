@@ -1,6 +1,6 @@
 from pathlib import Path
 from openghg.modules import EulerianModel
-from openghg.processing import search, recombine_datasets
+from openghg.retrieve import search, recombine_datasets
 from openghg.objectstore import get_local_bucket
 from xarray import open_dataset
 

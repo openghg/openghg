@@ -2,7 +2,7 @@ import pytest
 from pathlib import Path
 from openghg.objectstore import get_local_bucket
 from openghg.modules import ObsSurface, Emissions, FOOTPRINTS
-from openghg.processing import footprints_data_merge
+from openghg.retrieve import footprints_data_merge
 
 def get_datapath(filename, data_type):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
