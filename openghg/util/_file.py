@@ -12,7 +12,7 @@ def load_object(class_name: str) -> Any:
     Returns:
         class_name: class_name object
     """
-    module_path = "openghg.process.surface"
+    module_path = "openghg.standardise.surface"
     class_name = str(class_name).upper()
 
     # Here we try upper and lowercase for the module
