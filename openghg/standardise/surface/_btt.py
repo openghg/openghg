@@ -1,12 +1,10 @@
-from openghg.store.base import BaseStore
 from typing import Dict, Optional, Union
 from pathlib import Path
 
-__all__ = ["BTT"]
+__all__ = ["parse_btt"]
 
 
-
-def read_file(
+def parse_btt(
     data_filepath: Union[str, Path],
     site: Optional[str] = "BTT",
     network: Optional[str] = "LGHG",
@@ -67,9 +65,7 @@ def read_file(
         processed_data = data.loc[:, [species]].sort_index()
         # Create a variability column
         species_stddev_label = species_sd[species]
-        processed_data[species][f"{species} variability"] = data[
-            species_stddev_label
-        ]
+        processed_data[species][f"{species} variability"] = data[species_stddev_label]
 
         # Replace any values below zero with NaNs
         processed_data[processed_data < 0] = np_nan
@@ -98,20 +94,3 @@ def read_file(
     gas_data = assign_attributes(data=gas_data, site=site, network=network)
 
     return gas_data
-
-def read_data(self, data_filepath: Path, sampling_period: str) -> Dict:
-    """Separates the gases stored in the dataframe in
-    separate dataframes and returns a dictionary of gases
-    with an assigned UUID as gas:UUID and a list of the processed
-    dataframes
-
-    Args:
-        data_filepath (pathlib.Path): Path of datafile
-    Returns:
-        dict: Dictionary containing attributes, data and metadata keys
-    """
-
-
-    
-
-    return combined_data

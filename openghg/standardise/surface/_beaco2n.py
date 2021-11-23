@@ -2,10 +2,10 @@ from typing import DefaultDict, Dict, Optional, Union
 from pathlib import Path
 from pandas import DataFrame
 
-__all__ = ["parse_BEACO2N"]
+__all__ = ["parse_beaco2n"]
 
 
-def parse_BEACO2N(
+def parse_beaco2n(
     data_filepath: Union[str, Path],
     site: str,
     network: str,
