@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>User API &#8212; OpenGHG 0+untagged.3.g33824af documentation</title>
+    <title>User API &#8212; OpenGHG 0+untagged.3.gd2c3b8b documentation</title>
     
   <link href="../_static/css/theme.css" rel="stylesheet">
   <link href="../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -230,7 +230,7 @@ OpenGHG hub. For developers documentation of the internal workings of the librar
 are used by functions in the <code class="docutils literal notranslate"><span class="pre">Client</span></code> or <code class="docutils literal notranslate"><span class="pre">LocalClient</span></code> modules when either uploading data to the OpenGHG cloud platform
 or processing data for storage in a local object store.</p>
 <dl class="simple">
-<dt><a class="reference internal" href="api_modules.html#openghg.modules.ObsSurface" title="openghg.modules.ObsSurface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsSurface</span></code></a></dt><dd><p>Process surface observation data</p>
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsSurface</span></code></dt><dd><p>Process surface observation data</p>
 </dd>
 </dl>
 </section>
@@ -269,9 +269,9 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
 <h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline">¶</a></h3>
 <p>These functions ensure that the processed data has the correct <a class="reference external" href="https://cfconventions.org/">CF compliant</a> attributes.</p>
 <dl class="simple">
-<dt><a class="reference internal" href="api_processing.html#openghg.processing.assign_attributes" title="openghg.processing.assign_attributes"><code class="xref py py-func docutils literal notranslate"><span class="pre">assign_attributes()</span></code></a></dt><dd><p>Assign attributes to a dictionary of observation data in NetCDF format using <code class="docutils literal notranslate"><span class="pre">get_attributes</span></code></p>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">assign_attributes()</span></code></dt><dd><p>Assign attributes to a dictionary of observation data in NetCDF format using <code class="docutils literal notranslate"><span class="pre">get_attributes</span></code></p>
 </dd>
-<dt><a class="reference internal" href="api_processing.html#openghg.processing.get_attributes" title="openghg.processing.get_attributes"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_attributes()</span></code></a></dt><dd><p>Write attributes to an in-memory NetCDF file to ensure it is <a class="reference external" href="https://cfconventions.org/">CF-compliant</a></p>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">get_attributes()</span></code></dt><dd><p>Write attributes to an in-memory NetCDF file to ensure it is <a class="reference external" href="https://cfconventions.org/">CF-compliant</a></p>
 </dd>
 </dl>
 </section>
@@ -279,7 +279,7 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
 <h3>Export<a class="headerlink" href="#export" title="Permalink to this headline">¶</a></h3>
 <p>These functions produce files that are used for upload of processed data to archiving facilities such as CEDA.</p>
 <dl class="simple">
-<dt><a class="reference internal" href="api_processing.html#openghg.processing.get_ceda_file" title="openghg.processing.get_ceda_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_ceda_file()</span></code></a></dt><dd><p>Create a file that contains the correct attributes for uploading to the <a class="reference external" href="http://archive.ceda.ac.uk/">CEDA archive</a></p>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">get_ceda_file()</span></code></dt><dd><p>Create a file that contains the correct attributes for uploading to the <a class="reference external" href="http://archive.ceda.ac.uk/">CEDA archive</a></p>
 </dd>
 </dl>
 </section>
@@ -287,9 +287,9 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
 <h3>Data control<a class="headerlink" href="#data-control" title="Permalink to this headline">¶</a></h3>
 <p>These control the assignment, splitting and recombination of data.</p>
 <dl class="simple">
-<dt><a class="reference internal" href="api_processing.html#openghg.processing.recombine_datasets" title="openghg.processing.recombine_datasets"><code class="xref py py-func docutils literal notranslate"><span class="pre">recombine_datasets()</span></code></a></dt><dd><p>Recombine separate NetCDF files into a single file sorted by date</p>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">recombine_datasets()</span></code></dt><dd><p>Recombine separate NetCDF files into a single file sorted by date</p>
 </dd>
-<dt><a class="reference internal" href="api_processing.html#openghg.processing.assign_data" title="openghg.processing.assign_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">assign_data()</span></code></a></dt><dd><p>Assings data to exisiting Datasources or creates new Datasources</p>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">assign_data()</span></code></dt><dd><p>Assings data to exisiting Datasources or creates new Datasources</p>
 </dd>
 </dl>
 </section>
@@ -297,7 +297,7 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
 <h3>Searching<a class="headerlink" href="#searching" title="Permalink to this headline">¶</a></h3>
 <p>The base search functionality provided to the <em class="xref py py-obj">client</em> and <em class="xref py py-obj">localclient</em> modules.</p>
 <dl class="simple">
-<dt><a class="reference internal" href="api_processing.html#openghg.processing.search" title="openghg.processing.search"><code class="xref py py-func docutils literal notranslate"><span class="pre">search()</span></code></a></dt><dd><p>The function that is used by <code class="docutils literal notranslate"><span class="pre">openghg.client.Search</span></code> and <code class="docutils literal notranslate"><span class="pre">openghg.localclient.Search</span></code> to search the object store</p>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">search()</span></code></dt><dd><p>The function that is used by <code class="docutils literal notranslate"><span class="pre">openghg.client.Search</span></code> and <code class="docutils literal notranslate"><span class="pre">openghg.localclient.Search</span></code> to search the object store</p>
 </dd>
 </dl>
 </section>

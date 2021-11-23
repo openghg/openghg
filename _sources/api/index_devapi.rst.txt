@@ -16,7 +16,7 @@ Base class
 This provides the functionality required by all data storage and processing classes, namely the saving, retrieval and loading
 of data from the object store.
 
-:class:`~openghg.modules.BaseModule`
+:class:`~openghg.modules.BaseStore`
     Base class which the other core processing modules inherit
 
 Data processing
