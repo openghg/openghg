@@ -20,3 +20,6 @@ from ._footprints import FOOTPRINTS
 from ._emissions import Emissions
 from ._scenario import ModelScenario
 from ._eulerian_model import EulerianModel
+from ._aqmesh import read_aqmesh
+from ._glasgow_licor import read_glasgow_licor
+from ._glasgow_picarro import GLASGOWPICARRO

@@ -272,8 +272,7 @@ def get_attributes(
     # if len(set(ds.time.values)) < len(ds.time.values):
     # if len(np_unique(ds.time.values)) < len(ds.time.values):
     #     print("WARNING. Duplicate time stamps")
-
-    first_year = pd_Timestamp(ds.time[0].values).year
+    first_year = pd_Timestamp(str(ds.time[0].values)).year
 
     ds.time.encoding = {"units": f"seconds since {str(first_year)}-01-01 00:00:00"}
 

@@ -36,8 +36,10 @@ from ._time import (
     split_encompassed_daterange,
     daterange_contains,
     sanitise_daterange,
+    is_nan, 
+    is_date
 )
 
 from ._errors import InvalidSiteError, UnknownDataError, FunctionError
 from ._tutorial import bilsdale_datapaths
-from ._export import to_dashboard
+from ._export import to_dashboard, to_dashboard_mobile

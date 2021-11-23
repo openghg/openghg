@@ -3,15 +3,17 @@
         "deployed": "2017-08-18",
         "id": 44,
         "latitude": 37.896,
+        "long_name": "Albany High School",
         "longitude": -122.292,
-        "magl": "NA",
+        "magl": 6.35,
         "masl": 25.554,
-        "node_folder_id": 2
+        "node_folder_id": 988
     },
     "ARROYOHIGHSCHOOL": {
         "deployed": "2014-08-28",
         "id": 101,
         "latitude": 37.68,
+        "long_name": "Arroyo High School",
         "longitude": -122.141,
         "magl": 3.0,
         "masl": 6.534,
@@ -21,26 +23,39 @@
         "deployed": "2017-09-13",
         "id": 43,
         "latitude": 37.96,
+        "long_name": "BAAQMD sanpablo",
         "longitude": -122.357,
         "magl": 5.44,
         "masl": 10.443,
-        "node_folder_id": 854
+        "node_folder_id": 979
     },
     "BAYAREAMETROCENTER": {
         "deployed": "2017-06-06",
         "id": 11,
         "latitude": 37.788,
+        "long_name": "Bay Area Metro Center",
         "longitude": -122.392,
-        "magl": "NA",
+        "magl": 42.0,
         "masl": 4.921,
-        "node_folder_id": 772
+        "node_folder_id": 998
+    },
+    "BELLAHOUSTONACADEMY": {
+        "deployed": "2021-07-15",
+        "id": 175,
+        "latitude": 55.848,
+        "long_name": "Bellahouston Academy",
+        "longitude": -4.301,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 932
     },
     "BERKELEYMARINA3": {
         "deployed": "2017-01-26",
         "id": 9,
         "latitude": 37.863,
+        "long_name": "Berkeley Marina 3",
         "longitude": -122.314,
-        "magl": 6.0,
+        "magl": 2.0,
         "masl": 2.643,
         "node_folder_id": 274
     },
@@ -48,6 +63,7 @@
         "deployed": "2016-12-01",
         "id": 10,
         "latitude": 38.006,
+        "long_name": "Bethel Island",
         "longitude": -121.642,
         "magl": "NA",
         "masl": -1.496,
@@ -57,6 +73,7 @@
         "deployed": "2018-06-13",
         "id": 81,
         "latitude": 38.087,
+        "long_name": "Beverly Hills Elementary School",
         "longitude": -122.225,
         "magl": 3.723,
         "masl": 34.835,
@@ -66,15 +83,17 @@
         "deployed": "2015-11-19",
         "id": 35,
         "latitude": 37.754,
+        "long_name": "Bishop O'Dowd High School",
         "longitude": -122.155,
         "magl": 3.0,
         "masl": 73.73,
-        "node_folder_id": 634
+        "node_folder_id": 980
     },
     "BRECHTELMFG": {
         "deployed": "2015-03-14",
         "id": 96,
         "latitude": 37.617,
+        "long_name": "Brechtel Mfg",
         "longitude": -122.069,
         "magl": "NA",
         "masl": 3.52,
@@ -84,6 +103,7 @@
         "deployed": "2017-12-05",
         "id": 90,
         "latitude": 29.726,
+        "long_name": "Briarwood Meadow Charter",
         "longitude": -95.513,
         "magl": 1.499,
         "masl": 19.648,
@@ -93,15 +113,17 @@
         "deployed": "2018-04-23",
         "id": 49,
         "latitude": 37.775,
+        "long_name": "Burckhalter Elementary",
         "longitude": -122.167,
-        "magl": 5.0,
+        "magl": 8.0,
         "masl": 88.48,
-        "node_folder_id": 831
+        "node_folder_id": 1037
     },
     "CARB": {
         "deployed": "2018-05-09",
         "id": 53,
         "latitude": 38.568,
+        "long_name": "CARB",
         "longitude": -121.493,
         "magl": "NA",
         "masl": 5.05,
@@ -111,24 +133,37 @@
         "deployed": "2017-11-30",
         "id": 70,
         "latitude": 29.776,
+        "long_name": "Casa de Amigos Health Center",
         "longitude": -95.362,
         "magl": 7.925,
         "masl": 15.083,
         "node_folder_id": 885
     },
+    "CASTELARELEMENTARYSCHOOL": {
+        "deployed": "2021-08-06",
+        "id": 207,
+        "latitude": 34.064,
+        "long_name": "Castelar Elementary School",
+        "longitude": -118.24,
+        "magl": 10.0,
+        "masl": "NA",
+        "node_folder_id": 1013
+    },
     "CHABOTSPACE&SCIENCECENTER": {
         "deployed": "2014-08-15",
         "id": 55,
         "latitude": 37.819,
+        "long_name": "Chabot Space & Science Center",
         "longitude": -122.181,
         "magl": 9.0,
         "masl": 466.646,
-        "node_folder_id": 640
+        "node_folder_id": 982
     },
     "CHARLTONCOMMUNITYCENTER": {
         "deployed": "2017-01-24",
         "id": 75,
         "latitude": 29.688,
+        "long_name": "Charlton Community Center",
         "longitude": -95.276,
         "magl": 6.477,
         "masl": 9.9,
@@ -138,6 +173,7 @@
         "deployed": "2018-01-24",
         "id": 74,
         "latitude": 29.744,
+        "long_name": "Clinton Community Center",
         "longitude": -95.262,
         "magl": 1.168,
         "masl": 10.663,
@@ -147,6 +183,7 @@
         "deployed": "2017-11-30",
         "id": 72,
         "latitude": 29.734,
+        "long_name": "Clinton Park Monitoring Trailer",
         "longitude": -95.258,
         "magl": "NA",
         "masl": 10.151,
@@ -156,33 +193,37 @@
         "deployed": "2017-09-01",
         "id": 37,
         "latitude": 37.848,
+        "long_name": "College Preparatory School",
         "longitude": -122.24,
-        "magl": 24.0,
+        "magl": 4.0,
         "masl": 93.145,
-        "node_folder_id": 875
+        "node_folder_id": 971
     },
     "COLLINSELEMENTARYSCHOOL": {
         "deployed": "2017-06-16",
         "id": 28,
         "latitude": 38.002,
+        "long_name": "Collins Elementary School",
         "longitude": -122.289,
         "magl": "NA",
         "masl": 9.619,
-        "node_folder_id": 863
+        "node_folder_id": 1043
     },
     "COOPERELEMENTARYSCHOOL": {
         "deployed": "2018-06-11",
         "id": 58,
         "latitude": 38.126,
+        "long_name": "Cooper Elementary School",
         "longitude": -122.24,
         "magl": 7.529,
         "masl": 36.246,
-        "node_folder_id": 849
+        "node_folder_id": 952
     },
     "CRESPIMIDDLESCHOOL": {
         "deployed": "2017-06-14",
         "id": 19,
         "latitude": 37.986,
+        "long_name": "Crespi Middle School",
         "longitude": -122.308,
         "magl": "NA",
         "masl": 82.266,
@@ -192,6 +233,7 @@
         "deployed": "2017-12-04",
         "id": 66,
         "latitude": 29.774,
+        "long_name": "Crockett Elementary School",
         "longitude": -95.38,
         "magl": 4.572,
         "masl": 16.26,
@@ -201,6 +243,7 @@
         "deployed": "2019-03-07",
         "id": 128,
         "latitude": 40.815,
+        "long_name": "CUNY, NGENS Lab",
         "longitude": -73.95,
         "magl": "NA",
         "masl": 36.39,
@@ -210,60 +253,77 @@
         "deployed": "2018-06-12",
         "id": 63,
         "latitude": 38.15,
+        "long_name": "Dan Mini Elementary School",
         "longitude": -122.259,
         "magl": 3.383,
         "masl": 6.318,
-        "node_folder_id": 836
+        "node_folder_id": 949
     },
     "DEJEANMIDDLESCHOOL": {
         "deployed": "2017-06-15",
         "id": 22,
         "latitude": 37.934,
+        "long_name": "Dejean Middle School",
         "longitude": -122.338,
         "magl": 5.008,
         "masl": 17.409,
-        "node_folder_id": 861
+        "node_folder_id": 972
+    },
+    "DORSEYHIGHSCHOOL": {
+        "deployed": "2021-07-19",
+        "id": 213,
+        "latitude": 34.023,
+        "long_name": "Dorsey High School",
+        "longitude": -118.348,
+        "magl": 12.2,
+        "masl": "NA",
+        "node_folder_id": 1007
     },
     "EBMUD": {
         "deployed": "2014-11-10",
         "id": 42,
         "latitude": 37.815,
+        "long_name": "EBMUD",
         "longitude": -122.282,
         "magl": 3.0,
         "masl": 4.149,
-        "node_folder_id": 758
+        "node_folder_id": 950
     },
     "ELCERRITOHIGHSCHOOL": {
         "deployed": "2013-02-13",
         "id": 50,
         "latitude": 37.908,
+        "long_name": "El Cerrito High School",
         "longitude": -122.295,
         "magl": 10.732,
         "masl": 34.614,
-        "node_folder_id": 864
+        "node_folder_id": 987
     },
     "ELLERHORSTELEMENTARYSCHOOL": {
         "deployed": "2017-06-14",
         "id": 16,
         "latitude": 37.982,
+        "long_name": "Ellerhorst Elementary School",
         "longitude": -122.273,
         "magl": "NA",
         "masl": 33.978,
-        "node_folder_id": 865
+        "node_folder_id": 973
     },
     "ELSAWIDENMANNELEMENTARYSCHOOL": {
         "deployed": "2018-06-12",
         "id": 62,
         "latitude": 38.147,
+        "long_name": "Elsa Widenmann Elementary School",
         "longitude": -122.245,
         "magl": 4.26,
         "masl": 23.243,
-        "node_folder_id": 843
+        "node_folder_id": 951
     },
     "ELSOBRANTE": {
         "deployed": "2018-04-27",
         "id": 51,
         "latitude": 37.974,
+        "long_name": "El Sobrante",
         "longitude": -122.275,
         "magl": "NA",
         "masl": 128.733,
@@ -273,33 +333,37 @@
         "deployed": "2014-09-25",
         "id": 48,
         "latitude": 37.802,
+        "long_name": "Exploratorium Bay",
         "longitude": -122.397,
-        "magl": 13.0,
+        "magl": 9.0,
         "masl": 3.0,
-        "node_folder_id": 6
+        "node_folder_id": 953
     },
     "EXPLORATORIUMEMBARCADERO": {
         "deployed": "2014-09-25",
         "id": 47,
         "latitude": 37.801,
+        "long_name": "Exploratorium Embarcadero",
         "longitude": -122.399,
-        "magl": 13.0,
+        "magl": 5.0,
         "masl": 2.982,
-        "node_folder_id": 5
+        "node_folder_id": 959
     },
     "FEDERALTERRACEELEMENTARYSCHOOL": {
         "deployed": "2018-06-12",
         "id": 64,
         "latitude": 38.123,
+        "long_name": "Federal Terrace Elementary School",
         "longitude": -122.269,
         "magl": 1.54,
         "masl": 15.791,
-        "node_folder_id": 840
+        "node_folder_id": 1031
     },
     "FIELDELEMENTARYSCHOOL": {
         "deployed": "2017-12-04",
         "id": 67,
         "latitude": 29.801,
+        "long_name": "Field Elementary School",
         "longitude": -95.389,
         "magl": 4.63,
         "masl": 17.444,
@@ -309,15 +373,17 @@
         "deployed": "2018-06-13",
         "id": 79,
         "latitude": 38.099,
+        "long_name": "Franklin Middle School",
         "longitude": -122.233,
         "magl": 6.782,
         "masl": 18.542,
-        "node_folder_id": 848
+        "node_folder_id": 968
     },
     "FREDT.KOREMATSU(PORTOLA)MIDDLESCHOOL": {
         "deployed": "2017-06-15",
         "id": 25,
         "latitude": 37.92,
+        "long_name": "Fred T. Korematsu (Portola) Middle School",
         "longitude": -122.306,
         "magl": 5.371,
         "masl": 41.042,
@@ -327,168 +393,87 @@
         "deployed": "2012-09-28",
         "id": 31,
         "latitude": 37.737,
+        "long_name": "Fred T. Korematsu Elementary School",
         "longitude": -122.175,
         "magl": "NA",
         "masl": 9.983,
-        "node_folder_id": 830
+        "node_folder_id": 964
     },
     "GEORGEWASHINGTONBRIDGE": {
         "deployed": "NA",
         "id": 88,
         "latitude": 40.854,
+        "long_name": "George Washington Bridge",
         "longitude": -73.966,
         "magl": "NA",
         "masl": 90.25,
         "node_folder_id": 185
     },
-    "GLASGOWS1": {
-        "deployed": "2020-10-01",
-        "id": 165,
-        "latitude": 55.861,
-        "longitude": -4.244,
-        "magl": "NA",
-        "masl": "NA",
-        "node_folder_id": 911
-    },
-    "GLASGOWS10": {
-        "deployed": "2020-10-01",
-        "id": 163,
-        "latitude": 55.861,
-        "longitude": -4.244,
-        "magl": "NA",
-        "masl": "NA",
-        "node_folder_id": 921
-    },
-    "GLASGOWS11": {
-        "deployed": "2020-10-01",
-        "id": 164,
-        "latitude": 55.861,
-        "longitude": -4.244,
-        "magl": "NA",
-        "masl": "NA",
-        "node_folder_id": 922
-    },
-    "GLASGOWS12": {
-        "deployed": "2020-10-01",
-        "id": 166,
-        "latitude": 55.861,
-        "longitude": -4.244,
-        "magl": "NA",
-        "masl": "NA",
-        "node_folder_id": 923
-    },
     "GLASGOWS12002": {
-        "deployed": "2020-03-20",
+        "deployed": "2021-01-20",
         "id": 157,
-        "latitude": 55.856,
-        "longitude": -4.302,
+        "latitude": 55.826,
+        "long_name": "GlasgowS12002",
+        "longitude": -4.226,
         "magl": "NA",
         "masl": "NA",
         "node_folder_id": 872
-    },
-    "GLASGOWS13": {
-        "deployed": "2020-08-01",
-        "id": 167,
-        "latitude": 37.869,
-        "longitude": -122.26,
-        "magl": "NA",
-        "masl": "NA",
-        "node_folder_id": 924
-    },
-    "GLASGOWS18": {
-        "deployed": "2020-08-01",
-        "id": 172,
-        "latitude": 37.869,
-        "longitude": -122.26,
-        "magl": "NA",
-        "masl": "NA",
-        "node_folder_id": 929
-    },
-    "GLASGOWS19": {
-        "deployed": "2020-10-01",
-        "id": 173,
-        "latitude": 55.861,
-        "longitude": -4.244,
-        "magl": "NA",
-        "masl": "NA",
-        "node_folder_id": 930
-    },
-    "GLASGOWS22": {
-        "deployed": "2020-10-01",
-        "id": 176,
-        "latitude": 55.861,
-        "longitude": -4.244,
-        "magl": "NA",
-        "masl": "NA",
-        "node_folder_id": 933
-    },
-    "GLASGOWS23": {
-        "deployed": "2020-08-01",
-        "id": 177,
-        "latitude": 37.869,
-        "longitude": -122.26,
-        "magl": "NA",
-        "masl": "NA",
-        "node_folder_id": 934
-    },
-    "GLASGOWS24": {
-        "deployed": "2020-08-01",
-        "id": 178,
-        "latitude": 37.869,
-        "longitude": -122.26,
-        "magl": "NA",
-        "masl": "NA",
-        "node_folder_id": 935
-    },
-    "GLASGOWS25": {
-        "deployed": "2020-10-01",
-        "id": 179,
-        "latitude": 55.861,
-        "longitude": -4.244,
-        "magl": "NA",
-        "masl": "NA",
-        "node_folder_id": 936
     },
     "GLENCOVEELEMENTARYSCHOOL": {
         "deployed": "2018-06-13",
         "id": 82,
         "latitude": 38.075,
+        "long_name": "Glen Cove Elementary School",
         "longitude": -122.209,
         "magl": 4.826,
         "masl": 48.381,
-        "node_folder_id": 844
+        "node_folder_id": 1032
     },
     "GRACEPATTERSONELEMENTARYSCHOOL": {
         "deployed": "2018-06-13",
         "id": 80,
         "latitude": 38.08,
+        "long_name": "Grace Patterson Elementary School",
         "longitude": -122.238,
         "magl": 6.562,
         "masl": 31.225,
-        "node_folder_id": 845
+        "node_folder_id": 967
     },
     "HALLOFJUSTICE": {
         "deployed": "2017-11-09",
         "id": 39,
         "latitude": 37.775,
+        "long_name": "Hall of Justice",
         "longitude": -122.404,
         "magl": "NA",
         "masl": 4.198,
-        "node_folder_id": 773
+        "node_folder_id": 996
     },
     "HARTMANCOMMUNITYCENTER": {
         "deployed": "2018-02-23",
         "id": 77,
         "latitude": 29.721,
+        "long_name": "Hartman Community Center",
         "longitude": -95.262,
         "magl": 1.626,
         "masl": 8.057,
         "node_folder_id": 892
     },
+    "HEADROYCESCHOOL": {
+        "deployed": "2012-10-05",
+        "id": 40,
+        "latitude": 37.809,
+        "long_name": "Head Royce School",
+        "longitude": -122.205,
+        "magl": 7.0,
+        "masl": 115.077,
+        "node_folder_id": 1026
+    },
     "HELMSMIDDLESCHOOL": {
         "deployed": "2017-06-13",
         "id": 14,
         "latitude": 37.963,
+        "long_name": "Helms Middle School",
         "longitude": -122.338,
         "magl": "NA",
         "masl": 19.19,
@@ -498,24 +483,37 @@
         "deployed": "2018-06-11",
         "id": 59,
         "latitude": 38.114,
+        "long_name": "Highland Elementary School",
         "longitude": -122.234,
         "magl": 5.766,
         "masl": 22.238,
-        "node_folder_id": 839
+        "node_folder_id": 966
+    },
+    "HILLPARKSECONDARYSCHOOL": {
+        "deployed": "2021-07-28",
+        "id": 174,
+        "latitude": 55.815,
+        "long_name": "Hillpark Secondary School",
+        "longitude": -4.299,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 931
     },
     "HOGANMIDDLESCHOOL": {
         "deployed": "2018-06-11",
         "id": 57,
         "latitude": 38.101,
+        "long_name": "Hogan Middle School",
         "longitude": -122.214,
         "magl": 11.709,
         "masl": 19.14,
-        "node_folder_id": 670
+        "node_folder_id": 965
     },
     "INTERNATIONALCOMMUNITYSCHOOL": {
         "deployed": "NA",
         "id": 99,
         "latitude": 37.782,
+        "long_name": "International Community School",
         "longitude": -122.226,
         "magl": 13.0,
         "masl": 19.562,
@@ -525,6 +523,7 @@
         "deployed": "2018-04-03",
         "id": 85,
         "latitude": 40.816,
+        "long_name": "Inwood Intermediate School 52",
         "longitude": -73.902,
         "magl": "NA",
         "masl": 16.092,
@@ -534,15 +533,27 @@
         "deployed": "2018-06-11",
         "id": 60,
         "latitude": 38.121,
+        "long_name": "Jesse Bethel High School",
         "longitude": -122.205,
         "magl": 9.318,
         "masl": 81.353,
-        "node_folder_id": 837
+        "node_folder_id": 1002
+    },
+    "JOHNPAULACADEMY": {
+        "deployed": "2021-07-15",
+        "id": 179,
+        "latitude": 55.904,
+        "long_name": "John Paul Academy",
+        "longitude": -4.295,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 936
     },
     "JOHNROBERTSJUNIORHIGHSCHOOL45": {
         "deployed": "2018-04-04",
         "id": 86,
         "latitude": 40.81,
+        "long_name": "John Roberts Junior High School 45",
         "longitude": -73.953,
         "magl": "NA",
         "masl": 10.082,
@@ -552,15 +563,17 @@
         "deployed": "2018-06-12",
         "id": 61,
         "latitude": 38.133,
+        "long_name": "John W. Finney High School",
         "longitude": -122.249,
         "magl": 6.815,
         "masl": 11.233,
-        "node_folder_id": 842
+        "node_folder_id": 999
     },
     "JRHARRISELEMENTARYSCHOOL": {
         "deployed": "2017-12-08",
         "id": 76,
         "latitude": 29.719,
+        "long_name": "JR Harris Elementary School",
         "longitude": -95.278,
         "magl": 1.626,
         "masl": 9.772,
@@ -570,15 +583,17 @@
         "deployed": "2018-05-10",
         "id": 54,
         "latitude": 37.809,
+        "long_name": "Kaiser Building",
         "longitude": -122.263,
         "magl": 119.0,
         "masl": 3.729,
-        "node_folder_id": 879
+        "node_folder_id": 1015
     },
     "KENSINGTONHILLTOPELEMENTARYSCHOOL": {
         "deployed": "2018-05-05",
         "id": 52,
         "latitude": 37.9,
+        "long_name": "Kensington Hilltop Elementary School",
         "longitude": -122.263,
         "magl": 1.42,
         "masl": 301.482,
@@ -588,24 +603,37 @@
         "deployed": "2020-03-26",
         "id": 156,
         "latitude": 56.043,
+        "long_name": "Killearn Stirlingshire GlasgowS22002",
         "longitude": -4.381,
         "magl": "NA",
         "masl": "NA",
         "node_folder_id": 873
     },
+    "KNIGHTSWOODSECONDARY": {
+        "deployed": "2021-07-12",
+        "id": 193,
+        "latitude": 55.891,
+        "long_name": "Knightswood Secondary",
+        "longitude": -4.339,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 913
+    },
     "LANEYCOLLEGE": {
         "deployed": "2015-10-29",
         "id": 45,
         "latitude": 37.794,
+        "long_name": "Laney College",
         "longitude": -122.263,
         "magl": 4.156,
         "masl": 3.727,
-        "node_folder_id": 880
+        "node_folder_id": 963
     },
     "LANSDALECOMMUNITYCENTER": {
         "deployed": "2017-12-05",
         "id": 95,
         "latitude": 29.699,
+        "long_name": "Lansdale Community Center",
         "longitude": -95.528,
         "magl": 2.591,
         "masl": 20.987,
@@ -615,6 +643,7 @@
         "deployed": "2012-05-04",
         "id": 140,
         "latitude": 37.792,
+        "long_name": "Laurel Elementary School",
         "longitude": -122.196,
         "magl": 12.0,
         "masl": "NA",
@@ -624,35 +653,89 @@
         "deployed": "2014-08-14",
         "id": 56,
         "latitude": 37.876,
+        "long_name": "LBNL Bldg 70",
         "longitude": -122.252,
         "magl": 10.3,
         "masl": 234.967,
-        "node_folder_id": 755
+        "node_folder_id": 985
+    },
+    "LEICESTER3": {
+        "deployed": "NA",
+        "id": 227,
+        "latitude": -122.256,
+        "long_name": "Leicester 3",
+        "longitude": 37.873,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 1054
+    },
+    "LEICESTER6": {
+        "deployed": "NA",
+        "id": 230,
+        "latitude": -122.256,
+        "long_name": "Leicester 6",
+        "longitude": 37.873,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 1057
+    },
+    "LEICESTER7": {
+        "deployed": "NA",
+        "id": 231,
+        "latitude": -122.256,
+        "long_name": "Leicester 7",
+        "longitude": 37.873,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 1058
+    },
+    "LEICESTER8": {
+        "deployed": "NA",
+        "id": 232,
+        "latitude": -122.256,
+        "long_name": "Leicester 8",
+        "longitude": 37.873,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 1059
     },
     "LIGHTHOUSECHARTERSCHOOL": {
         "deployed": "2012-12-13",
         "id": 8,
         "latitude": 37.736,
+        "long_name": "Lighthouse Charter School",
         "longitude": -122.196,
         "magl": 7.823,
         "masl": 4.043,
-        "node_folder_id": 853
+        "node_folder_id": 1034
     },
     "LINCOLNELEMENTARYSCHOOL": {
         "deployed": "2018-06-13",
         "id": 78,
         "latitude": 38.104,
+        "long_name": "Lincoln Elementary School",
         "longitude": -122.254,
         "magl": "NA",
         "masl": 28.502,
-        "node_folder_id": 846
+        "node_folder_id": 962
+    },
+    "LINCOLNHIGHSCHOOL": {
+        "deployed": "2021-06-29",
+        "id": 212,
+        "latitude": 34.075,
+        "long_name": "Lincoln High School",
+        "longitude": -118.203,
+        "magl": 13.7,
+        "masl": "NA",
+        "node_folder_id": 1008
     },
     "LUPINEHILLSELEMENTARYSCHOOL": {
         "deployed": "2017-06-16",
         "id": 27,
         "latitude": 38.008,
+        "long_name": "Lupine Hills Elementary School",
         "longitude": -122.253,
-        "magl": 67.0,
+        "magl": 6.7,
         "masl": 45.144,
         "node_folder_id": 166
     },
@@ -660,6 +743,7 @@
         "deployed": "2017-06-15",
         "id": 24,
         "latitude": 37.928,
+        "long_name": "Madera Elementary School",
         "longitude": -122.299,
         "magl": 9.106,
         "masl": 206.727,
@@ -669,15 +753,17 @@
         "deployed": "2018-06-12",
         "id": 65,
         "latitude": 38.095,
+        "long_name": "Mare Island Health and Fitness Academy",
         "longitude": -122.274,
         "magl": 4.577,
         "masl": 9.791,
-        "node_folder_id": 838
+        "node_folder_id": 961
     },
     "MILROYCOMMUNITYCENTER": {
         "deployed": "NA",
         "id": 68,
         "latitude": 29.793,
+        "long_name": "Milroy Community Center",
         "longitude": -95.4,
         "magl": 1.753,
         "masl": 17.894,
@@ -687,6 +773,7 @@
         "deployed": "2017-06-15",
         "id": 23,
         "latitude": 37.941,
+        "long_name": "Mira Vista Elementary School",
         "longitude": -122.314,
         "magl": 4.01,
         "masl": 100.035,
@@ -696,6 +783,7 @@
         "deployed": "2017-06-16",
         "id": 29,
         "latitude": 37.995,
+        "long_name": "Montalvin Elementary School",
         "longitude": -122.335,
         "magl": 5.033,
         "masl": 29.13,
@@ -705,15 +793,17 @@
         "deployed": "2013-05-08",
         "id": 4,
         "latitude": 37.831,
+        "long_name": "Montclair Elementary School",
         "longitude": -122.213,
-        "magl": 3.0,
+        "magl": 4.0,
         "masl": 185.787,
-        "node_folder_id": 833
+        "node_folder_id": 1033
     },
     "MOODYCOMMUNITYCENTER": {
         "deployed": "2017-12-04",
         "id": 69,
         "latitude": 29.794,
+        "long_name": "Moody Community Center",
         "longitude": -95.365,
         "magl": 1.905,
         "masl": 15.299,
@@ -723,51 +813,107 @@
         "deployed": "2018-04-02",
         "id": 84,
         "latitude": 40.836,
+        "long_name": "Morrisannia",
         "longitude": -73.92,
         "magl": "NA",
         "masl": 19.778,
         "node_folder_id": 110
     },
+    "MURCHISONSTREETELEMENTARYSCHOOL": {
+        "deployed": "2021-08-13",
+        "id": 217,
+        "latitude": 34.06,
+        "long_name": "Murchison Street Elementary School",
+        "longitude": -118.196,
+        "magl": 9.0,
+        "masl": "NA",
+        "node_folder_id": 1020
+    },
     "NEWYORKBOTANICALGARDEN": {
         "deployed": "2018-04-04",
         "id": 89,
         "latitude": 40.872,
+        "long_name": "New York Botanical Garden",
         "longitude": -73.887,
         "magl": "NA",
         "masl": 44.313,
         "node_folder_id": 33
     },
+    "NEWZEALAND1": {
+        "deployed": "2021-05-01",
+        "id": 218,
+        "latitude": -36.856,
+        "long_name": "New Zealand 1",
+        "longitude": 174.762,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 1017
+    },
+    "NEWZEALAND2": {
+        "deployed": "2021-08-26",
+        "id": 219,
+        "latitude": -41.196,
+        "long_name": "New Zealand 2",
+        "longitude": 174.937,
+        "magl": 2.5,
+        "masl": "NA",
+        "node_folder_id": 1050
+    },
+    "NINTHSTREETELEMENTARYSCHOOL": {
+        "deployed": "2021-07-09",
+        "id": 216,
+        "latitude": 34.036,
+        "long_name": "Ninth Street Elementary School",
+        "longitude": -118.247,
+        "magl": 7.6,
+        "masl": "NA",
+        "node_folder_id": 1004
+    },
     "NORTHOAKLANDCOMMUNITYCHARTERSCHOOL": {
         "deployed": "2017-09-01",
         "id": 36,
         "latitude": 37.833,
+        "long_name": "North Oakland Community Charter School",
         "longitude": -122.277,
         "magl": 3.0,
         "masl": 18.211,
         "node_folder_id": 228
     },
+    "NOTREDAMEHIGHSCHOOL": {
+        "deployed": "2021-07-12",
+        "id": 197,
+        "latitude": 55.878,
+        "long_name": "Notre Dame High School",
+        "longitude": -4.299,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 918
+    },
     "NYSTROMELEMENTARYSCHOOL": {
         "deployed": "2017-06-15",
         "id": 20,
         "latitude": 37.928,
+        "long_name": "Nystrom Elementary School",
         "longitude": -122.359,
         "magl": 9.538,
         "masl": 5.776,
-        "node_folder_id": 820
+        "node_folder_id": 978
     },
     "OAKLANDHIGHSCHOOL": {
         "deployed": "2012-11-27",
         "id": 33,
         "latitude": 37.804,
+        "long_name": "Oakland High School",
         "longitude": -122.237,
         "magl": 9.528,
         "masl": 47.583,
-        "node_folder_id": 827
+        "node_folder_id": 977
     },
     "OHLONEELEMENTARYSCHOOL": {
         "deployed": "2017-06-14",
         "id": 15,
         "latitude": 38.008,
+        "long_name": "Ohlone Elementary School",
         "longitude": -122.273,
         "magl": "NA",
         "masl": 25.882,
@@ -777,24 +923,27 @@
         "deployed": "2017-06-16",
         "id": 26,
         "latitude": 37.94,
+        "long_name": "Peres Elementary School",
         "longitude": -122.365,
-        "magl": "NA",
+        "magl": 6.264,
         "masl": 6.108,
-        "node_folder_id": 819
+        "node_folder_id": 1001
     },
     "PIEDMONTHIGHSCHOOL": {
         "deployed": "2013-05-09",
         "id": 3,
         "latitude": 37.824,
+        "long_name": "Piedmont High School",
         "longitude": -122.233,
-        "magl": 3.0,
+        "magl": 10.0,
         "masl": 91.29,
-        "node_folder_id": 74
+        "node_folder_id": 983
     },
     "PINESTREET": {
         "deployed": "2019-05-27",
         "id": 139,
         "latitude": 29.73,
+        "long_name": "Pine Street",
         "longitude": -95.294,
         "magl": 1.372,
         "masl": 7.0,
@@ -804,15 +953,27 @@
         "deployed": "2017-06-14",
         "id": 18,
         "latitude": 37.997,
+        "long_name": "Pinole Middle School",
         "longitude": -122.303,
-        "magl": 78.0,
+        "magl": 7.8,
         "masl": 74.9,
         "node_folder_id": 45
+    },
+    "PIOPICOMIDDLESCHOOL": {
+        "deployed": "2021-08-03",
+        "id": 208,
+        "latitude": 34.045,
+        "long_name": "Pio Pico Middle School",
+        "longitude": -118.317,
+        "magl": 7.6,
+        "masl": "NA",
+        "node_folder_id": 1012
     },
     "PLEASANTVILLEELEMENTARYSCHOOL": {
         "deployed": "2017-12-08",
         "id": 71,
         "latitude": 29.764,
+        "long_name": "PleasantVille Elementary School",
         "longitude": -95.272,
         "magl": 4.267,
         "masl": 10.335,
@@ -822,8 +983,9 @@
         "deployed": "2013-03-14",
         "id": 5,
         "latitude": 37.796,
+        "long_name": "Port of Oakland",
         "longitude": -122.279,
-        "magl": 3.0,
+        "magl": 32.0,
         "masl": 3.465,
         "node_folder_id": 158
     },
@@ -831,35 +993,39 @@
         "deployed": "2012-12-12",
         "id": 100,
         "latitude": 37.808,
+        "long_name": "Prescott Elementary",
         "longitude": -122.3,
         "magl": "NA",
         "masl": 5.94,
-        "node_folder_id": 98
+        "node_folder_id": 163
     },
     "RICHMONDFIELDSTATION(RFS)": {
         "deployed": "2017-10-25",
         "id": 41,
         "latitude": 37.913,
+        "long_name": "Richmond Field Station (RFS)",
         "longitude": -122.336,
         "magl": 4.9,
         "masl": 4.422,
-        "node_folder_id": 855
+        "node_folder_id": 1016
     },
     "RICHMONDHIGHSCHOOL": {
         "deployed": "2017-06-13",
         "id": 13,
         "latitude": 37.953,
+        "long_name": "Richmond High School",
         "longitude": -122.347,
         "magl": "NA",
         "masl": 21.041,
-        "node_folder_id": 817
+        "node_folder_id": 1000
     },
     "RIVERSIDEELEMENTARYSCHOOL": {
         "deployed": "2017-06-13",
         "id": 12,
-        "latitude": 37.963,
-        "longitude": -122.338,
-        "magl": 42.0,
+        "latitude": 37.952,
+        "long_name": "Riverside Elementary School",
+        "longitude": -122.327,
+        "magl": 3.0,
         "masl": 19.19,
         "node_folder_id": 94
     },
@@ -867,15 +1033,27 @@
         "deployed": "2018-04-03",
         "id": 83,
         "latitude": 40.811,
+        "long_name": "Roosevelt Intermediate School 143",
         "longitude": -73.952,
         "magl": "NA",
         "masl": 10.434,
         "node_folder_id": 243
     },
+    "ROSAPARKSELEMENTARYSCHOOL": {
+        "deployed": "2012-11-15",
+        "id": 98,
+        "latitude": 37.866,
+        "long_name": "Rosa Parks Elementary School",
+        "longitude": -122.295,
+        "magl": "NA",
+        "masl": 12.223,
+        "node_folder_id": 231
+    },
     "RUCKERELEMENTARYSCHOOL": {
         "deployed": "2017-12-06",
         "id": 73,
         "latitude": 29.694,
+        "long_name": "Rucker Elementary School",
         "longitude": -95.242,
         "magl": 2.515,
         "masl": 8.366,
@@ -885,24 +1063,27 @@
         "deployed": "2017-03-15",
         "id": 46,
         "latitude": 37.756,
+        "long_name": "SF Hospital Bldg 5",
         "longitude": -122.405,
         "magl": 52.0,
         "masl": 23.945,
-        "node_folder_id": 731
+        "node_folder_id": 995
     },
     "SFPUBLICSAFETYBUILDING": {
         "deployed": "2019-03-01",
         "id": 125,
         "latitude": 37.772,
+        "long_name": "SF Public Safety Building",
         "longitude": -122.392,
         "magl": "NA",
         "masl": 2.38,
-        "node_folder_id": 770
+        "node_folder_id": 997
     },
     "SHELDONELEMENTARYSCHOOL": {
         "deployed": "2017-06-16",
         "id": 30,
         "latitude": 37.967,
+        "long_name": "Sheldon Elementary School",
         "longitude": -122.298,
         "magl": "NA",
         "masl": 39.156,
@@ -912,8 +1093,9 @@
         "deployed": "2012-04-06",
         "id": 7,
         "latitude": 37.798,
+        "long_name": "Skyline High School",
         "longitude": -122.161,
-        "magl": 13.0,
+        "magl": 3.0,
         "masl": 348.402,
         "node_folder_id": 649
     },
@@ -921,6 +1103,7 @@
         "deployed": "2017-12-05",
         "id": 93,
         "latitude": 29.711,
+        "long_name": "SouthWest Multiservice Center",
         "longitude": -95.497,
         "magl": 1.9,
         "masl": 19.196,
@@ -930,15 +1113,17 @@
         "deployed": "2015-11-04",
         "id": 38,
         "latitude": 37.779,
+        "long_name": "St. Elizabeth High School",
         "longitude": -122.222,
-        "magl": 3.0,
+        "magl": 11.0,
         "masl": 16.323,
-        "node_folder_id": 874
+        "node_folder_id": 960
     },
     "STEWARTELEMENTARYSCHOOL": {
         "deployed": "2017-06-14",
         "id": 17,
         "latitude": 37.99,
+        "long_name": "Stewart Elementary School",
         "longitude": -122.291,
         "magl": "NA",
         "masl": 59.362,
@@ -948,6 +1133,7 @@
         "deployed": "2015-02-02",
         "id": 2,
         "latitude": 38.289,
+        "long_name": "Stone Edge Farms (Turbine)",
         "longitude": -122.503,
         "magl": "NA",
         "masl": 54.551,
@@ -957,33 +1143,87 @@
         "deployed": "2015-02-02",
         "id": 1,
         "latitude": 38.291,
+        "long_name": "Stone Edge Farms (Vineyard)",
         "longitude": -122.506,
         "magl": "NA",
         "masl": 57.941,
         "node_folder_id": 116
     },
+    "STPAULSHIGHSCHOOL": {
+        "deployed": "2021-07-28",
+        "id": 172,
+        "latitude": 55.824,
+        "long_name": "St Pauls High School",
+        "longitude": -4.338,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 929
+    },
+    "STTHOMASAQUINASRCSECONDARYSCHOOL": {
+        "deployed": "2021-07-28",
+        "id": 178,
+        "latitude": 55.881,
+        "long_name": "St Thomas Aquinas R C Secondary School",
+        "longitude": -4.336,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 935
+    },
     "SUTTONELEMENTARYSCHOOL": {
         "deployed": "2017-12-06",
         "id": 91,
         "latitude": 29.698,
+        "long_name": "Sutton Elementary School",
         "longitude": -95.502,
         "magl": 1.981,
         "masl": 19.438,
         "node_folder_id": 900
     },
+    "TENTHSTREETELEMENTARYSCHOOL": {
+        "deployed": "2021-06-17",
+        "id": 211,
+        "latitude": 34.047,
+        "long_name": "Tenth Street Elementary School",
+        "longitude": -118.273,
+        "magl": 10.0,
+        "masl": "NA",
+        "node_folder_id": 1009
+    },
     "THECITYCOLLEGEOFNEWYORK": {
         "deployed": "2018-04-03",
         "id": 87,
         "latitude": 40.82,
+        "long_name": "The City College of New York",
         "longitude": -73.948,
         "magl": "NA",
         "masl": 39.199,
         "node_folder_id": 132
     },
+    "UNIVERSITYOFSTRATHCLYDE": {
+        "deployed": "2021-01-01",
+        "id": 171,
+        "latitude": 55.861,
+        "long_name": "University of Strathclyde",
+        "longitude": -4.247,
+        "magl": "NA",
+        "masl": "NA",
+        "node_folder_id": 928
+    },
+    "USC1": {
+        "deployed": "2021-07-01",
+        "id": 206,
+        "latitude": 34.02,
+        "long_name": "USC1",
+        "longitude": -118.287,
+        "magl": 24.4,
+        "masl": "NA",
+        "node_folder_id": 1014
+    },
     "WALTERLIBRARY": {
         "deployed": "2017-12-06",
         "id": 94,
         "latitude": 29.71,
+        "long_name": "Walter Library",
         "longitude": -95.521,
         "magl": 1.118,
         "masl": 20.822,
@@ -993,9 +1233,20 @@
         "deployed": "2017-06-15",
         "id": 21,
         "latitude": 37.925,
+        "long_name": "Washington Elementary School",
         "longitude": -122.381,
         "magl": 5.111,
         "masl": 2.942,
         "node_folder_id": 856
+    },
+    "WILSHIRECRESTELEMENTARYSCHOOL": {
+        "deployed": "2021-08-12",
+        "id": 209,
+        "latitude": 34.058,
+        "long_name": "Wilshire Crest Elementary School",
+        "longitude": -118.343,
+        "magl": 5.0,
+        "masl": "NA",
+        "node_folder_id": 1011
     }
 }

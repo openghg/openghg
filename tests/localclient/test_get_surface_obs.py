@@ -9,7 +9,9 @@ from openghg.objectstore import get_local_bucket
 
 def get_datapath(filename, data_type):
     return (
-        Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+        Path(__file__)
+        .resolve(strict=True)
+        .parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
     )
 
 
@@ -17,12 +19,20 @@ def get_datapath(filename, data_type):
 def read_data():
     get_local_bucket(empty=True)
 
-    hfd_filepath = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
+    hfd_filepath = get_datapath(
+        filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS"
+    )
 
     cgo_data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     cgo_prec = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    ObsSurface.read_file(filepath=hfd_filepath, data_type="CRDS", site="hfd", network="DECC", inlet="100m")
+    ObsSurface.read_file(
+        filepath=hfd_filepath,
+        data_type="CRDS",
+        site="hfd",
+        network="DECC",
+        inlet="100m",
+    )
     ObsSurface.read_file(
         filepath=(cgo_data, cgo_prec),
         data_type="GCWERKS",
@@ -69,6 +79,7 @@ def test_get_observations_few_args():
         "type": "air",
         "scale": "WMO-X2007",
         "network": "decc",
+        "long_name": "heathfield",
     }
 
     assert data.attrs == expected_attrs
@@ -100,7 +111,11 @@ def test_get_observations_with_average():
 
 def test_get_observations_datetime_selection():
     results = get_obs_surface(
-        site="hfd", species="co2", inlet="100m", start_date="2001-01-01", end_date="2015-01-01"
+        site="hfd",
+        species="co2",
+        inlet="100m",
+        start_date="2001-01-01",
+        end_date="2015-01-01",
     )
 
     data = results.data
@@ -164,7 +179,11 @@ def test_get_observations_fixed_dates():
     end_date = "2015-05-31"
 
     results = get_obs_surface(
-        site="hfd", species="co2", inlet="100m", start_date=start_date, end_date=end_date
+        site="hfd",
+        species="co2",
+        inlet="100m",
+        start_date=start_date,
+        end_date=end_date,
     )
 
     assert results.data.time[0] == Timestamp("2015-01-01T18:25:30")
@@ -174,7 +193,11 @@ def test_get_observations_fixed_dates():
     end_date = Timestamp("2016-08-01")
 
     results = get_obs_surface(
-        site="hfd", species="co2", inlet="100m", start_date=start_date, end_date=end_date
+        site="hfd",
+        species="co2",
+        inlet="100m",
+        start_date=start_date,
+        end_date=end_date,
     )
 
     assert results.data.time[0] == Timestamp("2016-01-01T18:25:30")

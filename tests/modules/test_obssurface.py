@@ -79,7 +79,9 @@ def test_read_GC():
     data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     precision_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
+    results = ObsSurface.read_file(
+        filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE"
+    )
 
     expected_keys = [
         "benzene_70m",
@@ -205,7 +207,9 @@ def test_read_GC():
     data_filepath = get_datapath(filename="capegrim-medusa.future.C", data_type="GC")
     precision_filepath = get_datapath(filename="capegrim-medusa.future.precisions.C", data_type="GC")
 
-    results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
+    results = ObsSurface.read_file(
+        filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE"
+    )
 
     datasource = Datasource.load(uuid=uuid_one)
     data_one = datasource.data()
@@ -219,7 +223,11 @@ def test_read_GC():
     precision_filepath = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
 
     ObsSurface.read_file(
-        filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="THD", instrument="gcmd", network="AGAGE"
+        filepath=(data_filepath, precision_filepath),
+        data_type="GCWERKS",
+        site="THD",
+        instrument="gcmd",
+        network="AGAGE",
     )
 
     obs = ObsSurface.load()
@@ -239,7 +247,9 @@ def test_read_cranfield():
 
     data_filepath = get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="CRANFIELD", site="THB", network="CRANFIELD")
+    results = ObsSurface.read_file(
+        filepath=data_filepath, data_type="CRANFIELD", site="THB", network="CRANFIELD"
+    )
 
     expected_keys = ["ch4", "co", "co2"]
 
@@ -259,10 +269,14 @@ def test_read_cranfield():
     assert ch4_data["ch4 variability"][0] == pytest.approx(75.50218)
     assert ch4_data["ch4 variability"][-1] == pytest.approx(6.48413)
 
+
+@pytest.mark.skip(reason="Update to read both US and Glasgow site data")
 def test_read_beaco2n():
     data_filepath = get_datapath(filename="Charlton_Community_Center.csv", data_type="BEACO2N")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="BEACO2N", site="CCC", network="BEACO2N", overwrite=True)
+    results = ObsSurface.read_file(
+        filepath=data_filepath, data_type="BEACO2N", site="CCC", network="BEACO2N", overwrite=True
+    )
 
     uuid = results["processed"]["Charlton_Community_Center.csv"]["co2"]
 
@@ -279,7 +293,9 @@ def test_read_noaa_raw():
 
     data_filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
-    results = ObsSurface.read_file(filepath=data_filepath, data_type="NOAA", site="POCN25", network="NOAA", inlet="flask")
+    results = ObsSurface.read_file(
+        filepath=data_filepath, data_type="NOAA", site="POCN25", network="NOAA", inlet="flask"
+    )
 
     uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]
 
@@ -373,12 +389,16 @@ def test_upload_same_file_twice_raises():
 
     data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
-    ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60)
+    ObsSurface.read_file(
+        filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60
+    )
 
     # assert not res["error"]
 
     with pytest.raises(ValueError):
-        ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60)
+        ObsSurface.read_file(
+            filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60
+        )
 
     # assert "tta.co2.1minute.222m.min.dat" in res["error"]
 
@@ -388,7 +408,9 @@ def test_delete_Datasource():
 
     data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
-    ObsSurface.read_file(filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60)
+    ObsSurface.read_file(
+        filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60
+    )
 
     obs = ObsSurface.load()
 
@@ -417,7 +439,9 @@ def test_add_new_data_correct_datasource():
     data_filepath = get_datapath(filename="capegrim-medusa.05.C", data_type="GC")
     precision_filepath = get_datapath(filename="capegrim-medusa.05.precisions.C", data_type="GC")
 
-    results = ObsSurface.read_file(filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE")
+    results = ObsSurface.read_file(
+        filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE"
+    )
 
     first_results = results["processed"]["capegrim-medusa.05.C"]
 
@@ -586,3 +610,45 @@ def test_rank_daterange_start_overlap_overwrite():
     expected = {"test-uid-123": {"2012-01-01-00:00:00+00:00_2013-01-01-00:00:00+00:00": 1}}
 
     assert o._rank_data == expected
+
+
+def test_read_multiside_aqmesh():
+    datafile = get_datapath(filename="co2_data.csv", data_type="AQMESH")
+    metafile = get_datapath(filename="co2_metadata.csv", data_type="AQMESH")
+
+    result = ObsSurface.read_multisite_aqmesh(
+        data_filepath=datafile, metadata_filepath=metafile, overwrite=True
+    )
+
+    # This crazy structure will be fixed when add_datsources is updated
+    raith_uuid = result["raith"]["raith"]
+
+    d = Datasource.load(uuid=raith_uuid, shallow=False)
+
+    data = d.data()["2021-06-18-05:00:00+00:00_2021-06-21-13:00:00+00:00"]
+
+    data.time[0] == Timestamp("2021-06-18T05:00:00")
+    data.co2[0] == 442.64
+    data.time[-1] == Timestamp("2021-06-21T13:00:00")
+    data.co2[-1] == 404.84
+
+    expected_attrs = {
+        "site": "raith",
+        "pod_id": 39245,
+        "start_date": "2021-06-15 01:00:00",
+        "end_date": "2021-10-04 00:59:00",
+        "relocate_date": "NA",
+        "long_name": "Raith",
+        "borough": "Glasgow",
+        "site_type": "Roadside",
+        "in_ulez": "No",
+        "latitude": 55.798813,
+        "longitude": -4.058363,
+        "inlet": 1,
+        "network": "aqmesh_glasgow",
+        "sampling_period": "NA",
+        "species": "co2",
+        "units": "ppm",
+    }
+
+    assert data.attrs == expected_attrs

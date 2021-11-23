@@ -12,9 +12,14 @@ class DataTypes(Enum):
     CRANFIELD = "CRANFIELD"
     BEACO2N = "BEACO2N"
     FOOTPRINTS = "FOOTPRINTS"
+    NPL = "NPL"
+    BTT = "BTT"
+    AQMESH = "AQMESH"
+    GLASGOWPICARRO = "GLASGOWPICARRO"
 
 
 class ObsTypes(Enum):
     SURFACE = "ObsSurface"
     SATELLITE = "ObsSatellite"
     FLASK = "ObsFlask"
+    MOBILE = "ObsMobile"
