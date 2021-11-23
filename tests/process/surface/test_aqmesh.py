@@ -1,4 +1,4 @@
-from openghg.process.surface import read_aqmesh
+from openghg.standardise.surface import read_aqmesh
 from pandas import Timestamp
 from helpers import get_datapath
 

@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 import pytest
 
-from openghg.process.surface import NPL
+from openghg.standardise.surface import NPL
 from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")

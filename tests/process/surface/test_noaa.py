@@ -5,7 +5,7 @@ from pathlib import Path
 from pandas import Timestamp
 import pytest
 
-from openghg.process.surface import NOAA
+from openghg.standardise.surface import NOAA
 from openghg.store.base import Datasource
 from openghg.objectstore import get_local_bucket
 from helpers import get_datapath

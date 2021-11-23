@@ -1,6 +1,6 @@
 import logging
 
-from openghg.process.surface import CRDS, GCWERKS
+from openghg.standardise.surface import CRDS, GCWERKS
 from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket
 from openghg.store import recombine_datasets

@@ -3,7 +3,7 @@ from pathlib import Path
 import datetime
 from openghg.util import to_dashboard, to_dashboard_mobile
 from openghg.dataobjects import ObsData
-from openghg.process.surface import read_glasgow_licor
+from openghg.standardise.surface import read_glasgow_licor
 from tempfile import TemporaryDirectory
 import json
 

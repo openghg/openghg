@@ -1,5 +1,5 @@
 from helpers import get_mobile_datapath
-from openghg.process.surface import read_glasgow_licor
+from openghg.standardise.surface import read_glasgow_licor
 from pandas import Timestamp
 import pytest
 

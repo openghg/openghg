@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from openghg.process.surface import GCWERKS
+from openghg.standardise.surface import GCWERKS
 from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")

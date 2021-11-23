@@ -175,7 +175,7 @@ class ObsSurface(BaseStore):
 
         This data is different in that it contains multiple sites in the same file.
         """
-        from openghg.process.surface import read_aqmesh
+        from openghg.standardise.surface import read_aqmesh
         from openghg.store import assign_data
         from openghg.util import hash_file
         from collections import defaultdict
