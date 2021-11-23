@@ -175,7 +175,7 @@ class ObsSurface(BaseStore):
 
         This data is different in that it contains multiple sites in the same file.
         """
-        from openghg.standardise.surface import read_aqmesh
+        from openghg.standardise.surface import parse_aqmesh
         from openghg.store import assign_data
         from openghg.util import hash_file
         from collections import defaultdict
@@ -187,7 +187,7 @@ class ObsSurface(BaseStore):
         # Load the ObsSurface object for retrieve
         obs = ObsSurface.load()
         # Get a dict of data and metadata
-        processed_data = read_aqmesh(
+        processed_data = parse_aqmesh(
             data_filepath=data_filepath, metadata_filepath=metadata_filepath
         )
 

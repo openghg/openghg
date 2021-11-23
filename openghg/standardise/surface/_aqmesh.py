@@ -1,7 +1,7 @@
 from typing import Dict, Union
 from pathlib import Path
 
-__all__ = ["read_aqmesh"]
+__all__ = ["parse_aqmesh"]
 
 pathType = Union[str, Path]
 
@@ -48,7 +48,7 @@ def _parse_metadata(filepath: pathType) -> Dict:
     return dict_metadata
 
 
-def read_aqmesh(data_filepath: pathType, metadata_filepath: pathType) -> Dict:
+def parse_aqmesh(data_filepath: pathType, metadata_filepath: pathType) -> Dict:
     """Read AQMesh data files
 
     Args:

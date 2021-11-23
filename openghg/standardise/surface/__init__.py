@@ -1,5 +1,5 @@
-from ._aqmesh import read_aqmesh
-from ._beaco2n import BEACO2N
+from ._aqmesh import parse_aqmesh
+from ._beaco2n import parse_BEACO2N
 from ._btt import BTT
 from ._cranfield import CRANFIELD
 from ._crds import CRDS

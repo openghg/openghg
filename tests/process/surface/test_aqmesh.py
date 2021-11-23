@@ -1,4 +1,4 @@
-from openghg.standardise.surface import read_aqmesh
+from openghg.standardise.surface import parse_aqmesh
 from pandas import Timestamp
 from helpers import get_datapath
 
@@ -7,7 +7,7 @@ def test_aqmesh_read():
     datafile = get_datapath(filename="co2_data.csv", data_type="AQMesh")
     metafile = get_datapath(filename="co2_metadata.csv", data_type="AQMesh")
 
-    data = read_aqmesh(data_filepath=datafile, metadata_filepath=metafile)
+    data = parse_aqmesh(data_filepath=datafile, metadata_filepath=metafile)
 
     site_data = data["briarroadclydebank"]
 
