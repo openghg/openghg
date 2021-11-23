@@ -1,8 +1,7 @@
 from __future__ import annotations
 import cdsapi  # type: ignore
-from dataclasses import dataclass
 import numpy as np
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union, Optional
+from typing import TYPE_CHECKING, List, Tuple, Union, Optional
 import requests
 from xarray import open_dataset, Dataset
 from requests.adapters import HTTPAdapter
@@ -15,7 +14,12 @@ if TYPE_CHECKING:
 __all__ = ["retrieve_met", "METData"]
 
 
-def retrieve_met(site: str, network: str, years: Union[str, List[str]], variables: Optional[List[str]] = None) -> METData:
+def retrieve_met(
+    site: str,
+    network: str,
+    years: Union[str, List[str]],
+    variables: Optional[List[str]] = None,
+) -> METData:
     """Retrieve METData data. Note that this function will only download a
     full year of data which may take some time.
 
@@ -33,14 +37,20 @@ def retrieve_met(site: str, network: str, years: Union[str, List[str]], variable
     if variables is None:
         variables = ["u_component_of_wind", "v_component_of_wind"]
 
-    latitude, longitude, site_height, inlet_heights = _get_site_data(site=site, network=network)
+    latitude, longitude, site_height, inlet_heights = _get_site_data(
+        site=site, network=network
+    )
 
     # Get the area to retrieve data for
     ecmwf_area = _get_ecmwf_area(site_lat=latitude, site_long=longitude)
     # Calculate the pressure at measurement height(s)
-    measure_pressure = _get_site_pressure(inlet_heights=inlet_heights, site_height=site_height)
+    measure_pressure = _get_site_pressure(
+        inlet_heights=inlet_heights, site_height=site_height
+    )
     # Calculate the ERA5 pressure levels required
-    ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure=measure_pressure)
+    ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(
+        measure_pressure=measure_pressure
+    )
 
     if not isinstance(years, list):
         years = [years]
@@ -113,7 +123,10 @@ def _download_data(url: str) -> Dataset:
     timeout = 20  # seconds
 
     retry_strategy = Retry(
-        total=3, status_forcelist=retriable_status_codes, allowed_methods=["HEAD", "GET", "OPTIONS"], backoff_factor=1
+        total=3,
+        status_forcelist=retriable_status_codes,
+        allowed_methods=["HEAD", "GET", "OPTIONS"],
+        backoff_factor=1,
     )  # type: ignore
 
     adapter = HTTPAdapter(max_retries=retry_strategy)
@@ -244,9 +257,13 @@ def _altitude_to_ecmwf_pressure(measure_pressure: List[float]) -> List[str]:
     ecwmf_pressure_indices = np.zeros(len(measure_pressure) * 2)
 
     for index, m in enumerate(measure_pressure):
-        ecwmf_pressure_indices[(index * 2) : (index * 2 + 2)] = _two_closest_values(m - era5_pressure_levels)
+        ecwmf_pressure_indices[(index * 2) : (index * 2 + 2)] = _two_closest_values(
+            m - era5_pressure_levels
+        )
 
-    desired_era5_pressure = era5_pressure_levels[np.unique(ecwmf_pressure_indices).astype(int)]
+    desired_era5_pressure = era5_pressure_levels[
+        np.unique(ecwmf_pressure_indices).astype(int)
+    ]
 
     pressure_levels: List = desired_era5_pressure.astype(str).tolist()
 

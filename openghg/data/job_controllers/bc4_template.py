@@ -12,11 +12,11 @@ from Acquire.Client import PAR
 
 
 def data_watchdog():
-    """ Function that watches for completion of job
+    """Function that watches for completion of job
 
-        WIP: Unsure how this will be implemented currently.
-        Either watching for a file created at output or just upload
-        data to the cloud drive as we go?
+    WIP: Unsure how this will be implemented currently.
+    Either watching for a file created at output or just upload
+    data to the cloud drive as we go?
 
     """
     raise NotImplementedError

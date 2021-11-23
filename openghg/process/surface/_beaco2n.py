@@ -83,7 +83,9 @@ class BEACO2N:
 
         units = {"pm": "ug/m3", "co2": "ppm", "co": "ppm"}
 
-        gas_data: DefaultDict[str, Dict[str, Union[DataFrame, Dict]]] = defaultdict(dict)
+        gas_data: DefaultDict[str, Dict[str, Union[DataFrame, Dict]]] = defaultdict(
+            dict
+        )
         for mt in measurement_types:
             m_data = data[[mt, f"{mt}_qc"]]
             m_data = m_data.dropna(axis="rows", subset=[mt])

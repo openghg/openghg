@@ -57,7 +57,9 @@ class CRDS:
         )
 
         # Ensure the data is CF compliant
-        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=sampling_period)
+        gas_data = assign_attributes(
+            data=gas_data, site=site, sampling_period=sampling_period
+        )
 
         return gas_data
 
@@ -101,13 +103,19 @@ class CRDS:
             raise ValueError(f"{site} is not a valid site.")
 
         if site_fname != site:
-            raise ValueError("Site mismatch between passed site code and that read from filename.")
+            raise ValueError(
+                "Site mismatch between passed site code and that read from filename."
+            )
 
         if "m" not in inlet_fname:
-            raise ValueError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
+            raise ValueError(
+                "No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat"
+            )
 
         if inlet is not None and inlet != inlet_fname:
-            raise ValueError("Inlet mismatch between passed inlet and that read from filename.")
+            raise ValueError(
+                "Inlet mismatch between passed inlet and that read from filename."
+            )
         else:
             inlet = inlet_fname
 
@@ -153,7 +161,9 @@ class CRDS:
             # Compare against value extracted from the file name
             file_sampling_period = Timedelta(seconds=metadata["sampling_period"])
 
-            comparison_seconds = abs(sampling_period - file_sampling_period).total_seconds()
+            comparison_seconds = abs(
+                sampling_period - file_sampling_period
+            ).total_seconds()
             tolerance_seconds = 1
 
             if comparison_seconds > tolerance_seconds:
@@ -171,21 +181,29 @@ class CRDS:
 
         for n in range(n_gases):
             # Slice the columns
-            gas_data = data.iloc[:, skip_cols + n * n_cols : skip_cols + (n + 1) * n_cols]
+            gas_data = data.iloc[
+                :, skip_cols + n * n_cols : skip_cols + (n + 1) * n_cols
+            ]
 
             # Reset the column numbers
             gas_data.columns = RangeIndex(gas_data.columns.size)
             species = gas_data[0][0]
             species = species.lower()
 
-            column_labels = [species, f"{species}_variability", f"{species}_number_of_observations"]
+            column_labels = [
+                species,
+                f"{species}_variability",
+                f"{species}_number_of_observations",
+            ]
 
             # Name columns
             gas_data = gas_data.set_axis(column_labels, axis="columns", inplace=False)
 
             header_rows = 2
             # Drop the first two rows now we have the name
-            gas_data = gas_data.drop(index=gas_data.head(header_rows).index, inplace=False)
+            gas_data = gas_data.drop(
+                index=gas_data.head(header_rows).index, inplace=False
+            )
             # Cast data to float64 / double
             gas_data = gas_data.astype("float64")
 

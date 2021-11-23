@@ -557,7 +557,7 @@ def timeseries_HiTRes(
      have no effect if the time frequency was already regular but this may
      not be what we want and may want to add extra code to remove any NaNs, if
      they are introduced or to find a way to remove this requirement.
-     TODO: mypy having trouble with different types options and incompatible types, 
+     TODO: mypy having trouble with different types options and incompatible types,
      included as Any for now.
     """
     import numpy as np

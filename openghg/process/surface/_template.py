@@ -21,5 +21,3 @@ class TEMPLATE(BaseStore):
 
     def __init__(self) -> None:
         raise NotImplementedError
-
-    

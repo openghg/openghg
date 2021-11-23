@@ -175,7 +175,11 @@ def get_attributes(
 
     # Species-specific attributes
     # Long name
-    if species_upper.startswith("D") and species_upper != "DESFLURANE" or species_upper == "APD":
+    if (
+        species_upper.startswith("D")
+        and species_upper != "DESFLURANE"
+        or species_upper == "APD"
+    ):
         sp_long = species_translator[species_upper]["name"]
     elif species_upper == "RN":
         sp_long = "radioactivity_concentration_of_222Rn_in_air"
@@ -214,13 +218,17 @@ def get_attributes(
                         ds[key].attrs["units"] = unit_species[species_upper]
                     except KeyError:
                         try:
-                            ds[key].attrs["units"] = species_attrs[species_label.upper()]["units"]
+                            ds[key].attrs["units"] = species_attrs[
+                                species_label.upper()
+                            ]["units"]
                         except KeyError:
                             ds[key].attrs["units"] = "NA"
 
                 # If units are non-standard, add explanation
                 if species_upper in unit_species_long:
-                    ds[key].attrs["units_description"] = unit_species_long[species_upper]
+                    ds[key].attrs["units_description"] = unit_species_long[
+                        species_upper
+                    ]
 
             # Add to list of ancilliary variables
             if key != species_label:
@@ -334,6 +342,8 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
 
                 attributes[attr_key] = site_params[site][network][attr]
     else:
-        raise ValueError(f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale")
+        raise ValueError(
+            f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale"
+        )
 
     return attributes

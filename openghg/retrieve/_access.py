@@ -80,7 +80,9 @@ def get_obs_surface(
         start_date_data = timestamp_tzaware(data.time[0].values)
         end_date_data = timestamp_tzaware(data.time[-1].values)
     except AttributeError:
-        raise AttributeError("This dataset does not have a time attribute, unable to read date range")
+        raise AttributeError(
+            "This dataset does not have a time attribute, unable to read date range"
+        )
 
     if average is not None:
         # GJ - 2021-03-09
@@ -147,14 +149,16 @@ def get_obs_surface(
             data[species].resample(time=average).std(skipna=False, keep_attrs=True)
         )
         # If there are any periods where only one measurement was resampled, just use the median variability
-        ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
-            f"{species}_variability"
-        ].median()
+        ds_resampled[f"{species}_variability"][
+            ds_resampled[f"{species}_variability"] == 0.0
+        ] = ds_resampled[f"{species}_variability"].median()
         # Create attributes for variability variable
         ds_resampled[f"{species}_variability"].attrs[
             "long_name"
         ] = f"{data[species].attrs['long_name']}_variability"
-        ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
+        ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs[
+            "units"
+        ]
 
         # Resampling may introduce NaNs, so remove, if not keep_missing
         if keep_missing is False:
@@ -243,7 +247,7 @@ def get_flux(
     to to extract multiple. So if this is removed from this function the functionality
     itself would need to be wrapped up in another function call.
     """
-    from openghg.retrieve import search 
+    from openghg.retrieve import search
     from openghg.store import recombine_datasets
     from openghg.util import timestamp_epoch, timestamp_now
 
@@ -269,7 +273,9 @@ def get_flux(
     try:
         em_key = list(results.keys())[0]
     except IndexError:
-        raise ValueError(f"Unable to find any footprints data for {domain} for {species}.")
+        raise ValueError(
+            f"Unable to find any footprints data for {domain} for {species}."
+        )
 
     data_keys = results[em_key]["keys"]
     metadata = results[em_key]["metadata"]
@@ -287,7 +293,13 @@ def get_flux(
         species = metadata.get("species", "NA")
 
     return FluxData(
-        data=em_ds, metadata=metadata, flux={}, bc={}, species=species, scales="FIXME", units="FIXME"
+        data=em_ds,
+        metadata=metadata,
+        flux={},
+        bc={},
+        species=species,
+        scales="FIXME",
+        units="FIXME",
     )
 
 
@@ -353,7 +365,9 @@ def get_footprint(
                 f"Unable to find any footprints data for {site} at a height of {height} for species {species}."
             )
         else:
-            raise ValueError(f"Unable to find any footprints data for {site} at a height of {height}.")
+            raise ValueError(
+                f"Unable to find any footprints data for {site} at a height of {height}."
+            )
 
     keys = results[fp_site_key]["keys"]
     metadata = results[fp_site_key]["metadata"]
@@ -364,7 +378,13 @@ def get_footprint(
         species = metadata.get("species", "NA")
 
     return FootprintData(
-        data=fp_ds, metadata=metadata, flux={}, bc={}, species=species, scales="FIXME", units="FIXME"
+        data=fp_ds,
+        metadata=metadata,
+        flux={},
+        bc={},
+        species=species,
+        scales="FIXME",
+        units="FIXME",
     )
 
 
@@ -395,7 +415,9 @@ def _synonyms(species: str) -> str:
     if not matched_strings:
         for key in species_data:
             # Iterate over the alternative labels and check for a match
-            matched_strings = [s for s in species_data[key][alt_label] if s.upper() == species.upper()]
+            matched_strings = [
+                s for s in species_data[key][alt_label] if s.upper() == species.upper()
+            ]
 
             if matched_strings:
                 matched_strings = [key]
@@ -430,9 +452,9 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
     scale_convert_filepath = get_datapath("acrg_obs_scale_convert.csv")
 
     scale_converter = read_csv(scale_convert_filepath)
-    scale_converter_scales = scale_converter[scale_converter.isin([species.upper(), ds_scale, to_scale])][
-        ["species", "scale1", "scale2"]
-    ].dropna(axis=0, how="any")
+    scale_converter_scales = scale_converter[
+        scale_converter.isin([species.upper(), ds_scale, to_scale])
+    ][["species", "scale1", "scale2"]].dropna(axis=0, how="any")
 
     if len(scale_converter_scales) == 0:
         raise ValueError(

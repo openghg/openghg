@@ -6,10 +6,6 @@ pathType = Union[str, Path]
 
 
 class ObsMobile(BaseStore):
-    def __init__(self):
-        self.something = []
-        raise NotImplementedError
-
     @staticmethod
-    def read_file(filepath: pathType, network: str):
+    def read_file(filepath: pathType, network: str) -> None:
         raise NotImplementedError

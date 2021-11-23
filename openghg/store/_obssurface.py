@@ -93,7 +93,9 @@ class ObsSurface(BaseStore):
                         data_filepath = Path(fp[0])
                         precision_filepath = Path(fp[1])
                     except ValueError:
-                        raise ValueError("For GCWERKS data both data and precision filepaths must be given.")
+                        raise ValueError(
+                            "For GCWERKS data both data and precision filepaths must be given."
+                        )
                 else:
                     data_filepath = Path(fp)
 
@@ -185,7 +187,9 @@ class ObsSurface(BaseStore):
         # Load the ObsSurface object for retrieve
         obs = ObsSurface.load()
         # Get a dict of data and metadata
-        processed_data = read_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
+        processed_data = read_aqmesh(
+            data_filepath=data_filepath, metadata_filepath=metadata_filepath
+        )
 
         results: resultsType = defaultdict(dict)
         for site, site_data in tqdm(processed_data.items()):
@@ -203,7 +207,11 @@ class ObsSurface(BaseStore):
                 )
 
             uuid = obs.lookup_uuid(
-                site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period
+                site=site,
+                network=network,
+                inlet=inlet,
+                species=species,
+                sampling_period=sampling_period,
             )
 
             # Jump through these hoops until we can rework the data assignment functionality to split it out
@@ -258,7 +266,11 @@ class ObsSurface(BaseStore):
             species = data["species"]
 
             lookup_results[key] = self.lookup_uuid(
-                site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period
+                site=site,
+                network=network,
+                inlet=inlet,
+                species=species,
+                sampling_period=sampling_period,
             )
 
         return lookup_results
@@ -287,11 +299,17 @@ class ObsSurface(BaseStore):
                 )
 
             result = self.lookup_uuid(
-                site=site, network=network, inlet=inlet, species=species, sampling_period=sampling_period
+                site=site,
+                network=network,
+                inlet=inlet,
+                species=species,
+                sampling_period=sampling_period,
             )
 
             if result and result != uid:
-                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
+                raise ValueError(
+                    "Mismatch between assigned uuid and stored Datasource uuid."
+                )
 
             self.set_uuid(
                 site=site,
@@ -322,7 +340,13 @@ class ObsSurface(BaseStore):
         return uuid if uuid else False
 
     def set_uuid(
-        self, site: str, network: str, inlet: str, species: str, sampling_period: int, uuid: str
+        self,
+        site: str,
+        network: str,
+        inlet: str,
+        species: str,
+        sampling_period: int,
+        uuid: str,
     ) -> None:
         """Record a UUID of a Datasource in the datasource table
 

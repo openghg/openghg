@@ -62,7 +62,12 @@ class EulerianModel(BaseStore):
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
 
         from collections import defaultdict
-        from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
+        from openghg.util import (
+            clean_string,
+            hash_file,
+            timestamp_now,
+            timestamp_tzaware,
+        )
         from openghg.store import assign_data
         from xarray import open_dataset
         from pandas import Timestamp as pd_Timestamp
@@ -79,7 +84,9 @@ class EulerianModel(BaseStore):
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in em_store._file_hashes and not overwrite:
-            raise ValueError(f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]}.")
+            raise ValueError(
+                f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]}."
+            )
 
         em_data = open_dataset(filepath)
 
@@ -95,7 +102,9 @@ class EulerianModel(BaseStore):
                 if coord in em_data.coords:
                     break
             else:
-                raise ValueError("Input data must contain one of '{coord_options}' co-ordinate")
+                raise ValueError(
+                    "Input data must contain one of '{coord_options}' co-ordinate"
+                )
             if name != coord:
                 print("Renaming co-ordinate '{coord}' to '{name}'")
                 em_data = em_data.rename({coord: name})
@@ -119,7 +128,9 @@ class EulerianModel(BaseStore):
                 try:
                     start_date = attrs["simulation_start_date_and_time"]
                 except KeyError:
-                    raise Exception("Unable to derive start_date from data, please provide as an input.")
+                    raise Exception(
+                        "Unable to derive start_date from data, please provide as an input."
+                    )
                 else:
                     start_date = timestamp_tzaware(start_date)
                     start_date = str(start_date)
@@ -131,7 +142,9 @@ class EulerianModel(BaseStore):
                 try:
                     end_date = attrs["simulation_end_date_and_time"]
                 except KeyError:
-                    raise Exception("Unable to derive `end_date` from data, please provide as an input.")
+                    raise Exception(
+                        "Unable to derive `end_date` from data, please provide as an input."
+                    )
                 else:
                     end_date = timestamp_tzaware(end_date)
                     end_date = str(end_date)
@@ -150,11 +163,15 @@ class EulerianModel(BaseStore):
         history = metadata.get("history")
         if history is None:
             history = ""
-        metadata["history"] = history + f" {str(timestamp_now())} Processed onto OpenGHG cloud"
+        metadata["history"] = (
+            history + f" {str(timestamp_now())} Processed onto OpenGHG cloud"
+        )
 
         key = "_".join((model, species, date))
 
-        model_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+        model_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(
+            dict
+        )
         model_data[key]["data"] = em_data
         model_data[key]["metadata"] = metadata
 
@@ -164,10 +181,15 @@ class EulerianModel(BaseStore):
 
         data_type = "eulerian_model"
         datasource_uuids = assign_data(
-            data_dict=model_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type
+            data_dict=model_data,
+            lookup_results=lookup_results,
+            overwrite=overwrite,
+            data_type=data_type,
         )
 
-        em_store.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
+        em_store.add_datasources(
+            datasource_uuids=datasource_uuids, metadata=keyed_metadata
+        )
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
@@ -221,7 +243,9 @@ class EulerianModel(BaseStore):
             species = data["species"]
             date = data["date"]
 
-            lookup_results[key] = self.lookup_uuid(model=model, species=species, date=date)
+            lookup_results[key] = self.lookup_uuid(
+                model=model, species=species, date=date
+            )
 
         return lookup_results
 
@@ -243,7 +267,9 @@ class EulerianModel(BaseStore):
             result = self.lookup_uuid(model=model, species=species, date=date)
 
             if result and result != uid:
-                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
+                raise ValueError(
+                    "Mismatch between assigned uuid and stored Datasource uuid."
+                )
             else:
                 self.set_uuid(model=model, species=species, date=date, uuid=uid)
                 self._datasource_uuids[uid] = key

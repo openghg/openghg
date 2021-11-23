@@ -39,7 +39,9 @@ class SSHConnect:
         except AttributeError:
             return
 
-    def connect(self, username, hostname, keypath=None, password=None, known_host=False):
+    def connect(
+        self, username, hostname, keypath=None, password=None, known_host=False
+    ):
         """Use Paramiko to connect the hostname
 
         Args:

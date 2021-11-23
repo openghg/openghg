@@ -25,7 +25,9 @@ class GCWERKS:
             except KeyError:
                 pass
 
-    def find_files(self, data_path: Union[str, Path], skip_str: Union[str, List[str]] = "sf6") -> List[Tuple[Path, Path]]:
+    def find_files(
+        self, data_path: Union[str, Path], skip_str: Union[str, List[str]] = "sf6"
+    ) -> List[Tuple[Path, Path]]:
         """A helper file to find GCWERKS data and precisions file in a given folder.
         It searches for .C files of the format macehead.19.C, looks for a precisions file
         named macehead.19.precions.C and if it exists creates a tuple for these files.
@@ -115,9 +117,13 @@ class GCWERKS:
 
         # If we're not passed the instrument name and we can't find it raise an error
         if instrument is None:
-            instrument = self.check_instrument(filepath=data_filepath, should_raise=True)
+            instrument = self.check_instrument(
+                filepath=data_filepath, should_raise=True
+            )
         else:
-            fname_instrument = self.check_instrument(filepath=data_filepath, should_raise=False)
+            fname_instrument = self.check_instrument(
+                filepath=data_filepath, should_raise=False
+            )
 
             if fname_instrument is not None and instrument != fname_instrument:
                 raise ValueError(
@@ -155,7 +161,9 @@ class GCWERKS:
         site_name = findall(r"[\w']+", str(filepath.name))[0].lower()
 
         if len(site_code) > 3:
-            raise ValueError("Please pass in a 3 letter site code as the site argument.")
+            raise ValueError(
+                "Please pass in a 3 letter site code as the site argument."
+            )
 
         try:
             confirmed_code = self._name_to_code[site_name].lower()
@@ -163,11 +171,15 @@ class GCWERKS:
             raise ValueError(f"Cannot match {site_name} to a site code.")
 
         if site_code != confirmed_code:
-            raise ValueError(f"Mismatch between code reasd from filename: {confirmed_code} and that given: {site_code}")
+            raise ValueError(
+                f"Mismatch between code reasd from filename: {confirmed_code} and that given: {site_code}"
+            )
 
         return site_code
 
-    def check_instrument(self, filepath: Path, should_raise: bool = False) -> Union[str, None]:
+    def check_instrument(
+        self, filepath: Path, should_raise: bool = False
+    ) -> Union[str, None]:
         """Ensure we have the correct instrument or translate an instrument
         suffix to an instrument name.
 
@@ -248,7 +260,11 @@ class GCWERKS:
         data.index.name = "Datetime"
 
         # This metadata will be added to when species are split and attributes are written
-        metadata: Dict[str, str] = {"instrument": instrument, "site": site, "network": network}
+        metadata: Dict[str, str] = {
+            "instrument": instrument,
+            "site": site,
+            "network": network,
+        }
 
         extracted_sampling_period = self.get_precision(instrument)
         metadata["sampling_period"] = str(extracted_sampling_period)
@@ -256,7 +272,9 @@ class GCWERKS:
         if sampling_period is not None:
             # Compare input to definition within json file
             file_sampling_period = pd_Timedelta(seconds=extracted_sampling_period)
-            comparison_seconds = abs(sampling_period - file_sampling_period).total_seconds()
+            comparison_seconds = abs(
+                sampling_period - file_sampling_period
+            ).total_seconds()
             tolerance_seconds = 1
 
             if comparison_seconds > tolerance_seconds:
@@ -279,8 +297,12 @@ class GCWERKS:
                 # Add it to the dictionary for renaming later
                 columns_renamed[column] = gas_name + "_flag"
                 # Create 2 new columns based on the flag columns
-                data[gas_name + " status_flag"] = (data[column].str[0] != "-").astype(int)
-                data[gas_name + " integration_flag"] = (data[column].str[1] != "-").astype(int)
+                data[gas_name + " status_flag"] = (data[column].str[0] != "-").astype(
+                    int
+                )
+                data[gas_name + " integration_flag"] = (
+                    data[column].str[1] != "-"
+                ).astype(int)
 
                 col_shift = 4
                 units[gas_name] = header.iloc[1, col_loc + col_shift]
@@ -309,10 +331,16 @@ class GCWERKS:
             except ValueError:
                 raise ValueError(f"Cannot find {sp} in precisions file.")
 
-            data[sp + " repeatability"] = precision[precision_index].astype(float).reindex_like(data, method="pad")
+            data[sp + " repeatability"] = (
+                precision[precision_index]
+                .astype(float)
+                .reindex_like(data, method="pad")
+            )
 
         # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
-        data["new_time"] = data.index - pd_Timedelta(seconds=int(metadata["sampling_period"]) / 2.0)
+        data["new_time"] = data.index - pd_Timedelta(
+            seconds=int(metadata["sampling_period"]) / 2.0
+        )
 
         data = data.set_index("new_time", inplace=False, drop=True)
         data.index.name = "time"
@@ -346,7 +374,9 @@ class GCWERKS:
             return datetime.strptime(date, "%y%m%d")
 
         # Read precision species
-        precision_header = read_csv(filepath, skiprows=3, nrows=1, header=None, sep=r"\s+")
+        precision_header = read_csv(
+            filepath, skiprows=3, nrows=1, header=None, sep=r"\s+"
+        )
 
         precision_species = precision_header.values[0][1:].tolist()
 
@@ -367,7 +397,14 @@ class GCWERKS:
         return precision, precision_species
 
     def split_species(
-        self, data: DataFrame, site: str, instrument: str, species: List, metadata: Dict, units: Dict, scale: Dict
+        self,
+        data: DataFrame,
+        site: str,
+        instrument: str,
+        species: List,
+        metadata: Dict,
+        units: Dict,
+        scale: Dict,
     ) -> Dict:
         """Splits the species into separate dataframe into sections to be stored within individual Datasources
 
@@ -413,7 +450,15 @@ class GCWERKS:
 
                 # If we've only got a single inlet
                 if inlet == "any" or inlet == "air":
-                    spec_data = data[[spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]]
+                    spec_data = data[
+                        [
+                            spec,
+                            spec + " repeatability",
+                            spec + " status_flag",
+                            spec + " integration_flag",
+                            "Inlet",
+                        ]
+                    ]
                     spec_data = spec_data.dropna(axis="index", how="any")
                     spec_metadata["inlet"] = inlet_label
                 elif "date" in inlet:
@@ -421,7 +466,13 @@ class GCWERKS:
                     data_sliced = data.loc[dates[0] : dates[1]]
 
                     spec_data = data_sliced[
-                        [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
+                        [
+                            spec,
+                            spec + " repeatability",
+                            spec + " status_flag",
+                            spec + " integration_flag",
+                            "Inlet",
+                        ]
                     ]
                     spec_data = spec_data.dropna(axis="index", how="any")
                     spec_metadata["inlet"] = inlet_label
@@ -440,7 +491,13 @@ class GCWERKS:
                     inlet_data = data.loc[data["Inlet"] == select_inlet]
 
                     spec_data = inlet_data[
-                        [spec, spec + " repeatability", spec + " status_flag", spec + " integration_flag", "Inlet"]
+                        [
+                            spec,
+                            spec + " repeatability",
+                            spec + " status_flag",
+                            spec + " integration_flag",
+                            "Inlet",
+                        ]
                     ]
 
                     spec_data = spec_data.dropna(axis="index", how="any")
@@ -452,7 +509,9 @@ class GCWERKS:
                 if spec_data.empty:
                     continue
 
-                attributes = self.get_site_attributes(site=site, inlet=inlet_label, instrument=instrument).copy()
+                attributes = self.get_site_attributes(
+                    site=site, inlet=inlet_label, instrument=instrument
+                ).copy()
 
                 # We want an xarray Dataset
                 spec_data = spec_data.to_xarray()
@@ -520,7 +579,9 @@ class GCWERKS:
 
         return mapping_dict
 
-    def get_site_attributes(self, site: str, inlet: str, instrument: str) -> Dict[str, str]:
+    def get_site_attributes(
+        self, site: str, inlet: str, instrument: str
+    ) -> Dict[str, str]:
         """Gets the site specific attributes for writing to Datsets
 
         Args:
@@ -539,6 +600,8 @@ class GCWERKS:
             attributes["comment"] = self._gc_params["comment"][instrument]
         except KeyError:
             valid_instruments = list(self._gc_params["comment"].keys())
-            raise KeyError(f"Invalid instrument {instrument} passed, valid instruments : {valid_instruments}")
+            raise KeyError(
+                f"Invalid instrument {instrument} passed, valid instruments : {valid_instruments}"
+            )
 
         return attributes

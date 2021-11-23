@@ -39,7 +39,9 @@ def run_job(username, hostname, password, job_data, known_host=False):
     partition = job_data["partition"]
 
     if partition not in bc4_partitions:
-        raise ValueError(f"Invalid partition selected. Please select from one of the following :\n{bc4_partitions}")
+        raise ValueError(
+            f"Invalid partition selected. Please select from one of the following :\n{bc4_partitions}"
+        )
 
     n_nodes = job_data["n_nodes"]
     n_tasks_per_node = job_data["n_tasks_per_node"]
@@ -48,7 +50,9 @@ def run_job(username, hostname, password, job_data, known_host=False):
     memory_req = job_data["memory_req"]
 
     if not memory_req.endswith("G"):
-        raise ValueError("Memory requirements must be in gigabytes and end with a G i.e. 128G")
+        raise ValueError(
+            "Memory requirements must be in gigabytes and end with a G i.e. 128G"
+        )
 
     job_duration = job_data["job_duration"]
 
@@ -101,7 +105,9 @@ def run_job(username, hostname, password, job_data, known_host=False):
 
         # Here we'll only copy the files we've created
         # Other input files will be copied from the cloud drive by the  script we're passing
-        job_controller_path = get_datapath(filename="bc4_template.py", directory="job_controllers")
+        job_controller_path = get_datapath(
+            filename="bc4_template.py", directory="job_controllers"
+        )
 
         files = [jobscript_path, json_path, job_controller_path]
 
@@ -118,6 +124,8 @@ def run_job(username, hostname, password, job_data, known_host=False):
         # sc.write_files(files=files, remote_dir="first_job")
         sc.write_files(files=files, remote_dir=job_name)
 
-        response_list = sc.run_command(commands=f"cd {job_name}; python3 bc4_template.py {json_filename} &")
+        response_list = sc.run_command(
+            commands=f"cd {job_name}; python3 bc4_template.py {json_filename} &"
+        )
 
     return response_list

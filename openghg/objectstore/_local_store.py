@@ -43,7 +43,9 @@ def get_openghg_local_path() -> Path:
         )
 
 
-def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_prefix: bool = False) -> List:
+def get_all_object_names(
+    bucket: str, prefix: Optional[str] = None, without_prefix: bool = False
+) -> List:
     """Returns the names of all objects in the passed bucket
 
     Args:
@@ -269,7 +271,9 @@ def query_store() -> Dict:
     obs = ObsSurface.load()
 
     datasource_uuids = obs.datasources()
-    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+    datasources = (
+        Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids
+    )
 
     data = {}
 
@@ -330,7 +334,9 @@ def visualise_store() -> pyvis.network.Network:
             for inlet, inlet_data in site_data.items():
                 inlet_name = str(inlet).lower()
                 inlet_id = str(uuid4())
-                net.add_node(n_id=inlet_id, label=inlet_name, color="#808080", value=500)
+                net.add_node(
+                    n_id=inlet_id, label=inlet_name, color="#808080", value=500
+                )
                 net.add_edge(source=site_id, to=inlet_id)
 
                 # Now for each site create the datasource nodes
@@ -340,9 +346,15 @@ def visualise_store() -> pyvis.network.Network:
 
                     label = f"{species.upper()} {instrument}"
                     title = "\n".join(
-                        [f"Site: {site.upper()}", f"Species : {species.upper()}", f"Instrument: {instrument}"]
+                        [
+                            f"Site: {site.upper()}",
+                            f"Species : {species.upper()}",
+                            f"Instrument: {instrument}",
+                        ]
                     )
-                    net.add_node(n_id=uid, label=label, title=title, color="#f28e2b", value=100)
+                    net.add_node(
+                        n_id=uid, label=label, title=title, color="#f28e2b", value=100
+                    )
                     net.add_edge(source=inlet_id, to=uid)
 
     return net.show("openghg_objstore.html")

@@ -24,7 +24,9 @@ class TestService:
             raise PermissionError("Cannot use a null service")
 
         args = {"test": "test"}
-        response = self._service.call_function(function="testing.test_connection", args=args)
+        response = self._service.call_function(
+            function="testing.test_connection", args=args
+        )
         to_return: str = response["results"]
 
         return to_return

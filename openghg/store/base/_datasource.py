@@ -71,7 +71,13 @@ class Datasource:
         value = str(value)
         self._metadata[key.lower()] = value.lower()
 
-    def add_data(self, metadata: Dict, data: Dataset, data_type: str, overwrite: Optional[bool] = False) -> None:
+    def add_data(
+        self,
+        metadata: Dict,
+        data: Dataset,
+        data_type: str,
+        overwrite: Optional[bool] = False,
+    ) -> None:
         """Add data to this Datasource and segment the data by size.
         The data is stored as a tuple of the data and the daterange it covers.
 
@@ -83,11 +89,19 @@ class Datasource:
         Returns:
             None
         """
-        expected_data_types = ("timeseries", "emissions", "met", "footprints", "eulerian_model")
+        expected_data_types = (
+            "timeseries",
+            "emissions",
+            "met",
+            "footprints",
+            "eulerian_model",
+        )
 
         data_type = data_type.lower()
         if data_type not in expected_data_types:
-            raise TypeError(f"Incorrect data type selected. Please select from one of {expected_data_types}")
+            raise TypeError(
+                f"Incorrect data type selected. Please select from one of {expected_data_types}"
+            )
 
         self.add_metadata(metadata=metadata)
 
@@ -129,7 +143,9 @@ class Datasource:
             to_keep = []
             for current_daterange in self._data:
                 for new_daterange in additional_data:
-                    if not daterange_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
+                    if not daterange_overlap(
+                        daterange_a=current_daterange, daterange_b=new_daterange
+                    ):
                         to_keep.append(current_daterange)
 
             updated_data = {}
@@ -210,7 +226,9 @@ class Datasource:
             to_keep = []
             for current_daterange in self._data:
                 for new_daterange in new_data:
-                    if not daterange_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
+                    if not daterange_overlap(
+                        daterange_a=current_daterange, daterange_b=new_daterange
+                    ):
                         to_keep.append(current_daterange)
 
             updated_data = {}
@@ -238,7 +256,9 @@ class Datasource:
         """
         self.add_field_data(data=data, data_type="eulerian_model")
 
-    def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
+    def get_dataframe_daterange(
+        self, dataframe: DataFrame
+    ) -> Tuple[Timestamp, Timestamp]:
         """Returns the daterange for the passed DataFrame
 
         Args:
@@ -275,7 +295,9 @@ class Datasource:
 
             return start, end
         except AttributeError:
-            raise AttributeError("This dataset does not have a time attribute, unable to read date range")
+            raise AttributeError(
+                "This dataset does not have a time attribute, unable to read date range"
+            )
 
     def get_dataset_daterange_str(self, dataset: Dataset) -> str:
         start, end = self.get_dataset_daterange(dataset=dataset)
@@ -409,7 +431,11 @@ class Datasource:
         from copy import deepcopy
 
         from Acquire.ObjectStore import get_datetime_now_to_string
-        from openghg.objectstore import get_bucket, set_object_from_file, set_object_from_json
+        from openghg.objectstore import (
+            get_bucket,
+            set_object_from_file,
+            set_object_from_json,
+        )
 
         if bucket is None:
             bucket = get_bucket()
@@ -456,7 +482,13 @@ class Datasource:
         set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
 
     @classmethod
-    def load(cls: Type[T], bucket: str = None, uuid: str = None, key: str = None, shallow: bool = False) -> T:
+    def load(
+        cls: Type[T],
+        bucket: str = None,
+        uuid: str = None,
+        key: str = None,
+        shallow: bool = False,
+    ) -> T:
         """Load a Datasource from the object store either by name or UUID
 
         Args:
@@ -498,7 +530,9 @@ class Datasource:
 
             for date_key in self._data_keys["latest"]["keys"]:
                 data_key = self._data_keys["latest"]["keys"][date_key]
-                self._data[date_key] = Datasource.load_dataset(bucket=bucket, key=data_key)
+                self._data[date_key] = Datasource.load_dataset(
+                    bucket=bucket, key=data_key
+                )
 
         return self._data
 
@@ -577,7 +611,7 @@ class Datasource:
 
         results = {}
 
-        def search_recurse(term: str, data: Dict) -> None :
+        def search_recurse(term: str, data: Dict) -> None:
             for v in data.values():
                 if v == term:
                     results[term] = True
@@ -644,7 +678,9 @@ class Datasource:
         else:
             return False
 
-    def in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> bool:
+    def in_daterange(
+        self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]
+    ) -> bool:
         """Check if the data contained within this Datasource overlaps with the
         dates given.
 
@@ -664,7 +700,9 @@ class Datasource:
 
         return bool((start_date <= self._end_date) and (end_date >= self._start_date))
 
-    def keys_in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> List[str]:
+    def keys_in_daterange(
+        self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]
+    ) -> List[str]:
         """Return the keys for data between the two passed dates
 
         Args:
@@ -675,7 +713,9 @@ class Datasource:
         """
         data_keys = self._data_keys["latest"]["keys"]
 
-        return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
+        return self.key_date_compare(
+            keys=data_keys, start_date=start_date, end_date=end_date
+        )
 
     def keys_in_daterange_str(self, daterange: str) -> List[str]:
         """Return the keys for data within the specified daterange string
@@ -699,9 +739,13 @@ class Datasource:
 
         data_keys = self._data_keys["latest"]["keys"]
 
-        return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
+        return self.key_date_compare(
+            keys=data_keys, start_date=start_date, end_date=end_date
+        )
 
-    def key_date_compare(self, keys: Dict[str, str], start_date: Timestamp, end_date: Timestamp) -> List:
+    def key_date_compare(
+        self, keys: Dict[str, str], start_date: Timestamp, end_date: Timestamp
+    ) -> List:
         """Returns the keys in the key list that are between the given dates
 
         Args:
@@ -808,7 +852,9 @@ class Datasource:
         try:
             keys = list(self._data_keys[version]["keys"].values())
         except KeyError:
-            raise KeyError(f"Invalid version, valid versions {list(self._data_keys.keys())}")
+            raise KeyError(
+                f"Invalid version, valid versions {list(self._data_keys.keys())}"
+            )
 
         return keys
 

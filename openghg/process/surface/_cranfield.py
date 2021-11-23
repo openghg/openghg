@@ -5,7 +5,7 @@ __all__ = ["CRANFIELD"]
 
 
 class CRANFIELD:
-    """ Class for retrieve Cranfield data """
+    """Class for retrieve Cranfield data"""
 
     def read_file(
         self,

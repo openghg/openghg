@@ -53,14 +53,24 @@ class EUROCOM:
             sampling_period = "NOT_SET"
 
         # This should return xarray Datasets
-        gas_data = self.read_data(data_filepath=data_filepath, sampling_period=sampling_period, site=site)
+        gas_data = self.read_data(
+            data_filepath=data_filepath, sampling_period=sampling_period, site=site
+        )
 
         # Assign attributes to the xarray Datasets here data here makes it a lot easier to test
-        gas_data = assign_attributes(data=gas_data, site=site, sampling_period=sampling_period)
+        gas_data = assign_attributes(
+            data=gas_data, site=site, sampling_period=sampling_period
+        )
 
         return gas_data
 
-    def read_data(self, data_filepath: Path, site: str, sampling_period: str, height: Optional[str] = None) -> Dict:
+    def read_data(
+        self,
+        data_filepath: Path,
+        site: str,
+        sampling_period: str,
+        height: Optional[str] = None,
+    ) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -92,7 +102,9 @@ class EUROCOM:
         n_skip = len(header) - 1
         species = "co2"
 
-        def date_parser(year: str, month: str, day: str, hour: str, minute: str) -> Timestamp:
+        def date_parser(
+            year: str, month: str, day: str, hour: str, minute: str
+        ) -> Timestamp:
             return Timestamp(year=year, month=month, day=day, hour=hour, minute=minute)
 
         datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
@@ -188,6 +200,8 @@ class EUROCOM:
                 inlet = self._eurocom_params["intake_height"][site]
                 attributes["inlet_height_m"] = str(inlet)
             else:
-                raise ValueError(f"Unable to find inlet from filename or attributes file for {site}")
+                raise ValueError(
+                    f"Unable to find inlet from filename or attributes file for {site}"
+                )
 
         return attributes

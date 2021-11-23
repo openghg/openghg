@@ -38,7 +38,12 @@ class SearchResults:
             else:
                 print_strs.append(f"Site: {site.upper()}")
                 print_strs.append("---------")
-                print_strs.extend([f"{sp} at {', '.join(self.results[site][sp].keys())}" for sp in species])
+                print_strs.extend(
+                    [
+                        f"{sp} at {', '.join(self.results[site][sp].keys())}"
+                        for sp in species
+                    ]
+                )
             print_strs.append("\n")
 
         return "\n".join(print_strs)
@@ -61,7 +66,11 @@ class SearchResults:
         Returns:
             dict: Dictionary of data
         """
-        return {"results": self.results, "ranked_data": self.ranked_data, "cloud": self.cloud}
+        return {
+            "results": self.results,
+            "ranked_data": self.ranked_data,
+            "cloud": self.cloud,
+        }
 
     @classmethod
     def from_data(cls: Type[T], data: Dict) -> T:
@@ -72,7 +81,11 @@ class SearchResults:
         Returns:
             SearchResults: SearchResults object
         """
-        return cls(results=data["results"], ranked_data=data["ranked_data"], cloud=data["cloud"])
+        return cls(
+            results=data["results"],
+            ranked_data=data["ranked_data"],
+            cloud=data["cloud"],
+        )
 
     def raw(self) -> Dict:
         """Returns the raw results data
@@ -151,7 +164,9 @@ class SearchResults:
         for site, species_data in self.results.items():
             for species, inlet_data in species_data.items():
                 for inlet, keys in inlet_data.items():
-                    data[site][species][inlet] = self._create_obsdata(site=site, species=species, inlet=inlet)
+                    data[site][species][inlet] = self._create_obsdata(
+                        site=site, species=species, inlet=inlet
+                    )
 
         # TODO - update this once addict is stubbed
         data_dict: Dict = data.to_dict()
@@ -203,7 +218,9 @@ class SearchResults:
                     key = "_".join((a_site, species))
 
                     try:
-                        results[key] = self._create_obsdata(site=a_site, species=species)
+                        results[key] = self._create_obsdata(
+                            site=a_site, species=species
+                        )
                     except KeyError:
                         pass
 

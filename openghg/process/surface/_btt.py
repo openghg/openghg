@@ -45,7 +45,9 @@ class BTT(BaseStore):
         if sampling_period is None:
             sampling_period = "NOT_SET"
 
-        gas_data = self.read_data(data_filepath=data_filepath, sampling_period=sampling_period)
+        gas_data = self.read_data(
+            data_filepath=data_filepath, sampling_period=sampling_period
+        )
         gas_data = assign_attributes(data=gas_data, site=site, network=network)
 
         return gas_data
@@ -76,7 +78,9 @@ class BTT(BaseStore):
         sampling_period_seconds = str(int(sampling_period)) + "s"
 
         data = read_csv(data_filepath)
-        data["time"] = Timestamp("2019-01-01 00:00") + to_timedelta(data["DOY"] - 1, unit="D")
+        data["time"] = Timestamp("2019-01-01 00:00") + to_timedelta(
+            data["DOY"] - 1, unit="D"
+        )
         data["time"] = data["time"].dt.round(sampling_period_seconds)
         data = data[~isnull(data.time)]
 
@@ -88,7 +92,9 @@ class BTT(BaseStore):
             processed_data = data.loc[:, [species]].sort_index()
             # Create a variability column
             species_stddev_label = species_sd[species]
-            processed_data[species][f"{species} variability"] = data[species_stddev_label]
+            processed_data[species][f"{species} variability"] = data[
+                species_stddev_label
+            ]
 
             # Replace any values below zero with NaNs
             processed_data[processed_data < 0] = np_nan
@@ -103,7 +109,10 @@ class BTT(BaseStore):
             site_attributes["sampling_period"] = sampling_period
 
             # TODO - add in better metadata reading
-            metadata = {"species": clean_string(species), "sampling_period": str(sampling_period)}
+            metadata = {
+                "species": clean_string(species),
+                "sampling_period": str(sampling_period),
+            }
 
             combined_data[species] = {
                 "metadata": metadata,

@@ -45,7 +45,12 @@ class Footprints(BaseStore):
         """
         from collections import defaultdict
         from xarray import open_dataset
-        from openghg.util import hash_file, timestamp_tzaware, timestamp_now, clean_string
+        from openghg.util import (
+            hash_file,
+            timestamp_tzaware,
+            timestamp_now,
+            clean_string,
+        )
         from openghg.store import assign_data
 
         filepath = Path(filepath)
@@ -59,7 +64,9 @@ class Footprints(BaseStore):
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in fp._file_hashes and not overwrite:
-            raise ValueError(f"This file has been uploaded previously with the filename : {fp._file_hashes[file_hash]}.")
+            raise ValueError(
+                f"This file has been uploaded previously with the filename : {fp._file_hashes[file_hash]}."
+            )
 
         fp_data = open_dataset(filepath)
 
@@ -94,10 +101,18 @@ class Footprints(BaseStore):
         # If it's a high resolution footprints file we'll have two sets of lat/long values
         if high_res:
             try:
-                metadata["max_longitude_high"] = round(float(fp_data["lon_high"].max()), 5)
-                metadata["min_longitude_high"] = round(float(fp_data["lon_high"].min()), 5)
-                metadata["max_latitude_high"] = round(float(fp_data["lat_high"].max()), 5)
-                metadata["min_latitude_high"] = round(float(fp_data["lat_high"].min()), 5)
+                metadata["max_longitude_high"] = round(
+                    float(fp_data["lon_high"].max()), 5
+                )
+                metadata["min_longitude_high"] = round(
+                    float(fp_data["lon_high"].min()), 5
+                )
+                metadata["max_latitude_high"] = round(
+                    float(fp_data["lat_high"].max()), 5
+                )
+                metadata["min_latitude_high"] = round(
+                    float(fp_data["lat_high"].min()), 5
+                )
                 metadata["time_resolution"] = "high_time_resolution"
             except KeyError:
                 raise KeyError("Unable to find lat_high or lon_high data.")
@@ -116,7 +131,9 @@ class Footprints(BaseStore):
         # more than one footprints at a time
         key = "_".join((site, domain, model, height))
 
-        footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+        footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(
+            dict
+        )
         footprint_data[key]["data"] = fp_data
         footprint_data[key]["metadata"] = metadata
 
@@ -127,7 +144,10 @@ class Footprints(BaseStore):
 
         data_type = "footprints"
         datasource_uuids: Dict[str, str] = assign_data(
-            data_dict=footprint_data, lookup_results=lookup_results, overwrite=overwrite, data_type=data_type
+            data_dict=footprint_data,
+            lookup_results=lookup_results,
+            overwrite=overwrite,
+            data_type=data_type,
         )
 
         fp.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
@@ -139,7 +159,9 @@ class Footprints(BaseStore):
 
         return datasource_uuids
 
-    def lookup_uuid(self, site: str, domain: str, model: str, height: str) -> Union[str, bool]:
+    def lookup_uuid(
+        self, site: str, domain: str, model: str, height: str
+    ) -> Union[str, bool]:
         """Perform a lookup for the UUID of a Datasource
 
         Args:
@@ -154,7 +176,9 @@ class Footprints(BaseStore):
 
         return uuid if uuid else False
 
-    def set_uuid(self, site: str, domain: str, model: str, height: str, uuid: str) -> None:
+    def set_uuid(
+        self, site: str, domain: str, model: str, height: str, uuid: str
+    ) -> None:
         """Record a UUID of a Datasource in the datasource table
 
         Args:
@@ -187,7 +211,9 @@ class Footprints(BaseStore):
             height = data["height"]
             domain = data["domain"]
 
-            result = self.lookup_uuid(site=site, domain=domain, model=model, height=height)
+            result = self.lookup_uuid(
+                site=site, domain=domain, model=model, height=height
+            )
 
             if not result:
                 result = False
@@ -212,12 +238,18 @@ class Footprints(BaseStore):
             height = md["height"]
             domain = md["domain"]
 
-            result = self.lookup_uuid(site=site, domain=domain, model=model, height=height)
+            result = self.lookup_uuid(
+                site=site, domain=domain, model=model, height=height
+            )
 
             if result and result != uid:
-                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
+                raise ValueError(
+                    "Mismatch between assigned uuid and stored Datasource uuid."
+                )
             else:
-                self.set_uuid(site=site, domain=domain, model=model, height=height, uuid=uid)
+                self.set_uuid(
+                    site=site, domain=domain, model=model, height=height, uuid=uid
+                )
                 self._datasource_uuids[uid] = key
 
     def save(self) -> None:
@@ -236,7 +268,11 @@ class Footprints(BaseStore):
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
     def search(
-        self, site: str, network: str, start_date: Optional[Union[str, Timestamp]], end_date: Optional[Union[str, Timestamp]]
+        self,
+        site: str,
+        network: str,
+        start_date: Optional[Union[str, Timestamp]],
+        end_date: Optional[Union[str, Timestamp]],
     ) -> NoReturn:
         """Search for a footprints from a specific site and network, return a dictionary of data
         so the user can choose

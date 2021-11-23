@@ -1,6 +1,14 @@
 __all__ = ["Process"]
 
-from Acquire.Client import Drive, Service, PAR, Authorisation, StorageCreds, Wallet, User
+from Acquire.Client import (
+    Drive,
+    Service,
+    PAR,
+    Authorisation,
+    StorageCreds,
+    Wallet,
+    User,
+)
 from openghg.client import create_user
 
 from pathlib import Path
@@ -140,7 +148,9 @@ class Process:
 
             # If we try to upload many files we don't want it to fail if a single
             # file contains overlapping data
-            response = self._service.call_function(function="process.process", args=args)
+            response = self._service.call_function(
+                function="process.process", args=args
+            )
 
             if "Error" in response:
                 if data_type in ("GCWERKS", "GC"):

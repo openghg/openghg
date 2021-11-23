@@ -34,9 +34,13 @@ class RankSources:
         rank_table = obs.rank_data()
 
         # Shallow load the Datasources (only get their JSON metadata)
-        datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+        datasources = (
+            Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids
+        )
 
-        matching_sources = [d for d in datasources if d.search_metadata(site=site, species=species)]
+        matching_sources = [
+            d for d in datasources if d.search_metadata(site=site, species=species)
+        ]
 
         if not matching_sources:
             return {}
@@ -45,7 +49,11 @@ class RankSources:
             return "_".join([d.species(), d.inlet(), d.instrument()])
 
         self._user_info = {
-            name_str(d): {"rank_data": rank_table.get(d.uuid(), "NA"), "data_range": d.daterange_str()} for d in matching_sources
+            name_str(d): {
+                "rank_data": rank_table.get(d.uuid(), "NA"),
+                "data_range": d.daterange_str(),
+            }
+            for d in matching_sources
         }
 
         self._key_lookup = {name_str(d): d.uuid() for d in matching_sources}

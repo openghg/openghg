@@ -3,7 +3,9 @@ from xarray import Dataset
 __all__ = ["plot_footprint"]
 
 
-def plot_footprint(data: Dataset, label: str = None, vmin: float = None, vmax: float = None) -> None:
+def plot_footprint(
+    data: Dataset, label: str = None, vmin: float = None, vmax: float = None
+) -> None:
     """Plot a footprints
 
     Args:

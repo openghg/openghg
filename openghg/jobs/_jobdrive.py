@@ -73,6 +73,8 @@ class JobDrive:
 
         file_metadata = {}
         for fname in files:
-            file_metadata[fname] = self._drive.download(filename=fname, directory=local_dir)
+            file_metadata[fname] = self._drive.download(
+                filename=fname, directory=local_dir
+            )
 
         return file_metadata

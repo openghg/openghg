@@ -42,7 +42,9 @@ class NOAA(BaseStore):
         from pathlib import Path
 
         if inlet is None:
-            raise ValueError("Inlet must be given for NOAA data retrieve. If flask data pass flask as inlet.")
+            raise ValueError(
+                "Inlet must be given for NOAA data retrieve. If flask data pass flask as inlet."
+            )
 
         if sampling_period is None:
             sampling_period = "NOT_SET"
@@ -232,7 +234,12 @@ class NOAA(BaseStore):
         return gas_data
 
     def read_raw_data(
-        self, data_filepath: Path, species: str, inlet: str, sampling_period: str, measurement_type: str = "flask"
+        self,
+        data_filepath: Path,
+        species: str,
+        inlet: str,
+        sampling_period: str,
+        measurement_type: str = "flask",
     ) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
@@ -253,10 +260,21 @@ class NOAA(BaseStore):
 
         column_names = header[-1][14:].split()
 
-        def date_parser(year: str, month: str, day: str, hour: str, minute: str, second: str) -> Timestamp:
+        def date_parser(
+            year: str, month: str, day: str, hour: str, minute: str, second: str
+        ) -> Timestamp:
             return Timestamp(year, month, day, hour, minute, second)
 
-        date_parsing = {"time": ["sample_year", "sample_month", "sample_day", "sample_hour", "sample_minute", "sample_seconds"]}
+        date_parsing = {
+            "time": [
+                "sample_year",
+                "sample_month",
+                "sample_day",
+                "sample_hour",
+                "sample_minute",
+                "sample_seconds",
+            ]
+        }
 
         data_types = {
             "sample_year": int,

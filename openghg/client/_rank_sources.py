@@ -80,7 +80,9 @@ class RankSources:
             None
         """
         if all((start_date, end_date, dateranges)):
-            raise ValueError("Either a start and end date must be passed or a list of dateranges")
+            raise ValueError(
+                "Either a start and end date must be passed or a list of dateranges"
+            )
 
         uuid = self._key_lookup[key]
 

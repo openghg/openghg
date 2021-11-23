@@ -1,4 +1,14 @@
-from . import analyse, dataobjects, client, localclient, objectstore, process, retrieve, service, util
+from . import (
+    analyse,
+    dataobjects,
+    client,
+    localclient,
+    objectstore,
+    process,
+    retrieve,
+    service,
+    util,
+)
 import sys as _sys
 from ._version import get_versions  # type: ignore
 
@@ -11,7 +21,7 @@ __all__ = [
     "retrieve",
     "service",
     "store",
-    "util"
+    "util",
 ]
 
 if _sys.version_info.major < 3:

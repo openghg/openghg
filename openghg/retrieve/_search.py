@@ -39,8 +39,6 @@ def search(**kwargs):  # type: ignore
 
     from openghg.store import ObsSurface, Footprints, Emissions, EulerianModel
     from openghg.store.base import Datasource
-    from openghg.store import ObsSurface
-
 
     from openghg.util import (
         timestamp_now,
@@ -81,13 +79,17 @@ def search(**kwargs):  # type: ignore
         pass
 
     # As we might have kwargs that are None we want to get rid of those
-    search_kwargs = {k: clean_string(v) for k, v in kwargs_copy.items() if v is not None}
+    search_kwargs = {
+        k: clean_string(v) for k, v in kwargs_copy.items() if v is not None
+    }
 
     data_type = search_kwargs.get("data_type", "timeseries")
 
     valid_data_types = ("timeseries", "footprints", "emissions", "eulerian_model")
     if data_type not in valid_data_types:
-        raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
+        raise ValueError(
+            f"{data_type} is not a valid data type, please select one of {valid_data_types}"
+        )
 
     # Assume we want timeseries data
     obj: Union[ObsSurface, Footprints, Emissions, EulerianModel] = ObsSurface.load()
@@ -102,7 +104,9 @@ def search(**kwargs):  # type: ignore
     datasource_uuids = obj.datasources()
 
     # Shallow load the Datasources so we can search their metadata
-    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+    datasources = (
+        Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids
+    )
 
     # For the time being this will return a dict until we know how best to represent
     # the footprints and emissions results in a SearchResult object
@@ -111,13 +115,17 @@ def search(**kwargs):  # type: ignore
         for datasource in datasources:
             if datasource.search_metadata(**search_kwargs):
                 uid = datasource.uuid()
-                sources[uid]["keys"] = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+                sources[uid]["keys"] = datasource.keys_in_daterange(
+                    start_date=start_date, end_date=end_date
+                )
                 sources[uid]["metadata"] = datasource.metadata()
 
         return sources
 
     # Find the Datasources that contain matching metadata
-    matching_sources = {d.uuid(): d for d in datasources if d.search_metadata(**search_kwargs)}
+    matching_sources = {
+        d.uuid(): d for d in datasources if d.search_metadata(**search_kwargs)
+    }
 
     # TODO - Update this as it only uses the ACRG repo JSON at the moment
     # Check if this site only has one inlet, if so skip ranking
@@ -135,7 +143,9 @@ def search(**kwargs):  # type: ignore
     if {"site", "inlet", "species"} <= search_kwargs.keys() or skip_ranking is True:
         specific_sources = aDict()
         for datasource in matching_sources.values():
-            specific_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+            specific_keys = datasource.keys_in_daterange(
+                start_date=start_date, end_date=end_date
+            )
 
             if not specific_keys:
                 continue
@@ -246,7 +256,9 @@ def search(**kwargs):  # type: ignore
             # and the dates for which we have ranking information
 
             # Get the dateranges that are covered by ranking information
-            daterange_strs = list(iter_chain.from_iterable([m["dateranges"] for m in data["matching"]]))
+            daterange_strs = list(
+                iter_chain.from_iterable([m["dateranges"] for m in data["matching"]])
+            )
             # Find the gaps in the ranking coverage
             gap_dateranges = find_daterange_gaps(
                 start_search=start_date, end_search=end_date, dateranges=daterange_strs
@@ -259,7 +271,9 @@ def search(**kwargs):  # type: ignore
 
             for gap_daterange in gap_dateranges:
                 # We want to select the inlet that's ranked for dates closest to the ones we have here
-                closest_dr = closest_daterange(to_compare=gap_daterange, dateranges=ranked_dateranges)
+                closest_dr = closest_daterange(
+                    to_compare=gap_daterange, dateranges=ranked_dateranges
+                )
 
                 gap_start, gap_end = split_daterange_str(gap_daterange)
                 # Find the closest ranked inlet by date
@@ -284,7 +298,9 @@ def search(**kwargs):  # type: ignore
                     continue
 
                 # Retrieve the data keys
-                inlet_data_keys = results.keys(site=site, species=sp, inlet=chosen_inlet)
+                inlet_data_keys = results.keys(
+                    site=site, species=sp, inlet=chosen_inlet
+                )
 
                 data_keys[site][sp]["keys"].extend(inlet_data_keys)
 

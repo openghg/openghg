@@ -6,7 +6,12 @@ from typing import Dict
 __all__ = ["assign_data"]
 
 
-def assign_data(data_dict: Dict, lookup_results: Dict, overwrite: bool, data_type: str = "timeseries") -> Dict[str, str]:
+def assign_data(
+    data_dict: Dict,
+    lookup_results: Dict,
+    overwrite: bool,
+    data_type: str = "timeseries",
+) -> Dict[str, str]:
     """Assign data to a Datasource. This will either create a new Datasource
     Create or get an existing Datasource for each gas in the file
 
@@ -44,7 +49,9 @@ def assign_data(data_dict: Dict, lookup_results: Dict, overwrite: bool, data_typ
             datasource = Datasource.load(uuid=uuid)
 
         # Add the dataframe to the datasource
-        datasource.add_data(metadata=metadata, data=data, overwrite=overwrite, data_type=data_type)
+        datasource.add_data(
+            metadata=metadata, data=data, overwrite=overwrite, data_type=data_type
+        )
         # Save Datasource to object store
         datasource.save()
 

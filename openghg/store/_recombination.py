@@ -9,7 +9,7 @@ __all__ = ["recombine_multisite", "recombine_datasets"]
 
 
 def recombine_multisite(keys: Dict, sort: Optional[bool] = True) -> Dict:
-    """ Recombine the keys from multiple sites into a single Dataset for each site
+    """Recombine the keys from multiple sites into a single Dataset for each site
 
     Args:
         site_keys: A dictionary of lists of keys, keyed by site
