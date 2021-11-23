@@ -1,7 +1,8 @@
 import pytest
 from pandas import Timestamp
 
-from openghg.modules import Datasource, ObsSurface
+from openghg.store.base import Datasource
+from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket, exists
 from openghg.util import create_daterange_str
 from helpers import get_datapath

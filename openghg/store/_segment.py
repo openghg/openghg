@@ -17,7 +17,7 @@ def assign_data(data_dict: Dict, lookup_results: Dict, overwrite: bool, data_typ
         Returns:
             dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
     """
-    from openghg.modules import Datasource
+    from openghg.store.base import Datasource
 
     uuids = {}
 

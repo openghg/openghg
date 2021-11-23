@@ -53,7 +53,8 @@ class ObsSurface(BaseStore):
         import sys
         from tqdm import tqdm
         from openghg.util import load_object, hash_file, clean_string
-        from openghg.retrieve import assign_data, DataTypes
+        from openghg.retrieve import DataTypes
+        from openghg.store import assign_data
 
         if not isinstance(filepath, list):
             filepath = [filepath]
@@ -172,8 +173,8 @@ class ObsSurface(BaseStore):
 
         This data is different in that it contains multiple sites in the same file.
         """
-        from openghg.modules import read_aqmesh
-        from openghg.retrieve import assign_data
+        from openghg.process.surface import read_aqmesh
+        from openghg.store import assign_data
         from openghg.util import hash_file
         from collections import defaultdict
         from tqdm import tqdm
@@ -348,7 +349,7 @@ class ObsSurface(BaseStore):
             None
         """
         from openghg.objectstore import delete_object, get_bucket
-        from openghg.modules import Datasource
+        from openghg.store.base import Datasource
 
         bucket = get_bucket()
         # Load the Datasource and get all its keys

@@ -2,7 +2,7 @@ import logging
 import os
 from pathlib import Path
 
-from openghg.modules import CRDS
+from openghg.process.surface import CRDS
 from openghg.objectstore import get_local_bucket
 from openghg.retrieve import assign_attributes
 

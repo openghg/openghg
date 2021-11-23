@@ -46,7 +46,7 @@ class Footprints(BaseStore):
         from collections import defaultdict
         from xarray import open_dataset
         from openghg.util import hash_file, timestamp_tzaware, timestamp_now, clean_string
-        from openghg.retrieve import assign_data
+        from openghg.store import assign_data
 
         filepath = Path(filepath)
 

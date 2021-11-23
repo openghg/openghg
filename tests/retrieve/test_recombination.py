@@ -1,8 +1,10 @@
 import logging
 
-from openghg.modules import CRDS, GCWERKS, ObsSurface
+from openghg.process.surface import CRDS, GCWERKS
+from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket
-from openghg.store import recombine_datasets, search
+from openghg.store import recombine_datasets
+from openghg.retrieve import search
 from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")

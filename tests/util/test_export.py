@@ -1,10 +1,9 @@
-from os import read
 from pandas import DataFrame, date_range
 from pathlib import Path
 import datetime
 from openghg.util import to_dashboard, to_dashboard_mobile
 from openghg.dataobjects import ObsData
-from openghg.modules import read_glasgow_licor
+from openghg.process.surface import read_glasgow_licor
 from tempfile import TemporaryDirectory
 import json
 

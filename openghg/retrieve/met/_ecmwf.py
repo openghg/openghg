@@ -1,24 +1,20 @@
+from __future__ import annotations
 import cdsapi  # type: ignore
 from dataclasses import dataclass
 import numpy as np
-from typing import Dict, List, Tuple, Union, Optional
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union, Optional
 import requests
 from xarray import open_dataset, Dataset
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-
 from openghg.util import timestamp_tzaware
+
+if TYPE_CHECKING:
+    from openghg.dataobjects import METData
 
 __all__ = ["retrieve_met", "METData"]
 
 
-@dataclass(frozen=True)
-class METData:
-    data: Dataset
-    metadata: Dict
-
-
-# def retrieve_met(site: str, network: str, year: str) -> METData:
 def retrieve_met(site: str, network: str, years: Union[str, List[str]], variables: Optional[List[str]] = None) -> METData:
     """Retrieve METData data. Note that this function will only download a
     full year of data which may take some time.
@@ -32,6 +28,8 @@ def retrieve_met(site: str, network: str, years: Union[str, List[str]], variable
     Returns:
         METData: METData object holding data and metadata
     """
+    from openghg.dataobjects import METData
+
     if variables is None:
         variables = ["u_component_of_wind", "v_component_of_wind"]
 

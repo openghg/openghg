@@ -1,8 +1,10 @@
+from __future__ import annotations
 from openghg.store.base import BaseStore
 from pandas import Timestamp
-from typing import List, Union
+from typing import TYPE_CHECKING, List, Union
 
-from openghg.dataobjects import METData
+if TYPE_CHECKING:
+    from openghg.dataobjects import METData
 
 
 class METStore(BaseStore):
@@ -40,11 +42,11 @@ class METStore(BaseStore):
         Args:
             site: Three letter site code
             network: Network name
-            year: Year(s) required
+            years: Year(s) required
         Returns:
             METData: METData object holding data and metadata
         """
-        from openghg.modules import retrieve_met
+        from openghg.retrieve.met import retrieve_met
         from pandas import Timestamp
 
         if not isinstance(years, list):
@@ -108,7 +110,7 @@ class METStore(BaseStore):
         Returns:
             None
         """
-        from openghg.modules import Datasource
+        from openghg.store.base import Datasource
 
         metadata = met_data.metadata
 

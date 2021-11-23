@@ -1,7 +1,7 @@
 import pytest
 
-from openghg.store.footprints import Footprints
-from openghg.retrieve import search, recombine_datasets
+from openghg.store import Footprints, recombine_datasets
+from openghg.retrieve import search
 from openghg.objectstore import get_local_bucket
 from helpers import get_footprint_datapath
 
@@ -125,7 +125,7 @@ def test_read_same_footprint_twice_raises():
     datapath = get_footprint_datapath("footprint_test.nc")
 
     with pytest.raises(ValueError):
-        FOOTPRINTS.read_file(
+        Footprints.read_file(
             filepath=datapath,
             site="TMB",
             model="test_model",
@@ -136,7 +136,7 @@ def test_read_same_footprint_twice_raises():
 
 
 def test_set_lookup_uuids():
-    f = FOOTPRINTS()
+    f = Footprints()
 
     fake_uuid = "123456789"
 
@@ -153,7 +153,7 @@ def test_set_lookup_uuids():
 
 
 def test_datasource_add_lookup():
-    f = FOOTPRINTS()
+    f = Footprints()
 
     fake_datasource = {"tmb_lghg_10m_europe": "mock-uuid-123456"}
 
@@ -178,7 +178,7 @@ def test_datasource_add_lookup():
 
 
 def test_wrong_uuid_raises():
-    f = FOOTPRINTS()
+    f = Footprints()
 
     fake_datasource = {"tmb_lghg_10m_europe": "mock-uuid-123456"}
 

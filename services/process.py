@@ -2,7 +2,7 @@ from typing import Dict
 
 from Acquire.Client import PAR, Authorisation
 from Acquire.Service import get_this_service
-from openghg.modules import ObsSurface
+from openghg.store import ObsSurface
 from tempfile import TemporaryDirectory
 
 

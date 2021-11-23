@@ -1,6 +1,6 @@
 import pytest
 
-from openghg.modules import CRANFIELD
+from openghg.process.surface import CRANFIELD
 from helpers import get_datapath
 
 

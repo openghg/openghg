@@ -1,5 +1,5 @@
 import pytest
-from openghg.modules import retrieve_met
+from openghg.retrieve.met import retrieve_met
 from requests_mock import ANY
 from pandas import Timestamp
 from pathlib import Path

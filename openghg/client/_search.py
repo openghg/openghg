@@ -1,6 +1,9 @@
-from typing import Dict, List, Optional, Union
-from openghg.dataobjects import SearchResults
+from __future__ import annotations
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 from Acquire.Client import Wallet
+
+if TYPE_CHECKING:
+    from openghg.dataobjects import SearchResults
 
 
 __all__ = ["Search"]
@@ -39,11 +42,15 @@ class Search:
         Returns:
             SearchResults:  SearchResults object
         """
+        from openghg.dataobjects import SearchResults
+
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 
         if not any((species, site, inlet, instrument)):
-            raise ValueError("We must have at least one of  species, site, inlet or instrument")
+            raise ValueError(
+                "We must have at least one of  species, site, inlet or instrument"
+            )
 
         args = {}
 
@@ -67,7 +74,9 @@ class Search:
         args["skip_ranking"] = str(skip_ranking)
         args["data_type"] = str(data_type)
 
-        response: Dict = self._service.call_function(function="search.search", args=args)
+        response: Dict = self._service.call_function(
+            function="search.search", args=args
+        )
 
         try:
             results_data = response["results"]

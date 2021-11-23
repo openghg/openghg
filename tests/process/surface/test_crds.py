@@ -4,33 +4,12 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from openghg.modules import CRDS
+from openghg.process.surface import CRDS
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
-# @pytest.fixture(scope="session")
-# def data():
-#     filename = "bsd.picarro.1minute.248m.dat"
-#     dir_path = os.path.dirname(__file__)
-#     test_data = "../data/proc_test_data/CRDS"
-#     filepath = os.path.join(dir_path, test_data, filename)
-
-
-#     return pd.read_csv(filepath, header=None, skiprows=1, sep=r"\s+")
-
-
-def get_datapath(filename, data_type):
-    return (
-        Path(__file__)
-        .resolve(strict=True)
-        .parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
-    )
-
-
-@pytest.fixture(autouse=True)
-def hfd_filepath():
-    return get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
+from helpers import get_datapath
 
 
 def test_read_file():
@@ -59,8 +38,12 @@ def test_read_file():
     assert co_data["co_number_of_observations"][0] == pytest.approx(19.0)
 
 
-def test_gas_info(hfd_filepath):
+def test_gas_info():
     crds = CRDS()
+
+    hfd_filepath = get_datapath(
+        filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS"
+    )
 
     data = pd.read_csv(
         hfd_filepath,

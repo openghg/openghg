@@ -1,8 +1,6 @@
 import pytest
 from openghg.objectstore import get_local_bucket
-from openghg.store import ObsSurface
-from openghg.store.emissions import Emissions
-from openghg.store.footprints import Footprints
+from openghg.store import ObsSurface, Emissions, Footprints
 from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
 
 
@@ -67,6 +65,6 @@ def data_read():
     domain = "EUROPE"
     model = "test_model"
 
-    FOOTPRINTS.read_file(
+    Footprints.read_file(
         filepath=datapath, site=site, model=model, network=network, height=height, domain=domain
     )

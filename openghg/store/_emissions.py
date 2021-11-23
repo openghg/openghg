@@ -50,7 +50,7 @@ class Emissions(BaseStore):
         """
         from collections import defaultdict
         from xarray import open_dataset
-        from openghg.retrieve import assign_data
+        from openghg.store import assign_data
         from openghg.util import clean_string, hash_file, timestamp_tzaware, timestamp_now
 
         species = clean_string(species)

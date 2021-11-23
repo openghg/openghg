@@ -4,3 +4,5 @@ from ._footprints import Footprints
 from ._obsmobile import ObsMobile
 from ._obssurface import ObsSurface
 from ._metstore import METStore
+from ._recombination import recombine_datasets, recombine_multisite
+from ._segment import assign_data

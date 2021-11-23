@@ -63,7 +63,7 @@ class EulerianModel(BaseStore):
 
         from collections import defaultdict
         from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
-        from openghg.retrieve import assign_data
+        from openghg.store import assign_data
         from xarray import open_dataset
         from pandas import Timestamp as pd_Timestamp
 

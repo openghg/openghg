@@ -1,4 +1,4 @@
-from openghg.modules import BEACO2N
+from openghg.process.surface import BEACO2N
 from pandas import Timestamp
 import pytest
 from helpers import get_datapath

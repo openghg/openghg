@@ -11,7 +11,7 @@ class DataTypes(Enum):
     THAMESBARRIER = "THAMESBARRIER"
     CRANFIELD = "CRANFIELD"
     BEACO2N = "BEACO2N"
-    FOOTPRINTS = "Footprints"
+    Footprints = "Footprints"
     NPL = "NPL"
     BTT = "BTT"
     AQMESH = "AQMESH"

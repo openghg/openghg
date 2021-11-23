@@ -1,5 +1,5 @@
 import pytest
-from openghg.modules import METStore
+from openghg.store import METStore
 from openghg.objectstore import get_local_bucket
 from requests_mock import ANY
 from pathlib import Path

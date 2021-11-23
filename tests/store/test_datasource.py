@@ -9,7 +9,8 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from openghg.modules import CRDS, Datasource
+from openghg.store.base import Datasource
+from openghg.process.surface import CRDS
 from openghg.objectstore import get_local_bucket, get_object_names
 from openghg.util import create_daterange_str, timestamp_tzaware
 from helpers import get_datapath

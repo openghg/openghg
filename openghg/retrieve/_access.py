@@ -38,7 +38,8 @@ def get_obs_surface(
     from pandas import Timestamp, Timedelta
     import numpy as np
     from xarray import concat as xr_concat
-    from openghg.retrieve import search, recombine_datasets
+    from openghg.retrieve import search
+    from openghg.store import recombine_datasets
     from openghg.util import clean_string, load_json, timestamp_tzaware
 
     site_info = load_json(filename="acrg_site_info.json")
@@ -242,7 +243,8 @@ def get_flux(
     to to extract multiple. So if this is removed from this function the functionality
     itself would need to be wrapped up in another function call.
     """
-    from openghg.retrieve import search, recombine_datasets
+    from openghg.retrieve import search 
+    from openghg.store import recombine_datasets
     from openghg.util import timestamp_epoch, timestamp_now
 
     if start_date is None:
@@ -318,7 +320,8 @@ def get_footprint(
     Returns:
         FootprintData: FootprintData dataclass
     """
-    from openghg.store import recombine_datasets, search
+    from openghg.store import recombine_datasets
+    from openghg.retrieve import search
     from openghg.dataobjects import FootprintData
 
     results = search(

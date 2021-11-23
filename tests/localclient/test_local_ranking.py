@@ -1,6 +1,6 @@
 import pytest
 from openghg.localclient import RankSources
-from openghg.modules import ObsSurface
+from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket
 from openghg.util import bilsdale_datapaths
 

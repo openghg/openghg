@@ -37,10 +37,9 @@ def search(**kwargs):  # type: ignore
     from copy import deepcopy
     from itertools import chain as iter_chain
 
-    from openghg.modules import Datasource, ObsSurface, FOOTPRINTS, Emissions, EulerianModel
+    from openghg.store import ObsSurface, Footprints, Emissions, EulerianModel
     from openghg.store.base import Datasource
     from openghg.store import ObsSurface
-    from openghg.store.footprints import Footprints
 
 
     from openghg.util import (
@@ -91,10 +90,10 @@ def search(**kwargs):  # type: ignore
         raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
 
     # Assume we want timeseries data
-    obj: Union[ObsSurface, FOOTPRINTS, Emissions, EulerianModel] = ObsSurface.load()
+    obj: Union[ObsSurface, Footprints, Emissions, EulerianModel] = ObsSurface.load()
 
     if data_type == "footprints":
-        obj = FOOTPRINTS.load()
+        obj = Footprints.load()
     elif data_type == "emissions":
         obj = Emissions.load()
     elif data_type == "eulerian_model":

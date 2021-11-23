@@ -1,8 +1,7 @@
-import pytest
 from pathlib import Path
 from openghg.objectstore import get_local_bucket
-from openghg.modules import ObsSurface, Emissions, FOOTPRINTS
-from openghg.retrieve import footprints_data_merge
+from openghg.store import ObsSurface, Emissions, Footprints
+from openghg.analyse import footprints_data_merge
 
 def get_datapath(filename, data_type):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
@@ -44,7 +43,7 @@ def co2_setup():
 
     ObsSurface.read_file(filepath=tac_file, data_type=data_type, site=site, network=network, inlet=height)
 
-    FOOTPRINTS.read_file(filepath=tac_footprint, site=site, height=height, domain=domain, model=model, metmodel=metmodel, species=species)
+    Footprints.read_file(filepath=tac_footprint, site=site, height=height, domain=domain, model=model, metmodel=metmodel, species=species)
 
     Emissions.read_file(filepath=co2_emissions, species=species, source=source, domain=domain, date=date, high_time_resolution=True)
 

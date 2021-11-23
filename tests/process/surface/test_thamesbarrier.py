@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 import pytest
 
-from openghg.modules import THAMESBARRIER
+from openghg.process.surface import THAMESBARRIER
 from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")

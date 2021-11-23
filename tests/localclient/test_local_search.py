@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from openghg.modules import ObsSurface
+from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket
 from openghg.localclient import Search
 

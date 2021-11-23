@@ -3,7 +3,7 @@ from pandas import Timestamp
 from pathlib import Path
 
 from openghg.localclient import get_obs_surface
-from openghg.modules import ObsSurface
+from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket
 
 
