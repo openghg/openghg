@@ -148,7 +148,7 @@ class ModelScenario():
                             ) -> Dataset:
         """
         """
-        self.check_data(need=["obs", "footprint"])
+        self.check_data_is_present(need=["obs", "footprint"])
 
         resample_to = resample_to.lower()
         resample_choices = ("obs", "footprint", "coarsest")
