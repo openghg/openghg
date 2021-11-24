@@ -42,9 +42,7 @@ class NOAA(BaseStore):
         from pathlib import Path
 
         if inlet is None:
-            raise ValueError(
-                "Inlet must be given for NOAA data retrieve. If flask data pass flask as inlet."
-            )
+            raise ValueError("Inlet must be given for NOAA data retrieve. If flask data pass flask as inlet.")
 
         if sampling_period is None:
             sampling_period = "NOT_SET"
@@ -260,9 +258,7 @@ class NOAA(BaseStore):
 
         column_names = header[-1][14:].split()
 
-        def date_parser(
-            year: str, month: str, day: str, hour: str, minute: str, second: str
-        ) -> Timestamp:
+        def date_parser(year: str, month: str, day: str, hour: str, minute: str, second: str) -> Timestamp:
             return Timestamp(year, month, day, hour, minute, second)
 
         date_parsing = {

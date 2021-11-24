@@ -38,12 +38,7 @@ class SearchResults:
             else:
                 print_strs.append(f"Site: {site.upper()}")
                 print_strs.append("---------")
-                print_strs.extend(
-                    [
-                        f"{sp} at {', '.join(self.results[site][sp].keys())}"
-                        for sp in species
-                    ]
-                )
+                print_strs.extend([f"{sp} at {', '.join(self.results[site][sp].keys())}" for sp in species])
             print_strs.append("\n")
 
         return "\n".join(print_strs)
@@ -164,9 +159,7 @@ class SearchResults:
         for site, species_data in self.results.items():
             for species, inlet_data in species_data.items():
                 for inlet, keys in inlet_data.items():
-                    data[site][species][inlet] = self._create_obsdata(
-                        site=site, species=species, inlet=inlet
-                    )
+                    data[site][species][inlet] = self._create_obsdata(site=site, species=species, inlet=inlet)
 
         # TODO - update this once addict is stubbed
         data_dict: Dict = data.to_dict()
@@ -218,9 +211,7 @@ class SearchResults:
                     key = "_".join((a_site, species))
 
                     try:
-                        results[key] = self._create_obsdata(
-                            site=a_site, species=species
-                        )
+                        results[key] = self._create_obsdata(site=a_site, species=species)
                     except KeyError:
                         pass
 

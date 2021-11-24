@@ -93,9 +93,7 @@ class ObsSurface(BaseStore):
                         data_filepath = Path(fp[0])
                         precision_filepath = Path(fp[1])
                     except ValueError:
-                        raise ValueError(
-                            "For GCWERKS data both data and precision filepaths must be given."
-                        )
+                        raise ValueError("For GCWERKS data both data and precision filepaths must be given.")
                 else:
                     data_filepath = Path(fp)
 
@@ -187,9 +185,7 @@ class ObsSurface(BaseStore):
         # Load the ObsSurface object for retrieve
         obs = ObsSurface.load()
         # Get a dict of data and metadata
-        processed_data = parse_aqmesh(
-            data_filepath=data_filepath, metadata_filepath=metadata_filepath
-        )
+        processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
 
         results: resultsType = defaultdict(dict)
         for site, site_data in tqdm(processed_data.items()):
@@ -307,9 +303,7 @@ class ObsSurface(BaseStore):
             )
 
             if result and result != uid:
-                raise ValueError(
-                    "Mismatch between assigned uuid and stored Datasource uuid."
-                )
+                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
 
             self.set_uuid(
                 site=site,

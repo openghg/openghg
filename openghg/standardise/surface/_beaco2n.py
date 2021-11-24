@@ -19,7 +19,7 @@ def parse_beaco2n(
         data_filepath: Data filepath
         site: Site name
         network: Network name
-        inlet: Inlet height in meters
+        inlet: Inlet height in metres
         instrument: Instrument name
         sampling_period: Measurement sampling period
     Returns:
@@ -100,7 +100,7 @@ def parse_beaco2n(
             "inlet": clean_string(inlet),
             "network": "beaco2n",
             "sampling_period": str(sampling_period),
-            "instrument": instrument
+            "instrument": instrument,
         }
 
         gas_data[mt]["data"] = m_data

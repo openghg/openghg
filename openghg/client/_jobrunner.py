@@ -173,9 +173,7 @@ class JobRunner:
         args["requirements"] = requirements
         args["key_password"] = encrypted_password
 
-        function_response = self._service.call_function(
-            function="job_runner", args=args
-        )
+        function_response = self._service.call_function(function="job_runner", args=args)
 
         response = {}
         response["function_response"] = function_response

@@ -25,9 +25,7 @@ class GLASGOWPICARRO:
         Returns:
             dict: Dictionary of processed data
         """
-        warn(
-            message="Temporary function used to read Glasgow Science Tower Picarro data"
-        )
+        warn(message="Temporary function used to read Glasgow Science Tower Picarro data")
 
         df = pd.read_csv(data_filepath, index_col=[0], parse_dates=True)
         df = df.dropna(axis="rows", how="any")

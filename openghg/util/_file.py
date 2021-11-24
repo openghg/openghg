@@ -46,11 +46,7 @@ def get_datapath(filename: str, directory: Optional[str] = None) -> Path:
     if directory is None:
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{filename}")
     else:
-        return (
-            Path(__file__)
-            .resolve()
-            .parent.parent.joinpath(f"data/{directory}/{filename}")
-        )
+        return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
 def load_json(filename: str) -> Dict:

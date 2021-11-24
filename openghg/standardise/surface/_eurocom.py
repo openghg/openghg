@@ -17,7 +17,7 @@ def parse_eurocom(
         site: Site code
         sampling_period: Sampling period in seconds
         network: Network name
-        Inlet: Inlet height in meters
+        Inlet: Inlet height in metres
         Instrument: Instrument name
     Returns:
         dict: Dictionary of measurement data
@@ -50,9 +50,7 @@ def parse_eurocom(
     n_skip = len(header) - 1
     species = "co2"
 
-    def date_parser(
-        year: str, month: str, day: str, hour: str, minute: str
-    ) -> Timestamp:
+    def date_parser(year: str, month: str, day: str, hour: str, minute: str) -> Timestamp:
         return Timestamp(year=year, month=month, day=day, hour=hour, minute=minute)
 
     datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
@@ -110,9 +108,7 @@ def parse_eurocom(
             calibration_scale = eurocom_attributes["calibration"][site]
         except KeyError:
             calibration_scale = {}
-            raise ValueError(
-                f"Unable to find inlet from filename or attributes file for {site}"
-            )
+            raise ValueError(f"Unable to find inlet from filename or attributes file for {site}")
 
     gas_data = get_attributes(
         ds=data,
@@ -137,8 +133,6 @@ def parse_eurocom(
         "attributes": global_attributes,
     }
 
-    gas_data = assign_attributes(
-        data=combined_data, site=site, sampling_period=sampling_period
-    )
+    gas_data = assign_attributes(data=combined_data, site=site, sampling_period=sampling_period)
 
     return gas_data

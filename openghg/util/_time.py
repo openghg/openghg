@@ -93,9 +93,7 @@ def daterange_overlap(daterange_a: str, daterange_b: str) -> bool:
     return bool(start_a <= end_b and end_a >= start_b)
 
 
-def create_daterange(
-    start: Timestamp, end: Timestamp, freq: Optional[str] = "D"
-) -> DatetimeIndex:
+def create_daterange(start: Timestamp, end: Timestamp, freq: Optional[str] = "D") -> DatetimeIndex:
     """Create a minute aligned daterange
 
     Args:
@@ -115,9 +113,7 @@ def create_daterange(
     return date_range(start=start, end=end, freq=freq)
 
 
-def create_daterange_str(
-    start: Union[str, Timestamp], end: Union[str, Timestamp]
-) -> str:
+def create_daterange_str(start: Union[str, Timestamp], end: Union[str, Timestamp]) -> str:
     """Convert the passed datetimes into a daterange string
     for use in searches and Datasource interactions
 
@@ -301,9 +297,7 @@ def closest_daterange(to_compare: str, dateranges: Union[str, List[str]]) -> str
         return closest_daterange_end
 
 
-def find_daterange_gaps(
-    start_search: Timestamp, end_search: Timestamp, dateranges: List
-) -> List[str]:
+def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, dateranges: List) -> List[str]:
     """Given a start and end date and a list of dateranges find the gaps.
 
     For example given a list of dateranges

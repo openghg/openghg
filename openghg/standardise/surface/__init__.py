@@ -3,8 +3,8 @@ from ._beaco2n import parse_beaco2n
 from ._btt import parse_btt
 from ._cranfield import parse_cranfield
 from ._crds import parse_crds
-from ._eurocom import EUROCOM
-from ._gcwerks import GCWERKS
+from ._eurocom import parse_eurocom
+from ._gcwerks import parse_gcwerks
 from ._glasgow_licor import read_glasgow_licor
 from ._glasgow_picarro import GLASGOWPICARRO
 from ._noaa import NOAA

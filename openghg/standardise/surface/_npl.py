@@ -42,16 +42,12 @@ class NPL(BaseStore):
 
         site = "NPL"
 
-        gas_data = self.read_data(
-            data_filepath=data_filepath, sampling_period=sampling_period
-        )
+        gas_data = self.read_data(data_filepath=data_filepath, sampling_period=sampling_period)
         gas_data = assign_attributes(data=gas_data, site=site, network=network)
 
         return gas_data
 
-    def read_data(
-        self, data_filepath: Path, sampling_period: str, inlet: str = None
-    ) -> Dict:
+    def read_data(self, data_filepath: Path, sampling_period: str, inlet: str = None) -> Dict:
         """Separates the gases stored in the dataframe in
         separate dataframes and returns a dictionary of gases
         with an assigned UUID as gas:UUID and a list of the processed
@@ -97,9 +93,7 @@ class NPL(BaseStore):
 
             # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate
             # when averaging
-            processed_data["{} variability".format(species)] = (
-                processed_data[species] * 0.0
-            )
+            processed_data["{} variability".format(species)] = processed_data[species] * 0.0
 
             site_attributes = self._params["global_attributes"]
             site_attributes["inlet_height_magl"] = self._params["inlet"]

@@ -165,9 +165,7 @@ class BaseStore:
         """
         del self._datasource_uuids[uuid]
 
-    def get_rank(
-        self: T, uuid: str, start_date: Timestamp, end_date: Timestamp
-    ) -> Dict:
+    def get_rank(self: T, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
         """Get the rank for the given Datasource for a given date range
 
         Args:
@@ -245,9 +243,7 @@ class BaseStore:
         rank = int(rank)
 
         if not 1 <= rank <= 10:
-            raise TypeError(
-                "Rank can only take values 1 to 10 (for unranked). Where 1 is the highest rank."
-            )
+            raise TypeError("Rank can only take values 1 to 10 (for unranked). Where 1 is the highest rank.")
 
         if not isinstance(date_range, list):
             date_range = [date_range]
@@ -269,9 +265,7 @@ class BaseStore:
                 overlap = False
                 # Check for overlapping dateranges and add
                 for existing_daterange, existing_rank in rank_data.items():
-                    if daterange_overlap(
-                        daterange_a=new_daterange, daterange_b=existing_daterange
-                    ):
+                    if daterange_overlap(daterange_a=new_daterange, daterange_b=existing_daterange):
                         overlap = True
 
                         if rank != existing_rank and overwrite:
@@ -319,9 +313,7 @@ class BaseStore:
                         # If the existing daterange contains the new daterange
                         # we need to split it into parts and save those
                         elif daterange_contains(container=existing, contained=new):
-                            result = split_encompassed_daterange(
-                                container=existing, contained=new
-                            )
+                            result = split_encompassed_daterange(container=existing, contained=new)
 
                             existing_start = result["container_start"]
                             ranking_backup[existing_start] = rank_copy

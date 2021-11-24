@@ -51,9 +51,7 @@ def parse_btt(
     sampling_period_seconds = str(int(sampling_period)) + "s"
 
     data = read_csv(data_filepath)
-    data["time"] = Timestamp("2019-01-01 00:00") + to_timedelta(
-        data["DOY"] - 1, unit="D"
-    )
+    data["time"] = Timestamp("2019-01-01 00:00") + to_timedelta(data["DOY"] - 1, unit="D")
     data["time"] = data["time"].dt.round(sampling_period_seconds)
     data = data[~isnull(data.time)]
 

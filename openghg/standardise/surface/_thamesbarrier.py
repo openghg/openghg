@@ -47,9 +47,7 @@ class THAMESBARRIER(BaseStore):
 
         data_filepath = Path(data_filepath)
 
-        data = pd_read_csv(
-            data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0
-        )
+        data = pd_read_csv(data_filepath, parse_dates=[0], infer_datetime_format=True, index_col=0)
         # Drop NaNs from the data
         data = data.dropna(axis="rows", how="all")
         # Drop a column if it's all NaNs
@@ -73,14 +71,10 @@ class THAMESBARRIER(BaseStore):
 
             # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate
             # when averaging
-            processed_data["{} variability".format(species)] = (
-                processed_data[species] * 0.0
-            )
+            processed_data["{} variability".format(species)] = processed_data[species] * 0.0
 
             site_attributes = self._tb_params["global_attributes"]
-            site_attributes["inlet_height_magl"] = clean_string(
-                self._tb_params["inlet"]
-            )
+            site_attributes["inlet_height_magl"] = clean_string(self._tb_params["inlet"])
             site_attributes["instrument"] = clean_string(self._tb_params["instrument"])
             # site_attributes["inlet"] = clean_string(self._tb_params["inlet"])
             # site_attributes["unit_species"] = self._tb_params["unit_species"]

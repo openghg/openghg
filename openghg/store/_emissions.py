@@ -112,9 +112,7 @@ class Emissions(BaseStore):
 
         key = "_".join((species, source, domain, date))
 
-        emissions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(
-            dict
-        )
+        emissions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
         emissions_data[key]["data"] = em_data
         emissions_data[key]["metadata"] = metadata
 
@@ -130,9 +128,7 @@ class Emissions(BaseStore):
             data_type=data_type,
         )
 
-        em_store.add_datasources(
-            datasource_uuids=datasource_uuids, metadata=keyed_metadata
-        )
+        em_store.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
@@ -141,9 +137,7 @@ class Emissions(BaseStore):
 
         return datasource_uuids
 
-    def lookup_uuid(
-        self, species: str, source: str, domain: str, date: str
-    ) -> Union[str, bool]:
+    def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, bool]:
         """Perform a lookup for the UUID of a Datasource
 
         Args:
@@ -158,9 +152,7 @@ class Emissions(BaseStore):
 
         return uuid if uuid else False
 
-    def set_uuid(
-        self, species: str, source: str, domain: str, date: str, uuid: str
-    ) -> None:
+    def set_uuid(self, species: str, source: str, domain: str, date: str, uuid: str) -> None:
         """Record a UUID of a Datasource in the datasource table
 
         Args:
@@ -193,9 +185,7 @@ class Emissions(BaseStore):
             domain = data["domain"]
             date = data["date"]
 
-            lookup_results[key] = self.lookup_uuid(
-                species=species, source=source, domain=domain, date=date
-            )
+            lookup_results[key] = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
 
         return lookup_results
 
@@ -215,16 +205,10 @@ class Emissions(BaseStore):
             domain = md["domain"]
             date = md["date"]
 
-            result = self.lookup_uuid(
-                species=species, source=source, domain=domain, date=date
-            )
+            result = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
 
             if result and result != uid:
-                raise ValueError(
-                    "Mismatch between assigned uuid and stored Datasource uuid."
-                )
+                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
             else:
-                self.set_uuid(
-                    species=species, source=source, domain=domain, date=date, uuid=uid
-                )
+                self.set_uuid(species=species, source=source, domain=domain, date=date, uuid=uid)
                 self._datasource_uuids[uid] = key

@@ -9,9 +9,7 @@ def create_user() -> User:
     username = str(uuid4())
     password = PrivateKey.random_passphrase()
 
-    result = User.register(
-        username=username, password=password, identity_url="identity"
-    )
+    result = User.register(username=username, password=password, identity_url="identity")
 
     otpsecret = result["otpsecret"]
     otp = OTP(otpsecret)

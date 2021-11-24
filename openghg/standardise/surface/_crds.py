@@ -45,9 +45,7 @@ def parse_crds(
     )
 
     # Ensure the data is CF compliant
-    gas_data = assign_attributes(
-        data=gas_data, site=site, sampling_period=sampling_period
-    )
+    gas_data = assign_attributes(data=gas_data, site=site, sampling_period=sampling_period)
 
     return gas_data
 
@@ -85,7 +83,9 @@ def _read_data(
         site_fname = clean_string(split_fname[0])
         inlet_fname = clean_string(split_fname[3])
     except IndexError:
-        raise ValueError("Error reading metadata from filename, we expect a form hfd.picarro.1minute.100m.dat")
+        raise ValueError(
+            "Error reading metadata from filename, we expect a form hfd.picarro.1minute.100m.dat"
+        )
 
     site = site.lower()
 
@@ -93,19 +93,13 @@ def _read_data(
         raise ValueError(f"{site} is not a valid site.")
 
     if site_fname != site:
-        raise ValueError(
-            "Site mismatch between passed site code and that read from filename."
-        )
+        raise ValueError("Site mismatch between passed site code and that read from filename.")
 
     if "m" not in inlet_fname:
-        raise ValueError(
-            "No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat"
-        )
+        raise ValueError("No inlet found, we expect filenames such as: bsd.picarro.1minute.108m.dat")
 
     if inlet is not None and inlet != inlet_fname:
-        raise ValueError(
-            "Inlet mismatch between passed inlet and that read from filename."
-        )
+        raise ValueError("Inlet mismatch between passed inlet and that read from filename.")
     else:
         inlet = inlet_fname
 
@@ -195,9 +189,7 @@ def _read_data(
         # Here we can convert the Dataframe to a Dataset and then write the attributes
         gas_data = gas_data.to_xarray()
 
-        site_attributes = _get_site_attributes(
-            site=site, inlet=inlet, crds_metadata=crds_metadata
-        )
+        site_attributes = _get_site_attributes(site=site, inlet=inlet, crds_metadata=crds_metadata)
 
         scale = crds_metadata["default_scales"].get(species.upper(), "NA")
 

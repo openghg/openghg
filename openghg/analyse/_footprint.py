@@ -240,9 +240,7 @@ def footprints_data_merge(
 
     # Calculate model time series, if required
     if calc_timeseries:
-        combined_dataset = add_timeseries(
-            combined_dataset=combined_dataset, flux_dict=flux_dict
-        )
+        combined_dataset = add_timeseries(combined_dataset=combined_dataset, flux_dict=flux_dict)
 
     return FootprintData(
         data=combined_dataset,
@@ -304,9 +302,7 @@ def indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
     """
     import numpy as np
 
-    common_indices = (
-        key for key in dataset_A.indexes.keys() if key in dataset_B.indexes.keys()
-    )
+    common_indices = (key for key in dataset_A.indexes.keys() if key in dataset_B.indexes.keys())
 
     for index in common_indices:
         if not len(dataset_A.indexes[index]) == len(dataset_B.indexes[index]):
@@ -371,9 +367,9 @@ def align_datasets(
         obs_data_period_s = float(obs_attributes["sampling_period"])
     else:
         # Attempt to derive sampling period from frequency of data
-        obs_data_period_s = np.nanmedian(
-            (obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9
-        ).astype("float32")
+        obs_data_period_s = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9).astype(
+            "float32"
+        )
 
         obs_data_period_s_min = np.diff(obs_data.time.data).min() / 1e9
         obs_data_period_s_max = np.diff(obs_data.time.data).max() / 1e9
@@ -408,9 +404,7 @@ def align_datasets(
     footprint_data = footprint_data.sel(time=slice(start_slice, end_slice))
 
     # Only non satellite datasets with different periods need to be resampled
-    timeperiod_diff_s = np.abs(
-        obs_data_timeperiod - footprint_data_timeperiod
-    ).total_seconds()
+    timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
     tolerance = 1e-9  # seconds
 
     if timeperiod_diff_s >= tolerance:
@@ -424,23 +418,15 @@ def align_datasets(
 
         if resample_to == "obs":
 
-            resample_period = (
-                str(round(obs_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
-            )
+            resample_period = str(round(obs_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
 
-            footprint_data = footprint_data.resample(
-                indexer={"time": resample_period}, base=base
-            ).mean()
+            footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
 
         elif resample_to == "footprints":
 
-            resample_period = (
-                str(round(footprint_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
-            )
+            resample_period = str(round(footprint_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
 
-            obs_data = obs_data.resample(
-                indexer={"time": resample_period}, base=base
-            ).mean()
+            obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
 
     return obs_data, footprint_data
 
@@ -469,9 +455,7 @@ def add_timeseries(combined_dataset: Dataset, flux_dict: Dict[str, Dataset]) -> 
             mf_mod = timeseries_integrated(combined_dataset, flux_ds)
             name = "mf_mod"
 
-        combined_dataset[name] = DataArray(
-            mf_mod, coords={"time": combined_dataset.time}
-        )
+        combined_dataset[name] = DataArray(mf_mod, coords={"time": combined_dataset.time})
 
     return combined_dataset
 
@@ -571,9 +555,7 @@ def timeseries_HiTRes(
     # Calculate time resolution for both the flux and footprints data
     nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
     flux_res_H = int(flux_ds.time.diff(dim="time").values.mean() * nanosecond_to_hour)
-    fp_res_time_H = int(
-        fp_HiTRes.time.diff(dim="time").values.mean() * nanosecond_to_hour
-    )
+    fp_res_time_H = int(fp_HiTRes.time.diff(dim="time").values.mean() * nanosecond_to_hour)
 
     fp_res_Hback_H = int(fp_HiTRes["H_back"].diff(dim="H_back").values.mean())
 
@@ -600,9 +582,7 @@ def timeseries_HiTRes(
 
     # Only allow for high frequency resolution < 24 hours
     if time_hf_res_H > 24:
-        raise ValueError(
-            f"High frequency resolution must be <= 24 hours. Current: {time_hf_res_H}H"
-        )
+        raise ValueError(f"High frequency resolution must be <= 24 hours. Current: {time_hf_res_H}H")
     elif 24 % time_hf_res_H != 0 or 24 % time_hf_res_H != 0.0:
         raise ValueError(
             f"High frequency resolution must exactly divide into 24 hours. Current: {time_hf_res_H}H"
@@ -636,8 +616,7 @@ def timeseries_HiTRes(
     date_end = time_array[-1] + np.timedelta64(1, "s")
 
     start = {
-        dd: getattr(np.datetime64(time_array[0].values, "h").astype(object), dd)
-        for dd in ["month", "year"]
+        dd: getattr(np.datetime64(time_array[0].values, "h").astype(object), dd) for dd in ["month", "year"]
     }
 
     # Create times for matching to the flux
@@ -646,11 +625,7 @@ def timeseries_HiTRes(
     ).to_numpy()
 
     # Create low frequency flux data (monthly)
-    flux_ds_low_freq = (
-        flux_ds.resample({"time": "1MS"})
-        .mean()
-        .sel(time=slice(date_start_back, date_end))
-    )
+    flux_ds_low_freq = flux_ds.resample({"time": "1MS"}).mean().sel(time=slice(date_start_back, date_end))
     flux_ds_low_freq = flux_ds_low_freq.transpose(*("lat", "lon", "time"))
 
     # Select and align high frequency flux data
@@ -663,18 +638,12 @@ def timeseries_HiTRes(
         )
         if flux_res_H <= highest_res_H:
             # Downsample flux to match to footprints frequency
-            flux_ds_high_freq = flux_ds_high_freq.resample(
-                {"time": highest_resolution}, base=base
-            ).mean()
+            flux_ds_high_freq = flux_ds_high_freq.resample({"time": highest_resolution}, base=base).mean()
         elif flux_res_H > highest_res_H:
             # Upsample flux to match footprints frequency and forward fill
-            flux_ds_high_freq = flux_ds_high_freq.resample(
-                {"time": highest_resolution}, base=base
-            ).ffill()
+            flux_ds_high_freq = flux_ds_high_freq.resample({"time": highest_resolution}, base=base).ffill()
         # Reindex to match to correct values
-        flux_ds_high_freq = flux_ds_high_freq.reindex(
-            {"time": full_dates}, method="ffill"
-        )
+        flux_ds_high_freq = flux_ds_high_freq.reindex({"time": full_dates}, method="ffill")
     elif flux_res_H > 24:
         # If flux is not high frequency use the monthly averages instead.
         flux_ds_high_freq = flux_ds_low_freq
@@ -703,13 +672,8 @@ def timeseries_HiTRes(
     for tt, time in enumerate(iters):
 
         # Get correct index for low resolution data based on start and current date
-        current = {
-            dd: getattr(np.datetime64(time, "h").astype(object), dd)
-            for dd in ["month", "year"]
-        }
-        tt_low = (
-            current["month"] - start["month"] + 12 * (current["year"] - start["year"])
-        )
+        current = {dd: getattr(np.datetime64(time, "h").astype(object), dd) for dd in ["month", "year"]}
+        tt_low = current["month"] - start["month"] + 12 * (current["year"] - start["year"])
 
         # get 4 dimensional chunk of high time res footprints for this timestep
         # units : mol/mol/mol/m2/s
@@ -717,9 +681,7 @@ def timeseries_HiTRes(
         fp_time = fp_HiTRes[:, :, tt, ::-1]
 
         fp_high_freq = fp_time[:, :, 1:]
-        fp_residual = fp_time[
-            :, :, 0:1
-        ]  # First element (reversed) contains residual footprints
+        fp_residual = fp_time[:, :, 0:1]  # First element (reversed) contains residual footprints
 
         # Extract flux data from dataset
         flux_high_freq = flux_ds_high_freq.flux
