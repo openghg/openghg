@@ -1,13 +1,8 @@
 import logging
-import os
-
-from pathlib import Path
 from pandas import Timestamp
 import pytest
 
-from openghg.standardise.surface import NOAA
-from openghg.store.base import Datasource
-from openghg.objectstore import get_local_bucket
+from openghg.standardise.surface import parse_noaa
 from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -18,11 +13,12 @@ mpl_logger.setLevel(logging.WARNING)
 
 
 def test_read_obspack():
-    noaa = NOAA()
 
     filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
 
-    data = noaa.read_file(data_filepath=filepath, site="esp", inlet="flask", measurement_type="flask", network="NOAA")
+    data = parse_noaa(
+        data_filepath=filepath, site="esp", inlet="flask", measurement_type="flask", network="NOAA"
+    )
 
     ch4_data = data["ch4"]["data"]
 
@@ -37,11 +33,12 @@ def test_read_obspack():
 
 
 def test_read_file_site_filename_read():
-    noaa = NOAA()
 
     filepath = get_datapath(filename="ch4_scsn06_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
-    data = noaa.read_file(data_filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask", sampling_period="1200")
+    data = parse_noaa(
+        data_filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask", sampling_period="1200"
+    )
 
     ch4_data = data["ch4"]["data"]
 
@@ -86,11 +83,12 @@ def test_read_file_site_filename_read():
 
 
 def test_read_raw_file():
-    noaa = NOAA()
 
     filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
-    data = noaa.read_file(data_filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask", sampling_period=1200)
+    data = parse_noaa(
+        data_filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask", sampling_period=1200
+    )
 
     assert data["co"]["metadata"] == {
         "species": "co",
@@ -138,9 +136,8 @@ def test_read_raw_file():
 
 
 def test_read_incorrect_site_raises():
-    noaa = NOAA()
 
     filepath = get_datapath(filename="ch4_UNKOWN_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
     with pytest.raises(ValueError):
-        data = noaa.read_file(data_filepath=filepath, site="NotASite", inlet="flask", measurement_type="flask")
+        data = parse_noaa(data_filepath=filepath, site="NotASite", inlet="flask", measurement_type="flask")

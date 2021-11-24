@@ -59,19 +59,6 @@ def test_read_file_capegrim(cgo_path, cgo_prec_path):
     assert len(sorted_keys) == 56
 
 
-def test_incorrect_inlet_raises(data_thd, prec_thd):
-
-    with pytest.raises(ValueError):
-        parse_gcwerks(
-            data_filepath=data_thd,
-            precision_filepath=prec_thd,
-            site="thd",
-            network="agage",
-            instrument="gcmd",
-            inlet="666m",
-        )
-
-
 def test_read_file_thd(data_thd, prec_thd):
 
     gas_data = parse_gcwerks(

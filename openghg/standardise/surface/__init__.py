@@ -5,8 +5,8 @@ from ._cranfield import parse_cranfield
 from ._crds import parse_crds
 from ._eurocom import parse_eurocom
 from ._gcwerks import parse_gcwerks
-from ._glasgow_licor import read_glasgow_licor
-from ._glasgow_picarro import GLASGOWPICARRO
-from ._noaa import NOAA
+from ._glasgow_licor import parse_glasow_licor
+from ._glasgow_picarro import parse_glasow_picarro
+from ._noaa import parse_noaa
 from ._npl import NPL
 from ._thamesbarrier import THAMESBARRIER

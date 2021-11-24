@@ -1,8 +1,6 @@
 from typing import Dict, Optional, Union
 from pathlib import Path
 
-__all__ = ["parse_btt"]
-
 
 def parse_btt(
     data_filepath: Union[str, Path],
