@@ -343,8 +343,7 @@ def _read_raw_data(
     data = data.to_xarray()
 
     # TODO  - this could do with a better name
-    attributes_data = load_json("attributes.json")
-    noaa_params = attributes_data["NOAA"]
+    noaa_params = load_json("attributes.json")["NOAA"]
 
     site_attributes = noaa_params["global_attributes"]
     site_attributes["inlet_height_magl"] = "NA"

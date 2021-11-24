@@ -1,117 +1,93 @@
-from openghg.store.base import BaseStore
-from typing import Dict, Union
+from openghg.util import pathType
+from typing import Dict
+from pandas import read_csv, NaT
+from datetime import datetime
+from openghg.util import clean_string, load_json
+from openghg.retrieve import assign_attributes
 from pathlib import Path
 
-__all__ = ["NPL"]
 
+def parse_npl(
+    data_filepath: pathType,
+    site: str = "NPL",
+    network: str = "LGHG",
+    inlet: str = None,
+    instrument: str = None,
+    sampling_period: str = None,
+    measurement_type: str = None,
+) -> Dict:
+    """Reads NPL data files and returns the UUIDS of the Datasources
+    the processed data has been assigned to
 
-class NPL(BaseStore):
-    """Class for retrieve National Physical Laboratory (NPL) data"""
+    Args:
+        data_filepath: Path of file to load
+        site: Site name
+    Returns:
+        list: UUIDs of Datasources data has been assigned to
+    """
 
-    def __init__(self) -> None:
-        from openghg.util import load_json
+    if sampling_period is None:
+        sampling_period = "NOT_SET"
 
-        data = load_json(filename="attributes.json")
-        self._params = data["NPL"]
+    data_filepath = Path(data_filepath)
 
-    def read_file(
-        self,
-        data_filepath: Union[str, Path],
-        site: str = "NPL",
-        network: str = "LGHG",
-        inlet: str = None,
-        instrument: str = None,
-        sampling_period: str = None,
-        measurement_type: str = None,
-    ) -> Dict:
-        """Reads NPL data files and returns the UUIDS of the Datasources
-        the processed data has been assigned to
+    site = "NPL"
 
-        Args:
-            data_filepath: Path of file to load
-            site: Site name
-        Returns:
-            list: UUIDs of Datasources data has been assigned to
-        """
-        from openghg.retrieve import assign_attributes
+    attributes_data = load_json(filename="attributes.json")
+    npl_params = attributes_data["NPL"]
 
-        if sampling_period is None:
-            sampling_period = "NOT_SET"
+    # mypy doesn't like NaT or NaNs - look into this
+    def parser(date: str):  # type: ignore
+        try:
+            return datetime.strptime(str(date), "%d/%m/%Y %H:%M")
+        except ValueError:
+            return NaT
 
-        data_filepath = Path(data_filepath)
+    data = read_csv(data_filepath, index_col=0, date_parser=parser)
 
-        site = "NPL"
+    # Drop the NaT/NaNs
+    data = data.loc[data.index.dropna()]
 
-        gas_data = self.read_data(data_filepath=data_filepath, sampling_period=sampling_period)
-        gas_data = assign_attributes(data=gas_data, site=site, network=network)
+    # Rename columns
+    rename_dict = {"Cal_CO2_dry": "CO2", "Cal_CH4_dry": "CH4"}
 
-        return gas_data
+    data = data.rename(columns=rename_dict)
+    data.index.name = "time"
 
-    def read_data(self, data_filepath: Path, sampling_period: str, inlet: str = None) -> Dict:
-        """Separates the gases stored in the dataframe in
-        separate dataframes and returns a dictionary of gases
-        with an assigned UUID as gas:UUID and a list of the processed
-        dataframes
+    if inlet is None:
+        inlet = "NA"
 
-        Args:
-            data_filepath (pathlib.Path): Path of datafile
-        Returns:
-            dict: Dictionary containing attributes, data and metadata keys
-        """
-        from pandas import read_csv, NaT
-        from datetime import datetime
-        from openghg.util import clean_string
+    gas_data = {}
+    for species in data.columns:
+        processed_data = data.loc[:, [species]].sort_index().to_xarray()
 
-        # mypy doesn't like NaT or NaNs - look into this
-        def parser(date: str):  # type: ignore
-            try:
-                return datetime.strptime(str(date), "%d/%m/%Y %H:%M")
-            except ValueError:
-                return NaT
+        # Convert methane to ppb
+        if species == "CH4":
+            processed_data[species] *= 1000
 
-        data = read_csv(data_filepath, index_col=0, date_parser=parser)
+        # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate
+        # when averaging
+        processed_data["{} variability".format(species)] = processed_data[species] * 0.0
 
-        # Drop the NaT/NaNs
-        data = data.loc[data.index.dropna()]
+        site_attributes = npl_params["global_attributes"]
+        site_attributes["inlet_height_magl"] = npl_params["inlet"]
+        site_attributes["instrument"] = npl_params["instrument"]
 
-        # Rename columns
-        rename_dict = {"Cal_CO2_dry": "CO2", "Cal_CH4_dry": "CH4"}
+        metadata = {
+            "species": clean_string(species),
+            "sampling_period": str(sampling_period),
+            "site": "NPL",
+            "network": "LGHG",
+            "inlet": inlet,
+        }
 
-        data = data.rename(columns=rename_dict)
-        data.index.name = "time"
+        # TODO - add in better metadata reading
+        gas_data[species] = {
+            "metadata": metadata,
+            "data": processed_data,
+            "attributes": site_attributes,
+        }
 
-        if inlet is None:
-            inlet = "NA"
+    gas_data = assign_attributes(data=gas_data, site=site, network=network)
 
-        combined_data = {}
-        for species in data.columns:
-            processed_data = data.loc[:, [species]].sort_index().to_xarray()
-
-            # Convert methane to ppb
-            if species == "CH4":
-                processed_data[species] *= 1000
-
-            # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate
-            # when averaging
-            processed_data["{} variability".format(species)] = processed_data[species] * 0.0
-
-            site_attributes = self._params["global_attributes"]
-            site_attributes["inlet_height_magl"] = self._params["inlet"]
-            site_attributes["instrument"] = self._params["instrument"]
-
-            metadata = {
-                "species": clean_string(species),
-                "sampling_period": str(sampling_period),
-                "site": "NPL",
-                "network": "LGHG",
-                "inlet": inlet,
-            }
-
-            # TODO - add in better metadata reading
-            combined_data[species] = {
-                "metadata": metadata,
-                "data": processed_data,
-                "attributes": site_attributes,
-            }
-
-        return combined_data
+    return gas_data

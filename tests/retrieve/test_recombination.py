@@ -1,6 +1,6 @@
 import logging
 
-from openghg.standardise.surface import CRDS, GCWERKS
+from openghg.standardise.surface import parse_crds, parse_gcwerks
 from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket
 from openghg.store import recombine_datasets
@@ -17,11 +17,9 @@ def test_recombination_CRDS():
     filename = "hfd.picarro.1minute.100m.min.dat"
     filepath = get_datapath(filename=filename, data_type="CRDS")
 
-    crds = CRDS()
-
     ObsSurface.read_file(filepath, data_type="CRDS", site="hfd", network="DECC")
 
-    gas_data = crds.read_data(data_filepath=filepath, site="HFD", network="AGAGE")
+    gas_data = parse_crds(data_filepath=filepath, site="HFD", network="AGAGE")
 
     ch4_data_read = gas_data["ch4"]["data"]
 
@@ -44,14 +42,12 @@ def test_recombination_CRDS():
 def test_recombination_GC():
     get_local_bucket(empty=True)
 
-    gc = GCWERKS()
-
     data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     precision = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
     ObsSurface.read_file((data, precision), data_type="GCWERKS", site="cgo", network="agage")
 
-    data = gc.read_data(data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa", network="AGAGE")
+    data = parse_gcwerks(data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa", network="AGAGE")
 
     toluene_data = data["toluene_70m"]["data"]
 
