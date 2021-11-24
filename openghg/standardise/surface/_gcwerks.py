@@ -18,6 +18,8 @@ class GCWERKS:
         # passed metadata on read
         self._name_to_code = {}
 
+
+
         for site_code, value in self._gc_params["sites"].items():
             try:
                 name = value["gcwerks_site_name"]
@@ -71,7 +73,7 @@ class GCWERKS:
 
         return data_precision_tuples
 
-    def read_file(
+    def parse_gcwerks(
         self,
         data_filepath: Union[str, Path],
         precision_filepath: Union[str, Path],
