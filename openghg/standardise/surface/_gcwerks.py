@@ -143,10 +143,8 @@ def _check_site(filepath: Path, site_code: str, gc_params: Dict) -> str:
     """
     from re import findall
 
-    # name_code_conversion = {value["gcwerks_site_name"]: site_code for site_code, value in gc_params.items()}
-
-    for site_code, value in gc_params.items():
-        print(site_code)
+    site_data = gc_params["sites"]
+    name_code_conversion = {value["gcwerks_site_name"]: site_code for site_code, value in site_data.items()}
 
     site_code = site_code.lower()
     site_name = findall(r"[\w']+", str(filepath.name))[0].lower()
@@ -257,7 +255,7 @@ def _read_data(
         "network": network,
     }
 
-    extracted_sampling_period = _get_sampling_period(instrument)
+    extracted_sampling_period = _get_sampling_period(instrument=instrument, gc_params=gc_params)
     metadata["sampling_period"] = extracted_sampling_period
 
     if sampling_period is not None:
@@ -492,7 +490,9 @@ def _split_species(
             if spec_data.empty:
                 continue
 
-            attributes = _get_site_attributes(site=site, inlet=inlet_label, instrument=instrument)
+            attributes = _get_site_attributes(
+                site=site, inlet=inlet_label, instrument=instrument, gc_params=gc_params
+            )
             attributes = attributes.copy()
 
             # We want an xarray Dataset
