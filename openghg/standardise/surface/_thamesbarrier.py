@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 from pathlib import Path
-from openghg.util import pathType
+from openghg.types import pathType
 
 
 def parse_tmb(

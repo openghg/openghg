@@ -1,4 +1,4 @@
-from openghg.util import pathType
+from openghg.types import pathType
 from typing import Dict
 from pandas import read_csv, NaT
 from datetime import datetime

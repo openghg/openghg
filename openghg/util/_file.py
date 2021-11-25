@@ -1,34 +1,26 @@
 from pathlib import Path
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Union, Optional, Callable
 
-__all__ = ["load_object", "get_datapath", "read_header", "load_json"]
+__all__ = ["load_surface_parser", "get_datapath", "read_header", "load_json"]
 
 
-def load_object(class_name: str) -> Any:
-    """Load an object of type class_name
+def load_surface_parser(data_type: str) -> Callable:
+    """Load a parsing object of type class_name
 
     Args:
-        class_name (str): Name of class to load
+        data_type: Name of data type such as CRDS
     Returns:
-        class_name: class_name object
+        callable: class_name object
     """
-    module_path = "openghg.standardise.surface"
-    class_name = str(class_name).upper()
+    from importlib import import_module
 
-    # Here we try upper and lowercase for the module
-    try:
-        # Although __import__ is not usually recommended, here we want to use the
-        # fromlist argument that import_module doesn't support
-        module_object = __import__(name=module_path, fromlist=class_name)
-        target_class = getattr(module_object, class_name)
-    except AttributeError:
-        class_name = class_name.lower().capitalize()
-        module_object = __import__(name=module_path, fromlist=class_name)
-        target_class = getattr(module_object, class_name)
-    except ModuleNotFoundError as err:
-        raise ModuleNotFoundError(f"{class_name} is not a valid module {err}")
+    module_name = "openghg.standardise.surface"
+    surface_module = import_module(name=module_name)
 
-    return target_class()
+    function_name = f"parse_{data_type.lower()}"
+    fn = getattr(surface_module, function_name)
+
+    return fn
 
 
 def get_datapath(filename: str, directory: Optional[str] = None) -> Path:
@@ -68,7 +60,7 @@ def load_json(filename: str) -> Dict:
     return data
 
 
-def read_header(filepath: Union[str, Path], comment_char: Optional[str] = "#") -> List:
+def read_header(filepath: Union[str, Path], comment_char: str = "#") -> List:
     """Reads the header lines denoted by the comment_char
 
     Args:

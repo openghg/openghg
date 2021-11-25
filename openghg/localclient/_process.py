@@ -2,7 +2,7 @@
 from pathlib import Path
 from typing import Dict, List, Union
 from openghg.store import ObsSurface
-from openghg.retrieve import DataTypes
+from openghg.types import DataTypes
 
 __all__ = ["process_files"]
 

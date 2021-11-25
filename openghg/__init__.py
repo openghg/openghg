@@ -8,6 +8,7 @@ from . import (
     retrieve,
     service,
     util,
+    types,
 )
 import sys as _sys
 from ._version import get_versions  # type: ignore

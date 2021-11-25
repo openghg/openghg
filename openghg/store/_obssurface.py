@@ -52,17 +52,17 @@ class ObsSurface(BaseStore):
         from pandas import Timedelta
         import sys
         from tqdm import tqdm
-        from openghg.util import load_object, hash_file, clean_string
-        from openghg.retrieve import DataTypes
+        from openghg.util import load_surface_parser, hash_file, clean_string
+        from openghg.types import SurfaceTypes
         from openghg.store import assign_data
 
         if not isinstance(filepath, list):
             filepath = [filepath]
 
         try:
-            data_type = DataTypes[data_type.upper()].name
+            data_type = SurfaceTypes[data_type.upper()].name
         except KeyError:
-            raise ValueError(f"Incorrect data type {data_type} selected.")
+            raise ValueError(f"Unknown data type {data_type} selected.")
 
         # Test that the passed values are valid
         # Check validity of site, instrument, inlet etc in acrg_site_info.json
@@ -79,7 +79,7 @@ class ObsSurface(BaseStore):
             sampling_period_seconds = str(Timedelta(sampling_period).total_seconds())
 
         # Load the data retrieve object
-        data_obj = load_object(class_name=data_type)
+        parser_fn = load_surface_parser(data_type=data_type)
 
         obs = ObsSurface.load()
 
@@ -107,7 +107,7 @@ class ObsSurface(BaseStore):
                 progress_bar.set_description(f"Processing: {data_filepath.name}")
 
                 if data_type == "GCWERKS":
-                    data = data_obj.read_file(
+                    data = parser_fn(
                         data_filepath=data_filepath,
                         precision_filepath=precision_filepath,
                         site=site,
@@ -118,7 +118,7 @@ class ObsSurface(BaseStore):
                         measurement_type=measurement_type,
                     )
                 else:
-                    data = data_obj.read_file(
+                    data = parser_fn(
                         data_filepath=data_filepath,
                         site=site,
                         network=network,
