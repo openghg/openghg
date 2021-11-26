@@ -17,6 +17,7 @@ def get_obs_surface(
     instrument: Optional[str] = None,
     calibration_scale: Optional[str] = None,
     keep_missing: Optional[bool] = False,
+    skip_ranking: Optional[bool] = False,
 ) -> ObsData:
     """Get measurements from one site.
 
@@ -59,6 +60,7 @@ def get_obs_surface(
         end_date=end_date,
         instrument=instrument,
         find_all=True,
+        skip_ranking=skip_ranking,
     )
 
     if not obs_results:

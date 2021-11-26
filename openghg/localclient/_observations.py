@@ -17,6 +17,7 @@ def get_obs_surface(
     instrument: str = None,
     calibration_scale: str = None,
     keep_missing: bool = False,
+    skip_ranking: bool = False,
 ) -> ObsData:
     """This is the equivalent of the get_obs function from the ACRG repository.
 
@@ -48,4 +49,5 @@ def get_obs_surface(
         instrument=instrument,
         calibration_scale=calibration_scale,
         keep_missing=keep_missing,
+        skip_ranking=skip_ranking,
     )
