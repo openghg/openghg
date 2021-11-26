@@ -1,4 +1,4 @@
-from typing import DefaultDict, Dict, List, Optional, Union, Tuple
+from typing import Dict, List, Optional, Union, Tuple
 from pathlib import Path
 from pandas import DataFrame
 
@@ -400,7 +400,7 @@ def _split_species(
     Returns:
         dict: Dataframe of gas data and metadata
     """
-    from collections import defaultdict
+    from addict import Dict as aDict
     from fnmatch import fnmatch
     from openghg.util import clean_string
 
@@ -414,7 +414,7 @@ def _split_species(
             "Unable to read inlets from data, please ensure this data is of the GC type expected by this retrieve module"
         )
 
-    combined_data: DefaultDict[str, Dict] = defaultdict(dict)
+    combined_data = aDict()
 
     for spec in species:
         # Skip this species if the data is all NaNs
@@ -517,7 +517,9 @@ def _split_species(
             combined_data[data_key]["data"] = spec_data
             combined_data[data_key]["attributes"] = attributes
 
-    return combined_data
+    to_return: Dict = combined_data.to_dict()
+
+    return to_return
 
 
 def _get_sampling_period(instrument: str, gc_params: Dict) -> str:

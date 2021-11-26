@@ -1,14 +1,10 @@
 from openghg.store.base import BaseStore
+from openghg.types import pathType, multiPathType, resultsType
 from pathlib import Path
 from typing import DefaultDict, Dict, Union
 
-# import traceback
 
 __all__ = ["ObsSurface"]
-
-pathType = Union[str, Path]
-multiPathType = Union[str, Path, list]
-resultsType = DefaultDict[str, Dict]
 
 
 class ObsSurface(BaseStore):
@@ -60,7 +56,7 @@ class ObsSurface(BaseStore):
             filepath = [filepath]
 
         try:
-            data_type = SurfaceTypes[data_type.upper()].name
+            data_type = SurfaceTypes[data_type.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {data_type} selected.")
 

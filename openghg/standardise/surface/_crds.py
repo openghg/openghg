@@ -1,7 +1,7 @@
 from openghg.util import load_json
 from pandas import DataFrame, Timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 
 def parse_crds(
@@ -266,8 +266,6 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
     Returns:
         dict: Dictionary of attributes
     """
-    from openghg.util import load_json
-
     try:
         site_attributes: Dict = crds_metadata[site.upper()]
         global_attributes: Dict = site_attributes["global_attributes"]

@@ -49,10 +49,6 @@ def test_recombination_GC():
 
     data = parse_gcwerks(data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa", network="AGAGE")
 
-    print(data)
-
-    return
-
     toluene_data = data["toluene_70m"]["data"]
 
     species = "toluene"
@@ -66,14 +62,9 @@ def test_recombination_GC():
 
     toluene_data.attrs = {}
     toluene_data_recombined.attrs = {}
-    
-    print(toluene_data)
-    print(toluene_data_recombined)
-
-    return
 
     assert toluene_data.time.equals(toluene_data_recombined.time)
-    assert toluene_data["toluene"].equals(toluene_data_recombined["c6h5ch3"])
-    assert toluene_data["toluene repeatability"].equals(toluene_data_recombined["c6h5ch3_repeatability"])
-    assert toluene_data["toluene status_flag"].equals(toluene_data_recombined["c6h5ch3_status_flag"])
-    assert toluene_data["toluene integration_flag"].equals(toluene_data_recombined["c6h5ch3_integration_flag"])
+    assert toluene_data["c6h5ch3"].equals(toluene_data_recombined["c6h5ch3"])
+    assert toluene_data["c6h5ch3_repeatability"].equals(toluene_data_recombined["c6h5ch3_repeatability"])
+    assert toluene_data["c6h5ch3_status_flag"].equals(toluene_data_recombined["c6h5ch3_status_flag"])
+    assert toluene_data["c6h5ch3_integration_flag"].equals(toluene_data_recombined["c6h5ch3_integration_flag"])

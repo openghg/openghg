@@ -45,8 +45,7 @@ def parse_btt(
     param_data = load_json(filename="attributes.json")
     network_params = param_data["BTT"]
 
-    sampling_period = network_params["sampling_period"]
-    sampling_period_seconds = str(int(sampling_period)) + "s"
+    sampling_period_seconds = str(int(network_params["sampling_period"])) + "s"
 
     data = read_csv(data_filepath)
     data["time"] = Timestamp("2019-01-01 00:00") + to_timedelta(data["DOY"] - 1, unit="D")

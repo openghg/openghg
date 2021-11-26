@@ -18,7 +18,7 @@ def load_surface_parser(data_type: str) -> Callable:
     surface_module = import_module(name=module_name)
 
     function_name = f"parse_{data_type.lower()}"
-    fn = getattr(surface_module, function_name)
+    fn: Callable = getattr(surface_module, function_name)
 
     return fn
 
