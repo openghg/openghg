@@ -1,8 +1,8 @@
 # The local version of the Process object
 from pathlib import Path
 from typing import Dict, List, Union
-from openghg.modules import ObsSurface
-from openghg.processing import DataTypes
+from openghg.store import ObsSurface
+from openghg.types import DataTypes
 
 __all__ = ["process_files"]
 
@@ -41,13 +41,21 @@ def process_files(
     # TODO: Delete this, as we already have the same warning in read_file?
     if data_type == "GCWERKS":
         if not all(isinstance(item, tuple) for item in files):
-            raise TypeError("If data type is GC, a list of tuples for data and precision filenames must be passed")
+            raise TypeError(
+                "If data type is GC, a list of tuples for data and precision filenames must be passed"
+            )
         files = [(Path(f), Path(p)) for f, p in files]
     else:
         files = [Path(f) for f in files]
 
     r = obs.read_file(
-        filepath=files, data_type=data_type, site=site, network=network, instrument=instrument, inlet=inlet, overwrite=overwrite
+        filepath=files,
+        data_type=data_type,
+        site=site,
+        network=network,
+        instrument=instrument,
+        inlet=inlet,
+        overwrite=overwrite,
     )
     results.update(r)
 

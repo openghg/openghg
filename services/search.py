@@ -2,7 +2,7 @@ from typing import Dict
 
 
 def search(args: Dict) -> Dict:
-    from openghg.processing import search as openghg_search
+    from openghg.retrieve import search as openghg_search
 
     skip_ranking = str(args["skip_ranking"]).lower()
 

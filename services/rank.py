@@ -1,5 +1,6 @@
 from typing import Dict
-from openghg.modules import Datasource, ObsSurface
+from openghg.store.base import Datasource
+from openghg.store import ObsSurface
 
 
 def set_rank(args: Dict) -> None:

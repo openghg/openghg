@@ -1,8 +1,8 @@
 import pytest
 from pandas import Timestamp
-from openghg.processing import search
+from openghg.retrieve import search
 from openghg.localclient import RankSources
-from openghg.modules import ObsSurface
+from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket
 
 from helpers import get_datapath

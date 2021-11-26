@@ -1,11 +1,23 @@
-=========================
+=================
 client API Detail
-=========================
+=================
+
+JobRunner
+=========
+
+The ``JobRunner`` class is used to run jobs on HPC clusters.
+
+.. autoclass:: openghg.client.JobRunner
+    :members:
+    :private-members:
+
+.. toctree::
+   :maxdepth: 1
 
 Process
 =======
 
-The ``Process`` class is used to upload locally stored files to cloud for processing.
+The ``Process`` class is used upload data for processing by OpenGHG.
 
 .. autoclass:: openghg.client.Process
     :members:
@@ -30,14 +42,13 @@ that data from that Datasource will be preferred when a user searches for data.
     :members:
     :private-members:
 
-JobRunner
-=========
+Retrieve
+===========
 
-The ``JobRunner`` class is used to run jobs on HPC clusters.
+The ``Retrieve`` class is used to retrieve data from the object store.
 
-.. autoclass:: openghg.client.JobRunner
+.. autoclass:: openghg.client.Retrieve
     :members:
     :private-members:
 
-.. toctree::
-   :maxdepth: 1
+

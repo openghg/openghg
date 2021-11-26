@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 
-from openghg.modules import ObsSurface
+from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket, query_store
 
 

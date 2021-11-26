@@ -3,21 +3,30 @@ body {
     background-color: black;
 } */
 
-.wy-side-nav-search {
-    background-color: white;
+/* .wy-side-nav-search {
+  background-color: white;
 }
 
 .wy-nav-content-wrap {
-    background-color: #808080;
+  background-color: #2d5d7b;
 }
 
 .wy-nav-side {
-    background-color: #808080;
+  background-color: #2d5d7b;
 }
 
 .wy-nav-content {
- max-width: 55%;
+  max-width: 55%;
 }
+
+.wy-menu {
+  font-size: 1.2em;
+}
+
+.wy-menu :hover {
+  color: #808080;
+} */
+
 /* 
 .wy-side-scroll {
     background-color: #5188b4;

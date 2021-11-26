@@ -10,10 +10,6 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
 import sys
 import os
 from pathlib import Path
@@ -35,7 +31,7 @@ import openghg
 # -- Project information -----------------------------------------------------
 
 project = "OpenGHG"
-copyright = "2020 OpenGHG development team" 
+copyright = "2021 OpenGHG development team"
 author = "OpenGHG development team"
 
 # -- General configuration ---------------------------------------------------
@@ -54,8 +50,8 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 extensions = [
-    'nbsphinx',
-    'sphinx.ext.mathjax',
+    "nbsphinx",
+    "sphinx.ext.mathjax",
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.autosummary",
@@ -72,7 +68,7 @@ extensions = [
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+html_theme = "pydata_sphinx_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -85,8 +81,6 @@ issues_github_path = "openghg/openghg"
 master_doc = "index"
 # The suffix of source filenames.
 source_suffix = ".rst"
-
-
 
 # autoapi_type = "python"
 # autoapi_dirs = ["../../openghg"]
@@ -136,20 +130,20 @@ add_function_parentheses = True
 show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "sphinx"
+# pygments_style = "sphinx"
 
-html_theme = "sphinx_rtd_theme"
+# html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-    "logo_only": True,
-    "display_version": False,
-    "prev_next_buttons_location": "both",
-    "style_external_links": False,
-    "style_nav_header_background": "",
-}
+# html_theme_options = {
+#     "logo_only": True,
+#     "display_version": False,
+#     "prev_next_buttons_location": "both",
+#     "style_external_links": False,
+#     "style_nav_header_background": "",
+# }
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -160,7 +154,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "images/openghg_logo_v1.png"
+html_logo = "images/OpenGHG_Logo_NoText.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -225,7 +219,10 @@ def setup(app):
 
         class AutoAutoSummary(Autosummary):
 
-            option_spec = {"methods": directives.unchanged, "attributes": directives.unchanged}
+            option_spec = {
+                "methods": directives.unchanged,
+                "attributes": directives.unchanged,
+            }
 
             required_arguments = 1
 
@@ -241,7 +238,9 @@ def setup(app):
                         continue
                     if documenter.objtype == typ:
                         items.append(name)
-                public = [x for x in items if x in include_public or not x.startswith("_")]
+                public = [
+                    x for x in items if x in include_public or not x.startswith("_")
+                ]
                 return public, items
 
             def run(self):
@@ -253,10 +252,18 @@ def setup(app):
                     if "methods" in self.options:
                         _, methods = self.get_members(c, "method", ["__init__"])
 
-                        self.content = ["~%s.%s" % (clazz, method) for method in methods if not method.startswith("_")]
+                        self.content = [
+                            "~%s.%s" % (clazz, method)
+                            for method in methods
+                            if not method.startswith("_")
+                        ]
                     if "attributes" in self.options:
                         _, attribs = self.get_members(c, "attribute")
-                        self.content = ["~%s.%s" % (clazz, attrib) for attrib in attribs if not attrib.startswith("_")]
+                        self.content = [
+                            "~%s.%s" % (clazz, attrib)
+                            for attrib in attribs
+                            if not attrib.startswith("_")
+                        ]
                 finally:
                     return super(AutoAutoSummary, self).run()
 
