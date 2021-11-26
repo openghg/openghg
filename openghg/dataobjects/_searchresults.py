@@ -1,6 +1,7 @@
 from addict import Dict as aDict
 from dataclasses import dataclass
 from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
+
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
 from openghg.util import clean_string
@@ -81,6 +82,20 @@ class SearchResults:
             ranked_data=data["ranked_data"],
             cloud=data["cloud"],
         )
+
+    def rankings(self) -> Dict:
+        if not self.ranked_data:
+            print("No rank data")
+
+        rank_result = aDict()
+
+        for site, species_data in self.results.items():
+            for species, data in species_data.items():
+                rank_result[site][species] = data["rank_metadata"]
+
+        to_return: Dict = rank_result.to_dict()
+
+        return to_return
 
     def raw(self) -> Dict:
         """Returns the raw results data
