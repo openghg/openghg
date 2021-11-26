@@ -285,7 +285,6 @@ def _read_data(
             # Add it to the dictionary for renaming later
             columns_renamed[column] = gas_name + "_flag"
 
-
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 # Create 2 new columns based on the flag columns
