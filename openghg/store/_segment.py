@@ -49,9 +49,7 @@ def assign_data(
             datasource = Datasource.load(uuid=uuid)
 
         # Add the dataframe to the datasource
-        datasource.add_data(
-            metadata=metadata, data=data, overwrite=overwrite, data_type=data_type
-        )
+        datasource.add_data(metadata=metadata, data=data, overwrite=overwrite, data_type=data_type)
         # Save Datasource to object store
         datasource.save()
 

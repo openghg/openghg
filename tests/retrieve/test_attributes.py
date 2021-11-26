@@ -2,9 +2,10 @@ import logging
 import os
 from pathlib import Path
 
-from openghg.standardise.surface import CRDS
+from openghg.standardise.surface import parse_crds
 from openghg.objectstore import get_local_bucket
 from openghg.retrieve import assign_attributes
+from helpers import get_datapath
 
 # import tempfile
 # from cfchecker import CFChecker
@@ -15,24 +16,14 @@ mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
 
-def get_datapath(filename, data_type):
-    return (
-        Path(__file__)
-        .resolve(strict=True)
-        .parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
-    )
-
-
 def test_crds_attributes():
     get_local_bucket(empty=True)
-
-    crds = CRDS()
 
     filepath = get_datapath(
         filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS"
     )
 
-    combined = crds.read_file(data_filepath=filepath, site="tac", network="DECC")
+    combined = parse_crds(data_filepath=filepath, site="tac", network="DECC")
 
     combined_attributes = assign_attributes(data=combined, site="tac")
 

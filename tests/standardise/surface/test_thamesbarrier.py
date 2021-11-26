@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 import pytest
 
-from openghg.standardise.surface import THAMESBARRIER
+from openghg.standardise.surface import parse_tmb
 from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -10,11 +10,9 @@ mpl_logger.setLevel(logging.WARNING)
 
 
 def test_read_file():
-    tb = THAMESBARRIER()
-
     filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
-    data = tb.read_file(data_filepath=filepath)
+    data = parse_tmb(data_filepath=filepath)
 
     ch4_data = data["CH4"]["data"]
     co2_data = data["CO2"]["data"]

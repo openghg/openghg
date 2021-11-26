@@ -37,20 +37,14 @@ def retrieve_met(
     if variables is None:
         variables = ["u_component_of_wind", "v_component_of_wind"]
 
-    latitude, longitude, site_height, inlet_heights = _get_site_data(
-        site=site, network=network
-    )
+    latitude, longitude, site_height, inlet_heights = _get_site_data(site=site, network=network)
 
     # Get the area to retrieve data for
     ecmwf_area = _get_ecmwf_area(site_lat=latitude, site_long=longitude)
     # Calculate the pressure at measurement height(s)
-    measure_pressure = _get_site_pressure(
-        inlet_heights=inlet_heights, site_height=site_height
-    )
+    measure_pressure = _get_site_pressure(inlet_heights=inlet_heights, site_height=site_height)
     # Calculate the ERA5 pressure levels required
-    ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(
-        measure_pressure=measure_pressure
-    )
+    ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure=measure_pressure)
 
     if not isinstance(years, list):
         years = [years]
@@ -257,13 +251,9 @@ def _altitude_to_ecmwf_pressure(measure_pressure: List[float]) -> List[str]:
     ecwmf_pressure_indices = np.zeros(len(measure_pressure) * 2)
 
     for index, m in enumerate(measure_pressure):
-        ecwmf_pressure_indices[(index * 2) : (index * 2 + 2)] = _two_closest_values(
-            m - era5_pressure_levels
-        )
+        ecwmf_pressure_indices[(index * 2) : (index * 2 + 2)] = _two_closest_values(m - era5_pressure_levels)
 
-    desired_era5_pressure = era5_pressure_levels[
-        np.unique(ecwmf_pressure_indices).astype(int)
-    ]
+    desired_era5_pressure = era5_pressure_levels[np.unique(ecwmf_pressure_indices).astype(int)]
 
     pressure_levels: List = desired_era5_pressure.astype(str).tolist()
 

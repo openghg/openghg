@@ -1,14 +1,12 @@
 import pytest
 
-from openghg.standardise.surface import CRANFIELD
+from openghg.standardise.surface import parse_cranfield
 from helpers import get_datapath
 
 
 def test_read_file():
-    c = CRANFIELD()
-
     filepath = get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")
-    data = c.read_file(data_filepath=filepath, sampling_period="1200")
+    data = parse_cranfield(data_filepath=filepath, sampling_period="1200")
 
     assert sorted(list(data.keys())) == sorted(["co2", "co", "ch4"])
 

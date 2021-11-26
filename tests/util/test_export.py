@@ -3,7 +3,7 @@ from pathlib import Path
 import datetime
 from openghg.util import to_dashboard, to_dashboard_mobile
 from openghg.dataobjects import ObsData
-from openghg.standardise.surface import read_glasgow_licor
+from openghg.standardise.surface import parse_glasow_licor
 from tempfile import TemporaryDirectory
 import json
 
@@ -89,7 +89,7 @@ def test_export_to_dashboard():
 def test_to_dashboard_mobile_return_dict():
     test_data = get_mobile_datapath(filename="glasgow_licor_sample.txt")
 
-    data = read_glasgow_licor(filepath=test_data)
+    data = parse_glasow_licor(filepath=test_data)
 
     exported = to_dashboard_mobile(data=data)
 

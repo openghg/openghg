@@ -48,9 +48,7 @@ class Search:
             raise PermissionError("Cannot use a null service")
 
         if not any((species, site, inlet, instrument)):
-            raise ValueError(
-                "We must have at least one of  species, site, inlet or instrument"
-            )
+            raise ValueError("We must have at least one of  species, site, inlet or instrument")
 
         args = {}
 
@@ -74,9 +72,7 @@ class Search:
         args["skip_ranking"] = str(skip_ranking)
         args["data_type"] = str(data_type)
 
-        response: Dict = self._service.call_function(
-            function="search.search", args=args
-        )
+        response: Dict = self._service.call_function(function="search.search", args=args)
 
         try:
             results_data = response["results"]

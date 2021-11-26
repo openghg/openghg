@@ -60,9 +60,7 @@ class METStore(BaseStore):
         start_date = Timestamp(f"{years[0]}-1-1")
         end_date = Timestamp(f"{years[-1]}-12-31")
 
-        result = store.search(
-            site=site, network=network, start_date=start_date, end_date=end_date
-        )
+        result = store.search(site=site, network=network, start_date=start_date, end_date=end_date)
 
         # Retrieve from the Copernicus store
         if result is None:
@@ -93,9 +91,7 @@ class METStore(BaseStore):
         from openghg.store.base import Datasource
         from openghg.dataobjects import METData
 
-        datasources = (
-            Datasource.load(uuid=uuid, shallow=True) for uuid in self._datasource_uuids
-        )
+        datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in self._datasource_uuids)
 
         # We should only get one datasource here currently
         for datasource in datasources:

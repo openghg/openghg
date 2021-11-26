@@ -1,12 +1,10 @@
-__all__ = ["read_glasgow_licor"]
-
 from pandas import read_csv, to_datetime
 from pathlib import Path
 from typing import Dict
 from addict import Dict as aDict
 
 
-def read_glasgow_licor(filepath: Path) -> Dict:
+def parse_glasow_licor(filepath: Path) -> Dict:
     """Read the Glasgow LICOR data from NPL
 
     Args:

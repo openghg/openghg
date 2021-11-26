@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 import pytest
 
-from openghg.standardise.surface import BTT
+from openghg.standardise.surface import parse_btt
 from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -10,11 +10,9 @@ mpl_logger.setLevel(logging.WARNING)
 
 
 def test_read_file():
-    btt = BTT()
-
     filepath = get_datapath(filename="BTT_test.csv", data_type="LGHG")
 
-    data = btt.read_file(data_filepath=filepath)
+    data = parse_btt(data_filepath=filepath)
 
     co2_data = data["CO2"]["data"]
     ch4_data = data["CH4"]["data"]

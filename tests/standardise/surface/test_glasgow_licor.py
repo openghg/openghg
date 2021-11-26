@@ -1,12 +1,12 @@
 from helpers import get_mobile_datapath
-from openghg.standardise.surface import read_glasgow_licor
+from openghg.standardise.surface import parse_glasow_licor
 from pandas import Timestamp
 import pytest
 
 
 def test_glasgow_licor_read():
     test_data = get_mobile_datapath(filename="glasgow_licor_sample.txt")
-    data = read_glasgow_licor(filepath=test_data)
+    data = parse_glasow_licor(filepath=test_data)
 
     ch4_data = data["ch4"]["data"]
     metadata = data["ch4"]["metadata"]
@@ -17,4 +17,3 @@ def test_glasgow_licor_read():
     assert ch4_data.ch4[0] == 13.43
 
     assert metadata == {'units': 'ppb', 'notes': 'measurement value is methane enhancement over background'}
-

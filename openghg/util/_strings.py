@@ -63,9 +63,7 @@ def to_lowercase(d: str) -> str:
     ...
 
 
-def to_lowercase(
-    d: Union[Dict, List, Tuple, Set, str]
-) -> Union[Dict, List, Tuple, Set, str]:
+def to_lowercase(d: Union[Dict, List, Tuple, Set, str]) -> Union[Dict, List, Tuple, Set, str]:
     """Convert an object to lowercase. All keys and values in a dictionary will be converted
     to lowercase as will all objects in a list, tuple or set.
 

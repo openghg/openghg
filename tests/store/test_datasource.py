@@ -10,7 +10,7 @@ import pytest
 import xarray as xr
 
 from openghg.store.base import Datasource
-from openghg.standardise.surface import CRDS
+from openghg.standardise.surface import parse_crds
 from openghg.objectstore import get_local_bucket, get_object_names
 from openghg.util import create_daterange_str, timestamp_tzaware
 from helpers import get_datapath
@@ -24,14 +24,10 @@ mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
 
 @pytest.fixture(scope="session")
 def data():
-    crds = CRDS()
-
     filename = "bsd.picarro.1minute.248m.min.dat"
     filepath = get_datapath(filename=filename, data_type="CRDS")
 
-    combined_data = crds.read_data(data_filepath=filepath, site="bsd", network="DECC")
-
-    return combined_data
+    return parse_crds(data_filepath=filepath, site="bsd", network="DECC")
 
 
 @pytest.fixture

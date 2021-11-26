@@ -77,9 +77,7 @@ def to_dashboard(
         return export_dict
 
 
-def to_dashboard_mobile(
-    data: Dict, filename: Union[str, Path] = None
-) -> Union[Dict, None]:
+def to_dashboard_mobile(data: Dict, filename: Union[str, Path] = None) -> Union[Dict, None]:
     """Export the Glasgow LICOR data to JSON for the dashboard
 
     Args:

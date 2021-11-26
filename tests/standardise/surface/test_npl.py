@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 import pytest
 
-from openghg.standardise.surface import NPL
+from openghg.standardise.surface import parse_npl
 from helpers import get_datapath
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -10,11 +10,10 @@ mpl_logger.setLevel(logging.WARNING)
 
 
 def test_read_file():
-    npl = NPL()
 
     filepath = get_datapath(filename="NPL_test.csv", data_type="LGHG")
 
-    data = npl.read_file(data_filepath=filepath, sampling_period=60)
+    data = parse_npl(data_filepath=filepath, sampling_period=60)
 
     co2_data = data["CO2"]["data"]
     ch4_data = data["CH4"]["data"]
@@ -41,7 +40,7 @@ def test_read_file():
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
-        'Processed by': 'OpenGHG_Cloud',
+        "Processed by": "OpenGHG_Cloud",
         "species": "co2",
         "Calibration_scale": "unknown",
         "station_longitude": -0.3487,

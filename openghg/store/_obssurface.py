@@ -1,14 +1,10 @@
 from openghg.store.base import BaseStore
+from openghg.types import pathType, multiPathType, resultsType
 from pathlib import Path
 from typing import DefaultDict, Dict, Union
 
-# import traceback
 
 __all__ = ["ObsSurface"]
-
-pathType = Union[str, Path]
-multiPathType = Union[str, Path, list]
-resultsType = DefaultDict[str, Dict]
 
 
 class ObsSurface(BaseStore):
@@ -52,17 +48,17 @@ class ObsSurface(BaseStore):
         from pandas import Timedelta
         import sys
         from tqdm import tqdm
-        from openghg.util import load_object, hash_file, clean_string
-        from openghg.retrieve import DataTypes
+        from openghg.util import load_surface_parser, hash_file, clean_string
+        from openghg.types import SurfaceTypes
         from openghg.store import assign_data
 
         if not isinstance(filepath, list):
             filepath = [filepath]
 
         try:
-            data_type = DataTypes[data_type.upper()].name
+            data_type = SurfaceTypes[data_type.upper()].value
         except KeyError:
-            raise ValueError(f"Incorrect data type {data_type} selected.")
+            raise ValueError(f"Unknown data type {data_type} selected.")
 
         # Test that the passed values are valid
         # Check validity of site, instrument, inlet etc in acrg_site_info.json
@@ -79,7 +75,7 @@ class ObsSurface(BaseStore):
             sampling_period_seconds = str(Timedelta(sampling_period).total_seconds())
 
         # Load the data retrieve object
-        data_obj = load_object(class_name=data_type)
+        parser_fn = load_surface_parser(data_type=data_type)
 
         obs = ObsSurface.load()
 
@@ -93,9 +89,7 @@ class ObsSurface(BaseStore):
                         data_filepath = Path(fp[0])
                         precision_filepath = Path(fp[1])
                     except ValueError:
-                        raise ValueError(
-                            "For GCWERKS data both data and precision filepaths must be given."
-                        )
+                        raise ValueError("For GCWERKS data both data and precision filepaths must be given.")
                 else:
                     data_filepath = Path(fp)
 
@@ -109,7 +103,7 @@ class ObsSurface(BaseStore):
                 progress_bar.set_description(f"Processing: {data_filepath.name}")
 
                 if data_type == "GCWERKS":
-                    data = data_obj.read_file(
+                    data = parser_fn(
                         data_filepath=data_filepath,
                         precision_filepath=precision_filepath,
                         site=site,
@@ -120,7 +114,7 @@ class ObsSurface(BaseStore):
                         measurement_type=measurement_type,
                     )
                 else:
-                    data = data_obj.read_file(
+                    data = parser_fn(
                         data_filepath=data_filepath,
                         site=site,
                         network=network,
@@ -175,7 +169,7 @@ class ObsSurface(BaseStore):
 
         This data is different in that it contains multiple sites in the same file.
         """
-        from openghg.standardise.surface import read_aqmesh
+        from openghg.standardise.surface import parse_aqmesh
         from openghg.store import assign_data
         from openghg.util import hash_file
         from collections import defaultdict
@@ -187,9 +181,7 @@ class ObsSurface(BaseStore):
         # Load the ObsSurface object for retrieve
         obs = ObsSurface.load()
         # Get a dict of data and metadata
-        processed_data = read_aqmesh(
-            data_filepath=data_filepath, metadata_filepath=metadata_filepath
-        )
+        processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
 
         results: resultsType = defaultdict(dict)
         for site, site_data in tqdm(processed_data.items()):
@@ -307,9 +299,7 @@ class ObsSurface(BaseStore):
             )
 
             if result and result != uid:
-                raise ValueError(
-                    "Mismatch between assigned uuid and stored Datasource uuid."
-                )
+                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
 
             self.set_uuid(
                 site=site,

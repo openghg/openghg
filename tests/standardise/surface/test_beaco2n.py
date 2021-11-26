@@ -1,4 +1,4 @@
-from openghg.standardise.surface import BEACO2N
+from openghg.standardise.surface import parse_beaco2n
 from pandas import Timestamp
 import pytest
 from helpers import get_datapath
@@ -76,10 +76,9 @@ from numpy import isnan
 
 
 def test_read_glasgow_valid_data():
-    beacon = BEACO2N()
     filepath = get_datapath(filename="175_BELLAHOUSTONACADEMY.csv", data_type="BEACO2N")
 
-    result = beacon.read_file(
+    result = parse_beaco2n(
         data_filepath=filepath,
         site="BELLAHOUSTONACADEMY",
         network="BEACO2N",
@@ -96,12 +95,11 @@ def test_read_glasgow_valid_data():
 
 
 def test_read_glasgow_no_valid_data():
-    beacon = BEACO2N()
     filepath = get_datapath(
         filename="171_UNIVERSITYOFSTRATHCLYDE.csv", data_type="BEACO2N"
     )
 
-    result = beacon.read_file(
+    result = parse_beaco2n(
         data_filepath=filepath,
         site="UNIVERSITYOFSTRATHCLYDE",
         network="BEACO2N",
@@ -114,19 +112,14 @@ def test_read_glasgow_no_valid_data():
 def test_incorrect_file_read_raises():
     filepath = get_datapath(filename="incorrect_format.csv", data_type="BEACO2N")
 
-    beacon = BEACO2N()
     with pytest.raises(ValueError):
-        beacon.read_file(
-            data_filepath=filepath, site="test", network="test", inlet="test"
-        )
+        parse_beaco2n(data_filepath=filepath, site="test", network="test", inlet="test")
 
 
 def test_incorrect_site_raises():
     filepath = get_datapath(filename="Unknown_site.csv", data_type="BEACO2N")
 
-    beacon = BEACO2N()
-
     with pytest.raises(ValueError):
-        beacon.read_file(
+        parse_beaco2n(
             data_filepath=filepath, site="test", network="test", inlet="test"
         )

@@ -34,13 +34,9 @@ class RankSources:
         rank_table = obs.rank_data()
 
         # Shallow load the Datasources (only get their JSON metadata)
-        datasources = (
-            Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids
-        )
+        datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
-        matching_sources = [
-            d for d in datasources if d.search_metadata(site=site, species=species)
-        ]
+        matching_sources = [d for d in datasources if d.search_metadata(site=site, species=species)]
 
         if not matching_sources:
             return {}
