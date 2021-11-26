@@ -50,6 +50,12 @@ def pytest_sessionfinish(session, exitstatus):
 
     # Set the environment variable back
     try:
+        # Delete the testing object store
+        shutil.rmtree(temp_path)
+    except FileNotFoundError:
+        pass
+
+    try:
         os.environ["OPENGHG_PATH"] = os.environ["OPENGHG_PATH_BAK"]
         del os.environ["OPENGHG_PATH_BAK"]
     except KeyError:

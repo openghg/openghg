@@ -1,4 +1,4 @@
-from openghg.modules import ObsSurface
+from openghg.store import ObsSurface
 
 import os
 os.environ["OPENGHG_PATH"] = "/work/chxmr/objectStore"

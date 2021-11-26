@@ -263,7 +263,8 @@ def query_store() -> Dict:
     Returns:
         dict: Dictionary for data to be shown in force graph
     """
-    from openghg.modules import Datasource, ObsSurface
+    from openghg.store.base import Datasource
+    from openghg.store import ObsSurface
 
     obs = ObsSurface.load()
 
@@ -339,7 +340,11 @@ def visualise_store() -> pyvis.network.Network:
 
                     label = f"{species.upper()} {instrument}"
                     title = "\n".join(
-                        [f"Site: {site.upper()}", f"Species : {species.upper()}", f"Instrument: {instrument}"]
+                        [
+                            f"Site: {site.upper()}",
+                            f"Species : {species.upper()}",
+                            f"Instrument: {instrument}",
+                        ]
                     )
                     net.add_node(n_id=uid, label=label, title=title, color="#f28e2b", value=100)
                     net.add_edge(source=inlet_id, to=uid)

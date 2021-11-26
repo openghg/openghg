@@ -1,4 +1,5 @@
-from openghg.modules import Datasource, ObsSurface
+from openghg.store.base import Datasource
+from openghg.store import ObsSurface
 from openghg.util import valid_site, create_daterange_str, InvalidSiteError
 
 # from pyvis.network import Network
@@ -44,7 +45,11 @@ class RankSources:
             return "_".join([d.species(), d.inlet(), d.instrument()])
 
         self._user_info = {
-            name_str(d): {"rank_data": rank_table.get(d.uuid(), "NA"), "data_range": d.daterange_str()} for d in matching_sources
+            name_str(d): {
+                "rank_data": rank_table.get(d.uuid(), "NA"),
+                "data_range": d.daterange_str(),
+            }
+            for d in matching_sources
         }
 
         self._key_lookup = {name_str(d): d.uuid() for d in matching_sources}

@@ -8,28 +8,28 @@ __all__ = ["ObsData"]
 
 @dataclass(frozen=True)
 class ObsData(_BaseData, abc.Mapping):
-    """ This class is used to return observations data from the get_observations function
+    """This class is used to return observations data from the get_observations function
 
-        Args:
-            data: Dictionary of xarray Dataframes
-            metadata: Dictionary of metadata
+    Args:
+        data: Dictionary of xarray Dataframes
+        metadata: Dictionary of metadata
     """
 
     # Compatability layer for legacy format - mimicing the reponse of a dictionary
     # Previous format expected a dictionary containing the site code and data
     # as key:value pairs.
-    # TODO: May also want to check other expected keys within the legacy 
+    # TODO: May also want to check other expected keys within the legacy
     # dictionary format and add them below
     def __getitem__(self, key: str) -> Any:
         """
-        Returns the data attribute (xarray Dataset) when the site name is 
+        Returns the data attribute (xarray Dataset) when the site name is
         specified.
         Included as a compatability layer for legacy format as a dictionary
         containing a Dataset for each site code.
 
         key (str): Site code
         """
-        site = self.metadata["site"].lower()            
+        site = self.metadata["site"].lower()
         if key.lower() == site:
             return self.data
         else:
