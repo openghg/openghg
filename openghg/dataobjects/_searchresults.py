@@ -2,7 +2,6 @@ from addict import Dict as aDict
 from dataclasses import dataclass
 from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
 
-import addict
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
 from openghg.util import clean_string
@@ -94,7 +93,7 @@ class SearchResults:
             for species, data in species_data.items():
                 rank_result[site][species] = data["rank_metadata"]
 
-        to_return = rank_result.to_dict()
+        to_return: Dict = rank_result.to_dict()
 
         return to_return
 
