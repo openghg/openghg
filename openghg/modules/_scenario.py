@@ -40,12 +40,12 @@ class ModelScenario():
                 print(f"Add this using by setting the {attr} input, for example: ")
                 print("  ModelScenario.{attr} = {attr.capitalize()}Data")
         
-        if missing:
-            raise ValueError(f"Missing necessary {' and '.join(missing)} data")
+        if missing:            
+            raise ValueError(f"Missing necessary {' and '.join(missing)} data.")
 
     def align_obs_footprint(self, 
-                                resample_to: Optional[str] = "coarsest",
-                                platform: Optional[str] = None) -> Tuple:
+                            resample_to: Optional[str] = "coarsest",
+                            platform: Optional[str] = None) -> Tuple:
         """
         Slice and resample obs and footprint data to align along time
 
