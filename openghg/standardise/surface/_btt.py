@@ -8,8 +8,6 @@ def parse_btt(
     network: Optional[str] = "LGHG",
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
-    measurement_type: Optional[str] = None,
 ) -> Dict:
     """Reads NPL data files and returns the UUIDS of the Datasources
     the processed data has been assigned to
@@ -32,9 +30,6 @@ def parse_btt(
 
     site = "BTT"
 
-    if sampling_period is None:
-        sampling_period = "NOT_SET"
-
     # Rename these columns
     rename_dict = {"co2.cal": "CO2", "ch4.cal.ppb": "CH4"}
     # We only want these species
@@ -45,7 +40,8 @@ def parse_btt(
     param_data = load_json(filename="attributes.json")
     network_params = param_data["BTT"]
 
-    sampling_period_seconds = str(int(network_params["sampling_period"])) + "s"
+    sampling_period = int(network_params["sampling_period"])
+    sampling_period_seconds = str(sampling_period) + "s"
 
     data = read_csv(data_filepath)
     data["time"] = Timestamp("2019-01-01 00:00") + to_timedelta(data["DOY"] - 1, unit="D")
