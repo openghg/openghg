@@ -39,11 +39,11 @@ def test_retrieve_complex_ranked():
     rank = RankSources()
 
     rank.get_sources(site="tac", species="ch4")
-    rank.set_rank(key="ch4_100m_picarro", rank=1, start_date="2014-01-01", end_date="2017-01-01")
+    rank.set_rank(inlet="100m", rank=1, start_date="2014-01-01", end_date="2017-01-01")
     rank.get_sources(site="hfd", species="co2")
-    rank.set_rank(key="co2_50m_picarro", rank=1, start_date="2015-01-01", end_date="2019-01-01")
+    rank.set_rank(inlet="50m", rank=1, start_date="2015-01-01", end_date="2019-01-01")
     rank.get_sources(site="bsd", species="co")
-    rank.set_rank(key="co_42m_picarro", rank=1, start_date="2013-01-01", end_date="2020-01-01")
+    rank.set_rank(inlet="42m", rank=1, start_date="2013-01-01", end_date="2020-01-01")
 
     results = search(species="ch4")
 
