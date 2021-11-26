@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.client._search &#8212; OpenGHG 0+untagged.3.g3fbfaec documentation</title>
+    <title>openghg.client._search &#8212; OpenGHG 0+untagged.3.g0227d49 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -207,9 +207,7 @@
             <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="s2">&quot;Cannot use a null service&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">((</span><span class="n">species</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">instrument</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;We must have at least one of  species, site, inlet or instrument&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;We must have at least one of  species, site, inlet or instrument&quot;</span><span class="p">)</span>
 
         <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -233,9 +231,7 @@
         <span class="n">args</span><span class="p">[</span><span class="s2">&quot;skip_ranking&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">skip_ranking</span><span class="p">)</span>
         <span class="n">args</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
 
-        <span class="n">response</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span>
-            <span class="n">function</span><span class="o">=</span><span class="s2">&quot;search.search&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span>
-        <span class="p">)</span>
+        <span class="n">response</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s2">&quot;search.search&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">results_data</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>

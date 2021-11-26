@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.client._process &#8212; OpenGHG 0+untagged.3.g3fbfaec documentation</title>
+    <title>openghg.client._process &#8212; OpenGHG 0+untagged.3.g0227d49 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -307,9 +307,7 @@
 
             <span class="c1"># If we try to upload many files we don&#39;t want it to fail if a single</span>
             <span class="c1"># file contains overlapping data</span>
-            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span>
-                <span class="n">function</span><span class="o">=</span><span class="s2">&quot;process.process&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span>
-            <span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s2">&quot;process.process&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="s2">&quot;Error&quot;</span> <span class="ow">in</span> <span class="n">response</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;GCWERKS&quot;</span><span class="p">,</span> <span class="s2">&quot;GC&quot;</span><span class="p">):</span>
