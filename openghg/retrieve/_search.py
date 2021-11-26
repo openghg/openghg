@@ -124,8 +124,12 @@ def search(**kwargs):  # type: ignore
     #     if not isinstance(site, list) and not multiple_inlets(site=site):
     #         skip_ranking = True
 
-    # If there isn't any ranking data, skip all the ranking functionality
+    # If there isn't *any* ranking data at all, skip all the ranking functionality
     if not obj._rank_data:
+        skip_ranking = True
+
+    # If only one datasource has been returned, skip all the ranking functionality
+    if len(matching_sources) == 1:
         skip_ranking = True
 
     # If we have the site, inlet and instrument then just return the data
