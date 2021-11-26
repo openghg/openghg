@@ -183,9 +183,13 @@ class SearchResults:
         # If inlet is not specified, check if this is unambiguous
         # If so, set inlet to be the only value and continue.
         if inlet is None:
-            potential_inlets = self.results[site][species].keys()
-            if len(potential_inlets) == 1:
-                inlet = list(potential_inlets)[0]
+            try:
+                potential_inlets = self.results[site][species].keys()
+            except KeyError:
+                pass
+            else:
+                if len(potential_inlets) == 1:
+                    inlet = list(potential_inlets)[0]
 
         if self.ranked_data:
             if all((site, species, inlet)):
