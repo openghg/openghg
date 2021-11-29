@@ -8,6 +8,7 @@ from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
 def data_read():
     get_local_bucket(empty=True)
 
+    # DECC network sites
     network = "DECC"
     bsd_248_path = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
     bsd_108_path = get_datapath(filename="bsd.picarro.1minute.108m.min.dat", data_type="CRDS")
@@ -26,11 +27,18 @@ def data_read():
     tac_path = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
     ObsSurface.read_file(filepath=tac_path, data_type="CRDS", site="tac", network=network)
 
+    # GCWERKS data (AGAGE network sites)
     data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     prec_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
     ObsSurface.read_file(filepath=(data_filepath, prec_filepath), site="CGO", data_type="GCWERKS", network="AGAGE")
 
+    mhd_data_filepath = get_datapath(filename="macehead.12.C", data_type="GC")
+    mhd_prec_filepath = get_datapath(filename="macehead.12.precisions.C", data_type="GC")
+
+    ObsSurface.read_file(filepath=(mhd_data_filepath, mhd_prec_filepath), site="MHD", data_type="GCWERKS", network="AGAGE", instrument="GCMD")
+
+    # Set ranking information for BSD
     obs = ObsSurface.load()
 
     uid_248 = bsd_results["processed"]["bsd.picarro.1minute.248m.min.dat"]["ch4"]
@@ -46,6 +54,7 @@ def data_read():
     uid_42 = bsd_results["processed"]["bsd.picarro.1minute.42m.min.dat"]["ch4"]
     obs.set_rank(uuid=uid_42, rank=1, date_range="2019-01-02_2021-01-01")
 
+    # Emissions data
     test_datapath = get_emissions_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
 
     Emissions.read_file(
@@ -57,6 +66,7 @@ def data_read():
         high_time_resolution=False,
     )
 
+    # Footprint data
     datapath = get_footprint_datapath("footprint_test.nc")
 
     site = "TMB"
