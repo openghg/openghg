@@ -97,7 +97,7 @@ def get_attributes(
             (e.g. ["1900-01-01", "2010-01-01"])
     """
     from pandas import Timestamp as pd_Timestamp
-    from openghg.util import clean_string, load_json
+    from openghg.util import clean_string, load_json, timestamp_now
 
     # from numpy import unique as np_unique
 
@@ -157,7 +157,7 @@ def get_attributes(
     else:
         global_attributes = global_attributes_default
 
-    global_attributes["File created"] = str(pd_Timestamp.now(tz="UTC"))
+    global_attributes["File created"] = str(timestamp_now())
     global_attributes["Processed by"] = "OpenGHG_Cloud"
     global_attributes["species"] = species_label
 
