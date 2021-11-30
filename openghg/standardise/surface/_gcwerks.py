@@ -1,7 +1,6 @@
 from typing import Dict, List, Optional, Union, Tuple
 from pathlib import Path
 from pandas import DataFrame
-from openghg.util import clean_string, load_json
 
 
 def find_files(
@@ -403,7 +402,7 @@ def _split_species(
     """
     from addict import Dict as aDict
     from fnmatch import fnmatch
-    from openghg.util import clean_string
+    from openghg.util import load_json, clean_string
 
     # Load species translator so we can keep species names consistent
     attributes_data = load_json("attributes.json")
