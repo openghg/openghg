@@ -363,10 +363,10 @@ def test_search_incorrect_inlet_site_finds_nothing():
 
 def test_no_ranked_data_raises():
     with pytest.raises(ValueError):
-        _ = search(site="tac", species="co2")
+        _ = search(site="hfd", species="ch4")
 
     # Make sure this doesn't fail
-    res = search(site="tac", species="co2", inlet="100m")
+    res = search(site="hfd", species="ch4", inlet="100m")
 
     assert res
 
