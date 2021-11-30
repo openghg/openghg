@@ -73,8 +73,10 @@ def get_obs_surface(
     if start_date is not None and end_date is not None:
         start_date_tzaware = timestamp_tzaware(start_date)
         end_date_tzaware = timestamp_tzaware(end_date)
+        end_date_tzaware_exclusive = end_date_tzaware - Timedelta(1, unit="nanosecond")  # Deduct 1 ns to make the end day (date) exclusive.
+
         # Slice the data to only cover the dates we're interested in
-        data = data.loc[dict(time=slice(start_date_tzaware, end_date_tzaware))]
+        data = data.sel(time=slice(start_date_tzaware, end_date_tzaware_exclusive))
 
     try:
         start_date_data = timestamp_tzaware(data.time[0].values)
