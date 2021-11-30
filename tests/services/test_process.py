@@ -103,7 +103,7 @@ def test_process_GCWERKS_files(authenticated_user):
 
     cgo_response = response["processed"]["capegrim-medusa.18.C"]
 
-    partial_expected_keys = ["benzene_70m", "c4f10_70m", "c6f14_70m", "ccl4_70m", "cf4_70m"]
+    partial_expected_keys = ['c2cl4_70m', 'c2f6_70m', 'c2h2_70m', 'c2h6_70m', 'c2hcl3_70m']
 
     assert len(cgo_response.keys()) == 56
     assert sorted(cgo_response.keys())[:5] == partial_expected_keys

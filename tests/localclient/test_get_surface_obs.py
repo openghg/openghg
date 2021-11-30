@@ -159,7 +159,9 @@ def test_gcwerks_retrieval():
         "data_type": "timeseries",
     }
 
-    assert metadata == expected_metadata
+    for key, expected_value in expected_metadata.items():
+        value = expected_metadata[key]
+        assert value == expected_value
 
     assert data.time[0] == Timestamp("2018-01-01T02:24:00")
     assert data.time[-1] == Timestamp("2018-01-31T23:33:00")
