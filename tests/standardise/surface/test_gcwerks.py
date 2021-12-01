@@ -41,15 +41,17 @@ def test_read_file_capegrim(cgo_path, cgo_prec_path):
         network="agage",
     )
 
+    # 30/11/2021: Species labels were updated to be standardised in line with variable naming
+    # This list of expected labels was updated.
     expected_eight = [
-        "benzene_70m",
-        "c4f10_70m",
-        "c6f14_70m",
-        "ccl4_70m",
-        "cf4_70m",
-        "cfc112_70m",
-        "cfc113_70m",
-        "cfc114_70m",
+        'c2cl4_70m', 
+        'c2f6_70m', 
+        'c2h2_70m', 
+        'c2h6_70m', 
+        'c2hcl3_70m', 
+        'c3f8_70m', 
+        'c3h8_70m', 
+        'c4f10_70m',
     ]
 
     sorted_keys = sorted(list(gas_data.keys()))
@@ -89,7 +91,11 @@ def test_read_file_thd(data_thd, prec_thd):
         "sampling_period": "75",
     }
 
-    assert gas_data["ch3ccl3_10m"]["metadata"] == expected_metadata
+    # Check metadata contains *at least* expected data (may contain more items)
+    metadata = gas_data["ch3ccl3_10m"]["metadata"]
+    for key, expected_value in expected_metadata.items():
+        value = metadata[key]
+        assert value == expected_value
 
     meas_data = gas_data["ch3ccl3_10m"]["data"]
 

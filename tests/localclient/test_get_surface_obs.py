@@ -5,23 +5,14 @@ from pathlib import Path
 from openghg.localclient import get_obs_surface
 from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket
-
-
-def get_datapath(filename, data_type):
-    return (
-        Path(__file__)
-        .resolve(strict=True)
-        .parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
-    )
+from helpers import get_datapath
 
 
 @pytest.fixture(scope="session", autouse=True)
 def read_data():
     get_local_bucket(empty=True)
 
-    hfd_filepath = get_datapath(
-        filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS"
-    )
+    hfd_filepath = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
 
     cgo_data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     cgo_prec = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
@@ -136,6 +127,16 @@ def test_gcwerks_retrieval():
     del metadata["File created"]
 
     expected_metadata = {
+        "instrument": "medusa",
+        "site": "cgo",
+        "network": "agage",
+        "sampling_period": "1200",
+        "units": "ppt",
+        "scale": "SIO-05",
+        "inlet": "70m",
+        "species": "cfc11",
+        "species_alt": "CFC-11",
+        "data_type": "timeseries",
         "data_owner": "Paul Krummel",
         "data_owner_email": "paul.krummel@csiro.au",
         "inlet_height_magl": "70m",
@@ -144,19 +145,10 @@ def test_gcwerks_retrieval():
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
         "Processed by": "OpenGHG_Cloud",
-        "species": "cfc11",
         "station_longitude": 144.689,
         "station_latitude": -40.683,
         "station_long_name": "Cape Grim, Tasmania",
         "station_height_masl": 94.0,
-        "instrument": "medusa",
-        "site": "cgo",
-        "network": "agage",
-        "units": "ppt",
-        "scale": "SIO-05",
-        "inlet": "70m",
-        "sampling_period": "1200",
-        "data_type": "timeseries",
     }
 
     assert metadata == expected_metadata
