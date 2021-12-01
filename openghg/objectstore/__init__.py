@@ -1,7 +1,7 @@
 import sys
 import os
 
-cloud_env = os.environ.get("OPENGHG_CLOUD")
+cloud_env = os.environ.get("OPENGHG_CLOUD", "0")
 
 if cloud_env is not None:
     from ._openghg_objstore import (
