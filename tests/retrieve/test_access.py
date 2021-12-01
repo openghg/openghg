@@ -1,5 +1,5 @@
 import pytest
-from pandas import Timestamp
+from pandas import Timestamp, Timedelta
 
 from openghg.retrieve import get_obs_surface, get_flux, get_footprint
 
@@ -57,6 +57,22 @@ def test_timeslice_slices_correctly():
     sliced_co2_data = timeslice_data.data
     assert sliced_co2_data.time[0] == Timestamp("2017-02-18T06:36:30")
     assert sliced_co2_data.time[-1] == Timestamp("2018-02-18T15:42:30")
+
+
+def test_timeslice_slices_correctly_exclusive():
+    # Test time slicing works with an exclusive time range for continuous data - up to but not including the end point
+    timeslice_data = get_obs_surface(
+        site="mhd", species="ch4", inlet="10m", start_date="2012-01-11", end_date="2012-02-05"
+    )
+
+    sliced_mhd_data = timeslice_data.data
+
+    sampling_period = Timedelta(75, unit="seconds")
+
+    assert sliced_mhd_data.time[0] == (Timestamp("2012-01-11T00:13") - sampling_period/2.0)
+    assert sliced_mhd_data.time[-1] == (Timestamp("2012-02-04T23:47") - sampling_period/2.0)
+    assert sliced_mhd_data.mf[0] == 1849.814
+    assert sliced_mhd_data.mf[-1] == 1891.094
 
 
 def test_get_flux():
