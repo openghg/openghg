@@ -1,10 +1,12 @@
 from pandas import read_csv, to_datetime
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 from addict import Dict as aDict
 
 
-def parse_glasow_licor(filepath: Path) -> Dict:
+def parse_glasow_licor(filepath: Path,
+                       sampling_period: Optional[str] = None,
+) -> Dict:
     """Read the Glasgow LICOR data from NPL
 
     Args:
@@ -34,9 +36,13 @@ def parse_glasow_licor(filepath: Path) -> Dict:
 
     ds = df.to_xarray()
 
+    if sampling_period is None:
+        sampling_period = "NOT_SET"
+
     metadata = {
         "units": "ppb",
         "notes": "measurement value is methane enhancement over background",
+        "sampling_period": sampling_period,
     }
 
     data = aDict()
