@@ -105,4 +105,5 @@ def test_to_dashboard_mobile_return_dict():
     assert exported["ch4"]["metadata"] == {
         "units": "ppb",
         "notes": "measurement value is methane enhancement over background",
+        "sampling_period": "NOT_SET",
     }
