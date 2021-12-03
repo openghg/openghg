@@ -1,21 +1,27 @@
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 from pathlib import Path
 
 
 pathType = Union[str, Path]
 
 
-def parse_aqmesh(data_filepath: pathType, metadata_filepath: pathType) -> Dict:
+def parse_aqmesh(data_filepath: pathType, 
+                 metadata_filepath: pathType,
+                 sampling_period: Optional[str] = None,) -> Dict:
     """Read AQMesh data files
 
     Args:
         data_filepath: Data filepath
         metadata_filepath: Metadata filepath
+        sampling_period: Measurement sampling period (str)
     Returns:
         dict: Dictionary of data
     """
     from addict import Dict as aDict
     from pandas import read_csv
+
+    if sampling_period is None:
+        sampling_period = "NOT_SET"
 
     use_cols = [0, 1, 4, 6]
     datetime_cols = {"time": ["date_UTC"]}
@@ -57,6 +63,7 @@ def parse_aqmesh(data_filepath: pathType, metadata_filepath: pathType) -> Dict:
         # Add in the species to the metadata
         site_data[site_name]["metadata"]["species"] = species_lower
         site_data[site_name]["metadata"]["units"] = units
+        site_data[site_name]["metadata"]["sampling_period"] = sampling_period
 
     site_dict: Dict = site_data.to_dict()
     return site_dict
