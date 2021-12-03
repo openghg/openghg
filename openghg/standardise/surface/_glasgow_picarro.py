@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 from pathlib import Path
 from warnings import warn
 from addict import Dict as aDict
@@ -11,7 +11,7 @@ def parse_glasow_picarro(
     network: str,
     inlet: str,
     instrument: str = "picarro",
-    sampling_period: str = "NA",
+    sampling_period: Optional[str] = None,
     measurement_type: str = "timeseries",
 ) -> Dict:
     """Read the Glasgow Science Tower Picarro data
@@ -35,6 +35,9 @@ def parse_glasow_picarro(
 
     units = {"ch4": "ppb", "co2": "ppm"}
 
+    if sampling_period is None:
+        sampling_period = "NOT_SET"    
+
     gas_data = aDict()
     for s in species:
         gas_data[s]["data"] = df[[s]].to_xarray()
@@ -46,7 +49,7 @@ def parse_glasow_picarro(
             "longitude": -4.296180,
             "network": "npl_picarro",
             "inlet": "124m",
-            "sampling_period": "NA",
+            "sampling_period": sampling_period,
             "site": site,
             "instrument": "picarro",
             "units": units[s],

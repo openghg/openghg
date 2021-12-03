@@ -650,7 +650,7 @@ def test_read_multiside_aqmesh():
         "longitude": -4.058363,
         "inlet": 1,
         "network": "aqmesh_glasgow",
-        "sampling_period": "NA",
+        "sampling_period": "NOT_SET",
         "species": "co2",
         "units": "ppm",
     }
