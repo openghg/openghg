@@ -5,8 +5,7 @@ from addict import Dict as aDict
 
 
 def parse_glasow_licor(filepath: Path,
-                       sampling_period: Optional[str] = None,
-) -> Dict:
+                       sampling_period: Optional[str] = None) -> Dict:
     """Read the Glasgow LICOR data from NPL
 
     Args:
