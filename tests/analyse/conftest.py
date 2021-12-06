@@ -1,12 +1,20 @@
+import os
 import pytest
+import tempfile
 from openghg.objectstore import get_local_bucket
 from openghg.store import ObsSurface, Emissions, Footprints
 from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
 
-
 @pytest.fixture(scope="module", autouse=True)
 def data_read():
-    get_local_bucket(empty=True)
+
+    # Creating temporary object store for our data
+    temporary_store = tempfile.TemporaryDirectory()
+    temporary_store_path = temporary_store.name
+
+    os.environ["OPENGHG_PATH"] = temporary_store_path
+    obj_store = get_local_bucket(empty=True)
+    print(f"\nWriting to temporary object store: {obj_store}")
 
     # Files for creating forward model (mf_mod) for methane at TAC site
 
@@ -46,3 +54,8 @@ def data_read():
     Footprints.read_file(
         filepath=fp_datapath, site=site, model=model, network=network, height=height, domain=domain
     )
+
+    yield
+
+    print(f"\n Cleaning up temp directory: {temporary_store_path}")
+    temporary_store.cleanup()
