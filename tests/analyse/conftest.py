@@ -1,13 +1,15 @@
 import os
-import pytest
 import tempfile
+import pytest
+from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
 from openghg.objectstore import get_local_bucket
 from openghg.store import ObsSurface, Emissions, Footprints
-from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
 
 @pytest.fixture(scope="module", autouse=True)
 def data_read():
-
+    '''
+    Data set up for running tests for these sets of modules.
+    '''
     # Creating temporary object store for our data
     temporary_store = tempfile.TemporaryDirectory()
     temporary_store_path = temporary_store.name
