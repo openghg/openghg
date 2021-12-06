@@ -10,14 +10,6 @@ def data_read():
     '''
     Data set up for running tests for these sets of modules.
     '''
-    # Creating temporary object store for our data
-    temporary_store = tempfile.TemporaryDirectory()
-    temporary_store_path = temporary_store.name
-
-    os.environ["OPENGHG_PATH"] = temporary_store_path
-    obj_store = get_local_bucket(empty=True)
-    print(f"\nWriting to temporary object store: {obj_store}")
-
     # Files for creating forward model (mf_mod) for methane at TAC site
 
     # Observation data
@@ -56,8 +48,3 @@ def data_read():
     Footprints.read_file(
         filepath=fp_datapath, site=site, model=model, network=network, height=height, domain=domain
     )
-
-    yield
-
-    print(f"\n Cleaning up temp directory: {temporary_store_path}")
-    temporary_store.cleanup()
