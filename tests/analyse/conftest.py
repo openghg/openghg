@@ -10,6 +10,8 @@ def data_read():
     '''
     Data set up for running tests for these sets of modules.
     '''
+    get_local_bucket(empty=True)
+
     # Files for creating forward model (mf_mod) for methane at TAC site
 
     # Observation data
