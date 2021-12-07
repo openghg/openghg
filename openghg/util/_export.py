@@ -58,14 +58,12 @@ def to_dashboard(
                     df = df.iloc[::downsample_n]
 
                 network = metadata["network"]
+                instrument = metadata["instrument"]
 
-                site_data = to_export[network.lower()][species.lower()][site.lower()]
+                site_data = to_export[network.lower()][species.lower()][site.lower()][instrument.lower()][inlet.lower()]
 
                 site_data["data"] = loads(df.to_json())
                 site_data["metadata"] = measurement_data.metadata
-
-                # We only want data from one inlet
-                break
 
     if filename is not None:
         with open(filename, "w") as f:
