@@ -1,7 +1,7 @@
-import sys as _sys
-import os as _os
+import sys
+import os
 
-cloud_env = _os.environ.get("OPENGHG_CLOUD")
+cloud_env = os.environ.get("OPENGHG_CLOUD")
 
 if cloud_env is not None:
     from ._openghg_objstore import (
@@ -9,29 +9,29 @@ if cloud_env is not None:
         exists,
         get_abs_filepaths,
         get_bucket,
-        get_object_from_json,
+        get_local_bucket,
         get_md5,
         get_md5_bytes,
         get_object,
-        get_local_bucket,
-        set_object_from_json,
-        set_object_from_file,
+        get_object_from_json,
         hash_files,
+        set_object_from_file,
+        set_object_from_json,
     )
 else:
     from ._local_store import (
         delete_object,
-        get_openghg_local_path,
+        exists,
         get_all_object_names,
-        get_object_names,
         get_bucket,
         get_local_bucket,
         get_object,
-        set_object,
-        set_object_from_json,
-        set_object_from_file,
         get_object_from_json,
-        exists,
+        get_object_names,
+        get_openghg_local_path,
         query_store,
+        set_object,
+        set_object_from_file,
+        set_object_from_json,
         visualise_store,
     )

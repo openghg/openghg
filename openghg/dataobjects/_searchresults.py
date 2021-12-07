@@ -1,8 +1,9 @@
 from addict import Dict as aDict
 from dataclasses import dataclass
 from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
+
 from openghg.dataobjects import ObsData
-from openghg.processing import recombine_datasets
+from openghg.store import recombine_datasets
 from openghg.util import clean_string
 from openghg.client import Retrieve
 
@@ -61,7 +62,11 @@ class SearchResults:
         Returns:
             dict: Dictionary of data
         """
-        return {"results": self.results, "ranked_data": self.ranked_data, "cloud": self.cloud}
+        return {
+            "results": self.results,
+            "ranked_data": self.ranked_data,
+            "cloud": self.cloud,
+        }
 
     @classmethod
     def from_data(cls: Type[T], data: Dict) -> T:
@@ -72,7 +77,25 @@ class SearchResults:
         Returns:
             SearchResults: SearchResults object
         """
-        return cls(results=data["results"], ranked_data=data["ranked_data"], cloud=data["cloud"])
+        return cls(
+            results=data["results"],
+            ranked_data=data["ranked_data"],
+            cloud=data["cloud"],
+        )
+
+    def rankings(self) -> Dict:
+        if not self.ranked_data:
+            print("No rank data")
+
+        rank_result = aDict()
+
+        for site, species_data in self.results.items():
+            for species, data in species_data.items():
+                rank_result[site][species] = data["rank_metadata"]
+
+        to_return: Dict = rank_result.to_dict()
+
+        return to_return
 
     def raw(self) -> Dict:
         """Returns the raw results data
@@ -171,6 +194,17 @@ class SearchResults:
         site = clean_string(site)
         species = clean_string(species)
         inlet = clean_string(inlet)
+
+        # If inlet is not specified, check if this is unambiguous
+        # If so, set inlet to be the only value and continue.
+        if inlet is None:
+            try:
+                potential_inlets = self.results[site][species].keys()
+            except KeyError:
+                pass
+            else:
+                if len(potential_inlets) == 1:
+                    inlet = list(potential_inlets)[0]
 
         if self.ranked_data:
             if all((site, species, inlet)):

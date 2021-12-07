@@ -12,20 +12,18 @@ from Acquire.Client import PAR
 
 
 def data_watchdog():
-    """ Function that watches for completion of job
+    """Function that watches for completion of job
 
-        WIP: Unsure how this will be implemented currently.
-        Either watching for a file created at output or just upload
-        data to the cloud drive as we go?
+    WIP: Unsure how this will be implemented currently.
+    Either watching for a file created at output or just upload
+    data to the cloud drive as we go?
 
     """
     raise NotImplementedError
 
 
 def run():
-    parser = argparse.ArgumentParser(
-        description="Run and watch a job on a HPC resource"
-    )
+    parser = argparse.ArgumentParser(description="Run and watch a job on a HPC resource")
     parser.add_argument("j", help="JSON data filename")
     args = parser.parse_args()
 
@@ -71,9 +69,7 @@ def run():
     runcmd_res = subprocess.run(run_command, stderr=True)
 
     if runcmd_res.returncode != 0:
-        raise subprocess.CalledProcessError(
-            "Error running application : ", runcmd_res.stderr
-        )
+        raise subprocess.CalledProcessError("Error running application : ", runcmd_res.stderr)
 
     # Upload everything in the output directory to the cloud drive
     drive.upload("output")

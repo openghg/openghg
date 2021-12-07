@@ -19,8 +19,8 @@ __all__ = [
     "split_encompassed_daterange",
     "daterange_contains",
     "sanitise_daterange",
-    "is_nan",
-    "is_date",
+    "check_nan",
+    "check_date",
 ]
 
 
@@ -370,7 +370,7 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
 
 
 def daterange_contains(container: str, contained: str) -> bool:
-    """Check if container contains contained
+    """Check if the daterange container contains the daterange contained
 
     Args:
         container: Daterange
@@ -385,7 +385,7 @@ def daterange_contains(container: str, contained: str) -> bool:
 
 
 def trim_daterange(to_trim: str, overlapping: str) -> str:
-    """Trims a daterange
+    """Removes overlapping dates from to_trim
 
     Args:
         to_trim: Daterange to trim down. Dates that overlap
@@ -504,14 +504,16 @@ def sanitise_daterange(daterange: str) -> str:
     return create_daterange_str(start=start, end=end)
 
 
-def is_date(date: str) -> str:
-    """ Check if the given value is a date, very limited,
-    needs work
+def check_date(date: str) -> str:
+    """Check if a date string can be converted to a pd.Timestamp
+    and returns NA if not.
+
+    Returns a string that can be JSON serialised.
 
     Args:
-        date
+        date: String to test
     Returns:
-        str
+        str: Returns NA if not a date, otherwise date string
     """
     from pandas import Timestamp, isnull
 
@@ -525,15 +527,15 @@ def is_date(date: str) -> str:
         return "NA"
 
 
-def is_nan(data: Union[int, float]) -> Union[str, float, int]:
-    """ Check if the given value is NaN, is so return an NA string
+def check_nan(data: Union[int, float]) -> Union[str, float, int]:
+    """Check if a number is Nan.
 
-        TODO - fix up, copied from web-scrape
+    Returns a string that can be JSON serialised.
 
-        Args:
-            data: Data to check
-        Returns:
-            Number or str
+    Args:
+        data: Number
+    Returns:
+        str, float, int: Returns NA if not a number else number
     """
     from math import isnan
 

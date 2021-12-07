@@ -39,7 +39,9 @@ def run_job(username, hostname, password, job_data, known_host=False):
     partition = job_data["partition"]
 
     if partition not in bc4_partitions:
-        raise ValueError(f"Invalid partition selected. Please select from one of the following :\n{bc4_partitions}")
+        raise ValueError(
+            f"Invalid partition selected. Please select from one of the following :\n{bc4_partitions}"
+        )
 
     n_nodes = job_data["n_nodes"]
     n_tasks_per_node = job_data["n_tasks_per_node"]

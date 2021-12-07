@@ -68,7 +68,7 @@ We can now install Fn
     wget -O install_fn.sh https://raw.githubusercontent.com/fnproject/cli/master/install
     echo a02456b8c8aba8b727d35f704cbca9234e40d2731f200b94abeceb9467973a13 install_fn.sh | sha256sum -c
     # This should have returned install_fn.sh: OK
-    # If not check the bash script
+    # If not carefully check the bash script
     bash install_fn.sh
 
 Note: if 

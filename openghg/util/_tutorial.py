@@ -8,7 +8,7 @@ __all__ = ["bilsdale_datapaths"]
 
 
 def bilsdale_datapaths() -> List:
-    """ Return a list of paths to the Tacolneston data for use in the ranking
+    """Return a list of paths to the Tacolneston data for use in the ranking
     tutorial
 
     Returns:

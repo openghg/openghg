@@ -2,7 +2,7 @@ from typing import Dict
 
 from Acquire.Client import PAR, Authorisation
 from Acquire.Service import get_this_service
-from openghg.modules import ObsSurface
+from openghg.store import ObsSurface
 from tempfile import TemporaryDirectory
 
 
@@ -11,9 +11,9 @@ def process(args: Dict) -> Dict:
 
     Args:
         args: Dictionary of JSON serialised objects to be
-        used by processing functions
+        used by retrieve functions
     Returns:
-        dict: Dictionary of results of processing
+        dict: Dictionary of results of retrieve
     """
     data_type = args["data_type"]
     data_type = data_type.upper()

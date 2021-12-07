@@ -1,6 +1,9 @@
-from typing import Dict, List, Optional, Union
-from openghg.dataobjects import SearchResults
+from __future__ import annotations
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 from Acquire.Client import Wallet
+
+if TYPE_CHECKING:
+    from openghg.dataobjects import SearchResults
 
 
 __all__ = ["Search"]
@@ -39,6 +42,8 @@ class Search:
         Returns:
             SearchResults:  SearchResults object
         """
+        from openghg.dataobjects import SearchResults
+
         if self._service is None:
             raise PermissionError("Cannot use a null service")
 

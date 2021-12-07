@@ -1,6 +1,6 @@
-=============
-Documentation
-=============
+========
+User API
+========
 
 This section of the documentation gives an overview of the public facing functions used in the Jupyter notebooks available at the
 OpenGHG hub. For developers documentation of the internal workings of the library are available in the developer API section.
@@ -29,20 +29,6 @@ Classes within the client module are used to interact with the cloud based OpenG
 :class:`~openghg.client.RankSources`
     Rank data sources by date range
 
-:class:`~openghg.client.JobRunner`
-    Run jobs on a local or cloud HPC cluster
-
-jobs
-====
-
-Classes within this module are used for running simulation jobs on high performace computing (HPC) clusters either locally
-or within the cloud based on a cluster as a service (CaaS) offering (see CitC).
-
-:class:`~openghg.jobs.SSHConnect`
-    Connect via SSH to a HPC cluster
-
-:class:`~openghg.jobs.JobDrive`
-    Create a cloud storage drive for use by the HPC job
 
 localclient
 ===========
@@ -64,20 +50,16 @@ of OpenGHG on your local filesystem. Use of this module results in the creation 
 :class:`~openghg.localclient.Search`
     Search for data within the object store (soon to be deprecated in favour of ``get_obs``
 
-
-objectstore
-===========
-
-Many of the functions in this submodule are only for internal use and will be renamed. 
-
-:func:`~openghg.objectstore.get_bucket`
-    Get a bucket (data container) for storing of data within the object store
-
-
 processing
 ==========
 
 This submodule contains functions that are widely used in the processing functions found in ``modules``.
+
+Attributes
+^^^^^^^^^^
+
+These functions ensure that the processed data has the correct `CF compliant
+<https://cfconventions.org/>`_ attributes.
 
 :func:`~openghg.processing.assign_attributes`
     Assign attributes to a dictionary of observation data in NetCDF format using ``get_attributes``
@@ -85,20 +67,30 @@ This submodule contains functions that are widely used in the processing functio
 :func:`~openghg.processing.get_attributes`
     Write attributes to an in-memory NetCDF file to ensure it is `CF-compliant <https://cfconventions.org/>`_
 
+Export
+^^^^^^
+
+These functions produce files that are used for upload of processed data to archiving facilities such as CEDA.
+
 :func:`~openghg.processing.get_ceda_file`
     Create a file that contains the correct attributes for uploading to the `CEDA archive <http://archive.ceda.ac.uk/>`_
+
+Data control
+^^^^^^^^^^^^
+
+These control the assignment, splitting and recombination of data.
 
 :func:`~openghg.processing.recombine_datasets`
     Recombine separate NetCDF files into a single file sorted by date
 
-:func:`~openghg.processing.search`
-    The function that is used by ``openghg.client.Search`` and ``openghg.localclient.Search`` to search the object store
 
 :func:`~openghg.processing.assign_data`
     Assings data to exisiting Datasources or creates new Datasources
 
+Searching
+^^^^^^^^^
 
-.. .. toctree::
-..    :maxdepth: 1
+The base search functionality provided to the `client` and `localclient` modules.
 
-..    index_api_client
+:func:`~openghg.processing.search`
+    The function that is used by ``openghg.client.Search`` and ``openghg.localclient.Search`` to search the object store
