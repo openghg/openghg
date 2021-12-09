@@ -72,6 +72,10 @@ def get_obs_surface(
     retrieved_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
     data = retrieved_data.data
 
+    if data.attrs["inlet"] == "multiple":
+        data.attrs["inlet_height_magl"] = "multiple"
+        retrieved_data.metadata["inlet"] = "multiple"
+
     if start_date is not None and end_date is not None:
         start_date_tzaware = timestamp_tzaware(start_date)
         end_date_tzaware = timestamp_tzaware(end_date)
