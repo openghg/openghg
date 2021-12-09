@@ -65,7 +65,7 @@ def recombine_datasets(keys: List[str],
             replace_values = [None]
         else:
             attributes = attrs_to_check
-            replace_values = [None]*len(attributes)
+            replace_values = [None] * len(attributes)
 
         data = elevate_duplicate_attrs(data, attributes)
 
