@@ -4,6 +4,7 @@
 """
 from typing import Dict, List, Optional, Union
 from xarray import Dataset, DataArray
+from xarray.core.coordinates import DatasetCoordinates
 import numpy as np
 import xarray as xr
 
@@ -58,14 +59,14 @@ def recombine_datasets(keys: List[str],
     # elevate duplicates to data variables within each Dataset
     if attrs_to_check:
         if isinstance(attrs_to_check, dict):
-            attributes = attrs_to_check.keys()
-            replace_values = attrs_to_check.values()
+            attributes = list(attrs_to_check.keys())
+            replace_values = list(attrs_to_check.values())
         elif isinstance(attrs_to_check, str):
             attributes = [attrs_to_check]
-            replace_values = [None]
+            replace_values = [""]
         else:
             attributes = attrs_to_check
-            replace_values = [None] * len(attributes)
+            replace_values = [""] * len(attributes)
 
         data = elevate_duplicate_attrs(data, attributes)
 
@@ -94,7 +95,7 @@ def recombine_datasets(keys: List[str],
 
 
 def create_array_from_value(value: str,
-                            coords: Union[DataArray, Dict],
+                            coords: Union[DatasetCoordinates, Dict[str, DatasetCoordinates]],  # type: ignore
                             name: Union[str, None] = None) -> DataArray:
     '''
     Create a new xarray.DataArray object containing a single value repeated
@@ -113,7 +114,7 @@ def create_array_from_value(value: str,
         names = list(coords.keys())
         dims = tuple(len(coords[n]) for n in names)
     elif isinstance(coords, dict):
-        dims = (len(coord) for coord in list(coords.values()))
+        dims = tuple(len(coord) for coord in list(coords.values()))
     else:
         dims = (len(coords), )
 
