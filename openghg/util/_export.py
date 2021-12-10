@@ -63,15 +63,18 @@ def to_dashboard(
                 instrument = metadata["instrument"]
 
                 # TODO - remove this if we add site location to standard metadata
-                location = {"latitude": attributes["station_latitude"], "longtitude": attributes["station_longitude"]}
+                location = {
+                    "latitude": attributes["station_latitude"],
+                    "longitude": attributes["station_longitude"],
+                }
                 metadata.update(location)
-
-                key = f"{network.lower()}_{species.lower()}_{site.lower()}_{inlet.lower()}_{instrument.lower()}"
 
                 json_data = loads(df.to_json())
                 metadata = measurement_data.metadata
 
-                to_export[key] = {"data": json_data, "metadata": metadata}
+                key = f"{network.lower()}_{site.lower()}_{inlet.lower()}_{instrument.lower()}"
+
+                to_export[species][key] = {"data": json_data, "metadata": metadata}
 
     if filename is not None:
         with open(filename, "w") as f:
