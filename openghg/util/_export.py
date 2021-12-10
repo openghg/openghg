@@ -41,6 +41,8 @@ def to_dashboard(
             for inlet, measurement_data in inlet_data.items():
                 dataset = measurement_data.data
                 metadata = measurement_data.metadata
+                attributes = dataset.attrs
+
                 df = dataset.to_dataframe()
 
                 rename_lower = {c: str(c).lower() for c in df.columns}
@@ -60,10 +62,16 @@ def to_dashboard(
                 network = metadata["network"]
                 instrument = metadata["instrument"]
 
-                site_data = to_export[network.lower()][species.lower()][site.lower()][instrument.lower()][inlet.lower()]
+                # TODO - remove this if we add site location to standard metadata
+                location = {"latitude": attributes["station_latitude"], "longtitude": attributes["station_longitude"]}
+                metadata.update(location)
 
-                site_data["data"] = loads(df.to_json())
-                site_data["metadata"] = measurement_data.metadata
+                key = f"{network.lower()}_{species.lower()}_{site.lower()}_{inlet.lower()}_{instrument.lower()}"
+
+                json_data = loads(df.to_json())
+                metadata = measurement_data.metadata
+
+                to_export[key] = {"data": json_data, "metadata": metadata}
 
     if filename is not None:
         with open(filename, "w") as f:
