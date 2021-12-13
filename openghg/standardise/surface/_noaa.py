@@ -133,8 +133,7 @@ def _read_obspack(
         "value": species,
         "value_std_dev": f"{species}_variability",
         "value_unc": f"{species}_variability",  # May need to be updated
-        "nvalue": f"{species}_number_of_observations",
-        }
+        "nvalue": f"{species}_number_of_observations"}
 
     to_extract = [name for name in variable_names.keys() if name in processed_ds]
     name_dict = {name: key for name, key in variable_names.items() if name in to_extract}
@@ -179,7 +178,7 @@ def _read_obspack(
     metadata["sampling_period"] = sampling_period
 
     if sampling_period_estimate >= 0.0:
-        metadata["sampling_period_estimate"] = str(sampling_period_estimate)  #  convert to string to keep consistent with "sampling_period"
+        metadata["sampling_period_estimate"] = str(sampling_period_estimate)  # convert to string to keep consistent with "sampling_period"
 
     if instrument is not None:
         metadata["instrument"] = instrument
@@ -422,11 +421,11 @@ def estimate_sampling_period(obspack_ds: Dataset, min_estimate: float = 10.0) ->
     # Check useful attributes
     data_selection = obspack_ds.attrs["dataset_selection_tag"]
 
-    hourly_s = 60*60
-    daily_s = hourly_s*24
-    weekly_s = daily_s*7
-    monthly_s = weekly_s*28  # approx
-    yearly_s = daily_s*365   # approx
+    hourly_s = 60 * 60
+    daily_s = hourly_s * 24
+    weekly_s = daily_s * 7
+    monthly_s = weekly_s * 28  # approx
+    yearly_s = daily_s * 365   # approx
 
     sampling_period_estimate = 0.0  # seconds
 
@@ -437,9 +436,9 @@ def estimate_sampling_period(obspack_ds: Dataset, min_estimate: float = 10.0) ->
 
     if not sampling_period_estimate:
         if "start_time" in obspack_ds and "midpoint_time" in obspack_ds:
-            half_sample_time = (obspack_ds["midpoint_time"]- obspack_ds["start_time"]).values
+            half_sample_time = (obspack_ds["midpoint_time"] - obspack_ds["start_time"]).values
             half_sample_time_s = half_sample_time.astype("timedelta64[s]").mean().astype(float)
-            sampling_period_estimate = round(half_sample_time_s*2, 1)
+            sampling_period_estimate = round(half_sample_time_s * 2, 1)
 
     if sampling_period_estimate < min_estimate:
         sampling_period_estimate = min_estimate
