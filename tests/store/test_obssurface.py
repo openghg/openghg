@@ -353,9 +353,10 @@ def test_read_noaa_obspack():
     data = ch4_data["1998-01-01-23:10:00+00:00_1998-12-31-19:50:00+00:00"]
 
     assert data.time[0] == Timestamp("1998-01-01T23:10:00")
-    assert data["value"][0] == pytest.approx(1.83337e-06)
-    assert data["nvalue"][0] == 2.0
-    assert data["value_std_dev"][0] == pytest.approx(2.093036e-09)
+    assert data["ch4"][0] == pytest.approx(1.83337e-06)
+    assert data["ch4_number_of_observations"][0] == 2.0
+    assert data["ch4_variability"][0] == pytest.approx(2.093036e-09)
+
 
 
 def test_read_thames_barrier():
