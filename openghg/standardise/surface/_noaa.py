@@ -107,6 +107,7 @@ def _read_obspack(
     time = time.assign_coords(time=time)
 
     # Drop any duplicate time values and extract the associated "obs" values
+    # TODO: Work out what to do with duplicates - may be genuine multiple measurements
     time_unique = time.drop_duplicates(dim="time", keep="first")
     obs_unique = time_unique.obs
 
@@ -130,9 +131,10 @@ def _read_obspack(
 
     variable_names = {
         "value": species,
-        "value_unc": f"{species}_uncertainity",  # May need to be updated
+        "value_std_dev": f"{species}_variability",
+        "value_unc": f"{species}_variability",  # May need to be updated
         "nvalue": f"{species}_number_of_observations",
-        "value_std_dev": f"{species}_variability"}
+        }
 
     to_extract = [name for name in variable_names.keys() if name in processed_ds]
     name_dict = {name: key for name, key in variable_names.items() if name in to_extract}
@@ -435,8 +437,9 @@ def estimate_sampling_period(obspack_ds: Dataset, min_estimate: float = 10.0) ->
 
     if not sampling_period_estimate:
         if "start_time" in obspack_ds and "midpoint_time" in obspack_ds:
-            half_sample_time = (obspack_ds["midpoint_time"] - obspack_ds["start_time"]).mean().astype("np.datetime64[s]")
-            sampling_period_estimate = round(float(half_sample_time)*2, 1)
+            half_sample_time = (obspack_ds["midpoint_time"]- obspack_ds["start_time"]).values
+            half_sample_time_s = half_sample_time.astype("timedelta64[s]").mean().astype(float)
+            sampling_period_estimate = round(half_sample_time_s*2, 1)
 
     if sampling_period_estimate < min_estimate:
         sampling_period_estimate = min_estimate
