@@ -365,6 +365,10 @@ def align_datasets(
         obs_data_period_s = float(obs_attributes["averaged_period"])
     elif "sampling_period" in obs_attributes:
         obs_data_period_s = float(obs_attributes["sampling_period"])
+    elif "sampling_period_estimate" in obs_attributes:
+        estimate = obs_attributes["sampling_period_estimate"]
+        print(f"WARNING: Using estimated sampling period of {estimate}s for observational data")
+        obs_data_period_s = float(estimate)
     else:
         # Attempt to derive sampling period from frequency of data
         obs_data_period_s = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9).astype(
