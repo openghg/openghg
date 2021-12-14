@@ -72,9 +72,10 @@ def to_dashboard(
                 json_data = loads(df.to_json())
                 metadata = measurement_data.metadata
 
-                key = f"{network.lower()}_{site.lower()}_{inlet.lower()}_{instrument.lower()}"
-
-                to_export[species][key] = {"data": json_data, "metadata": metadata}
+                to_export[species][network][site][inlet][instrument] = {
+                    "data": json_data,
+                    "metadata": metadata,
+                }
 
     if filename is not None:
         with open(filename, "w") as f:
