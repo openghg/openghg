@@ -113,7 +113,7 @@ def _read_obspack(
 
     # Estimate sampling period using metadata and midpoint time
     if sampling_period == "NOT_SET":
-        sampling_period_estimate = estimate_sampling_period(obspack_ds)
+        sampling_period_estimate = _estimate_sampling_period(obspack_ds)
     else:
         sampling_period_estimate = -1.0
 
@@ -399,7 +399,7 @@ def _read_raw_data(
     return combined_data
 
 
-def estimate_sampling_period(obspack_ds: Dataset, min_estimate: float = 10.0) -> float:
+def _estimate_sampling_period(obspack_ds: Dataset, min_estimate: float = 10.0) -> float:
     '''
     Estimate the sampling period for the NOAA data using either the "data_selection_tag"
     attribute (this sometimes contains useful information such as "HourlyData") or by using
