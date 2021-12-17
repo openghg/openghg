@@ -23,10 +23,10 @@ temporary_store = tempfile.TemporaryDirectory()
 temporary_store_path = temporary_store.name
 
 
-@pytest.fixture(autouse=True)
-def set_envs(monkeypatch):
-    monkeypatch.setenv("OPENGHG_STORE", temporary_store_path)
-    monkeypatch.setenv("ACQUIRE_HOST", "localhost:8080")
+@pytest.fixture(autouse=True, scope="session")
+def set_envs():
+    os.environ["ACQUIRE_HOST"] = "localhost:8080"
+    os.environ["OPENGHG_PATH"] = temporary_store_path
 
 
 def pytest_sessionfinish(session, exitstatus):

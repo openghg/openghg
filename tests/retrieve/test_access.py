@@ -1,5 +1,6 @@
 import pytest
 from pandas import Timestamp, Timedelta
+import numpy as np
 
 from openghg.retrieve import get_obs_surface, get_flux, get_footprint
 
@@ -31,16 +32,101 @@ def test_no_inlet_no_ranked_data_raises():
         get_obs_surface(site="bsd", species="co2")
 
 
-def test_get_obs_surface_no_inlet_ranking():
+def test_get_obs_surface_ranking_single():
+    '''
+    Test data returned from get_obs_surface data
+     - ranking data is set
+     - inlet is not specified
+     - date range should only include date for one inlet
+    '''
+
+    obsdata = get_obs_surface(site="bsd",
+    species="ch4",
+    start_date="2015-01-01",
+    end_date="2015-11-01")
+
+    data = obsdata.data
+    metadata = obsdata.metadata
+
+    assert data
+    assert data.attrs["inlet"] == "248m"
+    assert metadata["inlet"] == "248m"
+
+    data_at_one_time = data["mf"].sel(time = "2015-01-30T11:12:30")
+    assert data_at_one_time.size == 1
+
+    # TODO: Untangle this - check this output for the rank_metadata makes sense
+    # Full metadata from previous test was
+    # assert metadata["rank_metadata"] == {
+    #     "2015-01-01-00:00:00+00:00_2015-11-01-00:00:00+00:00": "248m",
+    #     "2014-09-02-00:00:00+00:00_2014-11-01-00:00:00+00:00": "108m",
+    #     "2016-09-02-00:00:00+00:00_2018-11-01-00:00:00+00:00": "108m",
+    #     "2019-01-02-00:00:00+00:00_2021-01-01-00:00:00+00:00": "42m",
+    # }
+    # In this output this seems to be
+    # {'2014-09-02-00:00:00+00:00_2014-11-01-00:00:00+00:00': '108m',
+    #  '2016-09-02-00:00:00+00:00_2018-11-01-00:00:00+00:00': '108m',
+    #  '2019-01-02-00:00:00+00:00_2021-01-01-00:00:00+00:00': '42m'}
+    # Not sure if that is expected
+
+
+@pytest.mark.xfail(reason = "Bug: Not returning unique data - time values duplicated.")
+def test_get_obs_surface_ranking_unique():
+    '''
+    Test data returned from get_obs_surface data
+     - ranking data is set
+     - inlet is not specified
+     - date range covers multiple inlets
+
+    Covers tests not included in `test_get_obs_surface_no_inlet_ranking`
+    TODO: At the moment this fails - unique data is not returned and there are multiple
+    entries for some time stamps. This is a bug which will need to be fixed.
+    '''
     obsdata = get_obs_surface(site="bsd", species="ch4")
 
-    assert obsdata.data
-    assert obsdata.metadata["rank_metadata"] == {
+    data = obsdata.data
+
+    inlet_slice = data["inlet"].sel(time=slice("2015-01-01-00:00:00", "2015-11-01-00:00:00")).values
+    expected_array = np.tile("248m", len(inlet_slice))
+
+    np.testing.assert_equal(inlet_slice, expected_array)
+
+    data_at_one_time_108m = data["mf"].sel(time = "2016-04-02T09:07:30")
+    assert data_at_one_time_108m.size == 1
+    assert data_at_one_time_108m["inlet"] == "108m"
+
+    data_at_one_time_248m = data.sel(time = "2015-01-30T11:12:30")
+    assert data_at_one_time_248m["mf"].size == 1
+    assert data_at_one_time_248m["inlet"] == "248m"
+
+
+def test_get_obs_surface_no_inlet_ranking():
+    '''
+    Test metadata and attributes returned from get_obs_surface
+     - ranking data is set
+     - inlet is not specified
+     - date range not specified (all dates returned)
+
+    Checks
+     - metadata includes expected "rank_metadata" attribute
+     - check inlet details have been appropriately updated
+    '''
+    obsdata = get_obs_surface(site="bsd", species="ch4")
+
+    data = obsdata.data
+    metadata = obsdata.metadata
+
+    assert data
+    assert metadata["rank_metadata"] == {
         "2015-01-01-00:00:00+00:00_2015-11-01-00:00:00+00:00": "248m",
         "2014-09-02-00:00:00+00:00_2014-11-01-00:00:00+00:00": "108m",
         "2016-09-02-00:00:00+00:00_2018-11-01-00:00:00+00:00": "108m",
         "2019-01-02-00:00:00+00:00_2021-01-01-00:00:00+00:00": "42m",
     }
+
+    assert "inlet" in data
+    assert data.attrs["inlet"] == "multiple"
+    assert metadata["inlet"] == "multiple"
 
 
 def test_averaging_incorrect_period_raises():
