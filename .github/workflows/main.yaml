@@ -54,9 +54,6 @@ jobs:
       run: |
         echo $'url: https://www.openghg.org\nkey: 00000:f5690ad7-test-test-test-6fb0573991ca\n' > ~/.cdsapirc
     - name: Test with pytest
-      env:
-        OPENGHG_PATH: /tmp/openghg_store
-        ACQUIRE_HOST: localhost
       run: |
         pytest --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
