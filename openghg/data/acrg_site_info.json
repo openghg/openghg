@@ -2047,6 +2047,14 @@
       "longitude": -78.35
     }
   },
+  "SPF": {
+    "NOAA": {
+      "height_station_masl": 1623.0,
+      "latitude": -73.8658,
+      "long_name": "Antarctic Firn Air, Antarctica",
+      "longitude": 163.687
+    }
+  },
   "SPO": {
     "NOAA": {
       "height": ["10m"],

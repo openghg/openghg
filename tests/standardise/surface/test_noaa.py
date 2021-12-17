@@ -2,8 +2,8 @@ import logging
 from pandas import Timestamp
 import pytest
 
-from openghg.standardise.surface import parse_noaa
 from helpers import get_datapath
+from openghg.standardise.surface import parse_noaa
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -12,8 +12,9 @@ mpl_logger.setLevel(logging.WARNING)
 # flake8: noqa: W503
 
 
-def test_read_obspack():
-
+def test_read_obspack_2020():
+    '''Test inputs from "obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24"
+    '''
     filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
 
     data = parse_noaa(
@@ -24,12 +25,55 @@ def test_read_obspack():
 
     assert ch4_data.time[0] == Timestamp("1993-06-17T00:12:30")
     assert ch4_data.time[-1] == Timestamp("2002-01-12T12:00:00")
-    assert ch4_data["value"][0] == pytest.approx(1.76763e-06)
-    assert ch4_data["value"][-1] == pytest.approx(1.848995e-06)
-    assert ch4_data["nvalue"][0] == 2.0
-    assert ch4_data["nvalue"][-1] == 2.0
-    assert ch4_data["value_std_dev"][0] == pytest.approx(1.668772e-09)
-    assert ch4_data["value_std_dev"][-1] == pytest.approx(1.5202796e-09)
+    assert ch4_data["ch4"][0] == pytest.approx(1.76763e-06)
+    assert ch4_data["ch4"][-1] == pytest.approx(1.848995e-06)
+    assert ch4_data["ch4_number_of_observations"][0] == 2.0
+    assert ch4_data["ch4_number_of_observations"][-1] == 2.0
+    assert ch4_data["ch4_variability"][0] == pytest.approx(1.668772e-09)
+    assert ch4_data["ch4_variability"][-1] == pytest.approx(1.5202796e-09)
+
+    # Check added attributes around sampling period
+    attributes = ch4_data.attrs
+
+    assert "sampling_period" in attributes
+    assert attributes["sampling_period"] == "NOT_SET"
+    assert "sampling_period_estimate" in attributes
+
+    ch4_metadata = data["ch4"]["metadata"]
+
+    assert "sampling_period" in ch4_metadata
+    assert "sampling_period_estimate" in ch4_metadata
+
+
+def test_read_obspack_flask_2021():
+    '''Test inputs from "obspack_multi-species_1_CCGGSurfaceFlask_v2.0_2021-02-09"
+    '''
+    filepath = get_datapath(filename="ch4_spf_surface-flask_1_ccgg_Event.nc", data_type="NOAA")
+
+    data = parse_noaa(
+        data_filepath=filepath, site="SPF", inlet="flask", measurement_type="flask", network="NOAA"
+    )
+
+    ch4_data = data["ch4"]["data"]
+
+    assert ch4_data.time[0] == Timestamp("1995-01-28T19:20:00")
+    assert ch4_data.time[-1] == Timestamp("2015-12-12T20:15:00")
+    assert ch4_data["ch4"][0] == pytest.approx(1673.89)
+    assert ch4_data["ch4"][-1] == pytest.approx(1785.86)
+    assert ch4_data["ch4_variability"][0] == pytest.approx(2.71)
+    assert ch4_data["ch4_variability"][-1] == pytest.approx(0.91)
+
+    attributes = ch4_data.attrs
+
+    assert "sampling_period" in attributes
+    assert attributes["sampling_period"] == "NOT_SET"
+    assert "sampling_period_estimate" in attributes
+    assert float(attributes["sampling_period_estimate"]) > 0.0
+
+    ch4_metadata = data["ch4"]["metadata"]
+
+    assert "sampling_period" in ch4_metadata
+    assert "sampling_period_estimate" in ch4_metadata
 
 
 def test_read_file_site_filename_read():
@@ -65,6 +109,7 @@ def test_read_file_site_filename_read():
         "data_owner_email": "ed.dlugokencky@noaa.gov, gabrielle.petron@noaa.gov",
         "inlet_height_magl": "NA",
         "instrument": "GC-FID",
+        "sampling_period" : "1200",
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
@@ -118,6 +163,7 @@ def test_read_raw_file():
         "data_owner_email": "ed.dlugokencky@noaa.gov, gabrielle.petron@noaa.gov",
         "inlet_height_magl": "NA",
         "instrument": "GC-HgO-VUV",
+        "sampling_period": "1200",
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
         "Source": "In situ measurements of air",
         "Conventions": "CF-1.6",
