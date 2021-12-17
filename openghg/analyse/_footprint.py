@@ -371,6 +371,11 @@ def align_datasets(
             infer_sampling_period = True
         else:
             obs_data_period_s = float(sampling_period)
+        obs_data_period_s = float(obs_attributes["sampling_period"])
+    elif "sampling_period_estimate" in obs_attributes:
+        estimate = obs_attributes["sampling_period_estimate"]
+        print(f"WARNING: Using estimated sampling period of {estimate}s for observational data")
+        obs_data_period_s = float(estimate)
     else:
         infer_sampling_period = True
 
