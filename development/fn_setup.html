@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Fn setup &#8212; OpenGHG 0+untagged.3.g9a05dd6 documentation</title>
+    <title>Fn setup &#8212; OpenGHG 0+untagged.3.gd22439b documentation</title>
     
   <link href="../_static/css/theme.css" rel="stylesheet">
   <link href="../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -283,54 +283,54 @@ using</p>
 </pre></div>
 </div>
 <p>Next we create a server config file for our reverse proxy in <code class="docutils literal notranslate"><span class="pre">/etc/nginx/conf.d/fn_proxy.conf</span></code>.</p>
-<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>    <span class="k">server</span> <span class="p">{</span>
-<span class="linenos"> 2</span>        <span class="kn">listen</span> <span class="mi">80</span> <span class="s">default_server</span><span class="p">;</span>
-<span class="linenos"> 3</span>        <span class="kn">listen</span> <span class="s">[::]:80</span> <span class="s">default_server</span><span class="p">;</span>
-<span class="linenos"> 4</span>        <span class="kn">server_name</span> <span class="s">fn.openghg.org</span><span class="p">;</span>
+<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">    </span><span class="k">server</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="w">        </span><span class="kn">listen</span><span class="w"> </span><span class="mi">80</span><span class="w"> </span><span class="s">default_server</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="w">        </span><span class="kn">listen</span><span class="w"> </span><span class="s">[::]:80</span><span class="w"> </span><span class="s">default_server</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="w">        </span><span class="kn">server_name</span><span class="w"> </span><span class="s">fn.openghg.org</span><span class="p">;</span><span class="w"></span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span>        <span class="kn">location</span> <span class="s">/</span> <span class="p">{}</span>
+<span class="linenos"> 6</span><span class="w">        </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span>        <span class="kn">location</span> <span class="s">/t</span> <span class="p">{</span>
-<span class="linenos"> 9</span>                <span class="kn">proxy_pass</span> <span class="s">http://localhost:8080/t/openghg</span><span class="p">;</span>
-<span class="linenos">10</span>                <span class="kn">proxy_set_header</span> <span class="s">Host</span> <span class="nv">$host</span><span class="p">;</span>
-<span class="linenos">11</span>                <span class="kn">proxy_set_header</span> <span class="s">X-Real-IP</span> <span class="nv">$remote_addr</span><span class="p">;</span>
-<span class="linenos">12</span>                <span class="kn">proxy_set_header</span> <span class="s">X-Forwarded-For</span> <span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
-<span class="linenos">13</span>                <span class="kn">proxy_set_header</span> <span class="s">X-Forwarded-Proto</span> <span class="s">https</span><span class="p">;</span>
-<span class="linenos">14</span>        <span class="p">}</span>
-<span class="linenos">15</span>    <span class="p">}</span>
+<span class="linenos"> 8</span><span class="w">        </span><span class="kn">location</span><span class="w"> </span><span class="s">/t</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">                </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://localhost:8080/t/openghg</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">                </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">11</span><span class="w">                </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="w"> </span><span class="nv">$remote_addr</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">                </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-For</span><span class="w"> </span><span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">13</span><span class="w">                </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Proto</span><span class="w"> </span><span class="s">https</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">14</span><span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">15</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Then we want to disable the default config by setting <code class="docutils literal notranslate"><span class="pre">/etc/nginx/nginx.conf</span></code>.
 It might be worth copying up your default <code class="docutils literal notranslate"><span class="pre">nginx.conf</span></code> to <code class="docutils literal notranslate"><span class="pre">nginx.conf.bak</span></code> before editing
 for easy roll-back and comparison.</p>
-<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>    <span class="k">user</span> <span class="s">nginx</span><span class="p">;</span>
-<span class="linenos"> 2</span>    <span class="k">worker_processes</span> <span class="s">auto</span><span class="p">;</span>
-<span class="linenos"> 3</span>    <span class="k">error_log</span> <span class="s">/var/log/nginx/error.log</span><span class="p">;</span>
-<span class="linenos"> 4</span>    <span class="k">pid</span> <span class="s">/run/nginx.pid</span><span class="p">;</span>
+<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">    </span><span class="k">user</span><span class="w"> </span><span class="s">nginx</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="k">worker_processes</span><span class="w"> </span><span class="s">auto</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="k">error_log</span><span class="w"> </span><span class="s">/var/log/nginx/error.log</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="k">pid</span><span class="w"> </span><span class="s">/run/nginx.pid</span><span class="p">;</span><span class="w"></span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span>    <span class="k">include</span> <span class="n">/usr/share/nginx/modules/*.conf</span>;
+<span class="linenos"> 6</span><span class="w">    </span><span class="k">include</span><span class="w"> </span><span class="n">/usr/share/nginx/modules/*.conf</span>;<span class="w"></span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span>    <span class="k">events</span> <span class="p">{</span>
-<span class="linenos"> 9</span>        <span class="kn">worker_connections</span> <span class="mi">1024</span><span class="p">;</span>
-<span class="linenos">10</span>    <span class="p">}</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="k">events</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="w">        </span><span class="kn">worker_connections</span><span class="w"> </span><span class="mi">1024</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">10</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="linenos">11</span>
-<span class="linenos">12</span>    <span class="k">http</span> <span class="p">{</span>
-<span class="linenos">13</span>        <span class="kn">log_format</span>  <span class="s">main</span>  <span class="s">&#39;</span><span class="nv">$remote_addr</span> <span class="s">-</span> <span class="nv">$remote_user</span> <span class="s">[</span><span class="nv">$time_local]</span> <span class="s">&quot;</span><span class="nv">$request&quot;</span> <span class="s">&#39;</span>
-<span class="linenos">14</span>                        <span class="s">&#39;</span><span class="nv">$status</span> <span class="nv">$body_bytes_sent</span> <span class="s">&quot;</span><span class="nv">$http_referer&quot;</span> <span class="s">&#39;</span>
-<span class="linenos">15</span>                        <span class="s">&#39;&quot;</span><span class="nv">$http_user_agent&quot;</span> <span class="s">&quot;</span><span class="nv">$http_x_forwarded_for&quot;&#39;</span><span class="p">;</span>
+<span class="linenos">12</span><span class="w">    </span><span class="k">http</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="linenos">13</span><span class="w">        </span><span class="kn">log_format</span><span class="w">  </span><span class="s">main</span><span class="w">  </span><span class="s">&#39;</span><span class="nv">$remote_addr</span><span class="w"> </span><span class="s">-</span><span class="w"> </span><span class="nv">$remote_user</span><span class="w"> </span><span class="s">[</span><span class="nv">$time_local]</span><span class="w"> </span><span class="s">&quot;</span><span class="nv">$request&quot;</span><span class="w"> </span><span class="s">&#39;</span><span class="w"></span>
+<span class="linenos">14</span><span class="w">                        </span><span class="s">&#39;</span><span class="nv">$status</span><span class="w"> </span><span class="nv">$body_bytes_sent</span><span class="w"> </span><span class="s">&quot;</span><span class="nv">$http_referer&quot;</span><span class="w"> </span><span class="s">&#39;</span><span class="w"></span>
+<span class="linenos">15</span><span class="w">                        </span><span class="s">&#39;&quot;</span><span class="nv">$http_user_agent&quot;</span><span class="w"> </span><span class="s">&quot;</span><span class="nv">$http_x_forwarded_for&quot;&#39;</span><span class="p">;</span><span class="w"></span>
 <span class="linenos">16</span>
-<span class="linenos">17</span>        <span class="kn">access_log</span>  <span class="s">/var/log/nginx/access.log</span>  <span class="s">main</span><span class="p">;</span>
+<span class="linenos">17</span><span class="w">        </span><span class="kn">access_log</span><span class="w">  </span><span class="s">/var/log/nginx/access.log</span><span class="w">  </span><span class="s">main</span><span class="p">;</span><span class="w"></span>
 <span class="linenos">18</span>
-<span class="linenos">19</span>        <span class="kn">sendfile</span>            <span class="no">on</span><span class="p">;</span>
-<span class="linenos">20</span>        <span class="kn">tcp_nopush</span>          <span class="no">on</span><span class="p">;</span>
-<span class="linenos">21</span>        <span class="kn">tcp_nodelay</span>         <span class="no">on</span><span class="p">;</span>
-<span class="linenos">22</span>        <span class="kn">keepalive_timeout</span>   <span class="mi">65</span><span class="p">;</span>
-<span class="linenos">23</span>        <span class="kn">types_hash_max_size</span> <span class="mi">2048</span><span class="p">;</span>
+<span class="linenos">19</span><span class="w">        </span><span class="kn">sendfile</span><span class="w">            </span><span class="no">on</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">20</span><span class="w">        </span><span class="kn">tcp_nopush</span><span class="w">          </span><span class="no">on</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">21</span><span class="w">        </span><span class="kn">tcp_nodelay</span><span class="w">         </span><span class="no">on</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">22</span><span class="w">        </span><span class="kn">keepalive_timeout</span><span class="w">   </span><span class="mi">65</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">23</span><span class="w">        </span><span class="kn">types_hash_max_size</span><span class="w"> </span><span class="mi">2048</span><span class="p">;</span><span class="w"></span>
 <span class="linenos">24</span>
-<span class="linenos">25</span>        <span class="kn">include</span>             <span class="s">/etc/nginx/mime.types</span><span class="p">;</span>
-<span class="linenos">26</span>        <span class="kn">default_type</span>        <span class="s">application/octet-stream</span><span class="p">;</span>
-<span class="linenos">27</span>        <span class="kn">include</span> <span class="s">/etc/nginx/conf.d/*.conf</span><span class="p">;</span>
-<span class="linenos">28</span>    <span class="p">}</span>
+<span class="linenos">25</span><span class="w">        </span><span class="kn">include</span><span class="w">             </span><span class="s">/etc/nginx/mime.types</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">26</span><span class="w">        </span><span class="kn">default_type</span><span class="w">        </span><span class="s">application/octet-stream</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">27</span><span class="w">        </span><span class="kn">include</span><span class="w"> </span><span class="s">/etc/nginx/conf.d/*.conf</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">28</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Then we can check that our configuration setup is valid by doing</p>
@@ -454,7 +454,7 @@ step unless our dependencies change.</p>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.2.<br>
 </p>
     </div>
     
