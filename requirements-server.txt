@@ -1,4 +1,4 @@
-# Acquire @ git+https://github.com/openghg/acquire@devel#egg=Acquire
+Acquire @ git+https://github.com/openghg/acquire@devel#egg=Acquire
 addict
 cdsapi
 # cfchecker @ git+git://github.com/gareth-j/cf-checker@removeBasestring#egg=cfchecker
