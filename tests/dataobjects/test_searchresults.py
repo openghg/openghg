@@ -60,24 +60,20 @@ def test_retrieve_complex_ranked():
     assert data_inlet.time[0] == Timestamp("2013-11-23T12:28:30")
     assert data_inlet.co2[0] == 404.95
 
-
     data_species = results.retrieve(species="co2")["hfd_co2"]
     data_species = data_species.data
 
-    assert data_species.equals(data_inlet)    
-
+    assert data_species.equals(data_inlet)
 
     data_site = results.retrieve(site="hfd")["hfd_co2"]
     data_site = data_site.data
 
     assert data_site.equals(data_inlet)
 
-
     data_all = results.retrieve(site="hfd", inlet="50m", species="co2")
     data_all = data_all.data
 
     assert data_all.equals(data_inlet)
-
 
     results = search(species="ch4", skip_ranking=True)
 
@@ -87,6 +83,3 @@ def test_retrieve_complex_ranked():
     assert raw_results["hfd"]["ch4"]["50m"]
     assert raw_results["bsd"]["ch4"]["42m"]
     assert raw_results["bsd"]["ch4"]["108m"]
-
-
-

@@ -1,7 +1,7 @@
 import pytest
 
 from openghg.standardise.surface import parse_cranfield
-from helpers import get_datapath
+from helpers import get_datapath, combined_meta_checker
 
 
 def test_read_file():
@@ -23,32 +23,34 @@ def test_read_file():
     assert co2_data["co2"][0] == pytest.approx(460.573223)
     assert co2_data["co2 variability"][0] == pytest.approx(0.226956417)
 
-    assert data["co"]["metadata"] == {
-        "site": "THB",
-        "instrument": "CRDS",
-        "sampling_period": "1200",
-        "height": "10magl",
-        "species": "co",
-        "inlet": "10magl",
-        "network": "CRANFIELD",
-    }
+    combined_meta_checker(data=data)
 
-    assert data["co2"]["metadata"] == {
-        "site": "THB",
-        "instrument": "CRDS",
-        "sampling_period": "1200",
-        "height": "10magl",
-        "species": "co2",
-        "inlet": "10magl",
-        "network": "CRANFIELD",
-    }
+    # assert data["co"]["metadata"] == {
+    #     "site": "THB",
+    #     "instrument": "CRDS",
+    #     "sampling_period": "1200",
+    #     "height": "10magl",
+    #     "species": "co",
+    #     "inlet": "10magl",
+    #     "network": "CRANFIELD",
+    # }
 
-    assert data["ch4"]["metadata"] == {
-        "site": "THB",
-        "instrument": "CRDS",
-        "sampling_period": "1200",
-        "height": "10magl",
-        "species": "ch4",
-        "inlet": "10magl",
-        "network": "CRANFIELD",
-    }
+    # assert data["co2"]["metadata"] == {
+    #     "site": "THB",
+    #     "instrument": "CRDS",
+    #     "sampling_period": "1200",
+    #     "height": "10magl",
+    #     "species": "co2",
+    #     "inlet": "10magl",
+    #     "network": "CRANFIELD",
+    # }
+
+    # assert data["ch4"]["metadata"] == {
+    #     "site": "THB",
+    #     "instrument": "CRDS",
+    #     "sampling_period": "1200",
+    #     "height": "10magl",
+    #     "species": "ch4",
+    #     "inlet": "10magl",
+    #     "network": "CRANFIELD",
+    # }
