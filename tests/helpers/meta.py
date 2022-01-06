@@ -24,7 +24,13 @@ def metadata_checker_obssurface(metadata: Dict, species: str) -> bool:
     expected_keys = {"site", "species", "inlet", "instrument", "sampling_period"}
     metadata_keys = set(metadata.keys())
 
-    assert species.lower() == metadata["species"].lower()
+    meta_species = metadata["species"].lower()
+    try:
+        assert species.lower() == meta_species
+    except AssertionError:
+        # GCWERKS species_inlet maybe
+        split_species = species.lower().split("_")[0]
+        assert split_species == meta_species
 
     return _key_checker(expected=expected_keys, present=metadata_keys)
 
@@ -56,7 +62,13 @@ def attributes_checker_obssurface(attrs: Dict, species: str) -> bool:
 
     attribute_keys = set(attrs.keys())
 
-    assert species.lower() == attrs["species"].lower()
+    meta_species = attrs["species"].lower()
+    try:
+        assert species.lower() == meta_species
+    except AssertionError:
+        # GCWERKS species_inlet maybe
+        split_species = species.lower().split("_")[0]
+        assert split_species == meta_species
 
     return _key_checker(expected=expected_keys, present=attribute_keys)
 
