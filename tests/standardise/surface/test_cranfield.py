@@ -1,7 +1,7 @@
 import pytest
 
 from openghg.standardise.surface import parse_cranfield
-from helpers import get_datapath, combined_meta_checker
+from helpers import get_datapath, combined_surface_metachecker
 
 
 def test_read_file():
@@ -23,7 +23,7 @@ def test_read_file():
     assert co2_data["co2"][0] == pytest.approx(460.573223)
     assert co2_data["co2 variability"][0] == pytest.approx(0.226956417)
 
-    combined_meta_checker(data=data)
+    combined_surface_metachecker(data=data)
 
     # assert data["co"]["metadata"] == {
     #     "site": "THB",

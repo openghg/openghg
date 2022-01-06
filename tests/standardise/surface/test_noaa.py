@@ -2,7 +2,7 @@ import logging
 from pandas import Timestamp
 import pytest
 
-from helpers import get_datapath
+from helpers import get_datapath, combined_surface_metachecker
 from openghg.standardise.surface import parse_noaa
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -75,6 +75,8 @@ def test_read_obspack_flask_2021():
     assert "sampling_period" in ch4_metadata
     assert "sampling_period_estimate" in ch4_metadata
 
+    combined_surface_metachecker(data=data)
+
 
 def test_read_file_site_filename_read():
 
@@ -93,38 +95,17 @@ def test_read_file_site_filename_read():
 
     metadata = data["ch4"]["metadata"]
 
-    expected_metadata = {
-        "species": "ch4",
-        "site": "SCSN06",
-        "measurement_type": "flask",
-        "network": "NOAA",
-        "inlet": "flask",
-        "sampling_period": "1200",
-    }
-
-    assert metadata == expected_metadata
+    combined_surface_metachecker(data=data)
 
     expected_attrs = {
-        "data_owner": "Ed Dlugokencky, Gabrielle Petron (CO)",
-        "data_owner_email": "ed.dlugokencky@noaa.gov, gabrielle.petron@noaa.gov",
-        "inlet_height_magl": "NA",
-        "instrument": "GC-FID",
-        "sampling_period" : "1200",
-        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "Source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
-        "Processed by": "OpenGHG_Cloud",
-        "species": "ch4",
-        "Calibration_scale": "unknown",
         "station_longitude": 107.0,
         "station_latitude": 6.0,
         "station_long_name": "South China Sea (6 N), N/A",
         "station_height_masl": 15.0,
     }
 
-    del ch4_data.attrs["File created"]
-
-    assert ch4_data.attrs == expected_attrs
+    for key, value in expected_attrs.items():
+        assert ch4_data.attrs[key] == value
 
 
 def test_read_raw_file():
@@ -135,14 +116,7 @@ def test_read_raw_file():
         data_filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask", sampling_period=1200
     )
 
-    assert data["co"]["metadata"] == {
-        "species": "co",
-        "site": "POC",
-        "measurement_type": "flask",
-        "network": "NOAA",
-        "inlet": "flask",
-        "sampling_period": "1200",
-    }
+    combined_surface_metachecker(data=data)
 
     co_data = data["co"]["data"]
 
