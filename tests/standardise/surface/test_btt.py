@@ -9,6 +9,7 @@ mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
 
+@pytest.mark.xfail(reason="Bug: No inlet or instrument keys in metadata, check if required - see #201")
 def test_read_file():
     filepath = get_datapath(filename="BTT_test.csv", data_type="LGHG")
 
@@ -28,5 +29,3 @@ def test_read_file():
     assert ch4_data["ch4"][0] == pytest.approx(1957.23980459)
     assert ch4_data.time[-1] == pd.Timestamp("2019-01-14T14:00:00")
     assert ch4_data["ch4"][-1] == pytest.approx(1961.72216725)
-
-

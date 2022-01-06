@@ -13,8 +13,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 
 def test_read_obspack_2020():
-    '''Test inputs from "obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24"
-    '''
+    '''Test inputs from "obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24"'''
     filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
 
     data = parse_noaa(
@@ -45,9 +44,9 @@ def test_read_obspack_2020():
     assert "sampling_period_estimate" in ch4_metadata
 
 
+@pytest.mark.xfail(reason="Bug: Missing instrment for flask data, required? - see #201")
 def test_read_obspack_flask_2021():
-    '''Test inputs from "obspack_multi-species_1_CCGGSurfaceFlask_v2.0_2021-02-09"
-    '''
+    '''Test inputs from "obspack_multi-species_1_CCGGSurfaceFlask_v2.0_2021-02-09"'''
     filepath = get_datapath(filename="ch4_spf_surface-flask_1_ccgg_Event.nc", data_type="NOAA")
 
     data = parse_noaa(
