@@ -79,7 +79,7 @@ def _read_obspack(
     """
     import xarray as xr
     from openghg.util import clean_string
-    from openghg.retrieve import assign_attributes
+    from openghg.standardise.meta import assign_attributes
 
     valid_types = ("flask", "insitu", "pfp")
 
@@ -221,7 +221,7 @@ def _read_raw_file(
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
-    from openghg.retrieve import assign_attributes
+    from openghg.standardise.meta import assign_attributes
     from pathlib import Path
 
     data_filepath = Path(data_filepath)

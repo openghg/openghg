@@ -72,7 +72,7 @@ def parse_gcwerks(
         dict: Dictionary of source_name : UUIDs
     """
     from pathlib import Path
-    from openghg.retrieve import assign_attributes
+    from openghg.standardise.meta import assign_attributes
     from openghg.util import valid_site, clean_string, load_json
 
     data_filepath = Path(data_filepath)

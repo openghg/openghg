@@ -1,8 +1,6 @@
 from typing import cast, Any, Dict, Optional, List
 from xarray import Dataset
 
-__all__ = ["assign_attributes", "get_attributes"]
-
 
 def assign_attributes(
     data: Dict,
@@ -23,18 +21,18 @@ def assign_attributes(
     Returns:
         dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
-    for key in data:
-        site_attributes = data[key]["attributes"]
-        species = data[key]["metadata"]["species"]
+    for key, gas_data in data.items():
+        site_attributes = gas_data["attributes"]
+        species = gas_data["metadata"]["species"]
 
-        units = data[key].get("metadata", {}).get("units")
-        scale = data[key].get("metadata", {}).get("scale")
+        units = gas_data.get("metadata", {}).get("units")
+        scale = gas_data.get("metadata", {}).get("scale")
 
         if sampling_period is None:
-            sampling_period = str(data[key].get("metadata", {}).get("sampling_period"))
+            sampling_period = str(gas_data.get("metadata", {}).get("sampling_period"))
 
-        data[key]["data"] = get_attributes(
-            ds=data[key]["data"],
+        gas_data["data"] = get_attributes(
+            ds=gas_data["data"],
             species=species,
             site=site,
             network=network,

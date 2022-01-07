@@ -4,7 +4,7 @@ from pathlib import Path
 
 from openghg.standardise.surface import parse_crds
 from openghg.objectstore import get_local_bucket
-from openghg.retrieve import assign_attributes
+from openghg.standardise.meta import assign_attributes
 from helpers import get_datapath
 
 # import tempfile

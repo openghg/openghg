@@ -22,7 +22,7 @@ def parse_eurocom(
     Returns:
         dict: Dictionary of measurement data
     """
-    from openghg.retrieve import assign_attributes, get_attributes
+    from openghg.standardise.meta import assign_attributes, get_attributes
     from pandas import read_csv, Timestamp
     from openghg.util import read_header, load_json
 

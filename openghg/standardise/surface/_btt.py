@@ -18,7 +18,7 @@ def parse_btt(
     Returns:
         dict: UUIDs of Datasources data has been assigned to
     """
-    from openghg.retrieve import assign_attributes
+    from openghg.standardise.meta import assign_attributes
     from pandas import read_csv, Timestamp, to_timedelta, isnull
     from numpy import nan as np_nan
     from openghg.util import clean_string, load_json
