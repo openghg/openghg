@@ -104,8 +104,6 @@ def search(**kwargs):  # type: ignore
             else:
                 updated_species.extend(translated)
 
-            print(updated_species)
-
         search_kwargs["species"] = updated_species
 
     data_type = search_kwargs.get("data_type", "timeseries")

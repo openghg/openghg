@@ -85,6 +85,23 @@ def test_specific_search_gc():
     assert metadata == expected_metadata
 
 
+def test_specific_search_translator():
+    results = search(species="toluene", site="CGO", skip_ranking=True)
+
+    metadata = results.results["cgo"]["c6h5ch3"]["70m"]["metadata"]
+    assert metadata["species"] == "c6h5ch3"
+
+    results = search(species="methylbenzene", site="CGO", skip_ranking=True)
+
+    metadata = results.results["cgo"]["c6h5ch3"]["70m"]["metadata"]
+    assert metadata["species"] == "c6h5ch3"
+
+    results = search(species="c6h5ch3", site="CGO", skip_ranking=True)
+
+    metadata = results.results["cgo"]["c6h5ch3"]["70m"]["metadata"]
+    assert metadata["species"] == "c6h5ch3"
+
+
 def test_unranked_location_search():
     species = ["co2", "ch4"]
     sites = ["hfd", "tac", "bsd"]
@@ -171,9 +188,7 @@ def test_search_find_any_unranked():
     inlet = "248m"
     instrument = "picarro"
 
-    results = search(
-        find_all=False, species=species, site=sites, inlet=inlet, instrument=instrument
-    )
+    results = search(find_all=False, species=species, site=sites, inlet=inlet, instrument=instrument)
 
     raw_results = results.raw()
 
