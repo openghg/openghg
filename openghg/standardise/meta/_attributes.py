@@ -1,5 +1,6 @@
 from typing import cast, Any, Dict, Optional, List
 from xarray import Dataset
+from openghg.standardise.meta import surface_standardise
 
 
 def assign_attributes(
@@ -9,7 +10,7 @@ def assign_attributes(
     sampling_period: str = None,
 ) -> Dict:
     """Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
-    are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
+    are CF 1.6 compliant. Some of the attributes written to the Dataset are saved as metadata
     to the Datasource allowing more detailed searching of data.
 
     Args:
@@ -31,8 +32,11 @@ def assign_attributes(
         if sampling_period is None:
             sampling_period = str(gas_data.get("metadata", {}).get("sampling_period"))
 
-        gas_data["data"] = get_attributes(
-            ds=gas_data["data"],
+        measurement_data = gas_data["data"]
+        metadata = gas_data["metadata"]
+
+        measurement_data = get_attributes(
+            ds=measurement_data,
             species=species,
             site=site,
             network=network,
@@ -41,6 +45,10 @@ def assign_attributes(
             global_attributes=site_attributes,
             sampling_period=sampling_period,
         )
+
+        # Now we update the metadata from the attributes
+        attrs = measurement_data.attrs
+        metadata = surface_standardise(metadata=metadata, attributes=attrs)
 
     return data
 
@@ -58,7 +66,7 @@ def get_attributes(
 ) -> Dataset:
     """
     This function writes attributes to an xarray.Dataset so that they conform with
-    the CF Convention v1.7
+    the CF Convention v1.6
 
     Attributes of the xarray DataSet are modified, and variable names are changed
 
