@@ -7,7 +7,7 @@ from openghg.standardise.surface import parse_crds
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
-from helpers import get_datapath, combined_surface_metachecker
+from helpers import get_datapath, parsed_surface_metachecker
 
 
 def test_read_file():
@@ -31,7 +31,7 @@ def test_read_file():
     assert co_data["co_variability"][0] == pytest.approx(4.081)
     assert co_data["co_number_of_observations"][0] == pytest.approx(19.0)
 
-    combined_surface_metachecker(data=gas_data)
+    parsed_surface_metachecker(data=gas_data)
 
 
 def test_bad_file_raises():

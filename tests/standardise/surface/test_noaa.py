@@ -2,7 +2,7 @@ import logging
 from pandas import Timestamp
 import pytest
 
-from helpers import get_datapath, combined_surface_metachecker
+from helpers import get_datapath, parsed_surface_metachecker
 from openghg.standardise.surface import parse_noaa
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -74,7 +74,7 @@ def test_read_obspack_flask_2021():
     assert "sampling_period" in ch4_metadata
     assert "sampling_period_estimate" in ch4_metadata
 
-    combined_surface_metachecker(data=data)
+    parsed_surface_metachecker(data=data)
 
 
 def test_read_file_site_filename_read():
@@ -94,7 +94,7 @@ def test_read_file_site_filename_read():
 
     metadata = data["ch4"]["metadata"]
 
-    combined_surface_metachecker(data=data)
+    parsed_surface_metachecker(data=data)
 
     expected_attrs = {
         "station_longitude": 107.0,
@@ -115,7 +115,7 @@ def test_read_raw_file():
         data_filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask", sampling_period=1200
     )
 
-    combined_surface_metachecker(data=data)
+    parsed_surface_metachecker(data=data)
 
     co_data = data["co"]["data"]
 

@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from openghg.standardise.surface import parse_btt
-from helpers import get_datapath, combined_surface_metachecker
+from helpers import get_datapath, parsed_surface_metachecker
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -15,7 +15,7 @@ def test_read_file():
 
     data = parse_btt(data_filepath=filepath)
 
-    combined_surface_metachecker(data=data)
+    parsed_surface_metachecker(data=data)
 
     co2_data = data["CO2"]["data"]
     ch4_data = data["CH4"]["data"]
