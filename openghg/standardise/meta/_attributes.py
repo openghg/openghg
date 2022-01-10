@@ -9,7 +9,7 @@ def assign_attributes(
     sampling_period: str = None,
 ) -> Dict:
     """Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
-    are CF 1.6 compliant. Some of the attributes written to the Dataset are saved as metadata
+    are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
     to the Datasource allowing more detailed searching of data.
 
     Args:
@@ -33,11 +33,8 @@ def assign_attributes(
         if sampling_period is None:
             sampling_period = str(gas_data.get("metadata", {}).get("sampling_period"))
 
-        measurement_data = gas_data["data"]
-        metadata = gas_data["metadata"]
-
-        measurement_data = get_attributes(
-            ds=measurement_data,
+        gas_data["data"] = get_attributes(
+            ds=gas_data["data"],
             species=species,
             site=site,
             network=network,
@@ -47,7 +44,9 @@ def assign_attributes(
             sampling_period=sampling_period,
         )
 
-        # Now we update the metadata from the attributes
+        measurement_data = gas_data["data"]
+        metadata = gas_data["metadata"]
+
         attrs = measurement_data.attrs
 
         gas_data["metadata"] = surface_standardise(metadata=metadata, attributes=attrs)

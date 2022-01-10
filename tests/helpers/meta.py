@@ -1,6 +1,6 @@
 # Check if obssurface metadata contains the minimum expected
 from typing import Dict
-
+from openghg.dataobjects import SearchResults
 
 def parsed_surface_metachecker(data: Dict) -> None:
     """Checks the metadata and attributes for data stored in a dictionary of the type
@@ -44,12 +44,13 @@ def metadata_checker_obssurface(metadata: Dict, species: str) -> bool:
     metadata_keys = set(metadata.keys())
 
     meta_species = metadata["species"].lower()
-    try:
-        assert species.lower() == meta_species
-    except AssertionError:
-        # GCWERKS species_inlet maybe
+
+    if species.lower() != meta_species:
         split_species = species.lower().split("_")[0]
-        assert split_species == meta_species
+
+        if split_species != meta_species:
+            print(f"Error: species don't match {split_species} != {meta_species}")
+            return False
 
     return _key_checker(expected=expected_keys, present=metadata_keys)
 
@@ -94,7 +95,7 @@ def attributes_checker_obssurface(attrs: Dict, species: str) -> bool:
         "inlet_height_magl",
         "conditions_of_use",
         "source",
-        "conventions",
+        "Conventions",
         "processed_by",
         "species",
         "calibration_scale",

@@ -113,16 +113,17 @@ def test_get_observations_datetime_selection():
 
 
 def test_gcwerks_retrieval():
-    results = get_obs_surface(site="CGO", species="cfc11", inlet="70m")
+    species = "cfc11"
+    results = get_obs_surface(site="CGO", species=species, inlet="70m")
 
     metadata = results.metadata
 
-    assert metadata_checker_obssurface(metadata=metadata, species="co2")
+    assert metadata_checker_obssurface(metadata=metadata, species=species)
 
     data = results.data
     attrs = data.attrs
 
-    assert attributes_checker_get_obs(attrs=attrs, species="co2")
+    assert attributes_checker_get_obs(attrs=attrs, species=species)
 
     assert data.time[0] == Timestamp("2018-01-01T02:24:00")
     assert data.time[-1] == Timestamp("2018-01-31T23:33:00")

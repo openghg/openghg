@@ -4,6 +4,7 @@ import pytest
 
 from helpers import get_datapath, parsed_surface_metachecker
 from openghg.standardise.surface import parse_noaa
+from helpers import attributes_checker_obssurface
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -131,28 +132,7 @@ def test_read_raw_file():
 
     attrs = co_data.attrs
 
-    expected_attrs = {
-        "data_owner": "Ed Dlugokencky, Gabrielle Petron (CO)",
-        "data_owner_email": "ed.dlugokencky@noaa.gov, gabrielle.petron@noaa.gov",
-        "inlet_height_magl": "NA",
-        "instrument": "GC-HgO-VUV",
-        "sampling_period": "1200",
-        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "Source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
-        "Processed by": "OpenGHG_Cloud",
-        "species": "co",
-        "Calibration_scale": "unknown",
-        "station_longitude": -139.0,
-        "station_latitude": 25.0,
-        "station_long_name": "Pacific Ocean (25 N), N/A",
-        "station_height_masl": 10.0,
-    }
-
-    del attrs["File created"]
-
-    assert attrs == expected_attrs
-
+    assert attributes_checker_obssurface(attrs=attrs, species="co")
 
 def test_read_incorrect_site_raises():
 

@@ -72,10 +72,6 @@ def get_obs_surface(
     retrieved_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
     data = retrieved_data.data
 
-    print(data["co2"].attrs)
-
-    assert False
-
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
         retrieved_data.metadata["inlet"] = "multiple"
