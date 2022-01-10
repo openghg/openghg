@@ -177,11 +177,16 @@ def _read_obspack(
     metadata["units"] = units
     metadata["sampling_period"] = sampling_period
 
-    if sampling_period_estimate >= 0.0:
-        metadata["sampling_period_estimate"] = str(sampling_period_estimate)  # convert to string to keep consistent with "sampling_period"
-
     if instrument is not None:
         metadata["instrument"] = instrument
+    else:
+        try:
+            metadata["instrument"] = obspack_ds.attrs["instrument"]
+        except KeyError: 
+            pass
+
+    if sampling_period_estimate >= 0.0:
+        metadata["sampling_period_estimate"] = str(sampling_period_estimate)  # convert to string to keep consistent with "sampling_period"
 
     # TODO: At the moment all attributes from the NOAA ObsPack are being copied
     # plus any variables we're adding.
@@ -389,6 +394,7 @@ def _read_raw_data(
     metadata["network"] = "NOAA"
     metadata["inlet"] = inlet
     metadata["sampling_period"] = sampling_period
+    metadata["instrument"] = noaa_params["instrument"][species.upper()]
 
     combined_data[species.lower()] = {
         "metadata": metadata,

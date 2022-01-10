@@ -16,7 +16,7 @@ def parse_btt(
         data_filepath: Path of file to load
         site: Site name
     Returns:
-        dict: UUIDs of Datasources data has been assigned to
+        dict: Dictionary of gas data
     """
     from openghg.standardise.meta import assign_attributes
     from pandas import read_csv, Timestamp, to_timedelta, isnull
@@ -74,6 +74,7 @@ def parse_btt(
         metadata = {
             "species": clean_string(species),
             "sampling_period": str(sampling_period),
+            "site": "BTT",
         }
 
         gas_data[species] = {

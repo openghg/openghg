@@ -7,13 +7,11 @@ from openghg.standardise.surface import parse_crds
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
-from helpers import get_datapath
+from helpers import get_datapath, combined_surface_metachecker
 
 
 def test_read_file():
-    hfd_filepath = get_datapath(
-        filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS"
-    )
+    hfd_filepath = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
 
     gas_data = parse_crds(data_filepath=hfd_filepath, site="hfd", network="DECC")
 
@@ -32,6 +30,8 @@ def test_read_file():
     assert co_data["co"][0] == pytest.approx(214.28)
     assert co_data["co_variability"][0] == pytest.approx(4.081)
     assert co_data["co_number_of_observations"][0] == pytest.approx(19.0)
+
+    combined_surface_metachecker(data=gas_data)
 
 
 def test_bad_file_raises():
