@@ -2,7 +2,7 @@ from typing import Dict, Tuple
 from copy import deepcopy
 
 
-def surface_standardise(metadata: Dict, attributes: Dict) -> Tuple[Dict, Dict]:
+def surface_standardise(metadata: Dict, attributes: Dict) -> Dict:
     """Makes sure the metadata and attributes dictionaries are the same
     and that any duplicated keys match.
 
