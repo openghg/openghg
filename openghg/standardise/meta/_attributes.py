@@ -1,6 +1,5 @@
 from typing import cast, Any, Dict, Optional, List
 from xarray import Dataset
-from openghg.standardise.meta import surface_standardise
 
 
 def assign_attributes(
@@ -22,6 +21,8 @@ def assign_attributes(
     Returns:
         dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
+    from openghg.standardise.meta import surface_standardise
+
     for key, gas_data in data.items():
         site_attributes = gas_data["attributes"]
         species = gas_data["metadata"]["species"]
@@ -48,7 +49,8 @@ def assign_attributes(
 
         # Now we update the metadata from the attributes
         attrs = measurement_data.attrs
-        metadata = surface_standardise(metadata=metadata, attributes=attrs)
+
+        gas_data["metadata"] = surface_standardise(metadata=metadata, attributes=attrs)
 
     return data
 
@@ -152,8 +154,8 @@ def get_attributes(
 
     # Global attributes
     global_attributes_default = {
-        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "Source": "In situ measurements of air",
+        "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
+        "source": "In situ measurements of air",
         "Conventions": "CF-1.6",
     }
 
@@ -163,14 +165,14 @@ def get_attributes(
     else:
         global_attributes = global_attributes_default
 
-    global_attributes["File created"] = str(timestamp_now())
-    global_attributes["Processed by"] = "OpenGHG_Cloud"
+    global_attributes["file_created"] = str(timestamp_now())
+    global_attributes["processed_by"] = "OpenGHG_Cloud"
     global_attributes["species"] = species_label
 
     if scale is None:
-        global_attributes["Calibration_scale"] = "unknown"
+        global_attributes["calibration_scale"] = "unknown"
     else:
-        global_attributes["Calibration_scale"] = scale
+        global_attributes["calibration_scale"] = scale
 
     # Update the Dataset attributes
     ds.attrs.update(global_attributes)  # type: ignore
