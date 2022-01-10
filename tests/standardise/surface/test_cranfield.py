@@ -1,7 +1,7 @@
 import pytest
 
 from openghg.standardise.surface import parse_cranfield
-from helpers import get_datapath, combined_surface_metachecker
+from helpers import get_datapath, parsed_surface_metachecker
 
 
 @pytest.mark.xfail(reason="Bug: No attributes for Cranfield - see #201")
@@ -24,7 +24,7 @@ def test_read_file():
     assert co2_data["co2"][0] == pytest.approx(460.573223)
     assert co2_data["co2 variability"][0] == pytest.approx(0.226956417)
 
-    combined_surface_metachecker(data=data)
+    parsed_surface_metachecker(data=data)
 
     # assert data["co"]["metadata"] == {
     #     "site": "THB",

@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from openghg.standardise.surface import parse_gcwerks
-from helpers import get_datapath, combined_surface_metachecker
+from helpers import get_datapath, parsed_surface_metachecker
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -41,7 +41,7 @@ def test_read_file_capegrim(cgo_path, cgo_prec_path):
         network="agage",
     )
 
-    combined_surface_metachecker(data=gas_data)
+    parsed_surface_metachecker(data=gas_data)
 
     # 30/11/2021: Species labels were updated to be standardised in line with variable naming
     # This list of expected labels was updated.
@@ -69,7 +69,7 @@ def test_read_file_thd(data_thd, prec_thd):
         data_filepath=data_thd, precision_filepath=prec_thd, site="thd", network="agage", instrument="gcmd"
     )
 
-    combined_surface_metachecker(data=gas_data)
+    parsed_surface_metachecker(data=gas_data)
 
     expected_keys = [
         "ccl4_10m",
@@ -133,7 +133,7 @@ def test_read_thd_window_inlet():
         data_filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="agage"
     )
 
-    combined_surface_metachecker(data=res)
+    parsed_surface_metachecker(data=res)
 
     data = res["ch4_10m"]["data"]
 
@@ -155,7 +155,7 @@ def test_read_shangdianzi_ASM_inlet():
         network="agage",
     )
 
-    combined_surface_metachecker(data=res)
+    parsed_surface_metachecker(data=res)
 
     data = res["nf3_80m"]["data"]
 
