@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.localclient._rank_sources &#8212; OpenGHG 0+untagged.3.gd3510ed documentation</title>
+    <title>openghg.localclient._rank_sources &#8212; OpenGHG 0+untagged.3.g07bdbf1 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -188,6 +188,10 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_site</span><span class="p">(</span><span class="n">site</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">InvalidSiteError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> is not a valid site code&quot;</span><span class="p">)</span>
 
+        <span class="c1"># Save these</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">site</span> <span class="o">=</span> <span class="n">site</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">species</span> <span class="o">=</span> <span class="n">species</span>
+
         <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
         <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">datasources</span><span class="p">()</span>
         <span class="n">rank_table</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">rank_data</span><span class="p">()</span>
@@ -200,25 +204,20 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_sources</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{}</span>
 
-        <span class="k">def</span> <span class="nf">name_str</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="n">Datasource</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">species</span><span class="p">(),</span> <span class="n">d</span><span class="o">.</span><span class="n">inlet</span><span class="p">(),</span> <span class="n">d</span><span class="o">.</span><span class="n">instrument</span><span class="p">()])</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_user_info</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">name_str</span><span class="p">(</span><span class="n">d</span><span class="p">):</span> <span class="p">{</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">inlet</span><span class="p">():</span> <span class="p">{</span>
                 <span class="s2">&quot;rank_data&quot;</span><span class="p">:</span> <span class="n">rank_table</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">uuid</span><span class="p">(),</span> <span class="s2">&quot;NA&quot;</span><span class="p">),</span>
                 <span class="s2">&quot;data_range&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">daterange_str</span><span class="p">(),</span>
             <span class="p">}</span>
             <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">matching_sources</span>
         <span class="p">}</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_key_lookup</span> <span class="o">=</span> <span class="p">{</span><span class="n">name_str</span><span class="p">(</span><span class="n">d</span><span class="p">):</span> <span class="n">d</span><span class="o">.</span><span class="n">uuid</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">matching_sources</span><span class="p">}</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span> <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_key_lookup</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="o">.</span><span class="n">inlet</span><span class="p">():</span> <span class="n">d</span><span class="o">.</span><span class="n">uuid</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">matching_sources</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_needs_update</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_info</span></div>
 
-<div class="viewcode-block" id="RankSources.get_specific_source"><a class="viewcode-back" href="../../../api/api_localclient.html#openghg.localclient.RankSources.get_specific_source">[docs]</a>    <span class="k">def</span> <span class="nf">get_specific_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="RankSources.get_specific_source"><a class="viewcode-back" href="../../../api/api_localclient.html#openghg.localclient.RankSources.get_specific_source">[docs]</a>    <span class="k">def</span> <span class="nf">get_specific_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return the ranking data of a specific key</span>
 
 <span class="sd">        Args:</span>
@@ -227,16 +226,14 @@
 <span class="sd">            dict: Dictionary of ranking data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_needs_update</span><span class="p">:</span>
-            <span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_data</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
-            <span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_data</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
-            <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sources</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_sources</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)</span>
 
-        <span class="n">rank_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_info</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;rank_data&quot;</span><span class="p">]</span>
+        <span class="n">rank_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_info</span><span class="p">[</span><span class="n">inlet</span><span class="p">][</span><span class="s2">&quot;rank_data&quot;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">rank_data</span></div>
 
 <div class="viewcode-block" id="RankSources.set_rank"><a class="viewcode-back" href="../../../api/api_localclient.html#openghg.localclient.RankSources.set_rank">[docs]</a>    <span class="k">def</span> <span class="nf">set_rank</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">rank</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
         <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -245,8 +242,7 @@
         <span class="sd">&quot;&quot;&quot;Set the rank data for the</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            key: Key of ranking data from the original dict</span>
-<span class="sd">            return by get_sources.</span>
+<span class="sd">            inlet: Inlet to set ranking data</span>
 <span class="sd">            rank: Number between 1 and 9</span>
 <span class="sd">            start_date: Start date</span>
 <span class="sd">            end_date: End date</span>
@@ -256,7 +252,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 
-        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key_lookup</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key_lookup</span><span class="p">[</span><span class="n">inlet</span><span class="p">]</span>
 
         <span class="n">daterange</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
 
@@ -264,7 +261,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_needs_update</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="RankSources.clear_rank"><a class="viewcode-back" href="../../../api/api_localclient.html#openghg.localclient.RankSources.clear_rank">[docs]</a>    <span class="k">def</span> <span class="nf">clear_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="RankSources.clear_rank"><a class="viewcode-back" href="../../../api/api_localclient.html#openghg.localclient.RankSources.clear_rank">[docs]</a>    <span class="k">def</span> <span class="nf">clear_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Clear the ranking data for a Datasource</span>
 
 <span class="sd">        Args:</span>
@@ -273,7 +270,8 @@
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key_lookup</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key_lookup</span><span class="p">[</span><span class="n">inlet</span><span class="p">]</span>
         <span class="n">obs</span><span class="o">.</span><span class="n">clear_rank</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_needs_update</span> <span class="o">=</span> <span class="kc">True</span></div></div>
 
