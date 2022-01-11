@@ -31,7 +31,7 @@ import openghg
 # -- Project information -----------------------------------------------------
 
 project = "OpenGHG"
-copyright = "2021 OpenGHG development team"
+copyright = "2022 OpenGHG development team"
 author = "OpenGHG development team"
 
 # -- General configuration ---------------------------------------------------
