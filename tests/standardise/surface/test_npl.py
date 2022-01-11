@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from openghg.standardise.surface import parse_npl
-from helpers import get_datapath
+from helpers import get_datapath, parsed_surface_metachecker
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -14,6 +14,8 @@ def test_read_file():
     filepath = get_datapath(filename="NPL_test.csv", data_type="LGHG")
 
     data = parse_npl(data_filepath=filepath, sampling_period=60)
+
+    parsed_surface_metachecker(data=data)
 
     co2_data = data["CO2"]["data"]
     ch4_data = data["CH4"]["data"]
@@ -27,30 +29,3 @@ def test_read_file():
     assert ch4_data["ch4"][0] == pytest.approx(2004.462127)
     assert ch4_data.time[-1] == pd.Timestamp("2020-07-01T00:24:00")
     assert ch4_data["ch4"][-1] == pytest.approx(1910.546256)
-
-    del co2_data.attrs["File created"]
-    del ch4_data.attrs["File created"]
-
-    expected_attrs = {
-        "data_owner": "Tim Arnold",
-        "data_owner_email": "tim.arnold@npl.co.uk",
-        "Notes": "Rooftop instrument at NPL campus in Teddington",
-        "inlet_height_magl": "17m",
-        "instrument": "Picarro G2401",
-        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "Source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
-        "Processed by": "OpenGHG_Cloud",
-        "species": "co2",
-        "Calibration_scale": "unknown",
-        "station_longitude": -0.3487,
-        "station_latitude": 51.4241,
-        "station_long_name": "National Physical Laboratory",
-        "station_height_masl": 0,
-    }
-
-    assert co2_data.attrs == expected_attrs
-
-    expected_attrs["species"] = "ch4"
-
-    assert ch4_data.attrs == expected_attrs

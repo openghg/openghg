@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from openghg.standardise.surface import parse_gcwerks
-from helpers import get_datapath
+from helpers import get_datapath, parsed_surface_metachecker
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -41,17 +41,19 @@ def test_read_file_capegrim(cgo_path, cgo_prec_path):
         network="agage",
     )
 
+    parsed_surface_metachecker(data=gas_data)
+
     # 30/11/2021: Species labels were updated to be standardised in line with variable naming
     # This list of expected labels was updated.
     expected_eight = [
-        'c2cl4_70m', 
-        'c2f6_70m', 
-        'c2h2_70m', 
-        'c2h6_70m', 
-        'c2hcl3_70m', 
-        'c3f8_70m', 
-        'c3h8_70m', 
-        'c4f10_70m',
+        "c2cl4_70m",
+        "c2f6_70m",
+        "c2h2_70m",
+        "c2h6_70m",
+        "c2hcl3_70m",
+        "c3f8_70m",
+        "c3h8_70m",
+        "c4f10_70m",
     ]
 
     sorted_keys = sorted(list(gas_data.keys()))
@@ -67,6 +69,8 @@ def test_read_file_thd(data_thd, prec_thd):
         data_filepath=data_thd, precision_filepath=prec_thd, site="thd", network="agage", instrument="gcmd"
     )
 
+    parsed_surface_metachecker(data=gas_data)
+
     expected_keys = [
         "ccl4_10m",
         "cfc113_10m",
@@ -79,23 +83,6 @@ def test_read_file_thd(data_thd, prec_thd):
     ]
 
     assert sorted(list(gas_data.keys())) == expected_keys
-
-    expected_metadata = {
-        "instrument": "gcmd",
-        "site": "thd",
-        "network": "agage",
-        "species": "ch3ccl3",
-        "units": "ppt",
-        "scale": "SIO-05",
-        "inlet": "10m",
-        "sampling_period": "75",
-    }
-
-    # Check metadata contains *at least* expected data (may contain more items)
-    metadata = gas_data["ch3ccl3_10m"]["metadata"]
-    for key, expected_value in expected_metadata.items():
-        value = metadata[key]
-        assert value == expected_value
 
     meas_data = gas_data["ch3ccl3_10m"]["data"]
 
@@ -146,20 +133,7 @@ def test_read_thd_window_inlet():
         data_filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="agage"
     )
 
-    expected_metadata = {
-        "instrument": "gcmd",
-        "site": "thd",
-        "network": "agage",
-        "species": "ch4",
-        "units": "ppb",
-        "scale": "Tohoku",
-        "inlet": "10m",
-        "sampling_period": "75",
-    }
-
-    metadata = res["ch4_10m"]["metadata"]
-
-    assert metadata == expected_metadata
+    parsed_surface_metachecker(data=res)
 
     data = res["ch4_10m"]["data"]
 
@@ -181,20 +155,7 @@ def test_read_shangdianzi_ASM_inlet():
         network="agage",
     )
 
-    expected_metadata = {
-        "instrument": "medusa",
-        "site": "sdz",
-        "network": "agage",
-        "species": "nf3",
-        "units": "ppt",
-        "scale": "SIO-12",
-        "inlet": "80m",
-        "sampling_period": "1200",
-    }
-
-    metadata = res["nf3_80m"]["metadata"]
-
-    assert metadata == expected_metadata
+    parsed_surface_metachecker(data=res)
 
     data = res["nf3_80m"]["data"]
 

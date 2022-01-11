@@ -3,7 +3,7 @@ import pytest
 from openghg.retrieve import search
 from openghg.util import timestamp_tzaware
 from pandas import Timestamp
-
+from helpers import metadata_checker_obssurface, attributes_checker_obssurface
 
 def test_specific_keyword_search():
     site = "bsd"
@@ -15,38 +15,24 @@ def test_specific_keyword_search():
 
     metadata = results.metadata(site=site, species=species, inlet=inlet)
 
-    expected_metadata = {
-        "site": "bsd",
-        "instrument": "picarro",
-        "sampling_period": "60",
-        "inlet": "248m",
-        "port": "9",
-        "type": "air",
-        "network": "decc",
-        "species": "co2",
-        "scale": "wmo-x2007",
-        "data_type": "timeseries",
-        "long_name": "bilsdale",
-    }
-
-    assert metadata == expected_metadata
+    assert metadata_checker_obssurface(metadata=metadata, species="co2")
 
     data = results.retrieve(site=site, species=species, inlet="248m")
     ds = data.data
 
-    del ds.attrs["File created"]
+    del ds.attrs["file_created"]
 
     expected_attrs = {
         "data_owner": "Simon O'Doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
         "inlet_height_magl": "248m",
         "comment": "Cavity ring-down measurements. Output from GCWerks",
-        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "Source": "In situ measurements of air",
+        "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
+        "source": "In situ measurements of air",
         "Conventions": "CF-1.6",
-        "Processed by": "OpenGHG_Cloud",
+        "processed_by": "OpenGHG_Cloud",
         "species": "co2",
-        "Calibration_scale": "WMO-X2007",
+        "calibration_scale": "WMO-X2007",
         "station_longitude": -1.15033,
         "station_latitude": 54.35858,
         "station_long_name": "Bilsdale, UK",
@@ -70,20 +56,7 @@ def test_specific_search_gc():
 
     metadata = results.metadata(site="cgo", species="nf3", inlet="70m")
 
-    expected_metadata = {
-        "site": "cgo",
-        "instrument": "medusa",
-        "species": "nf3",
-        "units": "ppt",
-        "scale": "sio-12",
-        "inlet": "70m",
-        "data_type": "timeseries",
-        "network": "agage",
-        "sampling_period": "1200",
-    }
-
-    assert metadata == expected_metadata
-
+    assert metadata_checker_obssurface(metadata=metadata, species="nf3")
 
 def test_specific_search_translator():
     results = search(species="toluene", site="CGO", skip_ranking=True)
@@ -149,23 +122,10 @@ def test_unranked_search_datetimes():
 
     metadata = results.metadata(site="bsd", species="co2", inlet="248m")
 
-    expected_metadata = {
-        "site": "bsd",
-        "instrument": "picarro",
-        "sampling_period": "60",
-        "inlet": "248m",
-        "port": "9",
-        "type": "air",
-        "network": "decc",
-        "species": "co2",
-        "scale": "wmo-x2007",
-        "data_type": "timeseries",
-        "long_name": "bilsdale",
-    }
+    assert metadata_checker_obssurface(metadata=metadata, species="co2")
 
     data_keys = results.keys(site="bsd", species="co2", inlet="248m")
     assert len(data_keys) == 1
-    assert metadata == expected_metadata
 
     start = timestamp_tzaware("2001-1-1")
     end = timestamp_tzaware("2021-1-1")
@@ -241,49 +201,8 @@ def test_ranked_bsd_search():
 
     metadata = result.metadata(site="bsd", species="ch4")
 
-    expected_inlet_metadata = {
-        "248m": {
-            "site": "bsd",
-            "instrument": "picarro",
-            "sampling_period": "60",
-            "inlet": "248m",
-            "port": "9",
-            "type": "air",
-            "network": "decc",
-            "species": "ch4",
-            "scale": "wmo-x2004a",
-            "data_type": "timeseries",
-            "long_name": "bilsdale",
-        },
-        "108m": {
-            "site": "bsd",
-            "instrument": "picarro",
-            "sampling_period": "60",
-            "inlet": "108m",
-            "port": "9",
-            "type": "air",
-            "network": "decc",
-            "species": "ch4",
-            "scale": "wmo-x2004a",
-            "data_type": "timeseries",
-            "long_name": "bilsdale",
-        },
-        "42m": {
-            "site": "bsd",
-            "instrument": "picarro",
-            "sampling_period": "60",
-            "inlet": "42m",
-            "port": "9",
-            "type": "air",
-            "network": "decc",
-            "species": "ch4",
-            "scale": "wmo-x2004a",
-            "data_type": "timeseries",
-            "long_name": "bilsdale",
-        },
-    }
-
-    assert metadata == expected_inlet_metadata
+    for key, meta in metadata.items():
+        assert metadata_checker_obssurface(metadata=meta, species="ch4")
 
     obs_data = result.retrieve(site="bsd", species="ch4")
 
@@ -318,8 +237,6 @@ def test_search_find_any():
         instrument=instrument,
     )
 
-    # print(results)
-
     raw_results = results.raw()
 
     bsd_data = raw_results["bsd"]
@@ -337,34 +254,11 @@ def test_search_find_any():
     assert sorted(list(hfd_data["co"].keys())) == expected_hfd_heights
     assert sorted(list(hfd_data["co2"].keys())) == expected_hfd_heights
 
-    assert bsd_data["ch4"]["42m"]["metadata"] == {
-        "site": "bsd",
-        "instrument": "picarro",
-        "sampling_period": "60",
-        "inlet": "42m",
-        "port": "9",
-        "type": "air",
-        "network": "decc",
-        "species": "ch4",
-        "scale": "wmo-x2004a",
-        "data_type": "timeseries",
-        "long_name": "bilsdale",
-    }
+    ch4_metadata = bsd_data["ch4"]["42m"]["metadata"]
+    co2_metadata = bsd_data["co2"]["42m"]["metadata"]
 
-    assert bsd_data["co2"]["42m"]["metadata"] == {
-        "site": "bsd",
-        "instrument": "picarro",
-        "sampling_period": "60",
-        "inlet": "42m",
-        "port": "9",
-        "type": "air",
-        "network": "decc",
-        "species": "co2",
-        "scale": "wmo-x2007",
-        "data_type": "timeseries",
-        "long_name": "bilsdale",
-    }
-
+    assert metadata_checker_obssurface(metadata=ch4_metadata, species="ch4")
+    assert metadata_checker_obssurface(metadata=co2_metadata, species="co2")
 
 def test_search_incorrect_inlet_site_finds_nothing():
     locations = "hfd"

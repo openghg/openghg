@@ -21,7 +21,7 @@ def parse_tmb(
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
-    from openghg.retrieve import assign_attributes
+    from openghg.standardise.meta import assign_attributes
     from pandas import read_csv as pd_read_csv
     from openghg.util import clean_string, load_json
 

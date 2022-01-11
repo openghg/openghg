@@ -1,8 +1,6 @@
 from typing import cast, Any, Dict, Optional, List
 from xarray import Dataset
 
-__all__ = ["assign_attributes", "get_attributes"]
-
 
 def assign_attributes(
     data: Dict,
@@ -23,18 +21,20 @@ def assign_attributes(
     Returns:
         dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
-    for key in data:
-        site_attributes = data[key]["attributes"]
-        species = data[key]["metadata"]["species"]
+    from openghg.standardise.meta import surface_standardise
 
-        units = data[key].get("metadata", {}).get("units")
-        scale = data[key].get("metadata", {}).get("scale")
+    for key, gas_data in data.items():
+        site_attributes = gas_data["attributes"]
+        species = gas_data["metadata"]["species"]
+
+        units = gas_data.get("metadata", {}).get("units")
+        scale = gas_data.get("metadata", {}).get("scale")
 
         if sampling_period is None:
-            sampling_period = str(data[key].get("metadata", {}).get("sampling_period"))
+            sampling_period = str(gas_data.get("metadata", {}).get("sampling_period"))
 
-        data[key]["data"] = get_attributes(
-            ds=data[key]["data"],
+        gas_data["data"] = get_attributes(
+            ds=gas_data["data"],
             species=species,
             site=site,
             network=network,
@@ -43,6 +43,13 @@ def assign_attributes(
             global_attributes=site_attributes,
             sampling_period=sampling_period,
         )
+
+        measurement_data = gas_data["data"]
+        metadata = gas_data["metadata"]
+
+        attrs = measurement_data.attrs
+
+        gas_data["metadata"] = surface_standardise(metadata=metadata, attributes=attrs)
 
     return data
 
@@ -60,7 +67,7 @@ def get_attributes(
 ) -> Dataset:
     """
     This function writes attributes to an xarray.Dataset so that they conform with
-    the CF Convention v1.7
+    the CF Convention v1.6
 
     Attributes of the xarray DataSet are modified, and variable names are changed
 
@@ -146,8 +153,8 @@ def get_attributes(
 
     # Global attributes
     global_attributes_default = {
-        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "Source": "In situ measurements of air",
+        "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
+        "source": "In situ measurements of air",
         "Conventions": "CF-1.6",
     }
 
@@ -157,14 +164,14 @@ def get_attributes(
     else:
         global_attributes = global_attributes_default
 
-    global_attributes["File created"] = str(timestamp_now())
-    global_attributes["Processed by"] = "OpenGHG_Cloud"
+    global_attributes["file_created"] = str(timestamp_now())
+    global_attributes["processed_by"] = "OpenGHG_Cloud"
     global_attributes["species"] = species_label
 
     if scale is None:
-        global_attributes["Calibration_scale"] = "unknown"
+        global_attributes["calibration_scale"] = "unknown"
     else:
-        global_attributes["Calibration_scale"] = scale
+        global_attributes["calibration_scale"] = scale
 
     # Update the Dataset attributes
     ds.attrs.update(global_attributes)  # type: ignore

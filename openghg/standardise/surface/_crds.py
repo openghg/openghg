@@ -27,7 +27,7 @@ def parse_crds(
         dict: Dictionary of gas data
     """
     from pathlib import Path
-    from openghg.retrieve import assign_attributes
+    from openghg.standardise.meta import assign_attributes
 
     if not isinstance(data_filepath, Path):
         data_filepath = Path(data_filepath)
