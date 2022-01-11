@@ -82,8 +82,19 @@ def test_add_data(data):
         "network": "decc",
         "species": "ch4",
         "scale": "wmo-x2004a",
-        "data_type": "timeseries",
         "long_name": "bilsdale",
+        "data_owner": "simon o'doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk",
+        "inlet_height_magl": "248m",
+        "comment": "cavity ring-down measurements. output from gcwerks",
+        "source": "in situ measurements of air",
+        "conventions": "cf-1.6",
+        "calibration_scale": "wmo-x2004a",
+        "station_longitude": -1.15033,
+        "station_latitude": 54.35858,
+        "station_long_name": "bilsdale, uk",
+        "station_height_masl": 380.0,
+        "data_type": "timeseries",
     }
 
     assert d.metadata() == expected_metadata
@@ -390,15 +401,11 @@ def test_search_metadata_find_all():
 
     d._metadata = {"inlet": "100m", "instrument": "violin", "car": "toyota"}
 
-    result = d.search_metadata(
-        inlet="100m", instrument="violin", car="toyota", find_all=True
-    )
+    result = d.search_metadata(inlet="100m", instrument="violin", car="toyota", find_all=True)
 
     assert result is True
 
-    result = d.search_metadata(
-        inlet="100m", instrument="violin", car="subaru", find_all=True
-    )
+    result = d.search_metadata(inlet="100m", instrument="violin", car="subaru", find_all=True)
 
     assert result is False
 
@@ -413,15 +420,11 @@ def test_search_metadata_finds_recursively():
 
     assert result is True
 
-    result = d.search_metadata(
-        search_terms=["100m", "violin", "toyota", "swallow"], find_all=True
-    )
+    result = d.search_metadata(search_terms=["100m", "violin", "toyota", "swallow"], find_all=True)
 
     assert result is False
 
-    result = d.search_metadata(
-        search_terms=["100m", "violin", "toyota", "swallow"], find_all=False
-    )
+    result = d.search_metadata(search_terms=["100m", "violin", "toyota", "swallow"], find_all=False)
 
     assert result is True
 
@@ -453,10 +456,7 @@ def test_in_daterange(data):
 
     dated_keys = d.keys_in_daterange_str(daterange=daterange)
 
-    assert (
-        dated_keys[0].split("/")[-1]
-        == "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00"
-    )
+    assert dated_keys[0].split("/")[-1] == "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00"
 
 
 def test_shallow_then_load_data(data):
@@ -514,9 +514,7 @@ def test_key_date_compare():
 
     assert not in_date
 
-    error_key = {
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00_2014-11-30-11:23:30+00:00": "broken"
-    }
+    error_key = {"2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00_2014-11-30-11:23:30+00:00": "broken"}
 
     with pytest.raises(ValueError):
         in_date = d.key_date_compare(keys=error_key, start_date=start, end_date=end)

@@ -49,9 +49,9 @@ def test_recombination_GC():
 
     data = parse_gcwerks(data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa", network="AGAGE")
 
-    toluene_data = data["toluene_70m"]["data"]
+    toluene_data = data["c6h5ch3_70m"]["data"]
 
-    species = "toluene"
+    species = "c6h5ch3"
     site = "CGO"
     inlet = "70m"
 

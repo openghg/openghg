@@ -3,7 +3,7 @@ from typing import Dict
 from pandas import read_csv, NaT
 from datetime import datetime
 from openghg.util import clean_string, load_json
-from openghg.retrieve import assign_attributes
+from openghg.standardise.meta import assign_attributes
 from pathlib import Path
 
 

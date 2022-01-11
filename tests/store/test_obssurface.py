@@ -5,7 +5,7 @@ from openghg.store.base import Datasource
 from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket, exists
 from openghg.util import create_daterange_str
-from helpers import get_datapath
+from helpers import get_datapath, attributes_checker_obssurface
 
 
 def test_read_CRDS():
@@ -84,64 +84,66 @@ def test_read_GC():
         filepath=(data_filepath, precision_filepath), data_type="GCWERKS", site="CGO", network="AGAGE"
     )
 
+    # 30/11/2021: Species labels were updated to be standardised in line with variable naming
+    # This list of expected labels was updated.
     expected_keys = [
-        "benzene_70m",
-        "c4f10_70m",
-        "c6f14_70m",
-        "ccl4_70m",
-        "cf4_70m",
-        "cfc112_70m",
-        "cfc113_70m",
-        "cfc114_70m",
-        "cfc115_70m",
-        "cfc11_70m",
-        "cfc12_70m",
-        "cfc13_70m",
-        "ch2br2_70m",
-        "ch2cl2_70m",
-        "ch3br_70m",
-        "ch3ccl3_70m",
-        "ch3cl_70m",
-        "ch3i_70m",
-        "chbr3_70m",
-        "chcl3_70m",
-        "cos_70m",
-        "cpropane_70m",
-        "desflurane_70m",
-        "ethane_70m",
-        "ethyne_70m",
-        "h1211_70m",
-        "h1301_70m",
-        "h2402_70m",
-        "hcfc124_70m",
-        "hcfc132b_70m",
-        "hcfc133a_70m",
-        "hcfc141b_70m",
-        "hcfc142b_70m",
-        "hcfc22_70m",
-        "hfc125_70m",
-        "hfc134a_70m",
-        "hfc143a_70m",
-        "hfc152a_70m",
-        "hfc227ea_70m",
-        "hfc236fa_70m",
-        "hfc23_70m",
-        "hfc245fa_70m",
-        "hfc32_70m",
-        "hfc365mfc_70m",
-        "hfc4310mee_70m",
-        "nf3_70m",
-        "pce_70m",
-        "pfc116_70m",
-        "pfc218_70m",
-        "pfc318_70m",
-        "propane_70m",
-        "sf5cf3_70m",
-        "sf6_70m",
-        "so2f2_70m",
-        "tce_70m",
-        "toluene_70m",
-    ]
+        'c2cl4_70m', 
+        'c2f6_70m', 
+        'c2h2_70m', 
+        'c2h6_70m', 
+        'c2hcl3_70m', 
+        'c3f8_70m', 
+        'c3h8_70m', 
+        'c4f10_70m', 
+        'c4f8_70m', 
+        'c6f14_70m', 
+        'c6h5ch3_70m', 
+        'c6h6_70m', 
+        'cc3h8_70m', 
+        'ccl4_70m', 
+        'cf4_70m', 
+        'cfc112_70m', 
+        'cfc113_70m', 
+        'cfc114_70m', 
+        'cfc115_70m', 
+        'cfc11_70m', 
+        'cfc12_70m', 
+        'cfc13_70m', 
+        'ch2br2_70m', 
+        'ch2cl2_70m', 
+        'ch3br_70m', 
+        'ch3ccl3_70m', 
+        'ch3cl_70m', 
+        'ch3i_70m', 
+        'chbr3_70m', 
+        'chcl3_70m', 
+        'cos_70m', 
+        'desflurane_70m', 
+        'halon1211_70m', 
+        'halon1301_70m', 
+        'halon2402_70m', 
+        'hcfc124_70m', 
+        'hcfc132b_70m', 
+        'hcfc133a_70m', 
+        'hcfc141b_70m', 
+        'hcfc142b_70m', 
+        'hcfc22_70m', 
+        'hfc125_70m', 
+        'hfc134a_70m', 
+        'hfc143a_70m', 
+        'hfc152a_70m', 
+        'hfc227ea_70m', 
+        'hfc236fa_70m', 
+        'hfc23_70m', 
+        'hfc245fa_70m', 
+        'hfc32_70m', 
+        'hfc365mfc_70m', 
+        'hfc4310mee_70m', 
+        'nf3_70m', 
+        'sf5cf3_70m', 
+        'sf6_70m', 
+        'so2f2_70m'
+        ]
 
     assert sorted(list(results["processed"]["capegrim-medusa.18.C"].keys())) == expected_keys
 
@@ -171,31 +173,9 @@ def test_read_GC():
 
     assert sorted(obs._datasource_uuids.values()) == expected_keys
 
-    del hfc152a_data.attrs["File created"]
+    attrs = hfc152a_data.attrs
 
-    assert hfc152a_data.attrs == {
-        "data_owner": "Paul Krummel",
-        "data_owner_email": "paul.krummel@csiro.au",
-        "inlet_height_magl": "70m",
-        "comment": "Medusa measurements. Output from GCWerks. See Miller et al. (2008).",
-        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "Source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
-        "Processed by": "OpenGHG_Cloud",
-        "species": "hfc152a",
-        "Calibration_scale": "SIO-05",
-        "station_longitude": 144.689,
-        "station_latitude": -40.683,
-        "station_long_name": "Cape Grim, Tasmania",
-        "station_height_masl": 94.0,
-        "instrument": "medusa",
-        "site": "cgo",
-        "network": "agage",
-        "units": "ppt",
-        "scale": "SIO-05",
-        "inlet": "70m",
-        "sampling_period": "1200",
-    }
+    assert attributes_checker_obssurface(attrs=attrs, species="hfc152a")
 
     # # Now test that if we add more data it adds it to the same Datasource
     uuid_one = obs.datasources()[0]
@@ -236,7 +216,7 @@ def test_read_GC():
 
     assert table["cgo"]["agage"]["nf3"]["70m"]
     assert table["cgo"]["agage"]["hfc236fa"]["70m"]
-    assert table["cgo"]["agage"]["h1211"]["70m"]
+    assert table["cgo"]["agage"]["halon1211"]["70m"]
 
     assert table["thd"]["agage"]["cfc11"]["10m"]
     assert table["thd"]["agage"]["n2o"]["10m"]
@@ -323,6 +303,7 @@ def test_read_noaa_raw():
     assert co_data["co_selection_flag"][-1] == 0
 
 
+@pytest.mark.xfail(reason="Select which ObsPack attributes we want - currently have non JSON serialisable data - see #207")
 def test_read_noaa_obspack():
     data_filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
 
@@ -350,9 +331,10 @@ def test_read_noaa_obspack():
     data = ch4_data["1998-01-01-23:10:00+00:00_1998-12-31-19:50:00+00:00"]
 
     assert data.time[0] == Timestamp("1998-01-01T23:10:00")
-    assert data["value"][0] == pytest.approx(1.83337e-06)
-    assert data["nvalue"][0] == 2.0
-    assert data["value_std_dev"][0] == pytest.approx(2.093036e-09)
+    assert data["ch4"][0] == pytest.approx(1.83337e-06)
+    assert data["ch4_number_of_observations"][0] == 2.0
+    assert data["ch4_variability"][0] == pytest.approx(2.093036e-09)
+
 
 
 def test_read_thames_barrier():
@@ -448,8 +430,8 @@ def test_add_new_data_correct_datasource():
 
     sorted_keys = sorted(list(results["processed"]["capegrim-medusa.05.C"].keys()))
 
-    assert sorted_keys[:4] == ["benzene_10m", "benzene_70m", "ccl4_10m", "ccl4_70m"]
-    assert sorted_keys[-4:] == ["so2f2_10m", "so2f2_70m", "toluene_10m", "toluene_70m"]
+    assert sorted_keys[:4] == ['c2cl4_10m', 'c2cl4_70m', 'c2f6_10m', 'c2f6_70m']
+    assert sorted_keys[-4:] == ['hfc32_70m', 'sf6_70m', 'so2f2_10m', 'so2f2_70m']
     assert len(sorted_keys) == 69
 
     data_filepath = get_datapath(filename="capegrim-medusa.06.C", data_type="GC")
@@ -647,7 +629,7 @@ def test_read_multiside_aqmesh():
         "longitude": -4.058363,
         "inlet": 1,
         "network": "aqmesh_glasgow",
-        "sampling_period": "NA",
+        "sampling_period": "NOT_SET",
         "species": "co2",
         "units": "ppm",
     }

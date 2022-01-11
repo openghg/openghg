@@ -359,13 +359,27 @@ def align_datasets(
         if platform == "satellite":
             return obs_data, footprint_data
 
+    # Whether sampling period is present or we need to try to infer this
+    infer_sampling_period = False
     # Get the period of measurements in time
     obs_attributes = obs_data.attrs
     if "averaged_period" in obs_attributes:
         obs_data_period_s = float(obs_attributes["averaged_period"])
     elif "sampling_period" in obs_attributes:
+        sampling_period = obs_attributes["sampling_period"]
+        if sampling_period == "NOT_SET":
+            infer_sampling_period = True
+        else:
+            obs_data_period_s = float(sampling_period)
         obs_data_period_s = float(obs_attributes["sampling_period"])
+    elif "sampling_period_estimate" in obs_attributes:
+        estimate = obs_attributes["sampling_period_estimate"]
+        print(f"WARNING: Using estimated sampling period of {estimate}s for observational data")
+        obs_data_period_s = float(estimate)
     else:
+        infer_sampling_period = True
+
+    if infer_sampling_period:
         # Attempt to derive sampling period from frequency of data
         obs_data_period_s = np.nanmedian((obs_data.time.data[1:] - obs_data.time.data[0:-1]) / 1e9).astype(
             "float32"
@@ -387,10 +401,11 @@ def align_datasets(
     footprint_data_timeperiod = Timedelta(footprint_data_period_ns, unit="ns")
 
     # Here we want timezone naive Timestamps
+    # Add sampling period to end date to make sure resample includes these values when matching
     obs_startdate = Timestamp(obs_data.time[0].values)
-    obs_enddate = Timestamp(obs_data.time[-1].values)
+    obs_enddate = Timestamp(obs_data.time[-1].values) + Timedelta(obs_data_timeperiod, unit="seconds")
     footprint_startdate = Timestamp(footprint_data.time[0].values)
-    footprint_enddate = Timestamp(footprint_data.time[-1].values)
+    footprint_enddate = Timestamp(footprint_data.time[-1].values) + Timedelta(footprint_data_timeperiod, unit="nanoseconds")
 
     start_date = max(obs_startdate, footprint_startdate)
     end_date = min(obs_enddate, footprint_enddate)

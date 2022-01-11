@@ -5,23 +5,14 @@ from pathlib import Path
 from openghg.localclient import get_obs_surface
 from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket
-
-
-def get_datapath(filename, data_type):
-    return (
-        Path(__file__)
-        .resolve(strict=True)
-        .parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
-    )
+from helpers import get_datapath, metadata_checker_obssurface, attributes_checker_get_obs
 
 
 @pytest.fixture(scope="session", autouse=True)
 def read_data():
     get_local_bucket(empty=True)
 
-    hfd_filepath = get_datapath(
-        filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS"
-    )
+    hfd_filepath = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
 
     cgo_data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     cgo_prec = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
@@ -46,7 +37,15 @@ def read_data():
 def test_get_observations_few_args():
     result = get_obs_surface(site="hfd", species="co2", inlet="100m")
 
+    metadata = result.metadata
+
+    assert metadata_checker_obssurface(metadata=metadata, species="co2")
+
     data = result.data
+
+    attrs = data.attrs
+
+    assert attributes_checker_get_obs(attrs=attrs, species="co2")
 
     assert data.time[0] == Timestamp("2013-12-04T14:02:30")
     assert data.time[-1] == Timestamp("2019-05-21T15:46:30")
@@ -55,34 +54,20 @@ def test_get_observations_few_args():
     assert data["mf_variability"][0] == pytest.approx(0.109)
     assert data["mf_number_of_observations"][0] == 19.0
 
-    del data.attrs["File created"]
+    # del data.attrs["File created"]
 
     expected_attrs = {
-        "data_owner": "Simon O'Doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "inlet_height_magl": "100m",
-        "comment": "Cavity ring-down measurements. Output from GCWerks",
-        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "Source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
-        "Processed by": "OpenGHG_Cloud",
         "species": "co2",
         "station_longitude": 0.23048,
         "station_latitude": 50.97675,
         "station_long_name": "Heathfield, UK",
         "station_height_masl": 150.0,
         "site": "hfd",
-        "instrument": "picarro",
-        "sampling_period": "60",
-        "inlet": "100m",
-        "port": "10",
-        "type": "air",
         "scale": "WMO-X2007",
-        "network": "decc",
-        "long_name": "heathfield",
     }
 
-    assert data.attrs == expected_attrs
+    for key, value in expected_attrs.items():
+        assert attrs[key] == value
 
 
 def test_get_observations_with_average():
@@ -128,38 +113,17 @@ def test_get_observations_datetime_selection():
 
 
 def test_gcwerks_retrieval():
-    results = get_obs_surface(site="CGO", species="cfc11", inlet="70m")
+    species = "cfc11"
+    results = get_obs_surface(site="CGO", species=species, inlet="70m")
 
-    data = results.data
     metadata = results.metadata
 
-    del metadata["File created"]
+    assert metadata_checker_obssurface(metadata=metadata, species=species)
 
-    expected_metadata = {
-        "data_owner": "Paul Krummel",
-        "data_owner_email": "paul.krummel@csiro.au",
-        "inlet_height_magl": "70m",
-        "comment": "Medusa measurements. Output from GCWerks. See Miller et al. (2008).",
-        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "Source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
-        "Processed by": "OpenGHG_Cloud",
-        "species": "cfc11",
-        "station_longitude": 144.689,
-        "station_latitude": -40.683,
-        "station_long_name": "Cape Grim, Tasmania",
-        "station_height_masl": 94.0,
-        "instrument": "medusa",
-        "site": "cgo",
-        "network": "agage",
-        "units": "ppt",
-        "scale": "SIO-05",
-        "inlet": "70m",
-        "sampling_period": "1200",
-        "data_type": "timeseries",
-    }
+    data = results.data
+    attrs = data.attrs
 
-    assert metadata == expected_metadata
+    assert attributes_checker_get_obs(attrs=attrs, species=species)
 
     assert data.time[0] == Timestamp("2018-01-01T02:24:00")
     assert data.time[-1] == Timestamp("2018-01-31T23:33:00")
