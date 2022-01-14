@@ -1,7 +1,7 @@
 import pytest
 from openghg.client import Process, Search, Retrieve
 from openghg.objectstore import get_local_bucket
-from helpers import get_datapath, glob_files
+from helpers import get_datapath, glob_files, metadata_checker_obssurface
 
 
 @pytest.fixture(scope="session")
@@ -63,51 +63,21 @@ def test_search(read_data):
 
     assert len(raw_results["bsd"]["co2"]["248m"]["keys"]) == 7
 
-    assert raw_results["bsd"]["co2"]["248m"]["metadata"] == {
-        "site": "bsd",
-        "instrument": "picarro",
-        "sampling_period": "60",
-        "inlet": "248m",
-        "port": "9",
-        "type": "air",
-        "network": "decc",
-        "species": "co2",
-        "scale": "wmo-x2007",
-        "data_type": "timeseries",
-        "long_name": "bilsdale",
-    }
+    metadata = raw_results["bsd"]["co2"]["248m"]["metadata"]
+
+    metadata_checker_obssurface(metadata=metadata, species="co2")
 
     results = search.search(site="hfd", species="co", skip_ranking=True)
 
     raw_results = results.raw()
 
-    assert raw_results["hfd"]["co"]["50m"]["metadata"] == {
-        "site": "hfd",
-        "instrument": "picarro",
-        "sampling_period": "60",
-        "inlet": "50m",
-        "port": "9",
-        "type": "air",
-        "network": "decc",
-        "species": "co",
-        "scale": "wmo-x2014a",
-        "data_type": "timeseries",
-        "long_name": "heathfield",
-    }
+    metadata = raw_results["hfd"]["co"]["50m"]["metadata"]
 
-    assert raw_results["hfd"]["co"]["100m"]["metadata"] == {
-        "site": "hfd",
-        "instrument": "picarro",
-        "sampling_period": "60",
-        "inlet": "100m",
-        "port": "10",
-        "type": "air",
-        "network": "decc",
-        "species": "co",
-        "scale": "wmo-x2014a",
-        "data_type": "timeseries",
-        "long_name": "heathfield",
-    }
+    metadata_checker_obssurface(metadata=metadata, species="co")
+
+    metadata = raw_results["hfd"]["co"]["100m"]["metadata"]
+
+    metadata_checker_obssurface(metadata=metadata, species="co")
 
     assert len(raw_results["hfd"]["co"]["50m"]["keys"]) == 3
     assert len(raw_results["hfd"]["co"]["100m"]["keys"]) == 6
@@ -116,17 +86,9 @@ def test_search(read_data):
 
     raw_results = results.raw()
 
-    assert raw_results["cgo"]["nf3"]["70m"]["metadata"] == {
-        "instrument": "medusa",
-        "site": "cgo",
-        "network": "agage",
-        "sampling_period": "1200",
-        "species": "nf3",
-        "units": "ppt",
-        "scale": "sio-12",
-        "inlet": "70m",
-        "data_type": "timeseries",
-    }
+    metadata = raw_results["cgo"]["nf3"]["70m"]["metadata"]
+
+    metadata_checker_obssurface(metadata=metadata, species="nf3")
 
     assert len(raw_results["cgo"]["nf3"]["70m"]["keys"]) == 1
 
@@ -149,16 +111,6 @@ def test_search_and_retrieve(read_data, monkeypatch):
 
     data = search_results.retrieve(site="cgo", species="nf3", inlet="70m")
 
-    expected_metadata = {
-        "instrument": "medusa",
-        "site": "cgo",
-        "network": "agage",
-        "sampling_period": "1200",
-        "species": "nf3",
-        "units": "ppt",
-        "scale": "sio-12",
-        "inlet": "70m",
-        "data_type": "timeseries",
-    }
+    metadata = data.metadata
 
-    assert data.metadata == expected_metadata
+    metadata_checker_obssurface(metadata=metadata, species="nf3")

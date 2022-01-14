@@ -2,7 +2,7 @@ import pytest
 from pandas import Timestamp
 from openghg.client import Search, Process, Retrieve
 from openghg.objectstore import get_local_bucket
-from helpers import get_datapath
+from helpers import get_datapath, attributes_checker_get_obs
 
 
 @pytest.fixture(scope="session")
@@ -49,34 +49,9 @@ def test_retrieve(authenticated_user):
 
     ds = data["bsd_co2_248m"]
 
-    del ds.attrs["File created"]
+    attrs = ds.attrs
 
-    expected_attributes = {
-        "data_owner": "Simon O'Doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "inlet_height_magl": "248m",
-        "comment": "Cavity ring-down measurements. Output from GCWerks",
-        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "Source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
-        "Processed by": "OpenGHG_Cloud",
-        "species": "co2",
-        "Calibration_scale": "WMO-X2007",
-        "station_longitude": -1.15033,
-        "station_latitude": 54.35858,
-        "station_long_name": "Bilsdale, UK",
-        "station_height_masl": 380.0,
-        "site": "bsd",
-        "instrument": "picarro",
-        "sampling_period": "60",
-        "inlet": "248m",
-        "port": "9",
-        "type": "air",
-        "network": "decc",
-        "scale": "WMO-X2007",
-        "long_name": "bilsdale",
-    }
+    attributes_checker_get_obs(attrs=attrs, species="co2")
 
     assert ds["time"][0] == Timestamp("2014-01-30T11:12:30")
     assert ds["co2"][0] == 409.55
-    assert ds.attrs == expected_attributes

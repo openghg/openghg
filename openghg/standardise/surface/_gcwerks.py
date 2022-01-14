@@ -72,7 +72,7 @@ def parse_gcwerks(
         dict: Dictionary of source_name : UUIDs
     """
     from pathlib import Path
-    from openghg.retrieve import assign_attributes
+    from openghg.standardise.meta import assign_attributes
     from openghg.util import valid_site, clean_string, load_json
 
     data_filepath = Path(data_filepath)
@@ -224,6 +224,7 @@ def _read_data(
     from datetime import datetime
     from pandas import read_csv
     from pandas import Timedelta as pd_Timedelta
+    import warnings
 
     # Read header
     header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
@@ -283,9 +284,12 @@ def _read_data(
             gas_name = data.columns[col_loc - 1]
             # Add it to the dictionary for renaming later
             columns_renamed[column] = gas_name + "_flag"
-            # Create 2 new columns based on the flag columns
-            data[gas_name + " status_flag"] = (data[column].str[0] != "-").astype(int)
-            data[gas_name + " integration_flag"] = (data[column].str[1] != "-").astype(int)
+
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                # Create 2 new columns based on the flag columns
+                data[gas_name + " status_flag"] = (data[column].str[0] != "-").astype(int)
+                data[gas_name + " integration_flag"] = (data[column].str[1] != "-").astype(int)
 
             col_shift = 4
             units[gas_name] = header.iloc[1, col_loc + col_shift]

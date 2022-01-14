@@ -29,6 +29,10 @@ class RankSources:
         if not valid_site(site):
             raise InvalidSiteError(f"{site} is not a valid site code")
 
+        # Save these
+        self.site = site
+        self.species = species
+
         obs = ObsSurface.load()
         datasource_uuids = obs.datasources()
         rank_table = obs.rank_data()
@@ -41,25 +45,20 @@ class RankSources:
         if not matching_sources:
             return {}
 
-        def name_str(d: Datasource) -> str:
-            return "_".join([d.species(), d.inlet(), d.instrument()])
-
         self._user_info = {
-            name_str(d): {
+            d.inlet(): {
                 "rank_data": rank_table.get(d.uuid(), "NA"),
                 "data_range": d.daterange_str(),
             }
             for d in matching_sources
         }
 
-        self._key_lookup = {name_str(d): d.uuid() for d in matching_sources}
-
-        self._lookup_data = {"site": site, "species": species}
+        self._key_lookup = {d.inlet(): d.uuid() for d in matching_sources}
         self._needs_update = False
 
         return self._user_info
 
-    def get_specific_source(self, key: str) -> Dict:
+    def get_specific_source(self, inlet: str) -> Dict:
         """Return the ranking data of a specific key
 
         Args:
@@ -68,16 +67,14 @@ class RankSources:
             dict: Dictionary of ranking data
         """
         if self._needs_update:
-            site = self._lookup_data["site"]
-            species = self._lookup_data["species"]
-            _ = self.get_sources(site=site, species=species)
+            self.get_sources(site=self.site, species=self.species)
 
-        rank_data: Dict[str, Union[str, Dict]] = self._user_info[key]["rank_data"]
+        rank_data: Dict[str, Union[str, Dict]] = self._user_info[inlet]["rank_data"]
         return rank_data
 
     def set_rank(
         self,
-        key: str,
+        inlet: str,
         rank: Union[int, str],
         start_date: str,
         end_date: str,
@@ -86,8 +83,7 @@ class RankSources:
         """Set the rank data for the
 
         Args:
-            key: Key of ranking data from the original dict
-            return by get_sources.
+            inlet: Inlet to set ranking data
             rank: Number between 1 and 9
             start_date: Start date
             end_date: End date
@@ -97,7 +93,8 @@ class RankSources:
         """
         obs = ObsSurface.load()
 
-        uuid = self._key_lookup[key]
+        inlet = inlet.lower()
+        uuid = self._key_lookup[inlet]
 
         daterange = create_daterange_str(start=start_date, end=end_date)
 
@@ -105,7 +102,7 @@ class RankSources:
 
         self._needs_update = True
 
-    def clear_rank(self, key: str) -> None:
+    def clear_rank(self, inlet: str) -> None:
         """Clear the ranking data for a Datasource
 
         Args:
@@ -114,7 +111,8 @@ class RankSources:
             None
         """
         obs = ObsSurface.load()
-        uuid = self._key_lookup[key]
+        inlet = inlet.lower()
+        uuid = self._key_lookup[inlet]
         obs.clear_rank(uuid=uuid)
         self._needs_update = True
 

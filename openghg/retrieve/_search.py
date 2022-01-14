@@ -48,6 +48,7 @@ def search(**kwargs):  # type: ignore
         closest_daterange,
         find_daterange_gaps,
         split_daterange_str,
+        load_json,
     )
     from openghg.dataobjects import SearchResults
 
@@ -80,6 +81,30 @@ def search(**kwargs):  # type: ignore
 
     # As we might have kwargs that are None we want to get rid of those
     search_kwargs = {k: clean_string(v) for k, v in kwargs_copy.items() if v is not None}
+
+    # Speices translation
+
+    species = search_kwargs.get("species")
+
+    if species is not None:
+        if not isinstance(species, list):
+            species = [species]
+
+        translator = load_json("species_translator.json")
+
+        updated_species = []
+
+        for s in species:
+            updated_species.append(s)
+
+            try:
+                translated = translator[s]
+            except KeyError:
+                pass
+            else:
+                updated_species.extend(translated)
+
+        search_kwargs["species"] = updated_species
 
     data_type = search_kwargs.get("data_type", "timeseries")
 

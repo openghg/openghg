@@ -154,14 +154,17 @@ def get_obs_surface(
         ds_resampled[f"{species}_variability"] = (
             data[species].resample(time=average).std(skipna=False, keep_attrs=True)
         )
+
         # If there are any periods where only one measurement was resampled, just use the median variability
         ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
             f"{species}_variability"
         ].median()
+        
         # Create attributes for variability variable
         ds_resampled[f"{species}_variability"].attrs[
             "long_name"
-        ] = f"{data[species].attrs['long_name']}_variability"
+        ] = f"{data.attrs['long_name']}_variability"
+
         ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
 
         # Resampling may introduce NaNs, so remove, if not keep_missing
@@ -192,8 +195,8 @@ def get_obs_surface(
 
     data.attrs["species"] = species
 
-    if "Calibration_scale" in data.attrs:
-        data.attrs["scale"] = data.attrs.pop("Calibration_scale")
+    if "calibration_scale" in data.attrs:
+        data.attrs["scale"] = data.attrs.pop("calibration_scale")
 
     if calibration_scale is not None:
         data = _scale_convert(data, species, calibration_scale)
