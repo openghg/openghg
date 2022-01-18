@@ -2,7 +2,7 @@ from typing import Dict
 from Acquire.Client import Wallet
 
 
-def call_test_service():
+def call_test_service() -> str:
     service_url = "https://fn.openghg.org/t"
 
     wallet = Wallet()
