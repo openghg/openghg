@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 from Acquire.Client import Wallet
+from openghg.retrieve import search as _local_search
+from openghg.util import running_in_cloud
 
 if TYPE_CHECKING:
     from openghg.dataobjects import SearchResults
@@ -9,74 +11,106 @@ if TYPE_CHECKING:
 __all__ = ["Search"]
 
 
-class Search:
-    def __init__(self, service_url: Optional[str] = None):
-        if service_url is not None:
-            self._service_url = service_url
-        else:
-            self._service_url = "https://fn.openghg.org/t"
+def search(
+    species: str = None,
+    site: str = None,
+    inlet: str = None,
+    instrument: str = None,
+    start_date: str = None,
+    end_date: str = None,
+) -> SearchResults:
+    """Cloud object store search
 
-        wallet = Wallet()
-        self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
+    Args:
+        species: Species
+        site: Three letter site code
+        inlet: Inlet height
+        instrument: Instrument name
+        start_date: Start date
+        end_date: End date
+    Returns:
+        SearchResults:  SearchResults object
+    """
+    cloud = running_in_cloud()
 
-    def search(
-        self,
-        species: Union[str, List] = None,
-        site: Union[str, List] = None,
-        inlet: Union[str, List] = None,
-        instrument: Union[str, List] = None,
-        start_date: str = None,
-        end_date: str = None,
-        skip_ranking: bool = False,
-        data_type: str = "timeseries",
-    ) -> Union[SearchResults, Dict]:
-        """Search for surface observations data in the object store
+    if cloud:
+        return _cloud_search(
+            species=species,
+            site=site,
+            inlet=inlet,
+            instrument=instrument,
+            start_date=start_date,
+            end_date=end_date,
+        )
+    else:
+        return _local_search(
+            species=species,
+            site=site,
+            inlet=inlet,
+            instrument=instrument,
+            start_date=start_date,
+            end_date=end_date,
+        )
 
-        Args:
-            species: Species
-            site: Three letter site code
-            inlet: Inlet height
-            instrument: Instrument name
-            start_date: Start date
-            end_date: End date
-        Returns:
-            SearchResults:  SearchResults object
-        """
-        from openghg.dataobjects import SearchResults
 
-        if self._service is None:
-            raise PermissionError("Cannot use a null service")
+def _cloud_search(
+    species: Union[str, List] = None,
+    site: Union[str, List] = None,
+    inlet: Union[str, List] = None,
+    instrument: Union[str, List] = None,
+    start_date: str = None,
+    end_date: str = None,
+    skip_ranking: bool = False,
+    data_type: str = "timeseries",
+    service_url: str = "https://fn.openghg.org/t",
+) -> Union[SearchResults, Dict]:
+    """Cloud object store search
 
-        if not any((species, site, inlet, instrument)):
-            raise ValueError("We must have at least one of  species, site, inlet or instrument")
+    Args:
+        species: Species
+        site: Three letter site code
+        inlet: Inlet height
+        instrument: Instrument name
+        start_date: Start date
+        end_date: End date
+    Returns:
+        SearchResults:  SearchResults object
+    """
+    from openghg.dataobjects import SearchResults
 
-        args = {}
+    wallet = Wallet()
+    cloud_service = wallet.get_service(service_url=f"{service_url}/openghg")
 
-        if species is not None:
-            args["species"] = species
+    if not any((species, site, inlet, instrument)):
+        raise ValueError("We must have at least one of  species, site, inlet or instrument")
 
-        if site is not None:
-            args["site"] = site
+    args = {}
 
-        if inlet is not None:
-            args["inlet"] = inlet
+    if species is not None:
+        args["species"] = species
 
-        if instrument is not None:
-            args["instrument"] = instrument
+    if site is not None:
+        args["site"] = site
 
-        if start_date is not None:
-            args["start_date"] = start_date
-        if end_date is not None:
-            args["end_date"] = end_date
+    if inlet is not None:
+        args["inlet"] = inlet
 
-        args["skip_ranking"] = str(skip_ranking)
-        args["data_type"] = str(data_type)
+    if instrument is not None:
+        args["instrument"] = instrument
 
-        response: Dict = self._service.call_function(function="search.search", args=args)
+    if start_date is not None:
+        args["start_date"] = start_date
+    if end_date is not None:
+        args["end_date"] = end_date
 
-        try:
-            results_data = response["results"]
-            search_results = SearchResults.from_data(results_data)
-            return search_results
-        except KeyError:
-            return response
+    args["skip_ranking"] = str(skip_ranking)
+    args["data_type"] = str(data_type)
+
+    response: Dict = cloud_service.call_function(function="search.search", args=args)
+
+    try:
+        results_data = response["results"]
+        search_results = SearchResults.from_data(results_data)
+        return search_results
+    except KeyError:
+        return response

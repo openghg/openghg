@@ -3,7 +3,7 @@
 
 """
 
-from typing import DefaultDict, Dict, Union
+from typing import Dict, Union
 
 __all__ = ["search"]
 
@@ -33,7 +33,6 @@ def search(**kwargs):  # type: ignore
         dict: List of keys of Datasources matching the search parameters
     """
     from addict import Dict as aDict
-    from collections import defaultdict
     from copy import deepcopy
     from itertools import chain as iter_chain
 
@@ -130,7 +129,7 @@ def search(**kwargs):  # type: ignore
     # For the time being this will return a dict until we know how best to represent
     # the footprints and emissions results in a SearchResult object
     if data_type in {"emissions", "footprints", "eulerian_model"}:
-        sources: DefaultDict[str, Dict] = defaultdict(dict)
+        sources: Dict = aDict()
         for datasource in datasources:
             if datasource.search_metadata(**search_kwargs):
                 uid = datasource.uuid()
