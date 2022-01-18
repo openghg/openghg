@@ -10,7 +10,23 @@ __all__ = [
     "valid_site",
     "pairwise",
     "multiple_inlets",
+    "running_in_cloud",
 ]
+
+
+def running_in_cloud() -> bool:
+    """Are we running in the cloud?
+
+    Checks for the OPENGHG_CLOUD environment variable being set
+
+    Returns:
+        bool: True if running in cloud
+    """
+    from os import environ
+
+    cloud_env = environ.get("OPENGHG_CLOUD")
+
+    return cloud_env is not None
 
 
 def unanimous(seq: Dict) -> bool:

@@ -1,5 +1,5 @@
 import pytest
-from openghg.client import Process, Search, Retrieve
+from openghg.client import process_files, search
 from openghg.objectstore import get_local_bucket
 from helpers import get_datapath, glob_files, metadata_checker_obssurface
 
@@ -8,21 +8,18 @@ from helpers import get_datapath, glob_files, metadata_checker_obssurface
 def read_data(authenticated_user):
     get_local_bucket(empty=True)
 
-    process = Process(service_url="openghg")
-
     data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     precision = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
     gc_files = (data, precision)
 
-    process.process_files(
+    process_files(
         user=authenticated_user,
         files=gc_files,
         site="cgo",
         network="AGAGE",
         data_type="GCWERKS",
-        openghg_url="openghg",
-        storage_url="storage",
+        service_url="openghg",
     )
 
     bsd_file = get_datapath(
@@ -30,34 +27,30 @@ def read_data(authenticated_user):
     )
     hfd_files = glob_files(search_str="hfd.picarro.1minute", data_type="CRDS")
 
-    process.process_files(
+    process_files(
         user=authenticated_user,
         files=bsd_file,
         site="bsd",
         network="DECC",
         data_type="CRDS",
-        openghg_url="openghg",
-        storage_url="storage",
+        service_url="openghg",
     )
 
-    process.process_files(
+    process_files(
         user=authenticated_user,
         files=hfd_files,
         site="hfd",
         network="DECC",
         data_type="CRDS",
-        openghg_url="openghg",
-        storage_url="storage",
+        service_url="openghg",
     )
 
-
+@pytest.mark.skip("Marked for removal")
 def test_search(read_data):
-    search = Search(service_url="openghg")
-
     species = "co2"
     site = "bsd"
 
-    results = search.search(species=species, site=site, inlet="248m")
+    results = search(species=species, site=site, inlet="248m")
 
     raw_results = results.raw()
 
@@ -92,20 +85,18 @@ def test_search(read_data):
 
     assert len(raw_results["cgo"]["nf3"]["70m"]["keys"]) == 1
 
-
+@pytest.mark.skip("Marked for removal")
 def test_search_and_retrieve(read_data, monkeypatch):
-    def fixed_init(self):
-        from Acquire.Client import Wallet
+    # def fixed_init(self):
+    #     from Acquire.Client import Wallet
 
-        self._service_url = "openghg"
-        wallet = Wallet()
-        self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
+    #     self._service_url = "openghg"
+    #     wallet = Wallet()
+    #     self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
 
-    monkeypatch.setattr(Retrieve, "__init__", fixed_init)
+    # monkeypatch.setattr(Retrieve, "__init__", fixed_init)
 
-    search = Search(service_url="openghg")
-
-    search_results = search.search(species="nf3", site="cgo", inlet="70m")
+    search_results = search(species="nf3", site="cgo", inlet="70m")
 
     assert search_results.cloud is True
 

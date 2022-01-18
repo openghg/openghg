@@ -90,6 +90,8 @@ class MockedRequests:
         elif url.startswith("https://"):
             url = url[8:]
 
+        # print("We're performing here ", url)
+
         if url.startswith("identity"):
             push_testing_objstore(_services["identity"])
             func = identity_handler

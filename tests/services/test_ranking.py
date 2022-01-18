@@ -1,8 +1,9 @@
 import pytest
 
-from openghg.client import RankSources, Process
+from openghg.client import rank_sources, process_files
 from openghg.objectstore import get_local_bucket
 from helpers import get_datapath
+
 
 @pytest.fixture(scope="session")
 def tempdir(tmpdir_factory):
@@ -20,32 +21,28 @@ def load_crds(authenticated_user):
     ]
     filepaths = [get_datapath(filename=f, data_type="CRDS") for f in files]
 
-    process = Process(service_url="openghg")
-
-    process.process_files(
+    process_files(
         user=authenticated_user,
         files=filepaths,
         site="hfd",
         network="DECC",
         data_type="CRDS",
-        openghg_url="openghg",
-        storage_url="storage",
     )
 
-
+@pytest.mark.skip("Marked for removal")
 def test_set_and_clear_ranking(authenticated_user, load_crds):
-    r = RankSources(service_url="openghg")
-
-    response = r.get_sources(site="hfd", species="co2")
+    r = rank_sources(site="hfd", species="co2", service_url="openghg")
 
     expected_response = {
         "co2_100m_picarro": {"rank_data": "NA", "data_range": "2013-12-04T14:02:30_2019-05-21T15:46:30"},
         "co2_50m_picarro": {"rank_data": "NA", "data_range": "2013-11-23T12:28:30_2020-06-24T09:41:30"},
     }
 
-    assert response == expected_response
+    raw_response = r.raw()
 
-    r.set_rank(key="co2_100m_picarro", rank=1, start_date="2015-01-01", end_date="2017-01-01")
+    assert raw_response == expected_response
+
+    r.set_rank(inlet="100m", rank=1, start_date="2015-01-01", end_date="2017-01-01")
 
     response = r.get_sources(site="hfd", species="co2")
 
@@ -59,7 +56,7 @@ def test_set_and_clear_ranking(authenticated_user, load_crds):
 
     assert response == expected_new_response
 
-    r.clear_rank(key="co2_100m_picarro")
+    r.clear_rank(inlet="100m")
 
     response = r.get_sources(site="hfd", species="co2")
 

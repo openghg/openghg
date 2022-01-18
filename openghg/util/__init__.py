@@ -7,6 +7,7 @@ from ._util import (
     valid_site,
     pairwise,
     multiple_inlets,
+    running_in_cloud
 )
 
 from ._hashing import hash_string, hash_file

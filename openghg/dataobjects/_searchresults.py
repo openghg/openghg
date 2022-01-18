@@ -5,7 +5,7 @@ from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
 from openghg.util import clean_string
-from openghg.client import Retrieve
+
 
 __all__ = ["SearchResults"]
 
@@ -272,26 +272,37 @@ class SearchResults:
         """
         if self.ranked_data:
             specific_source = self.results[site][species]
-            rank_data = specific_source["rank_metadata"]
         else:
             specific_source = self.results[site][species][inlet]
 
         data_keys = specific_source["keys"]
+        metadata = specific_source["metadata"]
 
         # If cloud use the Retrieve object
         if self.cloud:
-            retrieve = Retrieve()
-            # TODO - update this function to allow multi-site / species retrieval
-            key = f"{site}_{species}_{inlet}"
+            from Acquire.Client import Wallet
+            from xarray import open_dataset
+
+            wallet = Wallet()
+            self._service_url = "https://fn.openghg.org/t"
+            self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
+
+            key = f"{site}_{species}"
             keys_to_retrieve = {key: data_keys}
-            retrieved = retrieve.retrieve(keys=keys_to_retrieve)
-            data = retrieved[key]
+
+            args = {"keys": keys_to_retrieve}
+
+            response: Dict = self._service.call_function(function="retrieve.retrieve", args=args)
+
+            response_data = response["results"]
+
+            data = open_dataset(response_data[key])
         else:
             data = recombine_datasets(data_keys, sort=True)
 
         metadata = specific_source["metadata"]
 
         if self.ranked_data:
-            metadata["rank_metadata"] = rank_data
+            metadata["rank_metadata"] = specific_source["rank_metadata"]
 
         return ObsData(data=data, metadata=metadata)
