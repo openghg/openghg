@@ -1,4 +1,4 @@
-from openghg.client import TestService
+from openghg.client import call_test_service
 from pandas import Timestamp
 import pytest
 
@@ -10,10 +10,8 @@ def mock_timestamp(monkeypatch):
 
     monkeypatch.setattr(Timestamp, "now", mock_timestamp)
 
-
+@pytest.mark.skip("Marked for removal")
 def test_test_service(authenticated_user, mock_timestamp):
-    t = TestService(service_url="openghg")
-
-    timestamp = t.test()
+    timestamp = call_test_service()
 
     assert timestamp == "Function run at 2001-01-01 00:00:00+00:00"

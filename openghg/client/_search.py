@@ -8,9 +8,6 @@ if TYPE_CHECKING:
     from openghg.dataobjects import SearchResults
 
 
-__all__ = ["Search"]
-
-
 def search(
     species: str = None,
     site: str = None,

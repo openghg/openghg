@@ -7,16 +7,28 @@ from openghg.util import InvalidSiteError, create_daterange_str, running_in_clou
 
 
 class RankSources:
-    def __init__(self, cloud: bool = False) -> None:
+    def __init__(self, cloud: bool = False, service_url: str = None) -> None:
         self._cloud = cloud
 
         if cloud:
             from Acquire.Client import Wallet
 
             wallet = Wallet()
-            service_url = "https://fn.openghg.org/t"
+
+            if service_url is None:
+                service_url = "https://fn.openghg.org/t"
 
             self._service = wallet.get_service(service_url=f"{service_url}/openghg")
+
+    def raw(self) -> Dict:
+        """ Return the raw ranking data
+
+        Args:
+            None
+        Returns:
+            dict: Raw ranking data
+        """
+        return self._user_info
 
     def get_sources(self, site: str, species: str) -> Dict:
         """Get the datasources for this site and species to allow a ranking to be set
@@ -268,7 +280,7 @@ class RankSources:
     #     return net.show("openghg_rankings.html")
 
 
-def rank_sources(site: str, species: str) -> RankSources:
+def rank_sources(site: str, species: str, service_url: str = None) -> RankSources:
     """Retrieve datasources for a specific site and species. Returns a RankSources
     object that can be used to set and modify ranking data.
 
@@ -279,7 +291,7 @@ def rank_sources(site: str, species: str) -> RankSources:
         RankSources: A RankSources object
     """
     cloud = running_in_cloud()
-    ranker = RankSources(cloud)
+    ranker = RankSources(cloud=cloud, service_url=service_url)
     ranker.get_sources(site=site, species=species)
 
     return ranker

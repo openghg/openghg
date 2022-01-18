@@ -1,21 +1,17 @@
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
-from Acquire.Client import (
-    Authorisation,
-    Drive,
-    PAR,
-    Service,
-    StorageCreds,
-    User,
-    Wallet,
-)
+from Acquire.Client import (PAR, Authorisation, Drive, Service, StorageCreds,
+                            User, Wallet)
 from openghg.store import ObsSurface
 from openghg.types import DataTypes
+from openghg.util import running_in_cloud
+
+filepathType = Union[str, Path, List, Tuple[Path, Path]]
 
 
 def process_files(
-    files: Union[str, List],
+    files: filepathType,
     data_type: str,
     site: str,
     network: str,
@@ -38,7 +34,7 @@ def process_files(
     Returns:
         dict: UUIDs of Datasources storing data of processed files keyed by filename
     """
-    cloud = False
+    cloud = running_in_cloud()
 
     if cloud:
         return _process_files_cloud(
@@ -65,7 +61,7 @@ def process_files(
 
 
 def _process_files_cloud(
-    files: Union[str, List],
+    files: filepathType,
     data_type: str,
     site: str,
     network: str,
@@ -174,7 +170,7 @@ def _process_files_cloud(
 
 
 def _process_files_local(
-    files: Union[str, List],
+    files: filepathType,
     data_type: str,
     site: str,
     network: str,
