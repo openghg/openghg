@@ -33,7 +33,7 @@ def recombine_datasets(
     attrs_to_check: Union[str, List[str], Dict[str, str], None] = None,
 ) -> Dataset:
     """Combines datasets stored separately in the object store
-    into a single datasets
+    into a single dataset
 
     Args:
         keys: List of object store keys
