@@ -1,7 +1,7 @@
 Acquire @ git+https://github.com/openghg/acquire@devel#egg=Acquire
 addict
 cdsapi
-cfchecker @ git+https://github.com/openghg/cfchecker@master#egg=cfchecker
+cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cfchecker
 lazy_import
 matplotlib
 netcdf4
