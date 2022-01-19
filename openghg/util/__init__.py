@@ -4,7 +4,7 @@
 
 from ._util import (
     unanimous,
-    valid_site,
+    verify_site,
     pairwise,
     multiple_inlets,
     running_in_cloud

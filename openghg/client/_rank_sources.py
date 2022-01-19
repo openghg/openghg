@@ -2,7 +2,7 @@ from typing import Dict, List, Union
 
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
-from openghg.util import InvalidSiteError, create_daterange_str, running_in_cloud, valid_site
+from openghg.util import create_daterange_str, running_in_cloud, verify_site
 
 
 class RankSources:
@@ -44,8 +44,7 @@ class RankSources:
             return self._get_sources_local(site=site, species=species)
 
     def _get_sources_cloud(self, site: str, species: str) -> Dict:
-        if not valid_site(site):
-            raise InvalidSiteError(f"{site} is not a valid site code")
+        site = verify_site(site=site)
 
         args = {"site": site, "species": species}
 
@@ -64,8 +63,7 @@ class RankSources:
         return self._user_info
 
     def _get_sources_local(self, site: str, species: str) -> Dict:
-        if not valid_site(site):
-            raise InvalidSiteError(f"{site} is not a valid site code")
+        site = verify_site(site=site)
 
         # Save these
         self.site = site

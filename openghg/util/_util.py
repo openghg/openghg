@@ -7,7 +7,7 @@ from collections.abc import Iterable
 
 __all__ = [
     "unanimous",
-    "valid_site",
+    "verify_site",
     "pairwise",
     "multiple_inlets",
     "running_in_cloud",
@@ -65,7 +65,34 @@ def pairwise(iterable: Iterable) -> Iterator[Tuple[str, str]]:
     return zip(a, b)
 
 
-def valid_site(site: str) -> bool:
+def find_matching_site(site_name: str) -> str:
+    """Try and find the matching site code for a given site name
+
+    Args:
+        site_name: Name of site
+    Returns:
+        str: Site code
+    """
+    from rapidfuzz import process
+    from openghg.util import load_json, InvalidSiteError
+
+    name_code_lookup: Dict[str, str] = load_json(filename="name_code_lookup.json")
+
+    matches = process.extract(site_name, name_code_lookup.keys())
+    scores = [s for m, s, _ in matches]
+
+    # This seems like a decent cutoff score for a decent find
+    cutoff_score = 85
+
+    if scores[0] == scores[1] or scores[0] < cutoff_score:
+        raise InvalidSiteError(f"No definite match for {site_name}.")
+
+    best_match = matches[0][0]
+
+    return name_code_lookup[best_match]
+
+
+def verify_site(site: str) -> str:
     """Check if the passed site is a valid one
 
     Args:
@@ -77,7 +104,11 @@ def valid_site(site: str) -> bool:
 
     site_data = load_json("acrg_site_info.json")
 
-    return site.upper() in site_data
+    if site.upper() in site_data:
+        return site.lower()
+    else:
+        site_code = find_matching_site(site_name=site)
+        return site_code.lower()
 
 
 def multiple_inlets(site: str) -> bool:
