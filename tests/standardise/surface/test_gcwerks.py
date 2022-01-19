@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from openghg.standardise.surface import parse_gcwerks
-from helpers import get_datapath, parsed_surface_metachecker
+from helpers import get_datapath, parsed_surface_metachecker, check_cf_compliance
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -86,6 +86,8 @@ def test_read_file_thd(data_thd, prec_thd):
 
     meas_data = gas_data["ch3ccl3_10m"]["data"]
 
+    assert check_cf_compliance(dataset=meas_data)
+
     assert meas_data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
     assert meas_data.time[-1] == pd.Timestamp("2001-12-31T23:18:22.5")
 
@@ -136,6 +138,8 @@ def test_read_thd_window_inlet():
     parsed_surface_metachecker(data=res)
 
     data = res["ch4_10m"]["data"]
+
+    assert check_cf_compliance(dataset=data)
 
     assert data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
     assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")

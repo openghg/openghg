@@ -4,7 +4,7 @@ import pytest
 
 from helpers import get_datapath, parsed_surface_metachecker
 from openghg.standardise.surface import parse_noaa
-from helpers import attributes_checker_obssurface
+from helpers import attributes_checker_obssurface, check_cf_compliance
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -87,6 +87,8 @@ def test_read_file_site_filename_read():
     )
 
     ch4_data = data["ch4"]["data"]
+    
+    assert check_cf_compliance(dataset=ch4_data)
 
     assert ch4_data.time[0] == Timestamp("1991-07-05T17:00:00")
     assert ch4_data["ch4"][0] == pytest.approx(1713.21)

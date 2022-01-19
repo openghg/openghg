@@ -11,3 +11,5 @@ from .meta import (
     parsed_surface_metachecker,
     attributes_checker_get_obs,
 )
+
+from .cfchecking import check_cf_compliance

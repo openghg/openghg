@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from openghg.standardise.surface import parse_tmb
-from helpers import get_datapath, parsed_surface_metachecker
+from helpers import get_datapath, parsed_surface_metachecker, check_cf_compliance
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -19,6 +19,8 @@ def test_read_file():
     ch4_data = data["CH4"]["data"]
     co2_data = data["CO2"]["data"]
     co_data = data["CO"]["data"]
+
+    assert check_cf_compliance(dataset=co_data)
 
     assert ch4_data.time[0] == pd.Timestamp("2019-07-01T00:39:55.000000000")
     assert ch4_data["ch4"][0] == pytest.approx(1960.835716)
