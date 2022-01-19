@@ -1,5 +1,5 @@
 from logging import warning
-import cfchecker
+from cfchecker import CFChecker
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Union
@@ -15,7 +15,7 @@ def check_cf_compliance(dataset: xr.Dataset, debug: bool = False) -> bool:
     Returns:
         bool: True if compliant
     """
-    checker = cfchecker.cfchecks.CFChecker(debug=debug)
+    checker = CFChecker(debug=debug)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         with NamedTemporaryFile(suffix=".nc") as tmpfile:
