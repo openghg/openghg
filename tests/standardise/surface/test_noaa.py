@@ -13,6 +13,17 @@ mpl_logger.setLevel(logging.WARNING)
 # flake8: noqa: W503
 
 
+@pytest.fixture(scope="session")
+def scsn06_data():
+    filepath = get_datapath(filename="ch4_scsn06_surface-flask_1_ccgg_event.txt", data_type="NOAA")
+
+    data = parse_noaa(
+        data_filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask", sampling_period="1200"
+    )
+
+    return data
+
+
 def test_read_obspack_2020():
     '''Test inputs from "obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24"'''
     filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
@@ -78,26 +89,17 @@ def test_read_obspack_flask_2021():
     parsed_surface_metachecker(data=data)
 
 
-def test_read_file_site_filename_read():
-
-    filepath = get_datapath(filename="ch4_scsn06_surface-flask_1_ccgg_event.txt", data_type="NOAA")
-
-    data = parse_noaa(
-        data_filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask", sampling_period="1200"
-    )
-
-    ch4_data = data["ch4"]["data"]
-    
-    assert check_cf_compliance(dataset=ch4_data)
+def test_read_file_site_filename_read(scsn06_data):
+    ch4_data = scsn06_data["ch4"]["data"]
 
     assert ch4_data.time[0] == Timestamp("1991-07-05T17:00:00")
     assert ch4_data["ch4"][0] == pytest.approx(1713.21)
     assert ch4_data["ch4_repeatability"][0] == pytest.approx(2.4)
     assert ch4_data["ch4_selection_flag"][0] == 0
 
-    metadata = data["ch4"]["metadata"]
+    metadata = scsn06_data["ch4"]["metadata"]
 
-    parsed_surface_metachecker(data=data)
+    parsed_surface_metachecker(data=scsn06_data)
 
     expected_attrs = {
         "station_longitude": 107.0,
@@ -108,6 +110,13 @@ def test_read_file_site_filename_read():
 
     for key, value in expected_attrs.items():
         assert ch4_data.attrs[key] == value
+
+
+@pytest.mark.cfchecks
+def test_noaa_site_filename_cf_compliance(scsn06_data):
+    ch4_data = scsn06_data["ch4"]["data"]
+
+    assert check_cf_compliance(dataset=ch4_data)
 
 
 def test_read_raw_file():
@@ -135,6 +144,7 @@ def test_read_raw_file():
     attrs = co_data.attrs
 
     assert attributes_checker_obssurface(attrs=attrs, species="co")
+
 
 def test_read_incorrect_site_raises():
 
