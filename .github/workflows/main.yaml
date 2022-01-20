@@ -59,7 +59,7 @@ jobs:
     - name: Test with pytest
       run: |
         pip install --upgrade pytest
-        pytest --cov=./ --cov-report=xml
+        pytest --run-cfchecks --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
       run: |
         curl -s https://codecov.io/bash > codecov;
