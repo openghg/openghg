@@ -5,43 +5,46 @@ import pandas as pd
 import pytest
 
 from openghg.standardise.surface import parse_gcwerks
-from helpers import get_datapath, parsed_surface_metachecker
+from helpers import get_datapath, parsed_surface_metachecker, check_cf_compliance
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
 
 @pytest.fixture(scope="session")
-def cgo_path():
-    return get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
-
-
-@pytest.fixture(scope="session")
-def cgo_prec_path():
-    return get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
-
-
-@pytest.fixture(scope="session")
-def data_thd():
-    return get_datapath(filename="trinidadhead.01.C", data_type="GC")
-
-
-@pytest.fixture(scope="session")
-def prec_thd():
-    return get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
-
-
-def test_read_file_capegrim(cgo_path, cgo_prec_path):
+def thd_data():
+    thd_path = get_datapath(filename="trinidadhead.01.C", data_type="GC")
+    thd_prec_path = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
 
     gas_data = parse_gcwerks(
-        data_filepath=cgo_path,
-        precision_filepath=cgo_prec_path,
+        data_filepath=thd_path,
+        precision_filepath=thd_prec_path,
+        site="THD",
+        instrument="medusa",
+        network="agage",
+    )
+
+    return gas_data
+
+
+@pytest.fixture(scope="session")
+def cgo_data():
+    cgo_data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
+    cgo_prec = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
+
+    gas_data = parse_gcwerks(
+        data_filepath=cgo_data,
+        precision_filepath=cgo_prec,
         site="CGO",
         instrument="medusa",
         network="agage",
     )
 
-    parsed_surface_metachecker(data=gas_data)
+    return gas_data
+
+
+def test_read_file_capegrim(cgo_data):
+    parsed_surface_metachecker(data=cgo_data)
 
     # 30/11/2021: Species labels were updated to be standardised in line with variable naming
     # This list of expected labels was updated.
@@ -56,17 +59,23 @@ def test_read_file_capegrim(cgo_path, cgo_prec_path):
         "c4f10_70m",
     ]
 
-    sorted_keys = sorted(list(gas_data.keys()))
+    sorted_keys = sorted(list(cgo_data.keys()))
 
     assert sorted_keys[:8] == expected_eight
 
     assert len(sorted_keys) == 56
 
 
-def test_read_file_thd(data_thd, prec_thd):
+def test_read_file_thd():
+    thd_path = get_datapath(filename="trinidadhead.01.C", data_type="GC")
+    thd_prec_path = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
 
     gas_data = parse_gcwerks(
-        data_filepath=data_thd, precision_filepath=prec_thd, site="thd", network="agage", instrument="gcmd"
+        data_filepath=thd_path,
+        precision_filepath=thd_prec_path,
+        site="thd",
+        network="agage",
+        instrument="gcmd",
     )
 
     parsed_surface_metachecker(data=gas_data)
@@ -93,19 +102,28 @@ def test_read_file_thd(data_thd, prec_thd):
     assert meas_data["ch3ccl3"][-1] == 34.649
 
 
-def test_read_invalid_instrument_raises(data_thd, prec_thd):
+@pytest.mark.cfchecks
+def test_gc_thd_cf_compliance(thd_data):
+    meas_data = thd_data["ch3ccl3_10m"]["data"]
+    assert check_cf_compliance(dataset=meas_data)
+
+
+def test_read_invalid_instrument_raises():
+    thd_path = get_datapath(filename="trinidadhead.01.C", data_type="GC")
+    thd_prec_path = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
 
     with pytest.raises(ValueError):
         parse_gcwerks(
-            data_filepath=data_thd,
-            precision_filepath=prec_thd,
+            data_filepath=thd_path,
+            precision_filepath=thd_prec_path,
             site="CGO",
             instrument="fish",
             network="agage",
         )
 
 
-def test_no_precisions_species_raises(cgo_path):
+def test_no_precisions_species_raises():
+    cgo_path = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     missing_species_prec = get_datapath(filename="capegrim-medusa.18.precisions.broke.C", data_type="GC")
 
     with pytest.raises(ValueError):
@@ -141,6 +159,12 @@ def test_read_thd_window_inlet():
     assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
     assert data["ch4"][0] == pytest.approx(1818.62)
     assert data["ch4"][-1] == pytest.approx(1840.432)
+
+
+@pytest.mark.cfchecks
+def test_thd_cf_compliance(thd_data):
+    meas_data = thd_data["ch4_10m"]["data"]
+    assert check_cf_compliance(dataset=meas_data)
 
 
 def test_read_shangdianzi_ASM_inlet():
