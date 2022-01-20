@@ -143,10 +143,17 @@ def test_read_ridgehill_window_inlet_all_NaNs():
     assert not res
 
 
-def test_read_thd_window_inlet(thd_data):
-    parsed_surface_metachecker(data=thd_data)
+def test_read_thd_window_inlet():
+    data_path = get_datapath(filename="trinidadhead.01.window-inlet.C", data_type="GC")
+    prec_path = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
 
-    data = thd_data["ch4_10m"]["data"]
+    res = parse_gcwerks(
+        data_filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="agage"
+    )
+
+    parsed_surface_metachecker(data=res)
+
+    data = res["ch4_10m"]["data"]
 
     assert data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
     assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
