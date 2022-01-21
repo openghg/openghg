@@ -4,14 +4,14 @@
 
 from ._util import (
     unanimous,
-    valid_site,
+    verify_site,
     pairwise,
     multiple_inlets,
     running_in_cloud
 )
 
 from ._hashing import hash_string, hash_file
-from ._strings import clean_string, to_lowercase
+from ._strings import clean_string, to_lowercase, remove_punctuation
 
 from ._time import (
     timestamp_tzaware,

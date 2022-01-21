@@ -1,6 +1,4 @@
-from ast import parse
 import logging
-from pathlib import Path
 import pandas as pd
 import pytest
 
@@ -35,7 +33,7 @@ def cgo_data():
     gas_data = parse_gcwerks(
         data_filepath=cgo_data,
         precision_filepath=cgo_prec,
-        site="CGO",
+        site="cgo",
         instrument="medusa",
         network="agage",
     )

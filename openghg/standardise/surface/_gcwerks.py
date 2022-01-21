@@ -73,7 +73,7 @@ def parse_gcwerks(
     """
     from pathlib import Path
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import valid_site, clean_string, load_json
+    from openghg.util import clean_string, load_json
 
     data_filepath = Path(data_filepath)
     precision_filepath = Path(precision_filepath)
@@ -83,7 +83,6 @@ def parse_gcwerks(
     gcwerks_data = load_json(filename="process_gcwerks_parameters.json")
     gc_params = gcwerks_data["GCWERKS"]
 
-    site = clean_string(site)
     network = clean_string(network)
     # We don't currently do anything with inlet here as it's always read from data
     # or taken from process_gcwerks_parameters.json
@@ -92,8 +91,7 @@ def parse_gcwerks(
     if instrument is not None:
         instrument = clean_string(instrument)
 
-    if not valid_site(site):
-        raise ValueError(f"Invalid site {site} passed.")
+    # site = verify_site(site=site)
 
     # Check if the site code passed matches that read from the filename
     site = _check_site(

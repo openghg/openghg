@@ -33,7 +33,7 @@ def parse_crds(
         data_filepath = Path(data_filepath)
 
     # This may seem like an almost pointless function as this is all we do
-    # but it makes it a lot easier to test that assign_attributes
+    # but it makes it a lot easier to test assign_attributes
     gas_data = _read_data(
         data_filepath=data_filepath,
         site=site,
@@ -75,9 +75,10 @@ def _read_data(
     from datetime import datetime
     from pandas import RangeIndex, read_csv, NaT
     import warnings
-    from openghg.util import clean_string, valid_site
+    from openghg.util import clean_string
 
     split_fname = data_filepath.stem.split(".")
+    site = site.lower()
 
     try:
         site_fname = clean_string(split_fname[0])
@@ -86,11 +87,6 @@ def _read_data(
         raise ValueError(
             "Error reading metadata from filename, we expect a form hfd.picarro.1minute.100m.dat"
         )
-
-    site = site.lower()
-
-    if not valid_site:
-        raise ValueError(f"{site} is not a valid site.")
 
     if site_fname != site:
         raise ValueError("Site mismatch between passed site code and that read from filename.")

@@ -7,7 +7,7 @@ from collections.abc import Iterable
 
 __all__ = [
     "unanimous",
-    "valid_site",
+    "verify_site",
     "pairwise",
     "multiple_inlets",
     "running_in_cloud",
@@ -65,19 +65,66 @@ def pairwise(iterable: Iterable) -> Iterator[Tuple[str, str]]:
     return zip(a, b)
 
 
-def valid_site(site: str) -> bool:
-    """Check if the passed site is a valid one
+def find_matching_site(site_name: str, possible_sites: Dict) -> str:
+    """Try and find a similar name to site_name in site_list and return a suggestion or
+    error string.
 
     Args:
-        site: Three letter site code
+        site_name: Name of site
+        site_list: List of sites to check
     Returns:
-        bool: True if site is valid
+        str: Suggestion / error message
     """
-    from openghg.util import load_json
+    from rapidfuzz import process
 
-    site_data = load_json("acrg_site_info.json")
+    site_list = possible_sites.keys()
 
-    return site.upper() in site_data
+    matches = process.extract(site_name, site_list)
+
+    scores = [s for m, s, _ in matches]
+
+    # This seems like a decent cutoff score for a decent find
+    cutoff_score = 85
+
+    if scores[0] < cutoff_score:
+        return f"No suggestion for {site_name}."
+    elif scores[0] > cutoff_score and scores[0] > scores[1]:
+        best_match = matches[0][0]
+        return f"Did you mean {best_match.title()}, code: {possible_sites[best_match]} ?"
+    elif scores[0] == scores[1]:
+        suggestions = [f"{match.title()}, code: {possible_sites[match]}" for match, _, _ in matches]
+        nl_char = "\n"
+        return f"Did you mean one of : \n {nl_char.join(suggestions)}"
+    else:
+        return f"Unknown site: {site_name}"
+
+
+def verify_site(site: str) -> str:
+    """Check if the passed site is a valid one and returns the three
+    letter site code if found. Otherwise we use fuzzy text matching to suggest
+    sites with similar names.
+
+    Args:
+        site: Three letter site code or site name
+    Returns:
+        str: Verified three letter site code if valid site
+    """
+    from openghg.util import load_json, remove_punctuation, InvalidSiteError
+
+    site_data = load_json("site_lookup.json")
+
+    if site.upper() in site_data:
+        return site.lower()
+    else:
+        site = remove_punctuation(site)
+        name_lookup: Dict[str, str] = {value["short_name"]: code for code, value in site_data.items()}
+
+        try:
+            return name_lookup[site].lower()
+        except KeyError:
+            long_names = {value["long_name"]: code for code, value in site_data.items()}
+            message = find_matching_site(site_name=site, possible_sites=long_names)
+            raise InvalidSiteError(message)
 
 
 def multiple_inlets(site: str) -> bool:
