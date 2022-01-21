@@ -1,6 +1,4 @@
-from ast import parse
 import logging
-from pathlib import Path
 import pandas as pd
 import pytest
 
@@ -33,8 +31,8 @@ def cgo_data():
     cgo_prec = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
     gas_data = parse_gcwerks(
-        data_filepath=cgo_path,
-        precision_filepath=cgo_prec_path,
+        data_filepath=cgo_data,
+        precision_filepath=cgo_prec,
         site="cgo",
         instrument="medusa",
         network="agage",
