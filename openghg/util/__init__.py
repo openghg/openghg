@@ -11,7 +11,7 @@ from ._util import (
 )
 
 from ._hashing import hash_string, hash_file
-from ._strings import clean_string, to_lowercase
+from ._strings import clean_string, to_lowercase, remove_punctuation
 
 from ._time import (
     timestamp_tzaware,

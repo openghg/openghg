@@ -13,7 +13,7 @@ from helpers import get_datapath, parsed_surface_metachecker
 def test_read_file():
     hfd_filepath = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
 
-    gas_data = parse_crds(data_filepath=hfd_filepath, site="heathfield", network="DECC")
+    gas_data = parse_crds(data_filepath=hfd_filepath, site="hfd", network="DECC")
 
     ch4_data = gas_data["ch4"]["data"]
     co2_data = gas_data["co2"]["data"]

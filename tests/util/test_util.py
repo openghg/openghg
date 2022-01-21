@@ -1,6 +1,7 @@
 import os
 import pytest
 from openghg import util
+from openghg.util import InvalidSiteError
 
 
 def test_read_header():
@@ -25,19 +26,24 @@ def test_verify_site():
 
     assert result == "tac"
 
+    site = "tacolneston"
+    result = util.verify_site(site=site)
+
+    assert result == "tac"
+
     site = "atlantis"
 
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidSiteError):
         result = util.verify_site(site=site)
 
     site = "cape"
 
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidSiteError):
         result = util.verify_site(site=site)
 
     site = "india"
 
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidSiteError):
         result = util.verify_site(site=site)
 
 

@@ -28,17 +28,12 @@ def parse_crds(
     """
     from pathlib import Path
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import verify_site
 
     if not isinstance(data_filepath, Path):
         data_filepath = Path(data_filepath)
 
-    # This verifies that the site code is correct, or if a site name is given, returns the correct site
-    # code if we find one.
-    site = verify_site(site=site)
-
     # This may seem like an almost pointless function as this is all we do
-    # but it makes it a lot easier to test that assign_attributes
+    # but it makes it a lot easier to test assign_attributes
     gas_data = _read_data(
         data_filepath=data_filepath,
         site=site,
@@ -83,6 +78,7 @@ def _read_data(
     from openghg.util import clean_string
 
     split_fname = data_filepath.stem.split(".")
+    site = site.lower()
 
     try:
         site_fname = clean_string(split_fname[0])

@@ -98,3 +98,18 @@ def is_number(s: str) -> bool:
         return True
     except ValueError:
         return False
+
+
+def remove_punctuation(s: str) -> str:
+    """Removes punctuation and converts the passed string
+    to lowercase
+
+    Args:
+        s: String to convert
+    Returns:
+        str: Unpunctuated, lowercased string
+    """
+    import re
+
+    s = s.lower()
+    return re.sub(r"[^\w\s]", "", s)

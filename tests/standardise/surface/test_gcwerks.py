@@ -36,7 +36,7 @@ def test_read_file_capegrim(cgo_path, cgo_prec_path):
     gas_data = parse_gcwerks(
         data_filepath=cgo_path,
         precision_filepath=cgo_prec_path,
-        site="cape grim",
+        site="cgo",
         instrument="medusa",
         network="agage",
     )

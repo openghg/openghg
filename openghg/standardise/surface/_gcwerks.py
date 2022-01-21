@@ -73,7 +73,7 @@ def parse_gcwerks(
     """
     from pathlib import Path
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import verify_site, clean_string, load_json
+    from openghg.util import clean_string, load_json
 
     data_filepath = Path(data_filepath)
     precision_filepath = Path(precision_filepath)
@@ -91,7 +91,7 @@ def parse_gcwerks(
     if instrument is not None:
         instrument = clean_string(instrument)
 
-    site = verify_site(site=site)
+    # site = verify_site(site=site)
 
     # Check if the site code passed matches that read from the filename
     site = _check_site(
