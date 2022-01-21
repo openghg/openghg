@@ -2,6 +2,7 @@
 from typing import Dict
 from openghg.dataobjects import SearchResults
 
+
 def parsed_surface_metachecker(data: Dict) -> None:
     """Checks the metadata and attributes for data stored in a dictionary of the type
     returned from the standardisation functions such as parse_crds. This is a dictionary
