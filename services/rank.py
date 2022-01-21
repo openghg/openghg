@@ -38,13 +38,14 @@ def get_sources(args: Dict) -> Dict:
     if not matching_sources:
         return {}
 
-    def name_str(d):
-        return "_".join([d.species(), d.inlet(), d.instrument()])
-
     user_info = {
-        name_str(d): {"rank_data": rank_table.get(d.uuid(), "NA"), "data_range": d.daterange_str()} for d in matching_sources
+        d.inlet(): {
+            "rank_data": rank_table.get(d.uuid(), "NA"),
+            "data_range": d.daterange_str(),
+        }
+        for d in matching_sources
     }
 
-    key_lookup = {name_str(d): d.uuid() for d in matching_sources}
+    key_lookup = {d.inlet(): d.uuid() for d in matching_sources}
 
     return {"user_info": user_info, "key_lookup": key_lookup}

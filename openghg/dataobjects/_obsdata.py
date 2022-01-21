@@ -15,7 +15,7 @@ class ObsData(_BaseData, abc.Mapping):
         metadata: Dictionary of metadata
     """
 
-    # Compatability layer for legacy format - mimicing the reponse of a dictionary
+    # Compatability layer for legacy format - mimicking the behaviour of a dictionary
     # Previous format expected a dictionary containing the site code and data
     # as key:value pairs.
     # TODO: May also want to check other expected keys within the legacy

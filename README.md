@@ -61,6 +61,20 @@ Then
 $ pytest -v tests/
 ```
 
+> **_NOTE:_**  Some of the tests require the [udunits2](https://www.unidata.ucar.edu/software/udunits/) library to be installed.
+
+The `udunits` package is not `pip` installable but if you're on Debian / Ubuntu you can do
+
+```
+$ sudo apt-get install libudunits2-0
+```
+
+You can then run the `cfchecks` marked tests using
+
+```
+$ pytest -v --run-cfchecks tests/
+```
+
 If all the tests pass then you're good to go. If they don't please [open an issue](https://github.com/openghg/openghg/issues/new) and let us
 know some details about your setup.
 
