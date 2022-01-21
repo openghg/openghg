@@ -91,8 +91,6 @@ def parse_gcwerks(
     if instrument is not None:
         instrument = clean_string(instrument)
 
-    # site = verify_site(site=site)
-
     # Check if the site code passed matches that read from the filename
     site = _check_site(
         filepath=data_filepath,
