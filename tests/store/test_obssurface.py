@@ -303,7 +303,7 @@ def test_read_noaa_raw():
     assert co_data["co_selection_flag"][-1] == 0
 
 
-@pytest.mark.xfail(reason="Select which ObsPack attributes we want - currently have non JSON serialisable data - see #207")
+@pytest.mark.xfail(reason="Select which ObsPack attributes we want - currently have non JSON serialisable data - see #219 and #193")
 def test_read_noaa_obspack():
     data_filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
 

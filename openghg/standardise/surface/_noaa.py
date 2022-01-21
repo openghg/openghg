@@ -6,8 +6,8 @@ from xarray import Dataset
 def parse_noaa(
     data_filepath: Union[str, Path],
     site: str,
-    inlet: str,
     measurement_type: str,
+    inlet: Optional[str] = None,
     network: str = "NOAA",
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
@@ -26,9 +26,6 @@ def parse_noaa(
         dict: Dictionary of data and metadata
     """
     from pathlib import Path
-
-    if inlet is None:
-        raise ValueError("Inlet must be given for NOAA data retrieve. If flask data pass flask as inlet.")
 
     if sampling_period is None:
         sampling_period = "NOT_SET"
@@ -87,7 +84,7 @@ def _read_obspack(
         raise ValueError(f"measurement_type must be one of {valid_types}")
 
     obspack_ds = xr.open_dataset(data_filepath)
-    # orig_attrs = obspack_ds.attrs
+    orig_attrs = obspack_ds.attrs
 
     # Want to find and drop any duplicate time values for the original dataset
     # Using xarray directly we have to do in a slightly convoluted way as this is not well built
@@ -119,6 +116,17 @@ def _read_obspack(
 
     species = clean_string(obspack_ds.attrs["dataset_parameter"])
     network = "NOAA"
+
+    # If inlet is not defined try and derive this from the attribute data
+    if inlet is None:
+        if "dataset_intake_ht" in orig_attrs:
+            # Note: this attribute will be a float stored as a string e.g. 40.0, may want to update to int
+            inlet_value = orig_attrs["dataset_intake_ht"]  
+            inlet = f"{inlet_value}m"
+        elif measurement_type == "flask":
+            inlet = "flask"
+        else:
+            raise ValueError("Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass 'flask' as inlet.")
 
     # Use these obs values to filter the original dataset to remove any repeated times
     processed_ds = obspack_ds.sel(obs=obs_unique)
@@ -228,6 +236,11 @@ def _read_raw_file(
     """
     from openghg.standardise.meta import assign_attributes
     from pathlib import Path
+
+    # TODO: Added this for now to make sure inlet is specified but may be able to remove
+    # if this can be derived from the data format.
+    if inlet is None:
+        raise ValueError("Inlet must be specified to derive data from NOAA raw (txt) files.")
 
     data_filepath = Path(data_filepath)
     filename = data_filepath.name
