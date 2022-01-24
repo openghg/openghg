@@ -61,7 +61,7 @@ Clone Acquire
 
 OpenGHG currently relies on Acquire being in the directory about ``OpenGHG`` for tests to be run correctly. To do this 
 
-.. code-bloc:: bash
+.. code-block:: bash
 
     cd ..
     git clone https://github.com/openghg/acquire.git
