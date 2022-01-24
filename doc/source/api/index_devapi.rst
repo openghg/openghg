@@ -7,8 +7,41 @@ without warning due to the early stages of development of the project.
 
 .. warning:: Normal users should not use any of the functions shown here directly as they may be removed or their functionality may change.
 
-modules
+Standardisation functions
+=========================
+
+Surface measurements
+^^^^^^^^^^^^^^^^^^^^
+
+These functions take sureface measurement data and standardise it for storage in the object store. They ensure the correct metadata and attributes
+are recorded with the data, and that the data is `CF compliant <https://cfconventions.org/>`__. They are called by the ``ObsSurface`` class.
+
+:func:`~openghg.standardise.surface.parse_aqmesh`
+    For processing data from the AQMesh network
+:func:`~openghg.standardise.surface.parse_beaco2n`
+    For processing data from the BEACO2N network
+:func:`~openghg.standardise.surface.parse_btt`
+    For processing data from the BT Tower site
+:func:`~openghg.standardise.surface.parse_cranfield`
+    For processing data from Cranfield
+:func:`~openghg.standardise.surface.parse_crds`
+    For processing data from CRDS (cavity ring-down spectroscopy) data from the DECC network.
+:func:`~openghg.standardise.surface.parse_eurocom`
+    For processing data from the EUROCOM network
+:func:`~openghg.standardise.surface.parse_gcwerks`
+    For processing data in the form expected by the GCWERKS package
+:func:`~openghg.standardise.surface.parse_noaa`
+    For processing data from the NOAA network
+:func:`~openghg.standardise.surface.parse_npl`
+    For processing data from NPL
+:func:`~openghg.standardise.surface.parse_tmb`
+    For processing data from the Thames Barrier site
+
+
+Storage
 =======
+
+These functions and classes handle the lower level storage and retrieval of data from the object store.
 
 Base class
 ^^^^^^^^^^
@@ -16,28 +49,8 @@ Base class
 This provides the functionality required by all data storage and processing classes, namely the saving, retrieval and loading
 of data from the object store.
 
-:class:`~openghg.modules.BaseStore`
+:class:`~openghg.store.base.BaseStore`
     Base class which the other core processing modules inherit
-
-Data processing
-^^^^^^^^^^^^^^^
-
-These classes are used for the processing of data by the ``ObsSurface`` processing class. 
-
-:class:`~openghg.modules.CRANFIELD`
-    For processing data from Cranfield
-:class:`~openghg.modules.CRDS`
-    For processing data from CRDS (cavity ring-down spectroscopy) data from the DECC network.
-:class:`~openghg.modules.EUROCOM`
-    For processing data from the EUROCOM network
-:class:`~openghg.modules.GCWERKS`
-    For processing data in the form expected by the GCWERKS package
-:class:`~openghg.modules.ICOS`
-    For processing data from the ICOS network
-:class:`~openghg.modules.NOAA`
-    For processing data from the NOAA network
-:class:`~openghg.modules.THAMESBARRIER`
-    For processing data from the Thames Barrier measurement sites
 
 Datasource
 ^^^^^^^^^^
@@ -46,12 +59,12 @@ The Datasource is the smallest data provider within the OpenGHG topology. A Data
 measuring a specific gas at a specific height at a specific site. For an instrument measuring three gas species at an inlet height of 100m
 at a site we would have three Datasources.
 
-:class:`~openghg.modules.Datasource`
+:class:`~openghg.store.base.Datasource`
     Handles the storage of data, metadata and version information for measurements
 
 
 objectstore
-============
+^^^^^^^^^^^
 
 These functions handle the storage of data in the object store, in JSON or binary format. Each object and piece of data in the
 object store is stored at a specific ``key``, which can be thought of as the address of the data. The data is stored
@@ -201,3 +214,4 @@ These perform checks to ensure data processed for each site is correct
 
 :func:`~openghg.util.multiple_inlets`
     Check if the passed site has more than one inlet
+
