@@ -4,7 +4,7 @@ __all__ = ["plot_footprint"]
 
 
 def plot_footprint(data: Dataset, label: str = None, vmin: float = None, vmax: float = None) -> None:
-    """Plot a footprints
+    """Plot a footprint
 
     Args:
         data: Dataset containing fp variable

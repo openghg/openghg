@@ -6,11 +6,10 @@ These functions are used to call either remote serverless functions in the OpenG
 install. Calls are routed depending on the setting of the ``OPENGHG_CLOUD`` environment variable. If found it will attempt to call the remote
 functions, if it is absent the call will the routed to a local function.
 
+Processing and standardisation
+==============================
 
-process_files
-=============
-
-The ``Process`` class is used upload data for processing by OpenGHG.
+The ``process_files`` function is used to upload data files for standardisation and storage in the object store
 
 .. autofunction:: openghg.client.process_files
 
@@ -37,10 +36,11 @@ rank_sources
 The ``rank_sources`` is used to rank sources of data. Provided with a site and a species the ``rank_sources`` function will search for the given 
 site and species and return a :ref:`RankSources`<RankSources> object
 
-Setting a high rank for a Datasource across a specific daterange means
+Setting a high rank for a Datasource across a specific daterange means 
 that data from that Datasource will be preferred when a user searches for data.
 
 .. autofunction:: openghg.client.rank_sources
+
 
 JobRunner
 =========

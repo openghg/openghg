@@ -59,6 +59,7 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
+    "sphinx_autodoc_typehints",
     "sphinxcontrib.programoutput",
     "sphinx_issues",
     "IPython.sphinxext.ipython_console_highlighting",

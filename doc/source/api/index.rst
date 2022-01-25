@@ -22,3 +22,11 @@ Classes within the client module are used to interact with OpenGHG, whether it b
 :func:`~openghg.client.get_obs_surface`
     Retrieve data from the object store in a format expected by the ACRG
 
+
+plotting
+========
+
+These functions are a work in progress, we hope to soon allow users to easily create timeseries and 2D plots using Plotly.
+
+:func:`~openghg.plotting.plot_footprint`
+    Take a footprint dataset and return a 2D plot

@@ -13,7 +13,7 @@ Standardisation functions
 Surface measurements
 ^^^^^^^^^^^^^^^^^^^^
 
-These functions take sureface measurement data and standardise it for storage in the object store. They ensure the correct metadata and attributes
+These functions take surface measurement data and standardise it for storage in the object store. They ensure the correct metadata and attributes
 are recorded with the data, and that the data is `CF compliant <https://cfconventions.org/>`__. They are called by the ``ObsSurface`` class.
 
 :func:`~openghg.standardise.surface.parse_aqmesh`
@@ -37,6 +37,27 @@ are recorded with the data, and that the data is `CF compliant <https://cfconven
 :func:`~openghg.standardise.surface.parse_tmb`
     For processing data from the Thames Barrier site
 
+Metadata handling
+^^^^^^^^^^^^^^^^^
+
+These handle the assignment and standardisation of metadata.
+
+Attributes
+**********
+
+Ensuring the NetCDF created during standardisation has the correct attributes assigned to it.
+
+:func:`~openghg.standardise.meta.assign_attributes`
+    Assign attributes to a number of datasets.
+    
+:func:`~openghg.standardise.meta.get_attributes`
+    Assign attributes to a single dataset, called by the above.
+
+Metadata sync
+*************
+
+:func:`~openghg.standardise.meta.surface_standardise`
+    Ensure the required metadata is shared between the metadata and attributes.
 
 Storage
 =======
@@ -62,9 +83,74 @@ at a site we would have three Datasources.
 :class:`~openghg.store.base.Datasource`
     Handles the storage of data, metadata and version information for measurements
 
+Emissions
+^^^^^^^^^
 
-objectstore
-^^^^^^^^^^^
+Handles the storage of emissions data.
+:class:`~openghg.modules.Emissions`
+
+EulerianModel
+^^^^^^^^^^^^^
+
+Handles the storage of Eulerian model data.
+
+:class:`~openghg.modules.EulerianModel`
+
+METStore
+^^^^^^^^^
+
+Handles the storage of met data from the ECMWF data.
+
+:class:`~openghg.modules.METStore`
+
+Footprints
+^^^^^^^^^^
+
+Handles the storage of footprints / flux data.
+
+:class:`~openghg.modules.METStore`
+
+ObsSurfaces
+^^^^^^^^^^
+
+Handles the storage of surface measurement data.
+
+:class:`~openghg.modules.ObsSurface`
+
+
+Retrieval functions
+===================
+
+These handle the retrieval of data from the object store.
+
+Searching
+^^^^^^^^^
+
+:func:`~openghg.retrieve.search`
+    Search for data in the object store, accepts any pair of keyword - argument pairs
+    
+    Example usage:
+
+        search(site="bsd", inlet="50m", species="co2", interesting_metadata="special_units")
+
+Specific retrieval
+^^^^^^^^^^^^^^^^^^
+
+Handle the retrieval of specific data types, some functions may try to mirror the interface of functions in the Bristol ACRG
+repository but should hopefully be useful to all users.
+
+:func:`~openghg.retrieve.get_obs_surface`
+    Get measurements from one site
+
+:func:`~openghg.retrieve.get_flux`
+    Reads in all flux files for the domain and species as an ``xarray`` Dataset
+
+:func:`~openghg.retrieve.get_footprint`
+    Gets footprints from one site
+
+
+Object Store
+============
 
 These functions handle the storage of data in the object store, in JSON or binary format. Each object and piece of data in the
 object store is stored at a specific ``key``, which can be thought of as the address of the data. The data is stored
@@ -73,23 +159,44 @@ directory in the user's filesystem specific by the ``OPENGHG_PATH`` environment 
 
 :func:`~openghg.objectstore.delete_object`
     Delete an object in the store
+
 :func:`~openghg.objectstore.exists`
     Check if an object exists at that key
+
+:func:`~openghg.objectstore.get_abs_filepaths`
+    Get absolute filepaths for objects
+
 :func:`~openghg.objectstore.get_bucket`
     Get path to bucket
+
 :func:`~openghg.objectstore.get_local_bucket`
     Get path to local bucket
-:func:`~openghg.objectstore.get_object`
-    Get object at given key
-:func:`~openghg.objectstore.get_object_from_json`
-    Get object from JSON
-:func:`~openghg.objectstore.set_object_from_file`
-    Set data at a key from a given filepath
-:func:`~openghg.objectstore.set_object_from_json`
-    Set data at a key from JSON
 
-util
-====
+:func:`~openghg.objectstore.get_md5`
+    Get MD5 has of file
+
+:func:`~openghg.objectstore.get_md5_bytes`
+    Get MD5 hash of passed bytes
+
+:func:`~openghg.objectstore.get_object`
+    Retrieve object from object store
+
+:func:`~openghg.objectstore.get_object_from_json`
+    Retrieve JSON object from object store
+
+:func:`~openghg.objectstore.hash_files`
+    Get the MD5 hashes of the given files
+
+:func:`~openghg.objectstore.set_object_from_file`
+    Set an object in the object store
+
+:func:`~openghg.objectstore.set_object_from_json`
+    Create a JSON object in the object store
+
+
+
+Utility functions
+=================
 
 This module contains all the helper functions used throughout OpenGHG.
 
@@ -126,6 +233,9 @@ String cleaning and formatting functions
 
 :func:`~openghg.util.to_lowercase`
     Converts a string to lowercase
+
+:func:`~openghg.util.remove_punctuation`
+    Removes punctuation from a string
 
 Time
 ^^^^
@@ -209,9 +319,47 @@ Site Checks
 
 These perform checks to ensure data processed for each site is correct
 
-:func:`~openghg.util.valid_site`
-    Check if the passed site is a valid one
+:func:`~openghg.util.verify_site`
+    Verify that the given site is one we recognize, does fuzzy text matching to suggest a possible valid value.
 
 :func:`~openghg.util.multiple_inlets`
     Check if the passed site has more than one inlet
+
+
+Cloud
+^^^^^
+
+These handle cloud based functionality
+
+:func:`~openghg.util.running_in_cloud`
+    Checks if we're running in the cloud by checking for the ``OPENGHG_CLOUD`` environment variable.
+
+
+Custom Data Types
+=================
+
+Errors
+^^^^^^
+
+Customised errors for OpenGHG.
+
+:class:`~openghg.util.InvalidSiteError`
+    Raised if an invalid site is given
+
+:class:`~openghg.util.UnknownDataError`
+    Raised if we don't recognize the data passed
+
+:class:`~openghg.util.FunctionError`
+    Raised if there has been an error with a serverless function.
+
+Types
+^^^^^
+
+These are used in conjunction with ``mypy`` to make type hinting easier.
+
+:class:`~openghg.util.pathType`
+
+:class:`~openghg.util.multiPathType`
+
+:class:`~openghg.util.resultsType`
 
