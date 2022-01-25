@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.3.g10c1d61 documentation</title>
+    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.3.g7433b3b documentation</title>
     
     <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -172,8 +172,8 @@
 <div class="viewcode-block" id="parse_noaa"><a class="viewcode-back" href="../../../../api/api_standardise.html#openghg.standardise.surface.parse_noaa">[docs]</a><span class="k">def</span> <span class="nf">parse_noaa</span><span class="p">(</span>
     <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -192,9 +192,6 @@
 <span class="sd">        dict: Dictionary of data and metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-
-    <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Inlet must be given for NOAA data retrieve. If flask data pass flask as inlet.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">sampling_period</span> <span class="o">=</span> <span class="s2">&quot;NOT_SET&quot;</span>
@@ -226,7 +223,7 @@
 <span class="k">def</span> <span class="nf">_read_obspack</span><span class="p">(</span>
     <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -253,7 +250,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;measurement_type must be one of </span><span class="si">{</span><span class="n">valid_types</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">obspack_ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
-    <span class="c1"># orig_attrs = obspack_ds.attrs</span>
+    <span class="n">orig_attrs</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span>
 
     <span class="c1"># Want to find and drop any duplicate time values for the original dataset</span>
     <span class="c1"># Using xarray directly we have to do in a slightly convoluted way as this is not well built</span>
@@ -285,6 +282,17 @@
 
     <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;dataset_parameter&quot;</span><span class="p">])</span>
     <span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span>
+
+    <span class="c1"># If inlet is not defined try and derive this from the attribute data</span>
+    <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;dataset_intake_ht&quot;</span> <span class="ow">in</span> <span class="n">orig_attrs</span><span class="p">:</span>
+            <span class="c1"># Note: this attribute will be a float stored as a string e.g. 40.0, may want to update to int</span>
+            <span class="n">inlet_value</span> <span class="o">=</span> <span class="n">orig_attrs</span><span class="p">[</span><span class="s2">&quot;dataset_intake_ht&quot;</span><span class="p">]</span>
+            <span class="n">inlet</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_value</span><span class="si">}</span><span class="s2">m&quot;</span>
+        <span class="k">elif</span> <span class="n">measurement_type</span> <span class="o">==</span> <span class="s2">&quot;flask&quot;</span><span class="p">:</span>
+            <span class="n">inlet</span> <span class="o">=</span> <span class="s2">&quot;flask&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass &#39;flask&#39; as inlet.&quot;</span><span class="p">)</span>
 
     <span class="c1"># Use these obs values to filter the original dataset to remove any repeated times</span>
     <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">obs</span><span class="o">=</span><span class="n">obs_unique</span><span class="p">)</span>
@@ -348,7 +356,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span> 
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">pass</span>
 
     <span class="k">if</span> <span class="n">sampling_period_estimate</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">:</span>
@@ -377,7 +385,7 @@
 <span class="k">def</span> <span class="nf">_read_raw_file</span><span class="p">(</span>
     <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -394,6 +402,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
     <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+    <span class="c1"># TODO: Added this for now to make sure inlet is specified but may be able to remove</span>
+    <span class="c1"># if this can be derived from the data format.</span>
+    <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Inlet must be specified to derive data from NOAA raw (txt) files.&quot;</span><span class="p">)</span>
 
     <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span>
