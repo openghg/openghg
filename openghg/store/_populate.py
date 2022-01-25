@@ -186,7 +186,7 @@ def add_noaa_obspack(data_directory: Union[str, Path],
         files = _find_noaa_files(data_directory, ".txt")
 
     # Find relevant details for each file and call parse_noaa() function
-    processed_summary = {}
+    processed_summary: Dict[str, Dict] = {}
     for filepath in files:
         param = _param_from_filename(filepath)
         site = param["site"]
