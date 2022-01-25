@@ -2,6 +2,15 @@
 dataobjects API detail
 ======================
 
+_BaseData
+=========
+
+The base dataclass inherited by (most of) the dataclasses below.
+
+.. autoclass:: openghg.dataobjects._BaseData
+    :members:
+
+
 SearchResults
 =============
 
@@ -10,17 +19,15 @@ by the ``search`` function.
 
 .. autoclass:: openghg.dataobjects.SearchResults
     :members:
-    :private-members:
 
 ObsData
 =======
 
-This ``dataclass`` is returned by data retrieval functions such as :ref:`get_obs_surface`<get_obs_surface> and the :ref:`SearchResults`<SearchResults> 
+This ``dataclass`` is returned by data retrieval functions such as :ref:`get_obs_surface<get_obs_surface>` and the :ref:`SearchResults<SearchResults>` 
 retrieve function.
 
 .. autoclass:: openghg.dataobjects.ObsData
     :members:
-    :private-members:
 
 FluxData
 ========
@@ -29,7 +36,6 @@ This ``dataclass`` is used to return observations data from the get_flux functio
 
 .. autoclass:: openghg.dataobjects.FluxData
     :members:
-    :private-members:
 
 FootprintData
 =============
@@ -38,7 +44,6 @@ This ``dataclass`` is used to return observations data from the get_footprint fu
 
 .. autoclass:: openghg.dataobjects.FootprintData
     :members:
-    :private-members:
 
 
 METData
@@ -48,7 +53,6 @@ This ``dataclass`` is used to return observations data from the Met data retriev
 
 .. autoclass:: openghg.dataobjects.METData
     :members:
-    :private-members:
 
 
 RankSources
@@ -59,6 +63,5 @@ object store.
 
 .. autoclass:: openghg.dataobjects.RankSources
     :members:
-    :private-members:
 
 

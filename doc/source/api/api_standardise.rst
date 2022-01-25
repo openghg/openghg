@@ -43,8 +43,8 @@ These functions take surface measurement data, they are called by the ``ObsSurfa
 Metadata
 ========
 
-.. autofunction:: assign_attributes
+.. autofunction:: openghg.standardise.meta.assign_attributes
 
-.. autofunction:: get_attributes
+.. autofunction:: openghg.standardise.meta.get_attributes
 
-.. autofunction:: surface_standardise
+.. autofunction:: openghg.standardise.meta.surface_standardise

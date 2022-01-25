@@ -3,16 +3,18 @@ Retrieval functions
 
 These handle the retrieval of data from the object store.
 
-Search
-^^^^^^
+.. module:: openghg.retrieve
 
-.. autofunction:: search
+General search
+^^^^^^^^^^^^^^
 
-Specific retrieval
-^^^^^^^^^^^^^^^^^^
+.. autofunction:: openghg.retrieve.search
 
-.. autofunction:: get_obs_surface
+Specific retrieval functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: get_flux
+.. autofunction:: openghg.retrieve.get_obs_surface
 
-.. autofunction:: get_footprint
+.. autofunction:: openghg.retrieve.get_flux
+
+.. autofunction:: openghg.retrieve.get_footprint

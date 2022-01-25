@@ -37,7 +37,6 @@ Helpers to deal with all things datetime.
     
 .. autofunction:: openghg.util.timestamp_now
     
-
 .. autofunction:: openghg.util.timestamp_epoch
     
 .. autofunction:: openghg.util.daterange_from_str

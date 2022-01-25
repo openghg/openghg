@@ -7,8 +7,8 @@ without warning due to the early stages of development of the project.
 
 .. warning:: Normal users should not use any of the functions shown here directly as they may be removed or their functionality may change.
 
-Standardisation functions
-=========================
+Standardisation
+===============
 
 Surface measurements
 ^^^^^^^^^^^^^^^^^^^^
@@ -40,7 +40,7 @@ are recorded with the data, and that the data is `CF compliant <https://cfconven
 Metadata handling
 ^^^^^^^^^^^^^^^^^
 
-These handle the assignment and standardisation of metadata.
+These handle the assignment and standardisation of meta`data`.
 
 Attributes
 **********
@@ -87,35 +87,61 @@ Emissions
 ^^^^^^^^^
 
 Handles the storage of emissions data.
-:class:`~openghg.modules.Emissions`
+:class:`~openghg.dataobjects.Emissions`
 
 EulerianModel
 ^^^^^^^^^^^^^
 
 Handles the storage of Eulerian model data.
 
-:class:`~openghg.modules.EulerianModel`
+:class:`~openghg.store.EulerianModel`
 
 METStore
 ^^^^^^^^^
 
 Handles the storage of met data from the ECMWF data.
 
-:class:`~openghg.modules.METStore`
+:class:`~openghg.store.METStore`
 
 Footprints
 ^^^^^^^^^^
 
 Handles the storage of footprints / flux data.
 
-:class:`~openghg.modules.METStore`
+:class:`~openghg.store.Footprints`
 
-ObsSurfaces
+ObsSurface
 ^^^^^^^^^^
 
 Handles the storage of surface measurement data.
 
-:class:`~openghg.modules.ObsSurface`
+:class:`~openghg.store.ObsSurface`
+
+Dataclasses
+===========
+
+These dataclasses are used to facilitate the simple packaging and retrieval of data from the object store.
+
+:class:`~openghg.dataobjects._BaseData`
+    The base class that (most of) the dataclasses inherit.
+
+:class:`~openghg.dataobjects.FluxData`
+    Stores flux data.
+
+:class:`~openghg.dataobjects.FootprintData`
+    Stores footprint data.
+
+:class:`~openghg.dataobjects.METData`
+    Stores meteorological data retrieved from the ECMWF / our local cache. 
+
+:class:`~openghg.dataobjects.ObsData`
+    Stores data returned by search functions.
+
+:class:`~openghg.dataobjects.RankSources`
+    Handles the ranking of datasources.
+
+:class:`~openghg.dataobjects.SearchResults`
+    Makes the retrieval of data simple.
 
 
 Retrieval functions
