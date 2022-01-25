@@ -5,92 +5,28 @@ User API
 This section of the documentation gives an overview of the public facing functions used in the Jupyter notebooks available at the
 OpenGHG hub. For developers documentation of the internal workings of the library are available in the developer API section.
 
-modules
-=======
-
-These modules are used to process observation data. Classes in this module should not be used directly as they
-are used by functions in the ``Client`` or ``LocalClient`` modules when either uploading data to the OpenGHG cloud platform
-or processing data for storage in a local object store.
-
-:class:`~openghg.modules.ObsSurface`
-    Process surface observation data
-
 client
 ======
 
-Classes within the client module are used to interact with the cloud based OpenGHG system.
+Classes within the client module are used to interact with OpenGHG, whether it be a cloud or local instance.
 
-:class:`~openghg.client.Process`
-    Upload and process observation data files
+:func:`~openghg.client.process_files`
+    Upload data files for standardisation and storage in the object store
 
-:class:`~openghg.client.Search`
-    Search for data in the object store
+:func:`~openghg.client.search`
+    Search and retrieve data from the object store
 
-:class:`~openghg.client.RankSources`
+:func:`~openghg.client.rank_sources`
     Rank data sources by date range
 
-
-localclient
-===========
-
-For use with a local version of the object store. These functions make it easy to take advantage of the processing and export capabilities
-of OpenGHG on your local filesystem. Use of this module results in the creation of a local object store in a location controlled by the
-``OPENGHG_PATH`` environment variable.
+:func:`~openghg.client.get_obs_surface`
+    Retrieve data from the object store in a format expected by the ACRG
 
 
-:func:`~openghg.localclient.get_obs_surface`
-    Search for surface observations in the object store using a site, species and date range.
+plotting
+========
 
-:func:`~openghg.localclient.process_files`
-    Process files for storage in the object store
+These functions are a work in progress, we hope to soon allow users to easily create timeseries and 2D plots using Plotly.
 
-:class:`~openghg.localclient.RankSources`
-    Rank data sources by date range
-
-:class:`~openghg.localclient.Search`
-    Search for data within the object store (soon to be deprecated in favour of ``get_obs``
-
-processing
-==========
-
-This submodule contains functions that are widely used in the processing functions found in ``modules``.
-
-Attributes
-^^^^^^^^^^
-
-These functions ensure that the processed data has the correct `CF compliant
-<https://cfconventions.org/>`_ attributes.
-
-:func:`~openghg.processing.assign_attributes`
-    Assign attributes to a dictionary of observation data in NetCDF format using ``get_attributes``
-
-:func:`~openghg.processing.get_attributes`
-    Write attributes to an in-memory NetCDF file to ensure it is `CF-compliant <https://cfconventions.org/>`_
-
-Export
-^^^^^^
-
-These functions produce files that are used for upload of processed data to archiving facilities such as CEDA.
-
-:func:`~openghg.processing.get_ceda_file`
-    Create a file that contains the correct attributes for uploading to the `CEDA archive <http://archive.ceda.ac.uk/>`_
-
-Data control
-^^^^^^^^^^^^
-
-These control the assignment, splitting and recombination of data.
-
-:func:`~openghg.processing.recombine_datasets`
-    Recombine separate NetCDF files into a single file sorted by date
-
-
-:func:`~openghg.processing.assign_data`
-    Assings data to exisiting Datasources or creates new Datasources
-
-Searching
-^^^^^^^^^
-
-The base search functionality provided to the `client` and `localclient` modules.
-
-:func:`~openghg.processing.search`
-    The function that is used by ``openghg.client.Search`` and ``openghg.localclient.Search`` to search the object store
+:func:`~openghg.plotting.plot_footprint`
+    Take a footprint dataset and return a 2D plot

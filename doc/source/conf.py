@@ -50,6 +50,7 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 extensions = [
+    "sphinx.ext.napoleon",
     "myst_nb",
     "sphinx_togglebutton",
     "sphinx.ext.mathjax",
@@ -57,8 +58,8 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.autosummary",
     "sphinx.ext.autosectionlabel",
-    "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
+    "sphinx_autodoc_typehints",
     "sphinxcontrib.programoutput",
     "sphinx_issues",
     "IPython.sphinxext.ipython_console_highlighting",
