@@ -57,7 +57,7 @@ def _create_project_names(input_dict: Dict) -> List:
     for key, values in input_dict.items():
         if not isinstance(values, list):
             values = [values]
-        full_names = ["-".join([key,value]) for value in values]
+        full_names = ["-".join([key, value]) for value in values]
         projects.extend(full_names)
     return projects
 
@@ -118,8 +118,7 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
 
 def add_noaa_obspack(
     data_directory: Union[str, Path],
-    project: Optional[str] = None,
-    ) -> Dict:
+    project: Optional[str] = None) -> Dict:
     '''
     Function to detect and add files from the NOAA ObsPack to the object store.
 
@@ -159,8 +158,8 @@ def add_noaa_obspack(
     # these contain multiple heights per file - not sure we are handling this yet
     project_options_not_implemented_yet = {"tower": ["insitu"],
                                            "aircraft": ["pfp", "insitu"],
-                                           "shipboard":["flask"],
-                                           "aircorenoaa":[""]}
+                                           "shipboard": ["flask"],
+                                           "aircorenoaa": [""]}
 
     project_names_not_implemented = _create_project_names(project_options_not_implemented_yet)
 
@@ -205,7 +204,7 @@ def add_noaa_obspack(
         for key, value in processed.items():
             if key not in processed_summary:
                 processed_summary[key] = {}
-            for key_in,value_in in value.items():
+            for key_in, value_in in value.items():
                 processed_summary[key][key_in] = value_in
 
     return processed_summary
