@@ -116,9 +116,8 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
     return files
 
 
-def add_noaa_obspack(
-    data_directory: Union[str, Path],
-    project: Optional[str] = None) -> Dict:
+def add_noaa_obspack(data_directory: Union[str, Path],
+                     project: Optional[str] = None) -> Dict:
     '''
     Function to detect and add files from the NOAA ObsPack to the object store.
 
