@@ -50,14 +50,16 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 extensions = [
-    "nbsphinx",
+    "sphinx.ext.napoleon",
+    "myst_nb",
+    "sphinx_togglebutton",
     "sphinx.ext.mathjax",
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.autosummary",
     "sphinx.ext.autosectionlabel",
-    "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
+    "sphinx_autodoc_typehints",
     "sphinxcontrib.programoutput",
     "sphinx_issues",
     "IPython.sphinxext.ipython_console_highlighting",
@@ -238,9 +240,7 @@ def setup(app):
                         continue
                     if documenter.objtype == typ:
                         items.append(name)
-                public = [
-                    x for x in items if x in include_public or not x.startswith("_")
-                ]
+                public = [x for x in items if x in include_public or not x.startswith("_")]
                 return public, items
 
             def run(self):
@@ -253,16 +253,12 @@ def setup(app):
                         _, methods = self.get_members(c, "method", ["__init__"])
 
                         self.content = [
-                            "~%s.%s" % (clazz, method)
-                            for method in methods
-                            if not method.startswith("_")
+                            "~%s.%s" % (clazz, method) for method in methods if not method.startswith("_")
                         ]
                     if "attributes" in self.options:
                         _, attribs = self.get_members(c, "attribute")
                         self.content = [
-                            "~%s.%s" % (clazz, attrib)
-                            for attrib in attribs
-                            if not attrib.startswith("_")
+                            "~%s.%s" % (clazz, attrib) for attrib in attribs if not attrib.startswith("_")
                         ]
                 finally:
                     return super(AutoAutoSummary, self).run()
@@ -270,6 +266,12 @@ def setup(app):
         app.add_directive("autoautosummary", AutoAutoSummary)
     except BaseException as e:
         raise e
+
+
+# Add processing of MyST Markdown notebooks
+nbsphinx_custom_formats = {
+    ".md": ["jupytext.reads", {"fmt": "mystnb"}],
+}
 
 
 # Napoleon settings

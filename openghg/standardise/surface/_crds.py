@@ -263,7 +263,7 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
         dict: Dictionary of attributes
     """
     try:
-        site_attributes: Dict = crds_metadata[site.upper()]
+        site_attributes: Dict = crds_metadata["sites"][site.upper()]
         global_attributes: Dict = site_attributes["global_attributes"]
     except KeyError:
         raise ValueError(f"Unable to read attributes for site: {site}")

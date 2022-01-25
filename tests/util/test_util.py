@@ -1,7 +1,7 @@
 import os
 import pytest
 from openghg import util
-from openghg.util import InvalidSiteError
+from openghg.types import InvalidSiteError
 
 
 def test_read_header():
