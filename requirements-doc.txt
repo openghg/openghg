@@ -1,7 +1,14 @@
+Jinja2
+jupytext
+myst-nb
 notebook
 nbsphinx
-Jinja2==2.11.3
+pydata-sphinx-theme
 sphinx
-sphinx-issues
+sphinx-issues >= 3.0.1
 sphinx_rtd_theme
 sphinxcontrib-programoutput
+sphinx-autodoc-typehints
+
+
+

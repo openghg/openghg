@@ -1,7 +1,7 @@
 import os
 import sys
 import tempfile
-import shutil
+import pytest
 
 # Added for import of services modules in tests
 sys.path.insert(0, os.path.abspath("services"))
@@ -19,38 +19,38 @@ sys.path.insert(0, os.path.abspath(f"{acquire_dir}/services"))
 # load all of the common fixtures used by the mocked tests
 pytest_plugins = ["services.fixtures.mocked_services"]
 
+temporary_store = tempfile.TemporaryDirectory()
+temporary_store_path = temporary_store.name
 
-def pytest_configure(config):
-    config.addinivalue_line("markers", "slow: slow")
 
-
-def pytest_sessionstart(session):
-    """Called after the Session object has been created and
-    before performing collection and entering the run test loop.
-    """
-    # Save the old OpenGHG object store environment variable if there is one
-    old_path = os.environ.get("OPENGHG_PATH")
-
-    if old_path is not None:
-        os.environ["OPENGHG_PATH_BAK"] = old_path
-
-    os.environ["OPENGHG_PATH"] = str(tempfile.TemporaryDirectory().name)
+@pytest.fixture(autouse=True, scope="session")
+def set_envs():
+    os.environ["ACQUIRE_HOST"] = "localhost:8080"
+    os.environ["OPENGHG_PATH"] = temporary_store_path
 
 
 def pytest_sessionfinish(session, exitstatus):
     """Called after whole test run finished, right before
     returning the exit status to the system.
     """
-    temp_path = os.environ["OPENGHG_PATH"]
-    # Delete the testing object store
-    try:
-        shutil.rmtree(temp_path)
-    except FileNotFoundError:
-        pass
+    print(f"\n\nCleaning up testing store at {temporary_store.name}")
+    temporary_store.cleanup()
 
-    # Set the environment variable back
-    try:
-        os.environ["OPENGHG_PATH"] = os.environ["OPENGHG_PATH_BAK"]
-        del os.environ["OPENGHG_PATH_BAK"]
-    except KeyError:
-        pass
+
+def pytest_addoption(parser):
+    parser.addoption("--run-cfchecks", action="store_true", default=False, help="run CF compliance tests")
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "cfchecks: mark mark test as needing CF related libs to run")
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--run-cfchecks"):
+        # --run-cfchecks given in cli: do not skip slow tests
+        return
+
+    skip_cf = pytest.mark.skip(reason="need --run-cfchecks option to run")
+    for item in items:
+        if "cfchecks" in item.keywords:
+            item.add_marker(skip_cf)

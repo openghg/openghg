@@ -1,10 +1,11 @@
 from addict import Dict as aDict
 from dataclasses import dataclass
 from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
+
 from openghg.dataobjects import ObsData
-from openghg.processing import recombine_datasets
+from openghg.store import recombine_datasets
 from openghg.util import clean_string
-from openghg.client import Retrieve
+
 
 __all__ = ["SearchResults"]
 
@@ -61,7 +62,11 @@ class SearchResults:
         Returns:
             dict: Dictionary of data
         """
-        return {"results": self.results, "ranked_data": self.ranked_data, "cloud": self.cloud}
+        return {
+            "results": self.results,
+            "ranked_data": self.ranked_data,
+            "cloud": self.cloud,
+        }
 
     @classmethod
     def from_data(cls: Type[T], data: Dict) -> T:
@@ -72,7 +77,25 @@ class SearchResults:
         Returns:
             SearchResults: SearchResults object
         """
-        return cls(results=data["results"], ranked_data=data["ranked_data"], cloud=data["cloud"])
+        return cls(
+            results=data["results"],
+            ranked_data=data["ranked_data"],
+            cloud=data["cloud"],
+        )
+
+    def rankings(self) -> Dict:
+        if not self.ranked_data:
+            print("No rank data")
+
+        rank_result = aDict()
+
+        for site, species_data in self.results.items():
+            for species, data in species_data.items():
+                rank_result[site][species] = data["rank_metadata"]
+
+        to_return: Dict = rank_result.to_dict()
+
+        return to_return
 
     def raw(self) -> Dict:
         """Returns the raw results data
@@ -172,6 +195,17 @@ class SearchResults:
         species = clean_string(species)
         inlet = clean_string(inlet)
 
+        # If inlet is not specified, check if this is unambiguous
+        # If so, set inlet to be the only value and continue.
+        if inlet is None:
+            try:
+                potential_inlets = self.results[site][species].keys()
+            except KeyError:
+                pass
+            else:
+                if len(potential_inlets) == 1:
+                    inlet = list(potential_inlets)[0]
+
         if self.ranked_data:
             if all((site, species, inlet)):
                 # TODO - how to do this in a cleaner way?
@@ -238,26 +272,37 @@ class SearchResults:
         """
         if self.ranked_data:
             specific_source = self.results[site][species]
-            rank_data = specific_source["rank_metadata"]
         else:
             specific_source = self.results[site][species][inlet]
 
         data_keys = specific_source["keys"]
+        metadata = specific_source["metadata"]
 
         # If cloud use the Retrieve object
         if self.cloud:
-            retrieve = Retrieve()
-            # TODO - update this function to allow multi-site / species retrieval
-            key = f"{site}_{species}_{inlet}"
+            from Acquire.Client import Wallet
+            from xarray import open_dataset
+
+            wallet = Wallet()
+            self._service_url = "https://fn.openghg.org/t"
+            self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
+
+            key = f"{site}_{species}"
             keys_to_retrieve = {key: data_keys}
-            retrieved = retrieve.retrieve(keys=keys_to_retrieve)
-            data = retrieved[key]
+
+            args = {"keys": keys_to_retrieve}
+
+            response: Dict = self._service.call_function(function="retrieve.retrieve", args=args)
+
+            response_data = response["results"]
+
+            data = open_dataset(response_data[key])
         else:
             data = recombine_datasets(data_keys, sort=True)
 
         metadata = specific_source["metadata"]
 
         if self.ranked_data:
-            metadata["rank_metadata"] = rank_data
+            metadata["rank_metadata"] = specific_source["rank_metadata"]
 
         return ObsData(data=data, metadata=metadata)

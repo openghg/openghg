@@ -13,7 +13,7 @@ def retrieve(args: Dict) -> Dict:
         Returns:
             dict: Dictionary of results
     """
-    from openghg.processing import recombine_multisite
+    from openghg.store import recombine_multisite
 
     keys = args["keys"]
     # Get a dictionary of xarray Datasets

@@ -1,7 +1,7 @@
 Acquire @ git+https://github.com/openghg/acquire@devel#egg=Acquire
 addict
 cdsapi
-# cfchecker @ git+git://github.com/gareth-j/cf-checker@removeBasestring#egg=cfchecker
+cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
 lazy_import
 matplotlib
 netcdf4
@@ -23,7 +23,8 @@ pytest-tornasync
 pytest-cov
 requests-mock
 # For mypy
-mypy==0.910
+mypy==0.930
 types-paramiko
 types-PyYAML
 types-requests
+

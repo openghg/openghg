@@ -228,3 +228,12 @@ def get_local_bucket(empty: bool = False) -> str:
         local_buckets_dir.mkdir(parents=True)
 
     return str(local_buckets_dir)
+
+
+# TODO - should these functions raise errors if called in the cloud version?
+# get_all_object_names'
+# get_object_names'
+# get_openghg_local_path'
+# query_store'
+# set_object'
+# visualise_store
