@@ -42,3 +42,6 @@ latex:
 html_check:
 	$(SPHINXBUILD) -b linkcheck $(ALLSPHINXOPTS) build/html $(FILES)
 
+fresh:
+	make clean
+	make html

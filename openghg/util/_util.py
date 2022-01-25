@@ -109,7 +109,8 @@ def verify_site(site: str) -> str:
     Returns:
         str: Verified three letter site code if valid site
     """
-    from openghg.util import load_json, remove_punctuation, InvalidSiteError
+    from openghg.util import load_json, remove_punctuation
+    from openghg.types import InvalidSiteError
 
     site_data = load_json("site_lookup.json")
 

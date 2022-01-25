@@ -246,8 +246,6 @@
     }
   },
   "CRDS": {
-    "directory": "/dagage2/agage/%site-picarro/results-gcwerks/",
-    "directory_output": "/data/shared/obs_2018",
     "comment": "Cavity ring-down measurements. Output from GCWerks",
     "default_scales": {
       "N2O": "WMO-X2006A",
@@ -255,73 +253,75 @@
       "CO2": "WMO-X2007",
       "CO": "WMO-X2014A"
     },
-    "BSD": {
-      "gcwerks_site_name": "bilsdale",
-      "global_attributes": {
-        "data_owner": "Simon O'Doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk"
-      }
-    },
-    "HFD": {
-      "gcwerks_site_name": "heathfield",
-      "global_attributes": {
-        "data_owner": "Simon O'Doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk"
-      }
-    },
-    "KVH": {
-      "gcwerks_site_name": "Killearn Village Hall",
-      "global_attributes": {
-        "data_owner": "Simon O'Doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk"
-      }
-    },
-    "RGL": {
-      "gcwerks_site_name": "ridgehill",
-      "global_attributes": {
-        "data_owner": "Simon O'Doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk"
-      }
-    },
-    "RPB": {
-      "gcwerks_site_name": "barbados",
-      "global_attributes": {
-        "data_owner": "Simon O'Doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk"
-      }
-    },
-    "TAC": {
-      "gcwerks_site_name": "tacolneston",
-      "global_attributes": {
-        "data_owner": "Simon O'Doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk"
-      }
-    },
-    "TTA": {
-      "gcwerks_site_name": "angus",
-      "global_attributes": {
-        "data_owner": "Simon O'Doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk"
+    "sites": {
+      "BSD": {
+        "gcwerks_site_name": "bilsdale",
+        "global_attributes": {
+          "data_owner": "Simon O'Doherty",
+          "data_owner_email": "s.odoherty@bristol.ac.uk"
+        }
+      },
+      "HFD": {
+        "gcwerks_site_name": "heathfield",
+        "global_attributes": {
+          "data_owner": "Simon O'Doherty",
+          "data_owner_email": "s.odoherty@bristol.ac.uk"
+        }
+      },
+      "KVH": {
+        "gcwerks_site_name": "Killearn Village Hall",
+        "global_attributes": {
+          "data_owner": "Simon O'Doherty",
+          "data_owner_email": "s.odoherty@bristol.ac.uk"
+        }
+      },
+      "RGL": {
+        "gcwerks_site_name": "ridgehill",
+        "global_attributes": {
+          "data_owner": "Simon O'Doherty",
+          "data_owner_email": "s.odoherty@bristol.ac.uk"
+        }
+      },
+      "RPB": {
+        "gcwerks_site_name": "barbados",
+        "global_attributes": {
+          "data_owner": "Simon O'Doherty",
+          "data_owner_email": "s.odoherty@bristol.ac.uk"
+        }
+      },
+      "TAC": {
+        "gcwerks_site_name": "tacolneston",
+        "global_attributes": {
+          "data_owner": "Simon O'Doherty",
+          "data_owner_email": "s.odoherty@bristol.ac.uk"
+        }
+      },
+      "TTA": {
+        "gcwerks_site_name": "angus",
+        "global_attributes": {
+          "data_owner": "Simon O'Doherty",
+          "data_owner_email": "s.odoherty@bristol.ac.uk"
+        }
       }
     }
   },
   "ICOS": {
-    "directory": "/dagage2/agage/%site-picarro/results-icos/",
-    "directory_output": "/data/shared/obs_2018",
-    "MHD": {
-      "gcwerks_site_name": "macehead",
-      "inlet_rename": { "15m": "10m" },
-      "global_attributes": {
-        "data_owner": "Michael Ramonet",
-        "data_owner_email": "michel.ramonet@cea.fr"
-      }
-    },
-    "TTA": {
-      "gcwerks_site_name": "angus",
-      "inlet_rename": { "222m": "222m" },
-      "global_attributes": {
-        "data_owner": "Simon O'Doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk"
+    "sites": {
+      "MHD": {
+        "gcwerks_site_name": "macehead",
+        "inlet_rename": { "15m": "10m" },
+        "global_attributes": {
+          "data_owner": "Michael Ramonet",
+          "data_owner_email": "michel.ramonet@cea.fr"
+        }
+      },
+      "TTA": {
+        "gcwerks_site_name": "angus",
+        "inlet_rename": { "222m": "222m" },
+        "global_attributes": {
+          "data_owner": "Simon O'Doherty",
+          "data_owner_email": "s.odoherty@bristol.ac.uk"
+        }
       }
     }
   }
