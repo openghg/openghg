@@ -57,7 +57,7 @@ def parse_noaa(
 def _read_obspack(
     data_filepath: Union[str, Path],
     site: str,
-    inlet: str,
+    inlet: Union[str, None],
     sampling_period: str,
     measurement_type: str,
     instrument: Optional[str] = None,
@@ -121,7 +121,7 @@ def _read_obspack(
     if inlet is None:
         if "dataset_intake_ht" in orig_attrs:
             # Note: this attribute will be a float stored as a string e.g. 40.0, may want to update to int
-            inlet_value = orig_attrs["dataset_intake_ht"]  
+            inlet_value = orig_attrs["dataset_intake_ht"]
             inlet = f"{inlet_value}m"
         elif measurement_type == "flask":
             inlet = "flask"
@@ -190,7 +190,7 @@ def _read_obspack(
     else:
         try:
             metadata["instrument"] = obspack_ds.attrs["instrument"]
-        except KeyError: 
+        except KeyError:
             pass
 
     if sampling_period_estimate >= 0.0:
@@ -219,7 +219,7 @@ def _read_obspack(
 def _read_raw_file(
     data_filepath: Union[str, Path],
     site: str,
-    inlet: str,
+    inlet: Union[str, None],
     sampling_period: str,
     measurement_type: str,
     instrument: Optional[str] = None,

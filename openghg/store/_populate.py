@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 from openghg.store import ObsSurface
 
 
-def _param_from_filename(filename: str) -> Dict:
+def _param_from_filename(filename: Union[str, Path]) -> Dict:
     '''
     Extract parameter from the NOAA filename based on the agreed naming convention.
     See: https://gml.noaa.gov/ccgg/obspack/documentation.html
@@ -12,7 +12,7 @@ def _param_from_filename(filename: str) -> Dict:
 
     Args:
         filename: NOAA ObsPack filename with expected naming convention
-    
+
     Returns:
         Dict : Extracted parameters from filename
 
@@ -21,7 +21,10 @@ def _param_from_filename(filename: str) -> Dict:
         {"species": "ch4", "site" : "esp", "project": "surface-flask", "measurement_type": "flask"}
     '''
 
-    extracted_param = filename.name.split("_")
+    if isinstance(filename, str):
+        extracted_param = filename.split("_")
+    else:
+        extracted_param = filename.name.split("_")
     param = {}
     param["species"] = extracted_param[0]
     param["site"] = extracted_param[1]
@@ -37,10 +40,10 @@ def _create_project_names(input_dict: Dict) -> List:
 
     Expects input dictionary for each the type e.g. "surface" and the
     associated measurement types e.g. ["flask", "insitu", "pfp"]
-    
+
     Args:
         input_dict: In format described above
-    
+
     Returns:
         List: collated names for each project
 
@@ -64,16 +67,16 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
     Find obs files in NOAA ObsPack.
 
     Expected directory structure is:
-     - <ObsPack>/data/<filetype>/ 
+     - <ObsPack>/data/<filetype>/
        - e.g. obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24/data/nc/
 
     Args:
-        data_directory: Top level ObsPack data directory to search 
+        data_directory: Top level ObsPack data directory to search
         ext: Extension for files. Should be either ".txt" or ".nc"
 
     Returns:
         list: Filenames with appropriate extension
-    
+
     Examples:
         Can include top level directory (str or Path):
         >>> _find_noaa_files(Path("/home/user/obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24"), ".txt")
@@ -86,7 +89,7 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
 
     # ObsPack may contain nc or txt files:
     # - For nc files found, these should all the data files
-    # - For txt files foun, we need to make sure files are found in the correct 
+    # - For txt files found, we need to make sure files are found in the correct
     # sub-directory as otherwise this may find README and summary files
     if ext == ".nc":
         subdirectories = ["data/nc", "nc", ""]
@@ -94,6 +97,9 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
         subdirectories = ["data/txt", "txt"]
     else:
         raise ValueError("Did not recognise input for extension: {ext}. Should be one of '.txt' or '.nc'")
+
+    if isinstance(data_directory, str):
+        data_directory = Path(data_directory)
 
     # Allow user to specify various levels within ObsPack to e.g. just
     # extract nc files.
@@ -106,7 +112,7 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
             break
     else:
         files = []
-    
+
     return files
 
 
@@ -121,10 +127,10 @@ def add_noaa_obspack(
         data_directory: Top level directory for the downloaded NOAA ObsPack
         project (optional) : Specific project or type to process e.g. "surface"
         or "surface-flask"
-    
+
     Returns:
         Dict: Details of data which has been processed into the object store
-    
+
     Examples:
         To add all NOAA ObsPack data (which can be processed) to the object store:
         >>> add_noaa_obspack(Path("/home/user/obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24"))
@@ -135,7 +141,7 @@ def add_noaa_obspack(
         {"processed": {"ch4_esp_surface-flask_2_representative.nc":{"ch4": ...}, ...}}
 
         To add NOAA ObsPack data for one project type e.g. "surface-flask"
-        >>> add_noaa_obspack(Path("/home/user/obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24"), "surface-flask")        
+        >>> add_noaa_obspack(Path("/home/user/obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24"), "surface-flask")
         {"processed": {"ch4_esp_surface-flask_2_representative.nc":{"ch4": ...}, ...}}
 
     TODO: At the moment this will exclude all types which we can't process
@@ -149,13 +155,13 @@ def add_noaa_obspack(
     project_names = _create_project_names(project_options)
 
     # Options we can't process at the moment but may be encountered (ObsMobile, ...).
-    # TODO: "tower-insitu" should be able to run through ObsSurface but 
+    # TODO: "tower-insitu" should be able to run through ObsSurface but
     # these contain multiple heights per file - not sure we are handling this yet
     project_options_not_implemented_yet = {"tower": ["insitu"],
                                            "aircraft": ["pfp", "insitu"],
                                            "shipboard":["flask"],
                                            "aircorenoaa":[""]}
-    
+
     project_names_not_implemented = _create_project_names(project_options_not_implemented_yet)
 
     # If a specific project has been specified, extract file matching strings
@@ -166,7 +172,7 @@ def add_noaa_obspack(
             projects_to_read = [name for name in project_names if project in name]
         elif project in project_options_not_implemented_yet or project in project_names_not_implemented:
             raise ValueError(f"Functionality to process {project} data has not been implemented yet.")
-        else:    
+        else:
             raise ValueError(f"Did not recognise input {project} for project")
     else:
         projects_to_read = project_names
@@ -180,7 +186,7 @@ def add_noaa_obspack(
     files = _find_noaa_files(data_directory, ".nc")
     if len(files) == 0:
         files = _find_noaa_files(data_directory, ".txt")
-    
+
     # Find relevant details for each file and call parse_noaa() function
     processed_summary = {}
     for filepath in files:
@@ -203,4 +209,3 @@ def add_noaa_obspack(
                 processed_summary[key][key_in] = value_in
 
     return processed_summary
-

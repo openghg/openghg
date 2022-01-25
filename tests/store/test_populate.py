@@ -1,5 +1,5 @@
-from openghg.store import add_noaa_obspack
 from helpers import get_datapath
+from openghg.store import add_noaa_obspack
 
 def test_read_noaa_obspack_ch4():
     '''Test object store can be populated automatically when providing a NOAA

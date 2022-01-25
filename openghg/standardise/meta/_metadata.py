@@ -2,18 +2,18 @@ from typing import Dict, List, Optional
 from copy import deepcopy
 
 
-def surface_standardise(metadata: Dict, 
-                        attributes: Dict, 
+def surface_standardise(metadata: Dict,
+                        attributes: Dict,
                         keys_to_add: Optional[List] = None,
                         ) -> Dict:
-    """Makes sure any duplicated keys between the metadata and attributes 
+    """Makes sure any duplicated keys between the metadata and attributes
     dictionaries match and that certain keys are present in the metadata.
 
     Args:
         metadata: Dictionary of metadata
         attributes: Attributes
         keys_to_add: Add these keys to the metadata, if not present, based on
-        the attribute values. Note: this skips any keys which can't be 
+        the attribute values. Note: this skips any keys which can't be
         copied from the attribute values.
     Returns:
         dict: Copy of metadata updated with attributes
@@ -31,7 +31,7 @@ def surface_standardise(metadata: Dict,
             pass
 
     default_keys_to_add = ["site", "species", "inlet", "network", "instrument",
-                           "sampling_period", "long_name", "calibration_scale", 
+                           "sampling_period", "long_name", "calibration_scale",
                            "data_owner", "data_owner_email",
                            "station_longitude", "station_latitude",
                            "station_long_name", "station_height_masl",
