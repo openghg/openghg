@@ -1,0 +1,685 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.3.g308efeb documentation</title>
+    
+    <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  
+    
+    <link rel="stylesheet"
+      href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+  
+    
+      
+  
+    
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/pydata-sphinx-theme.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+  
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../../_static/custom.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../../index.html">
+<p class="title">OpenGHG</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../features.html">
+  Features
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../install.html">
+  Installation instructions
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../tutorials/index.html">
+  Tutorials
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../development/index_devel.html">
+  Development
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../api/index.html">
+  User API
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../api/index_devapi.html">
+  Developer API
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for openghg.retrieve._access</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
+<span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">ObsData</span><span class="p">,</span> <span class="n">FootprintData</span><span class="p">,</span> <span class="n">FluxData</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_obs_surface&quot;</span><span class="p">,</span> <span class="s2">&quot;get_footprint&quot;</span><span class="p">,</span> <span class="s2">&quot;get_flux&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="get_obs_surface"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_obs_surface">[docs]</a><span class="k">def</span> <span class="nf">get_obs_surface</span><span class="p">(</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">average</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">calibration_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">keep_missing</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">skip_ranking</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsData</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get measurements from one site.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        site: Site of interest e.g. MHD for the Mace Head site.</span>
+<span class="sd">        species: Species identifier e.g. ch4 for methane.</span>
+<span class="sd">        start_date: Output start date in a format that Pandas can interpret</span>
+<span class="sd">        end_date: Output end date in a format that Pandas can interpret</span>
+<span class="sd">        inlet: Inlet label</span>
+<span class="sd">        average: Averaging period for each dataset. Each value should be a string of</span>
+<span class="sd">        the form e.g. &quot;2H&quot;, &quot;30min&quot; (should match pandas offset aliases format).</span>
+<span class="sd">        keep_missing: Keep missing data points or drop them.</span>
+<span class="sd">        network: Network for the site/instrument (must match number of sites).</span>
+<span class="sd">        instrument: Specific instrument for the site (must match number of sites).</span>
+<span class="sd">        calibration_scale: Convert to this calibration scale</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        ObsData: ObsData object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">Timedelta</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">concat</span> <span class="k">as</span> <span class="n">xr_concat</span>
+    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">timestamp_tzaware</span>
+
+    <span class="n">site_info</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;acrg_site_info.json&quot;</span><span class="p">)</span>
+    <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">site</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">site_info</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No site called </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">, please enter a valid site name.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Find the correct synonym for the passed species</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">_synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
+
+    <span class="c1"># Get the observation data</span>
+    <span class="n">obs_results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span>
+        <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+        <span class="n">find_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">skip_ranking</span><span class="o">=</span><span class="n">skip_ranking</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">obs_results</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to find results for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># TODO - for some reason mypy doesn&#39;t pick up the ObsData being returned here, look into this</span>
+    <span class="c1"># GJ - 2021-07-19</span>
+    <span class="n">retrieved_data</span><span class="p">:</span> <span class="n">ObsData</span> <span class="o">=</span> <span class="n">obs_results</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">retrieved_data</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
+        <span class="n">retrieved_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
+
+    <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">start_date_tzaware</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+        <span class="n">end_date_tzaware</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+        <span class="n">end_date_tzaware_exclusive</span> <span class="o">=</span> <span class="n">end_date_tzaware</span> <span class="o">-</span> <span class="n">Timedelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;nanosecond&quot;</span><span class="p">)</span>  <span class="c1"># Deduct 1 ns to make the end day (date) exclusive.</span>
+
+        <span class="c1"># Slice the data to only cover the dates we&#39;re interested in</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">start_date_tzaware</span><span class="p">,</span> <span class="n">end_date_tzaware_exclusive</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">start_date_data</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">end_date_data</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;This dataset does not have a time attribute, unable to read date range&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">average</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># GJ - 2021-03-09</span>
+        <span class="c1"># TODO - check by RT</span>
+
+        <span class="c1"># # Average the Dataset over a given period</span>
+        <span class="c1"># if keep_missing is True:</span>
+        <span class="c1">#     # Create a dataset with one element and NaNs to prepend or append</span>
+        <span class="c1">#     ds_single_element = data[{&quot;time&quot;: 0}]</span>
+
+        <span class="c1">#     for v in ds_single_element.variables:</span>
+        <span class="c1">#         if v != &quot;time&quot;:</span>
+        <span class="c1">#             ds_single_element[v].values = np.nan</span>
+
+        <span class="c1">#     ds_concat = []</span>
+
+        <span class="c1">#     # Pad with an empty entry at the start date</span>
+        <span class="c1">#     if timestamp_tzaware(data.time.min()) &gt; start_date:</span>
+        <span class="c1">#         ds_single_element_start = ds_single_element.copy()</span>
+        <span class="c1">#         ds_single_element_start.time.values = Timestamp(start_date)</span>
+        <span class="c1">#         ds_concat.append(ds_single_element_start)</span>
+
+        <span class="c1">#     ds_concat.append(data)</span>
+
+        <span class="c1">#     # Pad with an empty entry at the end date</span>
+        <span class="c1">#     if data.time.max() &lt; Timestamp(end_date):</span>
+        <span class="c1">#         ds_single_element_end = ds_single_element.copy()</span>
+        <span class="c1">#         ds_single_element_end.time.values = Timestamp(end_date) - Timedelta(&quot;1ns&quot;)</span>
+        <span class="c1">#         ds_concat.append(ds_single_element_end)</span>
+
+        <span class="c1">#     data = xr_concat(ds_concat, dim=&quot;time&quot;)</span>
+
+        <span class="c1">#     # Now sort to get everything in the right order</span>
+        <span class="c1">#     data = data.sortby(&quot;time&quot;)</span>
+
+        <span class="c1"># First do a mean resample on all variables</span>
+        <span class="n">ds_resampled</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">average</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># keep_attrs doesn&#39;t seem to work for some reason, so manually copy</span>
+        <span class="n">ds_resampled</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">average_in_seconds</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">average</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">ds_resampled</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;averaged_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">average_in_seconds</span>
+        <span class="n">ds_resampled</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;averaged_period_str&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">average</span>
+
+        <span class="c1"># For some variables, need a different type of resampling</span>
+        <span class="n">data_variables</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">variables</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">data_variables</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;repeatability&quot;</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
+                <span class="n">ds_resampled</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">average</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+                    <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">average</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Copy over some attributes</span>
+            <span class="k">if</span> <span class="s2">&quot;long_name&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+                <span class="n">ds_resampled</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;units&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+                <span class="n">ds_resampled</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Create a new variability variable, containing the standard deviation within the resampling period</span>
+        <span class="n">ds_resampled</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">average</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># If there are any periods where only one measurement was resampled, just use the median variability</span>
+        <span class="n">ds_resampled</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">][</span><span class="n">ds_resampled</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds_resampled</span><span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+        
+        <span class="c1"># Create attributes for variability variable</span>
+        <span class="n">ds_resampled</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span>
+            <span class="s2">&quot;long_name&quot;</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;long_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_variability&quot;</span>
+
+        <span class="n">ds_resampled</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Resampling may introduce NaNs, so remove, if not keep_missing</span>
+        <span class="k">if</span> <span class="n">keep_missing</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">ds_resampled</span> <span class="o">=</span> <span class="n">ds_resampled</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">ds_resampled</span>
+
+    <span class="c1"># Rename variables</span>
+    <span class="n">rename</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">data_variables</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">variables</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">data_variables</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="n">rename</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mf&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;repeatability&quot;</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
+            <span class="n">rename</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mf_repeatability&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;variability&quot;</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
+            <span class="n">rename</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mf_variability&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;number_of_observations&quot;</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
+            <span class="n">rename</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mf_number_of_observations&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;status_flag&quot;</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
+            <span class="n">rename</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;status_flag&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;integration_flag&quot;</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
+            <span class="n">rename</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;integration_flag&quot;</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename_vars</span><span class="p">(</span><span class="n">rename</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
+
+    <span class="k">if</span> <span class="s2">&quot;calibration_scale&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">calibration_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">_scale_convert</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">calibration_scale</span><span class="p">)</span>
+
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">retrieved_data</span><span class="o">.</span><span class="n">metadata</span>
+    <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+
+    <span class="n">obs_data</span> <span class="o">=</span> <span class="n">ObsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
+
+    <span class="c1"># It doesn&#39;t make sense to do this now as we&#39;ve only got a single Dataset</span>
+    <span class="c1"># # Now check if the units match for each of the observation Datasets</span>
+    <span class="c1"># units = set((f.data.mf.attrs[&quot;units&quot;] for f in obs_files))</span>
+    <span class="c1"># scales = set((f.data.attrs[&quot;scale&quot;] for f in obs_files))</span>
+
+    <span class="c1"># if len(units) &gt; 1:</span>
+    <span class="c1">#     raise ValueError(</span>
+    <span class="c1">#         f&quot;Units do not match for these observation Datasets {[(f.mf.attrs[&#39;station_long_name&#39;],f.attrs[&#39;units&#39;]) for f in obs_files]}&quot;</span>
+    <span class="c1">#     )</span>
+
+    <span class="c1"># if len(scales) &gt; 1:</span>
+    <span class="c1">#     print(</span>
+    <span class="c1">#         f&quot;Scales do not match for these observation Datasets {[(f.mf.attrs[&#39;station_long_name&#39;],f.attrs[&#39;units&#39;]) for f in obs_files]}&quot;</span>
+    <span class="c1">#     )</span>
+    <span class="c1">#     print(&quot;Suggestion: set calibration_scale to convert scales&quot;)</span>
+
+    <span class="k">return</span> <span class="n">obs_data</span></div>
+
+
+<div class="viewcode-block" id="get_flux"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_flux">[docs]</a><span class="k">def</span> <span class="nf">get_flux</span><span class="p">(</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">sources</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">time_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FluxData</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The flux function reads in all flux files for the domain and species as an xarray Dataset.</span>
+<span class="sd">    Note that at present ALL flux data is read in per species per domain or by emissions name.</span>
+<span class="sd">    To be consistent with the footprints, fluxes should be in mol/m2/s.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        species: Species name</span>
+<span class="sd">        sources: Source name</span>
+<span class="sd">        domain: Domain e.g. EUROPE</span>
+<span class="sd">        start_date: Start date</span>
+<span class="sd">        end_date: End date</span>
+<span class="sd">        time_resolution: One of [&quot;standard&quot;, &quot;high&quot;]</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        FluxData: FluxData object</span>
+
+<span class="sd">    TODO: Update this to output to a FluxData class?</span>
+<span class="sd">    TODO: Update inputs to just accept a string and extract one flux file at a time?</span>
+<span class="sd">    As it stands, this only extracts one flux at a time but is set up to be extended</span>
+<span class="sd">    to to extract multiple. So if this is removed from this function the functionality</span>
+<span class="sd">    itself would need to be wrapped up in another function call.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">timestamp_epoch</span><span class="p">,</span> <span class="n">timestamp_now</span>
+
+    <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_epoch</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_now</span><span class="p">()</span>
+
+    <span class="n">results</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span>
+        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span>
+        <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+        <span class="n">time_resolution</span><span class="o">=</span><span class="n">time_resolution</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;emissions&quot;</span><span class="p">,</span>
+    <span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to find flux data for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">sources</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># TODO - more than one emissions file (but see above)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">em_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to find any footprints data for </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="n">data_keys</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">em_key</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">em_key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+
+    <span class="n">em_ds</span> <span class="o">=</span> <span class="n">recombine_datasets</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">data_keys</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Check for level coordinate. If one level, assume surface and drop</span>
+    <span class="k">if</span> <span class="s2">&quot;lev&quot;</span> <span class="ow">in</span> <span class="n">em_ds</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">em_ds</span><span class="o">.</span><span class="n">lev</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error: More than one flux level&quot;</span><span class="p">)</span>
+
+        <span class="n">em_ds</span> <span class="o">=</span> <span class="n">em_ds</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="s2">&quot;lev&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">FluxData</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">em_ds</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+        <span class="n">flux</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">bc</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+        <span class="n">scales</span><span class="o">=</span><span class="s2">&quot;FIXME&quot;</span><span class="p">,</span>
+        <span class="n">units</span><span class="o">=</span><span class="s2">&quot;FIXME&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_footprint"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_footprint">[docs]</a><span class="k">def</span> <span class="nf">get_footprint</span><span class="p">(</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FootprintData</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get footprints from one site.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        site: The name of the site given in the footprints. This often matches</span>
+<span class="sd">              to the site name but  if the same site footprints are run with a</span>
+<span class="sd">              different met and they are named slightly differently from the obs</span>
+<span class="sd">              file. E.g. site=&quot;DJI&quot;, site_modifier = &quot;DJI-SAM&quot; -</span>
+<span class="sd">              station called DJI, footprints site called DJI-SAM</span>
+<span class="sd">        domain : Domain name for the footprints</span>
+<span class="sd">        height: Height of inlet in metres</span>
+<span class="sd">        start_date: Output start date in a format that Pandas can interpret</span>
+<span class="sd">        end_date: Output end date in a format that Pandas can interpret</span>
+<span class="sd">        species: Species identifier e.g. &quot;co2&quot; for carbon dioxide. Only needed</span>
+<span class="sd">                 if species needs a modified footprints from the typical 30-day</span>
+<span class="sd">                 footprints appropriate for a long-lived species (like methane)</span>
+<span class="sd">                 e.g. for high time resolution (co2) or is a short-lived species.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        FootprintData: FootprintData dataclass</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
+    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+    <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">FootprintData</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span>
+        <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+        <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span>
+    <span class="p">)</span>  <span class="c1"># type: ignore</span>
+    <span class="c1"># Get the footprints data</span>
+    <span class="c1"># if species is not None:</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     results = search(</span>
+    <span class="c1">#         site=site,</span>
+    <span class="c1">#         domain=domain,</span>
+    <span class="c1">#         height=height,</span>
+    <span class="c1">#         start_date=start_date,</span>
+    <span class="c1">#         end_date=end_date,</span>
+    <span class="c1">#         data_type=&quot;footprints&quot;,</span>
+    <span class="c1">#     )  # type: ignore</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">fp_site_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unable to find any footprints data for </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> at a height of </span><span class="si">{</span><span class="n">height</span><span class="si">}</span><span class="s2"> for species </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to find any footprints data for </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> at a height of </span><span class="si">{</span><span class="n">height</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="n">keys</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">fp_site_key</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">fp_site_key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+    <span class="c1"># fp_ds = recombine_datasets(keys=keys, sort=False) # Why did this have sort=False before?</span>
+    <span class="n">fp_ds</span> <span class="o">=</span> <span class="n">recombine_datasets</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">FootprintData</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">fp_ds</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+        <span class="n">flux</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">bc</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+        <span class="n">scales</span><span class="o">=</span><span class="s2">&quot;FIXME&quot;</span><span class="p">,</span>
+        <span class="n">units</span><span class="o">=</span><span class="s2">&quot;FIXME&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check to see if there are other names that we should be using for</span>
+<span class="sd">    a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc-11,</span>
+<span class="sd">    as this is used in species_info.json</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        species (str): Input string that you&#39;re trying to match</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Matched species string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
+
+    <span class="c1"># Load in the species data</span>
+    <span class="n">species_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;acrg_species_info.json&quot;</span><span class="p">)</span>
+
+    <span class="c1"># First test whether site matches keys (case insensitive)</span>
+    <span class="n">matched_strings</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">species_data</span> <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
+
+    <span class="c1"># Used to access the alternative names in species_data</span>
+    <span class="n">alt_label</span> <span class="o">=</span> <span class="s2">&quot;alt&quot;</span>
+
+    <span class="c1"># If not found, search synonyms</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">matched_strings</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">species_data</span><span class="p">:</span>
+            <span class="c1"># Iterate over the alternative labels and check for a match</span>
+            <span class="n">matched_strings</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">alt_label</span><span class="p">]</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
+
+            <span class="k">if</span> <span class="n">matched_strings</span><span class="p">:</span>
+                <span class="n">matched_strings</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">matched_strings</span><span class="p">:</span>
+        <span class="n">updated_species</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">matched_strings</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">updated_species</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to find synonym for species </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_scale_convert</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">to_scale</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Convert to a new calibration scale</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Must contain an mf variable (mole fraction), and scale must be in global attributes</span>
+<span class="sd">        species: species name</span>
+<span class="sd">        to_scale: Calibration scale to convert to</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        xarray.Dataset: Dataset with mole fraction data scaled</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span>
+    <span class="kn">from</span> <span class="nn">numexpr</span> <span class="kn">import</span> <span class="n">evaluate</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_datapath</span>
+
+    <span class="c1"># If scale is already correct, return</span>
+    <span class="n">ds_scale</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">ds_scale</span> <span class="o">==</span> <span class="n">to_scale</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="n">scale_convert_filepath</span> <span class="o">=</span> <span class="n">get_datapath</span><span class="p">(</span><span class="s2">&quot;acrg_obs_scale_convert.csv&quot;</span><span class="p">)</span>
+
+    <span class="n">scale_converter</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">scale_convert_filepath</span><span class="p">)</span>
+    <span class="n">scale_converter_scales</span> <span class="o">=</span> <span class="n">scale_converter</span><span class="p">[</span><span class="n">scale_converter</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">ds_scale</span><span class="p">,</span> <span class="n">to_scale</span><span class="p">])][</span>
+        <span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;scale1&quot;</span><span class="p">,</span> <span class="s2">&quot;scale2&quot;</span><span class="p">]</span>
+    <span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scale_converter_scales</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Scales </span><span class="si">{</span><span class="n">ds_scale</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">to_scale</span><span class="si">}</span><span class="s2"> are not both in any one row in acrg_obs_scale_convert.csv for species </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">scale_converter_scales</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Duplicate rows in acrg_obs_scale_convert.csv?&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">scale_converter_scales</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">converter</span> <span class="o">=</span> <span class="n">scale_converter</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">to_scale</span> <span class="o">==</span> <span class="n">converter</span><span class="p">[</span><span class="s2">&quot;scale1&quot;</span><span class="p">]:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="s2">&quot;2to1&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="s2">&quot;1to2&quot;</span>
+
+    <span class="c1"># flake8: noqa: F841</span>
+    <span class="c1"># scale_convert file has variable X in equations, so let&#39;s create it</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">converter</span><span class="p">[</span><span class="n">direction</span><span class="p">])</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;mf&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_scale</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+</pre></div>
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+    <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+  <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022 OpenGHG development team.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

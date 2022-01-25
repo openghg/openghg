@@ -1,0 +1,336 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>openghg.store._segment &#8212; OpenGHG 0+untagged.3.g308efeb documentation</title>
+    
+    <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  
+    
+    <link rel="stylesheet"
+      href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+  
+    
+      
+  
+    
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/pydata-sphinx-theme.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    
+    <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+  
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../../_static/custom.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../../index.html">
+<p class="title">OpenGHG</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../features.html">
+  Features
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../install.html">
+  Installation instructions
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../tutorials/index.html">
+  Tutorials
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../development/index_devel.html">
+  Development
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../api/index.html">
+  User API
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../api/index_devapi.html">
+  Developer API
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for openghg.store._segment</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Segment the data into Datasources</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;assign_data&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="assign_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.assign_data">[docs]</a><span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">lookup_results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Assign data to a Datasource. This will either create a new Datasource</span>
+<span class="sd">    Create or get an existing Datasource for each gas in the file</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_dict: Dictionary containing data and metadata for species</span>
+<span class="sd">            lookup_results: Dictionary of lookup results]</span>
+<span class="sd">            overwrite: If True overwrite current data stored</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
+
+    <span class="n">uuids</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">:</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Our lookup results and gas data have the same keys</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="n">lookup_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="c1"># TODO - Could this be done somewhere else? It doesn&#39;t feel quite right it</span>
+        <span class="c1"># being here</span>
+
+        <span class="c1"># Add the read metadata to the Dataset attributes being careful</span>
+        <span class="c1"># not to overwrite any attributes that are already there</span>
+        <span class="n">to_add</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">}</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
+
+        <span class="c1"># If we have a UUID for this Datasource load the existing object</span>
+        <span class="c1"># from the object store</span>
+        <span class="k">if</span> <span class="n">uuid</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
+
+        <span class="c1"># Add the dataframe to the datasource</span>
+        <span class="n">datasource</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="c1"># Save Datasource to object store</span>
+        <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">uuids</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">uuids</span></div>
+
+
+<span class="c1"># def assign_footprint_data(footprint_data: Dict, lookup_results: Dict, overwrite: bool) -&gt; Dict:</span>
+<span class="c1">#     &quot;&quot;&quot; Create Datasources for the passed footprints data</span>
+
+<span class="c1">#         Args:</span>
+<span class="c1">#             data: xarray Dataset of footprints data</span>
+<span class="c1">#             metadata: Associated metadata</span>
+<span class="c1">#             datasource_uid: The UUID of the datasource if we&#39;ve processed footprints data from this</span>
+<span class="c1">#             source before, otherwise False</span>
+<span class="c1">#         Returns:</span>
+<span class="c1">#             dict: Dictionary containing Datasource UUIDs</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from openghg.modules import Datasource</span>
+
+<span class="c1">#     uuids = {}</span>
+
+<span class="c1">#     # Add in copying of attributes, or add attributes to the metadata at an earlier state.</span>
+<span class="c1">#     for key in footprint_data:</span>
+<span class="c1">#         metadata = footprint_data[key][&quot;metadata&quot;]</span>
+<span class="c1">#         data = footprint_data[key][&quot;data&quot;]</span>
+
+<span class="c1">#         # Our lookup results and gas data have the same keys</span>
+<span class="c1">#         uuid = lookup_results[key]</span>
+
+<span class="c1">#         # TODO - Could this be done somewhere else? It doesn&#39;t feel quite right it</span>
+<span class="c1">#         # being here</span>
+
+<span class="c1">#         # Add the read metadata to the Dataset attributes being careful</span>
+<span class="c1">#         # not to overwrite any attributes that are already there</span>
+<span class="c1">#         to_add = {k: v for k, v in metadata.items() if k not in data.attrs}</span>
+<span class="c1">#         data.attrs.update(to_add)</span>
+
+<span class="c1">#         # If we have a UUID for this Datasource load the existing object</span>
+<span class="c1">#         # from the object store</span>
+<span class="c1">#         if uuid:</span>
+<span class="c1">#             datasource = Datasource.load(uuid=uuid)</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             datasource = Datasource()</span>
+
+<span class="c1">#         # TODO - can we just ad</span>
+<span class="c1">#         # Add the dataframe to the datasource</span>
+<span class="c1">#         datasource.add_footprint_data(data=data, metadata=metadata, overwrite=overwrite)</span>
+<span class="c1">#         # Save Datasource to object store</span>
+<span class="c1">#         datasource.save()</span>
+
+<span class="c1">#         uuids[key] = datasource.uuid()</span>
+
+<span class="c1">#     return uuids</span>
+
+<span class="c1"># def assign_emissions_data(data: Dataset, metadata: Dict, datasource_uid: Union[str, bool]) -&gt; str:</span>
+<span class="c1">#     &quot;&quot;&quot; Create Datasources for the passed flux data</span>
+
+<span class="c1">#         Args:</span>
+<span class="c1">#             data: xarray Dataset of footprints data</span>
+<span class="c1">#             metadata: Associated metadata</span>
+<span class="c1">#             datasource_uid: The UUID of the datasource if we&#39;ve processed flux data from this</span>
+<span class="c1">#             source before, otherwise False</span>
+<span class="c1">#         Returns:</span>
+<span class="c1">#             str: UUID of Datasource</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from openghg.modules import Datasource</span>
+
+<span class="c1">#     if datasource_uid is not False:</span>
+<span class="c1">#         datasource = Datasource.load(uuid=datasource_uid)</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         datasource = Datasource()</span>
+
+<span class="c1">#     # Add the read metadata to the Dataset attributes being careful</span>
+<span class="c1">#     # not to overwrite any attributes that are already there</span>
+<span class="c1">#     to_add = {k: v for k, v in metadata.items() if k not in data.attrs}</span>
+<span class="c1">#     data.attrs.update(to_add)</span>
+
+<span class="c1">#     datasource.add_emissions_data(data=data, metadata=metadata)</span>
+<span class="c1">#     datasource.save()</span>
+
+<span class="c1">#     return datasource.uuid()</span>
+</pre></div>
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+    <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+  <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022 OpenGHG development team.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

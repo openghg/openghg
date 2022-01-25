@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>localclient API Detail &#8212; OpenGHG 0+untagged.3.g40298c6 documentation</title>
+    <title>Plotting functions &#8212; OpenGHG 0+untagged.3.g308efeb documentation</title>
     
     <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -156,34 +156,9 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage pt-5 pb-3">
-    <i class="fas fa-list"></i> On this page
-</div>
 
 <nav id="bd-toc-nav">
-    <ul class="visible nav section-nav flex-column">
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#get-obs-surface">
-   get_obs_surface
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#process-files">
-   process_files
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#ranksources">
-   RankSources
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#search">
-   Search
-  </a>
- </li>
-</ul>
-
+    
 </nav>
               </div>
               
@@ -203,25 +178,31 @@
               
               <div>
                 
-  <section id="localclient-api-detail">
-<h1>localclient API Detail<a class="headerlink" href="#localclient-api-detail" title="Permalink to this headline">¶</a></h1>
-<section id="get-obs-surface">
-<h2>get_obs_surface<a class="headerlink" href="#get-obs-surface" title="Permalink to this headline">¶</a></h2>
-<p>Used to search the object store using a site name, species and daterange and returns the data found.</p>
-</section>
-<section id="process-files">
-<h2>process_files<a class="headerlink" href="#process-files" title="Permalink to this headline">¶</a></h2>
-<p>Used to process files for storage in the local object store.</p>
-</section>
-<section id="ranksources">
-<h2>RankSources<a class="headerlink" href="#ranksources" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">RankSources</span></code> class is used to rank sources of data. Setting a high rank for a Datasource across a specific daterange means
-that data from that Datasource will be preferred when a user searches for data.</p>
-</section>
-<section id="search">
-<h2>Search<a class="headerlink" href="#search" title="Permalink to this headline">¶</a></h2>
-<p>Search the local object store for data. This will be removed as it has been replaced with the <code class="docutils literal notranslate"><span class="pre">get_obs</span></code> function above.</p>
-</section>
+  <section id="plotting-functions">
+<h1>Plotting functions<a class="headerlink" href="#plotting-functions" title="Permalink to this headline">¶</a></h1>
+<p>These functions help in the creation of simple plots.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="openghg.plotting.plot_footprint">
+<span class="sig-prename descclassname"><span class="pre">openghg.plotting.</span></span><span class="sig-name descname"><span class="pre">plot_footprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/plotting/_footprint.html#plot_footprint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.plotting.plot_footprint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a footprint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code>) – Dataset containing fp variable</p></li>
+<li><p><strong>label</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Label for colourbar</p></li>
+<li><p><strong>vmin</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Minimum value for colours</p></li>
+<li><p><strong>vmax</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – MinimumMax value for colours</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>objectstore API Detail &#8212; OpenGHG 0+untagged.3.g40298c6 documentation</title>
+    <title>objectstore API Detail &#8212; OpenGHG 0+untagged.3.g308efeb documentation</title>
     
     <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -183,24 +183,27 @@
 <p>These functions are used by OpenGHG to store and retrieve data from the object store.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.delete_object">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">delete_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#delete_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.delete_object" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">delete_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#delete_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.delete_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove object at key in bucket</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bucket</strong> – Bucket path</p></li>
-<li><p><strong>key</strong> – Key to data in bucket</p></li>
+<li><p><strong>bucket</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Bucket path</p></li>
+<li><p><strong>key</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Key to data in bucket</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>None</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.get_openghg_local_path">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_openghg_local_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pathlib.Path</span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_openghg_local_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_openghg_local_path" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_openghg_local_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_openghg_local_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_openghg_local_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the path to the local OpenGHG object store bucket</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -214,14 +217,14 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.get_all_object_names">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_all_object_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">without_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_all_object_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_all_object_names" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_all_object_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">without_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_all_object_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_all_object_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the names of all objects in the passed bucket</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bucket</strong> – Bucket path</p></li>
-<li><p><strong>prefix</strong> – Prefix for keys</p></li>
-<li><p><strong>without_prefix</strong> – If True don’t use prefix</p></li>
+<li><p><strong>bucket</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Bucket path</p></li>
+<li><p><strong>prefix</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Prefix for keys</p></li>
+<li><p><strong>without_prefix</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If True don’t use prefix</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -235,11 +238,11 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.get_object_names">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_object_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_object_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_object_names" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_object_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_object_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_object_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>List all the keys in the object store</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>bucket</strong> – Bucket containing data</p>
+<dd class="field-odd"><p><strong>bucket</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Bucket containing data</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>List of keys in object store</p>
@@ -252,20 +255,25 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.get_bucket">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_bucket</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_bucket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_bucket" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_bucket</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_bucket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_bucket" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find and return a new bucket in the object store called
 ‘bucket_name’. If ‘create_if_needed’ is True
 then the bucket will be created if it doesn’t exist. Otherwise,
 if the bucket does not exist then an exception will be raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.get_local_bucket">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_local_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">empty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_local_bucket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_local_bucket" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_local_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">empty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_local_bucket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_local_bucket" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates and returns a local bucket</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>empty</strong> – If True return an empty bucket</p>
+<dd class="field-odd"><p><strong>empty</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If True return an empty bucket</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Path to local bucket</p>
@@ -278,13 +286,13 @@ if the bucket does not exist then an exception will be raised.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.get_object">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bytes</span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_object" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the object at key in the passed bucket</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bucket</strong> – Bucket containing data</p></li>
-<li><p><strong>key</strong> – Key for data in bucket</p></li>
+<li><p><strong>bucket</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Bucket containing data</p></li>
+<li><p><strong>key</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Key for data in bucket</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -298,68 +306,77 @@ if the bucket does not exist then an exception will be raised.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.set_object">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">set_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#set_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.set_object" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">set_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#set_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.set_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Store data in bucket at key</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bucket</strong> – Bucket path</p></li>
-<li><p><strong>key</strong> – Key to store data in bucket</p></li>
-<li><p><strong>data</strong> – Data in string form</p></li>
+<li><p><strong>bucket</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Bucket path</p></li>
+<li><p><strong>key</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Key to store data in bucket</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – Data in string form</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>None</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.set_object_from_json">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">set_object_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#set_object_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.set_object_from_json" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">set_object_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#set_object_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.set_object_from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set JSON data in the object store</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bucket</strong> – Bucket for data storage</p></li>
-<li><p><strong>key</strong> – Key for data in bucket</p></li>
-<li><p><strong>data</strong> – JSON serialised data string</p></li>
+<li><p><strong>bucket</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Bucket for data storage</p></li>
+<li><p><strong>key</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Key for data in bucket</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]) – JSON serialised data string</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>None</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.set_object_from_file">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">set_object_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#set_object_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.set_object_from_file" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">set_object_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#set_object_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.set_object_from_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the contents of file at filename to key in bucket</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bucket</strong> – Bucket path</p></li>
-<li><p><strong>key</strong> – Key to for data</p></li>
+<li><p><strong>bucket</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Bucket path</p></li>
+<li><p><strong>key</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Key to for data</p></li>
 <li><p><strong>filename</strong> (<em>str</em><em>, </em><em>pathlib.Path</em>) – Filename/path</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>None</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.get_object_from_json">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_object_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_object_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_object_from_json" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_object_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_object_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_object_from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes the daterange from the passed key and uses the reduced
 key to get an object from the object store.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bucket</strong> – Bucket containing data</p></li>
-<li><p><strong>key</strong> – Key for data in bucket</p></li>
+<li><p><strong>bucket</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Bucket containing data</p></li>
+<li><p><strong>key</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Key for data in bucket</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -373,13 +390,13 @@ key to get an object from the object store.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.exists">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.exists" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.exists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if there is an object in the object store with the given key</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bucket</strong> – Bucket containing data</p></li>
-<li><p><strong>key</strong> – Prefix for key in object store</p></li>
+<li><p><strong>bucket</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Bucket containing data</p></li>
+<li><p><strong>key</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Prefix for key in object store</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -393,12 +410,15 @@ key to get an object from the object store.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.visualise_store">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">visualise_store</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pyvis.network.Network</span></span></span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#visualise_store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.visualise_store" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">visualise_store</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#visualise_store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.visualise_store" title="Permalink to this definition">¶</a></dt>
 <dd><p>View the object store using a pyvis force graph.</p>
 <p>This function should only be called from within a notebook</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>pyvis.network.Network</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Network</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>pyvis.network.Network</p>
 </dd>
 </dl>
 </dd></dl>

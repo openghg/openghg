@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>processing API Detail &#8212; OpenGHG 0+untagged.3.g40298c6 documentation</title>
+    <title>Types &#8212; OpenGHG 0+untagged.3.g308efeb documentation</title>
     
     <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -163,18 +163,13 @@
 <nav id="bd-toc-nav">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#attributes">
-   Attributes
+  <a class="reference internal nav-link" href="#custom-errors">
+   Custom errors
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#export">
-   Export
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#recombination">
-   Recombination
+  <a class="reference internal nav-link" href="#custom-types">
+   Custom types
   </a>
  </li>
 </ul>
@@ -198,18 +193,50 @@
               
               <div>
                 
-  <section id="processing-api-detail">
-<h1>processing API Detail<a class="headerlink" href="#processing-api-detail" title="Permalink to this headline">¶</a></h1>
-<section id="attributes">
-<h2>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline">¶</a></h2>
-<p>These functions ensure that the processed data has the correct <a class="reference external" href="https://cfconventions.org/">CF compliant</a> attributes.</p>
+  <section id="types">
+<h1>Types<a class="headerlink" href="#types" title="Permalink to this headline">¶</a></h1>
+<section id="custom-errors">
+<h2>Custom errors<a class="headerlink" href="#custom-errors" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="openghg.types.InvalidSiteError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.types.</span></span><span class="sig-name descname"><span class="pre">InvalidSiteError</span></span><a class="reference internal" href="../_modules/openghg/types/_errors.html#InvalidSiteError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.types.InvalidSiteError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised if an invalid site is passed</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openghg.types.UnknownDataError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.types.</span></span><span class="sig-name descname"><span class="pre">UnknownDataError</span></span><a class="reference internal" href="../_modules/openghg/types/_errors.html#UnknownDataError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.types.UnknownDataError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised if an unknown data type is passed</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openghg.types.FunctionError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.types.</span></span><span class="sig-name descname"><span class="pre">FunctionError</span></span><a class="reference internal" href="../_modules/openghg/types/_errors.html#FunctionError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.types.FunctionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised if a serverless function cannot be called correctly</p>
+</dd></dl>
+
 </section>
-<section id="export">
-<h2>Export<a class="headerlink" href="#export" title="Permalink to this headline">¶</a></h2>
-<p>These functions produce files that are used for upload of processed data to archiving facilities such as CEDA.</p>
-</section>
-<section id="recombination">
-<h2>Recombination<a class="headerlink" href="#recombination" title="Permalink to this headline">¶</a></h2>
+<section id="custom-types">
+<h2>Custom types<a class="headerlink" href="#custom-types" title="Permalink to this headline">¶</a></h2>
+<p>Used to makes type hinting with <code class="docutils literal notranslate"><span class="pre">mypy</span></code> easier.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openghg.types.pathType">
+<span class="sig-prename descclassname"><span class="pre">openghg.types.</span></span><span class="sig-name descname"><span class="pre">pathType</span></span><a class="headerlink" href="#openghg.types.pathType" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openghg.types.multiPathType">
+<span class="sig-prename descclassname"><span class="pre">openghg.types.</span></span><span class="sig-name descname"><span class="pre">multiPathType</span></span><a class="headerlink" href="#openghg.types.multiPathType" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="openghg.types.resultsType">
+<span class="sig-prename descclassname"><span class="pre">openghg.types.</span></span><span class="sig-name descname"><span class="pre">resultsType</span></span><a class="headerlink" href="#openghg.types.resultsType" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultDict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</p>
+</dd></dl>
+
 </section>
 </section>
 

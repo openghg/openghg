@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>client API Detail &#8212; OpenGHG 0+untagged.3.g40298c6 documentation</title>
+    <title>client API Detail &#8212; OpenGHG 0+untagged.3.g308efeb documentation</title>
     
     <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -163,28 +163,28 @@
 <nav id="bd-toc-nav">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#jobrunner">
-   JobRunner
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#process">
-   Process
+  <a class="reference internal nav-link" href="#processing-and-standardisation">
+   Processing and standardisation
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#search-client">
-   Search (Client)
+   search (client)
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#ranksources">
-   RankSources
+  <a class="reference internal nav-link" href="#get-obs-surface">
+   get_obs_surface
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#retrieve">
-   Retrieve
+  <a class="reference internal nav-link" href="#rank-sources">
+   rank_sources
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#jobrunner">
+   JobRunner
   </a>
  </li>
 </ul>
@@ -210,9 +210,139 @@
                 
   <section id="client-api-detail">
 <h1>client API Detail<a class="headerlink" href="#client-api-detail" title="Permalink to this headline">¶</a></h1>
+<p>These functions are used to call either remote serverless functions in the OpenGHG Cloud or local processes if OpenGHG is being used as a local
+install. Calls are routed depending on the setting of the <code class="docutils literal notranslate"><span class="pre">OPENGHG_CLOUD</span></code> environment variable. If found it will attempt to call the remote
+functions, if it is absent the call will the routed to a local function.</p>
+<span class="target" id="module-openghg.client"></span><section id="processing-and-standardisation">
+<h2>Processing and standardisation<a class="headerlink" href="#processing-and-standardisation" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">process_files</span></code> function is used to upload data files for standardisation and storage in the object store</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="openghg.client.process_files">
+<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">process_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://fn.openghg.org/t'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_process.html#process_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.process_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process data files, standardise them and add the data to the object store</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Args:</dt><dd><p>files: Path of files to be processed
+data_type: Type of data to be processed (CRDS, GC etc)
+site: Site code or name
+network: Network name
+instrument: Instrument name
+overwrite: Should this data overwrite data
+stored for these datasources for existing dateranges</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>UUIDs of Datasources storing data of processed files keyed by filename</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="search-client">
+<h2>search (client)<a class="headerlink" href="#search-client" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">search</span></code> function is used to search for and retrieve data from the object store. The <a class="reference internal" href="api_dataobjects.html#searchresults"><span class="std std-ref">SearchResults</span></a> object that
+it returns can then be used to retrieve data from the object store.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="openghg.client.search">
+<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_search.html#search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cloud object store search</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>species</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Species</p></li>
+<li><p><strong>site</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Three letter site code</p></li>
+<li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Inlet height</p></li>
+<li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Instrument name</p></li>
+<li><p><strong>start_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Start date</p></li>
+<li><p><strong>end_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – End date</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>SearchResults object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.SearchResults" title="openghg.dataobjects.SearchResults">SearchResults</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="get-obs-surface">
+<h2>get_obs_surface<a class="headerlink" href="#get-obs-surface" title="Permalink to this headline">¶</a></h2>
+<p>A helper function for those familiar with the Bristol ACRG repository. This attempts to provide the same interface as the
+equivalnet to the <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code> as available in that repository. This returns a list of <a class="reference internal" href="api_dataobjects.html#obsdata"><span class="std std-ref">ObsData</span></a> objects</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="openghg.client.get_obs_surface">
+<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">get_obs_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_ranking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_observations.html#get_obs_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.get_obs_surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the equivalent of the get_obs function from the ACRG repository.</p>
+<p>Usage and return values are the same whilst implementation may differ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site of interest e.g. MHD for the Mace Head site.</p></li>
+<li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species identifier e.g. ch4 for methane.</p></li>
+<li><p><strong>start_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Output start date in a format that Pandas can interpret</p></li>
+<li><p><strong>end_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Output end date in a format that Pandas can interpret</p></li>
+<li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Inlet label</p></li>
+<li><p><strong>average</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Averaging period for each dataset. Each value should be a string of</p></li>
+<li><p><strong>&quot;2H&quot;</strong> (<em>the form e.g.</em>) – </p></li>
+<li><p><strong>&quot;30min&quot;</strong> (<em>should match pandas offset aliases format</em>) – </p></li>
+<li><p><strong>keep_missing</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Keep missing data points or drop them.</p></li>
+<li><p><strong>network</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Network for the site/instrument (must match number of sites).</p></li>
+<li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Specific instrument for the sipte (must match number of sites).</p></li>
+<li><p><strong>calibration_scale</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Convert to this calibration scale</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of ObsData objects</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="rank-sources">
+<h2>rank_sources<a class="headerlink" href="#rank-sources" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">rank_sources</span></code> is used to rank sources of data. Provided with a site and a species the <code class="docutils literal notranslate"><span class="pre">rank_sources</span></code> function will search for the given
+site and species and return a <a class="reference internal" href="api_dataobjects.html#ranksources"><span class="std std-ref">RankSources</span></a> object</p>
+<p>Setting a high rank for a Datasource across a specific daterange means
+that data from that Datasource will be preferred when a user searches for data.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="openghg.client.rank_sources">
+<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">rank_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_rank_sources.html#rank_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.rank_sources" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve datasources for a specific site and species. Returns a RankSources
+object that can be used to set and modify ranking data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site code</p></li>
+<li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A RankSources object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.RankSources" title="openghg.dataobjects.RankSources">RankSources</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="jobrunner">
 <h2>JobRunner<a class="headerlink" href="#jobrunner" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">JobRunner</span></code> class is used to run jobs on HPC clusters.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This will currently raise a <code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code> if used.</p>
+</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.client.JobRunner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">JobRunner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_jobrunner.html#JobRunner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.JobRunner" title="Permalink to this definition">¶</a></dt>
@@ -271,23 +401,6 @@ This will contain the PAR for access for data upload and download.</p>
 
 <div class="toctree-wrapper compound">
 </div>
-</section>
-<section id="process">
-<h2>Process<a class="headerlink" href="#process" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">Process</span></code> class is used upload data for processing by OpenGHG.</p>
-</section>
-<section id="search-client">
-<h2>Search (Client)<a class="headerlink" href="#search-client" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">Search</span></code> class is used to search for data in the object store.</p>
-</section>
-<section id="ranksources">
-<h2>RankSources<a class="headerlink" href="#ranksources" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">RankSources</span></code> class is used to rank sources of data. Setting a high rank for a Datasource across a specific daterange means
-that data from that Datasource will be preferred when a user searches for data.</p>
-</section>
-<section id="retrieve">
-<h2>Retrieve<a class="headerlink" href="#retrieve" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">Retrieve</span></code> class is used to retrieve data from the object store.</p>
 </section>
 </section>
 

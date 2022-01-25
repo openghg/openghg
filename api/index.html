@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>User API &#8212; OpenGHG 0+untagged.3.g40298c6 documentation</title>
+    <title>User API &#8212; OpenGHG 0+untagged.3.g308efeb documentation</title>
     
     <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -165,46 +165,14 @@
 <nav id="bd-toc-nav">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#modules">
-   modules
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#client">
    client
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#localclient">
-   localclient
+  <a class="reference internal nav-link" href="#plotting">
+   plotting
   </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#processing">
-   processing
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#attributes">
-     Attributes
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#export">
-     Export
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#data-control">
-     Data control
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#searching">
-     Searching
-    </a>
-   </li>
-  </ul>
  </li>
 </ul>
 
@@ -231,83 +199,27 @@
 <h1>User API<a class="headerlink" href="#user-api" title="Permalink to this headline">¶</a></h1>
 <p>This section of the documentation gives an overview of the public facing functions used in the Jupyter notebooks available at the
 OpenGHG hub. For developers documentation of the internal workings of the library are available in the developer API section.</p>
-<section id="modules">
-<h2>modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h2>
-<p>These modules are used to process observation data. Classes in this module should not be used directly as they
-are used by functions in the <code class="docutils literal notranslate"><span class="pre">Client</span></code> or <code class="docutils literal notranslate"><span class="pre">LocalClient</span></code> modules when either uploading data to the OpenGHG cloud platform
-or processing data for storage in a local object store.</p>
-<dl class="simple">
-<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsSurface</span></code></dt><dd><p>Process surface observation data</p>
-</dd>
-</dl>
-</section>
 <section id="client">
 <h2>client<a class="headerlink" href="#client" title="Permalink to this headline">¶</a></h2>
-<p>Classes within the client module are used to interact with the cloud based OpenGHG system.</p>
+<p>Classes within the client module are used to interact with OpenGHG, whether it be a cloud or local instance.</p>
 <dl class="simple">
-<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></dt><dd><p>Upload and process observation data files</p>
+<dt><a class="reference internal" href="api_client.html#openghg.client.process_files" title="openghg.client.process_files"><code class="xref py py-func docutils literal notranslate"><span class="pre">process_files()</span></code></a></dt><dd><p>Upload data files for standardisation and storage in the object store</p>
 </dd>
-<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">Search</span></code></dt><dd><p>Search for data in the object store</p>
+<dt><a class="reference internal" href="api_client.html#openghg.client.search" title="openghg.client.search"><code class="xref py py-func docutils literal notranslate"><span class="pre">search()</span></code></a></dt><dd><p>Search and retrieve data from the object store</p>
 </dd>
-<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">RankSources</span></code></dt><dd><p>Rank data sources by date range</p>
+<dt><a class="reference internal" href="api_client.html#openghg.client.rank_sources" title="openghg.client.rank_sources"><code class="xref py py-func docutils literal notranslate"><span class="pre">rank_sources()</span></code></a></dt><dd><p>Rank data sources by date range</p>
+</dd>
+<dt><a class="reference internal" href="api_client.html#openghg.client.get_obs_surface" title="openghg.client.get_obs_surface"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_obs_surface()</span></code></a></dt><dd><p>Retrieve data from the object store in a format expected by the ACRG</p>
 </dd>
 </dl>
 </section>
-<section id="localclient">
-<h2>localclient<a class="headerlink" href="#localclient" title="Permalink to this headline">¶</a></h2>
-<p>For use with a local version of the object store. These functions make it easy to take advantage of the processing and export capabilities
-of OpenGHG on your local filesystem. Use of this module results in the creation of a local object store in a location controlled by the
-<code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code> environment variable.</p>
+<section id="plotting">
+<h2>plotting<a class="headerlink" href="#plotting" title="Permalink to this headline">¶</a></h2>
+<p>These functions are a work in progress, we hope to soon allow users to easily create timeseries and 2D plots using Plotly.</p>
 <dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">get_obs_surface()</span></code></dt><dd><p>Search for surface observations in the object store using a site, species and date range.</p>
-</dd>
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">process_files()</span></code></dt><dd><p>Process files for storage in the object store</p>
-</dd>
-<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">RankSources</span></code></dt><dd><p>Rank data sources by date range</p>
-</dd>
-<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">Search</span></code></dt><dd><p>Search for data within the object store (soon to be deprecated in favour of <code class="docutils literal notranslate"><span class="pre">get_obs</span></code></p>
+<dt><a class="reference internal" href="api_plotting.html#openghg.plotting.plot_footprint" title="openghg.plotting.plot_footprint"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot_footprint()</span></code></a></dt><dd><p>Take a footprint dataset and return a 2D plot</p>
 </dd>
 </dl>
-</section>
-<section id="processing">
-<h2>processing<a class="headerlink" href="#processing" title="Permalink to this headline">¶</a></h2>
-<p>This submodule contains functions that are widely used in the processing functions found in <code class="docutils literal notranslate"><span class="pre">modules</span></code>.</p>
-<section id="attributes">
-<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline">¶</a></h3>
-<p>These functions ensure that the processed data has the correct <a class="reference external" href="https://cfconventions.org/">CF compliant</a> attributes.</p>
-<dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">assign_attributes()</span></code></dt><dd><p>Assign attributes to a dictionary of observation data in NetCDF format using <code class="docutils literal notranslate"><span class="pre">get_attributes</span></code></p>
-</dd>
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">get_attributes()</span></code></dt><dd><p>Write attributes to an in-memory NetCDF file to ensure it is <a class="reference external" href="https://cfconventions.org/">CF-compliant</a></p>
-</dd>
-</dl>
-</section>
-<section id="export">
-<h3>Export<a class="headerlink" href="#export" title="Permalink to this headline">¶</a></h3>
-<p>These functions produce files that are used for upload of processed data to archiving facilities such as CEDA.</p>
-<dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">get_ceda_file()</span></code></dt><dd><p>Create a file that contains the correct attributes for uploading to the <a class="reference external" href="http://archive.ceda.ac.uk/">CEDA archive</a></p>
-</dd>
-</dl>
-</section>
-<section id="data-control">
-<h3>Data control<a class="headerlink" href="#data-control" title="Permalink to this headline">¶</a></h3>
-<p>These control the assignment, splitting and recombination of data.</p>
-<dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">recombine_datasets()</span></code></dt><dd><p>Recombine separate NetCDF files into a single file sorted by date</p>
-</dd>
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">assign_data()</span></code></dt><dd><p>Assings data to exisiting Datasources or creates new Datasources</p>
-</dd>
-</dl>
-</section>
-<section id="searching">
-<h3>Searching<a class="headerlink" href="#searching" title="Permalink to this headline">¶</a></h3>
-<p>The base search functionality provided to the <em class="xref py py-obj">client</em> and <em class="xref py py-obj">localclient</em> modules.</p>
-<dl class="simple">
-<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">search()</span></code></dt><dd><p>The function that is used by <code class="docutils literal notranslate"><span class="pre">openghg.client.Search</span></code> and <code class="docutils literal notranslate"><span class="pre">openghg.localclient.Search</span></code> to search the object store</p>
-</dd>
-</dl>
-</section>
 </section>
 </section>
 
