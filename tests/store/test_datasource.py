@@ -72,6 +72,8 @@ def test_add_data(data):
 
     assert combined.equals(ch4_data)
 
+    print("d.metadata()", d.metadata())
+
     expected_metadata = {
         "site": "bsd",
         "instrument": "picarro",
@@ -83,6 +85,7 @@ def test_add_data(data):
         "species": "ch4",
         "scale": "wmo-x2004a",
         "long_name": "bilsdale",
+        "calibration_scale": "wmo-x2004a",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
         "station_longitude": -1.15033,
