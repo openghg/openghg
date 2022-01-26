@@ -281,23 +281,23 @@ class SearchResults:
         # If cloud use the Retrieve object
         if self.cloud:
             raise NotImplementedError
-            from Acquire.Client import Wallet
-            from xarray import open_dataset
+            # from Acquire.Client import Wallet
+            # from xarray import open_dataset
 
-            wallet = Wallet()
-            self._service_url = "https://fn.openghg.org/t"
-            self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
+            # wallet = Wallet()
+            # self._service_url = "https://fn.openghg.org/t"
+            # self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
 
-            key = f"{site}_{species}"
-            keys_to_retrieve = {key: data_keys}
+            # key = f"{site}_{species}"
+            # keys_to_retrieve = {key: data_keys}
 
-            args = {"keys": keys_to_retrieve}
+            # args = {"keys": keys_to_retrieve}
 
-            response: Dict = self._service.call_function(function="retrieve.retrieve", args=args)
+            # response: Dict = self._service.call_function(function="retrieve.retrieve", args=args)
 
-            response_data = response["results"]
+            # response_data = response["results"]
 
-            data = open_dataset(response_data[key])
+            # data = open_dataset(response_data[key])
         else:
             data = recombine_datasets(data_keys, sort=True)
 

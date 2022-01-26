@@ -62,14 +62,14 @@ class BaseStore:
         Returns:
             cls: Class object of cls type
         """
-        from Acquire.ObjectStore import string_to_datetime
+        from openghg.util import timestamp_tzaware
         from addict import Dict as aDict
 
         if not data:
             raise ValueError("Unable to create object with empty dictionary")
 
         c = cls()
-        c._creation_datetime = string_to_datetime(data["creation_datetime"])
+        c._creation_datetime = timestamp_tzaware(data["creation_datetime"])
         c._datasource_uuids = data["datasource_uuids"]
         c._file_hashes = data["file_hashes"]
         c._datasource_table = aDict(data["datasource_table"])
@@ -85,10 +85,8 @@ class BaseStore:
         Returns:
             dict: Dictionary version of object
         """
-        from Acquire.ObjectStore import datetime_to_string
-
-        data = {}
-        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
+        data: Dict[str, Union[str, bool, Dict]] = {}
+        data["creation_datetime"] = str(self._creation_datetime)
         data["stored"] = self._stored
         data["datasource_table"] = self._datasource_table
         data["datasource_uuids"] = self._datasource_uuids

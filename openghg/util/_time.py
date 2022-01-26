@@ -23,6 +23,7 @@ __all__ = [
     "check_date",
 ]
 
+
 def timestamp_tzaware(timestamp: Union[str, Timestamp]) -> Timestamp:
     """Returns the pandas Timestamp passed as a timezone (UTC) aware
     Timestamp.

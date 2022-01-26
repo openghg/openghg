@@ -31,14 +31,15 @@ def search(
     cloud = running_in_cloud()
 
     if cloud:
-        return _cloud_search(
-            species=species,
-            site=site,
-            inlet=inlet,
-            instrument=instrument,
-            start_date=start_date,
-            end_date=end_date,
-        )
+        raise NotImplementedError
+        # return _cloud_search(
+        #     species=species,
+        #     site=site,
+        #     inlet=inlet,
+        #     instrument=instrument,
+        #     start_date=start_date,
+        #     end_date=end_date,
+        # )
     else:
         results: Union[Dict, SearchResults] = _local_search(
             species=species,
@@ -77,41 +78,41 @@ def _cloud_search(
     """
     raise NotImplementedError
 
-    from openghg.dataobjects import SearchResults
+    # from openghg.dataobjects import SearchResults
 
-    wallet = Wallet()
-    cloud_service = wallet.get_service(service_url=f"{service_url}/openghg")
+    # wallet = Wallet()
+    # cloud_service = wallet.get_service(service_url=f"{service_url}/openghg")
 
-    if not any((species, site, inlet, instrument)):
-        raise ValueError("We must have at least one of  species, site, inlet or instrument")
+    # if not any((species, site, inlet, instrument)):
+    #     raise ValueError("We must have at least one of  species, site, inlet or instrument")
 
-    args = {}
+    # args = {}
 
-    if species is not None:
-        args["species"] = species
+    # if species is not None:
+    #     args["species"] = species
 
-    if site is not None:
-        args["site"] = site
+    # if site is not None:
+    #     args["site"] = site
 
-    if inlet is not None:
-        args["inlet"] = inlet
+    # if inlet is not None:
+    #     args["inlet"] = inlet
 
-    if instrument is not None:
-        args["instrument"] = instrument
+    # if instrument is not None:
+    #     args["instrument"] = instrument
 
-    if start_date is not None:
-        args["start_date"] = start_date
-    if end_date is not None:
-        args["end_date"] = end_date
+    # if start_date is not None:
+    #     args["start_date"] = start_date
+    # if end_date is not None:
+    #     args["end_date"] = end_date
 
-    args["skip_ranking"] = str(skip_ranking)
-    args["data_type"] = str(data_type)
+    # args["skip_ranking"] = str(skip_ranking)
+    # args["data_type"] = str(data_type)
 
-    response: Dict = cloud_service.call_function(function="search.search", args=args)
+    # response: Dict = cloud_service.call_function(function="search.search", args=args)
 
-    try:
-        results_data = response["results"]
-        search_results = SearchResults.from_data(results_data)
-        return search_results
-    except KeyError:
-        return response
+    # try:
+    #     results_data = response["results"]
+    #     search_results = SearchResults.from_data(results_data)
+    #     return search_results
+    # except KeyError:
+    #     return response
