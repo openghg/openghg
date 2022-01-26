@@ -72,6 +72,8 @@ def test_add_data(data):
 
     assert combined.equals(ch4_data)
 
+    print("d.metadata()", d.metadata())
+
     expected_metadata = {
         "site": "bsd",
         "instrument": "picarro",
@@ -83,17 +85,14 @@ def test_add_data(data):
         "species": "ch4",
         "scale": "wmo-x2004a",
         "long_name": "bilsdale",
+        "calibration_scale": "wmo-x2004a",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "inlet_height_magl": "248m",
-        "comment": "cavity ring-down measurements. output from gcwerks",
-        "source": "in situ measurements of air",
-        "conventions": "cf-1.6",
-        "calibration_scale": "wmo-x2004a",
         "station_longitude": -1.15033,
         "station_latitude": 54.35858,
         "station_long_name": "bilsdale, uk",
         "station_height_masl": 380.0,
+        "inlet_height_magl": "248m",
         "data_type": "timeseries",
     }
 
