@@ -1,4 +1,3 @@
-Acquire @ git+https://github.com/openghg/acquire@devel#egg=Acquire
 addict
 cdsapi
 dask
