@@ -46,10 +46,12 @@ def _extract_site_param(data_type: str) -> Dict:
         crds_params = params_full[data_type]
         site_params = {key: value for key, value in crds_params.items() if len(key) == 3 and key.isupper()}
     elif data_type in lghg_sites.keys():
-        params_full = load_json(filename="lghg_sites.json")
+        # TODO: May want to update this now new sites have been added to lghg_data.json
+        # Do these sites have their own data types?
+        params_full = load_json(filename="lghg_data.json")
         site_name = lghg_sites[data_type]
         site_params = {}
-        site_params[site_name] = params_full["current"][site_name]
+        site_params[site_name] = params_full["sites"][site_name]
     elif data_type == "BEACO2N":
         params_full = load_json(filename="beaco2n_site_data.json")
         site_params = params_full
