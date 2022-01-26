@@ -280,6 +280,7 @@ class SearchResults:
 
         # If cloud use the Retrieve object
         if self.cloud:
+            raise NotImplementedError
             from Acquire.Client import Wallet
             from xarray import open_dataset
 

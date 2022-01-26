@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, List, Union
-from Acquire.Client import Wallet
+# from Acquire.Client import Wallet
 from openghg.retrieve import search as _local_search
 from openghg.util import running_in_cloud
 
@@ -75,6 +75,8 @@ def _cloud_search(
     Returns:
         SearchResults:  SearchResults object
     """
+    raise NotImplementedError
+
     from openghg.dataobjects import SearchResults
 
     wallet = Wallet()

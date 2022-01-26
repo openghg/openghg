@@ -11,3 +11,7 @@ class UnknownDataError(Exception):
 
 class FunctionError(Exception):
     """Raised if a serverless function cannot be called correctly"""
+
+
+class ObjectStoreError(Exception):
+    """Raised if an error accessing an object at a key in the object store occurs"""

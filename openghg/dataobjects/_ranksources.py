@@ -10,6 +10,7 @@ class RankSources:
         self._cloud = cloud
 
         if cloud:
+            raise NotImplementedError
             from Acquire.Client import Wallet
 
             wallet = Wallet()

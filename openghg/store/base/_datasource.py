@@ -564,10 +564,8 @@ class Datasource:
         Returns:
             str: Daterange covered by this Datasource
         """
-        from Acquire.ObjectStore import datetime_to_string
-
         start, end = self.daterange()
-        return "".join([datetime_to_string(start), "_", datetime_to_string(end)])
+        return "".join([str(start), "_", str(end)])
 
     def search_metadata_old(
         self,

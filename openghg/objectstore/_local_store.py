@@ -136,6 +136,7 @@ def get_object(bucket: str, key: str) -> bytes:
         if filepath.exists():
             return filepath.read_bytes()
         else:
+            raise 
             raise ObjectStoreError(f"No object at key '{key}'")
 
 
