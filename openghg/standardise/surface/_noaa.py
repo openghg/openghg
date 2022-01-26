@@ -76,6 +76,7 @@ def _read_obspack(
         dict: Dictionary of results
     """
     import xarray as xr
+    import numpy as np
     from openghg.util import clean_string
     from openghg.standardise.meta import assign_attributes
 
@@ -118,21 +119,38 @@ def _read_obspack(
     species = clean_string(obspack_ds.attrs["dataset_parameter"])
     network = "NOAA"
 
-    # If inlet is not defined try and derive this from the attribute data
-    if inlet is None:
-        if "dataset_intake_ht" in orig_attrs:
-            # Inlet height attribute will be a float stored as a string e.g. 40.0
-            inlet_value = orig_attrs["dataset_intake_ht"]
-            inlet_value_num = float(inlet_value)
-            # Include 0 decimal places if remainder is 0, 1 d.p. otherwise
-            if inlet_value_num % 1 == 0:
-                inlet = f"{inlet_value_num:.0f}m"
-            else:
-                inlet = f"{inlet_value_num:.1f}m"   
-        elif measurement_type == "flask":
-            inlet = "flask"
+    # Check inlet within data variables and attribute data
+    if "intake_height" in obspack_ds.data_vars:
+        heights = obspack_ds["intake_height"]
+        heights_unique = np.unique(heights)
+        if len(heights_unique) == 1:
+            inlet_value_num = float(heights_unique[0])
+            inlet_from_file = f"{inlet_value_num:.0f}m"
         else:
-            raise ValueError("Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass 'flask' as inlet.")
+            # TODO: Add functionality to process NOAA data with multiple heights
+            raise Exception("Currently unable to process NOAA data containing multiple heights")
+    elif "dataset_intake_ht" in orig_attrs:
+        # Inlet height attribute will be a float stored as a string e.g. 40.0
+        inlet_value = orig_attrs["dataset_intake_ht"]
+        inlet_value_num = float(inlet_value)
+        # Include 0 decimal places if remainder is 0, 1 d.p. otherwise
+        if inlet_value_num % 1 == 0:
+            inlet = f"{inlet_value_num:.0f}m"
+        else:
+            inlet_from_file = f"{inlet_value_num:.1f}m"   
+    elif measurement_type == "flask":
+        inlet_from_file = "flask"
+    else:
+        inlet_from_file = None
+
+    # Check inlet from file against any provided inlet
+    if inlet is None and inlet_from_file:
+        inlet = inlet_from_file
+    elif inlet is not None and inlet_from_file:
+        if inlet != inlet_from_file:
+            print(f"WARNING: Provided inlet {inlet} does not match inlet derived from the input file: {inlet_from_file}")
+    else:
+        raise ValueError("Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass 'flask' as inlet.")
 
     # Use these obs values to filter the original dataset to remove any repeated times
     processed_ds = obspack_ds.sel(obs=obs_unique)
@@ -209,6 +227,8 @@ def _read_obspack(
     attributes["sampling_period"] = sampling_period
     if sampling_period_estimate >= 0.0:
         attributes["sampling_period_estimate"] = str(sampling_period_estimate)
+    # attributes["instrument"] = 
+
 
     gas_data = {species:
         {"data": processed_ds,
