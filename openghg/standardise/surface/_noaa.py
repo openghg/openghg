@@ -57,9 +57,9 @@ def parse_noaa(
 def _read_obspack(
     data_filepath: Union[str, Path],
     site: str,
-    inlet: Union[str, None],
     sampling_period: str,
     measurement_type: str,
+    inlet: Optional[str] = None,
     instrument: Optional[str] = None,
 ) -> Dict[str, Dict]:
     """Read NOAA ObsPack NetCDF files
@@ -67,10 +67,11 @@ def _read_obspack(
     Args:
         data_filepath: Path to file
         site: Three letter site code
-        inlet: Inlet height, if no height use measurement type e.g. flask
-        measurement_type: One of flask, insity or pfp
-        instrument: Instrument name
         sampling_period: Sampling period
+        measurement_type: One of flask, insitu or pfp
+        inlet: Inlet height, if no height use measurement type e.g. flask
+        instrument: Instrument name
+
     Returns:
         dict: Dictionary of results
     """
@@ -120,9 +121,14 @@ def _read_obspack(
     # If inlet is not defined try and derive this from the attribute data
     if inlet is None:
         if "dataset_intake_ht" in orig_attrs:
-            # Note: this attribute will be a float stored as a string e.g. 40.0, may want to update to int
+            # Inlet height attribute will be a float stored as a string e.g. 40.0
             inlet_value = orig_attrs["dataset_intake_ht"]
-            inlet = f"{inlet_value}m"
+            inlet_value_num = float(orig_attrs["dataset_intake_ht"])
+            # Include 0 decimal place if remainder if 0 and 1 d.p. otherwise
+            if inlet_value_num%1 == 0:
+                inlet = f"{inlet_value_num:.0f}m"
+            else:
+                inlet = f"{inlet_value_num:.1f}m"   
         elif measurement_type == "flask":
             inlet = "flask"
         else:
@@ -219,9 +225,9 @@ def _read_obspack(
 def _read_raw_file(
     data_filepath: Union[str, Path],
     site: str,
-    inlet: Union[str, None],
     sampling_period: str,
     measurement_type: str,
+    inlet: Optional[str] = None,
     instrument: Optional[str] = None,
 ) -> Dict:
     """Reads NOAA data files and returns a dictionary of processed
@@ -229,8 +235,12 @@ def _read_raw_file(
 
     Args:
         data_filepath: Path of file to load
-        species: Species name
         site: Site name
+        sampling_period: Sampling period
+        measurement_type: One of flask, insitu or pfp
+        inlet: Inlet height, if no height use measurement type e.g. flask
+        instrument: Instrument name
+
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """

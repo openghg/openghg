@@ -182,7 +182,7 @@ def add_noaa_obspack(data_directory: Union[str, Path],
     # ObsPack may contain nc or txt files
     # Try and extract one and then the other if possible
     files = _find_noaa_files(data_directory, ".nc")
-    if len(files) == 0:
+    if not files:
         files = _find_noaa_files(data_directory, ".txt")
 
     # Find relevant details for each file and call parse_noaa() function
@@ -197,6 +197,8 @@ def add_noaa_obspack(data_directory: Union[str, Path],
             processed = ObsSurface.read_file(filepath, site=site, measurement_type=measurement_type, network="NOAA", data_type="NOAA")
         elif project in project_names_not_implemented:
             print(f"Not processing {filepath.name} - no standardisation for {project} data implemented yet.")
+            processed = {}
+        else:
             processed = {}
 
         # Expect "processed" dictionary and/or "error" dictionary within `processed`
