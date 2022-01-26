@@ -123,7 +123,7 @@ def _read_obspack(
         if "dataset_intake_ht" in orig_attrs:
             # Inlet height attribute will be a float stored as a string e.g. 40.0
             inlet_value = orig_attrs["dataset_intake_ht"]
-            inlet_value_num = float(orig_attrs["dataset_intake_ht"])
+            inlet_value_num = float(inlet_value)
             # Include 0 decimal place if remainder if 0 and 1 d.p. otherwise
             if inlet_value_num%1 == 0:
                 inlet = f"{inlet_value_num:.0f}m"
