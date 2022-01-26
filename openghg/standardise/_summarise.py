@@ -36,23 +36,30 @@ def _extract_site_param(data_type: str) -> Dict:
 
     data_type = data_type.upper()
 
-    lghg_sites = {"NPL":"NPL", "BTT":"BTT", "THAMESBARRIER":"TMB"}
+    lghg_sites = {"NPL": "NPL", "BTT": "BTT", "THAMESBARRIER": "TMB"}
+
+    # TODO: Could create another json / csv which includes links 
+    # between GCWERKS and instruments (with a warning) if needed
 
     if data_type == "GCWERKS":
+        # "process_gcwerks_parameters.json" - ["GCWERKS"]["sites"], sites are keys
         params_full = load_json(filename="process_gcwerks_parameters.json")
         site_params: Dict = params_full[data_type]["sites"]
     elif data_type == "CRDS":
+        # "process_gcwerks_parameters.json" - ["CRDS"], sites are keys
         params_full = load_json(filename="process_gcwerks_parameters.json")
         crds_params = params_full[data_type]
         site_params = {key: value for key, value in crds_params.items() if len(key) == 3 and key.isupper()}
     elif data_type in lghg_sites.keys():
         # TODO: May want to update this now new sites have been added to lghg_data.json
         # Do these sites have their own data types?
+        # "lghg_data.json" - ["sites"], sites are keys
         params_full = load_json(filename="lghg_data.json")
         site_name = lghg_sites[data_type]
         site_params = {}
         site_params[site_name] = params_full["sites"][site_name]
     elif data_type == "BEACO2N":
+        # "beaco2n_site_data.json" - sites are keys
         params_full = load_json(filename="beaco2n_site_data.json")
         site_params = params_full
     else:
@@ -85,6 +92,7 @@ def _extract_site_names(site_params: Dict, data_type: str) -> Dict:
 
     return site_names
 
+
 def summary_data_types() -> pd.DataFrame:
     '''
     Create summary DataFrame of accepted input data types. This includes
@@ -111,7 +119,7 @@ def summary_data_types() -> pd.DataFrame:
             site_codes = [""]
             site_names = [""]
 
-        site_data = pd.DataFrame({"Site code":site_codes, "Long name":site_names})
+        site_data = pd.DataFrame({"Site code": site_codes, "Long name": site_names})
         site_data["Data type"] = data_type
         site_data["Platform"] = "surface site"
 
@@ -122,26 +130,3 @@ def summary_data_types() -> pd.DataFrame:
     # collated_site_data = collated_site_data.sort_values(by="Site code")
 
     return collated_site_data
-
-
-# NOAAObsPack,,,NOAA
-# BTT,,,BTT
-# NPL,,,NPL
-# TMB,,,TMB
-# ,,,EUROCOM
-# ,,,CRANFIELD
-# ,,,BEACO2N
-# ,,,AQMESH
-# ,,,GLASGOW_PICARRO
-# ,,,GLASGOW_LICOR
-
-# process_gcwerks_parameters.json includes list of sites
-# - ["GCWERKS"]["sites"] keywords
-# - ["CRDS"] - keys are sites rather than another keyword
-
-# beaco2n_site_data.json - sites are keys
-# lghg_sites.json - "current" and keys are site name / data type
-# NOAA ObsPack?
-
-# Could create another json / csv which includes links 
-# between GCWERKS and instruments (with a warning) if needed
