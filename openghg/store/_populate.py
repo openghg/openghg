@@ -103,8 +103,8 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
 
     # Allow user to specify various levels within ObsPack to e.g. just
     # extract nc files.
-    for dir in subdirectories:
-        path_to_search = data_directory / dir
+    for subdir in subdirectories:
+        path_to_search = data_directory / subdir
         print(f"Searching for {ext} files within {path_to_search}")
         files = list(path_to_search.glob(f"*{ext}"))
         suffix_values = [file.suffix for file in files]
@@ -117,14 +117,16 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
 
 
 def add_noaa_obspack(data_directory: Union[str, Path],
-                     project: Optional[str] = None) -> Dict:
+                     project: Optional[str] = None,
+                     overwrite: bool = False) -> Dict:
     '''
     Function to detect and add files from the NOAA ObsPack to the object store.
 
     Args:
         data_directory: Top level directory for the downloaded NOAA ObsPack
-        project (optional) : Specific project or type to process e.g. "surface"
+        project (optional) : Can specify project or type to process only e.g. "surface"
         or "surface-flask"
+        overwrite : Whether to overwrite existing entries in the object store
 
     Returns:
         Dict: Details of data which has been processed into the object store
@@ -194,7 +196,7 @@ def add_noaa_obspack(data_directory: Union[str, Path],
         measurement_type = param["measurement_type"]
 
         if project in projects_to_read:
-            processed = ObsSurface.read_file(filepath, site=site, measurement_type=measurement_type, network="NOAA", data_type="NOAA")
+            processed = ObsSurface.read_file(filepath, site=site, measurement_type=measurement_type, network="NOAA", data_type="NOAA", overwrite=overwrite)
         elif project in project_names_not_implemented:
             print(f"Not processing {filepath.name} - no standardisation for {project} data implemented yet.")
             processed = {}
