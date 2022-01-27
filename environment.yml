@@ -3,26 +3,25 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - backports-datetime-fromisoformat
-  - cachetools
+  - addict
   - cdsapi
-  - cryptography
+  - dask
   - lazy_import
   - matplotlib
   - netcdf4
   - numexpr
   - numpy
+  - nc-time-axis
   - pandas
   - paramiko
   - pyvis
-  - PyYAML
-  - qrcode
-  - requests
+  - rapidfuzz
+  - requests>=2.25
   - scipy
-  - pytables
-  - tblib
   - tqdm
-  - xarray
+  - xarray>=0.18.2
+  - urllib3>=1.26.3
   - pip
-  - pip:
-    - Acquire @ git+git://github.com/gareth-j/acquire@testStore#egg=Acquire
+
+  
+
