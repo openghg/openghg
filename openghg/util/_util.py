@@ -1,12 +1,35 @@
 """ Utility functions that are used by multiple modules
 
 """
-from typing import Dict
+from typing import Dict, Tuple, Iterator
+from collections.abc import Iterable
 
-__all__ = ["unanimous", "load_object", "get_datapath", "read_header", "load_json", "valid_site", "is_number", "to_lowercase"]
+
+__all__ = [
+    "unanimous",
+    "verify_site",
+    "pairwise",
+    "multiple_inlets",
+    "running_in_cloud",
+]
 
 
-def unanimous(seq):
+def running_in_cloud() -> bool:
+    """Are we running in the cloud?
+
+    Checks for the OPENGHG_CLOUD environment variable being set
+
+    Returns:
+        bool: True if running in cloud
+    """
+    from os import environ
+
+    cloud_env = environ.get("OPENGHG_CLOUD")
+
+    return cloud_env is not None
+
+
+def unanimous(seq: Dict) -> bool:
     """Checks that all values in an iterable object
     are the same
 
@@ -25,139 +48,107 @@ def unanimous(seq):
         return all(i == first for i in it)
 
 
-def load_object(class_name):
-    """Load an object of type class_name
+def pairwise(iterable: Iterable) -> Iterator[Tuple[str, str]]:
+    """Return a zip of an iterable where a is the iterable
+    and b is the iterable advanced one step.
 
     Args:
-        class_name (str): Name of class to load
+        iterable: Any iterable type
     Returns:
-        class_name: class_name object
+        tuple: Tuple of iterables
     """
-    module_path = "openghg.modules"
-    class_name = str(class_name).upper()
+    from itertools import tee
 
-    # Here we try upper and lowercase for the module
-    try:
-        # Although __import__ is not usually recommended, here we want to use the
-        # fromlist argument that import_module doesn't support
-        module_object = __import__(name=module_path, fromlist=class_name)
-        target_class = getattr(module_object, class_name)
-    except AttributeError:
-        class_name = class_name.lower().capitalize()
-        module_object = __import__(name=module_path, fromlist=class_name)
-        target_class = getattr(module_object, class_name)
-    except ModuleNotFoundError as err:
-        raise ModuleNotFoundError(f"{class_name} is not a valid module {err}")
+    a, b = tee(iterable)
+    next(b, None)
 
-    return target_class()
+    return zip(a, b)
 
 
-def get_datapath(filename, directory=None):
-    """Returns the correct path to JSON files used for assigning attributes
+def find_matching_site(site_name: str, possible_sites: Dict) -> str:
+    """Try and find a similar name to site_name in site_list and return a suggestion or
+    error string.
 
     Args:
-        filename (str): Name of JSON file
+        site_name: Name of site
+        site_list: List of sites to check
     Returns:
-        pathlib.Path: Path of file
+        str: Suggestion / error message
     """
-    from pathlib import Path
+    from rapidfuzz import process
 
-    filename = str(filename)
+    site_list = possible_sites.keys()
 
-    if directory is None:
-        return Path(__file__).resolve().parent.parent.joinpath(f"data/{filename}")
+    matches = process.extract(site_name, site_list)
+
+    scores = [s for m, s, _ in matches]
+
+    # This seems like a decent cutoff score for a decent find
+    cutoff_score = 85
+
+    if scores[0] < cutoff_score:
+        return f"No suggestion for {site_name}."
+    elif scores[0] > cutoff_score and scores[0] > scores[1]:
+        best_match = matches[0][0]
+        return f"Did you mean {best_match.title()}, code: {possible_sites[best_match]} ?"
+    elif scores[0] == scores[1]:
+        suggestions = [f"{match.title()}, code: {possible_sites[match]}" for match, _, _ in matches]
+        nl_char = "\n"
+        return f"Did you mean one of : \n {nl_char.join(suggestions)}"
     else:
-        return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
+        return f"Unknown site: {site_name}"
 
 
-def load_json(filename):
-    """Returns a dictionary deserialised from JSON. This function only works
-        for JSON files in the openghg/data directory.
+def verify_site(site: str) -> str:
+    """Check if the passed site is a valid one and returns the three
+    letter site code if found. Otherwise we use fuzzy text matching to suggest
+    sites with similar names.
 
     Args:
-        filename (str): Name of JSON file
+        site: Three letter site code or site name
     Returns:
-        dict: Dictionary created from JSON
+        str: Verified three letter site code if valid site
     """
-    from json import load
+    from openghg.util import load_json, remove_punctuation
+    from openghg.types import InvalidSiteError
 
-    path = get_datapath(filename)
+    site_data = load_json("site_lookup.json")
 
-    with open(path, "r") as f:
-        data = load(f)
+    if site.upper() in site_data:
+        return site.lower()
+    else:
+        site = remove_punctuation(site)
+        name_lookup: Dict[str, str] = {value["short_name"]: code for code, value in site_data.items()}
 
-    return data
+        try:
+            return name_lookup[site].lower()
+        except KeyError:
+            long_names = {value["long_name"]: code for code, value in site_data.items()}
+            message = find_matching_site(site_name=site, possible_sites=long_names)
+            raise InvalidSiteError(message)
 
 
-def read_header(filepath, comment_char="#"):
-    """Reads the header lines denoted by the comment_char
+def multiple_inlets(site: str) -> bool:
+    """Check if the passed site has more than one inlet
 
     Args:
-        filepath (str or Path): Path to file
-        comment_char (str, default="#"): Character that denotes a comment line
-        at the start of a file
-    """
-    comment_char = str(comment_char)
-
-    header = []
-    # Get the number of header lines
-    with open(filepath, "r") as f:
-        for line in f:
-            if line.startswith(comment_char):
-                header.append(line)
-            else:
-                break
-
-    return header
-
-
-def valid_site(site):
-    """Check if the passed site is a valid one
-
-    Args:
-        site (str): Three letter site code
+        site: Three letter site code
     Returns:
-        bool: True if site is valid
+        bool: True if multiple inlets
     """
+    from openghg.util import load_json
+
     site_data = load_json("acrg_site_info.json")
 
     site = site.upper()
+    network = next(iter(site_data[site]))
 
-    if site not in site_data:
-        site = site.lower()
-        site_name_code = load_json("site_codes.json")
-        return site in site_name_code["name_code"]
-
-    return True
-
-
-def is_number(s):
-    """Is it a number?
-
-    Args:
-        s (str): String which may be a number
-    """
     try:
-        float(s)
-        return True
-    except ValueError:
-        return False
+        heights = set(site_data[network]["height"])
+    except KeyError:
+        try:
+            heights = set(site_data[network]["height_name"])
+        except KeyError:
+            return True
 
-
-def to_lowercase(d: Dict) -> Dict:
-    """Convert all keys and values in a dictionary to lowercase
-
-    Args:
-        d: Dictionary to lower case
-    Returns:
-        dict: Dictionary of lower case keys and values
-    """
-    if isinstance(d, dict):
-        return {k.lower(): to_lowercase(v) for k, v in d.items()}
-    elif isinstance(d, (list, set, tuple)):
-        t = type(d)
-        return t(to_lowercase(o) for o in d)
-    elif isinstance(d, str):
-        return d.lower()
-    else:
-        return d
+    return len(heights) > 1

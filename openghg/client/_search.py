@@ -1,100 +1,115 @@
-__all__ = ["Search"]
-
-import json
-import warnings
-import xarray
+from __future__ import annotations
+from typing import TYPE_CHECKING, Dict, List, Union
 from Acquire.Client import Wallet
-from Acquire.ObjectStore import string_to_datetime, datetime_to_string
+from openghg.retrieve import search as _local_search
+from openghg.util import running_in_cloud
+
+if TYPE_CHECKING:
+    from openghg.dataobjects import SearchResults
 
 
-class Search:
-    def __init__(self, service_url=None):
-        if service_url:
-            self._service_url = service_url
-        else:
-            self._service_url = "https://fn.openghg.org/t"
+def search(
+    species: str = None,
+    site: str = None,
+    inlet: str = None,
+    instrument: str = None,
+    start_date: str = None,
+    end_date: str = None,
+) -> Union[SearchResults, Dict]:
+    """Cloud object store search
 
-        wallet = Wallet()
-        self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
+    Args:
+        species: Species
+        site: Three letter site code
+        inlet: Inlet height
+        instrument: Instrument name
+        start_date: Start date
+        end_date: End date
+    Returns:
+        SearchResults:  SearchResults object
+    """
+    cloud = running_in_cloud()
 
-    def search(self, locations, species=None, inlet=None, instrument=None, start_date=None, end_date=None):
-        """ Document me!
+    if cloud:
+        return _cloud_search(
+            species=species,
+            site=site,
+            inlet=inlet,
+            instrument=instrument,
+            start_date=start_date,
+            end_date=end_date,
+        )
+    else:
+        results: Union[Dict, SearchResults] = _local_search(
+            species=species,
+            site=site,
+            inlet=inlet,
+            instrument=instrument,
+            start_date=start_date,
+            end_date=end_date,
+        )
 
-        """
-        if self._service is None:
-            raise PermissionError("Cannot use a null service")
+        return results
 
-        args = {}
+
+def _cloud_search(
+    species: Union[str, List] = None,
+    site: Union[str, List] = None,
+    inlet: Union[str, List] = None,
+    instrument: Union[str, List] = None,
+    start_date: str = None,
+    end_date: str = None,
+    skip_ranking: bool = False,
+    data_type: str = "timeseries",
+    service_url: str = "https://fn.openghg.org/t",
+) -> Union[SearchResults, Dict]:
+    """Cloud object store search
+
+    Args:
+        species: Species
+        site: Three letter site code
+        inlet: Inlet height
+        instrument: Instrument name
+        start_date: Start date
+        end_date: End date
+    Returns:
+        SearchResults:  SearchResults object
+    """
+    from openghg.dataobjects import SearchResults
+
+    wallet = Wallet()
+    cloud_service = wallet.get_service(service_url=f"{service_url}/openghg")
+
+    if not any((species, site, inlet, instrument)):
+        raise ValueError("We must have at least one of  species, site, inlet or instrument")
+
+    args = {}
+
+    if species is not None:
         args["species"] = species
-        args["locations"] = locations
 
-        if inlet is not None:
-            args["inlet"] = inlet
+    if site is not None:
+        args["site"] = site
 
-        if instrument is not None:
-            args["instrument"] = instrument
+    if inlet is not None:
+        args["inlet"] = inlet
 
-        if start_date:
-            args["start_date"] = datetime_to_string(start_date)
-        if end_date:
-            args["end_date"] = datetime_to_string(end_date)
+    if instrument is not None:
+        args["instrument"] = instrument
 
-        response = self._service.call_function(function="search", args=args)["results"]
+    if start_date is not None:
+        args["start_date"] = start_date
+    if end_date is not None:
+        args["end_date"] = end_date
 
-        self._results = response
+    args["skip_ranking"] = str(skip_ranking)
+    args["data_type"] = str(data_type)
 
+    response: Dict = cloud_service.call_function(function="search.search", args=args)
+
+    try:
+        results_data = response["results"]
+        search_results = SearchResults.from_data(results_data)
+        return search_results
+    except KeyError:
         return response
-
-    def results(self):
-        """ Return the results in an easy to read format when printed to screen
-
-            Returns:    
-                dict: Dictionary of results
-        """
-        return {
-            key: f"Daterange : {self._results[key]['start_date']} - {self._results[key]['end_date']}"
-            for key in self._results
-        }
-
-    def download(self, selected_keys):
-        """ Downloads the selected keys and returns a dictionary of
-            xarray Datasets
-
-            Args:
-                keys (str, list): Key(s) from search results to download
-            Returns:
-                defaultdict(dict): Dictionary of Datasets
-        """
-        if not isinstance(selected_keys, list):
-            selected_keys = [selected_keys]
-
-        # Create a Retrieve object to interact with the object store
-        # Select the keys we want to download
-        download_keys = {key: self._results[key]["keys"] for key in selected_keys}
-
-        args = {"keys": download_keys, "return_type": "json"}
-        response = self._service.call_function(function="retrieve", args=args)
-        result_data = response["results"]
-
-        # datasets = defaultdict(dict)
-        datasets = []
-        # TODO - find a better way of doing this, returning compressed binary data would be far better
-        for key, dateranges in result_data.items():
-            for daterange in dateranges:
-                serialised_data = json.loads(result_data[key][daterange])
-
-                # We need to convert the datetime string back to datetime objects here
-                datetime_data = serialised_data["coords"]["time"]["data"]
-                for i, _ in enumerate(datetime_data):
-                    datetime_data[i] = string_to_datetime(datetime_data[i])
-
-                # TODO - catch FutureWarnings here that may affect run when used within voila
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    # datasets[key][daterange] = xarray.Dataset.from_dict(serialised_data)
-                    datasets.append(xarray.Dataset.from_dict(serialised_data))
-
-        return datasets
-
-    def service(self):
-        return self._service

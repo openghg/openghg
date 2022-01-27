@@ -56,6 +56,16 @@ clone the OpenGHG repository and then move into it and install the required depe
 
 OpenGHG should now be installed within your virtual environment. 
 
+Clone Acquire
+-------------
+
+OpenGHG currently relies on Acquire being in the directory about ``OpenGHG`` for tests to be run correctly. To do this 
+
+.. code-block:: bash
+
+    cd ..
+    git clone https://github.com/openghg/acquire.git
+
 Run tests
 ---------
 
@@ -120,7 +130,7 @@ exposed to the Python help system.
 
 .. code-block:: python
 
-   from module import *
+   from module import function_a, function_b
 
 This results in a clean API and documentation, with all extraneous information,
 e.g. external modules, hidden from the user. This is important when working
@@ -168,7 +178,7 @@ For a function that takes either a string or a list as its argument and returns 
             Returns:
                 list: List of data found
         """
-        # some excellent code
+        return ["found_item"]
 
 
 Workflow
@@ -228,7 +238,7 @@ To run the full test suite, simply type:
 
 .. code-block:: bash
 
-   pytest tests
+   pytest tests/
 
 
 To get more detailed information about each test, run pytests using the
@@ -236,7 +246,7 @@ To get more detailed information about each test, run pytests using the
 
 .. code-block:: bash
 
-   pytest -v
+   pytest -v tests/
 
 For more information on the capabilties of ``pytest`` please see the 
 `pytest documentation <https://docs.pytest.org/en/stable/contents.html>`__.
@@ -248,7 +258,6 @@ We use GitHub Actions to run a full continuous integration (CI)
 on all pull requests to devel and
 master, and all pushes to devel and master. We will not merge a pull
 request until all tests pass. We only accept pull requests to devel.
-We only allow pull requests from devel to master. In addition to CI,
 
 Documentation
 =============
@@ -264,7 +273,7 @@ additional packages. If you haven't yet installed the developer requirements ple
 
 .. code-block:: bash
 
-   pip install -r requirements-dev.txt
+   pip install -r requirements-doc.txt
 
 Next ensure you have `pandoc <https://pandoc.org/>`__ installed. Installation instructions
 can be `found here <https://pandoc.org/installing.html>`__

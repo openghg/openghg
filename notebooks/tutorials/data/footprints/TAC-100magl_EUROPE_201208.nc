@@ -1,0 +1,1 @@
+../../../../tests/data/footprints/TAC-100magl_EUROPE_201208.nc

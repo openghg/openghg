@@ -1123,6 +1123,16 @@
       "longitude": -112.0
     }
   },
+  "KVH": {
+    "AGAGE": {
+      "height": ["30m"],
+      "height_name": ["30magl"],
+      "height_station_masl": 3.0,
+      "latitude": 56.0451,
+      "long_name": "Killearn Village Hall",
+      "longitude": -4.3724
+    }
+  },
   "KUM": {
     "NOAA": {
       "height": ["10m"],
@@ -2035,6 +2045,14 @@
       "latitude": 38.617,
       "long_name": "Shenandoah National Park, United States",
       "longitude": -78.35
+    }
+  },
+  "SPF": {
+    "NOAA": {
+      "height_station_masl": 1623.0,
+      "latitude": -73.8658,
+      "long_name": "Antarctic Firn Air, Antarctica",
+      "longitude": 163.687
     }
   },
   "SPO": {

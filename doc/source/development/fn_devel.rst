@@ -143,27 +143,29 @@ We can also use ``curl`` to trigger the function. If we do
     [user@computer openghg_fn]$ fn inspect function openghg openghg_fn
     {
         "annotations": {
-            "fnproject.io/fn/invokeEndpoint": "http://localhost:8080/invoke/01ES6PE0FGNG8G00GZJ0000009"
+            "fnproject.io/fn/invokeEndpoint": "http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009"
         },
-        "app_id": "01ES6PDS9FNG8G00GZJ0000008",
-        "created_at": "2020-12-10T16:06:05.040Z",
-        "id": "01ES6PE0FGNG8G00GZJ0000009",
+        "app_id": "01ES9D6T23NG8G00GZJ0000008",
+        "created_at": "2020-12-11T17:22:35.461Z",
+        "id": "01ES9D6TA5NG8G00GZJ0000009",
         "idle_timeout": 30,
-        "image": "openghg_fn:0.0.6",
-        "memory": 256,
-        "name": "openghg_fn",
+        "image": "openghg:0.0.82",
+        "memory": 2048,
+        "name": "openghg",
         "timeout": 30,
-        "updated_at": "2020-12-10T16:09:22.043Z"
+        "updated_at": "2021-06-08T13:26:48.066Z"
     }
 
-We can see that there is an invocation endpoint at ``http://localhost:8080/invoke/01ES6PE0FGNG8G00GZJ0000009``, using curl we can
+
+We can see that there is an invocation endpoint at ``http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009``, using curl we can
 call the function like so
 
 .. code-block:: bash
 
-    [user@computer openghg_fn]$ curl -X POST http://localhost:8080/invoke/01ES6PE0FGNG8G00GZJ0000009
+    [user@computer openghg_fn]$ curl -X POST http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009
     {"message": "Hello from OpenGHG"}
 
+Note that your invocation endpoint may differ slightly from the one shown above.
 
 Dockerise
 ---------
@@ -308,6 +310,48 @@ If you have the base image built and have only made changes to the OpenGHG code 
 **Note** - if you've made changes to either ``requirements.txt`` or ``requirements-server.txt`` you'll need to do a rebuild of the base
 image. This ensures all dependencies are installed in the base image.
 
+Test a function
+---------------
+
+Say we want to test a function such as the ``testconnection`` function that is a part of OpenGHG. This simple function returns a simple
+string of the timestamp at which the function was called to the user. 
+
+As above we inspect the funtion and find its endpoint.
+
+.. code-block:: bash
+
+    [user@computer openghg_fn]$ fn inspect function openghg openghg
+    {
+        "annotations": {
+            "fnproject.io/fn/invokeEndpoint": "http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009"
+        },
+        "app_id": "01ES9D6T23NG8G00GZJ0000008",
+        "created_at": "2020-12-11T17:22:35.461Z",
+        "id": "01ES9D6TA5NG8G00GZJ0000009",
+        "idle_timeout": 30,
+        "image": "openghg:0.0.82",
+        "memory": 2048,
+        "name": "openghg",
+        "timeout": 30,
+        "updated_at": "2021-06-08T13:26:48.066Z"
+    }
+
+We can then call the function using
+
+.. code-block:: bash
+
+    curl -X POST -d '{"function" : "testconnection", "args": {}}' http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009
+
+.. note::
+    Your endpoint URL will differ from the one above.
+
+And we should recieve a response such as
+
+.. code-block:: bash
+
+    {'results': 'Function run at 2021-06-08 13:34:17.095579+00:00'}
+
+Now we know our Dockerised function can be called and works correctly.
 
 Calling from OpenGHG
 --------------------

@@ -119,7 +119,7 @@ services/hugs_service/credentials
 .DS_Store
 
 # NetCDF files
-*.nc
+# *.nc # Removed since we need to test footprints, emissions files etc. which will be in netcdf format 
 # Directory currently used for testing
 # reading and writing to the object store
 test_tmp/
@@ -134,3 +134,5 @@ keys/
 
 # Sphinx documentation
 doc/build/*
+
+.idea/*

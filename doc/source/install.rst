@@ -43,7 +43,7 @@ Virtual environment - pip
 
     python -m venv /path/to/env/openghg_env
     # Activate the environment
-    source /path/to/end/bin/activate
+    source /path/to/env/bin/activate
 
 Virtual environment - conda
 ---------------------------
@@ -57,7 +57,7 @@ Virtual environment - conda
 Clone and install
 -----------------
 
-OpenGHG is currently very early in its development process so the only way to install
+OpenGHG is currently early in its development process so the only way to install
 the library is by cloning the repository and installing manually using pip.
 
 .. code-block:: bash
@@ -69,4 +69,4 @@ the library is by cloning the repository and installing manually using pip.
 Developers
 ==========
 
-For developers please see the :doc:`development/python_devel`.
+For developers please see the :doc:`development/python_devel` documentation.

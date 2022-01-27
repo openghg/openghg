@@ -16,55 +16,75 @@ jobs:
       max-parallel: 4
       fail-fast: false
       matrix:
-        operating-system: [ubuntu-latest, macos-latest]
-        python-version: [3.7, 3.8]
+        operating-system: [ubuntu-latest]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2.3.1
+      uses: actions/checkout@v2
       with:
         persist-credentials: false
+        fetch-depth: 2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install openghg
+    - name: Do some macOS specific installs for Python 3.9
       run: |
-        python -m pip install --upgrade pip wheel
-        pip install -r requirements-dev.txt
-        pip install .
-    - name: 'Clone Acquire for services folder required for tests'
-      run: |
-        git clone -b testStore https://github.com/gareth-j/acquire.git ../acquire
-        pip install -r ../acquire/requirements.txt
-        pip install oci retry
+        brew install c-blosc hdf5
+      if: matrix.python-version == 3.9 && matrix.operating-system == 'macos-latest'
     - name: Lint with flake8
       run: |
+        python -m pip install --upgrade pip wheel flake8
         flake8 openghg/ --count --statistics
+    - name: Install openghg
+      run: |
+        pip install -r requirements-dev.txt
+        pip install .
+    - name: Run mypy
+      run: |
+        mypy --python-version ${{ matrix.python-version }} openghg/
+      if: matrix.python-version == 3.8 || matrix.python-version == 3.9
+    - name: 'Clone Acquire for services folder required for tests'
+      run: |
+        git clone -b devel https://github.com/openghg/acquire.git ../acquire
+        pip install -r ../acquire/requirements.txt
+        pip install oci retry
     - name: Create mock cdsapi config file
       run: |
         echo $'url: https://www.openghg.org\nkey: 00000:f5690ad7-test-test-test-6fb0573991ca\n' > ~/.cdsapirc
-    - name: Test with pytest
-      env:
-        OPENGHG_PATH: /tmp/openghg_store
+    - name: Install udunits package for CF compliance checks
       run: |
-        pytest --cov=./ --cov-report=xml
+        sudo apt-get install libudunits2-0
+      if: matrix.operating-system == 'ubuntu-latest'
+    - name: Test with pytest
+      run: |
+        pip install --upgrade pytest
+        pytest --run-cfchecks --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
       run: |
-        bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+        curl -s https://codecov.io/bash > codecov;
+        VERSION=$(grep -o 'VERSION=\"[0-9\.]*\"' codecov | cut -d'"' -f2);
+        for i in 1 256 512
+        do
+          shasum -a $i -c --ignore-missing <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM") ||
+          shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM")
+        done
+        bash codecov || echo "Codecov did not collect coverage reports"
+      if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
     - name: Install pandoc and build the documentation
       run: |
         sudo apt-get install -yq pandoc
+        pip install -r requirements-doc.txt
         cd doc
         make
-      if: matrix.python-version == 3.7 && matrix.operating-system == 'ubuntu-latest'
+      if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
     - name: Deploy to GitHub pages
-      uses: JamesIves/github-pages-deploy-action@3.7.1
+      uses: JamesIves/github-pages-deploy-action@0f24da7de3e7e135102609a4c9633b025be8411b
       with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH: gh-pages 
-        FOLDER: "doc/build/html"
-        CLEAN: true 
-      if: matrix.python-version == 3.7 && matrix.operating-system == 'ubuntu-latest'
+        branch: gh-pages
+        folder: "doc/build/html"
+        clean: true 
+      if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
       
         
 

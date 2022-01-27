@@ -1,30 +1,22 @@
-def search(args):
-    from Acquire.ObjectStore import string_to_datetime
-    from openghg.processing import search as hugs_search
+from typing import Dict
 
-    if "start_date" in args:
-        start_date = string_to_datetime(args["start_date"])
+
+def search(args: Dict) -> Dict:
+    from openghg.retrieve import search as openghg_search
+
+    skip_ranking = str(args["skip_ranking"]).lower()
+
+    if skip_ranking == "true":
+        args["skip_ranking"] = True
     else:
-        start_date = None
+        args["skip_ranking"] = False
 
-    if "end_date" in args:
-        end_date = string_to_datetime(args["end_date"])
-    else:
-        end_date = None
+    results = openghg_search(**args)
 
-    species = args.get("species")
-    locations = args["locations"]
+    # Tell the SearchResults class that it should
+    # retrieve data from the cloud
+    results.cloud = True
 
-    inlet = args.get("inlet")
-    instrument = args.get("instrument")
+    results_data = results.to_data()
 
-    results = hugs_search(
-        locations=locations,
-        species=species,
-        inlet=inlet,
-        instrument=instrument,
-        start_date=start_date,
-        end_date=end_date,
-    )
-
-    return {"results": results}
+    return {"results": results_data}

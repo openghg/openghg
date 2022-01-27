@@ -1,0 +1,14 @@
+Jinja2
+jupytext
+myst-nb
+notebook
+nbsphinx
+pydata-sphinx-theme
+sphinx
+sphinx-issues >= 3.0.1
+sphinx_rtd_theme
+sphinxcontrib-programoutput
+sphinx-autodoc-typehints
+
+
+

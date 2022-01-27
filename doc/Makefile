@@ -26,7 +26,8 @@ help:
 	@echo "  latex     to make LaTeX files, you can set PAPER=a4 or PAPER=letter"
 
 clean:
-	-rm -rf $(BUILD_DIR)/* source/generated source/api/generated
+	find ./build ! -name '.nojekyll' -type f -exec rm -rf {} +
+	rm -rf source/generated source/api/generated
 
 html:
 	mkdir -p $(BUILD_DIR)/html $(BUILD_DIR)/doctrees
@@ -41,3 +42,6 @@ latex:
 html_check:
 	$(SPHINXBUILD) -b linkcheck $(ALLSPHINXOPTS) build/html $(FILES)
 
+fresh:
+	make clean
+	make html

@@ -1,0 +1,47 @@
+{
+  "sites": {
+    "TMB": {
+      "long_name": "Thames Barrier",
+      "latitude": 51.497,
+      "longitude": 0.037,
+      "status": "current"
+    },
+    "BTT": {
+      "long_name": "BT Tower",
+      "latitude": 51.5215,
+      "longitude": -0.1389,
+      "status": "current"
+    },
+    "NPL": {
+      "long_name": "National Physical Laboratory",
+      "latitude": 51.4241,
+      "longitude": -0.3487,
+      "status": "current"
+    },
+    "UOW": {
+      "long_name": "University of Westminster, Harrow Campus",
+      "latitude": 51.5802,
+      "longitude": -0.1899
+    },
+    "STJ": {
+      "long_name": "St Jude on the Hill",
+      "latitude": 51.5802,
+      "longitude": -0.1899
+    },
+    "HFT": {
+      "long_name": "Highfield Tower",
+      "latitude": 51.608,
+      "longitude": 0.1745
+    },
+    "SMA": {
+      "long_name": "St Mary's",
+      "latitude": 51.5044,
+      "longitude": -0.3056
+    },
+    "RHO": {
+      "long_name": "Royal Holloway",
+      "latitude": 51.427582,
+      "longitude": -0.56278
+    }
+  }
+}
