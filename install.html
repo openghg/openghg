@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation instructions &#8212; OpenGHG 0+untagged.3.g4800602 documentation</title>
+    <title>Installation instructions &#8212; OpenGHG 0+untagged.3.ga480f2d documentation</title>
     
     <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -175,8 +175,13 @@
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#virtual-environment">
-     Virtual environment
+    <a class="reference internal nav-link" href="#virtual-environment-pip">
+     Virtual environment - pip
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#virtual-environment-conda">
+     Virtual environment - conda
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
@@ -236,13 +241,21 @@ If the version number is <code class="docutils literal notranslate"><span class=
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<section id="virtual-environment">
-<h3>Virtual environment<a class="headerlink" href="#virtual-environment" title="Permalink to this headline">¶</a></h3>
 <p>We highly recommend creating a separate virtual environment for <code class="docutils literal notranslate"><span class="pre">openghg</span></code>. This ensures the correct versions
 of libraries can be installed without making changes to versions of libraries needed for other projects / programs.</p>
+<section id="virtual-environment-pip">
+<h3>Virtual environment - pip<a class="headerlink" href="#virtual-environment-pip" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m venv /path/to/env/openghg_env
 <span class="c1"># Activate the environment</span>
 <span class="nb">source</span> /path/to/env/bin/activate
+</pre></div>
+</div>
+</section>
+<section id="virtual-environment-conda">
+<h3>Virtual environment - conda<a class="headerlink" href="#virtual-environment-conda" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create -f environment.yml
+<span class="c1"># Activate the environment</span>
+conda activate openghg
 </pre></div>
 </div>
 </section>
