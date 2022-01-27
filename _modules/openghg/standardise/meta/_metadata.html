@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.meta._metadata &#8212; OpenGHG 0+untagged.3.gea304f3 documentation</title>
+    <title>openghg.standardise.meta._metadata &#8212; OpenGHG 0+untagged.3.gbdef45b documentation</title>
     
     <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -168,10 +168,11 @@
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 
 
-<div class="viewcode-block" id="surface_standardise"><a class="viewcode-back" href="../../../../api/api_standardise.html#openghg.standardise.meta.surface_standardise">[docs]</a><span class="k">def</span> <span class="nf">surface_standardise</span><span class="p">(</span><span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
-                        <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
-                        <span class="n">keys_to_add</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="surface_standardise"><a class="viewcode-back" href="../../../../api/api_standardise.html#openghg.standardise.meta.surface_standardise">[docs]</a><span class="k">def</span> <span class="nf">surface_standardise</span><span class="p">(</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">keys_to_add</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Makes sure any duplicated keys between the metadata and attributes</span>
 <span class="sd">    dictionaries match and that certain keys are present in the metadata.</span>
 
@@ -196,12 +197,22 @@
             <span class="c1"># Key wasn&#39;t in attributes for comparison</span>
             <span class="k">pass</span>
 
-    <span class="n">default_keys_to_add</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">,</span> <span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;inlet&quot;</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">,</span> <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;sampling_period&quot;</span><span class="p">,</span> <span class="s2">&quot;long_name&quot;</span><span class="p">,</span> <span class="s2">&quot;calibration_scale&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;data_owner&quot;</span><span class="p">,</span> <span class="s2">&quot;data_owner_email&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;station_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;station_latitude&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;station_long_name&quot;</span><span class="p">,</span> <span class="s2">&quot;station_height_masl&quot;</span><span class="p">,</span>
-                           <span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span>
+    <span class="n">default_keys_to_add</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;site&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;species&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;inlet&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;network&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sampling_period&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;calibration_scale&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;data_owner&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;data_owner_email&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;station_longitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;station_latitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;station_long_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;station_height_masl&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
     <span class="k">if</span> <span class="n">keys_to_add</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">keys_to_add</span> <span class="o">=</span> <span class="n">default_keys_to_add</span>
 
