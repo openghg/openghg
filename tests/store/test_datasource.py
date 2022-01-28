@@ -72,8 +72,6 @@ def test_add_data(data):
 
     assert combined.equals(ch4_data)
 
-    print("d.metadata()", d.metadata())
-
     expected_metadata = {
         "site": "bsd",
         "instrument": "picarro",
