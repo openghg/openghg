@@ -67,11 +67,11 @@ jobs:
       if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
     - name: Ensure notebooks can be executed correctly
       run: |
-        cd doc
         jupytext --sync --execute notebooks/tutorials/*/*.ipynb
       if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
     - name: Build documentation
       run: |
+        cd doc
         make
       if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
     - name: Deploy to GitHub pages
