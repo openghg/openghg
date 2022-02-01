@@ -1,0 +1,1004 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Workflow: handling overlapping observation data &#8212; OpenGHG 0+untagged.3.g2acb53e.dirty documentation</title>
+    
+    <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  
+    
+    <link rel="stylesheet"
+      href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+  
+    
+      
+  
+    
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/pydata-sphinx-theme.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+    
+    <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+  
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../_static/custom.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Development" href="../../development/index_devel.html" />
+    <link rel="prev" title="Workflow: processing, searching and retrieving observations" href="1_Adding_observation_data.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../index.html">
+<p class="title">OpenGHG</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../features.html">
+  Features
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../install.html">
+  Installation instructions
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../index.html">
+  Tutorials
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../development/index_devel.html">
+  Development
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../api/index.html">
+  User API
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../api/index_devapi.html">
+  Developer API
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="1_Adding_observation_data.html">
+   Workflow: processing, searching and retrieving observations
+  </a>
+ </li>
+</ul>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Workflow: handling overlapping observation data
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#overlapping-observations">
+   1. Overlapping observations
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#get-ranking-data">
+   2. Get ranking data
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#set-ranking-data">
+   3. Set ranking data
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#retrieve-data">
+   4. Retrieve data
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#clean-up">
+     Clean up
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="workflow-handling-overlapping-observation-data">
+<h1>Workflow: handling overlapping observation data<a class="headerlink" href="#workflow-handling-overlapping-observation-data" title="Permalink to this headline">¶</a></h1>
+<p>As in the <a class="reference internal" href="1_Adding_observation_data.html"><span class="doc std std-doc">previous tutorial</span></a>, we will start by setting up our temporary object store for our data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_dir</span><span class="o">.</span><span class="n">name</span>   <span class="c1"># temporary directory</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="overlapping-observations">
+<h2>1. Overlapping observations<a class="headerlink" href="#overlapping-observations" title="Permalink to this headline">¶</a></h2>
+<p>For some surface sites in the networks considered, there will be multiple independent measurements made for the various species at the same time. This is often due to a site having multiple inlets which allow gases to be sampled at different heights.</p>
+<p>Often, when retrieving data for comparison there will be preferences between the streams of measurements, for example based on the inlet height. Within <code class="docutils literal notranslate"><span class="pre">openghg</span></code> it is possible to set a <em>ranking</em> for the different data sources so that the preferred data for a given species is always selected by default and without the need to know the exact details every time this data is accessed.</p>
+<p>To demonstrate this we will start by loading data from the Bilsdale (“BSD”) site within the DECC network with measurements of the same species at multiple inlet heights.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">ObsSurface</span>
+
+<span class="n">bsd_filepaths</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;../data/DECC/bsd.picarro.1minute.42m.min.dat&quot;</span><span class="p">,</span> <span class="s2">&quot;../data/DECC/bsd.picarro.1minute.108m.min.dat&quot;</span><span class="p">,</span> <span class="s2">&quot;../data/DECC/bsd.picarro.1minute.248m.min.dat&quot;</span><span class="p">]</span>
+<span class="n">decc_results</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">bsd_filepaths</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;bsd&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/3 [00:00&lt;?, ?it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.42m.min.dat:   0%|          | 0/3 [00:00&lt;?, ?it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.42m.min.dat:  33%|███▎      | 1/3 [00:00&lt;00:00,  5.01it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.108m.min.dat:  33%|███▎      | 1/3 [00:00&lt;00:00,  5.01it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.108m.min.dat:  67%|██████▋   | 2/3 [00:00&lt;00:00,  5.08it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat:  67%|██████▋   | 2/3 [00:00&lt;00:00,  5.08it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 3/3 [00:00&lt;00:00,  5.09it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 3/3 [00:00&lt;00:00,  5.07it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+<span class="n">search</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;bsd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Site: BSD
+---------
+co at 42m, 108m, 248m
+</pre></div>
+</div>
+</div>
+</div>
+<p>Before we set any ranking for this data, we can still retrieve this from the object store using the <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code> function, as we did before, but because there are multiple inlets we must specify these details to be able to return unambiguous observation data:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span>
+
+<span class="n">obs_data_42m</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;bsd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;42m&quot;</span><span class="p">)</span>
+<span class="n">obs_data_108m</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;bsd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;108m&quot;</span><span class="p">)</span>
+<span class="n">obs_data_248m</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;bsd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;108m&quot;</span><span class="p">)</span>
+
+<span class="c1">## Uncomment the cell below to see what happens if we don&#39;t include the inlet details.</span>
+<span class="c1"># obs_data = get_obs_surface(site=&quot;bsd&quot;, species=&quot;co&quot;)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can get around this by setting up ranking details once, which will then persist as long as the object store exists or this is updated again.</p>
+</section>
+<section id="get-ranking-data">
+<h2>2. Get ranking data<a class="headerlink" href="#get-ranking-data" title="Permalink to this headline">¶</a></h2>
+<p>We can access the ranking data and see any pre-existing details associated with our data by using the <code class="docutils literal notranslate"><span class="pre">RankSources</span></code> class and the <code class="docutils literal notranslate"><span class="pre">get_sources()</span></code> method. In this case we are looking at the Bilsdale site (“BSD”) and the carbon monoxide (“co”) species:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">rank_sources</span>
+
+<span class="n">ranker</span> <span class="o">=</span> <span class="n">rank_sources</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;BSD&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>What this tells us that, at the moment, there is no ranking data set for any of the inlets.</p>
+<ul class="simple">
+<li><p>rank data for each inlet is set to ‘NA’ as shown by <code class="docutils literal notranslate"><span class="pre">{'rank_data':'NA',...}</span></code></p></li>
+</ul>
+</section>
+<section id="set-ranking-data">
+<h2>3. Set ranking data<a class="headerlink" href="#set-ranking-data" title="Permalink to this headline">¶</a></h2>
+<p>To set ranking data for carbon monoxide at Bilsdale for given date ranges we can use the <code class="docutils literal notranslate"><span class="pre">set_rank</span></code> method along with the relevant details for each inlet. Here we want to set the following for our data:</p>
+<ul class="simple">
+<li><p>From 01/01/2016 to 01/01/2018 (exclusive range)</p>
+<ul>
+<li><p>Access carbon monoxide data from the inlet at “248m”</p></li>
+</ul>
+</li>
+<li><p>From 01/01/2018 to 30/05/2019</p>
+<ul>
+<li><p>Access carbon monoxide data from the inlet at “42m”</p></li>
+</ul>
+</li>
+<li><p>From 30/05/2019 to 30/11/2021</p>
+<ul>
+<li><p>Access carbon monoxide data from the inlet at “108m”</p></li>
+</ul>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ranker</span><span class="o">.</span><span class="n">set_rank</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;248m&quot;</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2016-01-01&quot;</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2018-01-01&quot;</span><span class="p">)</span>
+<span class="n">ranker</span><span class="o">.</span><span class="n">set_rank</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;42m&quot;</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2018-01-01&quot;</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2019-05-30&quot;</span><span class="p">)</span>
+<span class="n">ranker</span><span class="o">.</span><span class="n">set_rank</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;108m&quot;</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2019-05-30&quot;</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2021-11-30&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Secondary ranks (<code class="docutils literal notranslate"><span class="pre">rank=2</span></code>) and so forth can also be set covering the same date ranges, to set a preference order based on which data is available.</p>
+<p>Now we can check everything was set correctlying using <code class="docutils literal notranslate"><span class="pre">get_sources</span></code> again as above:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ranker</span><span class="o">.</span><span class="n">get_sources</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;BSD&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;42m&#39;: {&#39;rank_data&#39;: {&#39;2018-01-01-00:00:00+00:00_2019-05-30-00:00:00+00:00&#39;: 1},
+  &#39;data_range&#39;: &#39;2014-01-30T11:12:30_2020-12-01T22:31:30&#39;},
+ &#39;108m&#39;: {&#39;rank_data&#39;: {&#39;2019-05-30-00:00:00+00:00_2021-11-30-00:00:00+00:00&#39;: 1},
+  &#39;data_range&#39;: &#39;2014-01-30T11:12:30_2020-12-01T22:31:30&#39;},
+ &#39;248m&#39;: {&#39;rank_data&#39;: {&#39;2016-01-01-00:00:00+00:00_2018-01-01-00:00:00+00:00&#39;: 1},
+  &#39;data_range&#39;: &#39;2014-01-30T11:12:30_2020-12-01T22:31:30&#39;}}
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="retrieve-data">
+<h2>4. Retrieve data<a class="headerlink" href="#retrieve-data" title="Permalink to this headline">¶</a></h2>
+<p>Once this has been set, we can now try retrieving this data from the object store again. Whereas before we had to specify an inlet, we can now rely on the highest ranked data always being returned for each date range:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">co_data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;bsd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">co_data</span><span class="o">.</span><span class="n">data</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg>
+<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
+ *
+ */
+
+:root {
+  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --xr-border-color: var(--jp-border-color2, #e0e0e0);
+  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --xr-background-color: var(--jp-layout-color0, white);
+  --xr-background-color-row-even: var(--jp-layout-color1, white);
+  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+}
+
+html[theme=dark],
+body.vscode-dark {
+  --xr-font-color0: rgba(255, 255, 255, 1);
+  --xr-font-color2: rgba(255, 255, 255, 0.54);
+  --xr-font-color3: rgba(255, 255, 255, 0.38);
+  --xr-border-color: #1F1F1F;
+  --xr-disabled-color: #515151;
+  --xr-background-color: #111111;
+  --xr-background-color-row-even: #111111;
+  --xr-background-color-row-odd: #313131;
+}
+
+.xr-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+}
+
+.xr-text-repr-fallback {
+  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
+  display: none;
+}
+
+.xr-header {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: solid 1px var(--xr-border-color);
+}
+
+.xr-header > div,
+.xr-header > ul {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.xr-obj-type,
+.xr-array-name {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+.xr-obj-type {
+  color: var(--xr-font-color2);
+}
+
+.xr-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto 1fr 20px 20px;
+}
+
+.xr-section-item {
+  display: contents;
+}
+
+.xr-section-item input {
+  display: none;
+}
+
+.xr-section-item input + label {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-item input:enabled + label {
+  cursor: pointer;
+  color: var(--xr-font-color2);
+}
+
+.xr-section-item input:enabled + label:hover {
+  color: var(--xr-font-color0);
+}
+
+.xr-section-summary {
+  grid-column: 1;
+  color: var(--xr-font-color2);
+  font-weight: 500;
+}
+
+.xr-section-summary > span {
+  display: inline-block;
+  padding-left: 0.5em;
+}
+
+.xr-section-summary-in:disabled + label {
+  color: var(--xr-font-color2);
+}
+
+.xr-section-summary-in + label:before {
+  display: inline-block;
+  content: '►';
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.xr-section-summary-in:disabled + label:before {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-summary-in:checked + label:before {
+  content: '▼';
+}
+
+.xr-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.xr-section-summary,
+.xr-section-inline-details {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.xr-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.xr-section-details {
+  display: none;
+  grid-column: 1 / -1;
+  margin-bottom: 5px;
+}
+
+.xr-section-summary-in:checked ~ .xr-section-details {
+  display: contents;
+}
+
+.xr-array-wrap {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+.xr-array-wrap > label {
+  grid-column: 1;
+  vertical-align: top;
+}
+
+.xr-preview {
+  color: var(--xr-font-color3);
+}
+
+.xr-array-preview,
+.xr-array-data {
+  padding: 0 5px !important;
+  grid-column: 2;
+}
+
+.xr-array-data,
+.xr-array-in:checked ~ .xr-array-preview {
+  display: none;
+}
+
+.xr-array-in:checked ~ .xr-array-data,
+.xr-array-preview {
+  display: inline-block;
+}
+
+.xr-dim-list {
+  display: inline-block !important;
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.xr-dim-list li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.xr-dim-list:before {
+  content: '(';
+}
+
+.xr-dim-list:after {
+  content: ')';
+}
+
+.xr-dim-list li:not(:last-child):after {
+  content: ',';
+  padding-right: 5px;
+}
+
+.xr-has-index {
+  font-weight: bold;
+}
+
+.xr-var-list,
+.xr-var-item {
+  display: contents;
+}
+
+.xr-var-item > div,
+.xr-var-item label,
+.xr-var-item > .xr-var-name span {
+  background-color: var(--xr-background-color-row-even);
+  margin-bottom: 0;
+}
+
+.xr-var-item > .xr-var-name:hover span {
+  padding-right: 5px;
+}
+
+.xr-var-list > li:nth-child(odd) > div,
+.xr-var-list > li:nth-child(odd) > label,
+.xr-var-list > li:nth-child(odd) > .xr-var-name span {
+  background-color: var(--xr-background-color-row-odd);
+}
+
+.xr-var-name {
+  grid-column: 1;
+}
+
+.xr-var-dims {
+  grid-column: 2;
+}
+
+.xr-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-preview {
+  grid-column: 4;
+}
+
+.xr-var-name,
+.xr-var-dims,
+.xr-var-dtype,
+.xr-preview,
+.xr-attrs dt {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.xr-var-name:hover,
+.xr-var-dims:hover,
+.xr-var-dtype:hover,
+.xr-attrs dt:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.xr-var-attrs,
+.xr-var-data {
+  display: none;
+  background-color: var(--xr-background-color) !important;
+  padding-bottom: 5px !important;
+}
+
+.xr-var-attrs-in:checked ~ .xr-var-attrs,
+.xr-var-data-in:checked ~ .xr-var-data {
+  display: block;
+}
+
+.xr-var-data > table {
+  float: right;
+}
+
+.xr-var-name span,
+.xr-var-data,
+.xr-attrs {
+  padding-left: 25px !important;
+}
+
+.xr-attrs,
+.xr-var-attrs,
+.xr-var-data {
+  grid-column: 1 / -1;
+}
+
+dl.xr-attrs {
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 125px auto;
+}
+
+.xr-attrs dt,
+.xr-attrs dd {
+  padding: 0;
+  margin: 0;
+  float: left;
+  padding-right: 10px;
+  width: auto;
+}
+
+.xr-attrs dt {
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.xr-attrs dt:hover span {
+  display: inline-block;
+  background: var(--xr-background-color);
+  padding-right: 10px;
+}
+
+.xr-attrs dd {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.xr-icon-database,
+.xr-icon-file-text2 {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1.5em !important;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt;
+Dimensions:                    (time: 162)
+Coordinates:
+  * time                       (time) datetime64[ns] 2014-01-30T11:12:30 ... ...
+Data variables:
+    mf                         (time) float64 202.4 203.2 205.1 ... 114.5 114.2
+    mf_variability             (time) float64 5.265 6.307 8.518 ... 7.339 5.405
+    mf_number_of_observations  (time) float64 26.0 26.0 25.0 ... 23.0 24.0 23.0
+    inlet                      (time) &lt;U4 &#x27;248m&#x27; &#x27;248m&#x27; &#x27;248m&#x27; ... &#x27;108m&#x27; &#x27;108m&#x27;
+Attributes: (12/23)
+    data_owner:           Simon O&#x27;Doherty
+    data_owner_email:     s.odoherty@bristol.ac.uk
+    inlet_height_magl:    multiple
+    comment:              Cavity ring-down measurements. Output from GCWerks
+    long_name:            bilsdale
+    conditions_of_use:    Ensure that you contact the data owner at the outse...
+    ...                   ...
+    sampling_period:      60
+    inlet:                multiple
+    port:                 9
+    type:                 air
+    network:              decc
+    scale:                WMO-X2014A</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-9bfe7418-8051-4c4e-b7d4-8653fe66bd7d' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-9bfe7418-8051-4c4e-b7d4-8653fe66bd7d' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 162</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-b7a66bb9-c4b7-4a11-abbf-1892333b8d04' class='xr-section-summary-in' type='checkbox'  checked><label for='section-b7a66bb9-c4b7-4a11-abbf-1892333b8d04' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2014-01-30T11:12:30 ... 2020-12-...</div><input id='attrs-da82f045-ff77-463d-bd80-79caf2266c7a' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-da82f045-ff77-463d-bd80-79caf2266c7a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d27ba954-2aea-46f3-a813-44558c0c6d1b' class='xr-var-data-in' type='checkbox'><label for='data-d27ba954-2aea-46f3-a813-44558c0c6d1b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>label :</span></dt><dd>left</dd><dt><span>standard_name :</span></dt><dd>time</dd><dt><span>comment :</span></dt><dd>Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.</dd><dt><span>sampling_period_seconds :</span></dt><dd>60</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2014-01-30T11:12:30.000000000&#x27;, &#x27;2014-01-30T11:13:30.000000000&#x27;,
+       &#x27;2014-01-30T11:14:30.000000000&#x27;, &#x27;2014-01-30T11:15:30.000000000&#x27;,
+       &#x27;2014-01-30T11:16:30.000000000&#x27;, &#x27;2014-01-30T11:17:30.000000000&#x27;,
+       &#x27;2014-01-30T11:18:30.000000000&#x27;, &#x27;2014-11-30T11:19:30.000000000&#x27;,
+       &#x27;2014-11-30T11:20:30.000000000&#x27;, &#x27;2014-11-30T11:21:30.000000000&#x27;,
+       &#x27;2014-11-30T11:22:30.000000000&#x27;, &#x27;2014-11-30T11:23:30.000000000&#x27;,
+       &#x27;2015-01-30T11:12:30.000000000&#x27;, &#x27;2015-01-30T11:13:30.000000000&#x27;,
+       &#x27;2015-01-30T11:14:30.000000000&#x27;, &#x27;2015-01-30T11:15:30.000000000&#x27;,
+       &#x27;2015-01-30T11:16:30.000000000&#x27;, &#x27;2015-01-30T11:17:30.000000000&#x27;,
+       &#x27;2015-01-30T11:18:30.000000000&#x27;, &#x27;2015-01-30T11:19:30.000000000&#x27;,
+       &#x27;2015-01-30T11:20:30.000000000&#x27;, &#x27;2015-01-30T11:21:30.000000000&#x27;,
+       &#x27;2015-01-30T11:22:30.000000000&#x27;, &#x27;2015-01-30T11:23:30.000000000&#x27;,
+       &#x27;2015-11-30T11:12:30.000000000&#x27;, &#x27;2015-11-30T11:13:30.000000000&#x27;,
+       &#x27;2015-11-30T11:14:30.000000000&#x27;, &#x27;2015-11-30T11:15:30.000000000&#x27;,
+       &#x27;2015-11-30T11:16:30.000000000&#x27;, &#x27;2015-11-30T11:17:30.000000000&#x27;,
+       &#x27;2015-11-30T11:18:30.000000000&#x27;, &#x27;2015-11-30T11:19:30.000000000&#x27;,
+       &#x27;2015-11-30T11:20:30.000000000&#x27;, &#x27;2015-11-30T11:21:30.000000000&#x27;,
+       &#x27;2015-11-30T11:22:30.000000000&#x27;, &#x27;2015-11-30T11:23:30.000000000&#x27;,
+       &#x27;2016-04-02T06:52:30.000000000&#x27;, &#x27;2016-04-02T06:53:30.000000000&#x27;,
+       &#x27;2016-04-02T06:54:30.000000000&#x27;, &#x27;2016-04-02T06:55:30.000000000&#x27;,
+       &#x27;2016-04-02T06:56:30.000000000&#x27;, &#x27;2016-04-02T06:57:30.000000000&#x27;,
+       &#x27;2016-04-02T06:58:30.000000000&#x27;, &#x27;2016-04-02T09:04:30.000000000&#x27;,
+       &#x27;2016-04-02T09:05:30.000000000&#x27;, &#x27;2016-04-02T09:06:30.000000000&#x27;,
+       &#x27;2016-04-02T09:07:30.000000000&#x27;, &#x27;2016-11-02T09:50:30.000000000&#x27;,
+       &#x27;2016-11-02T09:51:30.000000000&#x27;, &#x27;2016-11-02T09:52:30.000000000&#x27;,
+       &#x27;2016-11-02T11:07:30.000000000&#x27;, &#x27;2016-11-02T12:06:30.000000000&#x27;,
+       &#x27;2016-11-02T12:07:30.000000000&#x27;, &#x27;2016-11-02T12:50:30.000000000&#x27;,
+       &#x27;2016-11-02T12:51:30.000000000&#x27;, &#x27;2016-11-02T12:52:30.000000000&#x27;,
+       &#x27;2016-11-02T12:53:30.000000000&#x27;, &#x27;2016-11-02T12:54:30.000000000&#x27;,
+       &#x27;2017-02-18T06:36:30.000000000&#x27;, &#x27;2017-02-18T06:37:30.000000000&#x27;,
+       &#x27;2017-02-18T06:38:30.000000000&#x27;, &#x27;2017-02-18T06:39:30.000000000&#x27;,
+       &#x27;2017-02-18T06:40:30.000000000&#x27;, &#x27;2017-02-18T06:41:30.000000000&#x27;,
+       &#x27;2017-02-18T06:42:30.000000000&#x27;, &#x27;2017-02-18T06:43:30.000000000&#x27;,
+       &#x27;2017-02-18T07:35:30.000000000&#x27;, &#x27;2017-02-18T07:36:30.000000000&#x27;,
+       &#x27;2017-02-18T14:35:30.000000000&#x27;, &#x27;2017-02-18T14:36:30.000000000&#x27;,
+       &#x27;2017-02-18T14:37:30.000000000&#x27;, &#x27;2017-02-18T14:38:30.000000000&#x27;,
+       &#x27;2017-02-18T14:39:30.000000000&#x27;, &#x27;2017-02-18T14:40:30.000000000&#x27;,
+       &#x27;2017-12-18T14:41:30.000000000&#x27;, &#x27;2017-12-18T14:42:30.000000000&#x27;,
+       &#x27;2017-12-18T14:43:30.000000000&#x27;, &#x27;2017-12-18T15:35:30.000000000&#x27;,
+       &#x27;2017-12-18T15:36:30.000000000&#x27;, &#x27;2017-12-18T15:37:30.000000000&#x27;,
+       &#x27;2017-12-18T15:38:30.000000000&#x27;, &#x27;2017-12-18T15:39:30.000000000&#x27;,
+       &#x27;2017-12-18T15:40:30.000000000&#x27;, &#x27;2017-12-18T15:41:30.000000000&#x27;,
+       &#x27;2018-02-18T15:35:30.000000000&#x27;, &#x27;2018-02-18T15:36:30.000000000&#x27;,
+       &#x27;2018-02-18T15:37:30.000000000&#x27;, &#x27;2018-02-18T15:38:30.000000000&#x27;,
+       &#x27;2018-02-18T15:39:30.000000000&#x27;, &#x27;2018-02-18T15:40:30.000000000&#x27;,
+       &#x27;2018-02-18T15:41:30.000000000&#x27;, &#x27;2018-02-18T15:42:30.000000000&#x27;,
+       &#x27;2018-02-18T15:42:30.000000000&#x27;, &#x27;2018-12-18T15:35:30.000000000&#x27;,
+       &#x27;2018-12-18T15:36:30.000000000&#x27;, &#x27;2018-12-18T15:37:30.000000000&#x27;,
+       &#x27;2018-12-18T15:38:30.000000000&#x27;, &#x27;2018-12-18T15:39:30.000000000&#x27;,
+       &#x27;2018-12-18T15:40:30.000000000&#x27;, &#x27;2018-12-18T15:41:30.000000000&#x27;,
+       &#x27;2018-12-18T15:42:30.000000000&#x27;, &#x27;2018-12-18T15:42:30.000000000&#x27;,
+       &#x27;2019-02-03T17:38:30.000000000&#x27;, &#x27;2019-02-03T17:38:30.000000000&#x27;,
+       &#x27;2019-02-03T17:39:30.000000000&#x27;, &#x27;2019-02-03T17:39:30.000000000&#x27;,
+       &#x27;2019-02-03T17:40:30.000000000&#x27;, &#x27;2019-02-03T17:40:30.000000000&#x27;,
+       &#x27;2019-02-03T17:41:30.000000000&#x27;, &#x27;2019-02-03T17:41:30.000000000&#x27;,
+       &#x27;2019-02-03T17:42:30.000000000&#x27;, &#x27;2019-02-03T17:42:30.000000000&#x27;,
+       &#x27;2019-02-03T17:43:30.000000000&#x27;, &#x27;2019-02-03T17:43:30.000000000&#x27;,
+       &#x27;2019-02-03T20:57:30.000000000&#x27;, &#x27;2019-02-03T20:57:30.000000000&#x27;,
+       &#x27;2019-02-03T20:58:30.000000000&#x27;, &#x27;2019-02-03T20:58:30.000000000&#x27;,
+       &#x27;2019-02-03T20:59:30.000000000&#x27;, &#x27;2019-02-03T20:59:30.000000000&#x27;,
+       &#x27;2019-02-03T21:00:30.000000000&#x27;, &#x27;2019-02-03T21:00:30.000000000&#x27;,
+       &#x27;2019-02-03T21:01:30.000000000&#x27;, &#x27;2019-02-03T21:01:30.000000000&#x27;,
+       &#x27;2019-02-03T21:02:30.000000000&#x27;, &#x27;2019-02-03T21:02:30.000000000&#x27;,
+       &#x27;2019-12-09T10:40:30.000000000&#x27;, &#x27;2019-12-09T10:41:30.000000000&#x27;,
+       &#x27;2019-12-09T10:41:30.000000000&#x27;, &#x27;2019-12-09T10:42:30.000000000&#x27;,
+       &#x27;2019-12-09T10:42:30.000000000&#x27;, &#x27;2019-12-09T10:43:30.000000000&#x27;,
+       &#x27;2019-12-09T10:43:30.000000000&#x27;, &#x27;2019-12-09T10:44:30.000000000&#x27;,
+       &#x27;2019-12-09T10:44:30.000000000&#x27;, &#x27;2019-12-09T10:45:30.000000000&#x27;,
+       &#x27;2019-12-09T10:45:30.000000000&#x27;, &#x27;2019-12-09T10:46:30.000000000&#x27;,
+       &#x27;2019-12-09T10:46:30.000000000&#x27;, &#x27;2019-12-09T10:47:30.000000000&#x27;,
+       &#x27;2019-12-09T10:47:30.000000000&#x27;, &#x27;2019-12-09T10:50:30.000000000&#x27;,
+       &#x27;2020-02-01T18:08:30.000000000&#x27;, &#x27;2020-02-01T18:09:30.000000000&#x27;,
+       &#x27;2020-02-01T18:10:30.000000000&#x27;, &#x27;2020-02-01T18:11:30.000000000&#x27;,
+       &#x27;2020-02-01T18:12:30.000000000&#x27;, &#x27;2020-02-01T18:13:30.000000000&#x27;,
+       &#x27;2020-02-01T18:14:30.000000000&#x27;, &#x27;2020-02-01T18:15:30.000000000&#x27;,
+       &#x27;2020-02-01T19:08:30.000000000&#x27;, &#x27;2020-02-01T21:29:30.000000000&#x27;,
+       &#x27;2020-12-01T21:30:30.000000000&#x27;, &#x27;2020-12-01T21:31:30.000000000&#x27;,
+       &#x27;2020-12-01T21:32:30.000000000&#x27;, &#x27;2020-12-01T21:33:30.000000000&#x27;,
+       &#x27;2020-12-01T21:34:30.000000000&#x27;, &#x27;2020-12-01T21:35:30.000000000&#x27;,
+       &#x27;2020-12-01T22:28:30.000000000&#x27;, &#x27;2020-12-01T22:29:30.000000000&#x27;,
+       &#x27;2020-12-01T22:30:30.000000000&#x27;, &#x27;2020-12-01T22:31:30.000000000&#x27;],
+      dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-9fbb73f4-ee00-4006-8c26-c11076b6ae62' class='xr-section-summary-in' type='checkbox'  checked><label for='section-9fbb73f4-ee00-4006-8c26-c11076b6ae62' class='xr-section-summary' >Data variables: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mf</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>202.4 203.2 205.1 ... 114.5 114.2</div><input id='attrs-7d5c5cdd-9115-4296-8928-8e5916111229' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-7d5c5cdd-9115-4296-8928-8e5916111229' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-2b99287d-3da7-4b47-9405-83d82b8ee7ad' class='xr-var-data-in' type='checkbox'><label for='data-2b99287d-3da7-4b47-9405-83d82b8ee7ad' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_monoxide_in_air</dd><dt><span>units :</span></dt><dd>1e-9</dd></dl></div><div class='xr-var-data'><pre>array([202.44, 203.23, 205.1 , 202.88, 203.88, 201.73, 203.14, 204.18,
+       204.96, 202.14, 203.67, 202.82, 202.44, 203.23, 205.1 , 202.88,
+       203.88, 201.73, 203.14, 204.18, 204.96, 202.14, 203.67, 202.82,
+       202.44, 203.23, 205.1 , 202.88, 203.88, 201.73, 203.14, 204.18,
+       204.96, 202.14, 203.67, 202.82, 151.48, 149.15, 151.43, 153.85,
+       149.16, 154.99, 151.64, 151.52, 153.91, 153.04, 156.93, 158.94,
+       156.27, 158.02, 161.4 , 164.25, 163.28, 166.07, 164.43, 164.84,
+       160.31, 164.48, 121.5 , 121.13, 118.62, 119.2 , 121.28, 118.34,
+       118.27, 122.41, 120.04, 117.14, 117.63, 115.66, 118.4 , 118.53,
+       118.45, 118.15, 118.83, 118.7 , 122.37, 121.32, 119.86, 118.09,
+       117.24, 119.31, 118.5 , 122.94, 121.32, 119.86, 118.09, 117.24,
+       119.31, 118.5 , 122.94, 121.86, 121.86, 121.32, 119.86, 118.09,
+       117.24, 119.31, 118.5 , 122.94, 121.86, 121.86, 154.99, 154.99,
+       156.64, 156.64, 151.35, 151.35, 154.78, 154.78, 151.08, 151.08,
+       156.51, 156.51, 150.87, 150.87, 156.4 , 156.4 , 157.29, 157.29,
+       154.92, 154.92, 159.35, 159.35, 164.32, 164.32, 125.78, 125.19,
+       125.19, 125.01, 125.01, 126.96, 126.96, 125.78, 125.78, 123.71,
+       123.71, 126.91, 126.91, 125.81, 125.81, 125.78, 116.12, 116.88,
+       116.82, 116.1 , 119.01, 114.81, 115.39, 116.67, 112.79, 114.04,
+       116.04, 114.86, 112.33, 113.44, 112.31, 116.25, 113.78, 113.92,
+       114.48, 114.24])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_variability</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>5.265 6.307 8.518 ... 7.339 5.405</div><input id='attrs-afcc783f-b2f6-40eb-817c-2065ac98f771' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-afcc783f-b2f6-40eb-817c-2065ac98f771' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7adc55e9-e27e-4ccb-b674-8ad3290f7365' class='xr-var-data-in' type='checkbox'><label for='data-7adc55e9-e27e-4ccb-b674-8ad3290f7365' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_monoxide_in_air_variability</dd><dt><span>units :</span></dt><dd>1e-9</dd></dl></div><div class='xr-var-data'><pre>array([5.265, 6.307, 8.518, 8.091, 6.419, 7.476, 6.514, 6.619, 5.995,
+       6.213, 6.535, 7.029, 5.265, 6.307, 8.518, 8.091, 6.419, 7.476,
+       6.514, 6.619, 5.995, 6.213, 6.535, 7.029, 5.265, 6.307, 8.518,
+       8.091, 6.419, 7.476, 6.514, 6.619, 5.995, 6.213, 6.535, 7.029,
+       6.322, 8.469, 5.801, 4.976, 6.78 , 8.013, 6.905, 6.005, 7.988,
+       6.791, 7.024, 7.94 , 6.387, 6.334, 7.092, 5.614, 4.655, 6.804,
+       5.086, 4.993, 5.773, 6.394, 5.628, 4.639, 5.792, 5.788, 7.024,
+       7.253, 6.56 , 6.124, 6.1  , 8.11 , 6.469, 6.556, 5.306, 6.293,
+       4.357, 5.828, 7.37 , 7.346, 6.871, 5.616, 6.438, 4.598, 5.945,
+       6.462, 5.471, 6.323, 5.616, 6.438, 4.598, 5.945, 6.462, 5.471,
+       6.323, 7.972, 7.972, 5.616, 6.438, 4.598, 5.945, 6.462, 5.471,
+       6.323, 7.972, 7.972, 5.79 , 5.79 , 6.941, 6.941, 7.207, 7.207,
+       4.313, 4.313, 6.131, 6.131, 9.731, 9.731, 6.111, 6.111, 6.18 ,
+       6.18 , 7.025, 7.025, 6.201, 6.201, 8.674, 8.674, 7.595, 7.595,
+       7.143, 6.453, 6.453, 7.45 , 7.45 , 7.812, 7.812, 5.788, 5.788,
+       7.835, 7.835, 6.286, 6.286, 4.229, 4.229, 7.143, 5.923, 5.756,
+       5.919, 6.72 , 5.064, 6.578, 5.222, 5.873, 5.703, 6.447, 6.283,
+       7.224, 4.795, 6.312, 4.765, 6.168, 5.464, 5.645, 7.339, 5.405])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_number_of_observations</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>26.0 26.0 25.0 ... 23.0 24.0 23.0</div><input id='attrs-ba96a3b2-1b50-407a-a0ca-e1a0f9cfd80a' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-ba96a3b2-1b50-407a-a0ca-e1a0f9cfd80a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8451d326-ee46-4d34-92d1-821b2dad1b1a' class='xr-var-data-in' type='checkbox'><label for='data-8451d326-ee46-4d34-92d1-821b2dad1b1a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_monoxide_in_air_number_of_observations</dd></dl></div><div class='xr-var-data'><pre>array([26., 26., 25., 26., 26., 25., 26., 25., 26., 26., 25., 26., 26.,
+       26., 25., 26., 26., 25., 26., 25., 26., 26., 25., 26., 26., 26.,
+       25., 26., 26., 25., 26., 25., 26., 26., 25., 26., 19., 24., 20.,
+       22., 22., 23., 23., 21., 22., 22., 17., 24., 20., 21., 17., 20.,
+       19., 23., 22., 22., 20., 21., 23., 23., 24., 24., 23., 23., 24.,
+        6., 23., 23., 24., 23., 23., 23., 24., 23., 23., 23.,  7., 24.,
+       23., 23., 24., 23., 23., 24., 24., 23., 23., 24., 23., 23., 24.,
+       23., 23., 24., 23., 23., 24., 23., 23., 24., 23., 23., 25., 25.,
+       24., 24., 25., 25., 25., 25., 25., 25., 11., 11., 25., 25., 25.,
+       25., 25., 25., 24., 24., 25., 25., 25., 25., 24., 25., 25., 25.,
+       25., 24., 24., 25., 25., 25., 25., 25., 25., 12., 12., 24., 24.,
+       23., 23., 24., 23., 23., 24., 23., 24., 23., 24., 23., 24., 23.,
+       24., 23., 24., 23., 24., 23.])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>inlet</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>&lt;U4</div><div class='xr-var-preview xr-preview'>&#x27;248m&#x27; &#x27;248m&#x27; ... &#x27;108m&#x27; &#x27;108m&#x27;</div><input id='attrs-e2471aef-2b83-48a8-a8f8-687c214e6758' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-e2471aef-2b83-48a8-a8f8-687c214e6758' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d4c001ef-4341-4a57-a888-c4997b8f8dd3' class='xr-var-data-in' type='checkbox'><label for='data-d4c001ef-4341-4a57-a888-c4997b8f8dd3' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
+       &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
+       &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
+       &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
+       &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
+       &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
+       &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
+       &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
+       &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
+       &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
+       &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;,
+       &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;,
+       &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;,
+       &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;,
+       &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;,
+       &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;,
+       &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;, &#x27;42m&#x27;, &#x27;42m&#x27;, &#x27;108m&#x27;,
+       &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;,
+       &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;,
+       &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;], dtype=&#x27;&lt;U4&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-5efb1cd3-82c9-42a2-8fc2-7653993ec8d2' class='xr-section-summary-in' type='checkbox'  ><label for='section-5efb1cd3-82c9-42a2-8fc2-7653993ec8d2' class='xr-section-summary' >Attributes: <span>(23)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>data_owner :</span></dt><dd>Simon O&#x27;Doherty</dd><dt><span>data_owner_email :</span></dt><dd>s.odoherty@bristol.ac.uk</dd><dt><span>inlet_height_magl :</span></dt><dd>multiple</dd><dt><span>comment :</span></dt><dd>Cavity ring-down measurements. Output from GCWerks</dd><dt><span>long_name :</span></dt><dd>bilsdale</dd><dt><span>conditions_of_use :</span></dt><dd>Ensure that you contact the data owner at the outset of your project.</dd><dt><span>source :</span></dt><dd>In situ measurements of air</dd><dt><span>Conventions :</span></dt><dd>CF-1.6</dd><dt><span>file_created :</span></dt><dd>2022-02-01 16:00:51.804522+00:00</dd><dt><span>processed_by :</span></dt><dd>OpenGHG_Cloud</dd><dt><span>species :</span></dt><dd>co</dd><dt><span>station_longitude :</span></dt><dd>-1.15033</dd><dt><span>station_latitude :</span></dt><dd>54.35858</dd><dt><span>station_long_name :</span></dt><dd>Bilsdale, UK</dd><dt><span>station_height_masl :</span></dt><dd>380.0</dd><dt><span>site :</span></dt><dd>bsd</dd><dt><span>instrument :</span></dt><dd>picarro</dd><dt><span>sampling_period :</span></dt><dd>60</dd><dt><span>inlet :</span></dt><dd>multiple</dd><dt><span>port :</span></dt><dd>9</dd><dt><span>type :</span></dt><dd>air</dd><dt><span>network :</span></dt><dd>decc</dd><dt><span>scale :</span></dt><dd>WMO-X2014A</dd></dl></div></li></ul></div></div></div></div>
+</div>
+<p>You can also see that because we extracted all the data for this site and species, this has also returned details of which inlet was applicable for each data point.</p>
+<p>We will also have additional metadata associated with our returned <code class="docutils literal notranslate"><span class="pre">co_data</span></code> object which includes the details of the ranking and applicable date ranges:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">co_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;2018-01-01-00:00:00+00:00_2019-05-30-00:00:00+00:00&#39;: &#39;42m&#39;,
+ &#39;2019-05-30-00:00:00+00:00_2021-11-30-00:00:00+00:00&#39;: &#39;108m&#39;,
+ &#39;2016-01-01-00:00:00+00:00_2018-01-01-00:00:00+00:00&#39;: &#39;248m&#39;}
+</pre></div>
+</div>
+</div>
+</div>
+<hr class="docutils" />
+<section id="clean-up">
+<h3>Clean up<a class="headerlink" href="#clean-up" title="Permalink to this headline">¶</a></h3>
+<p>If you used the <code class="docutils literal notranslate"><span class="pre">tmp_dir</span></code> as a location for your object store at the start of the tutorial you can run the cell below to remove any files that were created to make sure any persistant data is refreshed when the notebook is re-run.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tmp_dir</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="1_Adding_observation_data.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Workflow: processing, searching and retrieving observations</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="../../development/index_devel.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Development</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+    <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+  <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022 OpenGHG development team.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>
