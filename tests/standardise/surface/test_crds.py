@@ -40,22 +40,6 @@ def test_read_file(crds_data):
     parsed_surface_metachecker(data=crds_data)
 
 
-def test_global_attributes(crds_data):
-    ''' Test correct global attributes are found within crds data'''
-    ch4_data = crds_data["ch4"]["data"]
-
-    data_attrs = ch4_data.attrs
-
-    expected_global_attrs = ["file_created", 
-                             "processed_by", 
-                             "species",
-                             "calibration_scale",
-                             "sampling_period"]
-
-    for expect_attr in expected_global_attrs:
-        assert expect_attr in data_attrs
-
-
 @pytest.mark.cfchecks
 def test_crds_cf_compliance(crds_data):
     ch4_data = crds_data["ch4"]["data"]
