@@ -279,11 +279,11 @@ class Datasource:
             tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
 
         """
-        from pandas import Timestamp
+        from openghg.util import timestamp_tzaware
 
         try:
-            start = Timestamp(dataset.time[0].values, tz="UTC")
-            end = Timestamp(dataset.time[-1].values, tz="UTC")
+            start = timestamp_tzaware(dataset.time[0].values)
+            end = timestamp_tzaware(dataset.time[-1].values)
 
             return start, end
         except AttributeError:
