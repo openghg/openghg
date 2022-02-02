@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow: processing, searching and retrieving observations &#8212; OpenGHG 0+untagged.3.g2aa18fa.dirty documentation</title>
+    <title>Workflow: processing, searching and retrieving observations &#8212; OpenGHG 0+untagged.3.gbff1cd3.dirty documentation</title>
     
     <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -153,6 +153,13 @@
  <li class="toctree-l1">
   <a class="reference internal" href="2_Ranking_for_observations.html">
    Workflow: handling overlapping observation data
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="3_Plotting_basics.html">
+   Plotting basics
   </a>
  </li>
 </ul>
@@ -523,22 +530,22 @@
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.42m.min.dat:   0%|          | 0/3 [00:00&lt;?, ?it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.42m.min.dat:  33%|███▎      | 1/3 [00:00&lt;00:00,  5.26it/s]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.42m.min.dat:  33%|███▎      | 1/3 [00:00&lt;00:00,  4.54it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.108m.min.dat:  33%|███▎      | 1/3 [00:00&lt;00:00,  5.26it/s]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.108m.min.dat:  33%|███▎      | 1/3 [00:00&lt;00:00,  4.54it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.108m.min.dat:  67%|██████▋   | 2/3 [00:00&lt;00:00,  5.36it/s]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.108m.min.dat:  67%|██████▋   | 2/3 [00:00&lt;00:00,  4.64it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat:  67%|██████▋   | 2/3 [00:00&lt;00:00,  5.36it/s]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat:  67%|██████▋   | 2/3 [00:00&lt;00:00,  4.64it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 3/3 [00:00&lt;00:00,  5.41it/s]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 3/3 [00:00&lt;00:00,  4.66it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 3/3 [00:00&lt;00:00,  5.38it/s]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 3/3 [00:00&lt;00:00,  4.64it/s]
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -553,7 +560,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>defaultdict(&lt;class &#39;dict&#39;&gt;, {&#39;processed&#39;: {&#39;bsd.picarro.1minute.42m.min.dat&#39;: {&#39;ch4&#39;: &#39;e0e98bbe-23d2-4bad-903f-a198a63207b4&#39;, &#39;co2&#39;: &#39;99fc2324-51dc-47bb-af77-2f26e11e3b87&#39;, &#39;co&#39;: &#39;f2d373ac-3e25-424a-b3bd-7b2ab3dca8e0&#39;}, &#39;bsd.picarro.1minute.108m.min.dat&#39;: {&#39;ch4&#39;: &#39;64f2ee8f-b754-448a-bf11-a6ff37208c2b&#39;, &#39;co2&#39;: &#39;9da7fc21-cf8c-478b-9a31-c34e0222b7fa&#39;, &#39;co&#39;: &#39;c0125304-d930-480d-b679-218fe343ec54&#39;}, &#39;bsd.picarro.1minute.248m.min.dat&#39;: {&#39;ch4&#39;: &#39;d92e4c8e-2bb3-4deb-a0f5-63ca4b30d554&#39;, &#39;co2&#39;: &#39;c59867cf-c432-419c-9cf9-af5fe3840fb0&#39;, &#39;co&#39;: &#39;4b45b2d8-24da-40bc-ad67-6bd4bdb3d12d&#39;}}})
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>defaultdict(&lt;class &#39;dict&#39;&gt;, {&#39;processed&#39;: {&#39;bsd.picarro.1minute.42m.min.dat&#39;: {&#39;ch4&#39;: &#39;97b06bc5-743d-4bdb-a452-6c4120ca2123&#39;, &#39;co2&#39;: &#39;524bad8b-58de-49c0-bf75-1f04aed9c8ae&#39;, &#39;co&#39;: &#39;47a59cea-1f0f-41f1-9fcb-1e3edb110cb6&#39;}, &#39;bsd.picarro.1minute.108m.min.dat&#39;: {&#39;ch4&#39;: &#39;4e199eda-08c3-4853-9683-354a6ffb7d9c&#39;, &#39;co2&#39;: &#39;6b79ad36-4794-48c0-9e63-97634ec2ed99&#39;, &#39;co&#39;: &#39;0f260437-1d60-43ff-9f86-17986bc6730b&#39;}, &#39;bsd.picarro.1minute.248m.min.dat&#39;: {&#39;ch4&#39;: &#39;a94e57e7-b39e-45ad-aa6a-3ac8a54b294b&#39;, &#39;co2&#39;: &#39;2e3e7d3f-228c-4347-9679-cf42d8c721ee&#39;, &#39;co&#39;: &#39;eace0598-1c58-46f1-9daf-346466b51644&#39;}}})
 </pre></div>
 </div>
 </div>
@@ -597,10 +604,10 @@
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: capegrim-medusa.18.C:   0%|          | 0/1 [00:00&lt;?, ?it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:01&lt;00:00,  1.49s/it]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:01&lt;00:00,  1.70s/it]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:01&lt;00:00,  1.49s/it]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: capegrim-medusa.18.C: 100%|██████████| 1/1 [00:01&lt;00:00,  1.70s/it]
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -617,62 +624,62 @@
 </div>
 <div class="cell_output docutils container">
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>defaultdict(dict,
-            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;nf3_70m&#39;: &#39;9ee6e533-1489-4962-92fe-9f7de0dd3ba3&#39;,
-               &#39;cf4_70m&#39;: &#39;2e72579f-fbf5-4c34-a09f-61a97f72a983&#39;,
-               &#39;c2f6_70m&#39;: &#39;ffbf32fe-8268-4b52-82e3-ce80394ecbd7&#39;,
-               &#39;c3f8_70m&#39;: &#39;c606e23e-fa87-4135-8865-9fd65f672ce0&#39;,
-               &#39;c4f8_70m&#39;: &#39;2211539e-2c54-493c-9a9b-e7eb2a2bc167&#39;,
-               &#39;c4f10_70m&#39;: &#39;621bbc7c-55f5-4972-80b2-0541808c1e39&#39;,
-               &#39;c6f14_70m&#39;: &#39;997093c2-f99e-499c-839a-b54ca0917651&#39;,
-               &#39;sf6_70m&#39;: &#39;9668cd07-8164-4f09-b2e9-fbcfb6bf2407&#39;,
-               &#39;so2f2_70m&#39;: &#39;26a4e038-fa0e-4d0f-ad00-8d5938179108&#39;,
-               &#39;sf5cf3_70m&#39;: &#39;08638f1d-52e5-46af-8e4b-664842f7f289&#39;,
-               &#39;hfc23_70m&#39;: &#39;a18ee5c3-7ebc-4081-9e16-731ecb113dc6&#39;,
-               &#39;hfc32_70m&#39;: &#39;0037f2a6-5e59-40d3-9f96-31e3acddbb4b&#39;,
-               &#39;hfc125_70m&#39;: &#39;5f4de49a-23cd-48e6-b44a-562180762ad0&#39;,
-               &#39;hfc134a_70m&#39;: &#39;0731e68e-646a-494d-9bce-6b965916edfe&#39;,
-               &#39;hfc143a_70m&#39;: &#39;013d7344-32f1-460c-9cd1-cc5a391307f6&#39;,
-               &#39;hfc152a_70m&#39;: &#39;68e3f906-2f50-4543-aa1a-acc0d2f4118c&#39;,
-               &#39;hfc227ea_70m&#39;: &#39;027b16bd-3068-4a17-9c23-f83956a89d87&#39;,
-               &#39;hfc236fa_70m&#39;: &#39;1bbc3c74-13b8-4751-92a1-64ecc3be19f8&#39;,
-               &#39;hfc245fa_70m&#39;: &#39;3d32cf77-f994-4035-99b6-857a861b827d&#39;,
-               &#39;hfc365mfc_70m&#39;: &#39;5eb1bf12-c03c-4866-a081-4574bcb919f8&#39;,
-               &#39;hfc4310mee_70m&#39;: &#39;058dabf0-69b0-4feb-ae95-4f91e684934e&#39;,
-               &#39;hcfc22_70m&#39;: &#39;5dd6ee17-4d71-4ca3-b85e-78e04be22626&#39;,
-               &#39;hcfc124_70m&#39;: &#39;929d78b2-9727-45cd-abb9-c24322006fb7&#39;,
-               &#39;hcfc132b_70m&#39;: &#39;1fbee25f-3bc4-471d-ad8e-7ae137888f05&#39;,
-               &#39;hcfc133a_70m&#39;: &#39;eb52d457-7d90-4454-b9d5-04faf80ef14c&#39;,
-               &#39;hcfc141b_70m&#39;: &#39;2b264451-4bbc-4441-979e-778c399bda4f&#39;,
-               &#39;hcfc142b_70m&#39;: &#39;7b4a4883-5471-4faf-9b0b-262a29759679&#39;,
-               &#39;cfc11_70m&#39;: &#39;11409d7c-268e-430c-a5b1-36af044aae78&#39;,
-               &#39;cfc12_70m&#39;: &#39;8befc8b7-a7b1-4916-8d52-464e53cb2257&#39;,
-               &#39;cfc13_70m&#39;: &#39;f3a59f06-7b02-494f-871c-390c77201a42&#39;,
-               &#39;cfc112_70m&#39;: &#39;67b86f75-86a1-4a93-843b-7dd40cc263a9&#39;,
-               &#39;cfc113_70m&#39;: &#39;5582d315-ae64-4504-b036-715ae320d0fc&#39;,
-               &#39;cfc114_70m&#39;: &#39;333e1c30-082d-42e3-bf03-850b0ba0175e&#39;,
-               &#39;cfc115_70m&#39;: &#39;119ee215-2943-4e9f-9e20-7ec472fbac07&#39;,
-               &#39;halon1211_70m&#39;: &#39;b8b700e0-44ad-427f-9412-b53892e543f1&#39;,
-               &#39;halon1301_70m&#39;: &#39;491bc4e1-2795-4ff3-a8b5-cbc034950aec&#39;,
-               &#39;halon2402_70m&#39;: &#39;efa68387-af20-411d-89c8-3ba1db9f4715&#39;,
-               &#39;ch3cl_70m&#39;: &#39;3db72e69-2158-4b10-895d-fdf8db6bcd80&#39;,
-               &#39;ch3br_70m&#39;: &#39;c376f249-a087-4657-b59f-bc7c9f566e8e&#39;,
-               &#39;ch3i_70m&#39;: &#39;9db80e75-85e6-43d0-9bc2-f2350d25e859&#39;,
-               &#39;ch2cl2_70m&#39;: &#39;2ab52ce1-ffd9-4753-8aa4-66dd04bb827d&#39;,
-               &#39;chcl3_70m&#39;: &#39;830d87c4-03c6-4f4c-af3a-006ab9827047&#39;,
-               &#39;ccl4_70m&#39;: &#39;f7920916-ff31-4540-aedb-4bedfa06fc1c&#39;,
-               &#39;ch2br2_70m&#39;: &#39;820fd03c-2fb8-49c7-92e0-80162312af1a&#39;,
-               &#39;chbr3_70m&#39;: &#39;5778c227-a606-4925-9319-b4b3b89bee4d&#39;,
-               &#39;ch3ccl3_70m&#39;: &#39;0c55e053-758b-4212-985e-6146d161ffe3&#39;,
-               &#39;c2hcl3_70m&#39;: &#39;66e0f43c-4ad7-4236-a221-834a7b24debf&#39;,
-               &#39;c2cl4_70m&#39;: &#39;35a1f238-8a73-44c3-92b3-2f7cc75f31a8&#39;,
-               &#39;c2h2_70m&#39;: &#39;8fd573f4-93ce-46f5-8369-4361d67cc416&#39;,
-               &#39;c2h6_70m&#39;: &#39;a00ed1d5-1f73-475f-8276-abe83eff657e&#39;,
-               &#39;c3h8_70m&#39;: &#39;e23b4bb8-2296-4af7-b137-c6d5424b8363&#39;,
-               &#39;cc3h8_70m&#39;: &#39;400f19b2-09c6-4115-9787-c5b73c550c21&#39;,
-               &#39;c6h6_70m&#39;: &#39;a5b717bd-620c-4cd5-bceb-9069752fb9d3&#39;,
-               &#39;c6h5ch3_70m&#39;: &#39;f50260ce-b01a-466f-a201-c22addf2a0e7&#39;,
-               &#39;cos_70m&#39;: &#39;1fdaee39-dfe3-4d22-8b45-680ce6f61cec&#39;,
-               &#39;desflurane_70m&#39;: &#39;67581d25-cf92-46f1-8ed2-ddee68c01832&#39;}}})
+            {&#39;processed&#39;: {&#39;capegrim-medusa.18.C&#39;: {&#39;nf3_70m&#39;: &#39;d7556010-5b81-43b0-a731-d538f5e7577b&#39;,
+               &#39;cf4_70m&#39;: &#39;8289f99b-1fdb-4cc1-a979-5650224bde28&#39;,
+               &#39;c2f6_70m&#39;: &#39;83f22f70-151d-481e-a803-9e656367e19e&#39;,
+               &#39;c3f8_70m&#39;: &#39;75a5acbe-a4b2-4fa7-ac8e-47d669a69075&#39;,
+               &#39;c4f8_70m&#39;: &#39;89a20d48-aabe-4b9d-9a52-732f18d744f9&#39;,
+               &#39;c4f10_70m&#39;: &#39;deac204b-6c5e-4e08-b3fc-2d49175813d1&#39;,
+               &#39;c6f14_70m&#39;: &#39;b40000e7-3633-4921-a2e5-3d79a61ee56a&#39;,
+               &#39;sf6_70m&#39;: &#39;8afb65da-fea0-4139-9788-0bcda4a57441&#39;,
+               &#39;so2f2_70m&#39;: &#39;9bd1d505-015f-4851-8f50-e21d972010db&#39;,
+               &#39;sf5cf3_70m&#39;: &#39;9c08b0f2-0123-410d-aa4a-1e1ee4d96293&#39;,
+               &#39;hfc23_70m&#39;: &#39;ed62be31-0bcc-4157-af21-2c6b4d31d562&#39;,
+               &#39;hfc32_70m&#39;: &#39;f9f4cd6d-8f13-4ebf-8929-92ed888821e9&#39;,
+               &#39;hfc125_70m&#39;: &#39;99abe267-4d41-48b0-84ff-577435399784&#39;,
+               &#39;hfc134a_70m&#39;: &#39;29a5e1aa-f5ad-4792-b413-b4ac10f976c4&#39;,
+               &#39;hfc143a_70m&#39;: &#39;68db3e98-0929-4253-920e-dfa4772d64ac&#39;,
+               &#39;hfc152a_70m&#39;: &#39;5535f2f1-be40-44ec-91d8-b9c3d4f9cca3&#39;,
+               &#39;hfc227ea_70m&#39;: &#39;e7b548e6-bd0e-40b5-92ff-7e45e826133d&#39;,
+               &#39;hfc236fa_70m&#39;: &#39;40d729da-f40a-4e1f-b57d-c6dd7277f937&#39;,
+               &#39;hfc245fa_70m&#39;: &#39;c5a2c7e4-ae39-4b3c-b5ed-b861bdf50c99&#39;,
+               &#39;hfc365mfc_70m&#39;: &#39;db3de728-8750-4bab-aac0-fb087152a48e&#39;,
+               &#39;hfc4310mee_70m&#39;: &#39;f49dd720-fc63-47b8-8fe6-1fed83e8edb4&#39;,
+               &#39;hcfc22_70m&#39;: &#39;e6d21f71-1bca-41da-8aef-15651a7ca4aa&#39;,
+               &#39;hcfc124_70m&#39;: &#39;9496d0f7-8c64-411a-b3ca-44b172d92e43&#39;,
+               &#39;hcfc132b_70m&#39;: &#39;9ab66711-a461-48ea-a5eb-4a896ab066db&#39;,
+               &#39;hcfc133a_70m&#39;: &#39;952040fc-e81c-43b0-a65e-af8602ef7333&#39;,
+               &#39;hcfc141b_70m&#39;: &#39;2d004fd4-3bfd-42e8-82d7-f38e23387284&#39;,
+               &#39;hcfc142b_70m&#39;: &#39;6f596565-740b-42b2-a13a-23f4bcd861cb&#39;,
+               &#39;cfc11_70m&#39;: &#39;eb348c23-1c6d-428e-ade8-caddd2f5c104&#39;,
+               &#39;cfc12_70m&#39;: &#39;31d35ecb-1c5b-48e1-90a9-cd88df930891&#39;,
+               &#39;cfc13_70m&#39;: &#39;0c244841-e860-4837-ab2c-98c57fbdf6b3&#39;,
+               &#39;cfc112_70m&#39;: &#39;c69b6373-db9a-46f8-9bac-7b8474aa86e4&#39;,
+               &#39;cfc113_70m&#39;: &#39;f81c837f-a94b-4866-a8a3-678bb830a612&#39;,
+               &#39;cfc114_70m&#39;: &#39;7ec9d5d3-182f-4062-ba0d-e74bb54983fa&#39;,
+               &#39;cfc115_70m&#39;: &#39;296566b4-3823-43ae-bf3b-862ad3c28d10&#39;,
+               &#39;halon1211_70m&#39;: &#39;f9fa618d-6057-43ce-a151-bb9e569f6d44&#39;,
+               &#39;halon1301_70m&#39;: &#39;f09e4716-c543-4741-9b31-ecbf03e99d1e&#39;,
+               &#39;halon2402_70m&#39;: &#39;55e70a94-7750-4ab9-8438-78767ac7bb77&#39;,
+               &#39;ch3cl_70m&#39;: &#39;78fed51f-a963-4e64-b4bd-7931e81b6e93&#39;,
+               &#39;ch3br_70m&#39;: &#39;76b2ae16-7e16-4fe6-814f-3334c0a2a3a0&#39;,
+               &#39;ch3i_70m&#39;: &#39;bd689011-f53c-4e9c-9037-a376493fdc60&#39;,
+               &#39;ch2cl2_70m&#39;: &#39;98941d99-91da-4e14-b695-3312b1abe776&#39;,
+               &#39;chcl3_70m&#39;: &#39;d3e63cfc-886b-41d7-af98-2c93c63a3b1e&#39;,
+               &#39;ccl4_70m&#39;: &#39;0a40bb48-ce17-427b-bd7c-6228dbc724ed&#39;,
+               &#39;ch2br2_70m&#39;: &#39;a49ce951-1eeb-481b-b274-91d2d52051c8&#39;,
+               &#39;chbr3_70m&#39;: &#39;5ed32dc0-0136-424d-9952-70ca6bb396a0&#39;,
+               &#39;ch3ccl3_70m&#39;: &#39;a09f3ec1-e796-4ccd-aab5-90c00a152717&#39;,
+               &#39;c2hcl3_70m&#39;: &#39;525b3c0d-3ef5-4fe9-aa20-47a3b7eb65aa&#39;,
+               &#39;c2cl4_70m&#39;: &#39;24868222-fb06-4f92-8445-012f5573784e&#39;,
+               &#39;c2h2_70m&#39;: &#39;47452edd-7bad-4a6a-a16b-9c94577aae87&#39;,
+               &#39;c2h6_70m&#39;: &#39;6c947ce0-d670-461c-af79-089c936a6a6b&#39;,
+               &#39;c3h8_70m&#39;: &#39;91b12b22-4acd-48eb-84f1-3309a3460f56&#39;,
+               &#39;cc3h8_70m&#39;: &#39;5597237c-5259-478b-ad2b-c5086da1dbe1&#39;,
+               &#39;c6h6_70m&#39;: &#39;c1af3f74-a632-4c34-bc46-07f2efaa5ea3&#39;,
+               &#39;c6h5ch3_70m&#39;: &#39;e7fd8165-ec35-40de-9acb-8fb6b6673bcd&#39;,
+               &#39;cos_70m&#39;: &#39;a3db2b51-5314-4461-9dec-57fa1443900c&#39;,
+               &#39;desflurane_70m&#39;: &#39;d833537a-b3f4-4302-a018-63cb6345a52f&#39;}}})
 </pre></div>
 </div>
 </div>
@@ -789,7 +796,7 @@ Attributes: (12/23)
     port:                 9
     type:                 air
     network:              decc
-    scale:                WMO-X2014A, metadata={&#39;site&#39;: &#39;bsd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;60&#39;, &#39;inlet&#39;: &#39;248m&#39;, &#39;port&#39;: &#39;9&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;species&#39;: &#39;co&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;, &#39;long_name&#39;: &#39;bilsdale&#39;, &#39;calibration_scale&#39;: &#39;wmo-x2014a&#39;, &#39;data_owner&#39;: &quot;Simon O&#39;Doherty&quot;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;station_longitude&#39;: -1.15033, &#39;station_latitude&#39;: 54.35858, &#39;station_long_name&#39;: &#39;Bilsdale, UK&#39;, &#39;station_height_masl&#39;: 380.0, &#39;inlet_height_magl&#39;: &#39;248m&#39;, &#39;data_type&#39;: &#39;timeseries&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;conditions_of_use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;file_created&#39;: &#39;2022-02-01 16:10:54.581850+00:00&#39;, &#39;processed_by&#39;: &#39;OpenGHG_Cloud&#39;})
+    scale:                WMO-X2014A, metadata={&#39;site&#39;: &#39;bsd&#39;, &#39;instrument&#39;: &#39;picarro&#39;, &#39;sampling_period&#39;: &#39;60&#39;, &#39;inlet&#39;: &#39;248m&#39;, &#39;port&#39;: &#39;9&#39;, &#39;type&#39;: &#39;air&#39;, &#39;network&#39;: &#39;decc&#39;, &#39;species&#39;: &#39;co&#39;, &#39;scale&#39;: &#39;WMO-X2014A&#39;, &#39;long_name&#39;: &#39;bilsdale&#39;, &#39;calibration_scale&#39;: &#39;wmo-x2014a&#39;, &#39;data_owner&#39;: &quot;Simon O&#39;Doherty&quot;, &#39;data_owner_email&#39;: &#39;s.odoherty@bristol.ac.uk&#39;, &#39;station_longitude&#39;: -1.15033, &#39;station_latitude&#39;: 54.35858, &#39;station_long_name&#39;: &#39;Bilsdale, UK&#39;, &#39;station_height_masl&#39;: 380.0, &#39;inlet_height_magl&#39;: &#39;248m&#39;, &#39;data_type&#39;: &#39;timeseries&#39;, &#39;comment&#39;: &#39;Cavity ring-down measurements. Output from GCWerks&#39;, &#39;conditions_of_use&#39;: &#39;Ensure that you contact the data owner at the outset of your project.&#39;, &#39;source&#39;: &#39;In situ measurements of air&#39;, &#39;Conventions&#39;: &#39;CF-1.6&#39;, &#39;file_created&#39;: &#39;2022-02-02 17:23:45.124714+00:00&#39;, &#39;processed_by&#39;: &#39;OpenGHG_Cloud&#39;})
 </pre></div>
 </div>
 </div>
@@ -1765,7 +1772,7 @@ if (IPython.notebook.kernel !== null) {
         mpl.mpl_figure_comm
     );
 }
-</script><div class="output text_html"><div id='a4a3006c-0ab5-4719-b3cf-b9d4dc64fd21'></div></div><div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.lines.Line2D at 0x7ff7f53e8190&gt;]
+</script><div class="output text_html"><div id='760c1ba8-4dfc-46c8-b8fe-4c7841ec9d1f'></div></div><div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.lines.Line2D at 0x7f30b9953ee0&gt;]
 </pre></div>
 </div>
 </div>
