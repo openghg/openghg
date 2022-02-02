@@ -8,7 +8,7 @@ from helpers import check_cf_compliance
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
-from helpers import get_datapath, parsed_surface_metachecker, attributes_checker_obssurface
+from helpers import get_datapath, parsed_surface_metachecker
 
 
 @pytest.fixture(scope="session")
