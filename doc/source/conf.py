@@ -273,7 +273,6 @@ nbsphinx_custom_formats = {
     ".md": ["jupytext.reads", {"fmt": "mystnb"}],
 }
 
-
 # Napoleon settings
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
