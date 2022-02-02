@@ -39,11 +39,6 @@ def test_read_file(crds_data):
 
     parsed_surface_metachecker(data=crds_data)
 
-    # Check attributes
-    attributes_checker_obssurface(ch4_data.attrs, species="ch4")
-    attributes_checker_obssurface(co2_data.attrs, species="co2")
-    attributes_checker_obssurface(co_data.attrs, species="co")
-
 
 def test_global_attributes(crds_data):
     ''' Test correct global attributes are found within crds data'''
