@@ -8,7 +8,7 @@ from helpers import check_cf_compliance
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
-from helpers import get_datapath, parsed_surface_metachecker
+from helpers import get_datapath, parsed_surface_metachecker, attributes_checker_obssurface
 
 
 @pytest.fixture(scope="session")
@@ -38,6 +38,11 @@ def test_read_file(crds_data):
     assert co_data["co_number_of_observations"][0] == pytest.approx(19.0)
 
     parsed_surface_metachecker(data=crds_data)
+
+    # Check attributes
+    attributes_checker_obssurface(ch4_data.attrs, species="ch4")
+    attributes_checker_obssurface(co2_data.attrs, species="co2")
+    attributes_checker_obssurface(co_data.attrs, species="co")
 
 
 def test_global_attributes(crds_data):
