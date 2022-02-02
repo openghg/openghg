@@ -49,3 +49,18 @@ class ObsData(_BaseData, abc.Mapping):
         # Fixed length as 1 at the moment but may need to update if other key
         # values are added.
         return 1
+
+    def plot_timeseries(self) -> None:
+        """Plot a timeseries"""
+        import plotly.graph_objects as go
+
+        species = self.metadata["species"]
+
+        x_data = self.data["time"].to_numpy()
+        y_data = self.data[species].to_numpy()
+
+        # Create traces
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=species.upper()))
+
+        fig.show()

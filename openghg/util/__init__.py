@@ -36,6 +36,6 @@ from ._time import (
 )
 
 
-from ._tutorial import bilsdale_datapaths
+from ._tutorial import bilsdale_datapaths, retrieve_example_data
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import get_datapath, load_json, load_surface_parser, read_header
