@@ -55,7 +55,6 @@ class ObsData(_BaseData, abc.Mapping):
         self, title: str = None, xlabel: str = None, ylabel: str = None, units: str = None
     ) -> go.Figure:
         """Plot a timeseries"""
-        
 
         species = self.metadata["species"]
         site = self.metadata["site"]

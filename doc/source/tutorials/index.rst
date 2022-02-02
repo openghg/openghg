@@ -27,3 +27,12 @@ functions.
 
    beginner_workflow/2_Ranking_for_observations
 
+Tutorial 3 - Plotting basics
+---------------------------------
+
+This tutorial covers making a simple timeseries plot of some CO2 data.
+
+.. toctree::
+   :maxdepth: 1
+
+   beginner_workflow/3_Plotting_basics
