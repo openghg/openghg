@@ -83,10 +83,10 @@ def parse_btt(
         processed_data = processed_data.to_xarray()
 
         species_attributes = attributes.copy()
-        species_attributes["species"] = species
+        species_attributes["species"] = clean_string(species)
 
         species_metadata = metadata.copy()
-        species_metadata["species"] = species
+        species_metadata["species"] = clean_string(species)
 
         gas_data[species] = {
             "metadata": species_metadata,
