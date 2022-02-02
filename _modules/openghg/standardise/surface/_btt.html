@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._btt &#8212; OpenGHG 0+untagged.3.gd492287.dirty documentation</title>
+    <title>openghg.standardise.surface._btt &#8212; OpenGHG 0+untagged.3.g5f796eb.dirty documentation</title>
     
     <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -203,11 +203,28 @@
     <span class="c1"># Take std-dev measurements from these columns for these species</span>
     <span class="n">species_sd</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;CO2&quot;</span><span class="p">:</span> <span class="s2">&quot;co2.sd.ppm&quot;</span><span class="p">,</span> <span class="s2">&quot;CH4&quot;</span><span class="p">:</span> <span class="s2">&quot;ch4.sd.ppb&quot;</span><span class="p">}</span>
 
+    <span class="n">site_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;acrg_site_info.json&quot;</span><span class="p">)</span>
+    <span class="n">site_info</span> <span class="o">=</span> <span class="n">site_data</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">]</span>
+
     <span class="n">param_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
     <span class="n">network_params</span> <span class="o">=</span> <span class="n">param_data</span><span class="p">[</span><span class="s2">&quot;BTT&quot;</span><span class="p">]</span>
+    <span class="n">site_attributes</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
 
     <span class="n">sampling_period</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">network_params</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">])</span>
     <span class="n">sampling_period_seconds</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;s&quot;</span>
+
+    <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_info</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_info</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_info</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>
+
+    <span class="n">attributes</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
+    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+    <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">(</span><span class="s2">&quot;2019-01-01 00:00&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">to_timedelta</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;DOY&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;D&quot;</span><span class="p">)</span>
@@ -231,20 +248,14 @@
         <span class="c1"># Convert to a Dataset</span>
         <span class="n">processed_data</span> <span class="o">=</span> <span class="n">processed_data</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
 
-        <span class="n">site_attributes</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
-        <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
-        <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
-        <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampling_period</span>
+        <span class="n">species_attributes</span> <span class="o">=</span> <span class="n">attributes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">species_attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
 
-        <span class="c1"># TODO - add in better metadata reading</span>
-        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">species</span><span class="p">),</span>
-            <span class="s2">&quot;sampling_period&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">),</span>
-            <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;BTT&quot;</span><span class="p">,</span>
-        <span class="p">}</span>
+        <span class="n">species_metadata</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">species_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
 
         <span class="n">gas_data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
+            <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">species_metadata</span><span class="p">,</span>
             <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">processed_data</span><span class="p">,</span>
             <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">site_attributes</span><span class="p">,</span>
         <span class="p">}</span>

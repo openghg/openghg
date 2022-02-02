@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.meta._attributes &#8212; OpenGHG 0+untagged.3.gd492287.dirty documentation</title>
+    <title>openghg.standardise.meta._attributes &#8212; OpenGHG 0+untagged.3.g5f796eb.dirty documentation</title>
     
     <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -197,7 +197,7 @@
         <span class="n">scale</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scale&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">sampling_period</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">gas_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">))</span>
+            <span class="n">sampling_period</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">gas_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">,</span> <span class="s2">&quot;NOT_SET&quot;</span><span class="p">))</span>
 
         <span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_attributes</span><span class="p">(</span>
             <span class="n">ds</span><span class="o">=</span><span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span>
@@ -338,6 +338,12 @@
         <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale</span>
+
+    <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NOT_SET&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampling_period</span>
+        <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period_unit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;s&quot;</span>
 
     <span class="c1"># Update the Dataset attributes</span>
     <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">global_attributes</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
