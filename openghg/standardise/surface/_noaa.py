@@ -191,7 +191,7 @@ def _split_inlets(obspack_ds: Dataset,
         {"ch4": {"data": xr.Dataset(...), "attributes": {...}, "metadata": {...}}}
         or
         {"ch4_40m": {"data": xr.Dataset(...), "attributes": {...}, "metadata": {...}}, "ch4_60m": {...}, ...}
-        
+
     '''
 
     orig_attrs = obspack_ds.attrs
@@ -221,6 +221,8 @@ def _split_inlets(obspack_ds: Dataset,
 
             # Creating id keys of the form "<species>_<inlet>" e.g. "ch4_40m" or "co_12.5m"
             inlet_str = _format_inlet(ht)
+            inlet_num_str = inlet_str.strip("m")
+
             if num_groups > 1:
                 id_key = f"{species}_{inlet_str}"
             else:
@@ -237,7 +239,9 @@ def _split_inlets(obspack_ds: Dataset,
             meta_copy = metadata.copy()
 
             attrs_copy["inlet"] = inlet_str
+            attrs_copy["inlet_height_magl"] = inlet_num_str
             meta_copy["inlet"] = inlet_str
+            meta_copy["inlet_height_magl"] = inlet_num_str
 
             gas_data[id_key]["metadata"] = meta_copy
             gas_data[id_key]["attributes"] = attrs_copy
@@ -264,8 +268,15 @@ def _split_inlets(obspack_ds: Dataset,
 
         id_key = f"{species}"
 
+        if inlet != "flask":
+            inlet_num_str = inlet.strip("m")
+        else:
+            inlet_num_str = ""
+
         metadata["inlet"] = inlet
+        metadata["inlet_height_magl"] = inlet_num_str
         attributes["inlet"] = inlet
+        attributes["inlet_height_magl"] = inlet_num_str
 
         standardised_ds = _standarise_variables(obspack_ds, species)
 
@@ -354,7 +365,7 @@ def _read_obspack(
             units = "1e-3"
         elif units == "micromol mol-1":
             units = "1e-6"
-        elif units == "nmol mol-1":
+        elif units in ["nmol mol-1", "nanomol mol-1"]:
             units = "1e-9"
         elif units == "pmol mol-1":
             units = "1e-12"
@@ -380,9 +391,12 @@ def _read_obspack(
     else:
         metadata["instrument"] = orig_attrs.get("instrument", "NOT_SET")
 
-    # Add data owner details if present
+    # Add data owner details, station position and calibration scale, if present
     metadata["data_owner"] = orig_attrs.get("provider_1_name", "NOT_SET")
     metadata["data_owner_email"] = orig_attrs.get("provider_1_email", "NOT_SET")
+    metadata["station_longitude"] = orig_attrs.get("site_longitude", "NOT_SET")
+    metadata["station_latitude"] = orig_attrs.get("site_latitude", "NOT_SET")
+    metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", "NOT_SET")
 
     # Create attributes with copy of metadata values
     attributes = metadata.copy()
@@ -390,6 +404,17 @@ def _read_obspack(
     # TODO: At the moment all attributes from the NOAA ObsPack are being copied
     # plus any variables we're adding - decide if we want to reduce this
     attributes.update(orig_attrs)
+
+    # expected_keys = {
+    #     "site",
+    #     "species",
+    #     "inlet",
+    #     "instrument",
+    #     "sampling_period",
+    #     "calibration_scale",
+    #     "station_longitude",
+    #     "station_latitude",
+    # }
 
     gas_data = _split_inlets(processed_ds, attributes, metadata, inlet=inlet)
 
