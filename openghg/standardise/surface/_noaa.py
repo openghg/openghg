@@ -122,11 +122,10 @@ def _standarise_variables(obspack_ds: Dataset, species: str) -> Dataset:
     # "value_unc" --> ??
     # TODO: Clarify what "value_unc" should be renamed to
 
-    variable_names = {
-    "value": species,
-    "value_std_dev": f"{species}_variability",
-    "value_unc": f"{species}_variability",  # May need to be updated
-    "nvalue": f"{species}_number_of_observations"}
+    variable_names = {"value": species,
+                      "value_std_dev": f"{species}_variability",
+                      "value_unc": f"{species}_variability",  # May need to be updated
+                      "nvalue": f"{species}_number_of_observations"}
 
     to_extract = [name for name in variable_names.keys() if name in obspack_ds]
 
