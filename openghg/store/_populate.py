@@ -211,6 +211,3 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
         files = []
 
     return files
-
-
-
