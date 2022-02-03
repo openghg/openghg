@@ -111,7 +111,7 @@ def get_attributes(
     if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
 
-    # Current CF Conventions (v1.7) demand that valid variable names
+    # Current CF Conventions (v1.8) demand that valid variable names
     # begin with a letter and be composed of letters, digits and underscores
     # Here variable names are also made lowercase to enable easier matching below
 
@@ -155,7 +155,7 @@ def get_attributes(
     global_attributes_default = {
         "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
         "source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
+        "Conventions": "CF-1.8",
     }
 
     if global_attributes is not None:

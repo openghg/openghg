@@ -29,7 +29,7 @@ def test_specific_keyword_search():
         "comment": "Cavity ring-down measurements. Output from GCWerks",
         "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
         "source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
+        "Conventions": "CF-1.8",
         "processed_by": "OpenGHG_Cloud",
         "species": "co2",
         "calibration_scale": "WMO-X2007",
