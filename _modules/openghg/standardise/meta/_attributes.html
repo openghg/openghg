@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.meta._attributes &#8212; OpenGHG 0+untagged.3.gf119f37.dirty documentation</title>
+    <title>openghg.standardise.meta._attributes &#8212; OpenGHG 0+untagged.3.g1c33148.dirty documentation</title>
     
     <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -194,7 +194,7 @@
         <span class="n">species</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
 
         <span class="n">units</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
-        <span class="n">scale</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;scale&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sampling_period</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">gas_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">))</span>
@@ -277,7 +277,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;This function only accepts xarray Datasets&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Current CF Conventions (v1.7) demand that valid variable names</span>
+    <span class="c1"># Current CF Conventions (v1.8) demand that valid variable names</span>
     <span class="c1"># begin with a letter and be composed of letters, digits and underscores</span>
     <span class="c1"># Here variable names are also made lowercase to enable easier matching below</span>
 
@@ -321,7 +321,7 @@
     <span class="n">global_attributes_default</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;conditions_of_use&quot;</span><span class="p">:</span> <span class="s2">&quot;Ensure that you contact the data owner at the outset of your project.&quot;</span><span class="p">,</span>
         <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;In situ measurements of air&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Conventions&quot;</span><span class="p">:</span> <span class="s2">&quot;CF-1.6&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Conventions&quot;</span><span class="p">:</span> <span class="s2">&quot;CF-1.8&quot;</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="n">global_attributes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
