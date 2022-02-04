@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
 from xarray import Dataset
+import numpy as np
 
 
 def parse_noaa(
@@ -25,8 +26,6 @@ def parse_noaa(
     Returns:
         dict: Dictionary of data and metadata
     """
-    from pathlib import Path
-
     if sampling_period is None:
         sampling_period = "NOT_SET"
 
@@ -52,6 +51,237 @@ def parse_noaa(
             instrument=instrument,
             sampling_period=sampling_period,
         )
+
+
+def _format_inlet(inlet: Union[str, float, int]) -> str:
+    '''
+    Output inlet name in expected format. This will include 1 decimal place for floats with a fractional component
+    and 0 decimal places otherwise.
+
+    Args:
+        inlet : Inlet value. This can be a string as long as this can be converted directly to a float
+
+    Returns:
+        str : Formatted string of inlet name
+
+    Examples:
+        >>> _format_inlet(40)
+        "40m"
+        >>> _format_inlet("10.0")
+        "10m"
+        >>> _format_inlet(2.511432)
+        "2.5m"
+    '''
+    if isinstance(inlet, str):
+        try:
+            inlet_value = float(inlet)
+        except ValueError:
+            inlet_values_str = inlet.split('-')
+            try:
+                inlet_values = [float(value) for value in inlet_values_str]
+            except ValueError:
+                raise ValueError("Unable to convert inlet {inlet} to a float")
+            else:
+                inlet_value = np.mean(inlet_values)
+    else:
+        inlet_value = inlet
+
+    if inlet_value % 1 == 0:
+        inlet_str = f"{inlet_value:.0f}m"
+    else:
+        inlet_str = f"{inlet_value:.1f}m"
+
+    return inlet_str
+
+
+def _standarise_variables(obspack_ds: Dataset, species: str) -> Dataset:
+    '''
+    Converts data from NOAA ObsPack dataset into our standardised variables to be stored within the object store.
+    The species is also needed so this name can be used to label the variables in the new dataset.
+
+    Expects inputs with: "value", "value_std_dev" or "value_unc", "nvalue" as per NOAA ObsPack standard.
+
+    Args:
+        obspack_ds : Dataset derived from a netcdf file within the NOAA obspack
+        species : Standardised species name (e.g. "ch4")
+
+    Returns:
+        Dataset : Standardised dataset with variables extracted and renamed
+
+    Example output:
+        For species = "ch4":
+            xarray.Dataset("ch4":[...]
+                           "ch4_variability":[...]
+                           "ch4_number_of_observations": [...])
+    '''
+
+    processed_ds = obspack_ds.copy()
+
+    # Rename variables to match our internal standard
+    # "value_std_dev" --> f"{species}_variability"
+    # "value_unc" --> ??
+    # TODO: Clarify what "value_unc" should be renamed to
+
+    variable_names = {"value": species,
+                      "value_std_dev": f"{species}_variability",
+                      "value_unc": f"{species}_variability",  # May need to be updated
+                      "nvalue": f"{species}_number_of_observations"}
+
+    to_extract = [name for name in variable_names.keys() if name in obspack_ds]
+
+    # For the error variables we only want to take one set of values from the
+    # obspack dataset but multiple variables may be available.
+    # If multiple are present, combine these together and only extract one
+    error_names = ["value_std_dev", "value_unc"]
+    error_variables = [name for name in error_names if name in to_extract]
+
+    if len(error_variables) > 1:
+        main_ev = error_variables[0]  # Treat first item in the list at the one to keep
+
+        history_attr = "history"
+        processed_ds[main_ev].attrs[history_attr] = f"Merged {main_ev} variable from original file with "
+
+        for ev in error_variables[1:]:
+            # Combine details from additional additional error variable with main variable
+            variable = processed_ds[main_ev]
+            new_variable = processed_ds[ev]
+
+            # Update Dataset and add details within attributes
+            updated_variable = variable.combine_first(new_variable)
+            processed_ds[main_ev] = updated_variable
+            processed_ds[main_ev].attrs[history_attr] += f"{ev}, "
+
+            # Remove this extra variables from the list of variables to extract from the dataset
+            to_extract.remove(ev)
+
+    # Create dictionary of names to convert obspack ds to our format
+    name_dict = {name: key for name, key in variable_names.items() if name in to_extract}
+
+    if not to_extract:
+        wanted = variable_names.keys()
+        raise ValueError(
+            f"No valid data variables columns found in obspack dataset. We expect the following data variables in the passed NetCDF: {wanted}"
+        )
+
+    # Grab only the variables we want to keep and rename these
+    processed_ds = processed_ds[to_extract]
+    processed_ds = processed_ds.rename(name_dict)
+    processed_ds = processed_ds.sortby("time")
+
+    return processed_ds
+
+
+def _split_inlets(obspack_ds: Dataset,
+                  attributes: Dict,
+                  metadata: Dict,
+                  inlet: Optional[str] = None) -> Dict:
+    '''
+    Splits the overall dataset by different inlet values, if present. The expected dataset input should be from the NOAA ObsPack.
+
+    Args:
+        obspack_ds : Dataset derived from a netcdf file within the NOAA obspack
+        attributes: Attributes extracted from the NOAA obspack. Should contain at least "species" and "measurement_type"
+        metadata: Metadata to store alongside standardised data
+
+    Returns:
+        Dict: gas data containing "data", "metadata", "attributes" for each inlet
+
+    Example output:
+        {"ch4": {"data": xr.Dataset(...), "attributes": {...}, "metadata": {...}}}
+        or
+        {"ch4_40m": {"data": xr.Dataset(...), "attributes": {...}, "metadata": {...}}, "ch4_60m": {...}, ...}
+
+    '''
+
+    orig_attrs = obspack_ds.attrs
+    species = attributes["species"]
+    measurement_type = attributes["measurement_type"]
+
+    height_var = "intake_height"
+
+    # Check whether the input data contains different inlet height values for each data point ("intake_height" data variable)
+    # If so we need to select the data for each inlet and indicate this is a separate Datasource
+    # Each data key is labelled based on the species and the inlet (if needed)
+
+    gas_data: Dict[str, Dict] = {}
+    if height_var in obspack_ds.data_vars:
+
+        if inlet is not None:
+            # TODO: Add to logging?
+            print(f"WARNING: Ignoring inlet value of {inlet} since file has each data point has an associated height (contains 'intake_height' variable)")
+
+        # Group dataset by the height values
+        # Note: could use ds.groupby_bins(...) if necessary if there are lots of small height differences to group these
+        obspack_ds_grouped = obspack_ds.groupby(height_var)
+        num_groups = len(obspack_ds_grouped.groups)
+
+        # For each group standardise and store with id based on species and inlet height
+        for ht, obspack_ds_ht in obspack_ds_grouped:
+
+            # Creating id keys of the form "<species>_<inlet>" e.g. "ch4_40m" or "co_12.5m"
+            inlet_str = _format_inlet(ht)
+            inlet_num_str = inlet_str.strip("m")
+
+            if num_groups > 1:
+                id_key = f"{species}_{inlet_str}"
+            else:
+                id_key = f"{species}"
+
+            # Extract wanted variables and convert to standardised names
+            standarised_ds = _standarise_variables(obspack_ds_ht, species)
+
+            gas_data[id_key] = {}
+            gas_data[id_key]["data"] = standarised_ds
+
+            # Add inlet details to attributes and metadata
+            attrs_copy = attributes.copy()
+            meta_copy = metadata.copy()
+
+            attrs_copy["inlet"] = inlet_str
+            attrs_copy["inlet_height_magl"] = inlet_num_str
+            meta_copy["inlet"] = inlet_str
+            meta_copy["inlet_height_magl"] = inlet_num_str
+
+            gas_data[id_key]["metadata"] = meta_copy
+            gas_data[id_key]["attributes"] = attrs_copy
+
+    else:
+        try:
+            inlet_value = orig_attrs["dataset_intake_ht"]
+        except KeyError:
+            inlet_from_file = None
+        else:
+            inlet_from_file = _format_inlet(inlet_value)
+
+        if measurement_type == "flask":
+            inlet_from_file = "flask"
+
+        # Check inlet from file against any provided inlet
+        if inlet is None and inlet_from_file:
+            inlet = inlet_from_file
+        elif inlet is not None and inlet_from_file:
+            if inlet != inlet_from_file:
+                print(f"WARNING: Provided inlet {inlet} does not match inlet derived from the input file: {inlet_from_file}")
+        else:
+            raise ValueError("Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass 'flask' as inlet.")
+
+        id_key = f"{species}"
+
+        if inlet != "flask":
+            inlet_num_str = inlet.strip("m")
+        else:
+            inlet_num_str = ""
+
+        metadata["inlet"] = inlet
+        metadata["inlet_height_magl"] = inlet_num_str
+        attributes["inlet"] = inlet
+        attributes["inlet_height_magl"] = inlet_num_str
+
+        standardised_ds = _standarise_variables(obspack_ds, species)
+
+        gas_data[id_key] = {"data": standardised_ds, "metadata": metadata, "attributes": attributes}
+
+    return gas_data
 
 
 def _read_obspack(
@@ -109,6 +339,10 @@ def _read_obspack(
     time_unique = time.drop_duplicates(dim="time", keep="first")
     obs_unique = time_unique.obs
 
+    # Use these obs values to filter the original dataset to remove any repeated times
+    processed_ds = obspack_ds.sel(obs=obs_unique)
+    processed_ds = processed_ds.set_coords(["time"])
+
     # Estimate sampling period using metadata and midpoint time
     if sampling_period == "NOT_SET":
         sampling_period_estimate = _estimate_sampling_period(obspack_ds)
@@ -118,53 +352,9 @@ def _read_obspack(
     species = clean_string(obspack_ds.attrs["dataset_parameter"])
     network = "NOAA"
 
-    # If inlet is not defined try and derive this from the attribute data
-    if inlet is None:
-        if "dataset_intake_ht" in orig_attrs:
-            # Inlet height attribute will be a float stored as a string e.g. 40.0
-            inlet_value = orig_attrs["dataset_intake_ht"]
-            inlet_value_num = float(inlet_value)
-            # Include 0 decimal places if remainder is 0, 1 d.p. otherwise
-            if inlet_value_num % 1 == 0:
-                inlet = f"{inlet_value_num:.0f}m"
-            else:
-                inlet = f"{inlet_value_num:.1f}m"   
-        elif measurement_type == "flask":
-            inlet = "flask"
-        else:
-            raise ValueError("Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass 'flask' as inlet.")
-
-    # Use these obs values to filter the original dataset to remove any repeated times
-    processed_ds = obspack_ds.sel(obs=obs_unique)
-    processed_ds = processed_ds.set_coords(["time"])
-
-    # Rename variables to match our internal standard
-    # "value_std_dev" --> f"{species}_variability"
-    # "value_unc" --> ??
-    # TODO: Clarify what "value_unc" should be renamed to
-
-    variable_names = {
-        "value": species,
-        "value_std_dev": f"{species}_variability",
-        "value_unc": f"{species}_variability",  # May need to be updated
-        "nvalue": f"{species}_number_of_observations"}
-
-    to_extract = [name for name in variable_names.keys() if name in processed_ds]
-    name_dict = {name: key for name, key in variable_names.items() if name in to_extract}
-
-    if not to_extract:
-        wanted = variable_names.keys()
-        raise ValueError(
-            f"No valid data columns found in converted DataFrame. We expect the following data variables in the passed NetCDF: {wanted}"
-        )
-
-    processed_ds = processed_ds[to_extract]
-    processed_ds = processed_ds.rename(name_dict)
-    processed_ds = processed_ds.sortby("time")
-
     try:
         # Extract units attribute from value data variable
-        units = processed_ds[species].units
+        units = processed_ds["value"].units
     except (KeyError, AttributeError):
         print("Unable to extract units from 'value' within input dataset")
     else:
@@ -174,7 +364,7 @@ def _read_obspack(
             units = "1e-3"
         elif units == "micromol mol-1":
             units = "1e-6"
-        elif units == "nmol mol-1":
+        elif units in ["nmol mol-1", "nanomol mol-1"]:
             units = "1e-9"
         elif units == "pmol mol-1":
             units = "1e-12"
@@ -184,36 +374,48 @@ def _read_obspack(
 
     metadata = {}
     metadata["site"] = site
-    metadata["inlet"] = inlet
     metadata["network"] = network
     metadata["measurement_type"] = measurement_type
     metadata["species"] = species
     metadata["units"] = units
     metadata["sampling_period"] = sampling_period
 
-    if instrument is not None:
-        metadata["instrument"] = instrument
-    else:
-        try:
-            metadata["instrument"] = obspack_ds.attrs["instrument"]
-        except KeyError:
-            pass
-
+    # Add additional sampling_period_estimate if sampling_period is not set
     if sampling_period_estimate >= 0.0:
         metadata["sampling_period_estimate"] = str(sampling_period_estimate)  # convert to string to keep consistent with "sampling_period"
 
-    # TODO: At the moment all attributes from the NOAA ObsPack are being copied
-    # plus any variables we're adding.
-    # - decide if we want to reduce this
-    attributes = obspack_ds.attrs
-    attributes["sampling_period"] = sampling_period
-    if sampling_period_estimate >= 0.0:
-        attributes["sampling_period_estimate"] = str(sampling_period_estimate)
+    # Add instrument if present
+    if instrument is not None:
+        metadata["instrument"] = instrument
+    else:
+        metadata["instrument"] = orig_attrs.get("instrument", "NOT_SET")
 
-    gas_data = {species:
-        {"data": processed_ds,
-        "metadata": metadata,
-        "attributes": attributes}}
+    # Add data owner details, station position and calibration scale, if present
+    metadata["data_owner"] = orig_attrs.get("provider_1_name", "NOT_SET")
+    metadata["data_owner_email"] = orig_attrs.get("provider_1_email", "NOT_SET")
+    metadata["station_longitude"] = orig_attrs.get("site_longitude", "NOT_SET")
+    metadata["station_latitude"] = orig_attrs.get("site_latitude", "NOT_SET")
+    metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", "NOT_SET")
+
+    # Create attributes with copy of metadata values
+    attributes = metadata.copy()
+
+    # TODO: At the moment all attributes from the NOAA ObsPack are being copied
+    # plus any variables we're adding - decide if we want to reduce this
+    attributes.update(orig_attrs)
+
+    # expected_keys = {
+    #     "site",
+    #     "species",
+    #     "inlet",
+    #     "instrument",
+    #     "sampling_period",
+    #     "calibration_scale",
+    #     "station_longitude",
+    #     "station_latitude",
+    # }
+
+    gas_data = _split_inlets(processed_ds, attributes, metadata, inlet=inlet)
 
     gas_data = assign_attributes(data=gas_data,
         site=site,
@@ -245,7 +447,6 @@ def _read_raw_file(
         list: UUIDs of Datasources data has been assigned to
     """
     from openghg.standardise.meta import assign_attributes
-    from pathlib import Path
 
     # TODO: Added this for now to make sure inlet is specified but may be able to remove
     # if this can be derived from the data format.

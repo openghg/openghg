@@ -28,10 +28,10 @@ def assign_attributes(
         species = gas_data["metadata"]["species"]
 
         units = gas_data.get("metadata", {}).get("units")
-        scale = gas_data.get("metadata", {}).get("scale")
+        scale = gas_data.get("metadata", {}).get("calibration_scale")
 
         if sampling_period is None:
-            sampling_period = str(gas_data.get("metadata", {}).get("sampling_period"))
+            sampling_period = str(gas_data.get("metadata", {}).get("sampling_period", "NOT_SET"))
 
         gas_data["data"] = get_attributes(
             ds=gas_data["data"],
@@ -111,7 +111,7 @@ def get_attributes(
     if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
 
-    # Current CF Conventions (v1.7) demand that valid variable names
+    # Current CF Conventions (v1.8) demand that valid variable names
     # begin with a letter and be composed of letters, digits and underscores
     # Here variable names are also made lowercase to enable easier matching below
 
@@ -172,6 +172,12 @@ def get_attributes(
         global_attributes["calibration_scale"] = "unknown"
     else:
         global_attributes["calibration_scale"] = scale
+
+    if sampling_period is None:
+        global_attributes["sampling_period"] = "NOT_SET"
+    else:
+        global_attributes["sampling_period"] = sampling_period
+        global_attributes["sampling_period_unit"] = "s"
 
     # Update the Dataset attributes
     ds.attrs.update(global_attributes)  # type: ignore
