@@ -60,6 +60,9 @@ import tempfile
 
 tmp_dir = tempfile.TemporaryDirectory()
 os.environ["OPENGHG_PATH"] = tmp_dir.name   # temporary directory
+
+%load_ext autoreload
+%autoreload 2
 ```
 
 When creating your own longer term object store we recommend a path such as ``~/openghg_store`` which will create the object store in your home directory in a directory called ``openghg_store``. If you want this to be a permanent location this can be added to your "~/.bashrc" or "~/.bash_profile" file depending on the system being used. e.g. as
@@ -93,33 +96,33 @@ summary = summary_data_types()
 summary
 ```
 
-Note: there may be multiple data types applicable for a give site. This is can be dependent on various factors including the instrument type used to measure the data e.g. for Bilsdale ("BSD"):
+Note: there may be multiple data types applicable for a give site. This is can be dependent on various factors including the instrument type used to measure the data e.g. for Tacolneston ("TAC"):
 
 ```{code-cell} ipython3
-summary[summary["Site code"] == "BSD"]
+summary[summary["Site code"] == "TAC"]
 ```
 
 ### DECC network
 
-We will start by adding data to the object store from a surface site within the DECC network. Here we have accessed a subset of data from the Bilsdale site (site code "BSD") in the UK.
+We will start by adding data to the object store from a surface site within the DECC network. Here we have accessed a subset of data from the Tacolneston site (site code "TAC") in the UK.
 
 ```{code-cell} ipython3
-bsd_filepaths = ["../data/DECC/bsd.picarro.1minute.42m.min.dat", 
-                 "../data/DECC/bsd.picarro.1minute.108m.min.dat", 
-                 "../data/DECC/bsd.picarro.1minute.248m.min.dat"]
+from openghg.util import retrieve_example_data
+
+tac_data = retrieve_example_data(path="timeseries/tac_example.tar.gz")
 ```
 
 As this data is measured in-situ, this is classed as a surface site and we need to use the `ObsSurface` class to interpret this data. We can pass our list of files to the `read_file` method associated within the `ObsSurface` class, also providing details on:
- - site code - `"BSD"` for Billsdale
+ - site code - `"TAC"` for Billsdale
  - type of data we want to process, known as the data type - `"CRDS"`
  - network - `"DECC"`
 
 This is shown below:
 
 ```{code-cell} ipython3
-from openghg.store import ObsSurface
+from openghg.client import process_files
 
-decc_results = ObsSurface.read_file(filepath=bsd_filepaths, data_type="CRDS", site="bsd", network="DECC")
+decc_results = process_files(files=tac_data, data_type="CRDS", site="TAC", network="DECC")
 ```
 
 ```{code-cell} ipython3
@@ -138,19 +141,30 @@ Another data type which can be added is data from the AGAGE network. The functio
 
 +++
 
+We can now retrieve the example data for Capegrim as we did above
+
+```{code-cell} ipython3
+capegrim_data = retrieve_example_data(path="timeseries/capegrim_example.tar.gz")
+```
+
+```{code-cell} ipython3
+capegrim_data
+```
+
 We must create a `tuple` associated with each data file to link this to a precision file:
 
 ```python
 list_of_tuples = [(data1_filepath, precision1_filepath), (data2_filepath, precision2_filepath), ...]
 ```
 
-+++
+```{code-cell} ipython3
+capegrim_data.sort()
+capegrim_tuple = (capegrim_data[0], capegrim_data[1])
+```
 
 The data being uploaded here is from the Cape Grim station in Australia, site code "CGO".
 
-```{code-cell} ipython3
-agage_tuples = [('../data/AGAGE/capegrim-medusa.18.C', '../data/AGAGE/capegrim-medusa.18.precisions.C')]
-```
++++
 
 We can add these files to the object store in the same way as the DECC data by including the right keywords:
  - site code - `"CGO"` for Cape Grim
@@ -158,9 +172,8 @@ We can add these files to the object store in the same way as the DECC data by i
  - network - `"AGAGE"`
 
 ```{code-cell} ipython3
-from openghg.store import ObsSurface
-
-agage_results = ObsSurface.read_file(filepath=agage_tuples, data_type="GCWERKS", site="CGO", network="AGAGE")
+agage_results = process_files(files=capegrim_tuple, data_type="GCWERKS", site="CGO", 
+                              network="AGAGE", instrument="medusa")
 ```
 
 When viewing `agage_results` there will be a large number of Datasource UUIDs shown due to the large number of gases in each data file
@@ -212,14 +225,15 @@ We can search the object store by property using the `search(...)` function.
 For example we can find all sites which have measurements for carbon tetrafluoride ("cf4") using the `species` keyword:
 
 ```{code-cell} ipython3
-from openghg.retrieve import search
-search(species="cf4")
+from openghg.client import search
+
+search(species="cfc11")
 ```
 
 We could also look for details of all the data measured at the Billsdale ("BSD") site using the `site` keyword:
 
 ```{code-cell} ipython3
-search(site="bsd")
+search(site="tac")
 ```
 
 For this site you can see this contains details of each of the species as well as the inlet heights these were measured at.
@@ -234,12 +248,12 @@ To retrieve the standardised data from the object store there are several functi
 
 To access the surface data we have added so far we can use the `get_obs_surface` function and pass keywords for the site code, species and inlet height to retrieve our data.
 
-In this case we want to extract the carbon monoxide ("co") data from the Bilsdale data ("BSD") site measured at the "248m" inlet:
+In this case we want to extract the carbon dioxide ("co2") data from the Tacolneston data ("TAC") site measured at the "185m" inlet:
 
 ```{code-cell} ipython3
-from openghg.retrieve import get_obs_surface
+from openghg.client import get_obs_surface
 
-obs_data = get_obs_surface(site="bsd", species="co", inlet="248m")
+co2_data = get_obs_surface(site="tac", species="co2", inlet="185m")
 ```
 
 If we view our returned `obs_data` variable this will contain:
@@ -248,22 +262,18 @@ If we view our returned `obs_data` variable this will contain:
  - `metadata` - The associated metadata (accessed using e.g. `obs_data.metadata`).
 
 ```{code-cell} ipython3
-obs_data
+co2_data
 ```
 
-First we tell `matplotlib` that we are plotting inside a Jupyter notebook, this ensures a plot with controls is created.
+We can now make a simple plot using the `plot_timeseries` method of the `ObsData` object.
+
+> **_NOTE:_**  the plot created below may not show up on the online documentation version of this notebook.
 
 ```{code-cell} ipython3
-%matplotlib notebook
+co2_data.plot_timeseries()
 ```
 
-```{code-cell} ipython3
-example_data = obs_data.data
-mol_frac = example_data.mf
-mol_frac.plot()
-```
-
----
+You can also pass any of `title`, `xlabel`, `ylabel` and `units` to the `plot_timeseries` function to modify the labels.
 
 +++
 
