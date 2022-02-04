@@ -1,9 +1,9 @@
 import sys
 import os
 
-cloud_env = os.environ.get("OPENGHG_CLOUD")
+cloud_env = os.environ.get("OPENGHG_CLOUD", False)
 
-if cloud_env is not None:
+if cloud_env:
     from ._openghg_objstore import (
         delete_object,
         exists,

@@ -72,8 +72,8 @@ def parse_gcwerks(
         dict: Dictionary of source_name : UUIDs
     """
     from pathlib import Path
-    from openghg.retrieve import assign_attributes
-    from openghg.util import valid_site, clean_string, load_json
+    from openghg.standardise.meta import assign_attributes
+    from openghg.util import clean_string, load_json
 
     data_filepath = Path(data_filepath)
     precision_filepath = Path(precision_filepath)
@@ -83,7 +83,6 @@ def parse_gcwerks(
     gcwerks_data = load_json(filename="process_gcwerks_parameters.json")
     gc_params = gcwerks_data["GCWERKS"]
 
-    site = clean_string(site)
     network = clean_string(network)
     # We don't currently do anything with inlet here as it's always read from data
     # or taken from process_gcwerks_parameters.json
@@ -91,9 +90,6 @@ def parse_gcwerks(
         inlet = clean_string(inlet)
     if instrument is not None:
         instrument = clean_string(instrument)
-
-    if not valid_site(site):
-        raise ValueError(f"Invalid site {site} passed.")
 
     # Check if the site code passed matches that read from the filename
     site = _check_site(
@@ -224,6 +220,7 @@ def _read_data(
     from datetime import datetime
     from pandas import read_csv
     from pandas import Timedelta as pd_Timedelta
+    import warnings
 
     # Read header
     header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
@@ -283,9 +280,12 @@ def _read_data(
             gas_name = data.columns[col_loc - 1]
             # Add it to the dictionary for renaming later
             columns_renamed[column] = gas_name + "_flag"
-            # Create 2 new columns based on the flag columns
-            data[gas_name + " status_flag"] = (data[column].str[0] != "-").astype(int)
-            data[gas_name + " integration_flag"] = (data[column].str[1] != "-").astype(int)
+
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                # Create 2 new columns based on the flag columns
+                data[gas_name + " status_flag"] = (data[column].str[0] != "-").astype(int)
+                data[gas_name + " integration_flag"] = (data[column].str[1] != "-").astype(int)
 
             col_shift = 4
             units[gas_name] = header.iloc[1, col_loc + col_shift]

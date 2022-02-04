@@ -3,7 +3,7 @@
 
 """
 
-from typing import DefaultDict, Dict, Union
+from typing import Dict, Union
 
 __all__ = ["search"]
 
@@ -33,7 +33,6 @@ def search(**kwargs):  # type: ignore
         dict: List of keys of Datasources matching the search parameters
     """
     from addict import Dict as aDict
-    from collections import defaultdict
     from copy import deepcopy
     from itertools import chain as iter_chain
 
@@ -48,6 +47,7 @@ def search(**kwargs):  # type: ignore
         closest_daterange,
         find_daterange_gaps,
         split_daterange_str,
+        load_json,
     )
     from openghg.dataobjects import SearchResults
 
@@ -81,6 +81,30 @@ def search(**kwargs):  # type: ignore
     # As we might have kwargs that are None we want to get rid of those
     search_kwargs = {k: clean_string(v) for k, v in kwargs_copy.items() if v is not None}
 
+    # Speices translation
+
+    species = search_kwargs.get("species")
+
+    if species is not None:
+        if not isinstance(species, list):
+            species = [species]
+
+        translator = load_json("species_translator.json")
+
+        updated_species = []
+
+        for s in species:
+            updated_species.append(s)
+
+            try:
+                translated = translator[s]
+            except KeyError:
+                pass
+            else:
+                updated_species.extend(translated)
+
+        search_kwargs["species"] = updated_species
+
     data_type = search_kwargs.get("data_type", "timeseries")
 
     valid_data_types = ("timeseries", "footprints", "emissions", "eulerian_model")
@@ -105,7 +129,7 @@ def search(**kwargs):  # type: ignore
     # For the time being this will return a dict until we know how best to represent
     # the footprints and emissions results in a SearchResult object
     if data_type in {"emissions", "footprints", "eulerian_model"}:
-        sources: DefaultDict[str, Dict] = defaultdict(dict)
+        sources: Dict = aDict()
         for datasource in datasources:
             if datasource.search_metadata(**search_kwargs):
                 uid = datasource.uuid()

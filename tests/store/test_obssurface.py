@@ -5,7 +5,7 @@ from openghg.store.base import Datasource
 from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket, exists
 from openghg.util import create_daterange_str
-from helpers import get_datapath
+from helpers import get_datapath, attributes_checker_obssurface
 
 
 def test_read_CRDS():
@@ -173,32 +173,9 @@ def test_read_GC():
 
     assert sorted(obs._datasource_uuids.values()) == expected_keys
 
-    del hfc152a_data.attrs["File created"]
+    attrs = hfc152a_data.attrs
 
-    assert hfc152a_data.attrs == {
-        "data_owner": "Paul Krummel",
-        "data_owner_email": "paul.krummel@csiro.au",
-        "inlet_height_magl": "70m",
-        "comment": "Medusa measurements. Output from GCWerks. See Miller et al. (2008).",
-        "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "Source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
-        "Processed by": "OpenGHG_Cloud",
-        "species": "hfc152a",
-        "species_alt": "HFC-152a",
-        "Calibration_scale": "SIO-05",
-        "station_longitude": 144.689,
-        "station_latitude": -40.683,
-        "station_long_name": "Cape Grim, Tasmania",
-        "station_height_masl": 94.0,
-        "instrument": "medusa",
-        "site": "cgo",
-        "network": "agage",
-        "units": "ppt",
-        "scale": "SIO-05",
-        "inlet": "70m",
-        "sampling_period": "1200",
-    }
+    assert attributes_checker_obssurface(attrs=attrs, species="hfc152a")
 
     # # Now test that if we add more data it adds it to the same Datasource
     uuid_one = obs.datasources()[0]
@@ -353,9 +330,10 @@ def test_read_noaa_obspack():
     data = ch4_data["1998-01-01-23:10:00+00:00_1998-12-31-19:50:00+00:00"]
 
     assert data.time[0] == Timestamp("1998-01-01T23:10:00")
-    assert data["value"][0] == pytest.approx(1.83337e-06)
-    assert data["nvalue"][0] == 2.0
-    assert data["value_std_dev"][0] == pytest.approx(2.093036e-09)
+    assert data["ch4"][0] == pytest.approx(1.83337e-06)
+    assert data["ch4_number_of_observations"][0] == 2.0
+    assert data["ch4_variability"][0] == pytest.approx(2.093036e-09)
+
 
 
 def test_read_thames_barrier():

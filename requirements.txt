@@ -2,7 +2,6 @@ Acquire @ git+https://github.com/openghg/acquire@devel#egg=Acquire
 addict
 cdsapi
 dask
-# cfchecker @ git+git://github.com/gareth-j/cf-checker@removeBasestring#egg=cfchecker
 lazy_import
 matplotlib
 netcdf4
@@ -11,7 +10,9 @@ numpy
 nc-time-axis
 pandas
 paramiko
+plotly
 pyvis
+rapidfuzz
 requests >= 2.25
 scipy
 tqdm

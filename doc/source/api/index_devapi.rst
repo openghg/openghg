@@ -7,8 +7,62 @@ without warning due to the early stages of development of the project.
 
 .. warning:: Normal users should not use any of the functions shown here directly as they may be removed or their functionality may change.
 
-modules
+Standardisation
+===============
+
+Surface measurements
+^^^^^^^^^^^^^^^^^^^^
+
+These functions take surface measurement data and standardise it for storage in the object store. They ensure the correct metadata and attributes
+are recorded with the data, and that the data is `CF compliant <https://cfconventions.org/>`__. They are called by the ``ObsSurface`` class.
+
+:func:`~openghg.standardise.surface.parse_aqmesh`
+    For processing data from the AQMesh network
+:func:`~openghg.standardise.surface.parse_beaco2n`
+    For processing data from the BEACO2N network
+:func:`~openghg.standardise.surface.parse_btt`
+    For processing data from the BT Tower site
+:func:`~openghg.standardise.surface.parse_cranfield`
+    For processing data from Cranfield
+:func:`~openghg.standardise.surface.parse_crds`
+    For processing data from CRDS (cavity ring-down spectroscopy) data from the DECC network.
+:func:`~openghg.standardise.surface.parse_eurocom`
+    For processing data from the EUROCOM network
+:func:`~openghg.standardise.surface.parse_gcwerks`
+    For processing data in the form expected by the GCWERKS package
+:func:`~openghg.standardise.surface.parse_noaa`
+    For processing data from the NOAA network
+:func:`~openghg.standardise.surface.parse_npl`
+    For processing data from NPL
+:func:`~openghg.standardise.surface.parse_tmb`
+    For processing data from the Thames Barrier site
+
+Metadata handling
+^^^^^^^^^^^^^^^^^
+
+These handle the assignment and standardisation of meta`data`.
+
+Attributes
+**********
+
+Ensuring the NetCDF created during standardisation has the correct attributes assigned to it.
+
+:func:`~openghg.standardise.meta.assign_attributes`
+    Assign attributes to a number of datasets.
+    
+:func:`~openghg.standardise.meta.get_attributes`
+    Assign attributes to a single dataset, called by the above.
+
+Metadata sync
+*************
+
+:func:`~openghg.standardise.meta.surface_standardise`
+    Ensure the required metadata is shared between the metadata and attributes.
+
+Storage
 =======
+
+These functions and classes handle the lower level storage and retrieval of data from the object store.
 
 Base class
 ^^^^^^^^^^
@@ -16,28 +70,8 @@ Base class
 This provides the functionality required by all data storage and processing classes, namely the saving, retrieval and loading
 of data from the object store.
 
-:class:`~openghg.modules.BaseStore`
+:class:`~openghg.store.base.BaseStore`
     Base class which the other core processing modules inherit
-
-Data processing
-^^^^^^^^^^^^^^^
-
-These classes are used for the processing of data by the ``ObsSurface`` processing class. 
-
-:class:`~openghg.modules.CRANFIELD`
-    For processing data from Cranfield
-:class:`~openghg.modules.CRDS`
-    For processing data from CRDS (cavity ring-down spectroscopy) data from the DECC network.
-:class:`~openghg.modules.EUROCOM`
-    For processing data from the EUROCOM network
-:class:`~openghg.modules.GCWERKS`
-    For processing data in the form expected by the GCWERKS package
-:class:`~openghg.modules.ICOS`
-    For processing data from the ICOS network
-:class:`~openghg.modules.NOAA`
-    For processing data from the NOAA network
-:class:`~openghg.modules.THAMESBARRIER`
-    For processing data from the Thames Barrier measurement sites
 
 Datasource
 ^^^^^^^^^^
@@ -46,11 +80,102 @@ The Datasource is the smallest data provider within the OpenGHG topology. A Data
 measuring a specific gas at a specific height at a specific site. For an instrument measuring three gas species at an inlet height of 100m
 at a site we would have three Datasources.
 
-:class:`~openghg.modules.Datasource`
+:class:`~openghg.store.base.Datasource`
     Handles the storage of data, metadata and version information for measurements
 
+Emissions
+^^^^^^^^^
 
-objectstore
+Handles the storage of emissions data.
+:class:`~openghg.dataobjects.Emissions`
+
+EulerianModel
+^^^^^^^^^^^^^
+
+Handles the storage of Eulerian model data.
+
+:class:`~openghg.store.EulerianModel`
+
+METStore
+^^^^^^^^^
+
+Handles the storage of met data from the ECMWF data.
+
+:class:`~openghg.store.METStore`
+
+Footprints
+^^^^^^^^^^
+
+Handles the storage of footprints / flux data.
+
+:class:`~openghg.store.Footprints`
+
+ObsSurface
+^^^^^^^^^^
+
+Handles the storage of surface measurement data.
+
+:class:`~openghg.store.ObsSurface`
+
+Dataclasses
+===========
+
+These dataclasses are used to facilitate the simple packaging and retrieval of data from the object store.
+
+:class:`~openghg.dataobjects._BaseData`
+    The base class that (most of) the dataclasses inherit.
+
+:class:`~openghg.dataobjects.FluxData`
+    Stores flux data.
+
+:class:`~openghg.dataobjects.FootprintData`
+    Stores footprint data.
+
+:class:`~openghg.dataobjects.METData`
+    Stores meteorological data retrieved from the ECMWF / our local cache. 
+
+:class:`~openghg.dataobjects.ObsData`
+    Stores data returned by search functions.
+
+:class:`~openghg.dataobjects.RankSources`
+    Handles the ranking of datasources.
+
+:class:`~openghg.dataobjects.SearchResults`
+    Makes the retrieval of data simple.
+
+
+Retrieval functions
+===================
+
+These handle the retrieval of data from the object store.
+
+Searching
+^^^^^^^^^
+
+:func:`~openghg.retrieve.search`
+    Search for data in the object store, accepts any pair of keyword - argument pairs
+    
+    Example usage:
+
+        search(site="bsd", inlet="50m", species="co2", interesting_metadata="special_units")
+
+Specific retrieval
+^^^^^^^^^^^^^^^^^^
+
+Handle the retrieval of specific data types, some functions may try to mirror the interface of functions in the Bristol ACRG
+repository but should hopefully be useful to all users.
+
+:func:`~openghg.retrieve.get_obs_surface`
+    Get measurements from one site
+
+:func:`~openghg.retrieve.get_flux`
+    Reads in all flux files for the domain and species as an ``xarray`` Dataset
+
+:func:`~openghg.retrieve.get_footprint`
+    Gets footprints from one site
+
+
+Object Store
 ============
 
 These functions handle the storage of data in the object store, in JSON or binary format. Each object and piece of data in the
@@ -60,23 +185,44 @@ directory in the user's filesystem specific by the ``OPENGHG_PATH`` environment 
 
 :func:`~openghg.objectstore.delete_object`
     Delete an object in the store
+
 :func:`~openghg.objectstore.exists`
     Check if an object exists at that key
+
+:func:`~openghg.objectstore.get_abs_filepaths`
+    Get absolute filepaths for objects
+
 :func:`~openghg.objectstore.get_bucket`
     Get path to bucket
+
 :func:`~openghg.objectstore.get_local_bucket`
     Get path to local bucket
-:func:`~openghg.objectstore.get_object`
-    Get object at given key
-:func:`~openghg.objectstore.get_object_from_json`
-    Get object from JSON
-:func:`~openghg.objectstore.set_object_from_file`
-    Set data at a key from a given filepath
-:func:`~openghg.objectstore.set_object_from_json`
-    Set data at a key from JSON
 
-util
-====
+:func:`~openghg.objectstore.get_md5`
+    Get MD5 has of file
+
+:func:`~openghg.objectstore.get_md5_bytes`
+    Get MD5 hash of passed bytes
+
+:func:`~openghg.objectstore.get_object`
+    Retrieve object from object store
+
+:func:`~openghg.objectstore.get_object_from_json`
+    Retrieve JSON object from object store
+
+:func:`~openghg.objectstore.hash_files`
+    Get the MD5 hashes of the given files
+
+:func:`~openghg.objectstore.set_object_from_file`
+    Set an object in the object store
+
+:func:`~openghg.objectstore.set_object_from_json`
+    Create a JSON object in the object store
+
+
+
+Utility functions
+=================
 
 This module contains all the helper functions used throughout OpenGHG.
 
@@ -113,6 +259,9 @@ String cleaning and formatting functions
 
 :func:`~openghg.util.to_lowercase`
     Converts a string to lowercase
+
+:func:`~openghg.util.remove_punctuation`
+    Removes punctuation from a string
 
 Time
 ^^^^
@@ -196,8 +345,47 @@ Site Checks
 
 These perform checks to ensure data processed for each site is correct
 
-:func:`~openghg.util.valid_site`
-    Check if the passed site is a valid one
+:func:`~openghg.util.verify_site`
+    Verify that the given site is one we recognize, does fuzzy text matching to suggest a possible valid value.
 
 :func:`~openghg.util.multiple_inlets`
     Check if the passed site has more than one inlet
+
+
+Cloud
+^^^^^
+
+These handle cloud based functionality
+
+:func:`~openghg.util.running_in_cloud`
+    Checks if we're running in the cloud by checking for the ``OPENGHG_CLOUD`` environment variable.
+
+
+Custom Data Types
+=================
+
+Errors
+^^^^^^
+
+Customised errors for OpenGHG.
+
+:class:`~openghg.util.InvalidSiteError`
+    Raised if an invalid site is given
+
+:class:`~openghg.util.UnknownDataError`
+    Raised if we don't recognize the data passed
+
+:class:`~openghg.util.FunctionError`
+    Raised if there has been an error with a serverless function.
+
+Types
+^^^^^
+
+These are used in conjunction with ``mypy`` to make type hinting easier.
+
+:class:`~openghg.util.pathType`
+
+:class:`~openghg.util.multiPathType`
+
+:class:`~openghg.util.resultsType`
+

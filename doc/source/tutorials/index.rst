@@ -6,13 +6,33 @@ These tutorials will get you up and running with OpenGHG so you can process, ana
 or a local object store.
 
 
-Tutorial 1 - Beginner workflow
-------------------------------
+Tutorial 1 - Adding observation data
+------------------------------------
 
-This tutorial is an introduction to a beginner workflow of processing data, visualising the object store and retrieving and
-visualising data.
+This tutorial covers adding data to the object store using the standardisation functions.
 
 .. toctree::
    :maxdepth: 1
 
-   beginner_workflow/workflow
+   beginner_workflow/1_Adding_observation_data
+
+Tutorial 2 - Ranking observations
+---------------------------------
+
+This tutorial covers ranking the data available in the object store. This ensures users always find the correct data when using the search
+functions.
+
+.. toctree::
+   :maxdepth: 1
+
+   beginner_workflow/2_Ranking_for_observations
+
+Tutorial 3 - Plotting basics
+---------------------------------
+
+This tutorial covers making a simple timeseries plot of some CO2 data.
+
+.. toctree::
+   :maxdepth: 1
+
+   beginner_workflow/3_Plotting_basics

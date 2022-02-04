@@ -1,5 +1,7 @@
 import os
+import pytest
 from openghg import util
+from openghg.types import InvalidSiteError
 
 
 def test_read_header():
@@ -13,21 +15,36 @@ def test_read_header():
     assert len(header) == 7
 
 
-def test_valid_site():
+def test_verify_site():
     site = "BSD"
-    result = util.valid_site(site=site)
+    result = util.verify_site(site=site)
 
-    assert result is True
+    assert result == "bsd"
 
     site = "tac"
-    result = util.valid_site(site=site)
+    result = util.verify_site(site=site)
 
-    assert result is True
+    assert result == "tac"
 
-    site = "Dover"
-    result = util.valid_site(site=site)
+    site = "tacolneston"
+    result = util.verify_site(site=site)
 
-    assert result is False
+    assert result == "tac"
+
+    site = "atlantis"
+
+    with pytest.raises(InvalidSiteError):
+        result = util.verify_site(site=site)
+
+    site = "cape"
+
+    with pytest.raises(InvalidSiteError):
+        result = util.verify_site(site=site)
+
+    site = "india"
+
+    with pytest.raises(InvalidSiteError):
+        result = util.verify_site(site=site)
 
 
 def test_to_lowercase():

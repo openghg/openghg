@@ -48,7 +48,7 @@ class ObsSurface(BaseStore):
         from pandas import Timedelta
         import sys
         from tqdm import tqdm
-        from openghg.util import load_surface_parser, hash_file, clean_string
+        from openghg.util import load_surface_parser, hash_file, clean_string, verify_site
         from openghg.types import SurfaceTypes
         from openghg.store import assign_data
 
@@ -63,7 +63,8 @@ class ObsSurface(BaseStore):
         # Test that the passed values are valid
         # Check validity of site, instrument, inlet etc in acrg_site_info.json
         # Clean the strings
-        site = clean_string(site)
+        site = verify_site(site=site)
+
         network = clean_string(network)
         inlet = clean_string(inlet)
         instrument = clean_string(instrument)

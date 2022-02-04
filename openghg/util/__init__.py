@@ -4,13 +4,14 @@
 
 from ._util import (
     unanimous,
-    valid_site,
+    verify_site,
     pairwise,
     multiple_inlets,
+    running_in_cloud
 )
 
 from ._hashing import hash_string, hash_file
-from ._strings import clean_string, to_lowercase
+from ._strings import clean_string, to_lowercase, remove_punctuation
 
 from ._time import (
     timestamp_tzaware,
@@ -34,7 +35,7 @@ from ._time import (
     check_date,
 )
 
-from ._errors import InvalidSiteError, UnknownDataError, FunctionError
-from ._tutorial import bilsdale_datapaths
+
+from ._tutorial import bilsdale_datapaths, retrieve_example_data
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import get_datapath, load_json, load_surface_parser, read_header

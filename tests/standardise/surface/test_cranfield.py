@@ -1,9 +1,10 @@
 import pytest
 
 from openghg.standardise.surface import parse_cranfield
-from helpers import get_datapath
+from helpers import get_datapath, parsed_surface_metachecker, check_cf_compliance
 
 
+@pytest.mark.xfail(reason="Bug: No attributes for Cranfield - see #201")
 def test_read_file():
     filepath = get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")
     data = parse_cranfield(data_filepath=filepath, sampling_period="1200")
@@ -14,6 +15,8 @@ def test_read_file():
     co2_data = data["co2"]["data"]
     co_data = data["co"]["data"]
 
+    assert check_cf_compliance(dataset=co2_data)
+
     assert ch4_data["ch4"][0] == pytest.approx(2585.6510)
     assert ch4_data["ch4 variability"][0] == pytest.approx(75.502187065)
 
@@ -23,32 +26,34 @@ def test_read_file():
     assert co2_data["co2"][0] == pytest.approx(460.573223)
     assert co2_data["co2 variability"][0] == pytest.approx(0.226956417)
 
-    assert data["co"]["metadata"] == {
-        "site": "THB",
-        "instrument": "CRDS",
-        "sampling_period": "1200",
-        "height": "10magl",
-        "species": "co",
-        "inlet": "10magl",
-        "network": "CRANFIELD",
-    }
+    parsed_surface_metachecker(data=data)
 
-    assert data["co2"]["metadata"] == {
-        "site": "THB",
-        "instrument": "CRDS",
-        "sampling_period": "1200",
-        "height": "10magl",
-        "species": "co2",
-        "inlet": "10magl",
-        "network": "CRANFIELD",
-    }
+    # assert data["co"]["metadata"] == {
+    #     "site": "THB",
+    #     "instrument": "CRDS",
+    #     "sampling_period": "1200",
+    #     "height": "10magl",
+    #     "species": "co",
+    #     "inlet": "10magl",
+    #     "network": "CRANFIELD",
+    # }
 
-    assert data["ch4"]["metadata"] == {
-        "site": "THB",
-        "instrument": "CRDS",
-        "sampling_period": "1200",
-        "height": "10magl",
-        "species": "ch4",
-        "inlet": "10magl",
-        "network": "CRANFIELD",
-    }
+    # assert data["co2"]["metadata"] == {
+    #     "site": "THB",
+    #     "instrument": "CRDS",
+    #     "sampling_period": "1200",
+    #     "height": "10magl",
+    #     "species": "co2",
+    #     "inlet": "10magl",
+    #     "network": "CRANFIELD",
+    # }
+
+    # assert data["ch4"]["metadata"] == {
+    #     "site": "THB",
+    #     "instrument": "CRDS",
+    #     "sampling_period": "1200",
+    #     "height": "10magl",
+    #     "species": "ch4",
+    #     "inlet": "10magl",
+    #     "network": "CRANFIELD",
+    # }

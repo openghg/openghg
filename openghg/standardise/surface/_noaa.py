@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
+from xarray import Dataset
 
 
 def parse_noaa(
     data_filepath: Union[str, Path],
     site: str,
-    inlet: str,
     measurement_type: str,
+    inlet: Optional[str] = None,
     network: str = "NOAA",
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
@@ -25,9 +26,6 @@ def parse_noaa(
         dict: Dictionary of data and metadata
     """
     from pathlib import Path
-
-    if inlet is None:
-        raise ValueError("Inlet must be given for NOAA data retrieve. If flask data pass flask as inlet.")
 
     if sampling_period is None:
         sampling_period = "NOT_SET"
@@ -59,9 +57,9 @@ def parse_noaa(
 def _read_obspack(
     data_filepath: Union[str, Path],
     site: str,
-    inlet: str,
     sampling_period: str,
     measurement_type: str,
+    inlet: Optional[str] = None,
     instrument: Optional[str] = None,
 ) -> Dict[str, Dict]:
     """Read NOAA ObsPack NetCDF files
@@ -69,15 +67,17 @@ def _read_obspack(
     Args:
         data_filepath: Path to file
         site: Three letter site code
-        inlet: Inlet height, if no height use measurement type e.g. flask
-        measurement_type: One of flask, insity or pfp
-        instrument: Instrument name
         sampling_period: Sampling period
+        measurement_type: One of flask, insitu or pfp
+        inlet: Inlet height, if no height use measurement type e.g. flask
+        instrument: Instrument name
+
     Returns:
         dict: Dictionary of results
     """
     import xarray as xr
     from openghg.util import clean_string
+    from openghg.standardise.meta import assign_attributes
 
     valid_types = ("flask", "insitu", "pfp")
 
@@ -85,7 +85,7 @@ def _read_obspack(
         raise ValueError(f"measurement_type must be one of {valid_types}")
 
     obspack_ds = xr.open_dataset(data_filepath)
-    # orig_attrs = obspack_ds.attrs
+    orig_attrs = obspack_ds.attrs
 
     # Want to find and drop any duplicate time values for the original dataset
     # Using xarray directly we have to do in a slightly convoluted way as this is not well built
@@ -105,34 +105,66 @@ def _read_obspack(
     time = time.assign_coords(time=time)
 
     # Drop any duplicate time values and extract the associated "obs" values
+    # TODO: Work out what to do with duplicates - may be genuine multiple measurements
     time_unique = time.drop_duplicates(dim="time", keep="first")
     obs_unique = time_unique.obs
+
+    # Estimate sampling period using metadata and midpoint time
+    if sampling_period == "NOT_SET":
+        sampling_period_estimate = _estimate_sampling_period(obspack_ds)
+    else:
+        sampling_period_estimate = -1.0
+
+    species = clean_string(obspack_ds.attrs["dataset_parameter"])
+    network = "NOAA"
+
+    # If inlet is not defined try and derive this from the attribute data
+    if inlet is None:
+        if "dataset_intake_ht" in orig_attrs:
+            # Inlet height attribute will be a float stored as a string e.g. 40.0
+            inlet_value = orig_attrs["dataset_intake_ht"]
+            inlet_value_num = float(inlet_value)
+            # Include 0 decimal places if remainder is 0, 1 d.p. otherwise
+            if inlet_value_num % 1 == 0:
+                inlet = f"{inlet_value_num:.0f}m"
+            else:
+                inlet = f"{inlet_value_num:.1f}m"   
+        elif measurement_type == "flask":
+            inlet = "flask"
+        else:
+            raise ValueError("Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass 'flask' as inlet.")
 
     # Use these obs values to filter the original dataset to remove any repeated times
     processed_ds = obspack_ds.sel(obs=obs_unique)
     processed_ds = processed_ds.set_coords(["time"])
 
-    wanted = ["value", "value_unc", "nvalue", "value_std_dev"]
-    to_extract = [x for x in wanted if x in processed_ds]
+    # Rename variables to match our internal standard
+    # "value_std_dev" --> f"{species}_variability"
+    # "value_unc" --> ??
+    # TODO: Clarify what "value_unc" should be renamed to
+
+    variable_names = {
+        "value": species,
+        "value_std_dev": f"{species}_variability",
+        "value_unc": f"{species}_variability",  # May need to be updated
+        "nvalue": f"{species}_number_of_observations"}
+
+    to_extract = [name for name in variable_names.keys() if name in processed_ds]
+    name_dict = {name: key for name, key in variable_names.items() if name in to_extract}
 
     if not to_extract:
+        wanted = variable_names.keys()
         raise ValueError(
             f"No valid data columns found in converted DataFrame. We expect the following data variables in the passed NetCDF: {wanted}"
         )
 
     processed_ds = processed_ds[to_extract]
+    processed_ds = processed_ds.rename(name_dict)
     processed_ds = processed_ds.sortby("time")
-
-    # TODO - need to choose which keys we want to keep
-    # GJ - 2021-04-15
-    # processed_ds.attrs = orig_attrs
-
-    species = clean_string(obspack_ds.attrs["dataset_parameter"])
-    network = "NOAA"
 
     try:
         # Extract units attribute from value data variable
-        units = processed_ds["value"].units
+        units = processed_ds[species].units
     except (KeyError, AttributeError):
         print("Unable to extract units from 'value' within input dataset")
     else:
@@ -156,27 +188,46 @@ def _read_obspack(
     metadata["network"] = network
     metadata["measurement_type"] = measurement_type
     metadata["species"] = species
-    metadata["sampling_period"] = sampling_period
     metadata["units"] = units
+    metadata["sampling_period"] = sampling_period
 
     if instrument is not None:
         metadata["instrument"] = instrument
+    else:
+        try:
+            metadata["instrument"] = obspack_ds.attrs["instrument"]
+        except KeyError:
+            pass
 
-    data = {species: {"data": processed_ds, "metadata": metadata}}
+    if sampling_period_estimate >= 0.0:
+        metadata["sampling_period_estimate"] = str(sampling_period_estimate)  # convert to string to keep consistent with "sampling_period"
 
-    # TODO - how do we want to handle the CF compliance for the ObsPack files?
-    # GJ - 2021-04-14
-    # data = assign_attributes(data=data, site=site, network=network)
+    # TODO: At the moment all attributes from the NOAA ObsPack are being copied
+    # plus any variables we're adding.
+    # - decide if we want to reduce this
+    attributes = obspack_ds.attrs
+    attributes["sampling_period"] = sampling_period
+    if sampling_period_estimate >= 0.0:
+        attributes["sampling_period_estimate"] = str(sampling_period_estimate)
 
-    return data
+    gas_data = {species:
+        {"data": processed_ds,
+        "metadata": metadata,
+        "attributes": attributes}}
+
+    gas_data = assign_attributes(data=gas_data,
+        site=site,
+        network=network)
+
+    return gas_data
 
 
 def _read_raw_file(
     data_filepath: Union[str, Path],
     site: str,
-    inlet: str,
     sampling_period: str,
     measurement_type: str,
+    inlet: Optional[str] = None,
     instrument: Optional[str] = None,
 ) -> Dict:
     """Reads NOAA data files and returns a dictionary of processed
@@ -184,13 +235,22 @@ def _read_raw_file(
 
     Args:
         data_filepath: Path of file to load
-        species: Species name
         site: Site name
+        sampling_period: Sampling period
+        measurement_type: One of flask, insitu or pfp
+        inlet: Inlet height, if no height use measurement type e.g. flask
+        instrument: Instrument name
+
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
-    from openghg.retrieve import assign_attributes
+    from openghg.standardise.meta import assign_attributes
     from pathlib import Path
+
+    # TODO: Added this for now to make sure inlet is specified but may be able to remove
+    # if this can be derived from the data format.
+    if inlet is None:
+        raise ValueError("Inlet must be specified to derive data from NOAA raw (txt) files.")
 
     data_filepath = Path(data_filepath)
     filename = data_filepath.name
@@ -348,6 +408,7 @@ def _read_raw_data(
     site_attributes = noaa_params["global_attributes"]
     site_attributes["inlet_height_magl"] = "NA"
     site_attributes["instrument"] = noaa_params["instrument"][species.upper()]
+    site_attributes["sampling_period"] = sampling_period
 
     metadata = {}
     metadata["species"] = clean_string(species)
@@ -356,6 +417,7 @@ def _read_raw_data(
     metadata["network"] = "NOAA"
     metadata["inlet"] = inlet
     metadata["sampling_period"] = sampling_period
+    metadata["instrument"] = noaa_params["instrument"][species.upper()]
 
     combined_data[species.lower()] = {
         "metadata": metadata,
@@ -364,3 +426,50 @@ def _read_raw_data(
     }
 
     return combined_data
+
+
+def _estimate_sampling_period(obspack_ds: Dataset, min_estimate: float = 10.0) -> float:
+    '''
+    Estimate the sampling period for the NOAA data using either the "data_selection_tag"
+    attribute (this sometimes contains useful information such as "HourlyData") or by using
+    the midpoint_time within the data itself.
+
+    Note: midpoint_time often seems to match start_time implying instantaneous measurement
+    or that this value has not been correctly included.
+
+    If the estimate is less than `min_estimate` the estimate sampling period will be set to
+    this value.
+
+    Args:
+        obspack_ds : Dataset of raw obs pack file opened as an xarray Dataset
+        min_estimate : Minimum sampling period estimate to use in seconds.
+
+    Returns:
+        int: Seconds for the estimated sampling period.
+    '''
+    # Check useful attributes
+    data_selection = obspack_ds.attrs["dataset_selection_tag"]
+
+    hourly_s = 60 * 60
+    daily_s = hourly_s * 24
+    weekly_s = daily_s * 7
+    monthly_s = weekly_s * 28  # approx
+    yearly_s = daily_s * 365   # approx
+
+    sampling_period_estimate = 0.0  # seconds
+
+    frequency_keywords = {"hourly": hourly_s, "daily": daily_s, "weekly": weekly_s, "monthly": monthly_s, "yearly": yearly_s}
+    for freq, time_s in frequency_keywords.items():
+        if freq in data_selection.lower():
+            sampling_period_estimate = time_s
+
+    if not sampling_period_estimate:
+        if "start_time" in obspack_ds and "midpoint_time" in obspack_ds:
+            half_sample_time = (obspack_ds["midpoint_time"] - obspack_ds["start_time"]).values
+            half_sample_time_s = half_sample_time.astype("timedelta64[s]").mean().astype(float)
+            sampling_period_estimate = round(half_sample_time_s * 2, 1)
+
+    if sampling_period_estimate < min_estimate:
+        sampling_period_estimate = min_estimate
+
+    return sampling_period_estimate

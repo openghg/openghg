@@ -27,13 +27,13 @@ def parse_crds(
         dict: Dictionary of gas data
     """
     from pathlib import Path
-    from openghg.retrieve import assign_attributes
+    from openghg.standardise.meta import assign_attributes
 
     if not isinstance(data_filepath, Path):
         data_filepath = Path(data_filepath)
 
     # This may seem like an almost pointless function as this is all we do
-    # but it makes it a lot easier to test that assign_attributes
+    # but it makes it a lot easier to test assign_attributes
     gas_data = _read_data(
         data_filepath=data_filepath,
         site=site,
@@ -75,9 +75,10 @@ def _read_data(
     from datetime import datetime
     from pandas import RangeIndex, read_csv, NaT
     import warnings
-    from openghg.util import clean_string, valid_site
+    from openghg.util import clean_string
 
     split_fname = data_filepath.stem.split(".")
+    site = site.lower()
 
     try:
         site_fname = clean_string(split_fname[0])
@@ -86,11 +87,6 @@ def _read_data(
         raise ValueError(
             "Error reading metadata from filename, we expect a form hfd.picarro.1minute.100m.dat"
         )
-
-    site = site.lower()
-
-    if not valid_site:
-        raise ValueError(f"{site} is not a valid site.")
 
     if site_fname != site:
         raise ValueError("Site mismatch between passed site code and that read from filename.")
@@ -267,7 +263,7 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
         dict: Dictionary of attributes
     """
     try:
-        site_attributes: Dict = crds_metadata[site.upper()]
+        site_attributes: Dict = crds_metadata["sites"][site.upper()]
         global_attributes: Dict = site_attributes["global_attributes"]
     except KeyError:
         raise ValueError(f"Unable to read attributes for site: {site}")
