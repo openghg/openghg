@@ -31,7 +31,7 @@ def assign_attributes(
         scale = gas_data.get("metadata", {}).get("calibration_scale")
 
         if sampling_period is None:
-            sampling_period = str(gas_data.get("metadata", {}).get("sampling_period"))
+            sampling_period = str(gas_data.get("metadata", {}).get("sampling_period", "NOT_SET"))
 
         gas_data["data"] = get_attributes(
             ds=gas_data["data"],
@@ -172,6 +172,12 @@ def get_attributes(
         global_attributes["calibration_scale"] = "unknown"
     else:
         global_attributes["calibration_scale"] = scale
+
+    if sampling_period is None:
+        global_attributes["sampling_period"] = "NOT_SET"
+    else:
+        global_attributes["sampling_period"] = sampling_period
+        global_attributes["sampling_period_unit"] = "s"
 
     # Update the Dataset attributes
     ds.attrs.update(global_attributes)  # type: ignore

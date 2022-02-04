@@ -196,6 +196,9 @@ def _read_data(
         species_metadata["calibration_scale"] = scale
         species_metadata["long_name"] = site_attributes["long_name"]
 
+        # Make sure metadata keys are included in attributes
+        site_attributes.update(species_metadata)
+
         combined_data[species] = {
             "metadata": species_metadata,
             "data": gas_data,
@@ -268,7 +271,7 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
     except KeyError:
         raise ValueError(f"Unable to read attributes for site: {site}")
 
-    attributes = global_attributes
+    attributes = global_attributes.copy()
 
     attributes["inlet_height_magl"] = inlet
     attributes["comment"] = crds_metadata["comment"]
