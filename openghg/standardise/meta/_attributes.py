@@ -155,7 +155,7 @@ def get_attributes(
     global_attributes_default = {
         "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
         "source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
+        "Conventions": "CF-1.8",
     }
 
     if global_attributes is not None:
