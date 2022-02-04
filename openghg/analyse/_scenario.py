@@ -1,19 +1,178 @@
 from pandas import Timestamp
 from xarray import Dataset
 from typing import Optional, Tuple, Union, List
+from openghg.dataobjects import ObsData, FootprintData, FluxData
+from openghg.retrieve import get_obs_surface, get_footprint, search
 
-__all__ = ["indexes_match", "combine_datasets", "ModelScenario"]
+__all__ = ["ModelScenario", "combine_datasets"]
+
+
+# TODO: Need to think about input into the class
+# We can include a site, inlet, species input and this will be able to grab
+# the observations and footprints but we should think about how we want
+# to assign the emissions
+# Could we print out a list of emissions options if present which matched
+# the input criteria for species etc.
+
+# TODO: Emissions also shouldn't need to match against a domain
+# We should be able to grab global/bigger area emissions and cut that down 
+# to whichever area out LPDM model covered.
+
+# TODO: Add static methods for different ways of creating the class
+# e.g. from_existing_data(), from_search(), empty() , ...
+
 
 class ModelScenario():
     """
     """
-    def __init__(self, obs=None, footprint=None, flux=None):
+    def __init__(self,
+                 site: Optional[str] = None,
+                 species: Optional[str] = None,
+                 inlet: Optional[str] = None,
+                 network: Optional[str] = None,
+                 domain: Optional[str] = None,
+                 model: Optional[str] = None,
+                 metmodel: Optional[str] = None,
+                 sources: Optional[str] = None,  # TODO: Allow this to be a list of str as well?
+                 start_date: Optional[str] = None,   # TODO: Allow str or Timestamp
+                 end_date: Optional[str] = None,   # TODO: Allow str or Timestamp
+                 obs: Optional[ObsData] = None, 
+                 footprint: Optional[FootprintData] = None, 
+                 flux: Optional[FluxData] = None):
+        """
+        Allow a set of keywords to be specified or for the objects to be supplied
+        directly.
+
+        """
+
+        self.add_obs(site = site,
+                     species = species,
+                     inlet = inlet,
+                     network = network,
+                     start_date = start_date,
+                     end_date = end_date,
+                     obs = obs)
+
+        self.add_footprint(site = site,
+                           inlet = inlet,
+                           domain = domain,
+                           model = model,
+                           metmodel = metmodel,
+                           start_date = start_date,
+                           end_date = end_date,
+                           species = species,
+                           footprint = footprint)
+
+        # TODO: Don't necessarily want to "add" flux... may want to rename?
+        self.add_flux(species=species,
+                      domain=domain,
+                      sources=sources,
+                      start_date = start_date,
+                      end_date = end_date,
+                      flux = flux)
+
+
+    def add_obs(self,
+                site: Optional[str] = None,
+                species: Optional[str] = None,
+                inlet: Optional[str] = None,
+                network: Optional[str] = None,
+                start_date: Optional[str] = None,   # TODO: Allow str or Timestamp
+                end_date: Optional[str] = None,   # TODO: Allow str or Timestamp
+                obs: Optional[ObsData] = None):
+
+        # TODO: Work out how we want to cache calculations
+        # Make sure cache is empty to update obs
+        # self.obs_cache = None
+
+        # Search for obs data based on keywords
+        if site and not obs:
+            # search for obs based on suitable keywords - site, species, inlet
+            obs_params = {"site": site, 
+                          "species": species,
+                          "inlet": inlet,
+                          "network": network,
+                          "start_date": start_date,
+                          "end_date": end_date}
+
+            try:
+                obs = get_obs_surface(**obs_params)
+            except ValueError:
+                print("Unable to add observation data based on keywords supplied.")
+                print(f"Inputs - site: {site}, species: {species}, inlet: {inlet}")
+                obs_search = search(site=site, species=species, inlet=inlet)
+                print(obs_search)
+                # TODO: If we can determine how many results are returned from search
+                # we can use this to give better information about why no data has
+                # been found for these inputs.
+        
         self.obs = obs
+
+    def add_footprint(self,
+                      site: Optional[str] = None,
+                      inlet: Optional[str] = None,
+                      domain: Optional[str] = None,
+                      model: Optional[str] = None,
+                      metmodel: Optional[str] = None,
+                      start_date: Optional[str] = None,   # TODO: Allow str or Timestamp
+                      end_date: Optional[str] = None,   # TODO: Allow str or Timestamp
+                      species: Optional[str] = None,
+                      footprint: Optional[FootprintData] = None):
+
+        # Search for footprint data based on keywords
+        # - site, domain, inlet (can extract from obs), model, metmodel
+        if site and not footprint:
+
+            if not inlet and self.obs:
+                # TODO: Add case to deal with "multiple" inlets
+                inlet = self.obs.metadata["inlet"]
+
+            footprint_params = {"site": site, 
+                                "height": inlet,
+                                "domain": domain,
+                                "model": model,  # Not currently used in get_footprint - should be added
+                                # "metmodel": metmodel,  # Should be added to inputs for get_footprint() 
+                                "start_date": start_date,
+                                "end_date": end_date}
+
+            try:
+                # Check if there is a species specific footprint
+                footprint = get_footprint(species=species, **footprint_params)
+            except ValueError:
+                try:
+                    # If not, look for generic footprint
+                    footprint = get_footprint(**footprint_params)
+                except ValueError:
+                    print("Unable to add footprint data based on keywords supplied.")
+                    print("Inputs - \n")
+                    print(f" site: {site}\n inlet: {inlet}\n domain: {domain}\n model: {model}\n metmodel: {metmodel}\n (species: {species})")
+                    # TODO: Add footprint search? What's the syntax?
+                    # TODO: If we can determine how many results are returned from search
+                    # we can use this to give better information about why no data has
+                    # been found for these inputs.
+        
         self.footprint = footprint
+
+    def add_flux(self,
+                 species: Optional[str] = None,
+                 domain: Optional[str] = None,
+                 sources: Optional[str] = None,  # TODO: Allow this to be a list of str as well?
+                 start_date: Optional[str] = None,   # TODO: Allow str or Timestamp
+                 end_date: Optional[str] = None,   # TODO: Allow str or Timestamp
+                 flux: Optional[FluxData] = None):
+
+        # TODO: DECIDE HOW BEST TO SEARCH FOR AND ADD FLUX HERE!
+
+        # Search for flux data based on keywords (but don't necessarily add..?)
+        if species and not flux:
+
+            pass
+            # search for flux based on suitable keywords
+            # BUT don't add automatically to the model scenario just print out 
+            # options with details of how to add flux - decide on those details!
+
         self.flux = flux
 
-        # Set keywords based on obs, footprint and flux input or otherwise
-        # species, domain, ...
 
     def check_data_is_present(self, need=["obs", "footprint"]):
         """
@@ -195,7 +354,7 @@ class ModelScenario():
     #         raise ValueError("Footprint and flux must be both be specified to calculate the modelled observation")
         
 
-def indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
+def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
     """Check if two datasets need to be reindexed_like for combine_datasets
 
     Args:
@@ -248,7 +407,7 @@ def combine_datasets(
     """
     import numpy as np
 
-    if indexes_match(dataset_A, dataset_B):
+    if _indexes_match(dataset_A, dataset_B):
         dataset_B_temp = dataset_B
     else:
         dataset_B_temp = dataset_B.reindex_like(dataset_A, method, tolerance=tolerance)
