@@ -430,7 +430,7 @@ def _split_species(
             # Create a copy of metadata for local modification
             spec_metadata = metadata.copy()
             spec_metadata["units"] = units[spec]
-            spec_metadata["scale"] = scale[spec]
+            spec_metadata["calibration_scale"] = scale[spec]
 
             # If we've only got a single inlet
             if inlet == "any" or inlet == "air":

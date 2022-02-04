@@ -16,7 +16,6 @@ def btt_data():
     return data
 
 
-@pytest.mark.xfail(reason="Bug: No inlet or instrument keys in metadata, check if required - see #201")
 def test_read_file(btt_data):
     parsed_surface_metachecker(data=btt_data)
 

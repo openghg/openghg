@@ -16,17 +16,19 @@ def test_read_noaa_obspack_ch4():
 
     # Check first file in folder has been processed
     filename1 = "ch4_esp_surface-flask_2_representative.nc"
-    species1 = "ch4"
+    key1 = "ch4"
     assert filename1 in processed.keys()
     processed_1 = processed[filename1]
-    assert species1 in processed_1.keys()
+    assert key1 in processed_1.keys()
 
     # Check second file in folder has been processed
     filename2 = "ch4_spf_surface-flask_1_ccgg_Event.nc"
-    species2 = "ch4"
+    key2 = "ch4_-2820m"  # Negative heights given in file!
     assert filename2 in processed.keys()
     processed_2 = processed[filename2]
-    assert species2 in processed_2.keys()
+    assert key2 in processed_2.keys()
+    # TODO: update this test when we have thought a way around negative inlet heights
+    # being supplied.
 
 
 # TODO: Add test for multi-species / txt data when able to do so.

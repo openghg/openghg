@@ -63,7 +63,7 @@ def parse_tmb(
         site_attributes["instrument"] = clean_string(tb_params["instrument"])
         # site_attributes["inlet"] = clean_string(tb_params["inlet"])
         # site_attributes["unit_species"] = tb_params["unit_species"]
-        # site_attributes["scale"] = tb_params["scale"]
+        # site_attributes["calibration_scale"] = tb_params["scale"]
 
         # All attributes stored in the metadata?
         metadata = {
