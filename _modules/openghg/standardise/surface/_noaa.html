@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.3.g6b8fdb6.dirty documentation</title>
+    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.2.g408ed19.dirty documentation</title>
     
     <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -167,6 +167,7 @@
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
 <div class="viewcode-block" id="parse_noaa"><a class="viewcode-back" href="../../../../api/api_standardise.html#openghg.standardise.surface.parse_noaa">[docs]</a><span class="k">def</span> <span class="nf">parse_noaa</span><span class="p">(</span>
@@ -191,8 +192,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of data and metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-
     <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">sampling_period</span> <span class="o">=</span> <span class="s2">&quot;NOT_SET&quot;</span>
 
@@ -218,6 +217,237 @@
             <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
             <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Output inlet name in expected format. This will include 1 decimal place for floats with a fractional component</span>
+<span class="sd">    and 0 decimal places otherwise.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        inlet : Inlet value. This can be a string as long as this can be converted directly to a float</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str : Formatted string of inlet name</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; _format_inlet(40)</span>
+<span class="sd">        &quot;40m&quot;</span>
+<span class="sd">        &gt;&gt;&gt; _format_inlet(&quot;10.0&quot;)</span>
+<span class="sd">        &quot;10m&quot;</span>
+<span class="sd">        &gt;&gt;&gt; _format_inlet(2.511432)</span>
+<span class="sd">        &quot;2.5m&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inlet</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">inlet_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">inlet_values_str</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">inlet_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">inlet_values_str</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to convert inlet </span><span class="si">{inlet}</span><span class="s2"> to a float&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inlet_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">inlet_values</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">inlet_value</span> <span class="o">=</span> <span class="n">inlet</span>
+
+    <span class="k">if</span> <span class="n">inlet_value</span> <span class="o">%</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">inlet_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_value</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">m&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">inlet_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_value</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">m&quot;</span>
+
+    <span class="k">return</span> <span class="n">inlet_str</span>
+
+
+<span class="k">def</span> <span class="nf">_standarise_variables</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Converts data from NOAA ObsPack dataset into our standardised variables to be stored within the object store.</span>
+<span class="sd">    The species is also needed so this name can be used to label the variables in the new dataset.</span>
+
+<span class="sd">    Expects inputs with: &quot;value&quot;, &quot;value_std_dev&quot; or &quot;value_unc&quot;, &quot;nvalue&quot; as per NOAA ObsPack standard.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obspack_ds : Dataset derived from a netcdf file within the NOAA obspack</span>
+<span class="sd">        species : Standardised species name (e.g. &quot;ch4&quot;)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dataset : Standardised dataset with variables extracted and renamed</span>
+
+<span class="sd">    Example output:</span>
+<span class="sd">        For species = &quot;ch4&quot;:</span>
+<span class="sd">            xarray.Dataset(&quot;ch4&quot;:[...]</span>
+<span class="sd">                           &quot;ch4_variability&quot;:[...]</span>
+<span class="sd">                           &quot;ch4_number_of_observations&quot;: [...])</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Rename variables to match our internal standard</span>
+    <span class="c1"># &quot;value_std_dev&quot; --&gt; f&quot;{species}_variability&quot;</span>
+    <span class="c1"># &quot;value_unc&quot; --&gt; ??</span>
+    <span class="c1"># TODO: Clarify what &quot;value_unc&quot; should be renamed to</span>
+
+    <span class="n">variable_names</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
+                      <span class="s2">&quot;value_std_dev&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;value_unc&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">,</span>  <span class="c1"># May need to be updated</span>
+                      <span class="s2">&quot;nvalue&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_number_of_observations&quot;</span><span class="p">}</span>
+
+    <span class="n">to_extract</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">variable_names</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">obspack_ds</span><span class="p">]</span>
+
+    <span class="c1"># For the error variables we only want to take one set of values from the</span>
+    <span class="c1"># obspack dataset but multiple variables may be available.</span>
+    <span class="c1"># If multiple are present, combine these together and only extract one</span>
+    <span class="n">error_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;value_std_dev&quot;</span><span class="p">,</span> <span class="s2">&quot;value_unc&quot;</span><span class="p">]</span>
+    <span class="n">error_variables</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">error_names</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">to_extract</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">error_variables</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">main_ev</span> <span class="o">=</span> <span class="n">error_variables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Treat first item in the list at the one to keep</span>
+
+        <span class="n">history_attr</span> <span class="o">=</span> <span class="s2">&quot;history&quot;</span>
+        <span class="n">processed_ds</span><span class="p">[</span><span class="n">main_ev</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">history_attr</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Merged </span><span class="si">{</span><span class="n">main_ev</span><span class="si">}</span><span class="s2"> variable from original file with &quot;</span>
+
+        <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">error_variables</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="c1"># Combine details from additional additional error variable with main variable</span>
+            <span class="n">variable</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="p">[</span><span class="n">main_ev</span><span class="p">]</span>
+            <span class="n">new_variable</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="p">[</span><span class="n">ev</span><span class="p">]</span>
+
+            <span class="c1"># Update Dataset and add details within attributes</span>
+            <span class="n">updated_variable</span> <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">combine_first</span><span class="p">(</span><span class="n">new_variable</span><span class="p">)</span>
+            <span class="n">processed_ds</span><span class="p">[</span><span class="n">main_ev</span><span class="p">]</span> <span class="o">=</span> <span class="n">updated_variable</span>
+            <span class="n">processed_ds</span><span class="p">[</span><span class="n">main_ev</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">history_attr</span><span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ev</span><span class="si">}</span><span class="s2">, &quot;</span>
+
+            <span class="c1"># Remove this extra variables from the list of variables to extract from the dataset</span>
+            <span class="n">to_extract</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span>
+
+    <span class="c1"># Create dictionary of names to convert obspack ds to our format</span>
+    <span class="n">name_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">key</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">variable_names</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">to_extract</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">to_extract</span><span class="p">:</span>
+        <span class="n">wanted</span> <span class="o">=</span> <span class="n">variable_names</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;No valid data variables columns found in obspack dataset. We expect the following data variables in the passed NetCDF: </span><span class="si">{</span><span class="n">wanted</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Grab only the variables we want to keep and rename these</span>
+    <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="p">[</span><span class="n">to_extract</span><span class="p">]</span>
+    <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name_dict</span><span class="p">)</span>
+    <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">processed_ds</span>
+
+
+<span class="k">def</span> <span class="nf">_split_inlets</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
+                  <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+                  <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+                  <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Splits the overall dataset by different inlet values, if present. The expected dataset input should be from the NOAA ObsPack.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obspack_ds : Dataset derived from a netcdf file within the NOAA obspack</span>
+<span class="sd">        attributes: Attributes extracted from the NOAA obspack. Should contain at least &quot;species&quot; and &quot;measurement_type&quot;</span>
+<span class="sd">        metadata: Metadata to store alongside standardised data</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: gas data containing &quot;data&quot;, &quot;metadata&quot;, &quot;attributes&quot; for each inlet</span>
+
+<span class="sd">    Example output:</span>
+<span class="sd">        {&quot;ch4&quot;: {&quot;data&quot;: xr.Dataset(...), &quot;attributes&quot;: {...}, &quot;metadata&quot;: {...}}}</span>
+<span class="sd">        or</span>
+<span class="sd">        {&quot;ch4_40m&quot;: {&quot;data&quot;: xr.Dataset(...), &quot;attributes&quot;: {...}, &quot;metadata&quot;: {...}}, &quot;ch4_60m&quot;: {...}, ...}</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">orig_attrs</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+    <span class="n">measurement_type</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;measurement_type&quot;</span><span class="p">]</span>
+
+    <span class="n">height_var</span> <span class="o">=</span> <span class="s2">&quot;intake_height&quot;</span>
+
+    <span class="c1"># Check whether the input data contains different inlet height values for each data point (&quot;intake_height&quot; data variable)</span>
+    <span class="c1"># If so we need to select the data for each inlet and indicate this is a separate Datasource</span>
+    <span class="c1"># Each data key is labelled based on the species and the inlet (if needed)</span>
+
+    <span class="n">gas_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">height_var</span> <span class="ow">in</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># TODO: Add to logging?</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING: Ignoring inlet value of </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2"> since file has each data point has an associated height (contains &#39;intake_height&#39; variable)&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Group dataset by the height values</span>
+        <span class="c1"># Note: could use ds.groupby_bins(...) if necessary if there are lots of small height differences to group these</span>
+        <span class="n">obspack_ds_grouped</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">height_var</span><span class="p">)</span>
+        <span class="n">num_groups</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">obspack_ds_grouped</span><span class="o">.</span><span class="n">groups</span><span class="p">)</span>
+
+        <span class="c1"># For each group standardise and store with id based on species and inlet height</span>
+        <span class="k">for</span> <span class="n">ht</span><span class="p">,</span> <span class="n">obspack_ds_ht</span> <span class="ow">in</span> <span class="n">obspack_ds_grouped</span><span class="p">:</span>
+
+            <span class="c1"># Creating id keys of the form &quot;&lt;species&gt;_&lt;inlet&gt;&quot; e.g. &quot;ch4_40m&quot; or &quot;co_12.5m&quot;</span>
+            <span class="n">inlet_str</span> <span class="o">=</span> <span class="n">_format_inlet</span><span class="p">(</span><span class="n">ht</span><span class="p">)</span>
+            <span class="n">inlet_num_str</span> <span class="o">=</span> <span class="n">inlet_str</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">num_groups</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">id_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">inlet_str</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">id_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="c1"># Extract wanted variables and convert to standardised names</span>
+            <span class="n">standarised_ds</span> <span class="o">=</span> <span class="n">_standarise_variables</span><span class="p">(</span><span class="n">obspack_ds_ht</span><span class="p">,</span> <span class="n">species</span><span class="p">)</span>
+
+            <span class="n">gas_data</span><span class="p">[</span><span class="n">id_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">gas_data</span><span class="p">[</span><span class="n">id_key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">standarised_ds</span>
+
+            <span class="c1"># Add inlet details to attributes and metadata</span>
+            <span class="n">attrs_copy</span> <span class="o">=</span> <span class="n">attributes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">meta_copy</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="n">attrs_copy</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_str</span>
+            <span class="n">attrs_copy</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_num_str</span>
+            <span class="n">meta_copy</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_str</span>
+            <span class="n">meta_copy</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_num_str</span>
+
+            <span class="n">gas_data</span><span class="p">[</span><span class="n">id_key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta_copy</span>
+            <span class="n">gas_data</span><span class="p">[</span><span class="n">id_key</span><span class="p">][</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrs_copy</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">inlet_value</span> <span class="o">=</span> <span class="n">orig_attrs</span><span class="p">[</span><span class="s2">&quot;dataset_intake_ht&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">inlet_from_file</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inlet_from_file</span> <span class="o">=</span> <span class="n">_format_inlet</span><span class="p">(</span><span class="n">inlet_value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">measurement_type</span> <span class="o">==</span> <span class="s2">&quot;flask&quot;</span><span class="p">:</span>
+            <span class="n">inlet_from_file</span> <span class="o">=</span> <span class="s2">&quot;flask&quot;</span>
+
+        <span class="c1"># Check inlet from file against any provided inlet</span>
+        <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">inlet_from_file</span><span class="p">:</span>
+            <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet_from_file</span>
+        <span class="k">elif</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">inlet_from_file</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">inlet</span> <span class="o">!=</span> <span class="n">inlet_from_file</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING: Provided inlet </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2"> does not match inlet derived from the input file: </span><span class="si">{</span><span class="n">inlet_from_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass &#39;flask&#39; as inlet.&quot;</span><span class="p">)</span>
+
+        <span class="n">id_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="n">inlet</span> <span class="o">!=</span> <span class="s2">&quot;flask&quot;</span><span class="p">:</span>
+            <span class="n">inlet_num_str</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inlet_num_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_num_str</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_num_str</span>
+
+        <span class="n">standardised_ds</span> <span class="o">=</span> <span class="n">_standarise_variables</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">,</span> <span class="n">species</span><span class="p">)</span>
+
+        <span class="n">gas_data</span><span class="p">[</span><span class="n">id_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">standardised_ds</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span> <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">attributes</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">gas_data</span>
 
 
 <span class="k">def</span> <span class="nf">_read_obspack</span><span class="p">(</span>
@@ -275,6 +505,10 @@
     <span class="n">time_unique</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)</span>
     <span class="n">obs_unique</span> <span class="o">=</span> <span class="n">time_unique</span><span class="o">.</span><span class="n">obs</span>
 
+    <span class="c1"># Use these obs values to filter the original dataset to remove any repeated times</span>
+    <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">obs</span><span class="o">=</span><span class="n">obs_unique</span><span class="p">)</span>
+    <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="o">.</span><span class="n">set_coords</span><span class="p">([</span><span class="s2">&quot;time&quot;</span><span class="p">])</span>
+
     <span class="c1"># Estimate sampling period using metadata and midpoint time</span>
     <span class="k">if</span> <span class="n">sampling_period</span> <span class="o">==</span> <span class="s2">&quot;NOT_SET&quot;</span><span class="p">:</span>
         <span class="n">sampling_period_estimate</span> <span class="o">=</span> <span class="n">_estimate_sampling_period</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">)</span>
@@ -284,53 +518,9 @@
     <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;dataset_parameter&quot;</span><span class="p">])</span>
     <span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span>
 
-    <span class="c1"># If inlet is not defined try and derive this from the attribute data</span>
-    <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;dataset_intake_ht&quot;</span> <span class="ow">in</span> <span class="n">orig_attrs</span><span class="p">:</span>
-            <span class="c1"># Inlet height attribute will be a float stored as a string e.g. 40.0</span>
-            <span class="n">inlet_value</span> <span class="o">=</span> <span class="n">orig_attrs</span><span class="p">[</span><span class="s2">&quot;dataset_intake_ht&quot;</span><span class="p">]</span>
-            <span class="n">inlet_value_num</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">inlet_value</span><span class="p">)</span>
-            <span class="c1"># Include 0 decimal places if remainder is 0, 1 d.p. otherwise</span>
-            <span class="k">if</span> <span class="n">inlet_value_num</span> <span class="o">%</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">inlet</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_value_num</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">m&quot;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">inlet</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_value_num</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">m&quot;</span>   
-        <span class="k">elif</span> <span class="n">measurement_type</span> <span class="o">==</span> <span class="s2">&quot;flask&quot;</span><span class="p">:</span>
-            <span class="n">inlet</span> <span class="o">=</span> <span class="s2">&quot;flask&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass &#39;flask&#39; as inlet.&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Use these obs values to filter the original dataset to remove any repeated times</span>
-    <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">obs</span><span class="o">=</span><span class="n">obs_unique</span><span class="p">)</span>
-    <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="o">.</span><span class="n">set_coords</span><span class="p">([</span><span class="s2">&quot;time&quot;</span><span class="p">])</span>
-
-    <span class="c1"># Rename variables to match our internal standard</span>
-    <span class="c1"># &quot;value_std_dev&quot; --&gt; f&quot;{species}_variability&quot;</span>
-    <span class="c1"># &quot;value_unc&quot; --&gt; ??</span>
-    <span class="c1"># TODO: Clarify what &quot;value_unc&quot; should be renamed to</span>
-
-    <span class="n">variable_names</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
-        <span class="s2">&quot;value_std_dev&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;value_unc&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">,</span>  <span class="c1"># May need to be updated</span>
-        <span class="s2">&quot;nvalue&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_number_of_observations&quot;</span><span class="p">}</span>
-
-    <span class="n">to_extract</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">variable_names</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">processed_ds</span><span class="p">]</span>
-    <span class="n">name_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">key</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">variable_names</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">to_extract</span><span class="p">}</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">to_extract</span><span class="p">:</span>
-        <span class="n">wanted</span> <span class="o">=</span> <span class="n">variable_names</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;No valid data columns found in converted DataFrame. We expect the following data variables in the passed NetCDF: </span><span class="si">{</span><span class="n">wanted</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
-
-    <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="p">[</span><span class="n">to_extract</span><span class="p">]</span>
-    <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name_dict</span><span class="p">)</span>
-    <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Extract units attribute from value data variable</span>
-        <span class="n">units</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="p">[</span><span class="n">species</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
     <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unable to extract units from &#39;value&#39; within input dataset&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -340,7 +530,7 @@
             <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;1e-3&quot;</span>
         <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;micromol mol-1&quot;</span><span class="p">:</span>
             <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;1e-6&quot;</span>
-        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;nmol mol-1&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;nmol mol-1&quot;</span><span class="p">,</span> <span class="s2">&quot;nanomol mol-1&quot;</span><span class="p">]:</span>
             <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;1e-9&quot;</span>
         <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;pmol mol-1&quot;</span><span class="p">:</span>
             <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;1e-12&quot;</span>
@@ -350,36 +540,48 @@
 
     <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
-    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
     <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
     <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;measurement_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement_type</span>
     <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
     <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
     <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampling_period</span>
 
-    <span class="k">if</span> <span class="n">instrument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">pass</span>
-
+    <span class="c1"># Add additional sampling_period_estimate if sampling_period is not set</span>
     <span class="k">if</span> <span class="n">sampling_period_estimate</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">:</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period_estimate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period_estimate</span><span class="p">)</span>  <span class="c1"># convert to string to keep consistent with &quot;sampling_period&quot;</span>
 
-    <span class="c1"># TODO: At the moment all attributes from the NOAA ObsPack are being copied</span>
-    <span class="c1"># plus any variables we&#39;re adding.</span>
-    <span class="c1"># - decide if we want to reduce this</span>
-    <span class="n">attributes</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span>
-    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampling_period</span>
-    <span class="k">if</span> <span class="n">sampling_period_estimate</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">:</span>
-        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period_estimate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period_estimate</span><span class="p">)</span>
+    <span class="c1"># Add instrument if present</span>
+    <span class="k">if</span> <span class="n">instrument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;instrument&quot;</span><span class="p">,</span> <span class="s2">&quot;NOT_SET&quot;</span><span class="p">)</span>
 
-    <span class="n">gas_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">species</span><span class="p">:</span>
-        <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">processed_ds</span><span class="p">,</span>
-        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
-        <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">attributes</span><span class="p">}}</span>
+    <span class="c1"># Add data owner details, station position and calibration scale, if present</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data_owner&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;provider_1_name&quot;</span><span class="p">,</span> <span class="s2">&quot;NOT_SET&quot;</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data_owner_email&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;provider_1_email&quot;</span><span class="p">,</span> <span class="s2">&quot;NOT_SET&quot;</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;site_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;NOT_SET&quot;</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;site_latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;NOT_SET&quot;</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dataset_calibration_scale&quot;</span><span class="p">,</span> <span class="s2">&quot;NOT_SET&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create attributes with copy of metadata values</span>
+    <span class="n">attributes</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># TODO: At the moment all attributes from the NOAA ObsPack are being copied</span>
+    <span class="c1"># plus any variables we&#39;re adding - decide if we want to reduce this</span>
+    <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">orig_attrs</span><span class="p">)</span>
+
+    <span class="c1"># expected_keys = {</span>
+    <span class="c1">#     &quot;site&quot;,</span>
+    <span class="c1">#     &quot;species&quot;,</span>
+    <span class="c1">#     &quot;inlet&quot;,</span>
+    <span class="c1">#     &quot;instrument&quot;,</span>
+    <span class="c1">#     &quot;sampling_period&quot;,</span>
+    <span class="c1">#     &quot;calibration_scale&quot;,</span>
+    <span class="c1">#     &quot;station_longitude&quot;,</span>
+    <span class="c1">#     &quot;station_latitude&quot;,</span>
+    <span class="c1"># }</span>
+
+    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">_split_inlets</span><span class="p">(</span><span class="n">processed_ds</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span>
 
     <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span>
         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
@@ -411,7 +613,6 @@
 <span class="sd">        list: UUIDs of Datasources data has been assigned to</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
-    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
     <span class="c1"># TODO: Added this for now to make sure inlet is specified but may be able to remove</span>
     <span class="c1"># if this can be derived from the data format.</span>
