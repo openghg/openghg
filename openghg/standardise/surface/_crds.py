@@ -193,7 +193,7 @@ def _read_data(
         species_metadata = metadata.copy()
         species_metadata["species"] = clean_string(species)
         species_metadata["inlet"] = inlet
-        species_metadata["scale"] = scale
+        species_metadata["calibration_scale"] = scale
         species_metadata["long_name"] = site_attributes["long_name"]
 
         combined_data[species] = {

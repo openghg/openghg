@@ -81,7 +81,7 @@ def test_add_data(data):
         "type": "air",
         "network": "decc",
         "species": "ch4",
-        "scale": "wmo-x2004a",
+        "calibration_scale": "wmo-x2004a",
         "long_name": "bilsdale",
         "calibration_scale": "wmo-x2004a",
         "data_owner": "simon o'doherty",

@@ -28,7 +28,7 @@ def assign_attributes(
         species = gas_data["metadata"]["species"]
 
         units = gas_data.get("metadata", {}).get("units")
-        scale = gas_data.get("metadata", {}).get("scale")
+        scale = gas_data.get("metadata", {}).get("calibration_scale")
 
         if sampling_period is None:
             sampling_period = str(gas_data.get("metadata", {}).get("sampling_period"))

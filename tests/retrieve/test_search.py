@@ -44,7 +44,7 @@ def test_specific_keyword_search():
         "port": "9",
         "type": "air",
         "network": "decc",
-        "scale": "WMO-X2007",
+        "calibration_scale": "WMO-X2007",
         "long_name": "bilsdale",
     }
 

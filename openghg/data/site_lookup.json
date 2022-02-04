@@ -3,26 +3,49 @@
     "short_name": "airborne aerosol observatory",
     "long_name": "airborne aerosol observatory bondville illinois united states"
   },
-  "ABP": { "short_name": "arembepe", "long_name": "arembepe bahia brazil" },
+  "ABP": {
+    "short_name": "arembepe",
+    "long_name": "arembepe bahia brazil"
+  },
+  "ABT": {
+    "short_name": "abbotsford british columbia",
+    "long_name": "abbotsford british columbia canada"
+  },
   "ACG": {
     "short_name": "alaska coast guard",
     "long_name": "alaska coast guard united states"
   },
-  "ADR": { "short_name": "adrigole", "long_name": "adrigole ireland" },
-  "ALT": { "short_name": "alert", "long_name": "alert canada" },
+  "ADR": {
+    "short_name": "adrigole",
+    "long_name": "adrigole ireland"
+  },
+  "ALT": {
+    "short_name": "alert",
+    "long_name": "alert canada"
+  },
   "AMS": {
     "short_name": "amsterdam island",
     "long_name": "amsterdam island france"
   },
-  "AMT": { "short_name": "argyle", "long_name": "argyle maine united states" },
+  "AMT": {
+    "short_name": "argyle",
+    "long_name": "argyle maine united states"
+  },
   "AMY": {
     "short_name": "anmyeondo",
     "long_name": "anmyeondo republic of korea"
   },
-  "AND": { "short_name": "anmyeondo", "long_name": "anmyeondo south korea" },
+  "AND": {
+    "short_name": "anmyeondo",
+    "long_name": "anmyeondo south korea"
+  },
   "AOC": {
     "short_name": "atlantic ocean cruise",
     "long_name": "atlantic ocean cruise"
+  },
+  "ARA": {
+    "short_name": "arcturus queensland",
+    "long_name": "arcturus queensland australia"
   },
   "ARH": {
     "short_name": "arrival heights",
@@ -32,7 +55,10 @@
     "short_name": "ascension island",
     "long_name": "ascension island united kingdom"
   },
-  "ASK": { "short_name": "assekrem", "long_name": "assekrem algeria" },
+  "ASK": {
+    "short_name": "assekrem",
+    "long_name": "assekrem algeria"
+  },
   "ATO": {
     "short_name": "amazon tall tower observatory",
     "long_name": "amazon tall tower observatory state of amazonas brazil"
@@ -45,7 +71,10 @@
     "short_name": "terceira island",
     "long_name": "terceira island azores portugal"
   },
-  "BAL": { "short_name": "baltic sea", "long_name": "baltic sea poland" },
+  "BAL": {
+    "short_name": "baltic sea",
+    "long_name": "baltic sea poland"
+  },
   "BAO": {
     "short_name": "boulder atmospheric observatory",
     "long_name": "boulder atmospheric observatory colorado united states"
@@ -62,18 +91,34 @@
     "short_name": "baring head",
     "long_name": "baring head new zealand"
   },
-  "BIK": { "short_name": "bialystok", "long_name": "bialystok" },
-  "BIR": { "short_name": "birkenes", "long_name": "birkenes" },
-  "BIS": { "short_name": "biscarosse", "long_name": "biscarosse" },
+  "BIK": {
+    "short_name": "bialystok",
+    "long_name": "bialystok"
+  },
+  "BIR": {
+    "short_name": "birkenes",
+    "long_name": "birkenes"
+  },
+  "BIS": {
+    "short_name": "biscarosse",
+    "long_name": "biscarosse"
+  },
   "BKT": {
     "short_name": "bukit kototabang",
     "long_name": "bukit kototabang indonesia"
+  },
+  "BLK": {
+    "short_name": "baker lake nunavut",
+    "long_name": "baker lake nunavut canada"
   },
   "BME": {
     "short_name": "st davids head",
     "long_name": "st davids head bermuda united kingdom"
   },
-  "BMW": { "short_name": "tudor hill", "long_name": "tudor hill bermuda" },
+  "BMW": {
+    "short_name": "tudor hill",
+    "long_name": "tudor hill bermuda"
+  },
   "BNE": {
     "short_name": "beaver crossing",
     "long_name": "beaver crossing nebraska united states"
@@ -82,13 +127,22 @@
     "short_name": "bratts lake",
     "long_name": "bratts lake saskatchewan canada"
   },
-  "BRW": { "short_name": "barrow", "long_name": "barrow alaska" },
+  "BRW": {
+    "short_name": "barrow",
+    "long_name": "barrow alaska"
+  },
   "BSC": {
     "short_name": "black sea",
     "long_name": "black sea constanta romania"
   },
-  "BSD": { "short_name": "bilsdale", "long_name": "bilsdale uk" },
-  "BTT": { "short_name": "bt tower", "long_name": "bt tower uk" },
+  "BSD": {
+    "short_name": "bilsdale",
+    "long_name": "bilsdale uk"
+  },
+  "BTT": {
+    "short_name": "bt tower",
+    "long_name": "bt tower uk"
+  },
   "BWD": {
     "short_name": "brentwood",
     "long_name": "brentwood maryland united states"
@@ -97,8 +151,14 @@
     "short_name": "briggsdale",
     "long_name": "briggsdale colorado united states"
   },
-  "CARIBIC": { "short_name": "caribic", "long_name": "caribic" },
-  "CBA": { "short_name": "cold bay", "long_name": "cold bay alaska" },
+  "CARIBIC": {
+    "short_name": "caribic",
+    "long_name": "caribic"
+  },
+  "CBA": {
+    "short_name": "cold bay",
+    "long_name": "cold bay alaska"
+  },
   "CBW": {
     "short_name": "cabauw tower",
     "long_name": "cabauw tower netherlands"
@@ -107,56 +167,134 @@
     "short_name": "cambridge bay",
     "long_name": "cambridge bay nunavut canada"
   },
-  "CGO": { "short_name": "cape grim", "long_name": "cape grim tasmania" },
+  "CDL": {
+    "short_name": "candle lake saskatchewan",
+    "long_name": "candle lake saskatchewan canada"
+  },
+  "CFA": {
+    "short_name": "cape ferguson queensland",
+    "long_name": "cape ferguson queensland australia"
+  },
+  "CGO": {
+    "short_name": "cape grim",
+    "long_name": "cape grim tasmania"
+  },
   "CHL": {
     "short_name": "churchill",
     "long_name": "churchill manitoba canada"
+  },
+  "CHM": {
+    "short_name": "chibougamau quebec",
+    "long_name": "chibougamau quebec canada"
   },
   "CHR": {
     "short_name": "christmas island",
     "long_name": "christmas island republic of kiribati"
   },
-  "CHS": { "short_name": "cherskii", "long_name": "cherskii russia" },
+  "CHS": {
+    "short_name": "cherskii",
+    "long_name": "cherskii russia"
+  },
   "CIB": {
     "short_name": "centro de investigacion de la baja atmosfera ciba",
     "long_name": "centro de investigacion de la baja atmosfera ciba spain"
   },
-  "CLA": { "short_name": "comilla", "long_name": "comilla bangladesh" },
+  "CLA": {
+    "short_name": "comilla",
+    "long_name": "comilla bangladesh"
+  },
   "CMA": {
     "short_name": "offshore cape may",
     "long_name": "offshore cape may new jersey united states"
   },
-  "CMN": { "short_name": "monte cimone", "long_name": "monte cimone italy" },
-  "CMO": { "short_name": "cape mears", "long_name": "cape mears oregon" },
-  "COI": { "short_name": "cape ochiishi", "long_name": "cape ochiishi japan" },
-  "COS": { "short_name": "cosmos", "long_name": "cosmos peru" },
-  "CPS": { "short_name": "chapais", "long_name": "chapais quebec canada" },
-  "CPT": { "short_name": "cape point", "long_name": "cape point south africa" },
-  "CRI": { "short_name": "cape rama", "long_name": "cape rama india" },
+  "CMN": {
+    "short_name": "monte cimone",
+    "long_name": "monte cimone italy"
+  },
+  "CMO": {
+    "short_name": "cape mears",
+    "long_name": "cape mears oregon"
+  },
+  "COI": {
+    "short_name": "cape ochiishi",
+    "long_name": "cape ochiishi japan"
+  },
+  "COS": {
+    "short_name": "cosmos",
+    "long_name": "cosmos peru"
+  },
+  "CPA": {
+    "short_name": "charles point darwin",
+    "long_name": "charles point darwin australia"
+  },
+  "CPS": {
+    "short_name": "chapais",
+    "long_name": "chapais quebec canada"
+  },
+  "CPT": {
+    "short_name": "cape point",
+    "long_name": "cape point south africa"
+  },
+  "CRI": {
+    "short_name": "cape rama",
+    "long_name": "cape rama india"
+  },
   "CRV": {
     "short_name": "carbon in arctic reservoirs vulnerability experiment carve",
     "long_name": "carbon in arctic reservoirs vulnerability experiment carve united states"
   },
-  "CRZ": { "short_name": "crozet island", "long_name": "crozet island france" },
-  "CVO": { "short_name": "cape verde", "long_name": "cape verde africa" },
-  "DJI": { "short_name": "darjeeling", "long_name": "darjeeling india" },
+  "CRZ": {
+    "short_name": "crozet island",
+    "long_name": "crozet island france"
+  },
+  "CVO": {
+    "short_name": "cape verde",
+    "long_name": "cape verde africa"
+  },
+  "CYA": {
+    "short_name": "casey antarctica",
+    "long_name": "casey antarctica australia"
+  },
+  "DJI": {
+    "short_name": "darjeeling",
+    "long_name": "darjeeling india"
+  },
   "DND": {
     "short_name": "dahlen",
     "long_name": "dahlen north dakota united states"
   },
-  "DRP": { "short_name": "drake passage", "long_name": "drake passage na" },
+  "DRP": {
+    "short_name": "drake passage",
+    "long_name": "drake passage na"
+  },
   "DSI": {
     "short_name": "dongsha island",
     "long_name": "dongsha island taiwan"
   },
-  "EGB": { "short_name": "egbert", "long_name": "egbert ontario canada" },
-  "EHL": { "short_name": "earlshall", "long_name": "earlshall uk" },
-  "EIC": { "short_name": "easter island", "long_name": "easter island chile" },
+  "EGB": {
+    "short_name": "egbert",
+    "long_name": "egbert ontario canada"
+  },
+  "EHL": {
+    "short_name": "earlshall",
+    "long_name": "earlshall uk"
+  },
+  "EIC": {
+    "short_name": "easter island",
+    "long_name": "easter island chile"
+  },
+  "ENA": {
+    "short_name": "eastern north atlantic graciosa azores",
+    "long_name": "eastern north atlantic graciosa azores portugal"
+  },
   "ESP": {
     "short_name": "estevan point",
     "long_name": "estevan point british columbia canada"
   },
-  "EST": { "short_name": "esther", "long_name": "esther alberta canada" },
+  "EST": {
+    "short_name": "esther",
+    "long_name": "esther alberta canada"
+  },
   "ETL": {
     "short_name": "east trout lake",
     "long_name": "east trout lake saskatchewan canada"
@@ -169,26 +307,46 @@
     "short_name": "fort mckay south",
     "long_name": "fort mckay south alberta canada"
   },
+  "FNE": {
+    "short_name": "fort nelson british columbia",
+    "long_name": "fort nelson british columbia canada"
+  },
   "FSD": {
     "short_name": "fraserdale",
     "long_name": "fraserdale ontario canada"
   },
-  "FTL": { "short_name": "fortaleza", "long_name": "fortaleza brazil" },
+  "FTL": {
+    "short_name": "fortaleza",
+    "long_name": "fortaleza brazil"
+  },
   "FWI": {
     "short_name": "fairchild",
     "long_name": "fairchild wisconsin united states"
+  },
+  "GAT": {
+    "short_name": "gartow",
+    "long_name": "gartow germany"
   },
   "GAUGE-FAAM": {
     "short_name": "gauge flights",
     "long_name": "gauge flights uk"
   },
-  "GAUGE-FERRY": { "short_name": "gauge ferry", "long_name": "gauge ferry uk" },
-  "GLA": { "short_name": "glatton", "long_name": "glatton uk" },
+  "GAUGE-FERRY": {
+    "short_name": "gauge ferry",
+    "long_name": "gauge ferry uk"
+  },
+  "GLA": {
+    "short_name": "glatton",
+    "long_name": "glatton uk"
+  },
   "GMI": {
     "short_name": "mariana islands",
     "long_name": "mariana islands guam"
   },
-  "GOSAT-BRAZIL": { "short_name": "gosat", "long_name": "gosat brazil" },
+  "GOSAT-BRAZIL": {
+    "short_name": "gosat",
+    "long_name": "gosat brazil"
+  },
   "GOSAT-BRAZIL-LAND": {
     "short_name": "gosat",
     "long_name": "gosat brazil land points"
@@ -205,9 +363,18 @@
     "short_name": "gosat",
     "long_name": "gosat brazil ocean glint points"
   },
-  "GOSAT-EUROPE": { "short_name": "gosat", "long_name": "gosat europe" },
-  "GOSAT-INDIA": { "short_name": "gosat", "long_name": "gosat india" },
-  "GOSAT-SAHARA": { "short_name": "gosat", "long_name": "gosat sahara" },
+  "GOSAT-EUROPE": {
+    "short_name": "gosat",
+    "long_name": "gosat europe"
+  },
+  "GOSAT-INDIA": {
+    "short_name": "gosat",
+    "long_name": "gosat india"
+  },
+  "GOSAT-SAHARA": {
+    "short_name": "gosat",
+    "long_name": "gosat sahara"
+  },
   "GOSAT-SOUTHAMERICA": {
     "short_name": "gosat",
     "long_name": "gosat south america"
@@ -216,30 +383,62 @@
     "short_name": "gosat",
     "long_name": "gosat south america land points only"
   },
-  "GOSAT-UK": { "short_name": "gosat", "long_name": "gosat uk" },
+  "GOSAT-UK": {
+    "short_name": "gosat",
+    "long_name": "gosat uk"
+  },
   "GOZ": {
     "short_name": "dwejra point",
     "long_name": "dwejra point gozo malta"
   },
-  "GSN": { "short_name": "gosan", "long_name": "gosan korea" },
+  "GPA": {
+    "short_name": "gunn point",
+    "long_name": "gunn point australia"
+  },
+  "GSN": {
+    "short_name": "gosan",
+    "long_name": "gosan korea"
+  },
   "HAA": {
     "short_name": "molokai island",
     "long_name": "molokai island hawaii united states"
   },
-  "HAD": { "short_name": "haddenham", "long_name": "haddenham uk" },
-  "HAT": { "short_name": "hateruma", "long_name": "hateruma japan" },
+  "HAD": {
+    "short_name": "haddenham",
+    "long_name": "haddenham uk"
+  },
+  "HAT": {
+    "short_name": "hateruma",
+    "long_name": "hateruma japan"
+  },
   "HBA": {
     "short_name": "halley station",
     "long_name": "halley station antarctica united kingdom"
   },
-  "HEI": { "short_name": "heidelberg", "long_name": "heidelberg germany" },
-  "HFD": { "short_name": "heathfield", "long_name": "heathfield uk" },
+  "HEI": {
+    "short_name": "heidelberg",
+    "long_name": "heidelberg germany"
+  },
+  "HFD": {
+    "short_name": "heathfield",
+    "long_name": "heathfield uk"
+  },
   "HFM": {
     "short_name": "harvard forest",
     "long_name": "harvard forest massachusetts united states"
   },
-  "HFT": { "short_name": "highfield tower", "long_name": "highfield tower" },
-  "HIL": { "short_name": "homer", "long_name": "homer illinois united states" },
+  "HFT": {
+    "short_name": "highfield tower",
+    "long_name": "highfield tower"
+  },
+  "HIL": {
+    "short_name": "homer",
+    "long_name": "homer illinois united states"
+  },
+  "HNP": {
+    "short_name": "hanlan's point ontario",
+    "long_name": "hanlan's point ontario canada"
+  },
   "HPB": {
     "short_name": "hohenpeissenberg",
     "long_name": "hohenpeissenberg germany"
@@ -248,7 +447,14 @@
     "short_name": "humboldt state university",
     "long_name": "humboldt state university united states"
   },
-  "HUN": { "short_name": "hegyhatsal", "long_name": "hegyhatsal hungary" },
+  "HTM": {
+    "short_name": "hyltemossa",
+    "long_name": "hyltemossa sweden"
+  },
+  "HUN": {
+    "short_name": "hegyhatsal",
+    "long_name": "hegyhatsal hungary"
+  },
   "ICE": {
     "short_name": "storhofdi",
     "long_name": "storhofdi vestmannaeyjar iceland"
@@ -261,32 +467,106 @@
     "short_name": "influx indianapolis flux experiment",
     "long_name": "influx indianapolis flux experiment united states"
   },
+  "INX01": {
+    "short_name": "influx site - tower 1",
+    "long_name": "influx site - tower 1 united states"
+  },
+  "INX02": {
+    "short_name": "influx site - tower 2",
+    "long_name": "influx site - tower 2 united states"
+  },
+  "INX04": {
+    "short_name": "influx site - tower 4",
+    "long_name": "influx site - tower 4 united states"
+  },
+  "INX05": {
+    "short_name": "influx site - tower 5",
+    "long_name": "influx site - tower 5 united states"
+  },
+  "INX07": {
+    "short_name": "influx site - tower 7",
+    "long_name": "influx site - tower 7 united states"
+  },
+  "INX08": {
+    "short_name": "influx site - tower 8",
+    "long_name": "influx site - tower 8 united states"
+  },
+  "INX09": {
+    "short_name": "influx site - tower 9",
+    "long_name": "influx site - tower 9 united states"
+  },
+  "INX10": {
+    "short_name": "influx site - tower 10",
+    "long_name": "influx site - tower 10 united states"
+  },
+  "INX11": {
+    "short_name": "influx site - tower 11",
+    "long_name": "influx site - tower 11 united states"
+  },
+  "INX13": {
+    "short_name": "influx site - tower 13",
+    "long_name": "influx site - tower 13 united states"
+  },
+  "INX14": {
+    "short_name": "influx site - tower 14",
+    "long_name": "influx site - tower 14 united states"
+  },
+  "IPR": {
+    "short_name": "ispra",
+    "long_name": "ispra italy"
+  },
   "ITN": {
     "short_name": "grifton",
     "long_name": "grifton north carolina united states"
   },
-  "IZA": { "short_name": "izana", "long_name": "izana tenerife" },
-  "IZO": { "short_name": "izana", "long_name": "izana tenerife" },
+  "IZA": {
+    "short_name": "izana",
+    "long_name": "izana tenerife"
+  },
+  "IZO": {
+    "short_name": "izana",
+    "long_name": "izana tenerife"
+  },
   "JFJ": {
     "short_name": "jungfraujoch",
     "long_name": "jungfraujoch switzerland"
   },
-  "KAS": { "short_name": "kasprowy", "long_name": "kasprowy poland" },
+  "KAS": {
+    "short_name": "kasprowy",
+    "long_name": "kasprowy poland"
+  },
   "KCO": {
     "short_name": "kaashidhoo",
     "long_name": "kaashidhoo republic of maldives"
   },
-  "KEY": { "short_name": "key biscane", "long_name": "key biscane florida" },
+  "KEY": {
+    "short_name": "key biscane",
+    "long_name": "key biscane florida"
+  },
+  "KLM": {
+    "short_name": "kohler mesa boulder colorado",
+    "long_name": "kohler mesa boulder colorado united states"
+  },
   "KPA": {
     "short_name": "kitt peak",
     "long_name": "kitt peak arizona united states"
+  },
+  "KRE": {
+    "short_name": "kresin u pacova",
+    "long_name": "kresin u pacova czech republic"
+  },
+  "KUM": {
+    "short_name": "cape kumukahi",
+    "long_name": "cape kumukahi hawaii"
   },
   "KVH": {
     "short_name": "killearn village hall",
     "long_name": "killearn village hall"
   },
-  "KUM": { "short_name": "cape kumukahi", "long_name": "cape kumukahi hawaii" },
-  "KZD": { "short_name": "sary taukum", "long_name": "sary taukum kazakhstan" },
+  "KZD": {
+    "short_name": "sary taukum",
+    "long_name": "sary taukum kazakhstan"
+  },
   "KZM": {
     "short_name": "plateau assy",
     "long_name": "plateau assy kazakhstan"
@@ -303,14 +583,34 @@
     "short_name": "lewisburg",
     "long_name": "lewisburg pennsylvania united states"
   },
+  "LIN": {
+    "short_name": "lindenberg",
+    "long_name": "lindenberg germany"
+  },
   "LLB": {
     "short_name": "lac la biche",
     "long_name": "lac la biche alberta canada"
   },
-  "LLN": { "short_name": "lulin", "long_name": "lulin taiwan" },
-  "LMP": { "short_name": "lampedusa", "long_name": "lampedusa italy" },
-  "LUT": { "short_name": "lutjewad", "long_name": "lutjewad netherlands" },
-  "MBC": { "short_name": "mould bay", "long_name": "mould bay canada" },
+  "LLN": {
+    "short_name": "lulin",
+    "long_name": "lulin taiwan"
+  },
+  "LMP": {
+    "short_name": "lampedusa",
+    "long_name": "lampedusa italy"
+  },
+  "LUT": {
+    "short_name": "lutjewad",
+    "long_name": "lutjewad netherlands"
+  },
+  "MAA": {
+    "short_name": "mawson station antarctica",
+    "long_name": "mawson station antarctica australia"
+  },
+  "MBC": {
+    "short_name": "mould bay",
+    "long_name": "mould bay canada"
+  },
   "MBO": {
     "short_name": "mt bachelor observatory",
     "long_name": "mt bachelor observatory usa"
@@ -319,17 +619,26 @@
     "short_name": "mcmurdo station",
     "long_name": "mcmurdo station antarctica united states"
   },
-  "MDO": { "short_name": "montana de oro", "long_name": "montana de oro usa" },
+  "MDO": {
+    "short_name": "montana de oro",
+    "long_name": "montana de oro usa"
+  },
   "MEX": {
     "short_name": "high altitude global climate observation center",
     "long_name": "high altitude global climate observation center mexico"
   },
-  "MHD": { "short_name": "mace head", "long_name": "mace head ireland" },
+  "MHD": {
+    "short_name": "mace head",
+    "long_name": "mace head ireland"
+  },
   "MID": {
     "short_name": "sand island",
     "long_name": "sand island midway united states"
   },
-  "MKN": { "short_name": "mt kenya", "long_name": "mt kenya kenya" },
+  "MKN": {
+    "short_name": "mt kenya",
+    "long_name": "mt kenya kenya"
+  },
   "MKO": {
     "short_name": "mauna kea",
     "long_name": "mauna kea hawaii united states"
@@ -338,10 +647,21 @@
     "short_name": "mauna loa",
     "long_name": "mauna loa hawaii united states"
   },
-  "MLO": { "short_name": "mauna loa", "long_name": "mauna loa hawaii" },
+  "MLO": {
+    "short_name": "mauna loa",
+    "long_name": "mauna loa hawaii"
+  },
+  "MNM": {
+    "short_name": "minamitorishima",
+    "long_name": "minamitorishima japan"
+  },
   "MONSOON-FAAM": {
     "short_name": "monsoon flights",
     "long_name": "monsoon flights india"
+  },
+  "MQA": {
+    "short_name": "macquarie island",
+    "long_name": "macquarie island australia"
   },
   "MRC": {
     "short_name": "marcellus pennsylvania",
@@ -351,7 +671,10 @@
     "short_name": "mashpee",
     "long_name": "mashpee massachusetts united states"
   },
-  "MUG": { "short_name": "mugogo", "long_name": "mugogo rwanda" },
+  "MUG": {
+    "short_name": "mugogo",
+    "long_name": "mugogo rwanda"
+  },
   "MVY": {
     "short_name": "marthas vineyard",
     "long_name": "marthas vineyard massachusetts united states"
@@ -376,8 +699,18 @@
     "short_name": "offshore portsmouth",
     "long_name": "offshore portsmouth new hampshire isles of shoals united states"
   },
-  "NMB": { "short_name": "gobabeb", "long_name": "gobabeb namibia" },
-  "NMY": { "short_name": "neumayer", "long_name": "neumayer antarctica" },
+  "NMB": {
+    "short_name": "gobabeb",
+    "long_name": "gobabeb namibia"
+  },
+  "NMY": {
+    "short_name": "neumayer",
+    "long_name": "neumayer antarctica"
+  },
+  "NOR": {
+    "short_name": "norunda",
+    "long_name": "norunda sweden"
+  },
   "NPL": {
     "short_name": "national physical laboratory",
     "long_name": "national physical laboratory"
@@ -398,9 +731,17 @@
     "short_name": "kaitorete spit",
     "long_name": "kaitorete spit new zealand"
   },
+  "OBN": {
+    "short_name": "obninsk",
+    "long_name": "obninsk russia"
+  },
   "OIL": {
     "short_name": "oglesby",
     "long_name": "oglesby illinois united states"
+  },
+  "OLI": {
+    "short_name": "oliktok point alaska",
+    "long_name": "oliktok point alaska united  states"
   },
   "OPE": {
     "short_name": "observatoire perenne de lenvironnement",
@@ -410,19 +751,38 @@
     "short_name": "olympic peninsula",
     "long_name": "olympic peninsula washington united states"
   },
-  "ORG": { "short_name": "cape meares", "long_name": "cape meares oregon" },
-  "OXK": { "short_name": "ochsenkopf", "long_name": "ochsenkopf germany" },
-  "PAL": { "short_name": "pallas", "long_name": "pallas finland" },
+  "ORG": {
+    "short_name": "cape meares",
+    "long_name": "cape meares oregon"
+  },
+  "OTA": {
+    "short_name": "otway victoria",
+    "long_name": "otway victoria australia"
+  },
+  "OXK": {
+    "short_name": "ochsenkopf",
+    "long_name": "ochsenkopf germany"
+  },
+  "PAL": {
+    "short_name": "pallas",
+    "long_name": "pallas finland"
+  },
   "PAO": {
     "short_name": "pacificatlantic ocean",
     "long_name": "pacificatlantic ocean na"
   },
-  "PCO": { "short_name": "pico", "long_name": "pico azores portugal" },
+  "PCO": {
+    "short_name": "pico",
+    "long_name": "pico azores portugal"
+  },
   "PFA": {
     "short_name": "poker flat",
     "long_name": "poker flat alaska united states"
   },
-  "POC": { "short_name": "pacific ocean", "long_name": "pacific ocean" },
+  "POC": {
+    "short_name": "pacific ocean",
+    "long_name": "pacific ocean"
+  },
   "POCN00": {
     "short_name": "pacific ocean 0 n",
     "long_name": "pacific ocean 0 n na"
@@ -491,7 +851,10 @@
     "short_name": "pacific ocean 35 s",
     "long_name": "pacific ocean 35 s na"
   },
-  "PRS": { "short_name": "plateau rosa", "long_name": "plateau rosa" },
+  "PRS": {
+    "short_name": "plateau rosa",
+    "long_name": "plateau rosa"
+  },
   "PSA": {
     "short_name": "palmer station",
     "long_name": "palmer station antarctica"
@@ -504,16 +867,42 @@
     "short_name": "point arena",
     "long_name": "point arena california united states"
   },
-  "RGL": { "short_name": "ridge hill", "long_name": "ridge hill uk" },
+  "PUY": {
+    "short_name": "puy de dome",
+    "long_name": "puy de dome france"
+  },
+  "RGL": {
+    "short_name": "ridge hill",
+    "long_name": "ridge hill uk"
+  },
   "RHL": {
     "short_name": "royal holloway",
     "long_name": "royal holloway university of london uk"
   },
-  "RHO": { "short_name": "royal holloway", "long_name": "royal holloway" },
-  "RPB": { "short_name": "ragged point", "long_name": "ragged point barbados" },
-  "RTA": { "short_name": "rarotonga", "long_name": "rarotonga cook islands" },
-  "RWA": { "short_name": "mt mugogo", "long_name": "mt mugogo" },
-  "SAN": { "short_name": "santarem", "long_name": "santarem brazil" },
+  "RHO": {
+    "short_name": "royal holloway",
+    "long_name": "royal holloway"
+  },
+  "RPB": {
+    "short_name": "ragged point",
+    "long_name": "ragged point barbados"
+  },
+  "RTA": {
+    "short_name": "rarotonga",
+    "long_name": "rarotonga cook islands"
+  },
+  "RWA": {
+    "short_name": "mt mugogo",
+    "long_name": "mt mugogo"
+  },
+  "RYO": {
+    "short_name": "ryori",
+    "long_name": "ryori japan"
+  },
+  "SAN": {
+    "short_name": "santarem",
+    "long_name": "santarem brazil"
+  },
   "SCA": {
     "short_name": "offshore charleston",
     "long_name": "offshore charleston south carolina united states"
@@ -550,8 +939,14 @@
     "short_name": "beech island",
     "long_name": "beech island south carolina united states"
   },
-  "SDZ": { "short_name": "shangdianzi", "long_name": "shangdianzi china" },
-  "SEY": { "short_name": "mahe island", "long_name": "mahe island seychelles" },
+  "SDZ": {
+    "short_name": "shangdianzi",
+    "long_name": "shangdianzi china"
+  },
+  "SEY": {
+    "short_name": "mahe island",
+    "long_name": "mahe island seychelles"
+  },
   "SGI": {
     "short_name": "bird island",
     "long_name": "bird island south georgia united kingdom"
@@ -560,12 +955,22 @@
     "short_name": "southern great plains",
     "long_name": "southern great plains oklahoma united states"
   },
-  "SHM": { "short_name": "shemya island", "long_name": "shemya island alaska" },
+  "SHM": {
+    "short_name": "shemya island",
+    "long_name": "shemya island alaska"
+  },
   "SIO": {
     "short_name": "scripps institue of oceanography",
     "long_name": "scripps institue of oceanography california"
   },
-  "SMA": { "short_name": "st marys church", "long_name": "st marys church" },
+  "SIS": {
+    "short_name": "shetland islands",
+    "long_name": "shetland islands scotland"
+  },
+  "SMA": {
+    "short_name": "st marys church",
+    "long_name": "st marys church"
+  },
   "SMO": {
     "short_name": "cape matatula",
     "long_name": "cape matatula american samoa"
@@ -574,7 +979,10 @@
     "short_name": "smearhyytiala",
     "long_name": "smearhyytiala finland"
   },
-  "SNG": { "short_name": "sinhagad", "long_name": "sinhagad india" },
+  "SNG": {
+    "short_name": "sinhagad",
+    "long_name": "sinhagad india"
+  },
   "SNP": {
     "short_name": "shenandoah national park",
     "long_name": "shenandoah national park united states"
@@ -583,19 +991,38 @@
     "short_name": "antarctic firn air",
     "long_name": "antarctic firn air antarctica"
   },
-  "SPO": { "short_name": "south pole", "long_name": "south pole antarctica" },
-  "SSL": { "short_name": "schauinsland", "long_name": "schauinsland germany" },
+  "SPO": {
+    "short_name": "south pole",
+    "long_name": "south pole antarctica"
+  },
+  "SSL": {
+    "short_name": "schauinsland",
+    "long_name": "schauinsland germany"
+  },
   "STC": {
     "short_name": "ocean station charlie",
     "long_name": "ocean station charlie united states"
   },
-  "STJ": { "short_name": "st judes church", "long_name": "st judes church" },
-  "STM": { "short_name": "ocean station m", "long_name": "ocean station m" },
+  "STJ": {
+    "short_name": "st judes church",
+    "long_name": "st judes church"
+  },
+  "STM": {
+    "short_name": "ocean station m",
+    "long_name": "ocean station m"
+  },
   "STR": {
     "short_name": "sutro",
     "long_name": "sutro tower san francisco united states"
   },
-  "SUM": { "short_name": "summit", "long_name": "summit greenland" },
+  "SUM": {
+    "short_name": "summit",
+    "long_name": "summit greenland"
+  },
+  "SVB": {
+    "short_name": "svartberget",
+    "long_name": "svartberget sweden"
+  },
   "SYO": {
     "short_name": "syowa station",
     "long_name": "syowa station antarctica"
@@ -604,11 +1031,18 @@
     "short_name": "tacolneston",
     "long_name": "tacolneston tower uk"
   },
+  "TAO": {
+    "short_name": "toronto atmospheric observatory university of toronto ontario",
+    "long_name": "toronto atmospheric observatory university of toronto ontario canada"
+  },
   "TAP": {
     "short_name": "taeahn peninsula",
     "long_name": "taeahn peninsula korea"
   },
-  "TBP": { "short_name": "tambopata", "long_name": "tambopata peru" },
+  "TBP": {
+    "short_name": "tambopata",
+    "long_name": "tambopata peru"
+  },
   "TGC": {
     "short_name": "offshore corpus christi",
     "long_name": "offshore corpus christi texas united states"
@@ -625,13 +1059,26 @@
     "short_name": "hydrometeorological observatory of tiksi",
     "long_name": "hydrometeorological observatory of tiksi russia"
   },
-  "TIL": { "short_name": "tilney", "long_name": "tilney uk" },
-  "TMB": { "short_name": "thames barrier", "long_name": "thames barrier uk" },
+  "TIL": {
+    "short_name": "tilney",
+    "long_name": "tilney uk"
+  },
+  "TMB": {
+    "short_name": "thames barrier",
+    "long_name": "thames barrier uk"
+  },
   "TMD": {
     "short_name": "thurmont",
     "long_name": "thurmont maryland united states"
   },
-  "TOB": { "short_name": "taunus", "long_name": "taunus germany" },
+  "TOB": {
+    "short_name": "taunus",
+    "long_name": "taunus germany"
+  },
+  "TOH": {
+    "short_name": "torfhaus",
+    "long_name": "torfhaus germany"
+  },
   "TPD": {
     "short_name": "turkey point",
     "long_name": "turkey point ontario canada"
@@ -640,19 +1087,38 @@
     "short_name": "taiping island",
     "long_name": "taiping island taiwan"
   },
-  "TRN": { "short_name": "trainou", "long_name": "trainou france" },
-  "TTA": { "short_name": "angus tower", "long_name": "angus tower uk" },
-  "ULB": { "short_name": "ulaanbaatar", "long_name": "ulaanbaatar mongolia" },
+  "TRN": {
+    "short_name": "trainou",
+    "long_name": "trainou france"
+  },
+  "TTA": {
+    "short_name": "angus tower",
+    "long_name": "angus tower uk"
+  },
+  "ULB": {
+    "short_name": "ulaanbaatar",
+    "long_name": "ulaanbaatar mongolia"
+  },
   "UOW": {
     "short_name": "university of westminster",
     "long_name": "university of westminster harrow campus"
   },
-  "USH": { "short_name": "ushaia", "long_name": "ushaia argentina" },
+  "USH": {
+    "short_name": "ushaia",
+    "long_name": "ushaia argentina"
+  },
   "UTA": {
     "short_name": "wendover",
     "long_name": "wendover utah united states"
   },
-  "UUM": { "short_name": "ulaan uul", "long_name": "ulaan uul mongolia" },
+  "UTO": {
+    "short_name": "uto",
+    "long_name": "uto finland"
+  },
+  "UUM": {
+    "short_name": "ulaan uul",
+    "long_name": "ulaan uul mongolia"
+  },
   "WAO": {
     "short_name": "weybourne observatory",
     "long_name": "weybourne observatory uk"
@@ -665,13 +1131,22 @@
     "short_name": "walnut grove",
     "long_name": "walnut grove california united states"
   },
-  "WGF": { "short_name": "woodgreen farm", "long_name": "woodgreen farm" },
+  "WGF": {
+    "short_name": "woodgreen farm",
+    "long_name": "woodgreen farm"
+  },
   "WIS": {
     "short_name": "weizmann institute of science at arva institute",
     "long_name": "weizmann institute of science at arva institute israel"
   },
-  "WKT": { "short_name": "moody", "long_name": "moody texas united states" },
-  "WLG": { "short_name": "mt waliguan", "long_name": "mt waliguan china" },
+  "WKT": {
+    "short_name": "moody",
+    "long_name": "moody texas united states"
+  },
+  "WLG": {
+    "short_name": "mt waliguan",
+    "long_name": "mt waliguan china"
+  },
   "WPC": {
     "short_name": "western pacific cruise",
     "long_name": "western pacific cruise na"
@@ -732,5 +1207,12 @@
     "short_name": "sable island",
     "long_name": "sable island nova scotia canada"
   },
-  "ZEP": { "short_name": "zeppelin", "long_name": "zeppelin ny alesund norway" }
+  "YON": {
+    "short_name": "yonagunijima",
+    "long_name": "yonagunijima japan"
+  },
+  "ZEP": {
+    "short_name": "zeppelin",
+    "long_name": "zeppelin ny alesund norway"
+  }
 }
