@@ -38,6 +38,8 @@ def retrieve_example_data(path: str, output_filename: str = None, download_dir: 
     download_path = Path(download_dir).joinpath(output_filename)
 
     with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+
         with open(download_path, 'wb') as f:
             shutil.copyfileobj(r.raw, f)
 
