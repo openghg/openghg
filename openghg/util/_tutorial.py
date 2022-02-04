@@ -3,7 +3,6 @@
 """
 from pathlib import Path
 from typing import List, Union
-from urllib.error import HTTPError
 
 __all__ = ["bilsdale_datapaths"]
 
