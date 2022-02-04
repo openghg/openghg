@@ -83,7 +83,6 @@ def test_scenario_infer_inlet():
     site = "tac"
     domain = "EUROPE"
     species = "ch4"
-    # source = "anthro"
 
     # TODO: Add extraction of flux data as well (get_flux) and add to ModelScenario call
 
@@ -94,5 +93,21 @@ def test_scenario_infer_inlet():
                                    start_date=start_date,
                                    end_date=end_date)
 
-    assert model_scenario.obs is not None
+    assert model_scenario.obs is not None    
     assert model_scenario.footprint is not None
+
+
+def test_scenario_too_few_inputs():
+    '''
+    Test no output is included if data can't be found using keywords.
+    '''
+
+    site = "tac"
+
+    # Explicitly not including inlet to test this can be inferred.
+    model_scenario = ModelScenario(site=site)
+
+    assert model_scenario.obs is None
+
+    # TODO: get_footprint() is not currently returning None - check this
+    # assert model_scenario.footprint is None
