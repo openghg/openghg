@@ -72,8 +72,7 @@ def _read_data(
     Returns:
         dict: Dictionary of gas data
     """
-    from datetime import datetime
-    from pandas import RangeIndex, read_csv, NaT, to_datetime
+    from pandas import RangeIndex, read_csv, to_datetime
     import warnings
     from openghg.util import clean_string
 
