@@ -218,7 +218,7 @@ def _read_data(
         dict: Dictionary of gas data keyed by species
     """
     from datetime import datetime
-    from pandas import read_csv
+    from pandas import read_csv, to_datetime
     from pandas import Timedelta as pd_Timedelta
     import warnings
 
@@ -232,13 +232,14 @@ def _read_data(
     # Read the data in and automatically create a datetime column from the 5 columns
     # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
     data = read_csv(
-        data_filepath,
+        gc_data,
         skiprows=4,
         sep=r"\s+",
         index_col=["yyyy_mm_dd_hh_mi"],
-        parse_dates=[[1, 2, 3, 4, 5]],
-        date_parser=parser,
+        parse_dates=[[1, 2, 3, 4, 5]]        
     )
+
+    data.index = to_datetime(data.index, format="%Y %m %d %H %M")
 
     if data.empty:
         raise ValueError("Cannot process empty file.")
