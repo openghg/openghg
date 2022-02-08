@@ -72,20 +72,6 @@ def test_read_file():
     assert metadata == expected_metadata
 
 
-def test_read_same_file_twice_raises():
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
-
-    with pytest.raises(ValueError):
-        Emissions.read_file(
-            filepath=test_datapath,
-            species="co2",
-            source="gpp-cardamom",
-            date="2012",
-            domain="europe",
-            high_time_resolution=False,
-        )
-
-
 def test_set_lookup_uuids():
     e = Emissions()
 

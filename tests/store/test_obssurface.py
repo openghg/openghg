@@ -365,25 +365,6 @@ def test_read_thames_barrier():
     assert sorted(obs._datasource_uuids.values()) == expected_keys
 
 
-def test_upload_same_file_twice_raises():
-    get_local_bucket(empty=True)
-
-    data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
-
-    ObsSurface.read_file(
-        filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60
-    )
-
-    # assert not res["error"]
-
-    with pytest.raises(ValueError):
-        ObsSurface.read_file(
-            filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60
-        )
-
-    # assert "tta.co2.1minute.222m.min.dat" in res["error"]
-
-
 def test_delete_Datasource():
     bucket = get_local_bucket(empty=True)
 
