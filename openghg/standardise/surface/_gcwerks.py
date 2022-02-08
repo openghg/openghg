@@ -232,7 +232,7 @@ def _read_data(
     # Read the data in and automatically create a datetime column from the 5 columns
     # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
     data = read_csv(
-        gc_data,
+        data_filepath,
         skiprows=4,
         sep=r"\s+",
         index_col=["yyyy_mm_dd_hh_mi"],
