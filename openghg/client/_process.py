@@ -196,8 +196,6 @@ def _process_files_local(
     if not isinstance(files, list):
         files = [files]
 
-    obs = ObsSurface.load()
-
     results = {}
     # Ensure we have Paths
     # TODO: Delete this, as we already have the same warning in read_file?
@@ -210,15 +208,14 @@ def _process_files_local(
     else:
         files = [Path(f) for f in files]
 
-    r = obs.read_file(
-        filepath=files,
+    res = ObsSurface.read_file(filepath=files,
         data_type=data_type,
         site=site,
         network=network,
         instrument=instrument,
         inlet=inlet,
-        overwrite=overwrite,
-    )
-    results.update(r)
+        overwrite=True)
+
+    results.update(res)
 
     return results

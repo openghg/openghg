@@ -22,9 +22,7 @@ def read_data(authenticated_user):
         service_url="openghg",
     )
 
-    bsd_file = get_datapath(
-        filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS"
-    )
+    bsd_file = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
     hfd_files = glob_files(search_str="hfd.picarro.1minute", data_type="CRDS")
 
     process_files(
@@ -44,6 +42,7 @@ def read_data(authenticated_user):
         data_type="CRDS",
         service_url="openghg",
     )
+
 
 @pytest.mark.skip("Marked for removal")
 def test_search(read_data):
@@ -84,6 +83,7 @@ def test_search(read_data):
     metadata_checker_obssurface(metadata=metadata, species="nf3")
 
     assert len(raw_results["cgo"]["nf3"]["70m"]["keys"]) == 1
+
 
 @pytest.mark.skip("Marked for removal")
 def test_search_and_retrieve(read_data, monkeypatch):

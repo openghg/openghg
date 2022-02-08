@@ -47,7 +47,9 @@ def test_recombination_GC():
 
     ObsSurface.read_file((data, precision), data_type="GCWERKS", site="cgo", network="agage")
 
-    data = parse_gcwerks(data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa", network="AGAGE")
+    data = parse_gcwerks(
+        data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa", network="AGAGE"
+    )
 
     toluene_data = data["c6h5ch3_70m"]["data"]
 
@@ -67,4 +69,6 @@ def test_recombination_GC():
     assert toluene_data["c6h5ch3"].equals(toluene_data_recombined["c6h5ch3"])
     assert toluene_data["c6h5ch3_repeatability"].equals(toluene_data_recombined["c6h5ch3_repeatability"])
     assert toluene_data["c6h5ch3_status_flag"].equals(toluene_data_recombined["c6h5ch3_status_flag"])
-    assert toluene_data["c6h5ch3_integration_flag"].equals(toluene_data_recombined["c6h5ch3_integration_flag"])
+    assert toluene_data["c6h5ch3_integration_flag"].equals(
+        toluene_data_recombined["c6h5ch3_integration_flag"]
+    )

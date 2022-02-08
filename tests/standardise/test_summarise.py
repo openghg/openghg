@@ -1,7 +1,8 @@
 from openghg.standardise import summary_data_types
 
+
 def test_summarise():
-    '''Test to check summary_data_types() function is producing expected output'''
+    """Test to check summary_data_types() function is producing expected output"""
     summary_df = summary_data_types()
 
     # Check subset of columns in DataFrame

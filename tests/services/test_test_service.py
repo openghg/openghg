@@ -10,6 +10,7 @@ def mock_timestamp(monkeypatch):
 
     monkeypatch.setattr(Timestamp, "now", mock_timestamp)
 
+
 @pytest.mark.skip("Marked for removal")
 def test_test_service(authenticated_user, mock_timestamp):
     timestamp = call_test_service()

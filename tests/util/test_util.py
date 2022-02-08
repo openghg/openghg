@@ -52,4 +52,4 @@ def test_to_lowercase():
 
     lower = util.to_lowercase(d)
 
-    assert lower == {'this': 'isanuppercase', 'spam': {'also_big': 'foo', 'baaar': 123}}
+    assert lower == {"this": "isanuppercase", "spam": {"also_big": "foo", "baaar": 123}}
