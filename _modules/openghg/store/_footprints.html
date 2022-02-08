@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.3.g1227e47.dirty documentation</title>
+    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.3.gda47779.dirty documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -230,8 +230,8 @@
 
         <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="n">fp</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">fp</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">fp</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
             <span class="p">)</span>
 
         <span class="n">fp_data</span> <span class="o">=</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
