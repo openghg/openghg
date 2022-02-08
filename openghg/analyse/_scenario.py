@@ -1,6 +1,7 @@
+from xml.sax import parseString
 from pandas import Timestamp
-from xarray import Dataset
-from typing import Optional, Tuple, Union, List, Dict
+from xarray import Dataset, DataArray
+from typing import Optional, Tuple, Union, List, Dict, Any
 from openghg.dataobjects import ObsData, FootprintData, FluxData
 from openghg.retrieve import get_obs_surface, get_footprint, get_flux, search
 
@@ -21,6 +22,8 @@ __all__ = ["ModelScenario", "combine_datasets"]
 # TODO: Add static methods for different ways of creating the class
 # e.g. from_existing_data(), from_search(), empty() , ...
 
+# TODO: Incorporate boundary conditions when possible
+
 
 class ModelScenario():
     """
@@ -33,7 +36,7 @@ class ModelScenario():
                  domain: Optional[str] = None,
                  model: Optional[str] = None,
                  metmodel: Optional[str] = None,
-                 sources: Optional[str] = None,  # TODO: Allow this to be a list of str as well?
+                 sources: Optional[Union[str, List]] = None,
                  start_date: Optional[str] = None,   # TODO: Allow str or Timestamp
                  end_date: Optional[str] = None,   # TODO: Allow str or Timestamp
                  obs: Optional[ObsData] = None, 
@@ -45,6 +48,7 @@ class ModelScenario():
 
         """
 
+        # Add observation data (directly or through keywords)
         self.add_obs(site = site,
                      species = species,
                      inlet = inlet,
@@ -53,6 +57,9 @@ class ModelScenario():
                      end_date = end_date,
                      obs = obs)
 
+        # TODO: Add updates to inputs here if obs has been specified directly if useful?
+
+        # Add footprint data (directly or through keywords)
         self.add_footprint(site = site,
                            inlet = inlet,
                            domain = domain,
@@ -63,14 +70,19 @@ class ModelScenario():
                            species = species,
                            footprint = footprint)
 
-        # TODO: Don't necessarily want to "add" flux... may want to rename?
+        # Add flux data (directly or through keywords)
         self.add_flux(species=species,
                       domain=domain,
                       sources=sources,
                       start_date = start_date,
                       end_date = end_date,
                       flux = flux)
-        
+
+        # Initialise attributes used for caching
+        self.scenario = None
+        self.modelled_obs = None
+
+        # TODO: Check species, site etc. values align between inputs?
         # TODO: May want to add class additional attributes for e.g. site, species etc.
 
     # TODO: May want to find a clever functional way to combine aspects of add_obs, add_footprint, add_flux together
@@ -126,9 +138,13 @@ class ModelScenario():
                 start_date: Optional[str] = None,   # TODO: Allow str or Timestamp
                 end_date: Optional[str] = None,   # TODO: Allow str or Timestamp
                 obs: Optional[ObsData] = None):
+        """
+        """
+        from openghg.util import clean_string
 
         # Search for obs data based on keywords
         if site and obs is None:
+            site = clean_string(site)
             # search for obs based on suitable keywords - site, species, inlet
             obs_keywords = {"site": site, 
                             "species": species,
@@ -140,7 +156,10 @@ class ModelScenario():
             obs = self._get_data(obs_keywords, input_type="obs_surface")
 
         self.obs = obs
-        self.obs_raw = self.obs  # May need to make a copy?
+
+        if self.obs is not None:
+            self.site = self.obs.metadata["site"]
+            self.species = self.obs.metadata["species"]
 
 
     def add_footprint(self,
@@ -153,11 +172,14 @@ class ModelScenario():
                       end_date: Optional[str] = None,   # TODO: Allow str or Timestamp
                       species: Optional[str] = None,
                       footprint: Optional[FootprintData] = None):
+        """
+        """
+        from openghg.util import clean_string
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs), model, metmodel
         if site and footprint is None:
-
+            site = clean_string(site)
             if not inlet and self.obs:
                 # TODO: Add case to deal with "multiple" inlets
                 inlet = self.obs.metadata["inlet"]
@@ -179,20 +201,27 @@ class ModelScenario():
             footprint = self._get_data(footprint_keywords, input_type="footprint")
         
         self.footprint = footprint
-        self.footprint_raw = self.footprint  # May need to make a copy?
+
+        # Is there any metadata associated with FootprintData??
+        if self.footprint is not None and not self.site:
+            self.site = self.footprint.data.attrs["site"]
 
 
     def add_flux(self,
                  species: Optional[str] = None,
                  domain: Optional[str] = None,
-                 sources: Optional[str] = None,  # TODO: Allow this to be a list of str as well?
+                 sources: Optional[Union[str, List]] = None,
                  start_date: Optional[str] = None,   # TODO: Allow str or Timestamp
                  end_date: Optional[str] = None,   # TODO: Allow str or Timestamp
                  flux: Optional[FluxData] = None):
-
+        """
+        """
         # Search for flux data based on keywords (but don't necessarily add..?)
         if species and flux is None:
-
+            if isinstance(sources, str):
+                sources = [sources]
+            
+            # TODO: Make this into a dictionary for each source
             flux_keywords_1 = {"species": species,
                                "sources": sources,
                                "domain": domain,
@@ -210,7 +239,9 @@ class ModelScenario():
             flux = self._get_data(flux_keywords, input_type="flux")
 
         self.flux = flux
-        self.flux_raw = self.flux  # May need to make a copy?
+
+        if self.flux is not None and not self.species:
+            self.species = species
 
 
     def _check_data_is_present(self, need=["obs", "footprint"]):
@@ -242,9 +273,25 @@ class ModelScenario():
             raise ValueError(f"Missing necessary {' and '.join(missing)} data.")
 
 
-    def align_obs_footprint(self, 
-                            resample_to: Optional[str] = "coarsest",
-                            platform: Optional[str] = None) -> Tuple:
+    def _get_platform(self) -> Union[str, None]:
+        """
+        """
+        from openghg.util import load_json
+
+        try:
+            site = self.site
+            site_upper = site.upper()
+        except AttributeError:
+            return None
+        else:
+            site_info = load_json(filename="acrg_site_info.json")
+            platform = site_info[site_upper].get("platform")
+            return platform
+
+
+    def _align_obs_footprint(self,
+                             resample_to: Optional[str] = "coarsest",
+                             platform: Optional[str] = None) -> Tuple:
         """
         Slice and resample obs and footprint data to align along time
 
@@ -349,18 +396,14 @@ class ModelScenario():
                 if obs_data_timeperiod >= footprint_data_timeperiod:
                     resample_to = "obs"
                 elif obs_data_timeperiod < footprint_data_timeperiod:
-                    resample_to = "footprints"
+                    resample_to = "footprint"
 
             if resample_to == "obs":
-
                 resample_period = str(round(obs_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
-
                 footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
 
-            elif resample_to == "footprints":
-
+            elif resample_to == "footprint":
                 resample_period = str(round(footprint_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
-
                 obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
 
         return obs_data, footprint_data
@@ -368,22 +411,17 @@ class ModelScenario():
 
     def combine_obs_footprint(self,
                               resample_to: Optional[str] = "obs",
-                              platform: Optional[str] = None,
-                              species: Optional[Union[str, List]] = None,
-                              ) -> Dataset:
+                              cache: Optional[bool] = "True") -> Dataset:
         """
         """
         self._check_data_is_present(need=["obs", "footprint"])
 
         # As we're not processing any satellite data yet just set tolerance to None
         tolerance = None
-        platform = None
-
-        # TODO: Use species input to inform us on how to combine these datasets.
-        # Can extract from self keywords or an external input?
+        platform = self._get_platform()
 
         # Align and merge the observation and footprint Datasets
-        aligned_obs, aligned_footprint = self.align_obs_footprint(resample_to=resample_to, platform=platform)
+        aligned_obs, aligned_footprint = self._align_obs_footprint(resample_to=resample_to, platform=platform)
         combined_dataset = combine_datasets(dataset_A=aligned_obs, dataset_B=aligned_footprint, tolerance=tolerance)
 
         # Transpose to keep time in the last dimension position in case it has been moved in resample
@@ -403,16 +441,370 @@ class ModelScenario():
         #     # if HiTRes:
         #     #     combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes / units))})
 
+        combined_dataset.attrs["resample_to"] = resample_to
+
+        if cache:
+            self.scenario = combined_dataset
+
         return combined_dataset
 
     # TODO: Write calc_modelled_obs function to create a forward model combining the footprint and emissions inputs
     # TODO: Will want to allow this to be resampled / reindexed to the obs values even though they are not used here
     # but should allow this to a seperate function if obs isn't present.
 
-    # def calc_modelled_obs(self, ):
+    def calc_modelled_obs(self,
+                          sources: Optional[Union[str, List]] = None,
+                        #   averaging: Optional[str] = None,
+                          resample_to: Optional[str] = "coarsest",
+                          cache: Optional[bool] = True,
+                          recalculate: Optional[bool] = False) -> DataArray:
+        """
+        Calculate the modelled observation based on footprint and fluxes.
+        """
 
-    #     if self.footprint is None or self.flux is None:
-    #         raise ValueError("Footprint and flux must be both be specified to calculate the modelled observation")
+        self._check_data_is_present(need=["footprint", "flux"])
+
+        # Check if cached modelled observations exist
+        if self.modelled_obs is None:
+            # Check if observations are present and use these for resampling
+            if self.obs is not None:
+                self.combine_obs_footprint(resample_to, cache=True)
+            else:
+                self.scenario = self.footprint.data
+        else:
+            if self.obs is not None:
+                # Check previous resample_to input for cached data
+                prev_resample_to = self.scenario.attrs.get("resample_to")
+
+                # Check if this previous resample period matches input value
+                # - if not (or explicit recalculation requested), recreate scenario
+                # - if so return cached modelled observations
+                if prev_resample_to != resample_to or recalculate:
+                    self.combine_obs_footprint(resample_to, cache=True)
+                else:
+                    return self.modelled_obs
+            elif recalculate:
+                # Recalculate based on footprint data if obs not present
+                self.scenario = self.footprint.data
+            else:
+                # Return cached modelled observations if explicit recalculation not requested
+                return self.modelled_obs
+
+        # Check species and use high time resolution steps if this is carbon dioxide
+        if self.species == "co2":
+            modelled_obs = self._calc_modelled_obs_HiTRes(sources=sources, output_TS=True, output_fpXflux=False)
+            name = "mf_mod_high_res"
+        else:
+            modelled_obs = self._calc_modelled_obs_integrated(sources=sources, output_TS=True, output_fpXflux=False)
+            name = "mf_mod"
+
+        # Cache output from calculations
+        if cache:
+            print("Caching calculated data")
+            self.modelled_obs = modelled_obs
+            self.scenario[name] = modelled_obs
+        else:
+            self.modelled_obs = None  # Make sure this is reset and not cached
+            self.scenario = None  # Reset this to None after calculation completed
+
+        return modelled_obs
+
+
+    def _calc_modelled_obs_integrated(self,
+                                      sources: Optional[Union[str, List]] = None,
+                                      output_TS: Optional[bool] = True,
+                                      output_fpXflux: Optional[bool] = False,
+                                      ) -> Any:
+        """
+        Calculate modelled mole fraction timeseries using integrated footprints data.
+
+        Returns:
+            DataArray :
+                Modelled mole fraction timeseries, dimensions = (time)
+
+        TODO: Also allow flux_mod to be returned as an option? Include flags if so.
+        """
+
+        # Integrate "sources" into flux extraction
+
+        scenario = self.scenario
+        flux = self.flux.data
+
+        flux = flux.reindex_like(scenario, "ffill")
+        flux_modelled: DataArray = scenario["fp"] * flux["flux"]
+        timeseries: DataArray = flux_modelled.sum(["lat", "lon"])
+
+        if output_TS and output_fpXflux:
+            return timeseries, flux_modelled
+        elif output_TS:
+            return timeseries
+        elif output_fpXflux:
+            return flux_modelled
+
+
+    def _calc_modelled_obs_HiTRes(self, 
+                                  averaging: Optional[str] = None,
+                                  sources: Optional[Union[str, List]] = None,
+                                  output_TS: Optional[bool] = True,
+                                  output_fpXflux: Optional[bool] = False,
+                                  ) -> Any:
+        """
+        Calculate modelled mole fraction timeseries using high time resolution
+        footprints data and emissions data.
+
+        Args:
+            averaging:
+                Time resolution to use to average the time dimension.
+                Default = None
+            output_TS:
+                Whether to output the modelled mole fraction timeseries DataArray.
+                Default = True
+            output_fpXflux:
+                Whether to output the modelled flux map DataArray used to create
+                the timeseries.
+                Default = False
+        Returns:
+            DataArray / DataArray :
+                Modelled mole fraction timeseries, dimensions = (time)
+                Modelled flux map, dimensions = (lat, lon, time)
+
+            If one of output_TS and output_fpXflux are True:
+                DataArray is returned for the respective output
+
+            If both output_TS and output_fpXflux are both True:
+                Both DataArrays are returned.
+
+        TODO: Low frequency flux values may need to be selected from the month before
+        (currently selecting the same month).
+        TODO: Indexing for low frequency flux should be checked to make sure this
+        allows for crossing over the end of the year.
+        TODO: Currently using pure dask arrays (based on Hannah's original code)
+        but would be good to update this to add more pre-indexing using xarray
+        and/or use dask as part of datasets.
+        TODO: May want to update this to not rely on indexing when selecting
+        the appropriate flux values. At the moment this solution has been chosen
+        because selecting on a dimension, rather than indexing, can be *very* slow
+        depending on the operations performed beforehand on the Dataset (e.g.
+        resample and reindex)
+        TODO: This code currently resamples the frequency to be regular. This will
+        have no effect if the time frequency was already regular but this may
+        not be what we want and may want to add extra code to remove any NaNs, if
+        they are introduced or to find a way to remove this requirement.
+        TODO: mypy having trouble with different types options and incompatible types,
+        included as Any for now.
+        """
+        import numpy as np
+        import dask.array as da  # type: ignore
+        from tqdm import tqdm
+        from pandas import date_range
+        from math import gcd
+
+        # TODO: Integrate sources into selection of flux
+
+        fp_HiTRes = self.scenario.fp_HiTRes
+        flux_ds = self.flux.data
+
+        # Calculate time resolution for both the flux and footprints data
+        nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
+        flux_res_H = int(flux_ds.time.diff(dim="time").values.mean() * nanosecond_to_hour)
+        fp_res_time_H = int(fp_HiTRes.time.diff(dim="time").values.mean() * nanosecond_to_hour)
+
+        fp_res_Hback_H = int(fp_HiTRes["H_back"].diff(dim="H_back").values.mean())
+
+        # Define resolution on time dimension in number in hours
+        if averaging:
+            try:
+                time_res_H = int(averaging)
+                time_resolution = f"{time_res_H}H"
+            except (ValueError, TypeError):
+                time_res_H = int(averaging[0])
+                time_resolution = averaging
+        else:
+            # If not specified derive from time from combined dataset
+            time_res_H = fp_res_time_H
+            time_resolution = f"{time_res_H}H"
+
+        # Resample fp timeseries to match time resolution
+        if fp_res_time_H != time_res_H:
+            fp_HiTRes = fp_HiTRes.resample(time=time_resolution).ffill()
+
+        # Define resolution on high frequency dimension in number of hours
+        # At the moment this is matched to the Hback dimension
+        time_hf_res_H = fp_res_Hback_H
+
+        # Only allow for high frequency resolution < 24 hours
+        if time_hf_res_H > 24:
+            raise ValueError(f"High frequency resolution must be <= 24 hours. Current: {time_hf_res_H}H")
+        elif 24 % time_hf_res_H != 0 or 24 % time_hf_res_H != 0.0:
+            raise ValueError(
+                f"High frequency resolution must exactly divide into 24 hours. Current: {time_hf_res_H}H"
+            )
+
+        # Find the greatest common denominator between time and high frequency resolutions.
+        # This is needed to make sure suitable flux frequency is used to allow for indexing.
+        # e.g. time: 1H; hf (high frequency): 2H, highest_res_H would be 1H
+        # e.g. time: 2H; hf (high frequency): 3H, highest_res_H would be 1H
+        highest_res_H = gcd(time_res_H, time_hf_res_H)
+        highest_resolution = f"{highest_res_H}H"
+
+        # create time array to loop through, with the required resolution
+        # fp_HiTRes.time is the release time of particles into the model
+        time_array = fp_HiTRes["time"]
+        lat = fp_HiTRes["lat"]
+        lon = fp_HiTRes["lon"]
+        hback = fp_HiTRes["H_back"]
+
+        ntime = len(time_array)
+        nlat = len(lat)
+        nlon = len(lon)
+        # nh_back = len(hback)
+
+        # Define maximum hour back
+        max_h_back = hback.values[-1]
+
+        # Define full range of dates to select from the flux input
+        date_start = time_array[0]
+        date_start_back = date_start - np.timedelta64(max_h_back, "h")
+        date_end = time_array[-1] + np.timedelta64(1, "s")
+
+        start = {
+            dd: getattr(np.datetime64(time_array[0].values, "h").astype(object), dd) for dd in ["month", "year"]
+        }
+
+        # Create times for matching to the flux
+        full_dates = date_range(
+            date_start_back.values, date_end.values, freq=highest_resolution, closed="left"
+        ).to_numpy()
+
+        # Create low frequency flux data (monthly)
+        flux_ds_low_freq = flux_ds.resample({"time": "1MS"}).mean().sel(time=slice(date_start_back, date_end))
+        flux_ds_low_freq = flux_ds_low_freq.transpose(*("lat", "lon", "time"))
+
+        # Select and align high frequency flux data
+        flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
+        if flux_res_H <= 24:
+            base = (
+                date_start_back.dt.hour.data
+                + date_start_back.dt.minute.data / 60.0
+                + date_start_back.dt.second.data / 3600.0
+            )
+            if flux_res_H <= highest_res_H:
+                # Downsample flux to match to footprints frequency
+                flux_ds_high_freq = flux_ds_high_freq.resample({"time": highest_resolution}, base=base).mean()
+            elif flux_res_H > highest_res_H:
+                # Upsample flux to match footprints frequency and forward fill
+                flux_ds_high_freq = flux_ds_high_freq.resample({"time": highest_resolution}, base=base).ffill()
+            # Reindex to match to correct values
+            flux_ds_high_freq = flux_ds_high_freq.reindex({"time": full_dates}, method="ffill")
+        elif flux_res_H > 24:
+            # If flux is not high frequency use the monthly averages instead.
+            flux_ds_high_freq = flux_ds_low_freq
+
+        # TODO: Add check to make sure time values are exactly aligned based on date range
+
+        # Make sure the dimensions match the expected order for indexing
+        fp_HiTRes = fp_HiTRes.transpose(*("lat", "lon", "time", "H_back"))
+        flux_ds_high_freq = flux_ds_high_freq.transpose(*("lat", "lon", "time"))
+
+        # Extract footprints array to use in numba loop
+        fp_HiTRes = da.array(fp_HiTRes)
+
+        # Set up a numpy array to calculate the product of the footprints (H matrix) with the fluxes
+        if output_fpXflux:
+            fpXflux = da.zeros((nlat, nlon, ntime))
+
+        if output_TS:
+            timeseries = da.zeros(ntime)
+
+        # Iterate through the time coord to get the total mf at each time step using the H back coord
+        # at each release time we disaggregate the particles backwards over the previous 24hrs
+        # The final value then contains the 29-day integrated residual footprints
+        print("Calculating modelled timeseries comparison:")
+        iters = tqdm(time_array.values)
+        for tt, time in enumerate(iters):
+
+            # Get correct index for low resolution data based on start and current date
+            current = {dd: getattr(np.datetime64(time, "h").astype(object), dd) for dd in ["month", "year"]}
+            tt_low = current["month"] - start["month"] + 12 * (current["year"] - start["year"])
+
+            # get 4 dimensional chunk of high time res footprints for this timestep
+            # units : mol/mol/mol/m2/s
+            # reverse the time coordinate to be chronological
+            fp_time = fp_HiTRes[:, :, tt, ::-1]
+
+            fp_high_freq = fp_time[:, :, 1:]
+            fp_residual = fp_time[:, :, 0:1]  # First element (reversed) contains residual footprints
+
+            # Extract flux data from dataset
+            flux_high_freq = flux_ds_high_freq.flux
+            flux_low_freq = flux_ds_low_freq.flux
+
+            # Define high and low frequency fluxes based on inputs
+            # Allow for variable frequency within 24 hours
+            flux_low_freq = flux_low_freq[:, :, tt_low : tt_low + 1]
+            if flux_res_H <= 24:
+                # Define indices to correctly select matching date range from flux data
+                # This will depend on the various frequencies of the inputs
+                # At present, highest_res_H matches the flux frequency
+                tt_start = tt * int(time_res_H / highest_res_H) + 1
+                tt_end = tt_start + int(max_h_back / highest_res_H)
+                selection = int(time_hf_res_H / highest_res_H)
+
+                # Extract matching time range from whole flux array
+                flux_high_freq = flux_high_freq[..., tt_start:tt_end]
+                if selection > 1:
+                    # If flux frequency does not match to the high frequency (hf, H_back)
+                    # dimension, select entries which do. Reversed to make sure
+                    # entries matching to the correct times are selected
+                    flux_high_freq = flux_high_freq[..., ::-selection]
+                    flux_high_freq = flux_high_freq[..., ::-1]
+            else:
+                flux_high_freq = flux_high_freq[:, :, tt_low : tt_low + 1]
+
+            # convert to array to use in numba loop
+            flux_high_freq = da.array(flux_high_freq)
+            flux_low_freq = da.array(flux_low_freq)
+
+            # Multiply the HiTRes footprints with the HiTRes emissions to give mf
+            # Multiply residual footprints by low frequency emissions data to give residual mf
+            # flux units : mol/m2/s;       fp units : mol/mol/mol/m2/s
+            # --> mol/mol/mol/m2/s * mol/m2/s === mol / mol
+            fpXflux_time = flux_high_freq * fp_high_freq
+            fpXflux_residual = flux_low_freq * fp_residual
+
+            # append the residual emissions
+            fpXflux_time = np.dstack((fpXflux_time, fpXflux_residual))
+
+            if output_fpXflux:
+                # Sum over time (H back) to give the total mf at this timestep
+                fpXflux[:, :, tt] = fpXflux_time.sum(axis=2)
+
+            if output_TS:
+                # work out timeseries by summing over lat, lon (24 hrs)
+                timeseries[tt] = fpXflux_time.sum()
+
+        if output_fpXflux:
+            fpXflux = DataArray(
+                fpXflux,
+                dims=("lat", "lon", "time"),
+                coords={"lat": lat, "lon": lon, "time": time_array},
+            )
+
+        if output_TS:
+            timeseries = DataArray(timeseries, dims=("time"), coords={"time": time_array})
+
+        if output_fpXflux and output_TS:
+            timeseries.compute()
+            fpXflux.compute()
+            return timeseries, fpXflux
+        elif output_fpXflux:
+            fpXflux.compute()
+            return fpXflux
+        elif output_TS:
+            timeseries.compute()
+            return timeseries
+
+        return None
         
 
 def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:

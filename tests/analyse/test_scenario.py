@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
+from pandas import Timestamp
 from openghg.analyse import ModelScenario
-from openghg.retrieve import get_obs_surface, get_footprint
-# from openghg.retrieve import get_flux
+from openghg.retrieve import get_obs_surface, get_footprint, get_flux
 
 
 def test_scenario_direct_objects():
@@ -18,7 +18,7 @@ def test_scenario_direct_objects():
     species="ch4"
     network="DECC"
     inlet="100m"
-    # source="anthro"
+    sources="anthro"
 
     obs_surface = get_obs_surface(site=site, 
                                   species=species,
@@ -30,12 +30,13 @@ def test_scenario_direct_objects():
     footprint = get_footprint(site=site, domain=domain, height=inlet,
                start_date=start_date, end_date=end_date)
 
-    # TODO: Add extraction of flux data as well (get_flux) and add to ModelScenario call
+    flux = get_flux(species=species, domain=domain, sources=sources)
 
-    model_scenario = ModelScenario(obs=obs_surface, footprint=footprint)
+    model_scenario = ModelScenario(obs=obs_surface, footprint=footprint, flux=flux)
 
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
+    assert model_scenario.flux is not None
 
     # TODO: Add more stringent tests here to check actual obs and fp values?
 
@@ -52,20 +53,20 @@ def test_scenario_infer_inputs():
     species = "ch4"
     inlet = "100m"
     network = "DECC"
-    # source = "anthro"
-
-    # TODO: Add extraction of flux data as well (get_flux) and add to ModelScenario call
+    sources = "anthro"
 
     model_scenario = ModelScenario(site=site,
                                    species=species,
                                    inlet=inlet,
                                    network=network,
                                    domain=domain,
+                                   sources=sources,
                                    start_date=start_date,
                                    end_date=end_date)
 
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
+    assert model_scenario.flux is not None
 
     # TODO: Add more stringent tests here to check actual obs and fp values?
     # To make sure this is grabbing the right data
@@ -111,3 +112,70 @@ def test_scenario_too_few_inputs():
 
     # TODO: get_footprint() is not currently returning None - check this
     # assert model_scenario.footprint is None
+
+
+@pytest.fixture(scope="function")
+def model_scenario_1():
+    '''Create model scenario as fixture for data in object store'''
+
+    start_date = "2012-01-01"
+    end_date = "2013-01-01"
+
+    site = "tac"
+    domain = "EUROPE"
+    species = "ch4"
+    inlet = "100m"
+    network = "DECC"
+    sources = "anthro"
+
+    model_scenario = ModelScenario(site=site,
+                                   species=species,
+                                   inlet=inlet,
+                                   network=network,
+                                   domain=domain,
+                                   sources=sources,
+                                   start_date=start_date,
+                                   end_date=end_date)
+
+    return model_scenario
+
+
+def test_combine_obs_footprint(model_scenario_1):
+    '''Test the combine_obs_footprint method of the ModelScenario class'''
+
+    combined_data = model_scenario_1.combine_obs_footprint(resample_to="coarsest")
+
+    cached_data = model_scenario_1.scenario
+
+    # Check returned value and cache associated with class
+    data_to_check = [combined_data, cached_data]
+
+    for data in data_to_check:
+        # Check mole fraction and footprint values are within this combined dataset
+        assert "mf" in data
+        assert "fp" in data
+
+        # Check times align with expected values based on resample_to input
+        time = data.time
+        assert time[0] == Timestamp("2012-08-01T00:00:00")
+        assert time[-1] == Timestamp("2012-08-31T22:00:00")
+
+        # Could add more checks here but may be better doing this with mocked data
+
+
+def test_calc_modelled_obs(model_scenario_1):
+    '''Test calc_modelled_obs method of ModelScenario class'''
+    modelled_obs = model_scenario_1.calc_modelled_obs(resample_to="coarsest")
+    cached_modelled_obs = model_scenario_1.modelled_obs
+
+    # Check returned value and cache associated with class
+    data_to_check = [modelled_obs, cached_modelled_obs]
+
+    for data in data_to_check:
+        # Check times align with expected values based on resample_to input
+        time = data.time
+        assert time[0] == Timestamp("2012-08-01T00:00:00")
+        assert time[-1] == Timestamp("2012-08-31T22:00:00")
+
+        # Could add more checks here but may be better doing this with mocked data
+
