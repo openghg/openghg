@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.3.g7432b05.dirty documentation</title>
+    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.3.ga8c8702.dirty documentation</title>
     
     <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -238,8 +238,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of gas data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">RangeIndex</span><span class="p">,</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">NaT</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">RangeIndex</span><span class="p">,</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">to_datetime</span>
     <span class="kn">import</span> <span class="nn">warnings</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span>
 
@@ -265,13 +264,6 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet_fname</span>
 
-    <span class="c1"># Function to parse the datetime format found in the datafile</span>
-    <span class="k">def</span> <span class="nf">parse_date</span><span class="p">(</span><span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="s2">&quot;%y%m</span><span class="si">%d</span><span class="s2"> %H%M%S&quot;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">NaT</span>
-
     <span class="c1"># Catch dtype warnings</span>
     <span class="c1"># TODO - look at setting dtypes - read header and data separately?</span>
     <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
@@ -281,12 +273,9 @@
             <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span>
-            <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;0_1&quot;</span><span class="p">],</span>
-            <span class="n">parse_dates</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
-            <span class="n">date_parser</span><span class="o">=</span><span class="n">parse_date</span><span class="p">,</span>
+            <span class="n">parse_dates</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]},</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
         <span class="p">)</span>
-
-    <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span>
 
     <span class="c1"># Drop any rows with NaNs</span>
     <span class="c1"># This is now done before creating metadata</span>
@@ -345,6 +334,7 @@
         <span class="n">header_rows</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="c1"># Drop the first two rows now we have the name</span>
         <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">gas_data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">header_rows</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">gas_data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">to_datetime</span><span class="p">(</span><span class="n">gas_data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;%y%m</span><span class="si">%d</span><span class="s2"> %H%M%S&quot;</span><span class="p">)</span>
         <span class="c1"># Cast data to float64 / double</span>
         <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
 
