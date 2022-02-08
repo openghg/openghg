@@ -97,8 +97,8 @@ class ObsSurface(BaseStore):
                 # try:
                 file_hash = hash_file(filepath=data_filepath)
                 if file_hash in obs._file_hashes and overwrite is False:
-                    raise ValueError(
-                        f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
+                    print(
+                        f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]} - skipping."
                     )
 
                 progress_bar.set_description(f"Processing: {data_filepath.name}")

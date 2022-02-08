@@ -1,13 +1,9 @@
 from openghg.client import process_files
 from openghg.objectstore import get_local_bucket
 from helpers import get_datapath
-import tempfile
 
 
-def test_process_files(monkeypatch):
-    tmpdir = tempfile.TemporaryDirectory()
-    monkeypatch.setenv("OPENGHG_PATH", tmpdir.name)
-
+def test_process_files():
     hfd_path = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
 
     results = process_files(
@@ -19,5 +15,3 @@ def test_process_files(monkeypatch):
     assert "error" not in results
     assert "ch4" in results
     assert "co2" in results
-
-    tmpdir.cleanup()

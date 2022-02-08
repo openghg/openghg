@@ -1,36 +1,40 @@
-import os
 import pytest
-
-from openghg.store import ObsSurface
-from openghg.objectstore import get_local_bucket
 from openghg.client import search
 
 
-@pytest.mark.skip(reason="Search class needs updating")
-def test_search_and_download(crds):
+def test_search_and_download(process_crds):
     results = search(species="co2", site="hfd")
 
-    raw_results = results.raw()
+    keys = results.keys(site="hfd", species="co2", inlet="100m")
+    assert len(keys) == 6
 
-    assert len(raw_results["co2_hfd_100m_picarro"]["keys"]) == 5
+    metadata = results.metadata(site="hfd", species="co2", inlet="100m")
 
     expected_metadata = {
         "site": "hfd",
         "instrument": "picarro",
-        "time_resolution": "1_minute",
+        "sampling_period": "60",
         "inlet": "100m",
         "port": "10",
         "type": "air",
+        "network": "decc",
         "species": "co2",
+        "calibration_scale": "wmo-x2007",
+        "long_name": "heathfield",
+        "data_owner": "simon o'doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk",
+        "station_longitude": 0.23048,
+        "station_latitude": 50.97675,
+        "station_long_name": "heathfield, uk",
+        "station_height_masl": 150.0,
+        "inlet_height_magl": "100m",
         "data_type": "timeseries",
-        "scale": "wmo-x2007",
     }
 
-    assert raw_results["co2_hfd_100m_picarro"]["metadata"] == expected_metadata
+    assert metadata == expected_metadata
 
     data = results.retrieve(site="hfd", species="co2", inlet="100m")
-
-    data = data["co2_hfd_100m_picarro"]
+    data = data.data
 
     assert data["co2"][0] == pytest.approx(414.21)
     assert data["co2_variability"][-1] == pytest.approx(0.247)

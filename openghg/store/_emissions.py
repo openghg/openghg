@@ -69,8 +69,8 @@ class Emissions(BaseStore):
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in em_store._file_hashes and not overwrite:
-            raise ValueError(
-                f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]}."
+            print(
+                f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]} - skipping."
             )
 
         em_data = open_dataset(filepath)

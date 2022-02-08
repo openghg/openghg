@@ -2,12 +2,10 @@ import pytest
 from pandas import Timestamp
 
 from openghg.client import get_obs_surface
-from openghg.store import ObsSurface
-from openghg.objectstore import get_local_bucket
-from helpers import get_datapath, metadata_checker_obssurface, attributes_checker_get_obs
+from helpers import metadata_checker_obssurface, attributes_checker_get_obs
 
 
-def test_get_observations_few_args():
+def test_get_observations_few_args(process_crds):
     result = get_obs_surface(site="hfd", species="co2", inlet="100m")
 
     metadata = result.metadata
@@ -43,7 +41,7 @@ def test_get_observations_few_args():
         assert attrs[key] == value
 
 
-def test_get_observations_with_average():
+def test_get_observations_with_average(process_crds):
     result_no_average = get_obs_surface(site="hfd", species="co2", inlet="100m")
 
     data_no_average = result_no_average.data
@@ -67,7 +65,7 @@ def test_get_observations_with_average():
     assert not data_missing.time.equals(data.time)
 
 
-def test_get_observations_datetime_selection():
+def test_get_observations_datetime_selection(process_crds):
     results = get_obs_surface(
         site="hfd",
         species="co2",
@@ -85,7 +83,7 @@ def test_get_observations_datetime_selection():
     assert data["mf"][-1] == pytest.approx(405.95)
 
 
-def test_gcwerks_retrieval():
+def test_gcwerks_retrieval(process_gcwerks):
     species = "cfc11"
     results = get_obs_surface(site="CGO", species=species, inlet="70m")
 
@@ -106,7 +104,7 @@ def test_gcwerks_retrieval():
     assert data["mf_repeatability"][-1] == pytest.approx(0.37784)
 
 
-def test_get_observations_fixed_dates():
+def test_get_observations_fixed_dates(process_crds):
     results = get_obs_surface(site="hfd", species="co2", inlet="100m")
 
     assert results.data.time[0] == Timestamp("2013-12-04T14:02:30")

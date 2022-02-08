@@ -3,10 +3,8 @@ import pytest
 from openghg.client import rank_sources, search
 
 
-def test_set_rank():
+def test_set_rank(process_crds):
     r = rank_sources(site="bsd", species="co2")
-
-    res = search(site="bsd")
 
     results = r.raw()
 
@@ -25,7 +23,7 @@ def test_set_rank():
     assert specific_results == {"2001-01-01-00:00:00+00:00_2007-01-01-00:00:00+00:00": 1}
 
 
-def test_clear_rank():
+def test_clear_rank(process_crds):
     r = rank_sources(site="bsd", species="co2")
 
     r.set_rank(inlet="42m", rank=1, start_date="2001-01-01", end_date="2007-01-01")
