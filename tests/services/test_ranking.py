@@ -29,6 +29,7 @@ def load_crds(authenticated_user):
         data_type="CRDS",
     )
 
+
 @pytest.mark.skip("Marked for removal")
 def test_set_and_clear_ranking(authenticated_user, load_crds):
     r = rank_sources(site="hfd", species="co2", service_url="openghg")

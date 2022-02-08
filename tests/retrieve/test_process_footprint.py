@@ -3,11 +3,16 @@ from openghg.objectstore import get_local_bucket
 from openghg.store import ObsSurface, Emissions, Footprints
 from openghg.analyse import footprints_data_merge
 
+
 def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+    return (
+        Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+    )
+
 
 def get_fp_datapath(filename):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/footprints/{filename}")
+
 
 def get_flux_datapath(filename):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/emissions/{filename}")
@@ -19,7 +24,7 @@ def get_flux_datapath(filename):
 
 #     res = ObsSurface.read_file()
 
-#@pytest.fixture()
+# @pytest.fixture()
 def co2_setup():
     get_local_bucket(empty=True)
 
@@ -43,10 +48,24 @@ def co2_setup():
 
     ObsSurface.read_file(filepath=tac_file, data_type=data_type, site=site, network=network, inlet=height)
 
-    Footprints.read_file(filepath=tac_footprint, site=site, height=height, domain=domain, model=model, metmodel=metmodel, species=species)
+    Footprints.read_file(
+        filepath=tac_footprint,
+        site=site,
+        height=height,
+        domain=domain,
+        model=model,
+        metmodel=metmodel,
+        species=species,
+    )
 
-    Emissions.read_file(filepath=co2_emissions, species=species, source=source, domain=domain, date=date, high_time_resolution=True)
-
+    Emissions.read_file(
+        filepath=co2_emissions,
+        species=species,
+        source=source,
+        domain=domain,
+        date=date,
+        high_time_resolution=True,
+    )
 
 
 def test_co2_footprint_data_merge():
@@ -64,25 +83,20 @@ def test_co2_footprint_data_merge():
     start_date = "2014-07-01"
     end_date = "2014-07-02"
 
-    CombinedData_HiTRes = footprints_data_merge(site=site, height=height, domain=domain, network=network,
-                                                start_date=start_date, end_date=end_date, flux_sources=source,
-                                                species=species, load_flux=True, calc_timeseries=True,
-                                                time_resolution="high")
+    CombinedData_HiTRes = footprints_data_merge(
+        site=site,
+        height=height,
+        domain=domain,
+        network=network,
+        start_date=start_date,
+        end_date=end_date,
+        flux_sources=source,
+        species=species,
+        load_flux=True,
+        calc_timeseries=True,
+        time_resolution="high",
+    )
 
     data = CombinedData_HiTRes.data
 
     assert "mf_mod_high_res" in data
-    
-    
-    
-
-
-
-
-
-
-
-
-
-
-

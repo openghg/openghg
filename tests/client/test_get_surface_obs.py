@@ -7,7 +7,6 @@ from openghg.objectstore import get_local_bucket
 from helpers import get_datapath, metadata_checker_obssurface, attributes_checker_get_obs
 
 
-
 def test_get_observations_few_args():
     result = get_obs_surface(site="hfd", species="co2", inlet="100m")
 

@@ -95,9 +95,7 @@ def test_read_glasgow_valid_data():
 
 
 def test_read_glasgow_no_valid_data():
-    filepath = get_datapath(
-        filename="171_UNIVERSITYOFSTRATHCLYDE.csv", data_type="BEACO2N"
-    )
+    filepath = get_datapath(filename="171_UNIVERSITYOFSTRATHCLYDE.csv", data_type="BEACO2N")
 
     result = parse_beaco2n(
         data_filepath=filepath,
@@ -120,6 +118,4 @@ def test_incorrect_site_raises():
     filepath = get_datapath(filename="Unknown_site.csv", data_type="BEACO2N")
 
     with pytest.raises(ValueError):
-        parse_beaco2n(
-            data_filepath=filepath, site="test", network="test", inlet="test"
-        )
+        parse_beaco2n(data_filepath=filepath, site="test", network="test", inlet="test")

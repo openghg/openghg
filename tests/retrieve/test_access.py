@@ -141,6 +141,7 @@ def test_timeslice_slices_correctly():
     assert sliced_co2_data.time[0] == Timestamp("2017-02-18T06:36:30")
     assert sliced_co2_data.time[-1] == Timestamp("2018-02-18T15:42:30")
 
+
 @pytest.mark.xfail(reason="Bug: Where's the MHD 10m inlet data?.")
 def test_timeslice_slices_correctly_exclusive():
     # Test time slicing works with an exclusive time range for continuous data - up to but not including the end point

@@ -6,7 +6,9 @@ from openghg.objectstore import get_local_bucket, query_store
 
 
 def get_datapath(filename, data_type):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+    return (
+        Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
+    )
 
 
 def hfd_filepath():
@@ -20,10 +22,9 @@ def populate_store():
     filepath = hfd_filepath()
     ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="hfd")
 
+
 # @pytest.mark.skip(reason="Unfinished")
 # def test_query_store(populate_store):
 #     data = query_store()
-    
-    # print(data)
 
-
+# print(data)

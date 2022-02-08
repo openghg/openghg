@@ -5,6 +5,7 @@ from openghg.util import timestamp_tzaware
 from pandas import Timestamp
 from helpers import metadata_checker_obssurface, attributes_checker_obssurface
 
+
 def test_specific_keyword_search():
     site = "bsd"
     species = "co2"
@@ -58,6 +59,7 @@ def test_specific_search_gc():
     metadata = results.metadata(site="cgo", species="nf3", inlet="70m")
 
     assert metadata_checker_obssurface(metadata=metadata, species="nf3")
+
 
 def test_specific_search_translator():
     results = search(species="toluene", site="CGO", skip_ranking=True)
@@ -260,6 +262,7 @@ def test_search_find_any():
 
     assert metadata_checker_obssurface(metadata=ch4_metadata, species="ch4")
     assert metadata_checker_obssurface(metadata=co2_metadata, species="co2")
+
 
 def test_search_incorrect_inlet_site_finds_nothing():
     locations = "hfd"

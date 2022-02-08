@@ -83,7 +83,7 @@ def test_read_obspack_flask_2021():
     assert attributes["sampling_period"] == "NOT_SET"
     assert "sampling_period_estimate" in attributes
     assert float(attributes["sampling_period_estimate"]) > 0.0
-    assert attributes["units"] == '1e-9'
+    assert attributes["units"] == "1e-9"
 
     ch4_metadata = data[inlet_key]["metadata"]
 
@@ -94,15 +94,13 @@ def test_read_obspack_flask_2021():
 
 
 def test_read_obspack_tower_multi_height():
-    '''
-    Test inputs from "obspack_multi-species_1_CCGGTowerInsitu_v1.0_2018-02-08". 
+    """
+    Test inputs from "obspack_multi-species_1_CCGGTowerInsitu_v1.0_2018-02-08".
      - This will contain data at multiple heights (intake_height variable) which should be split.
-     '''
+    """
     filepath = get_datapath(filename="ch4_bao_tower-insitu_1_ccgg_all.nc", data_type="NOAA")
 
-    data = parse_noaa(
-        data_filepath=filepath, site="BAO", measurement_type="insitu", network="NOAA"
-    )
+    data = parse_noaa(data_filepath=filepath, site="BAO", measurement_type="insitu", network="NOAA")
 
     # Check number of entries extracted - should be three inlet heights: 22m, 100m, 300m
     num_keys = len(data.keys())

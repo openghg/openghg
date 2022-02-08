@@ -12,6 +12,7 @@ from helpers import get_datapath
 #     # get_local_bucket(empty=True)
 #     monkeypatch.setenv("OPENGHG_CLOUD", "TESTCLOUD")
 
+
 @pytest.fixture()
 def set_env(monkeypatch):
     monkeypatch.setenv("OPENGHG_CLOUD", "TESTCLOUD")
@@ -37,6 +38,7 @@ def test_process_CRDS_files(authenticated_user):
     processed_species = response["processed"]["bsd.picarro.1minute.248m.min.dat"]
 
     assert sorted(list(processed_species.keys())) == ["ch4", "co", "co2"]
+
 
 @pytest.mark.skip("Marked for removal")
 def test_process_CRDS_incorrect_args(authenticated_user, set_env):
@@ -77,6 +79,7 @@ def test_process_CRDS_incorrect_args(authenticated_user, set_env):
     processed_species = response["processed"]["hfd.picarro.1minute.100m.min.dat"]
 
     assert sorted(list(processed_species.keys())) == ["ch4", "co", "co2"]
+
 
 @pytest.mark.skip("Marked for removal")
 def test_process_GCWERKS_files(authenticated_user):
