@@ -172,7 +172,7 @@ def search(**kwargs):  # type: ignore
             species = metadata["species"]
             inlet = metadata["inlet"]
 
-            specific_sources[site][species][inlet]["keys"] = specific_keys
+            specific_sources[site][species][inlet]["keys"]["unranked"] = specific_keys
             specific_sources[site][species][inlet]["metadata"] = metadata
 
         return SearchResults(results=specific_sources.to_dict(), ranked_data=False)
@@ -232,8 +232,6 @@ def search(**kwargs):  # type: ignore
     data_keys: Dict = aDict()
     for site, species in highest_ranked.items():
         for sp, data in species.items():
-            # data_keys[site][sp]["keys"] = []
-
             species_keys = []
             species_rank_data = {}
             species_metadata = {}
@@ -261,7 +259,7 @@ def search(**kwargs):  # type: ignore
 
             # Only create the dictionary keys if we have some data keys
             if species_keys:
-                data_keys[site][sp]["keys"] = species_keys
+                data_keys[site][sp]["keys"]["ranked"] = species_keys
                 data_keys[site][sp]["rank_metadata"] = species_rank_data
                 data_keys[site][sp]["metadata"] = species_metadata
             else:
@@ -273,7 +271,7 @@ def search(**kwargs):  # type: ignore
 
             # Get the dateranges that are covered by ranking information
             daterange_strs = list(iter_chain.from_iterable([m["dateranges"] for m in data["matching"]]))
-            # Find the gaps in the ranking coverage
+            # # Find the gaps in the ranking coverage
             gap_dateranges = find_daterange_gaps(
                 start_search=start_date, end_search=end_date, dateranges=daterange_strs
             )
@@ -281,8 +279,9 @@ def search(**kwargs):  # type: ignore
             # We want the dateranges and inlets for those dateranges
             inlet_dateranges = data_keys[site][sp]["rank_metadata"]
             # These are the dateranges for which we have ranking information for this site and species
-            ranked_dateranges = list(data_keys[site][sp]["rank_metadata"].keys())
+            ranked_dateranges = list(inlet_dateranges.keys())
 
+            unranked_keys = []
             for gap_daterange in gap_dateranges:
                 # We want to select the inlet that's ranked for dates closest to the ones we have here
                 closest_dr = closest_daterange(to_compare=gap_daterange, dateranges=ranked_dateranges)
@@ -312,10 +311,9 @@ def search(**kwargs):  # type: ignore
                 # Retrieve the data keys
                 inlet_data_keys = results.keys(site=site, species=sp, inlet=chosen_inlet)
 
-                data_keys[site][sp]["keys"].extend(inlet_data_keys)
+                unranked_keys.extend(inlet_data_keys)
 
-            # Remove any duplicate keys
-            data_keys[site][sp]["keys"] = list(set(data_keys[site][sp]["keys"]))
+            data_keys[site][sp]["keys"]["unranked"] = unranked_keys
 
     # TODO - create a stub for addict
     dict_data_keys = data_keys.to_dict()  # type: ignore

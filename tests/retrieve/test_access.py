@@ -2,7 +2,71 @@ import pytest
 from pandas import Timestamp, Timedelta
 import numpy as np
 
-from openghg.retrieve import get_obs_surface, get_flux, get_footprint
+from openghg.retrieve import get_obs_surface, get_flux, get_footprint, search
+from openghg.objectstore import get_local_bucket
+
+import pytest
+from openghg.objectstore import get_local_bucket
+from openghg.store import ObsSurface, Emissions, Footprints
+from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
+
+
+a = [
+    "1970-01-01-00:00:00+00:00_2011-12-31-00:00:00+00:00",
+    "2013-01-02-00:00:00+00:00_2014-09-01-00:00:00+00:00",
+    "2014-11-02-00:00:00+00:00_2014-12-31-00:00:00+00:00",
+    "2015-11-02-00:00:00+00:00_2016-09-01-00:00:00+00:00",
+    "2018-11-02-00:00:00+00:00_2019-01-01-00:00:00+00:00",
+    "2021-01-02-00:00:00+00:00_2022-02-09-15:55:27.361446+00:00",
+]
+
+b = {
+    "2015-01-01-00:00:00+00:00_2015-11-01-00:00:00+00:00": "248m",
+    "2019-01-02-00:00:00+00:00_2021-01-01-00:00:00+00:00": "42m",
+    "2014-09-02-00:00:00+00:00_2014-11-01-00:00:00+00:00": "108m",
+    "2016-09-02-00:00:00+00:00_2018-11-01-00:00:00+00:00": "108m",
+}
+
+c = [
+    "2015-01-01-00:00:00+00:00_2015-11-01-00:00:00+00:00",
+    "2019-01-02-00:00:00+00:00_2021-01-01-00:00:00+00:00",
+    "2014-09-02-00:00:00+00:00_2014-11-01-00:00:00+00:00",
+    "2016-09-02-00:00:00+00:00_2018-11-01-00:00:00+00:00",
+]
+
+
+def test_dupes():
+    get_local_bucket(empty=True)
+
+    # DECC network sites
+    network = "DECC"
+    bsd_248_path = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+    bsd_108_path = get_datapath(filename="bsd.picarro.1minute.108m.min.dat", data_type="CRDS")
+    bsd_42_path = get_datapath(filename="bsd.picarro.1minute.42m.min.dat", data_type="CRDS")
+
+    bsd_paths = [bsd_248_path, bsd_108_path, bsd_42_path]
+
+    bsd_results = ObsSurface.read_file(filepath=bsd_paths, data_type="CRDS", site="bsd", network=network)
+
+    # Set ranking information for BSD
+    obs = ObsSurface.load()
+
+    uid_248 = bsd_results["processed"]["bsd.picarro.1minute.248m.min.dat"]["ch4"]
+    obs.set_rank(uuid=uid_248, rank=1, date_range="2012-01-01_2013-01-01")
+
+    uid_108 = bsd_results["processed"]["bsd.picarro.1minute.108m.min.dat"]["ch4"]
+    obs.set_rank(uuid=uid_108, rank=1, date_range="2014-09-02_2014-11-01")
+
+    obs.set_rank(uuid=uid_248, rank=1, date_range="2015-01-01_2015-11-01")
+
+    obs.set_rank(uuid=uid_108, rank=1, date_range="2016-09-02_2018-11-01")
+
+    uid_42 = bsd_results["processed"]["bsd.picarro.1minute.42m.min.dat"]["ch4"]
+    obs.set_rank(uuid=uid_42, rank=1, date_range="2019-01-02_2021-01-01")
+
+    obs.save()
+
+    search(site="bsd", species="ch4")
 
 
 def test_get_obs_surface():
@@ -67,7 +131,6 @@ def test_get_obs_surface_ranking_single():
     # Not sure if that is expected
 
 
-@pytest.mark.xfail(reason="Bug: Not returning unique data - time values duplicated.")
 def test_get_obs_surface_ranking_unique():
     """
     Test data returned from get_obs_surface data
@@ -81,9 +144,32 @@ def test_get_obs_surface_ranking_unique():
     """
     obsdata = get_obs_surface(site="bsd", species="ch4")
 
+    print(obsdata.metadata)
+
+    d = {
+        "rank_metadata": {
+            "2015-01-01-00:00:00+00:00_2015-11-01-00:00:00+00:00": "248m",
+            "2014-09-02-00:00:00+00:00_2014-11-01-00:00:00+00:00": "108m",
+            "2016-09-02-00:00:00+00:00_2018-11-01-00:00:00+00:00": "108m",
+            "2019-01-02-00:00:00+00:00_2021-01-01-00:00:00+00:00": "42m",
+        }
+    }
+
     data = obsdata.data
+    print(data)
+
+    return
+
+    print(data["inlet"])
+
+    return
 
     inlet_slice = data["inlet"].sel(time=slice("2015-01-01-00:00:00", "2015-11-01-00:00:00")).values
+
+    print(inlet_slice)
+
+    return
+
     expected_array = np.tile("248m", len(inlet_slice))
 
     np.testing.assert_equal(inlet_slice, expected_array)

@@ -4,7 +4,7 @@ from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
 
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
-from openghg.util import clean_string
+from openghg.util import clean_string, split_daterange_str, find_daterange_gaps
 
 
 __all__ = ["SearchResults"]
@@ -280,25 +280,60 @@ class SearchResults:
 
         # If cloud use the Retrieve object
         if self.cloud:
-            from Acquire.Client import Wallet
-            from xarray import open_dataset
+            raise NotImplementedError
+            # from Acquire.Client import Wallet
+            # from xarray import open_dataset
 
-            wallet = Wallet()
-            self._service_url = "https://fn.openghg.org/t"
-            self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
+            # wallet = Wallet()
+            # self._service_url = "https://fn.openghg.org/t"
+            # self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
 
-            key = f"{site}_{species}"
-            keys_to_retrieve = {key: data_keys}
+            # key = f"{site}_{species}"
+            # keys_to_retrieve = {key: data_keys}
 
-            args = {"keys": keys_to_retrieve}
+            # args = {"keys": keys_to_retrieve}
 
-            response: Dict = self._service.call_function(function="retrieve.retrieve", args=args)
+            # response: Dict = self._service.call_function(function="retrieve.retrieve", args=args)
 
-            response_data = response["results"]
+            # response_data = response["results"]
 
-            data = open_dataset(response_data[key])
+            # data = open_dataset(response_data[key])
         else:
-            data = recombine_datasets(data_keys, sort=True)
+            if not self.ranked_data:
+                keys = data_keys["unranked"]
+                data = recombine_datasets(data_keys, sort=True)
+            else:
+                # NO! -  Here we retrieve the ranked data, then the unranked data and then combine the two, keeping the ranked data if timestamp overlap
+                # This WON'T work as if the timestamps are offset slightly then they won't look like their duplicates within a daterange
+                ranked_keys = data_keys["ranked"]
+                ranked_data = recombine_datasets(keys=ranked_keys, sort=True)
+
+                unranked_keys = data_keys["unranked"]
+                unranked_data = recombine_datasets(keys=unranked_keys, sort=True)
+
+                ranking_metadata = metadata["rank_metadata"]
+
+                ranked_slices = []
+                for dr in ranking_metadata:
+                    slice_start, slice_end = split_daterange_str(dr)
+                    ranked_slices.append(ranked_data.sel(time=slice(slice_start, slice_end)))
+            
+                gap_dateranges = find_daterange_gaps(
+                    start_search=start_date, end_search=end_date, dateranges=daterange_strs
+                )
+
+                
+                # Get the ranked data
+                # Slice it as the ranking covers
+                # Get the unranked data
+                # Find the gaps in the ranks
+                # Get slices from the unranked data
+                # Combine
+
+        
+
+
+                
 
         metadata = specific_source["metadata"]
 
