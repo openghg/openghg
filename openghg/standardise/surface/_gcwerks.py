@@ -217,10 +217,8 @@ def _read_data(
     Returns:
         dict: Dictionary of gas data keyed by species
     """
-    from datetime import datetime
-    from pandas import read_csv, to_datetime, concat
+    from pandas import read_csv, to_datetime, Series
     from pandas import Timedelta as pd_Timedelta
-    import warnings
 
     # Read header
     header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
@@ -263,7 +261,7 @@ def _read_data(
     units = {}
     scale = {}
 
-    flag_columns = []
+    flag_columns: List[Series] = []
     species = []
     columns_renamed = {}
     for column in data.columns:
