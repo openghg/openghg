@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._gcwerks &#8212; OpenGHG 0+untagged.3.gc7a992b.dirty documentation</title>
+    <title>openghg.standardise.surface._gcwerks &#8212; OpenGHG 0+untagged.3.g72be6fd.dirty documentation</title>
     
     <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -383,26 +383,16 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of gas data keyed by species</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">to_datetime</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">to_datetime</span><span class="p">,</span> <span class="n">Series</span>
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span> <span class="k">as</span> <span class="n">pd_Timedelta</span>
-    <span class="kn">import</span> <span class="nn">warnings</span>
 
     <span class="c1"># Read header</span>
     <span class="n">header</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Create a function to parse the datetime in the data file</span>
-    <span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="s2">&quot;%Y %m </span><span class="si">%d</span><span class="s2"> %H %M&quot;</span><span class="p">)</span>
-
     <span class="c1"># Read the data in and automatically create a datetime column from the 5 columns</span>
     <span class="c1"># Dropping the yyyy&#39;, &#39;mm&#39;, &#39;dd&#39;, &#39;hh&#39;, &#39;mi&#39; columns here</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span>
-        <span class="n">data_filepath</span><span class="p">,</span>
-        <span class="n">skiprows</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-        <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span>
-        <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;yyyy_mm_dd_hh_mi&quot;</span><span class="p">],</span>
-        <span class="n">parse_dates</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]</span>        
+        <span class="n">data_filepath</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;yyyy_mm_dd_hh_mi&quot;</span><span class="p">],</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]</span>
     <span class="p">)</span>
 
     <span class="n">data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;%Y %m </span><span class="si">%d</span><span class="s2"> %H %M&quot;</span><span class="p">)</span>
@@ -437,6 +427,7 @@
     <span class="n">units</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">scale</span> <span class="o">=</span> <span class="p">{}</span>
 
+    <span class="n">flag_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Series</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">species</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">columns_renamed</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -448,11 +439,11 @@
             <span class="c1"># Add it to the dictionary for renaming later</span>
             <span class="n">columns_renamed</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">gas_name</span> <span class="o">+</span> <span class="s2">&quot;_flag&quot;</span>
 
-            <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
-                <span class="c1"># Create 2 new columns based on the flag columns</span>
-                <span class="n">data</span><span class="p">[</span><span class="n">gas_name</span> <span class="o">+</span> <span class="s2">&quot; status_flag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-                <span class="n">data</span><span class="p">[</span><span class="n">gas_name</span> <span class="o">+</span> <span class="s2">&quot; integration_flag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="c1"># Create 2 new series based on the flag columns</span>
+            <span class="n">status_flag</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">gas_name</span><span class="si">}</span><span class="s2"> status_flag&quot;</span><span class="p">)</span>
+            <span class="n">integration_flag</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">gas_name</span><span class="si">}</span><span class="s2"> integration_flag&quot;</span><span class="p">)</span>
+
+            <span class="n">flag_columns</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">status_flag</span><span class="p">,</span> <span class="n">integration_flag</span><span class="p">))</span>
 
             <span class="n">col_shift</span> <span class="o">=</span> <span class="mi">4</span>
             <span class="n">units</span><span class="p">[</span><span class="n">gas_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">col_loc</span> <span class="o">+</span> <span class="n">col_shift</span><span class="p">]</span>
@@ -466,6 +457,7 @@
 
             <span class="n">species</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gas_name</span><span class="p">)</span>
 
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">flag_columns</span><span class="p">)</span>
     <span class="c1"># Rename columns to include the gas this flag represents</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns_renamed</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
