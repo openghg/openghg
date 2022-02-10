@@ -276,29 +276,21 @@ def search(**kwargs):  # type: ignore
                 start_search=start_date, end_search=end_date, dateranges=daterange_strs
             )
 
-            # We want the dateranges and inlets for those dateranges
-            inlet_dateranges = data_keys[site][sp]["rank_metadata"]
-            # These are the dateranges for which we have ranking information for this site and species
-            ranked_dateranges = list(inlet_dateranges.keys())
+            # Here just select the highest inlet that's been ranked and use that
+            highest_inlet = max(sorted(list(data_keys[site][sp]["metadata"].keys())))
+
+            inlet_metadata = data_keys[site][sp]["metadata"][highest_inlet]
+            inlet_instrument = inlet_metadata["instrument"]
+            inlet_sampling_period = inlet_metadata["sampling_period"]
 
             unranked_keys = []
             for gap_daterange in gap_dateranges:
-                # We want to select the inlet that's ranked for dates closest to the ones we have here
-                closest_dr = closest_daterange(to_compare=gap_daterange, dateranges=ranked_dateranges)
-
                 gap_start, gap_end = split_daterange_str(gap_daterange)
-                # Find the closest ranked inlet by date
-                chosen_inlet = inlet_dateranges[closest_dr]
 
-                inlet_metadata = data_keys[site][sp]["metadata"][chosen_inlet]
-                inlet_instrument = inlet_metadata["instrument"]
-                inlet_sampling_period = inlet_metadata["sampling_period"]
-
-                # Then we want to retrieve the correct metadata for those inlets
                 results: SearchResults = search(
                     site=site,
                     species=sp,
-                    inlet=chosen_inlet,
+                    inlet=highest_inlet,
                     instrument=inlet_instrument,
                     sampling_period=inlet_sampling_period,
                     start_date=gap_start,
@@ -309,11 +301,12 @@ def search(**kwargs):  # type: ignore
                     continue
 
                 # Retrieve the data keys
-                inlet_data_keys = results.keys(site=site, species=sp, inlet=chosen_inlet)
+                inlet_data_keys = results.keys(site=site, species=sp, inlet=highest_inlet)["unranked"]
 
                 unranked_keys.extend(inlet_data_keys)
 
-            data_keys[site][sp]["keys"]["unranked"] = unranked_keys
+            # If we've got keys that overlap two dateranges we'll get duplicates, remove those here
+            data_keys[site][sp]["keys"]["unranked"] = list(set(unranked_keys))
 
     # TODO - create a stub for addict
     dict_data_keys = data_keys.to_dict()  # type: ignore

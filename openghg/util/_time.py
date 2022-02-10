@@ -21,6 +21,7 @@ __all__ = [
     "sanitise_daterange",
     "check_nan",
     "check_date",
+    "first_last_dates",
 ]
 
 
@@ -297,7 +298,7 @@ def closest_daterange(to_compare: str, dateranges: Union[str, List[str]]) -> str
         return closest_daterange_end
 
 
-def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, dateranges: List) -> List[str]:
+def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, dateranges: List[str]) -> List[str]:
     """Given a start and end date and a list of dateranges find the gaps.
 
     For example given a list of dateranges
@@ -543,3 +544,28 @@ def check_nan(data: Union[int, float]) -> Union[str, float, int]:
         return "NA"
     else:
         return round(data, 3)
+
+
+def first_last_dates(keys: List) -> Tuple[Timestamp, Timestamp]:
+    """ Find the first and last timestamp from a list of keys
+
+    Args:
+        keys: List of keys
+    Returns:
+        tuple: First and last timestamp
+    """
+    def sorting_key(s):
+        return s.split("/")[-1]
+
+    sorted_keys = sorted(keys, key=sorting_key)
+
+    first_daterange = sorted_keys[0].split("/")[-1]
+    first_date = first_daterange.split("_")[0]
+
+    last_daterange = sorted_keys[-1].split("/")[-1]
+    last_date = last_daterange.split("_")[-1]
+
+    first = timestamp_tzaware(first_date)
+    last = timestamp_tzaware(last_date)
+
+    return first, last

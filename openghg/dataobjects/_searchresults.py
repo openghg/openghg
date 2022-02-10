@@ -1,11 +1,16 @@
-from addict import Dict as aDict
 from dataclasses import dataclass
-from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
+from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
 
+from addict import Dict as aDict
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
-from openghg.util import clean_string, split_daterange_str, find_daterange_gaps
-
+from openghg.util import (
+    clean_string,
+    find_daterange_gaps,
+    first_last_dates,
+    split_daterange_str,
+    timestamp_tzaware,
+)
 
 __all__ = ["SearchResults"]
 
@@ -270,6 +275,8 @@ class SearchResults:
         Returns:
             ObsData: ObsData object
         """
+        from xarray import concat
+
         if self.ranked_data:
             specific_source = self.results[site][species]
         else:
@@ -301,43 +308,46 @@ class SearchResults:
         else:
             if not self.ranked_data:
                 keys = data_keys["unranked"]
-                data = recombine_datasets(data_keys, sort=True)
+                final_dataset = recombine_datasets(keys, sort=True)
             else:
-                # NO! -  Here we retrieve the ranked data, then the unranked data and then combine the two, keeping the ranked data if timestamp overlap
-                # This WON'T work as if the timestamps are offset slightly then they won't look like their duplicates within a daterange
                 ranked_keys = data_keys["ranked"]
-                ranked_data = recombine_datasets(keys=ranked_keys, sort=True)
+                ranked_data = recombine_datasets(keys=ranked_keys, sort=False)
 
-                unranked_keys = data_keys["unranked"]
-                unranked_data = recombine_datasets(keys=unranked_keys, sort=True)
-
-                ranking_metadata = metadata["rank_metadata"]
+                ranking_metadata = specific_source["rank_metadata"]
 
                 ranked_slices = []
-                for dr in ranking_metadata:
+                ranked_dateranges = sorted(list(ranking_metadata.keys()))
+
+                for dr in ranked_dateranges:
                     slice_start, slice_end = split_daterange_str(dr)
-                    ranked_slices.append(ranked_data.sel(time=slice(slice_start, slice_end)))
-            
-                gap_dateranges = find_daterange_gaps(
-                    start_search=start_date, end_search=end_date, dateranges=daterange_strs
+                    ranked_slice = ranked_data.sel(time=slice(slice_start, slice_end))
+
+                    if ranked_slice.time.size > 0:
+                        ranked_slices.append(ranked_slice)
+
+                unranked_keys = data_keys["unranked"]
+                unranked_data = recombine_datasets(keys=unranked_keys, sort=False)
+
+                first_date, last_date = first_last_dates(keys=unranked_keys)
+
+                unranked_dateranges = find_daterange_gaps(
+                    start_search=first_date, end_search=last_date, dateranges=ranked_dateranges
                 )
 
-                
-                # Get the ranked data
-                # Slice it as the ranking covers
-                # Get the unranked data
-                # Find the gaps in the ranks
-                # Get slices from the unranked data
-                # Combine
+                unranked_slices = []
+                for dr in unranked_dateranges:
+                    slice_start, slice_end = split_daterange_str(dr)
+                    unranked_slice = unranked_data.sel(time=slice(slice_start, slice_end))
 
-        
+                    if unranked_slice.time.size > 0:
+                        unranked_slices.append(unranked_slice)
 
+                slices = ranked_slices + unranked_slices
 
-                
+                final_dataset = concat(objs=slices, dim="time").sortby("time")
+
+                metadata["rank_metadata"] = ranking_metadata
 
         metadata = specific_source["metadata"]
 
-        if self.ranked_data:
-            metadata["rank_metadata"] = specific_source["rank_metadata"]
-
-        return ObsData(data=data, metadata=metadata)
+        return ObsData(data=final_dataset, metadata=metadata)

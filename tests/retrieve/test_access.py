@@ -66,7 +66,9 @@ def test_dupes():
 
     obs.save()
 
-    search(site="bsd", species="ch4")
+    res = search(site="bsd", species="ch4")
+
+    data = res.retrieve(site="bsd", species="ch4")
 
 
 def test_get_obs_surface():
@@ -142,9 +144,9 @@ def test_get_obs_surface_ranking_unique():
     TODO: At the moment this fails - unique data is not returned and there are multiple
     entries for some time stamps. This is a bug which will need to be fixed.
     """
-    obsdata = get_obs_surface(site="bsd", species="ch4")
+    assert False
 
-    print(obsdata.metadata)
+    obsdata = get_obs_surface(site="bsd", species="ch4")
 
     d = {
         "rank_metadata": {
@@ -156,19 +158,8 @@ def test_get_obs_surface_ranking_unique():
     }
 
     data = obsdata.data
-    print(data)
-
-    return
-
-    print(data["inlet"])
-
-    return
 
     inlet_slice = data["inlet"].sel(time=slice("2015-01-01-00:00:00", "2015-11-01-00:00:00")).values
-
-    print(inlet_slice)
-
-    return
 
     expected_array = np.tile("248m", len(inlet_slice))
 

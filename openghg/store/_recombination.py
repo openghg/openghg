@@ -138,18 +138,25 @@ def elevate_duplicate_attrs(ds_list: List[Dataset], attributes: Union[str, List[
         attributes: Attribute values to check within the Datasets. If None is passed
         the original dataset list will be returned.
     Returns:
-        list: Modified list of Dataset objects
+        list: List of updated Dataset objects
     """
     if not isinstance(attributes, list):
         attributes = [attributes]
 
+    updated_datasets = []
     for attr in attributes:
-        data_attr = [ds.attrs[attr] for ds in ds_list if attr in ds.attrs]
-        if len(set(data_attr)) > 1:
-            for i, ds in enumerate(ds_list):
+        # Pull the attributes out of the datasets - usually inlet values for ranked data
+        data_attrs = [ds.attrs[attr] for ds in ds_list if attr in ds.attrs]
+
+        # If we have more than one unique value we update the Dataset by adding a new variable
+        # This is useful with ranked inlets so we can easily know which inlet a measurement was taken from
+        if len(set(data_attrs)) > 1:
+            for ds in ds_list:
                 value = ds.attrs[attr]
                 coords = ds.coords
-                new_variable = create_array_from_value(value, coords, name=attr)
-                ds_list[i] = ds.assign({attr: new_variable})
+                new_variable = create_array_from_value(value=value, coords=coords, name=attr)
+                updated_ds = ds.assign({attr: new_variable})
 
-    return ds_list
+                updated_datasets.append(updated_ds)
+
+    return updated_datasets
