@@ -7,6 +7,9 @@ from openghg.retrieve import get_obs_surface, get_footprint, get_flux, search
 
 __all__ = ["ModelScenario", "combine_datasets"]
 
+# TODO: Consider how to handle averaging
+# TODO: Consider how to handle sources as well as storing and using multiple fluxes
+# TODO: How does the high/low resolution for fluxes work with this?
 
 # TODO: Need to think about input into the class
 # We can include a site, inlet, species input and this will be able to grab
@@ -37,15 +40,45 @@ class ModelScenario():
                  model: Optional[str] = None,
                  metmodel: Optional[str] = None,
                  sources: Optional[Union[str, List]] = None,
-                 start_date: Optional[str] = None,   # TODO: Allow str or Timestamp
-                 end_date: Optional[str] = None,   # TODO: Allow str or Timestamp
+                 start_date: Optional[Union[str, Timestamp]] = None,
+                 end_date: Optional[Union[str, Timestamp]] = None,
                  obs: Optional[ObsData] = None, 
                  footprint: Optional[FootprintData] = None, 
                  flux: Optional[FluxData] = None):
         """
-        Allow a set of keywords to be specified or for the objects to be supplied
-        directly.
+        Create a ModelScenario instance based on a set of keywords to be 
+        or directly supplied objects. This can be created as an empty class to be 
+        populated.
 
+        The keywords are related to observation, footprint and flux data
+        which may be available within the object store. The combination of these supplied
+        will be used to extract the relevant data. Related keywords are as follows:
+         - Observation data: site, species, inlet, network, start_date, end_data
+         - Footprint data: site, inlet, domain, model, metmodel, species, start_date, end_date
+         - Flux data: species, sources, domain, start_date, end_date
+
+        Args:
+            site : Site code e.g. "TAC"
+            species : Species code e.g. "ch4"
+            inlet : Inlet value e.g. "10m"
+            network : Network name e.g. "AGAGE"
+            domain : Domain name e.g. "EUROPE"
+            model : Model name used in creation of footprint e.g. "NAME"
+            metmodel : Name of met model used in creation of footprint e.g. "UKV"
+            sources : Emissions sources
+            start_date : Start of date range to use. Note for flux this may not be applied
+            end_date : End of date range to use. Note for flux this may not be applied
+            obs : Supply ObsData object directly (e.g. from get_obs...() functions)
+            footprint : Supply FootprintData object directly (e.g. from get_footprint() function)
+            flux : Supply FluxData object directly (e.g. from get_flux() function)
+
+        Returns:
+            None
+
+            Sets up instance of class with associated values.
+
+        TODO: For obs, footprint, flux should we also allow Dataset input and turn
+        these into the appropriate class?
         """
 
         # Add observation data (directly or through keywords)
@@ -90,11 +123,14 @@ class ModelScenario():
     def _get_data(self,
                   keywords: Union[List[Dict[str, str]], Dict[str, str]],
                   input_type: str):
+        """
+        Use appropriate get function to search for data in object store.
+        """
 
         get_functions = {"obs_surface": get_obs_surface,
                          "footprint": get_footprint,
                          "flux": get_flux}
-        
+
         # TODO: Add/write footprint and flux search? What's the syntax?
         search_functions = {"obs_surface": search}
 
@@ -135,10 +171,11 @@ class ModelScenario():
                 species: Optional[str] = None,
                 inlet: Optional[str] = None,
                 network: Optional[str] = None,
-                start_date: Optional[str] = None,   # TODO: Allow str or Timestamp
-                end_date: Optional[str] = None,   # TODO: Allow str or Timestamp
+                start_date: Optional[Union[str, Timestamp]] = None,
+                end_date: Optional[Union[str, Timestamp]] = None,
                 obs: Optional[ObsData] = None):
         """
+        Add observation data based on keywords or direct ObsData object.
         """
         from openghg.util import clean_string
 
@@ -157,6 +194,7 @@ class ModelScenario():
 
         self.obs = obs
 
+        # Add keywords to class for convenience
         if self.obs is not None:
             self.site = self.obs.metadata["site"]
             self.species = self.obs.metadata["species"]
@@ -168,11 +206,12 @@ class ModelScenario():
                       domain: Optional[str] = None,
                       model: Optional[str] = None,
                       metmodel: Optional[str] = None,
-                      start_date: Optional[str] = None,   # TODO: Allow str or Timestamp
-                      end_date: Optional[str] = None,   # TODO: Allow str or Timestamp
+                      start_date: Optional[Union[str, Timestamp]] = None,
+                      end_date: Optional[Union[str, Timestamp]] = None,
                       species: Optional[str] = None,
                       footprint: Optional[FootprintData] = None):
         """
+        Add footprint data based on keywords or direct FootprintData object.
         """
         from openghg.util import clean_string
 
@@ -211,10 +250,11 @@ class ModelScenario():
                  species: Optional[str] = None,
                  domain: Optional[str] = None,
                  sources: Optional[Union[str, List]] = None,
-                 start_date: Optional[str] = None,   # TODO: Allow str or Timestamp
-                 end_date: Optional[str] = None,   # TODO: Allow str or Timestamp
+                 start_date: Optional[Union[str, Timestamp]] = None,
+                 end_date: Optional[Union[str, Timestamp]] = None,
                  flux: Optional[FluxData] = None):
         """
+        Add flux data based on keywords or direct FluxData object.
         """
         # Search for flux data based on keywords (but don't necessarily add..?)
         if species and flux is None:
@@ -240,8 +280,9 @@ class ModelScenario():
 
         self.flux = flux
 
+        # Is there any metadata associated with FluxData??
         if self.flux is not None and not self.species:
-            self.species = species
+            self.species = species  # TODO: Update to extract from flux?
 
 
     def _check_data_is_present(self, need=["obs", "footprint"]):
@@ -266,8 +307,8 @@ class ModelScenario():
                 missing.append(attr)
                 
                 print(f"Must have {attr} data linked to this ModelScenario to run this function")
-                print(f"Add this using by setting the {attr} input, for example: ")
-                print("  ModelScenario.{attr} = {attr.capitalize()}Data")
+                print(f"Include this by using the add function, with appropriate inputs:")
+                print("  ModelScenario.add_{attr}(...)")
         
         if missing:            
             raise ValueError(f"Missing necessary {' and '.join(missing)} data.")
@@ -275,6 +316,9 @@ class ModelScenario():
 
     def _get_platform(self) -> Union[str, None]:
         """
+        Find the platform for a site, if present.
+        
+        This will access the "acrg_site_info.json" file to find this information.
         """
         from openghg.util import load_json
 
@@ -296,12 +340,16 @@ class ModelScenario():
         Slice and resample obs and footprint data to align along time
 
         This slices the date to the smallest time frame
-        spanned by both the footprint and obs, then resamples the data
-        using the mean to the one with coarsest median resolution
-        starting from the sliced start date.
+        spanned by both the footprint and obs, using the sliced start date
+        The time dimension is resampled based on the resample_to input using the mean.
+        The resample_to options are:
+         - "coarsest" - resample to the coarsest resolution between obs and footprints
+         - "obs" - resample to observation data frequency
+         - "footprint" - resample to footprint data frequency
+         - a valid resample period e.g. "2H"
 
         Args:
-            resample_to: Overrides resampling to coarsest time resolution, can be one of ["coarsest", "footprint", "obs"]
+            resample_to: Resample option to use: either data based or using a valid pandas resample period.
             platform: Observation platform used to decide whether to resample
         
         Returns:
@@ -315,10 +363,9 @@ class ModelScenario():
         obs_data = self.obs.data
         footprint_data = self.footprint.data
 
-        resample_to = resample_to.lower()
-        resample_choices = ("obs", "footprint", "coarsest")
-        if resample_to not in resample_choices:
-            raise ValueError(f"Invalid resample choice '{resample_to}', please select from one of {resample_choices}")
+        resample_keyword_choices = ("obs", "footprint", "coarsest")
+        if resample_to in resample_keyword_choices:
+            resample_to = resample_to.lower()
 
         if platform is not None:
             platform = platform.lower()
@@ -385,11 +432,17 @@ class ModelScenario():
         obs_data = obs_data.sel(time=slice(start_slice, end_slice))
         footprint_data = footprint_data.sel(time=slice(start_slice, end_slice))
 
+        # Check whether resample has been requested by specifying a specific period rather than a keyword
+        if resample_to in resample_keyword_choices:
+            force_resample = False
+        else:
+            force_resample = True
+
         # Only non satellite datasets with different periods need to be resampled
         timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
         tolerance = 1e-9  # seconds
 
-        if timeperiod_diff_s >= tolerance:
+        if timeperiod_diff_s >= tolerance or force_resample:
             base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
 
             if resample_to == "coarsest":
@@ -406,19 +459,47 @@ class ModelScenario():
                 resample_period = str(round(footprint_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
                 obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
 
+            else:
+                resample_period = resample_to
+                footprint_data = footprint_data.resample(indexer={"time": resample_period}, base=base).mean()
+                obs_data = obs_data.resample(indexer={"time": resample_period}, base=base).mean()
+
         return obs_data, footprint_data
 
 
     def combine_obs_footprint(self,
                               resample_to: Optional[str] = "obs",
+                              platform: Optional[str] = None,
                               cache: Optional[bool] = "True") -> Dataset:
         """
+        Combine observation and footprint data so these are on the same time
+        axis. This will both slice and resample the data to align this axis.
+
+        - Data is slices to smallest timeframe spanned by both footprint and obs
+        - Data is resampled according to resample_to input and using the mean
+        - Data is combined into one dataset
+
+        Args:
+            resample_to: Resample option to use for averaging: 
+                          - either one of ["coarsest", "obs", "footprint"] to match to the datasets
+                          - or using a valid pandas resample period e.g. "2H".
+                         Default = "coarsest".
+            platform: Observation platform used to decide whether to resample
+            cache: Cache this data after calculation. Default = True.
+
+        Returns:
+            xarray.Dataset: Combined dataset aligned along the time dimension
+
+            If cache is True:
+                This data will be also be cached as the ModelScenario.scenario attribute.
         """
+
         self._check_data_is_present(need=["obs", "footprint"])
 
         # As we're not processing any satellite data yet just set tolerance to None
         tolerance = None
-        platform = self._get_platform()
+        if platform is None:
+            platform = self._get_platform()
 
         # Align and merge the observation and footprint Datasets
         aligned_obs, aligned_footprint = self._align_obs_footprint(resample_to=resample_to, platform=platform)
@@ -448,18 +529,51 @@ class ModelScenario():
 
         return combined_dataset
 
-    # TODO: Write calc_modelled_obs function to create a forward model combining the footprint and emissions inputs
-    # TODO: Will want to allow this to be resampled / reindexed to the obs values even though they are not used here
-    # but should allow this to a seperate function if obs isn't present.
+
+    def _check_footprint_resample(self, resample_to: str) -> FootprintData:
+        '''
+        Check whether footprint needs resampling based on resample_to input.
+        '''
+        if resample_to in ("coarsest", "obs", "footprint"):
+            return self.footprint.data
+        else:
+            footprint_data = self.footprint.data
+            time = footprint_data["time"].values
+            start_date = Timestamp(time[0])
+            base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
+            footprint_data = footprint_data.resample(indexer={"time": resample_to}, base=base).mean()
+            return footprint_data
+
 
     def calc_modelled_obs(self,
                           sources: Optional[Union[str, List]] = None,
-                        #   averaging: Optional[str] = None,
                           resample_to: Optional[str] = "coarsest",
+                          platform: Optional[str] = None,
                           cache: Optional[bool] = True,
                           recalculate: Optional[bool] = False) -> DataArray:
         """
-        Calculate the modelled observation based on footprint and fluxes.
+        Calculate the modelled observation points based on site footprint and fluxes.
+
+        The time points returned are dependent on the resample_to option chosen.
+        If obs data is also linked to the ModelScenario instance, this will be used
+        to derive the time points where appropriate.
+        
+        Args:
+            sources: NOT IMPLEMENTED YET. Sources to use for flux. All will be used if not specified.
+            resample_to: Resample option to use for averaging: 
+                          - either one of ["coarsest", "obs", "footprint"] to match to the datasets
+                          - or using a valid pandas resample period e.g. "2H".
+                         Default = "coarsest".
+            platform: Observation platform used to decide whether to resample e.g. "site", "satellite".
+            cache: Cache this data after calculation. Default = True.
+            recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+
+        Returns:
+            xarray.DataArray: Modelled observation values along the time axis
+
+            If cache is True:
+                This data will also be cached as the ModelScenario.modelled_obs attribute.
+                The associated scenario data will be cached as the ModelScenario.scenario attribute.
         """
 
         self._check_data_is_present(need=["footprint", "flux"])
@@ -468,9 +582,9 @@ class ModelScenario():
         if self.modelled_obs is None:
             # Check if observations are present and use these for resampling
             if self.obs is not None:
-                self.combine_obs_footprint(resample_to, cache=True)
+                self.combine_obs_footprint(resample_to, platform=platform, cache=True)
             else:
-                self.scenario = self.footprint.data
+                self.scenario = self._check_footprint_resample(resample_to)
         else:
             if self.obs is not None:
                 # Check previous resample_to input for cached data
@@ -480,12 +594,12 @@ class ModelScenario():
                 # - if not (or explicit recalculation requested), recreate scenario
                 # - if so return cached modelled observations
                 if prev_resample_to != resample_to or recalculate:
-                    self.combine_obs_footprint(resample_to, cache=True)
+                    self.combine_obs_footprint(resample_to, platform=platform, cache=True)
                 else:
                     return self.modelled_obs
             elif recalculate:
                 # Recalculate based on footprint data if obs not present
-                self.scenario = self.footprint.data
+                self.scenario = self._check_footprint_resample(resample_to)
             else:
                 # Return cached modelled observations if explicit recalculation not requested
                 return self.modelled_obs
@@ -543,14 +657,15 @@ class ModelScenario():
 
 
     def _calc_modelled_obs_HiTRes(self, 
-                                  averaging: Optional[str] = None,
                                   sources: Optional[Union[str, List]] = None,
+                                  averaging: Optional[str] = None,
                                   output_TS: Optional[bool] = True,
                                   output_fpXflux: Optional[bool] = False,
                                   ) -> Any:
         """
         Calculate modelled mole fraction timeseries using high time resolution
-        footprints data and emissions data.
+        footprints data and emissions data. This is appropriate for time variable
+        species reliant on high time resolution footprints such as carbon dioxide (co2).
 
         Args:
             averaging:

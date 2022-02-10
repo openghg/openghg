@@ -179,3 +179,20 @@ def test_calc_modelled_obs(model_scenario_1):
 
         # Could add more checks here but may be better doing this with mocked data
 
+
+def test_calc_modelled_obs_period(model_scenario_1):
+    '''Test calc_modelled_obs method of ModelScenario class can allow pandas resample inputs'''
+    modelled_obs = model_scenario_1.calc_modelled_obs(resample_to="1D")
+    cached_modelled_obs = model_scenario_1.modelled_obs
+
+    # Check returned value and cache associated with class
+    data_to_check = [modelled_obs, cached_modelled_obs]
+
+    for data in data_to_check:
+        # Check times align with expected values based on resample_to input
+        time = data.time
+        assert time[0] == Timestamp("2012-08-01T00:00:00")
+        assert time[-1] == Timestamp("2012-08-31T00:00:00")
+        assert len(time) == 31
+
+        # Could add more checks here but may be better doing this with mocked data
