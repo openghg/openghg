@@ -227,7 +227,7 @@ def get_obs_surface(
 
 def get_flux(
     species: str,
-    sources: Union[str, List[str]],
+    source: str,
     domain: str,
     start_date: Optional[Timestamp] = None,
     end_date: Optional[Timestamp] = None,
@@ -240,19 +240,13 @@ def get_flux(
 
     Args:
         species: Species name
-        sources: Source name
+        source: Source name
         domain: Domain e.g. EUROPE
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
     Returns:
         FluxData: FluxData object
-
-    TODO: Update this to output to a FluxData class?
-    TODO: Update inputs to just accept a string and extract one flux file at a time?
-    As it stands, this only extracts one flux at a time but is set up to be extended
-    to to extract multiple. So if this is removed from this function the functionality
-    itself would need to be wrapped up in another function call.
     """
     from openghg.retrieve import search
     from openghg.store import recombine_datasets
@@ -265,7 +259,7 @@ def get_flux(
 
     results: Dict = search(
         species=species,
-        source=sources,
+        source=source,
         domain=domain,
         time_resolution=time_resolution,
         start_date=start_date,
@@ -274,9 +268,8 @@ def get_flux(
     )  # type: ignore
 
     if not results:
-        raise ValueError(f"Unable to find flux data for {species} from {sources}")
+        raise ValueError(f"Unable to find flux data for {species} from {source}")
 
-    # TODO - more than one emissions file (but see above)
     try:
         em_key = list(results.keys())[0]
     except IndexError:

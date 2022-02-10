@@ -26,7 +26,7 @@ def data_read():
     # Emissions data
     # Anthropogenic ch4 (methane) data from 2012 for EUROPE
     species = "ch4"
-    source = "anthro"
+    source1 = "anthro"
     domain = "EUROPE"
 
     emissions_datapath = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
@@ -34,11 +34,16 @@ def data_read():
     Emissions.read_file(
         filepath=emissions_datapath,
         species=species,
-        source=source,
+        source=source1,
         date="2012",
         domain=domain,
         high_time_resolution=False,
     )
+
+    # TODO: Add additional emissions source here
+    # Just need to find / create a file that's not too big
+    # Can be for different date range but should be for 2012 or earlier
+
 
     # Footprint data
     # TAC footprint from 2012-08 - 2012-09 at 100m

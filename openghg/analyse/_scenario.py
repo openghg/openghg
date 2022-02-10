@@ -5,7 +5,7 @@ from typing import Optional, Tuple, Union, List, Dict, Any
 from openghg.dataobjects import ObsData, FootprintData, FluxData
 from openghg.retrieve import get_obs_surface, get_footprint, get_flux, search
 
-__all__ = ["ModelScenario", "combine_datasets"]
+__all__ = ["ModelScenario", "combine_datasets", "stack_datasets"]
 
 # TODO: Consider how to handle averaging
 # TODO: Consider how to handle sources as well as storing and using multiple fluxes
@@ -44,7 +44,7 @@ class ModelScenario():
                  end_date: Optional[Union[str, Timestamp]] = None,
                  obs: Optional[ObsData] = None, 
                  footprint: Optional[FootprintData] = None, 
-                 flux: Optional[FluxData] = None):
+                 flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None):
         """
         Create a ModelScenario instance based on a set of keywords to be 
         or directly supplied objects. This can be created as an empty class to be 
@@ -241,9 +241,8 @@ class ModelScenario():
         
         self.footprint = footprint
 
-        # Is there any metadata associated with FootprintData??
-        if self.footprint is not None and not self.site:
-            self.site = self.footprint.data.attrs["site"]
+        if self.footprint is not None and not hasattr(self, "site"):
+            self.site = self.footprint.metadata["site"]
 
 
     def add_flux(self,
@@ -252,37 +251,54 @@ class ModelScenario():
                  sources: Optional[Union[str, List]] = None,
                  start_date: Optional[Union[str, Timestamp]] = None,
                  end_date: Optional[Union[str, Timestamp]] = None,
-                 flux: Optional[FluxData] = None):
+                 flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None) -> Dict[str, FluxData]:
         """
         Add flux data based on keywords or direct FluxData object.
         """
         # Search for flux data based on keywords (but don't necessarily add..?)
         if species and flux is None:
-            if isinstance(sources, str):
+            if sources is None or isinstance(sources, str):
                 sources = [sources]
             
-            # TODO: Make this into a dictionary for each source
-            flux_keywords_1 = {"species": species,
-                               "sources": sources,
-                               "domain": domain,
-                               "start_date": start_date,
-                               "end_date": end_date}
+            flux = {}
+            for source in sources:
+                # TODO: Make this into a    dictionary for each source
+                flux_keywords_1 = {"species": species,
+                                   "source": source,
+                                   "domain": domain,
+                                   "start_date": start_date,
+                                   "end_date": end_date}
+                
+                flux_keywords_2 = flux_keywords_1.copy()
+                flux_keywords_2.pop("start_date")
+                flux_keywords_2.pop("end_date")
+
+                flux_keywords = [flux_keywords_1, flux_keywords_2]
+
+                # TODO: Add something to allow for e.g. global domain or no domain
+
+                flux_source = self._get_data(flux_keywords, input_type="flux")
             
-            flux_keywords_2 = flux_keywords_1.copy()
-            flux_keywords_2.pop("start_date")
-            flux_keywords_2.pop("end_date")
+            flux[source] = flux_source
 
-            flux_keywords = [flux_keywords_1, flux_keywords_2]
+        elif flux is not None:
+            if not isinstance(flux, dict):
+                if sources is None:
+                    source = "source"
+                elif isinstance(sources, list):
+                    source = sources[0]
+                else:
+                    source = sources
+                flux = {source: flux}
 
-            # TODO: Add something to allow for e.g. global domain or no domain
-
-            flux = self._get_data(flux_keywords, input_type="flux")
-
+        # TODO: Make this so flux.anthro can be called etc. - link in some way
         self.flux = flux
 
         # Is there any metadata associated with FluxData??
-        if self.flux is not None and not self.species:
-            self.species = species  # TODO: Update to extract from flux?
+        if self.flux is not None and not hasattr(self, "species"):
+            flux_values = list(self.flux.values())
+            flux_1 = flux_values[0]
+            self.species = flux_1.metadata["species"]
 
 
     def _check_data_is_present(self, need=["obs", "footprint"]):
@@ -530,6 +546,41 @@ class ModelScenario():
         return combined_dataset
 
 
+    def combine_flux_sources(self, sources: Optional[Union[str, List]] = None) -> Dataset:
+        """
+        Combine together flux sources on the time dimension. This will align to
+        the time of the highest frequency flux source both for time range and frequency.
+
+        Args:
+            sources : Names of sources to combine. Should already be attached to ModelScenario.
+
+        Returns:
+            Dataset: All flux sources stacked on the time dimension.
+        """
+        self._check_data_is_present(need=["flux"])
+
+        time_dim = "time"
+        flux_dict = self.flux
+
+        if sources is None:
+            sources = flux_dict.keys()
+        elif isinstance(sources, str):
+            sources = [sources]
+
+        flux_datasets = [flux_dict[source].data for source in sources]
+
+        if len(sources) == 1:
+            return flux_datasets[0]
+
+        try:
+            flux_stacked = stack_datasets(flux_datasets, dim=time_dim, method="ffill")
+        except ValueError:
+            sources = flux_dict.keys()
+            raise ValueError(f"Unable to combine flux data for sources: {list(sources)}")
+
+        return flux_stacked
+
+
     def _check_footprint_resample(self, resample_to: str) -> FootprintData:
         '''
         Check whether footprint needs resampling based on resample_to input.
@@ -633,16 +684,19 @@ class ModelScenario():
         Calculate modelled mole fraction timeseries using integrated footprints data.
 
         Returns:
-            DataArray :
+            DataArray / DataArray :
                 Modelled mole fraction timeseries, dimensions = (time)
+                Modelled flux map, dimensions = (lat, lon, time)
 
-        TODO: Also allow flux_mod to be returned as an option? Include flags if so.
+            If one of output_TS and output_fpXflux are True:
+                DataArray is returned for the respective output
+
+            If both output_TS and output_fpXflux are both True:
+                Both DataArrays are returned.
         """
 
-        # Integrate "sources" into flux extraction
-
         scenario = self.scenario
-        flux = self.flux.data
+        flux = self.combine_flux_sources(sources)
 
         flux = flux.reindex_like(scenario, "ffill")
         flux_modelled: DataArray = scenario["fp"] * flux["flux"]
@@ -714,10 +768,11 @@ class ModelScenario():
         from pandas import date_range
         from math import gcd
 
-        # TODO: Integrate sources into selection of flux
+        # TODO: Need to work out how this fits in with high time resolution method
+        # Do we need to flag low resolution to use a different method? natural / anthro for example
 
         fp_HiTRes = self.scenario.fp_HiTRes
-        flux_ds = self.flux.data
+        flux_ds = self.combine_flux_sources(sources)
 
         # Calculate time resolution for both the flux and footprints data
         nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
@@ -988,6 +1043,49 @@ def combine_datasets(
             merged_ds = merged_ds[dict(time=flag[0])]
 
     return merged_ds
+
+
+def stack_datasets(datasets: List[Dataset], 
+                   dim: str = "time",
+                   method: str = "ffill") -> Dataset:
+    """
+    Stacks multiple datasets based on the input dimension. By default this is time.
+    
+    At the moment, the two datasets must have identical coordinate values and 
+    variable names for these to be stacked.
+    
+    Args:
+        datasets : List of input datasets
+        dim : Name of dimension to stack along. Default = "time"
+        method: Method to use when aligning the datasets. Default = "ffill"
+    
+    Returns:
+        Dataset : Stacked dataset
+
+    TODO: Could update this to only allow DataArrays to be included to reduce the phase
+    space here.
+    TODO: Try this out with different inputs to check this is sensibly robust
+    """
+
+    if len(datasets) == 1:
+        dataset = datasets[0]
+        return dataset
+
+    data_frequency = (ds[dim].diff(dim=dim).mean() for ds in datasets)
+    index_highest_freq = min(range(len(data_frequency)), key=data_frequency.__getitem__)
+    data_highest_freq = datasets[index_highest_freq]
+    coords_to_match = data_highest_freq[dim]
+
+    for i, data in enumerate(datasets):
+        data_match = data.reindex({dim: coords_to_match}, method=method)
+        if i == 0:
+            data_stacked = data_match
+            data_stacked.attrs = {}
+        else:
+            data_stacked += data_match
+
+    return data_stacked
+
 
 # Blueprint from Issue #42 created for this
 

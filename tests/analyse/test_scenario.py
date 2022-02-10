@@ -18,7 +18,7 @@ def test_scenario_direct_objects():
     species="ch4"
     network="DECC"
     inlet="100m"
-    sources="anthro"
+    source="anthro"
 
     obs_surface = get_obs_surface(site=site, 
                                   species=species,
@@ -30,7 +30,7 @@ def test_scenario_direct_objects():
     footprint = get_footprint(site=site, domain=domain, height=inlet,
                start_date=start_date, end_date=end_date)
 
-    flux = get_flux(species=species, domain=domain, sources=sources)
+    flux = get_flux(species=species, domain=domain, source=source)
 
     model_scenario = ModelScenario(obs=obs_surface, footprint=footprint, flux=flux)
 
@@ -53,14 +53,14 @@ def test_scenario_infer_inputs():
     species = "ch4"
     inlet = "100m"
     network = "DECC"
-    sources = "anthro"
+    source = "anthro"
 
     model_scenario = ModelScenario(site=site,
                                    species=species,
                                    inlet=inlet,
                                    network=network,
                                    domain=domain,
-                                   sources=sources,
+                                   sources=source,
                                    start_date=start_date,
                                    end_date=end_date)
 
@@ -126,14 +126,14 @@ def model_scenario_1():
     species = "ch4"
     inlet = "100m"
     network = "DECC"
-    sources = "anthro"
+    source = "anthro"
 
     model_scenario = ModelScenario(site=site,
                                    species=species,
                                    inlet=inlet,
                                    network=network,
                                    domain=domain,
-                                   sources=sources,
+                                   sources=source,
                                    start_date=start_date,
                                    end_date=end_date)
 
@@ -196,3 +196,5 @@ def test_calc_modelled_obs_period(model_scenario_1):
         assert len(time) == 31
 
         # Could add more checks here but may be better doing this with mocked data
+
+# TODO: Add test for stacking flux datasets - only looked at one so far.
