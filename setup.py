@@ -9,17 +9,11 @@ files = ["openghg/*"]
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
-with open("requirements-dev.txt") as f:
-    dev_requirements = f.read().splitlines()
-
-with open("requirements-doc.txt") as f:
-    doc_requirements = f.read().splitlines()
-
 setuptools.setup(
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
+    # version=versioneer.get_version(),
+    # cmdclass=versioneer.get_cmdclass(),
+    version="0.5.0",
     install_requires=requirements,
-    extras_require={"dev": dev_requirements, "docs": doc_requirements},
     name="openghg",
     author="Gareth Jones",
     author_email="g.m.jones@bristol.ac.uk",
@@ -30,9 +24,13 @@ setuptools.setup(
     packages=setuptools.find_packages(include=["openghg", "openghg.*"]),
     package_data={"": ["data/*"]},
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: TBA",
-        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: POSIX :: Linux",
+        "Operating System :: MacOS",
     ],
     python_requires=">=3.7",
 )

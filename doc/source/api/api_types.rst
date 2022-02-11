@@ -10,6 +10,7 @@ Custom errors
 
 .. autoclass:: openghg.types.FunctionError
 
+.. autoclass:: openghg.types.ObjectStoreError
 
 Custom types
 ^^^^^^^^^^^^

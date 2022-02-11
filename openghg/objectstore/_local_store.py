@@ -3,7 +3,7 @@ import json
 import os
 from pathlib import Path
 import threading
-from Acquire.ObjectStore import ObjectStoreError
+from openghg.types import ObjectStoreError
 import pyvis
 from uuid import uuid4
 from typing import Dict, List, Optional, Union

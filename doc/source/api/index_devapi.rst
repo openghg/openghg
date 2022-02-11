@@ -378,6 +378,10 @@ Customised errors for OpenGHG.
 :class:`~openghg.util.FunctionError`
     Raised if there has been an error with a serverless function.
 
+:class:`~openghg.util.ObjectStoreError`
+    Raised if an error accessing an object at a key in the object store occurs
+    
+
 Types
 ^^^^^
 
