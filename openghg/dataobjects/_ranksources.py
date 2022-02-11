@@ -80,19 +80,19 @@ class RankSources:
 
         matching_sources = [d for d in datasources if d.search_metadata(site=site, species=species)]
 
-        if not matching_sources:
-            return {}
-
-        self._user_info = {
-            d.inlet(): {
-                "rank_data": rank_table.get(d.uuid(), "NA"),
-                "data_range": d.daterange_str(),
+        if matching_sources:
+            self._user_info = {
+                d.inlet(): {
+                    "rank_data": rank_table.get(d.uuid(), "NA"),
+                    "data_range": d.daterange_str(),
+                }
+                for d in matching_sources
             }
-            for d in matching_sources
-        }
 
-        self._key_lookup = {d.inlet(): d.uuid() for d in matching_sources}
-        self._needs_update = False
+            self._key_lookup = {d.inlet(): d.uuid() for d in matching_sources}
+            self._needs_update = False
+        else:
+            self._user_info = {}
 
         return self._user_info
 

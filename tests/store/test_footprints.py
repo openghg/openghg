@@ -121,20 +121,6 @@ def test_read_footprint():
     footprint_data["pressure"].min().values == pytest.approx(1011.92)
 
 
-def test_read_same_footprint_twice_raises():
-    datapath = get_footprint_datapath("footprint_test.nc")
-
-    with pytest.raises(ValueError):
-        Footprints.read_file(
-            filepath=datapath,
-            site="TMB",
-            model="test_model",
-            network="LGHG",
-            domain="EUROPE",
-            height="10magl",
-        )
-
-
 def test_set_lookup_uuids():
     f = Footprints()
 

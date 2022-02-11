@@ -56,7 +56,6 @@ def test_read_obspack_2020():
     assert "sampling_period_estimate" in ch4_metadata
 
 
-@pytest.mark.xfail(reason="Bug: Missing instrment for flask data, required? - see #201")
 def test_read_obspack_flask_2021():
     '''Test inputs from "obspack_multi-species_1_CCGGSurfaceFlask_v2.0_2021-02-09"'''
     filepath = get_datapath(filename="ch4_spf_surface-flask_1_ccgg_Event.nc", data_type="NOAA")
@@ -65,14 +64,18 @@ def test_read_obspack_flask_2021():
         data_filepath=filepath, site="SPF", inlet="flask", measurement_type="flask", network="NOAA"
     )
 
-    ch4_data = data["ch4"]["data"]
+    # TODO: Replace this test data example when possible.
+    # This ObsPack file contains negative heights because SPF is Antarctic Firn Air (ice cores)
+    # The intake_height in this case has been used to indicate depth.
+    inlet_key = "ch4_-2922m"
+    ch4_data = data[inlet_key]["data"]
 
-    assert ch4_data.time[0] == Timestamp("1995-01-28T19:20:00")
-    assert ch4_data.time[-1] == Timestamp("2015-12-12T20:15:00")
-    assert ch4_data["ch4"][0] == pytest.approx(1673.89)
-    assert ch4_data["ch4"][-1] == pytest.approx(1785.86)
+    assert ch4_data.time[0] == Timestamp("1995-02-01T14:36:00")
+    assert ch4_data.time[-1] == Timestamp("2001-01-15T12:34:56")
+    assert ch4_data["ch4"][0] == pytest.approx(921.43)
+    assert ch4_data["ch4"][-1] == pytest.approx(1143.27)
     assert ch4_data["ch4_variability"][0] == pytest.approx(2.71)
-    assert ch4_data["ch4_variability"][-1] == pytest.approx(0.91)
+    assert ch4_data["ch4_variability"][-1] == pytest.approx(1.4)
 
     attributes = ch4_data.attrs
 
@@ -80,11 +83,42 @@ def test_read_obspack_flask_2021():
     assert attributes["sampling_period"] == "NOT_SET"
     assert "sampling_period_estimate" in attributes
     assert float(attributes["sampling_period_estimate"]) > 0.0
+    assert attributes["units"] == "1e-9"
 
-    ch4_metadata = data["ch4"]["metadata"]
+    ch4_metadata = data[inlet_key]["metadata"]
 
     assert "sampling_period" in ch4_metadata
     assert "sampling_period_estimate" in ch4_metadata
+
+    parsed_surface_metachecker(data=data)
+
+
+def test_read_obspack_tower_multi_height():
+    """
+    Test inputs from "obspack_multi-species_1_CCGGTowerInsitu_v1.0_2018-02-08".
+     - This will contain data at multiple heights (intake_height variable) which should be split.
+    """
+    filepath = get_datapath(filename="ch4_bao_tower-insitu_1_ccgg_all.nc", data_type="NOAA")
+
+    data = parse_noaa(data_filepath=filepath, site="BAO", measurement_type="insitu", network="NOAA")
+
+    # Check number of entries extracted - should be three inlet heights: 22m, 100m, 300m
+    num_keys = len(data.keys())
+    assert num_keys == 3
+    assert "ch4_22m" in data.keys()
+    assert "ch4_100m" in data.keys()
+    assert "ch4_300m" in data.keys()
+
+    # Check values for one of the inlet heights
+    inlet_key1 = "ch4_22m"
+    ch4_data_22m = data[inlet_key1]["data"]
+
+    assert ch4_data_22m.time[0] == Timestamp("2012-05-04T00:00:00")
+    assert ch4_data_22m.time[-1] == Timestamp("2012-07-02T17:00:00")
+    assert ch4_data_22m["ch4"][0] == pytest.approx(1969.01)
+    assert ch4_data_22m["ch4"][-1] == pytest.approx(2057.103)
+    assert ch4_data_22m["ch4_variability"][0] == pytest.approx(78.326)
+    assert ch4_data_22m["ch4_variability"][-1] == pytest.approx(18.081)
 
     parsed_surface_metachecker(data=data)
 

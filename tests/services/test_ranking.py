@@ -29,9 +29,16 @@
 #         data_type="CRDS",
 #     )
 
+<<<<<<< HEAD
 # @pytest.mark.skip("Marked for removal")
 # def test_set_and_clear_ranking(authenticated_user, load_crds):
 #     r = rank_sources(site="hfd", species="co2", service_url="openghg")
+=======
+
+@pytest.mark.skip("Marked for removal")
+def test_set_and_clear_ranking(authenticated_user, load_crds):
+    r = rank_sources(site="hfd", species="co2", service_url="openghg")
+>>>>>>> devel
 
 #     expected_response = {
 #         "co2_100m_picarro": {"rank_data": "NA", "data_range": "2013-12-04T14:02:30_2019-05-21T15:46:30"},

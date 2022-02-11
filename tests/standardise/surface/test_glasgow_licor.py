@@ -16,6 +16,8 @@ def test_glasgow_licor_read():
     assert ch4_data.latitude[0] == pytest.approx(55.82689833)
     assert ch4_data.ch4[0] == 13.43
 
-    assert metadata == {'units': 'ppb', 
-                        'notes': 'measurement value is methane enhancement over background',
-                        'sampling_period': 'NOT_SET'}
+    assert metadata == {
+        "units": "ppb",
+        "notes": "measurement value is methane enhancement over background",
+        "sampling_period": "NOT_SET",
+    }

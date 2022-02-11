@@ -5,6 +5,7 @@ from openghg.util import timestamp_tzaware
 from pandas import Timestamp
 from helpers import metadata_checker_obssurface, attributes_checker_obssurface
 
+
 def test_specific_keyword_search():
     site = "bsd"
     species = "co2"
@@ -29,7 +30,7 @@ def test_specific_keyword_search():
         "comment": "Cavity ring-down measurements. Output from GCWerks",
         "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
         "source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
+        "Conventions": "CF-1.8",
         "processed_by": "OpenGHG_Cloud",
         "species": "co2",
         "calibration_scale": "WMO-X2007",
@@ -40,11 +41,12 @@ def test_specific_keyword_search():
         "site": "bsd",
         "instrument": "picarro",
         "sampling_period": "60",
+        "sampling_period_unit": "s",
         "inlet": "248m",
         "port": "9",
         "type": "air",
         "network": "decc",
-        "scale": "WMO-X2007",
+        "calibration_scale": "WMO-X2007",
         "long_name": "bilsdale",
     }
 
@@ -57,6 +59,7 @@ def test_specific_search_gc():
     metadata = results.metadata(site="cgo", species="nf3", inlet="70m")
 
     assert metadata_checker_obssurface(metadata=metadata, species="nf3")
+
 
 def test_specific_search_translator():
     results = search(species="toluene", site="CGO", skip_ranking=True)
@@ -259,6 +262,7 @@ def test_search_find_any():
 
     assert metadata_checker_obssurface(metadata=ch4_metadata, species="ch4")
     assert metadata_checker_obssurface(metadata=co2_metadata, species="co2")
+
 
 def test_search_incorrect_inlet_site_finds_nothing():
     locations = "hfd"

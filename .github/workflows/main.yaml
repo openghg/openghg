@@ -60,30 +60,26 @@ jobs:
       run: |
         pip install --upgrade pytest
         pytest --run-cfchecks --cov=./ --cov-report=xml
-    - name: Upload coverage to Codecov
-      run: |
-        curl -s https://codecov.io/bash > codecov;
-        VERSION=$(grep -o 'VERSION=\"[0-9\.]*\"' codecov | cut -d'"' -f2);
-        for i in 1 256 512
-        do
-          shasum -a $i -c --ignore-missing <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM") ||
-          shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM")
-        done
-        bash codecov || echo "Codecov did not collect coverage reports"
-      if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
     - name: Install pandoc and build the documentation
       run: |
         sudo apt-get install -yq pandoc
         pip install -r requirements-doc.txt
+      if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
+    - name: Ensure notebooks can be executed correctly
+      run: |
+        jupytext --sync --execute notebooks/tutorials/*/*.ipynb
+      if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
+    - name: Build documentation
+      run: |
         cd doc
         make
       if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
     - name: Deploy to GitHub pages
-      uses: JamesIves/github-pages-deploy-action@0f24da7de3e7e135102609a4c9633b025be8411b
+      uses: JamesIves/github-pages-deploy-action@v4.2.3
       with:
         branch: gh-pages
         folder: "doc/build/html"
-        clean: true 
+        clean: true
       if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
     - name: Install pypa/build
       run: |
@@ -104,6 +100,20 @@ jobs:
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}      
       if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
+    - name: Upload coverage to Codecov
+      run: |
+        curl -s https://codecov.io/bash > codecov;
+        VERSION=$(grep -o 'VERSION=\"[0-9\.]*\"' codecov | cut -d'"' -f2);
+        for i in 1 256 512
+        do
+          shasum -a $i -c --ignore-missing <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM") ||
+          shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM")
+        done
+        bash codecov || echo "Codecov did not collect coverage reports"
+      if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
+
+      
+        
 
 
     
