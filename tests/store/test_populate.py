@@ -1,14 +1,15 @@
 from helpers import get_datapath
 from openghg.store import add_noaa_obspack
 
+
 def test_read_noaa_obspack_ch4():
-    '''Test object store can be populated automatically when providing a NOAA
+    """Test object store can be populated automatically when providing a NOAA
     ObsPack path. This contains:
      - directory structure: data/nc/
      - methane files only: "ch4_..."
      - surface flask files: "..._surface-flask_..."
      - aircraft pfp file: "..._aircraft-pfp_..." - this should be ignored for now
-    '''
+    """
     data_directory = get_datapath("ObsPack_ch4", data_type="NOAA")
     out = add_noaa_obspack(data_directory)
 

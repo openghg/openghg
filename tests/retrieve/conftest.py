@@ -31,12 +31,20 @@ def data_read():
     data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     prec_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
-    ObsSurface.read_file(filepath=(data_filepath, prec_filepath), site="CGO", data_type="GCWERKS", network="AGAGE")
+    ObsSurface.read_file(
+        filepath=(data_filepath, prec_filepath), site="CGO", data_type="GCWERKS", network="AGAGE"
+    )
 
     mhd_data_filepath = get_datapath(filename="macehead.12.C", data_type="GC")
     mhd_prec_filepath = get_datapath(filename="macehead.12.precisions.C", data_type="GC")
 
-    ObsSurface.read_file(filepath=(mhd_data_filepath, mhd_prec_filepath), site="MHD", data_type="GCWERKS", network="AGAGE", instrument="GCMD")
+    ObsSurface.read_file(
+        filepath=(mhd_data_filepath, mhd_prec_filepath),
+        site="MHD",
+        data_type="GCWERKS",
+        network="AGAGE",
+        instrument="GCMD",
+    )
 
     # Set ranking information for BSD
     obs = ObsSurface.load()

@@ -14,8 +14,8 @@ from openghg.util import (
     trim_daterange,
     split_encompassed_daterange,
     daterange_contains,
-    check_nan, 
-    check_date
+    check_nan,
+    check_date,
 )
 
 

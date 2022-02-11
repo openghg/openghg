@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
 
-from Acquire.Client import (PAR, Authorisation, Drive, Service, StorageCreds,
-                            User, Wallet)
+# from Acquire.Client import (PAR, Authorisation, Drive, Service, StorageCreds,
+#                             User, Wallet)
 from openghg.store import ObsSurface
 from openghg.types import DataTypes
 from openghg.util import running_in_cloud
@@ -18,8 +18,6 @@ def process_files(
     inlet: str = None,
     instrument: str = None,
     overwrite: bool = False,
-    service_url: str = "https://fn.openghg.org/t",
-    user: User = None,
 ) -> Dict:
     """Process data files, standardise them and add the data to the object store
 
@@ -37,17 +35,7 @@ def process_files(
     cloud = running_in_cloud()
 
     if cloud:
-        return _process_files_cloud(
-            files=files,
-            data_type=data_type,
-            site=site,
-            network=network,
-            inlet=inlet,
-            instrument=instrument,
-            overwrite=overwrite,
-            service_url=service_url,
-            user=user,
-        )
+        raise NotImplementedError
     else:
         return _process_files_local(
             files=files,
@@ -60,113 +48,116 @@ def process_files(
         )
 
 
-def _process_files_cloud(
-    files: filepathType,
-    data_type: str,
-    site: str,
-    network: str,
-    inlet: str = None,
-    instrument: str = None,
-    overwrite: bool = False,
-    service_url: str = "https://fn.openghg.org/t",
-    user: User = None,
-) -> Dict:
-    """Process the passed file(s)
+# def _process_files_cloud(
+#     files: filepathType,
+#     data_type: str,
+#     site: str,
+#     network: str,
+#     inlet: str = None,
+#     instrument: str = None,
+#     overwrite: bool = False,
+#     service_url: str = "https://fn.openghg.org/t",
+#     user: User = None,
+# ) -> Dict:
+#     """Process the passed file(s)
 
-    Args:
-        user: Authenticated Acquire User
-        files (str, list): Path of files to be processed
-        data_type: Type of data to be processed (CRDS, GCWERKS etc)
-        site: Site name
-        network: Network name
-        instrument: If no instrument name is passed we will attempt
-        to find it from the filename.
-        site: Name of site, three letter code or long name
-    Returns:
-        dict: UUIDs of Datasources storing data of processed files keyed by filename
-    """
-    wallet = Wallet()
-    cloud_service = wallet.get_service(service_url=f"{service_url}/openghg")
+#     Args:
+#         user: Authenticated Acquire User
+#         files (str, list): Path of files to be processed
+#         data_type: Type of data to be processed (CRDS, GCWERKS etc)
+#         site: Site name
+#         network: Network name
+#         instrument: If no instrument name is passed we will attempt
+#         to find it from the filename.
+#         site: Name of site, three letter code or long name
+#     Returns:
+#         dict: UUIDs of Datasources storing data of processed files keyed by filename
+#     """
 
-    data_type = data_type.upper()
+#     return NotImplementedError
 
-    if not isinstance(files, list):
-        files = [files]
+    # wallet = Wallet()
+    # cloud_service = wallet.get_service(service_url=f"{service_url}/openghg")
 
-    if data_type in ("GCWERKS", "GC"):
-        if not all(isinstance(item, tuple) for item in files):
-            raise TypeError(
-                "If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed"
-            )
+    # data_type = data_type.upper()
 
-        files = [(Path(f), Path(p)) for f, p in files]
-    else:
-        files = [Path(f) for f in files]
+    # if not isinstance(files, list):
+    #     files = [files]
 
-    storage_url = f"{service_url}/storage"
-    openghg_url = f"{service_url}/openghg"
+    # if data_type in ("GCWERKS", "GC"):
+    #     if not all(isinstance(item, tuple) for item in files):
+    #         raise TypeError(
+    #             "If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed"
+    #         )
 
-    openghg = Service(service_url=openghg_url)
-    creds = StorageCreds(user=user, service_url=storage_url)
-    drive = Drive(creds=creds, name="openghg_drive")
-    auth = Authorisation(resource="process", user=user)
+    #     files = [(Path(f), Path(p)) for f, p in files]
+    # else:
+    #     files = [Path(f) for f in files]
 
-    # TODO - this should also just upload all the files at once and get them processed
-    results = {}
-    for file in files:
-        if data_type in ("GCWERKS", "GC"):
+    # storage_url = f"{service_url}/storage"
+    # openghg_url = f"{service_url}/openghg"
 
-            if "-" in site:
-                site = site.split("-")[0]
+    # openghg = Service(service_url=openghg_url)
+    # creds = StorageCreds(user=user, service_url=storage_url)
+    # drive = Drive(creds=creds, name="openghg_drive")
+    # auth = Authorisation(resource="process", user=user)
 
-            filemeta = drive.upload(file[0])
-            par = PAR(location=filemeta.location(), user=user)
-            par_secret = openghg.encrypt_data(par.secret())
+    # # TODO - this should also just upload all the files at once and get them processed
+    # results = {}
+    # for file in files:
+    #     if data_type in ("GCWERKS", "GC"):
 
-            prec_meta = drive.upload(file[1])
-            prec_par = PAR(location=prec_meta.location(), user=user)
-            prec_par_secret = openghg.encrypt_data(prec_par.secret())
+    #         if "-" in site:
+    #             site = site.split("-")[0]
 
-            args = {
-                "authorisation": auth.to_data(),
-                "par": {"data": par.to_data(), "precision": prec_par.to_data()},
-                "par_secret": {"data": par_secret, "precision": prec_par_secret},
-            }
-        else:
-            filemeta = drive.upload(file)
-            par = PAR(location=filemeta.location(), user=user)
-            par_secret = openghg.encrypt_data(par.secret())
+    #         filemeta = drive.upload(file[0])
+    #         par = PAR(location=filemeta.location(), user=user)
+    #         par_secret = openghg.encrypt_data(par.secret())
 
-            args = {
-                "authorisation": auth.to_data(),
-                "par": {"data": par.to_data()},
-                "par_secret": {"data": par_secret},
-            }
+    #         prec_meta = drive.upload(file[1])
+    #         prec_par = PAR(location=prec_meta.location(), user=user)
+    #         prec_par_secret = openghg.encrypt_data(prec_par.secret())
 
-        all_types = {
-            "data_type": data_type,
-            "overwrite": overwrite,
-            "site": site,
-            "network": network,
-        }
+    #         args = {
+    #             "authorisation": auth.to_data(),
+    #             "par": {"data": par.to_data(), "precision": prec_par.to_data()},
+    #             "par_secret": {"data": par_secret, "precision": prec_par_secret},
+    #         }
+    #     else:
+    #         filemeta = drive.upload(file)
+    #         par = PAR(location=filemeta.location(), user=user)
+    #         par_secret = openghg.encrypt_data(par.secret())
 
-        args.update(all_types)
+    #         args = {
+    #             "authorisation": auth.to_data(),
+    #             "par": {"data": par.to_data()},
+    #             "par_secret": {"data": par_secret},
+    #         }
 
-        # If we try to upload many files we don't want it to fail if a single
-        # file contains overlapping data
-        response: Dict = cloud_service.call_function(function="process.process", args=args)
+    #     all_types = {
+    #         "data_type": data_type,
+    #         "overwrite": overwrite,
+    #         "site": site,
+    #         "network": network,
+    #     }
 
-        if "Error" in response:
-            if data_type in ("GCWERKS", "GC"):
-                filename = file[0].name
-            else:
-                filename = file.name
+    #     args.update(all_types)
 
-            results[filename] = response["Error"]
-        elif "results" in response:
-            results.update(response["results"])
+    #     # If we try to upload many files we don't want it to fail if a single
+    #     # file contains overlapping data
+    #     response: Dict = cloud_service.call_function(function="process.process", args=args)
 
-    return results
+    #     if "Error" in response:
+    #         if data_type in ("GCWERKS", "GC"):
+    #             filename = file[0].name
+    #         else:
+    #             filename = file.name
+
+    #         results[filename] = response["Error"]
+    #     elif "results" in response:
+    #         results.update(response["results"])
+
+    # return results
 
 
 def _process_files_local(
@@ -196,8 +187,6 @@ def _process_files_local(
     if not isinstance(files, list):
         files = [files]
 
-    obs = ObsSurface.load()
-
     results = {}
     # Ensure we have Paths
     # TODO: Delete this, as we already have the same warning in read_file?
@@ -210,15 +199,14 @@ def _process_files_local(
     else:
         files = [Path(f) for f in files]
 
-    r = obs.read_file(
-        filepath=files,
+    res = ObsSurface.read_file(filepath=files,
         data_type=data_type,
         site=site,
         network=network,
         instrument=instrument,
         inlet=inlet,
-        overwrite=overwrite,
-    )
-    results.update(r)
+        overwrite=True)
+
+    results.update(res)
 
     return results

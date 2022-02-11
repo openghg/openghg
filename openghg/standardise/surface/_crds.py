@@ -72,8 +72,7 @@ def _read_data(
     Returns:
         dict: Dictionary of gas data
     """
-    from datetime import datetime
-    from pandas import RangeIndex, read_csv, NaT
+    from pandas import RangeIndex, read_csv, to_datetime
     import warnings
     from openghg.util import clean_string
 
@@ -99,13 +98,6 @@ def _read_data(
     else:
         inlet = inlet_fname
 
-    # Function to parse the datetime format found in the datafile
-    def parse_date(date: str):  # type: ignore
-        try:
-            return datetime.strptime(date, "%y%m%d %H%M%S")
-        except ValueError:
-            return NaT
-
     # Catch dtype warnings
     # TODO - look at setting dtypes - read header and data separately?
     with warnings.catch_warnings():
@@ -115,12 +107,9 @@ def _read_data(
             header=None,
             skiprows=1,
             sep=r"\s+",
-            index_col=["0_1"],
-            parse_dates=[[0, 1]],
-            date_parser=parse_date,
+            parse_dates={"time": [0, 1]},
+            index_col="time",
         )
-
-    data.index.name = "time"
 
     # Drop any rows with NaNs
     # This is now done before creating metadata
@@ -179,6 +168,7 @@ def _read_data(
         header_rows = 2
         # Drop the first two rows now we have the name
         gas_data = gas_data.drop(index=gas_data.head(header_rows).index, inplace=False)
+        gas_data.index = to_datetime(gas_data.index, format="%y%m%d %H%M%S")
         # Cast data to float64 / double
         gas_data = gas_data.astype("float64")
 

@@ -74,7 +74,11 @@ class ObsData(_BaseData, abc.Mapping):
 
         data = self.data
         x_data = data.time
-        y_data = data[species]
+
+        try:
+            y_data = data[species]
+        except KeyError:
+            y_data = data["mf"]
 
         font = {"size": 14}
 

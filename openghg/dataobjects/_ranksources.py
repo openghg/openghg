@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, Union
 
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
@@ -10,14 +10,15 @@ class RankSources:
         self._cloud = cloud
 
         if cloud:
-            from Acquire.Client import Wallet
+            raise NotImplementedError
+            # from Acquire.Client import Wallet
 
-            wallet = Wallet()
+            # wallet = Wallet()
 
-            if service_url is None:
-                service_url = "https://fn.openghg.org/t"
+            # if service_url is None:
+            #     service_url = "https://fn.openghg.org/t"
 
-            self._service = wallet.get_service(service_url=f"{service_url}/openghg")
+            # self._service = wallet.get_service(service_url=f"{service_url}/openghg")
 
     def raw(self) -> Dict:
         """Return the raw ranking data
@@ -39,28 +40,29 @@ class RankSources:
             dict: Dictionary of datasource metadata
         """
         if self._cloud:
-            return self._get_sources_cloud(site=site, species=species)
+            raise NotImplementedError
+            # return self._get_sources_cloud(site=site, species=species)
         else:
             return self._get_sources_local(site=site, species=species)
 
-    def _get_sources_cloud(self, site: str, species: str) -> Dict:
-        site = verify_site(site=site)
+    # def _get_sources_cloud(self, site: str, species: str) -> Dict:
+    #     site = verify_site(site=site)
 
-        args = {"site": site, "species": species}
+    #     args = {"site": site, "species": species}
 
-        self.site = site
-        self.species = species
+    #     self.site = site
+    #     self.species = species
 
-        response: Dict = self._service.call_function(function="rank.get_sources", args=args)
+    #     response: Dict = self._service.call_function(function="rank.get_sources", args=args)
 
-        if not response:
-            raise ValueError(f"No sources found for {species} at {site}")
+    #     if not response:
+    #         raise ValueError(f"No sources found for {species} at {site}")
 
-        self._user_info: Dict = response["user_info"]
-        self._key_lookup: Dict = response["key_lookup"]
-        self._needs_update = False
+    #     self._user_info: Dict = response["user_info"]
+    #     self._key_lookup: Dict = response["key_lookup"]
+    #     self._needs_update = False
 
-        return self._user_info
+    #     return self._user_info
 
     def _get_sources_local(self, site: str, species: str) -> Dict:
         site = verify_site(site=site)
@@ -78,19 +80,19 @@ class RankSources:
 
         matching_sources = [d for d in datasources if d.search_metadata(site=site, species=species)]
 
-        if not matching_sources:
-            return {}
-
-        self._user_info = {
-            d.inlet(): {
-                "rank_data": rank_table.get(d.uuid(), "NA"),
-                "data_range": d.daterange_str(),
+        if matching_sources:
+            self._user_info = {
+                d.inlet(): {
+                    "rank_data": rank_table.get(d.uuid(), "NA"),
+                    "data_range": d.daterange_str(),
+                }
+                for d in matching_sources
             }
-            for d in matching_sources
-        }
 
-        self._key_lookup = {d.inlet(): d.uuid() for d in matching_sources}
-        self._needs_update = False
+            self._key_lookup = {d.inlet(): d.uuid() for d in matching_sources}
+            self._needs_update = False
+        else:
+            self._user_info = {}
 
         return self._user_info
 
@@ -128,13 +130,7 @@ class RankSources:
             None
         """
         if self._cloud:
-            return self._set_rank_cloud(
-                inlet=inlet,
-                rank=rank,
-                start_date=start_date,
-                end_date=end_date,
-                overwrite=overwrite,
-            )
+            raise NotImplementedError
         else:
             return self._set_rank_local(
                 inlet=inlet,
@@ -144,27 +140,27 @@ class RankSources:
                 overwrite=overwrite,
             )
 
-    def _set_rank_cloud(
-        self,
-        inlet: str,
-        rank: Union[int, str],
-        start_date: str,
-        end_date: str,
-        overwrite: bool = False,
-    ) -> None:
-        inlet = inlet.lower()
-        uuid = self._key_lookup[inlet]
+    # def _set_rank_cloud(
+    #     self,
+    #     inlet: str,
+    #     rank: Union[int, str],
+    #     start_date: str,
+    #     end_date: str,
+    #     overwrite: bool = False,
+    # ) -> None:
+    #     inlet = inlet.lower()
+    #     uuid = self._key_lookup[inlet]
 
-        dateranges = create_daterange_str(start=start_date, end=end_date)
+    #     dateranges = create_daterange_str(start=start_date, end=end_date)
 
-        args: Dict[str, Union[str, int, List]] = {}
-        args["rank"] = rank
-        args["uuid"] = uuid
-        args["dateranges"] = dateranges
-        args["overwrite"] = overwrite
+    #     args: Dict[str, Union[str, int, List]] = {}
+    #     args["rank"] = rank
+    #     args["uuid"] = uuid
+    #     args["dateranges"] = dateranges
+    #     args["overwrite"] = overwrite
 
-        self._service.call_function(function="rank.set_rank", args=args)
-        self._needs_update = True
+    #     self._service.call_function(function="rank.set_rank", args=args)
+    #     self._needs_update = True
 
     def _set_rank_local(
         self,
@@ -194,7 +190,8 @@ class RankSources:
             None
         """
         if self._cloud:
-            return self._clear_rank_cloud(inlet=inlet)
+            raise NotImplementedError
+            # return self._clear_rank_cloud(inlet=inlet)
         else:
             return self._clear_rank_local(inlet=inlet)
 
@@ -212,18 +209,18 @@ class RankSources:
         obs.clear_rank(uuid=uuid)
         self._needs_update = True
 
-    def _clear_rank_cloud(self, inlet: str) -> None:
-        """Clear the ranking data for a Datasource
+    # def _clear_rank_cloud(self, inlet: str) -> None:
+    #     """Clear the ranking data for a Datasource
 
-        Args:
-            key: Key for specific source
-        Returns:
-            None
-        """
-        uuid = self._key_lookup[inlet]
-        args = {"uuid": uuid}
-        self._service.call_function(function="rank.clear_rank", args=args)
-        self._needs_update = True
+    #     Args:
+    #         key: Key for specific source
+    #     Returns:
+    #         None
+    #     """
+    #     uuid = self._key_lookup[inlet]
+    #     args = {"uuid": uuid}
+    #     self._service.call_function(function="rank.clear_rank", args=args)
+    #     self._needs_update = True
 
     # def visualise_rankings(self) -> Network:
     #     """ Creates a small network graph of ranked data with each rank given a colour
