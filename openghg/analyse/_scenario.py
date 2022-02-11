@@ -5,18 +5,10 @@ from typing import Optional, Tuple, Union, List, Dict, Any
 from openghg.dataobjects import ObsData, FootprintData, FluxData
 from openghg.retrieve import get_obs_surface, get_footprint, get_flux, search
 
-__all__ = ["ModelScenario", "combine_datasets", "stack_datasets"]
+__all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_resolution"]
 
-# TODO: Consider how to handle averaging
 # TODO: Consider how to handle sources as well as storing and using multiple fluxes
 # TODO: How does the high/low resolution for fluxes work with this?
-
-# TODO: Need to think about input into the class
-# We can include a site, inlet, species input and this will be able to grab
-# the observations and footprints but we should think about how we want
-# to assign the emissions
-# Could we print out a list of emissions options if present which matched
-# the input criteria for species etc.
 
 # TODO: Emissions also shouldn't need to match against a domain
 # We should be able to grab global/bigger area emissions and cut that down 
@@ -114,11 +106,10 @@ class ModelScenario():
         # Initialise attributes used for caching
         self.scenario = None
         self.modelled_obs = None
+        self.flux_stacked = None
 
         # TODO: Check species, site etc. values align between inputs?
-        # TODO: May want to add class additional attributes for e.g. site, species etc.
 
-    # TODO: May want to find a clever functional way to combine aspects of add_obs, add_footprint, add_flux together
 
     def _get_data(self,
                   keywords: Union[List[Dict[str, str]], Dict[str, str]],
@@ -254,47 +245,60 @@ class ModelScenario():
                  flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None) -> Dict[str, FluxData]:
         """
         Add flux data based on keywords or direct FluxData object.
+        Can add flux datasets for multiple sources.
         """
-        # Search for flux data based on keywords (but don't necessarily add..?)
+        if hasattr(self, "flux"):
+            # Check current species in any flux data
+            if species is not None:
+                current_flux_1 = list(self.flux.values())[0]
+                current_species = current_flux_1.metadata["species"]
+                if species != current_species:
+                    raise ValueError(f"New data must match current species {current_species} in ModelScenario. Input value: {species}")
+
         if species and flux is None:
+            flux = {}
+
             if sources is None or isinstance(sources, str):
                 sources = [sources]
-            
-            flux = {}
+
             for source in sources:
                 # TODO: Make this into a    dictionary for each source
                 flux_keywords_1 = {"species": species,
                                    "source": source,
-                                   "domain": domain,
-                                   "start_date": start_date,
-                                   "end_date": end_date}
-                
-                flux_keywords_2 = flux_keywords_1.copy()
-                flux_keywords_2.pop("start_date")
-                flux_keywords_2.pop("end_date")
+                                   "domain": domain}
 
-                flux_keywords = [flux_keywords_1, flux_keywords_2]
+                # For CO2 we need additional emissions data before a start_date to
+                # match to high time resolution footprints
+                # For now, just extract all data
+                if species == "co2":
+                    flux_keywords = [flux_keywords_1]
+                else:
+                    flux_keywords_1["start_date"] = start_date
+                    flux_keywords_1["end_date"] = end_date
+
+                    flux_keywords_2 = flux_keywords_1.copy()
+                    flux_keywords_2.pop("start_date")
+                    flux_keywords_2.pop("end_date")
+
+                    flux_keywords = [flux_keywords_1, flux_keywords_2]                
 
                 # TODO: Add something to allow for e.g. global domain or no domain
 
                 flux_source = self._get_data(flux_keywords, input_type="flux")
-            
+
             flux[source] = flux_source
 
         elif flux is not None:
             if not isinstance(flux, dict):
-                if sources is None:
-                    source = "source"
-                elif isinstance(sources, list):
-                    source = sources[0]
-                else:
-                    source = sources
+                source = flux.metadata["source"]
                 flux = {source: flux}
 
         # TODO: Make this so flux.anthro can be called etc. - link in some way
-        self.flux = flux
+        if hasattr(self, "flux") and self.flux is not None:
+            self.flux.update(flux)
+        else:
+            self.flux = flux
 
-        # Is there any metadata associated with FluxData??
         if self.flux is not None and not hasattr(self, "species"):
             flux_values = list(self.flux.values())
             flux_1 = flux_values[0]
@@ -380,8 +384,6 @@ class ModelScenario():
         footprint_data = self.footprint.data
 
         resample_keyword_choices = ("obs", "footprint", "coarsest")
-        if resample_to in resample_keyword_choices:
-            resample_to = resample_to.lower()
 
         if platform is not None:
             platform = platform.lower()
@@ -486,7 +488,8 @@ class ModelScenario():
     def combine_obs_footprint(self,
                               resample_to: Optional[str] = "obs",
                               platform: Optional[str] = None,
-                              cache: Optional[bool] = "True") -> Dataset:
+                              cache: Optional[bool] = True,
+                              recalculate: Optional[bool] = False) -> Dataset:
         """
         Combine observation and footprint data so these are on the same time
         axis. This will both slice and resample the data to align this axis.
@@ -511,6 +514,11 @@ class ModelScenario():
         """
 
         self._check_data_is_present(need=["obs", "footprint"])
+
+        # Return any matching cached data
+        if self.scenario is not None and not recalculate:
+            if self.scenario.attrs["resample_to"] == resample_to:
+                return self.scenario
 
         # As we're not processing any satellite data yet just set tolerance to None
         tolerance = None
@@ -546,26 +554,50 @@ class ModelScenario():
         return combined_dataset
 
 
-    def combine_flux_sources(self, sources: Optional[Union[str, List]] = None) -> Dataset:
+    def _clean_sources_input(self, sources: Optional[Union[str, List]] = None) -> List:
+        """
+
+        """
+        flux_dict = self.flux
+
+        if sources is None:
+            sources = list(flux_dict.keys())
+        elif isinstance(sources, str):
+            sources = [sources]
+
+        return sources
+
+
+    def combine_flux_sources(self,
+                             sources: Optional[Union[str, List]] = None,
+                             cache: Optional[bool] = True,
+                             recalculate: Optional[bool] = False) -> Dataset:
         """
         Combine together flux sources on the time dimension. This will align to
         the time of the highest frequency flux source both for time range and frequency.
 
         Args:
             sources : Names of sources to combine. Should already be attached to ModelScenario.
+            cache : Cache this data after calculation. Default = True
 
         Returns:
             Dataset: All flux sources stacked on the time dimension.
         """
         self._check_data_is_present(need=["flux"])
 
+        # TODO: Check other dimensions that time are sensibly aligned (can allow small
+        # tolerance as there are sometimes issues with lat, lon not exactly aligning)
+
         time_dim = "time"
         flux_dict = self.flux
 
-        if sources is None:
-            sources = flux_dict.keys()
-        elif isinstance(sources, str):
-            sources = [sources]
+        sources = self._clean_sources_input(sources)
+        sources_str = ', '.join(sources)
+
+        # Return any matching cached data
+        if self.flux_stacked is not None and not recalculate:
+            if self.flux_stacked.attrs["sources"] == sources_str:
+                return self.flux_stacked
 
         flux_datasets = [flux_dict[source].data for source in sources]
 
@@ -575,8 +607,11 @@ class ModelScenario():
         try:
             flux_stacked = stack_datasets(flux_datasets, dim=time_dim, method="ffill")
         except ValueError:
-            sources = flux_dict.keys()
-            raise ValueError(f"Unable to combine flux data for sources: {list(sources)}")
+            raise ValueError(f"Unable to combine flux data for sources: {sources_str}")
+
+        if cache:
+            flux_stacked.attrs["sources"] = sources_str
+            self.flux_stacked = flux_stacked
 
         return flux_stacked
 
@@ -584,6 +619,8 @@ class ModelScenario():
     def _check_footprint_resample(self, resample_to: str) -> FootprintData:
         '''
         Check whether footprint needs resampling based on resample_to input.
+        Ignores resample_to keywords of ("coarsest", "obs", "footprint") as this is 
+        for comparison with observation data but uses pandas frequencies to resample.
         '''
         if resample_to in ("coarsest", "obs", "footprint"):
             return self.footprint.data
@@ -608,9 +645,9 @@ class ModelScenario():
         The time points returned are dependent on the resample_to option chosen.
         If obs data is also linked to the ModelScenario instance, this will be used
         to derive the time points where appropriate.
-        
+
         Args:
-            sources: NOT IMPLEMENTED YET. Sources to use for flux. All will be used if not specified.
+            sources: Sources to use for flux. All will be used and stacked if not specified.
             resample_to: Resample option to use for averaging: 
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
                           - or using a valid pandas resample period e.g. "2H".
@@ -639,7 +676,7 @@ class ModelScenario():
         else:
             if self.obs is not None:
                 # Check previous resample_to input for cached data
-                prev_resample_to = self.scenario.attrs.get("resample_to")
+                prev_resample_to = self.modelled_obs.attrs.get("resample_to")
 
                 # Check if this previous resample period matches input value
                 # - if not (or explicit recalculation requested), recreate scenario
@@ -663,11 +700,14 @@ class ModelScenario():
             modelled_obs = self._calc_modelled_obs_integrated(sources=sources, output_TS=True, output_fpXflux=False)
             name = "mf_mod"
 
+        modelled_obs.attrs["resample_to"] = resample_to
+        modelled_obs = modelled_obs.rename(name)
+
         # Cache output from calculations
         if cache:
             print("Caching calculated data")
             self.modelled_obs = modelled_obs
-            self.scenario[name] = modelled_obs
+            # self.scenario[name] = modelled_obs
         else:
             self.modelled_obs = None  # Make sure this is reset and not cached
             self.scenario = None  # Reset this to None after calculation completed
@@ -682,6 +722,13 @@ class ModelScenario():
                                       ) -> Any:
         """
         Calculate modelled mole fraction timeseries using integrated footprints data.
+
+        Args:
+            sources : Flux sources to use for the calculation. By default this will use all available sources.
+            output_TS : Whether to output the modelled mole fraction timeseries DataArray.
+                       Default = True
+            output_fpXflux : Whether to output the modelled flux map DataArray used to create
+                            the timeseries. Default = False
 
         Returns:
             DataArray / DataArray :
@@ -722,16 +769,13 @@ class ModelScenario():
         species reliant on high time resolution footprints such as carbon dioxide (co2).
 
         Args:
-            averaging:
-                Time resolution to use to average the time dimension.
-                Default = None
-            output_TS:
-                Whether to output the modelled mole fraction timeseries DataArray.
-                Default = True
-            output_fpXflux:
-                Whether to output the modelled flux map DataArray used to create
-                the timeseries.
-                Default = False
+            sources : Flux sources to use for the calculation. By default this will use all available sources.
+            averaging : Time resolution to use to average the time dimension. Default = None
+            output_TS : Whether to output the modelled mole fraction timeseries DataArray.
+                       Default = True
+            output_fpXflux : Whether to output the modelled flux map DataArray used to create
+                            the timeseries. Default = False
+
         Returns:
             DataArray / DataArray :
                 Modelled mole fraction timeseries, dimensions = (time)
@@ -975,10 +1019,50 @@ class ModelScenario():
             return timeseries
 
         return None
+
+
+    def footprints_data_merge(self, 
+                              resample_to: Optional[str] = "coarsest",
+                              sources: Optional[Union[str, List]] = None,
+                              platform: Optional[str] = None,
+                              calc_timeseries: Optional[bool] = True,
+                              calc_bc: Optional[bool] = True,
+                              cache: Optional[bool] = True,
+                              recalculate: Optional[bool] = False):
+        
+        combined_dataset = self.combine_obs_footprint(resample_to=resample_to,
+                                                      platform=platform,
+                                                      cache=cache,
+                                                      recalculate=recalculate)
+        
+        # TODO: Extract extra previous day / some time period 
+        # for extracting flux for high time resolution data.
+        # Maybe check species as matching co2?
+
+        if calc_timeseries:
+            modelled_obs = self.calc_modelled_obs(resample_to=resample_to,
+                                                  sources=sources,
+                                                  platform=platform,
+                                                  cache=cache,
+                                                  recalculate=recalculate)
+
+
+            name = modelled_obs.name
+            combined_dataset = combined_dataset.assign({name: modelled_obs})  
+
+        if calc_bc:
+            # TODO: Add this in when BoundaryConditions have been incorporated
+            pass
+
+        if cache:
+            self.scenario = combined_dataset
+
+        return combined_dataset
         
 
 def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
-    """Check if two datasets need to be reindexed_like for combine_datasets
+    """
+    Check if two datasets need to be reindexed_like for combine_datasets
 
     Args:
         dataset_A: First dataset to check
@@ -1013,10 +1097,11 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 def combine_datasets(
     dataset_A: Dataset, dataset_B: Dataset, method: Optional[str] = "ffill", tolerance: Optional[str] = None) -> Dataset:
-    """Merges two datasets and re-indexes to the first dataset.
+    """
+    Merges two datasets and re-indexes to the first dataset.
 
-        If "fp" variable is found within the combined dataset,
-        the "time" values where the "lat", "lon" dimensions didn't match are removed.
+    If "fp" variable is found within the combined dataset,
+    the "time" values where the "lat", "lon" dimensions didn't match are removed.
 
     Args:
         dataset_A: First dataset to merge
@@ -1045,14 +1130,43 @@ def combine_datasets(
     return merged_ds
 
 
+def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
+    """
+    Calculates the average frequency along a given dimension.
+    
+    Args:
+        dataset : Dataset. Must contain the specified dimension
+        dim : Dimension name
+    
+    Returns:
+        np.timedelta64 / np.float / np.int : Resolution with input dtype
+
+        NaT : If unsuccessful and input dtype is np.datetime64
+        NaN : If unsuccessful for all other dtypes.
+    """
+    import numpy as np
+
+    try:
+        resolution = dataset[dim].diff(dim=dim).mean().values
+    except ValueError:
+        if np.issubdtype(dataset[dim].dtype, np.datetime64):
+            resolution = np.timedelta64('NaT')
+        else:
+            resolution = np.NaN
+
+    return resolution
+
+
 def stack_datasets(datasets: List[Dataset], 
                    dim: str = "time",
                    method: str = "ffill") -> Dataset:
     """
-    Stacks multiple datasets based on the input dimension. By default this is time.
+    Stacks multiple datasets based on the input dimension. By default this is time
+    and this will be aligned to the highest resolution / frequency 
+    (smallest difference betweeen coordinate values).
     
-    At the moment, the two datasets must have identical coordinate values and 
-    variable names for these to be stacked.
+    At the moment, the two datasets must have identical coordinate values for all 
+    other dimensions and variable names for these to be stacked.
     
     Args:
         datasets : List of input datasets
@@ -1071,7 +1185,7 @@ def stack_datasets(datasets: List[Dataset],
         dataset = datasets[0]
         return dataset
 
-    data_frequency = (ds[dim].diff(dim=dim).mean() for ds in datasets)
+    data_frequency = [calc_dim_resolution(ds, dim) for ds in datasets]
     index_highest_freq = min(range(len(data_frequency)), key=data_frequency.__getitem__)
     data_highest_freq = datasets[index_highest_freq]
     coords_to_match = data_highest_freq[dim]
@@ -1085,6 +1199,12 @@ def stack_datasets(datasets: List[Dataset],
             data_stacked += data_match
 
     return data_stacked
+
+
+def footprints_data_merge(data):
+    # Write this a wrapper for footprints_data_merge function from acrg_name.name file
+    pass
+
 
 
 # Blueprint from Issue #42 created for this

@@ -1,9 +1,11 @@
 import pytest
 import numpy as np
+import xarray as xr
+import pandas as pd
 from pandas import Timestamp
-from openghg.analyse import ModelScenario
+from openghg.analyse import ModelScenario, calc_dim_resolution, stack_datasets
+from openghg.analyse import calc_dim_resolution
 from openghg.retrieve import get_obs_surface, get_footprint, get_flux
-
 
 def test_scenario_direct_objects():
     '''
@@ -198,3 +200,78 @@ def test_calc_modelled_obs_period(model_scenario_1):
         # Could add more checks here but may be better doing this with mocked data
 
 # TODO: Add test for stacking flux datasets - only looked at one so far.
+
+#%% Test more generic dataset functions
+
+@pytest.fixture
+def flux_daily():
+    """Fixture of simple 3D dataset with daily frequency"""
+
+    time = pd.date_range("2012-01-01", "2012-02-01", freq="D")
+    lat = [1, 2]
+    lon = [10, 20]
+
+    nlat, nlon, ntime = len(lat), len(lon), len(time)
+    shape = (ntime, nlat, nlon)
+
+    flux = xr.Dataset({"flux":(("time", "lat", "lon"), np.ones(shape))},
+                       coords={"lat":lat, "lon":lon, "time":time})
+
+    return flux
+
+
+@pytest.fixture
+def flux_single_time():
+    """Fixture of simple 3D dataset with unknown frequency (1 time point)"""
+
+    time = pd.date_range("2012-01-01", "2012-01-31", freq="MS")
+    lat = [1, 2]
+    lon = [10, 20]
+
+    nlat, nlon, ntime = len(lat), len(lon), len(time)
+    shape = (ntime, nlat, nlon)
+
+    flux = xr.Dataset({"flux":(("time", "lat", "lon"), np.ones(shape))},
+                       coords={"lat":lat, "lon":lon, "time":time})
+
+    return flux 
+
+
+def test_calc_resolution(flux_daily):
+    """Test frequency/resolution can be calculated (daily data)"""
+    frequency = calc_dim_resolution(flux_daily, dim="time")
+
+    frequency_d = frequency.astype("timedelta64[D]").astype(int)
+    assert frequency_d == 1
+
+
+def test_calc_resolution_one_time(flux_single_time):
+    """Test NaT value can be calculated for unknown frequency (1 time point)"""
+    frequency = calc_dim_resolution(flux_single_time, dim="time")
+
+    assert isinstance(frequency, np.timedelta64)
+    assert pd.isnull(frequency)
+
+
+def test_stack_datasets(flux_daily, flux_single_time):
+    """
+    Test that datasets can be successfully resampled and added.
+    Inputs:
+     - daily frequency
+     - unknown frequency (1 time value)
+    Both contain one data variable, "flux", with all values equal to 1.
+    Dimensions are (time, lat, lon) and values other than time are identical.
+    """
+    datasets = [flux_daily, flux_single_time]
+
+    dataset_stacked = stack_datasets(datasets, dim="time")
+
+    # Check time dimension
+    expected_time = flux_daily.time  # Should match to data with highest resolution
+    output_time = dataset_stacked.time
+    xr.testing.assert_equal(output_time, expected_time)
+
+    # Check summed flux values
+    expected_flux = 2  # All values should be 2
+    output_flux = dataset_stacked.flux.values
+    np.testing.assert_allclose(output_flux, expected_flux)
