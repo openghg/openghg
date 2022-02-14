@@ -92,10 +92,14 @@ def recombine_datasets(
     if sort:
         combined = combined.sortby("time")
 
-    # Check for duplicates?
-    # This is taken from https://stackoverflow.com/questions/51058379/drop-duplicate-times-in-xarray
-    # _, index = np.unique(combined['time'], return_index=True)
-    # combined = combined.isel(time=index)
+    # This is modified from https://stackoverflow.com/a/51077784/1303032
+    unique, index, count = np.unique(combined.time, return_counts=True, return_index=True)
+
+    n_dupes = unique[count > 1].size
+    if n_dupes > 5:
+        raise ValueError("Large number of duplicate timestamps, check data overlap.")
+
+    combined = combined.isel(time=index)
 
     return combined
 

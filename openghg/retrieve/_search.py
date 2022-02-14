@@ -276,8 +276,11 @@ def search(**kwargs):  # type: ignore
                 start_search=start_date, end_search=end_date, dateranges=daterange_strs
             )
 
+            def max_key(s):
+                return float(s.rstrip("m"))
+
             # Here just select the highest inlet that's been ranked and use that
-            highest_inlet = max(sorted(list(data_keys[site][sp]["metadata"].keys())))
+            highest_inlet = max(sorted(list(data_keys[site][sp]["metadata"].keys())), key=max_key)
 
             inlet_metadata = data_keys[site][sp]["metadata"][highest_inlet]
             inlet_instrument = inlet_metadata["instrument"]

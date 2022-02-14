@@ -35,7 +35,7 @@ c = [
 ]
 
 
-def test_dupes():
+def test_no_duplicate_timestamps():
     get_local_bucket(empty=True)
 
     # DECC network sites
