@@ -1,3 +1,4 @@
+from datetime import date
 from pandas import Timestamp, DatetimeIndex
 from typing import Dict, List, Tuple, Optional, Union
 
@@ -210,16 +211,20 @@ def combine_dateranges(dateranges: List[str]) -> List[str]:
     return combined_strings
 
 
-def split_daterange_str(daterange_str: str) -> Tuple[Timestamp, Timestamp]:
+def split_daterange_str(
+    daterange_str: str, date_only: bool = False
+) -> Tuple[Union[Timestamp, date], Union[Timestamp, date]]:
     """Split a daterange string to the component start and end
     Timestamps
 
     Args:
-        daterange_str (str): Daterange string of the form
+        daterange_str: Daterange string of the form
+        date_only: Return only the date portion of the Timestamp, removing
+        the hours / seconds component
 
         2019-01-01T00:00:00_2019-12-31T00:00:00
     Returns:
-        tuple (Timestamp, Timestamp): Tuple of start, end pandas Timestamps
+        tuple (Timestamp / datetime.date, Timestamp / datetime.date): Tuple of start, end timestamps / dates
     """
     from pandas import Timestamp
 
@@ -227,6 +232,10 @@ def split_daterange_str(daterange_str: str) -> Tuple[Timestamp, Timestamp]:
 
     start = Timestamp(split[0], tz="UTC")
     end = Timestamp(split[1], tz="UTC")
+
+    if date_only:
+        start = start.date()
+        end = end.date()
 
     return start, end
 
@@ -547,13 +556,14 @@ def check_nan(data: Union[int, float]) -> Union[str, float, int]:
 
 
 def first_last_dates(keys: List) -> Tuple[Timestamp, Timestamp]:
-    """ Find the first and last timestamp from a list of keys
+    """Find the first and last timestamp from a list of keys
 
     Args:
         keys: List of keys
     Returns:
         tuple: First and last timestamp
     """
+
     def sorting_key(s):
         return s.split("/")[-1]
 

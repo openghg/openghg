@@ -31,6 +31,7 @@ def recombine_datasets(
     keys: List[str],
     sort: Optional[bool] = True,
     attrs_to_check: Union[str, List[str], Dict[str, str], None] = None,
+    elevate_inlet: bool = False,
 ) -> Dataset:
     """Combines datasets stored separately in the object store
     into a single dataset
@@ -42,6 +43,7 @@ def recombine_datasets(
             a new data variable will be created containing the values from each dataset
             If a dictionary is passed, the attribute(s) will be retained and the new value assigned.
             If a list/string is passed, the attribute(s) will be removed.
+        elevate_inlet: Force the elevation of the inlet attribute
     Returns:
         xarray.Dataset: Combined Dataset
     """
@@ -72,7 +74,7 @@ def recombine_datasets(
             attributes = attrs_to_check
             replace_values = [""] * len(attributes)
 
-        data = elevate_duplicate_attrs(ds_list=data, attributes=attributes)
+        data = elevate_duplicate_attrs(ds_list=data, attributes=attributes, elevate_inlet=elevate_inlet)
 
     # Concatenate datasets along time dimension
     combined = xr_concat(data, dim="time")
@@ -128,7 +130,9 @@ def create_array_from_value(
     return data_variable
 
 
-def elevate_duplicate_attrs(ds_list: List[Dataset], attributes: Union[str, List[str]]) -> List[Dataset]:
+def elevate_duplicate_attrs(
+    ds_list: List[Dataset], attributes: Union[str, List[str]], elevate_inlet: bool
+) -> List[Dataset]:
     """
     For a list of Datasets, if the specified attributes are being repeated
     these will be added as new data variables to each Dataset.
@@ -137,26 +141,26 @@ def elevate_duplicate_attrs(ds_list: List[Dataset], attributes: Union[str, List[
         ds_list: List of xarray Datasets
         attributes: Attribute values to check within the Datasets. If None is passed
         the original dataset list will be returned.
+        elevate_inlet: Force the elevation of inlet
     Returns:
         list: List of updated Dataset objects
     """
     if not isinstance(attributes, list):
         attributes = [attributes]
 
-    updated_datasets = []
     for attr in attributes:
         # Pull the attributes out of the datasets - usually inlet values for ranked data
         data_attrs = [ds.attrs[attr] for ds in ds_list if attr in ds.attrs]
 
         # If we have more than one unique value we update the Dataset by adding a new variable
         # This is useful with ranked inlets so we can easily know which inlet a measurement was taken from
-        if len(set(data_attrs)) > 1:
-            for ds in ds_list:
+        if len(set(data_attrs)) > 1 or (attr == "inlet" and elevate_inlet):
+            for i, ds in enumerate(ds_list):
                 value = ds.attrs[attr]
                 coords = ds.coords
                 new_variable = create_array_from_value(value=value, coords=coords, name=attr)
                 updated_ds = ds.assign({attr: new_variable})
 
-                updated_datasets.append(updated_ds)
+                ds_list[i] = updated_ds
 
-    return updated_datasets
+    return ds_list

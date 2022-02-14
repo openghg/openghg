@@ -311,7 +311,7 @@ class SearchResults:
                 final_dataset = recombine_datasets(keys, sort=True)
             else:
                 ranked_keys = data_keys["ranked"]
-                ranked_data = recombine_datasets(keys=ranked_keys, sort=False)
+                ranked_data = recombine_datasets(keys=ranked_keys, sort=True, elevate_inlet=True)
 
                 ranking_metadata = specific_source["rank_metadata"]
 
@@ -319,14 +319,19 @@ class SearchResults:
                 ranked_dateranges = sorted(list(ranking_metadata.keys()))
 
                 for dr in ranked_dateranges:
-                    slice_start, slice_end = split_daterange_str(dr)
-                    ranked_slice = ranked_data.sel(time=slice(slice_start, slice_end))
+                    slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
+
+                    # We convert to str here as xarray has some weird behaviour that means
+                    # "2018-01-01" - "2018-06-01"
+                    # gets treated differently to
+                    # datetime.date(2018, 1, 1) - datetime.date(2018, 6, 1)
+                    ranked_slice = ranked_data.sel(time=slice(str(slice_start), str(slice_end)))
 
                     if ranked_slice.time.size > 0:
                         ranked_slices.append(ranked_slice)
 
                 unranked_keys = data_keys["unranked"]
-                unranked_data = recombine_datasets(keys=unranked_keys, sort=False)
+                unranked_data = recombine_datasets(keys=unranked_keys, sort=True, elevate_inlet=True)
 
                 first_date, last_date = first_last_dates(keys=unranked_keys)
 
@@ -336,8 +341,8 @@ class SearchResults:
 
                 unranked_slices = []
                 for dr in unranked_dateranges:
-                    slice_start, slice_end = split_daterange_str(dr)
-                    unranked_slice = unranked_data.sel(time=slice(slice_start, slice_end))
+                    slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
+                    unranked_slice = unranked_data.sel(time=slice(str(slice_start), str(slice_end)))
 
                     if unranked_slice.time.size > 0:
                         unranked_slices.append(unranked_slice)
