@@ -160,7 +160,7 @@ def test_timeslice_slices_correctly_exclusive():
 
 
 def test_get_flux():
-    flux_data = get_flux(species="co2", sources="gpp-cardamom", domain="europe")
+    flux_data = get_flux(species="co2", source="gpp-cardamom", domain="europe")
 
     flux = flux_data.data
 
@@ -174,7 +174,7 @@ def test_get_flux():
 
 def test_get_flux_no_result():
     with pytest.raises(ValueError):
-        get_flux(species="co2", sources="cinnamon", domain="antarctica")
+        get_flux(species="co2", source="cinnamon", domain="antarctica")
 
 
 def test_get_footprint():

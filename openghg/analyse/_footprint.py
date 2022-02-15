@@ -211,7 +211,7 @@ def footprints_data_merge(
         flux_dict["standard"] = get_flux(
             species=species,
             domain=domain,
-            sources=flux_sources,
+            source=flux_sources,
             time_resolution=time_resolution,
             start_date=start_date,
             end_date=end_date,
@@ -232,7 +232,7 @@ def footprints_data_merge(
             flux_dict["high_time_res"] = get_flux(
                 species=species,
                 domain=domain,
-                sources=flux_sources,
+                source=flux_sources,
                 time_resolution=time_resolution,
                 start_date=start_date_hr,
                 end_date=end_date,
