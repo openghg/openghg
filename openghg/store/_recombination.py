@@ -79,6 +79,20 @@ def recombine_datasets(
     # Concatenate datasets along time dimension
     combined = xr_concat(data, dim="time")
 
+    # Check for unique inlets, sometimes we want to allow the elevation of the inlet so we
+    # can cleanly concat ranked and unranked Datasets. We also sometimes may not find
+    # ranked data so only a single inlets data is used.
+    # try:
+    #     unique_inlets = np.unique(combined["inlet"])
+
+    #     if unique_inlets.size == 1:
+    #         try:
+    #             attrs_to_check.pop("inlet", None)
+    #         except AttributeError:
+    #             pass
+    # except KeyError:
+    #     pass
+
     # Replace/remove incorrect attributes
     #  - xr.concat will only take value from first dataset if duplicated
     if attrs_to_check:

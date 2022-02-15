@@ -152,6 +152,12 @@ def test_get_obs_surface_ranking_single():
 
     obsdata = get_obs_surface(site="bsd", species="ch4", start_date="2015-01-01", end_date="2015-11-01")
 
+    print(obsdata)
+
+    print(obsdata.data["inlet"])
+
+    return
+
     data = obsdata.data
     metadata = obsdata.metadata
 
