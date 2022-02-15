@@ -313,10 +313,10 @@ class SearchResults:
                 ranked_keys = data_keys["ranked"]
                 ranked_data = recombine_datasets(keys=ranked_keys, sort=True, elevate_inlet=True)
 
-                ranking_metadata = specific_source["rank_metadata"]
+                ranked_metadata = specific_source["rank_metadata"]
 
                 ranked_slices = []
-                ranked_dateranges = sorted(list(ranking_metadata.keys()))
+                ranked_dateranges = sorted(list(ranked_metadata.keys()))
 
                 for dr in ranked_dateranges:
                     slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
@@ -340,9 +340,12 @@ class SearchResults:
                 )
 
                 unranked_slices = []
+                unranked_metadata = {}
                 for dr in unranked_dateranges:
                     slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
                     unranked_slice = unranked_data.sel(time=slice(str(slice_start), str(slice_end)))
+
+                    unranked_metadata[dr] = unranked_slice["inlet"].values[0]
 
                     if unranked_slice.time.size > 0:
                         unranked_slices.append(unranked_slice)
@@ -351,7 +354,7 @@ class SearchResults:
 
                 final_dataset = concat(objs=slices, dim="time").sortby("time")
 
-                metadata["rank_metadata"] = ranking_metadata
+                metadata["rank_metadata"] = {"ranked": ranked_metadata, "unranked": unranked_metadata}
 
         metadata = specific_source["metadata"]
 
