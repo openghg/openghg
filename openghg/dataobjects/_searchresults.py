@@ -9,7 +9,7 @@ from openghg.util import (
     find_daterange_gaps,
     first_last_dates,
     split_daterange_str,
-    timestamp_tzaware,
+    create_daterange_str,
 )
 
 __all__ = ["SearchResults"]
@@ -310,51 +310,71 @@ class SearchResults:
                 keys = data_keys["unranked"]
                 final_dataset = recombine_datasets(keys, sort=True)
             else:
+                dataset_slices = []
+
+                metadata["rank_metadata"] = {}
+
                 ranked_keys = data_keys["ranked"]
-                ranked_data = recombine_datasets(keys=ranked_keys, sort=True, elevate_inlet=True)
+                ranked_dateranges = []
 
-                ranked_metadata = specific_source["rank_metadata"]
+                if ranked_keys:
+                    ranked_data = recombine_datasets(keys=ranked_keys, sort=True, elevate_inlet=True)
 
-                ranked_slices = []
-                ranked_dateranges = sorted(list(ranked_metadata.keys()))
+                    ranked_metadata = specific_source["rank_metadata"]
+                    metadata["rank_metadata"]["ranked"] = ranked_metadata
 
-                for dr in ranked_dateranges:
-                    slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
+                    ranked_slices = []
+                    ranked_dateranges = sorted(list(ranked_metadata.keys()))
 
-                    # We convert to str here as xarray has some weird behaviour that means
-                    # "2018-01-01" - "2018-06-01"
-                    # gets treated differently to
-                    # datetime.date(2018, 1, 1) - datetime.date(2018, 6, 1)
-                    ranked_slice = ranked_data.sel(time=slice(str(slice_start), str(slice_end)))
+                    for dr in ranked_dateranges:
+                        slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
 
-                    if ranked_slice.time.size > 0:
-                        ranked_slices.append(ranked_slice)
+                        # We convert to str here as xarray has some weird behaviour that means
+                        # "2018-01-01" - "2018-06-01"
+                        # gets treated differently to
+                        # datetime.date(2018, 1, 1) - datetime.date(2018, 6, 1)
+                        ranked_slice = ranked_data.sel(time=slice(str(slice_start), str(slice_end)))
+
+                        if ranked_slice.time.size > 0:
+                            ranked_slices.append(ranked_slice)
+
+                    dataset_slices.extend(ranked_slices)
 
                 unranked_keys = data_keys["unranked"]
-                unranked_data = recombine_datasets(keys=unranked_keys, sort=True, elevate_inlet=True)
 
-                first_date, last_date = first_last_dates(keys=unranked_keys)
+                if unranked_keys:
+                    unranked_data = recombine_datasets(keys=unranked_keys, sort=True, elevate_inlet=True)
 
-                unranked_dateranges = find_daterange_gaps(
-                    start_search=first_date, end_search=last_date, dateranges=ranked_dateranges
-                )
+                    first_date, last_date = first_last_dates(keys=unranked_keys)
 
-                unranked_slices = []
-                unranked_metadata = {}
-                for dr in unranked_dateranges:
-                    slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
-                    unranked_slice = unranked_data.sel(time=slice(str(slice_start), str(slice_end)))
+                    unranked_dateranges = find_daterange_gaps(
+                        start_search=first_date, end_search=last_date, dateranges=ranked_dateranges
+                    )
 
-                    unranked_metadata[dr] = unranked_slice["inlet"].values[0]
+                    unranked_metadata = {}
+                    if unranked_dateranges:
+                        unranked_slices = []
+                        for dr in unranked_dateranges:
+                            slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
+                            unranked_slice = unranked_data.sel(time=slice(str(slice_start), str(slice_end)))
 
-                    if unranked_slice.time.size > 0:
-                        unranked_slices.append(unranked_slice)
+                            unranked_metadata[dr] = unranked_slice["inlet"].values[0]
 
-                slices = ranked_slices + unranked_slices
+                            if unranked_slice.time.size > 0:
+                                unranked_slices.append(unranked_slice)
 
-                final_dataset = concat(objs=slices, dim="time").sortby("time")
+                        dataset_slices.extend(unranked_slices)
+                    else:
+                        daterange_str = create_daterange_str(start=first_date, end=last_date)
+                        inlet = unranked_data["inlet"].values[0]
 
-                metadata["rank_metadata"] = {"ranked": ranked_metadata, "unranked": unranked_metadata}
+                        unranked_metadata[daterange_str] = inlet
+
+                        dataset_slices.extend(unranked_data)
+
+                    metadata["rank_metadata"]["unranked"] = unranked_metadata
+
+                final_dataset = concat(objs=dataset_slices, dim="time").sortby("time")
 
         metadata = specific_source["metadata"]
 

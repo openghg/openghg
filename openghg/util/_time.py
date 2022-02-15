@@ -333,6 +333,9 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
     from pandas import Timedelta
     from openghg.util import pairwise
 
+    if not dateranges:
+        return []
+
     sorted_dateranges = sorted(dateranges)
 
     # The difference between the start and end of the successived dateranges

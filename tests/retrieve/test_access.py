@@ -8,7 +8,13 @@ from openghg.objectstore import get_local_bucket
 import pytest
 from openghg.objectstore import get_local_bucket
 from openghg.store import ObsSurface, Emissions, Footprints
-from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
+from helpers import (
+    get_datapath,
+    get_emissions_datapath,
+    get_footprint_datapath,
+    metadata_checker_obssurface,
+    attributes_checker_get_obs,
+)
 
 
 a = [
@@ -110,6 +116,30 @@ def test_get_obs_surface():
 def test_no_inlet_no_ranked_data_raises():
     with pytest.raises(ValueError):
         get_obs_surface(site="bsd", species="co2")
+
+
+def test_get_obs_surface_ranked_data_only():
+    obsdata = get_obs_surface(site="bsd", species="ch4", start_date="2014-02-01", end_date="2014-12-31")
+    metadata = obsdata.metadata
+
+    assert metadata["rank_metadata"] == {
+        "ranked": {"2014-01-30-00:00:00+00:00_2015-01-01-00:00:00+00:00": "248m"}
+    }
+
+
+def test_get_obs_surface_no_ranked_data_raises_until_search_narrowed():
+    with pytest.raises(ValueError):
+        get_obs_surface(site="bsd", species="ch4", start_date="2018-02-01", end_date="2018-12-31")
+
+    obsdata = get_obs_surface(
+        site="bsd", species="ch4", inlet="42m", start_date="2018-02-01", end_date="2018-12-31"
+    )
+
+    attrs = obsdata.data.attrs
+    metadata = obsdata.metadata
+
+    metadata_checker_obssurface(metadata=metadata, species="ch4")
+    attributes_checker_get_obs(attrs=attrs, species="ch4")
 
 
 def test_get_obs_surface_ranking_single():
