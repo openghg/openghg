@@ -1,3 +1,48 @@
+'''
+
+The ModelScenario class allows users to collate related data sources and calculate
+modelled output based on this data. The types of data currently included are:
+ - Timeseries observation data (ObsData)
+ - Fixed domain sensitivity maps known as footprints (FootprintData)
+ - Fixed domain flux maps (FluxData) - multiple maps can be included and 
+ referenced by source name
+
+TODO: Also need to incorporate boundary conditions
+
+A ModelScenario instance can be created by searching the object store manually 
+and providing these outputs:
+>>> obs = get_obs_surface(site, species, ...)
+>>> footprint = get_footprint(site, domain, ...)
+>>> flux = get_flux(species, source, ...)
+>>> model = ModelScenario(obs=obs, footprint=footprint, flux=flux)
+
+A ModelScenario instance can also be created using keywords to search the object store:
+>>> model = ModelScenario(site, 
+                          species, 
+                          inlet, 
+                          network, 
+                          domain, 
+                          sources=sources, 
+                          start_date=start_date,
+                          end_date=end_date)
+
+A ModelScenario instance can also be initialised and then populated after creation:
+>>> model = ModelScenario()
+>>> model.add_obs(obs=obs)
+>>> model.add_footprint(site, inlet, domain, ...)
+>>> model.add_flux(species, domain, sources, ...)
+
+Once created, methods can be called on ModelScenario which will combine these 
+data sources and cache the outputs (if requested) to make for quicker calculation.
+
+>>> modelled_obs = model.calc_modelled_obs()
+>>> combined_data = model.footprints_data_merge()
+
+If some input types needed for these operations are missing, the user will be alerted
+on which data types are missing.
+'''
+
+from this import d
 from xml.sax import parseString
 from pandas import Timestamp
 from xarray import Dataset, DataArray
@@ -10,9 +55,9 @@ __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_reso
 # TODO: Consider how to handle sources as well as storing and using multiple fluxes
 # TODO: How does the high/low resolution for fluxes work with this?
 
-# TODO: Emissions also shouldn't need to match against a domain
+# TODO: Really with the emissions, they shouldn't need to match against a domain
 # We should be able to grab global/bigger area emissions and cut that down 
-# to whichever area out LPDM model covered.
+# to whichever area our LPDM model covers.
 
 # TODO: Add static methods for different ways of creating the class
 # e.g. from_existing_data(), from_search(), empty() , ...
@@ -73,6 +118,10 @@ class ModelScenario():
         these into the appropriate class?
         """
 
+        self.obs = None
+        self.footprint = None
+        self.fluxes = None
+
         # Add observation data (directly or through keywords)
         self.add_obs(site = site,
                      species = species,
@@ -82,7 +131,14 @@ class ModelScenario():
                      end_date = end_date,
                      obs = obs)
 
-        # TODO: Add updates to inputs here if obs has been specified directly if useful?
+        # Make sure obs data is present, make sure inputs match to metadata
+        if self.obs is not None:
+            obs_metadata = self.obs.metadata
+            site = obs_metadata["site"]
+            species = obs_metadata["species"]
+            inlet = obs_metadata["inlet"]
+            print("Updating any inputs based on observation data")
+            print(f"site: {site}, species: {species}, inlet: {inlet}")
 
         # Add footprint data (directly or through keywords)
         self.add_footprint(site = site,
@@ -210,9 +266,12 @@ class ModelScenario():
         # - site, domain, inlet (can extract from obs), model, metmodel
         if site and footprint is None:
             site = clean_string(site)
-            if not inlet and self.obs:
-                # TODO: Add case to deal with "multiple" inlets
+            if inlet is None and self.obs is not None:
                 inlet = self.obs.metadata["inlet"]
+            
+            # TODO: Add case to deal with "multiple" inlets
+            if inlet == "multiple":
+                raise ValueError("Unable to deal with multiple inlets yet:\n Please change date range or specify a specific inlet")
 
             footprint_keywords_1 = {"site": site, 
                                     "height": inlet,
@@ -229,7 +288,7 @@ class ModelScenario():
             footprint_keywords = [footprint_keywords_1, footprint_keywords_2]
 
             footprint = self._get_data(footprint_keywords, input_type="footprint")
-        
+
         self.footprint = footprint
 
         if self.footprint is not None and not hasattr(self, "site"):
@@ -247,10 +306,10 @@ class ModelScenario():
         Add flux data based on keywords or direct FluxData object.
         Can add flux datasets for multiple sources.
         """
-        if hasattr(self, "flux"):
+        if self.fluxes is not None:
             # Check current species in any flux data
             if species is not None:
-                current_flux_1 = list(self.flux.values())[0]
+                current_flux_1 = list(self.fluxes.values())[0]
                 current_species = current_flux_1.metadata["species"]
                 if species != current_species:
                     raise ValueError(f"New data must match current species {current_species} in ModelScenario. Input value: {species}")
@@ -294,15 +353,18 @@ class ModelScenario():
                 flux = {source: flux}
 
         # TODO: Make this so flux.anthro can be called etc. - link in some way
-        if hasattr(self, "flux") and self.flux is not None:
-            self.flux.update(flux)
+        if self.fluxes is not None:
+            self.fluxes.update(flux)
         else:
-            self.flux = flux
+            self.fluxes = flux
 
-        if self.flux is not None and not hasattr(self, "species"):
-            flux_values = list(self.flux.values())
-            flux_1 = flux_values[0]
-            self.species = flux_1.metadata["species"]
+        if self.fluxes is not None:
+            if not hasattr(self, "species"):
+                flux_values = list(self.fluxes.values())
+                flux_1 = flux_values[0]
+                self.species = flux_1.metadata["species"]
+
+            self.flux_sources = list(self.fluxes.keys())
 
 
     def _check_data_is_present(self, need=["obs", "footprint"]):
@@ -313,13 +375,14 @@ class ModelScenario():
 
         Args:
             need (list) : Names of objects needed for the function being called.
-            Should be one or more of "obs", "footprint", "flux"
+            Should be one or more of "obs", "footprint", "fluxes" (or "flux")
         
         Returns:
             None
 
             Raises ValueError is necessary data is missing.
         """
+        need = ["fluxes" if value == "flux" else value for value in need]  # Make sure attributes match
         missing = []
         for attr in need:
             value = getattr(self, attr)
@@ -532,21 +595,29 @@ class ModelScenario():
         # Transpose to keep time in the last dimension position in case it has been moved in resample
         combined_dataset = combined_dataset.transpose(..., "time")
 
-        # TODO: Add units into combined_dataset
-        # # Save the observation data units
-        # try:
-        #     units = float(obs_data.mf.attrs["units"])
-        # except KeyError:
-        #     units = None
-        # except AttributeError:
-        #     raise AttributeError("Unable to read mf attribute from observation data.")
+        # Save the observation data units
+        try:
+            mf = self.obs["mf"]
+            units = float(mf.attrs["units"])
+        except KeyError:
+            units = None
+        except AttributeError:
+            raise AttributeError("Unable to read mf attribute from observation data.")
 
-        # if units:
-        #     combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset.fp / units))})
-        #     # if HiTRes:
-        #     #     combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes / units))})
+        if units:
+            combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset.fp / units))})
+            if self.species == "co2":
+                combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes / units))})
 
-        combined_dataset.attrs["resample_to"] = resample_to
+        attributes = {}
+        attributes_obs = self.obs.data.attrs
+        attributes_footprint = self.footprint.data.attrs
+        attributes.update(attributes_footprint)
+        attributes.update(attributes_obs)
+
+        attributes["resample_to"] = resample_to
+
+        combined_dataset.attrs.update(attributes)
 
         if cache:
             self.scenario = combined_dataset
@@ -556,9 +627,10 @@ class ModelScenario():
 
     def _clean_sources_input(self, sources: Optional[Union[str, List]] = None) -> List:
         """
-
+        Check sources input and make sure this is a list. If None, this will extract
+        all sources from self.fluxes.
         """
-        flux_dict = self.flux
+        flux_dict = self.fluxes
 
         if sources is None:
             sources = list(flux_dict.keys())
@@ -583,13 +655,13 @@ class ModelScenario():
         Returns:
             Dataset: All flux sources stacked on the time dimension.
         """
-        self._check_data_is_present(need=["flux"])
+        self._check_data_is_present(need=["fluxes"])
 
         # TODO: Check other dimensions that time are sensibly aligned (can allow small
         # tolerance as there are sometimes issues with lat, lon not exactly aligning)
 
         time_dim = "time"
-        flux_dict = self.flux
+        flux_dict = self.fluxes
 
         sources = self._clean_sources_input(sources)
         sources_str = ', '.join(sources)
@@ -664,7 +736,7 @@ class ModelScenario():
                 The associated scenario data will be cached as the ModelScenario.scenario attribute.
         """
 
-        self._check_data_is_present(need=["footprint", "flux"])
+        self._check_data_is_present(need=["footprint", "fluxes"])
 
         # Check if cached modelled observations exist
         if self.modelled_obs is None:
@@ -1029,12 +1101,14 @@ class ModelScenario():
                               calc_bc: Optional[bool] = True,
                               cache: Optional[bool] = True,
                               recalculate: Optional[bool] = False):
-        
+        """
+
+        """
         combined_dataset = self.combine_obs_footprint(resample_to=resample_to,
                                                       platform=platform,
                                                       cache=cache,
                                                       recalculate=recalculate)
-        
+
         # TODO: Extract extra previous day / some time period 
         # for extracting flux for high time resolution data.
         # Maybe check species as matching co2?
@@ -1048,7 +1122,7 @@ class ModelScenario():
 
 
             name = modelled_obs.name
-            combined_dataset = combined_dataset.assign({name: modelled_obs})  
+            combined_dataset = combined_dataset.assign({name: modelled_obs})
 
         if calc_bc:
             # TODO: Add this in when BoundaryConditions have been incorporated
@@ -1203,6 +1277,34 @@ def stack_datasets(datasets: List[Dataset],
 
 def footprints_data_merge(data):
     # Write this a wrapper for footprints_data_merge function from acrg_name.name file
+
+    print("The footprint_data_merge() wrapper function will be deprecated.")
+    print("Please use the ModelScenario class to set up your data")
+    print("Then call the model.footprints_data_merge() method e.g.")
+    print(" model = ModelScenario(site, species, inlet, network, domain, ...)")
+    print(" combined_data = model.footprints_data_merge()")
+
+
+    # data,   -> from get_obs()
+    # domain, -> string
+    # met_model = None, 
+    # load_flux = True, 
+    # load_bc = True,
+    # calc_timeseries = True, 
+    # calc_bc = True, 
+    # HiTRes = False,
+    # site_modifier = {}, 
+    # height = None, 
+    # network = None,
+    # emissions_name = None,
+    # fp_directory = None,
+    # flux_directory = None,
+    # bc_directory = None,
+    # resample_to_data = False,
+    # species_footprint = None,
+    # chunks = False,
+    # verbose = True
+
     pass
 
 

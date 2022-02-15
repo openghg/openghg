@@ -38,7 +38,7 @@ def test_scenario_direct_objects():
 
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
-    assert model_scenario.flux is not None
+    assert model_scenario.fluxes is not None
 
     # TODO: Add more stringent tests here to check actual obs and fp values?
 
@@ -68,7 +68,7 @@ def test_scenario_infer_inputs():
 
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
-    assert model_scenario.flux is not None
+    assert model_scenario.fluxes is not None
 
     # TODO: Add more stringent tests here to check actual obs and fp values?
     # To make sure this is grabbing the right data
@@ -98,6 +98,7 @@ def test_scenario_infer_inlet():
 
     assert model_scenario.obs is not None    
     assert model_scenario.footprint is not None
+    assert model_scenario.fluxes is not None
 
 
 def test_scenario_too_few_inputs():
@@ -113,7 +114,30 @@ def test_scenario_too_few_inputs():
     assert model_scenario.obs is None
 
     # TODO: get_footprint() is not currently returning None - check this
-    # assert model_scenario.footprint is None
+    # assert model_scenario.footprint.data is None
+
+
+def test_add_data():
+
+    start_date = "2012-01-01"
+    end_date = "2013-01-01"
+
+    site = "tac"
+    domain = "EUROPE"
+    species = "ch4"
+    inlet = "100m"
+    network = "DECC"
+    source = "anthro"
+
+    model_scenario = ModelScenario()
+
+    model_scenario.add_obs(site=site, species=species, inlet=inlet)
+    model_scenario.add_footprint(site=site, inlet=inlet, domain=domain, species=species)
+    model_scenario.add_flux(species=species, domain=domain, sources=source)
+
+    assert model_scenario.obs is not None    
+    assert model_scenario.footprint is not None
+    assert model_scenario.fluxes is not None
 
 
 @pytest.fixture(scope="function")
@@ -199,7 +223,41 @@ def test_calc_modelled_obs_period(model_scenario_1):
 
         # Could add more checks here but may be better doing this with mocked data
 
-# TODO: Add test for stacking flux datasets - only looked at one so far.
+
+def test_add_multiple_flux(model_scenario_1):
+
+    species = "ch4"
+    source = "waste"
+    domain = "EUROPE"
+
+    model_scenario_1.add_flux(species=species, sources=source, domain=domain)
+
+    expected_sources = ["anthro", source]
+
+    for source in expected_sources:
+
+        assert source in model_scenario_1.fluxes
+
+        metadata = model_scenario_1.fluxes[source].metadata
+        assert metadata["source"] == source
+
+
+def test_footprints_data_merge(model_scenario_1):
+
+    combined_dataset = model_scenario_1.footprints_data_merge(resample_to="coarsest")
+
+    print(combined_dataset)
+
+    assert "fp" in combined_dataset
+    assert "mf" in combined_dataset
+    assert "mf_mod" in combined_dataset
+
+    attributes = combined_dataset.attrs
+    assert attributes["resample_to"] == "coarsest"
+
+# TODO: Add tests for full ModelScenario.footprint_data_merge method
+
+# TODO: Add tests for co2 data and high time resolution steps
 
 #%% Test more generic dataset functions
 
@@ -245,7 +303,7 @@ def test_calc_resolution(flux_daily):
     assert frequency_d == 1
 
 
-def test_calc_resolution_one_time(flux_single_time):
+def test_calc_resolution_single_time(flux_single_time):
     """Test NaT value can be calculated for unknown frequency (1 time point)"""
     frequency = calc_dim_resolution(flux_single_time, dim="time")
 

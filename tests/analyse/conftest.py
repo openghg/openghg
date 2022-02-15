@@ -30,10 +30,10 @@ def data_read():
     source1 = "anthro"
     domain = "EUROPE"
 
-    emissions_datapath = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
+    emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
 
     Emissions.read_file(
-        filepath=emissions_datapath,
+        filepath=emissions_datapath1,
         species=species,
         source=source1,
         date="2012",
@@ -41,10 +41,19 @@ def data_read():
         high_time_resolution=False,
     )
 
-    # TODO: Add additional emissions source here
-    # Just need to find / create a file that's not too big
-    # Can be for different date range but should be for 2012 or earlier
+    # Waste data for CH4 (from UKGHG model)
+    source2 = "waste"
 
+    emissions_datapath2 = get_emissions_datapath("ch4-ukghg-waste_EUROPE_2012.nc")
+
+    Emissions.read_file(
+        filepath=emissions_datapath2,
+        species=species,
+        source=source2,
+        date="2012",
+        domain=domain,
+        high_time_resolution=False,
+    )
 
     # Footprint data
     # TAC footprint from 2012-08 - 2012-09 at 100m
