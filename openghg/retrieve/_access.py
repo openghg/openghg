@@ -231,7 +231,7 @@ def get_flux(
     domain: str,
     start_date: Optional[Timestamp] = None,
     end_date: Optional[Timestamp] = None,
-    time_resolution: Optional[str] = "standard",
+    time_resolution: Optional[str] = None,
 ) -> FluxData:
     """
     The flux function reads in all flux files for the domain and species as an xarray Dataset.
