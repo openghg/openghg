@@ -491,6 +491,9 @@ class ModelScenario():
             if max_diff > 1.0:
                 raise ValueError("Sample period can be not be derived from observations")
 
+        # TODO: Check regularity of the data - will need this to decide is resampling
+        # is appropriate or need to do checks on a per time point basis
+
         obs_data_timeperiod = Timedelta(seconds=obs_data_period_s)
 
         # Derive the footprints period from the frequency of the data
@@ -511,8 +514,8 @@ class ModelScenario():
 
         # Subtract half a second to ensure lower range covered
         start_slice = start_date - Timedelta("0.5s")
-        # Add half a second to ensure upper range covered
-        end_slice = end_date + Timedelta("0.5s")
+        # Subtract very small time increment (1 nanosecond) to make this an exclusive selection
+        end_slice = end_date - Timedelta("1ns")
 
         obs_data = obs_data.sel(time=slice(start_slice, end_slice))
         footprint_data = footprint_data.sel(time=slice(start_slice, end_slice))
