@@ -11,6 +11,9 @@ from openghg.util import (
     split_daterange_str,
     create_daterange_str,
 )
+from xarray import Dataset
+from numpy import unique as np_unique
+import re
 
 __all__ = ["SearchResults"]
 
@@ -377,5 +380,37 @@ class SearchResults:
                 final_dataset = concat(objs=dataset_slices, dim="time").sortby("time")
 
         metadata = specific_source["metadata"]
+        # Ensure the metadata matches the inlets in the data
+        # metadata = self._metadata_checker(dataset=final_dataset, metadata=metadata)
 
         return ObsData(data=final_dataset, metadata=metadata)
+
+    def _metadata_checker(self, dataset: Dataset, metadata: dict) -> Dict:
+        """Make sure the metadata only contains data for the inlets the data contains.
+        Sometimes we might get metadata for inlets that cover dates outside the slice.
+
+        Only to be used for ranked data.
+
+        Args:
+            metadata: Dictionary of metadata for ranked data
+        Returns:
+            dict: Updated metadata dictionary
+        """
+        unique_inlets = list(np_unique(dataset["inlet"]))
+        multiple_inlets = len(unique_inlets) > 1
+
+        meta_copy = metadata.copy()
+
+        # Match the inlet height keys
+        r = re.compile(r"\d+.*m")
+        to_remove = [k for k in meta_copy if r.match(k) and k not in unique_inlets]
+
+        for k in to_remove:
+            meta_copy.pop(k)
+
+        if multiple_inlets:
+            meta_copy["inlet"] = "multiple"
+        else:
+            meta_copy["inlet"] = unique_inlets[0]
+
+        return meta_copy

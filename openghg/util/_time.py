@@ -128,6 +128,9 @@ def create_daterange_str(start: Union[str, Timestamp], end: Union[str, Timestamp
     start = timestamp_tzaware(start)
     end = timestamp_tzaware(end)
 
+    if start > end:
+        raise ValueError(f"Invalid daterange, start ({start}) > end ({end})")
+
     start = str(start).replace(" ", "-")
     end = str(end).replace(" ", "-")
 
@@ -338,26 +341,32 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
 
     sorted_dateranges = sorted(dateranges)
 
-    # The difference between the start and end of the successived dateranges
-    range_gap = "1day"
+    # The difference between the start and end of the successive dateranges
+    range_gap = Timedelta("1h")
+    min_gap = Timedelta("30m")
+
     # First find the gap between the start and the end
-    start_first, end_first = split_daterange_str(sorted_dateranges[0])
+    start_first, _ = split_daterange_str(sorted_dateranges[0])
 
     gaps = []
     if start_search < start_first:
         gap_start = start_search
-        gap_end = start_first - Timedelta(range_gap)
-        gap = create_daterange_str(start=gap_start, end=gap_end)
-        gaps.append(gap)
+        gap_end = start_first - range_gap
+
+        if gap_end - gap_start > min_gap:
+            gap = create_daterange_str(start=gap_start, end=gap_end)
+            gaps.append(gap)
 
     # Then find the gap between the end
-    start_last, end_last = split_daterange_str(sorted_dateranges[-1])
+    _, end_last = split_daterange_str(sorted_dateranges[-1])
 
     if end_search > end_last:
         gap_end = end_search
-        gap_start = end_last + Timedelta(range_gap)
-        gap = create_daterange_str(start=gap_start, end=gap_end)
-        gaps.append(gap)
+        gap_start = end_last + range_gap
+
+        if gap_end - gap_start > min_gap:
+            gap = create_daterange_str(start=gap_start, end=gap_end)
+            gaps.append(gap)
 
     for a, b in pairwise(sorted_dateranges):
         start_a, end_a = split_daterange_str(a)
@@ -368,9 +377,10 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
             continue
 
         diff = start_b - end_a
-        if diff > Timedelta(range_gap) and diff.value > 0:
-            gap_start = end_a + Timedelta(range_gap)
-            gap_end = start_b - Timedelta(range_gap)
+
+        if diff > min_gap:
+            gap_start = end_a + range_gap
+            gap_end = start_b - range_gap
 
             gap = create_daterange_str(start=gap_start, end=gap_end)
             gaps.append(gap)
@@ -567,7 +577,7 @@ def first_last_dates(keys: List) -> Tuple[Timestamp, Timestamp]:
         tuple: First and last timestamp
     """
 
-    def sorting_key(s):
+    def sorting_key(s: str) -> str:
         return s.split("/")[-1]
 
     sorted_keys = sorted(keys, key=sorting_key)

@@ -30,7 +30,7 @@ def recombine_multisite(keys: Dict, sort: Optional[bool] = True) -> Dict:
 def recombine_datasets(
     keys: List[str],
     sort: Optional[bool] = True,
-    attrs_to_check: Union[str, List[str], Dict[str, str], None] = None,
+    attrs_to_check: Dict[str, str] = None,
     elevate_inlet: bool = False,
 ) -> Dataset:
     """Combines datasets stored separately in the object store
@@ -58,40 +58,33 @@ def recombine_datasets(
 
     data = [Datasource.load_dataset(bucket=bucket, key=k) for k in keys]
 
+    # Check if we've got multiple inlet heights
+    inlets_to_check = check_inlets(data=data, elevate_inlet=elevate_inlet)
+
     if attrs_to_check is None:
-        attrs_to_check = {"inlet": "multiple"}
+        attrs_to_check = {}
+
+    attrs_to_check.update(inlets_to_check)
 
     # For specified attributes (e.g. "inlet")
     # elevate duplicates to data variables within each Dataset
     if attrs_to_check:
-        if isinstance(attrs_to_check, dict):
-            attributes = list(attrs_to_check.keys())
-            replace_values = list(attrs_to_check.values())
-        elif isinstance(attrs_to_check, str):
-            attributes = [attrs_to_check]
-            replace_values = [""]
-        else:
-            attributes = attrs_to_check
-            replace_values = [""] * len(attributes)
+        # if isinstance(attrs_to_check, dict):
+        attributes = list(attrs_to_check.keys())
+        replace_values = list(attrs_to_check.values())
+
+        # TODO - GJ - 2022-02-22 - I'm not sure we need to many different ways of passing in inlets to check here?
+        # elif isinstance(attrs_to_check, str):
+        #     attributes = [attrs_to_check]
+        #     replace_values = [""]
+        # else:
+        #     attributes = attrs_to_check
+        #     replace_values = [""] * len(attributes)
 
         data = elevate_duplicate_attrs(ds_list=data, attributes=attributes, elevate_inlet=elevate_inlet)
 
     # Concatenate datasets along time dimension
     combined = xr_concat(data, dim="time")
-
-    # Check for unique inlets, sometimes we want to allow the elevation of the inlet so we
-    # can cleanly concat ranked and unranked Datasets. We also sometimes may not find
-    # ranked data so only a single inlets data is used.
-    # try:
-    #     unique_inlets = np.unique(combined["inlet"])
-
-    #     if unique_inlets.size == 1:
-    #         try:
-    #             attrs_to_check.pop("inlet", None)
-    #         except AttributeError:
-    #             pass
-    # except KeyError:
-    #     pass
 
     # Replace/remove incorrect attributes
     #  - xr.concat will only take value from first dataset if duplicated
@@ -182,3 +175,30 @@ def elevate_duplicate_attrs(
                 ds_list[i] = updated_ds
 
     return ds_list
+
+
+def check_inlets(data: List[Dataset], elevate_inlet: bool) -> Dict:
+    """Check the inlets of the data to be processed
+
+    Args:
+        data: List of Datasets
+    Returns:
+        dict: Dictionary with single or multiple inlet replacement value
+    """
+    inlets = set()
+
+    for dataset in data:
+        try:
+            inlets.add(dataset.attrs["inlet"])
+        except KeyError:
+            pass
+
+    if len(inlets) > 1:
+        attrs = {"inlet": "multiple"}
+    else:
+        if elevate_inlet:
+            attrs = {"inlet": inlets.pop()}
+        else:
+            attrs = {}
+
+    return attrs

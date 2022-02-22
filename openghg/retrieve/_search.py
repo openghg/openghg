@@ -35,6 +35,7 @@ def search(**kwargs):  # type: ignore
     from addict import Dict as aDict
     from copy import deepcopy
     from itertools import chain as iter_chain
+    from pandas import Timedelta as pd_Timedelta
 
     from openghg.store import ObsSurface, Footprints, Emissions, EulerianModel
     from openghg.store.base import Datasource
@@ -44,7 +45,6 @@ def search(**kwargs):  # type: ignore
         timestamp_epoch,
         timestamp_tzaware,
         clean_string,
-        closest_daterange,
         find_daterange_gaps,
         split_daterange_str,
         load_json,
@@ -61,12 +61,12 @@ def search(**kwargs):  # type: ignore
     if start_date is None:
         start_date = timestamp_epoch()
     else:
-        start_date = timestamp_tzaware(start_date)
+        start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
 
     if end_date is None:
         end_date = timestamp_now()
     else:
-        end_date = timestamp_tzaware(end_date)
+        end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
 
     kwargs_copy["start_date"] = start_date
     kwargs_copy["end_date"] = end_date
@@ -276,7 +276,7 @@ def search(**kwargs):  # type: ignore
                 start_search=start_date, end_search=end_date, dateranges=daterange_strs
             )
 
-            def max_key(s):
+            def max_key(s: str) -> float:
                 return float(s.rstrip("m"))
 
             # Here just select the highest inlet that's been ranked and use that

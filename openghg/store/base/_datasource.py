@@ -542,8 +542,8 @@ class Datasource:
         start, _ = split_daterange_str(daterange_str=date_keys[0])
         _, end = split_daterange_str(daterange_str=date_keys[-1])
 
-        self._start_date = start
-        self._end_date = end
+        self._start_date = start  # type: ignore
+        self._end_date = end  # type: ignore
 
     def daterange(self) -> Tuple[Timestamp, Timestamp]:
         """Get the daterange the data in this Datasource covers as tuple
