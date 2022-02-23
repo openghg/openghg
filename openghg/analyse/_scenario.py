@@ -43,7 +43,7 @@ on which data types are missing.
 
 from pandas import Timestamp
 from xarray import Dataset, DataArray
-from typing import Optional, Tuple, Union, List, Dict, Any
+from typing import Optional, Tuple, Union, List, Dict, Any, Sequence, cast
 from pathlib import Path
 from openghg.dataobjects import ObsData, FootprintData, FluxData
 from openghg.retrieve import get_obs_surface, get_footprint, get_flux, search
@@ -60,6 +60,8 @@ __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_reso
 
 # TODO: Incorporate boundary conditions when possible
 
+ParamType = Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]
+
 
 class ModelScenario():
     """
@@ -74,7 +76,7 @@ class ModelScenario():
                  domain: Optional[str] = None,
                  model: Optional[str] = None,
                  metmodel: Optional[str] = None,
-                 sources: Optional[Union[str, List]] = None,
+                 sources: Optional[Union[str, Sequence]] = None,
                  start_date: Optional[Union[str, Timestamp]] = None,
                  end_date: Optional[Union[str, Timestamp]] = None,
                  obs: Optional[ObsData] = None,
@@ -116,9 +118,9 @@ class ModelScenario():
         these into the appropriate class?
         """
 
-        self.obs = None
-        self.footprint = None
-        self.fluxes = None
+        self.obs: Optional[ObsData] = None
+        self.footprint: Optional[FootprintData] = None
+        self.fluxes: Optional[Dict[str, FluxData]] = None
 
         # Add observation data (directly or through keywords)
         self.add_obs(site = site,
@@ -158,16 +160,16 @@ class ModelScenario():
                       flux = flux)
 
         # Initialise attributes used for caching
-        self.scenario = None
-        self.modelled_obs = None
-        self.flux_stacked = None
+        self.scenario: Optional[Dataset] = None
+        self.modelled_obs: Optional[DataArray] = None
+        self.flux_stacked: Optional[Dataset] = None
 
         # TODO: Check species, site etc. values align between inputs?
 
 
     def _get_data(self,
-                  keywords: Union[List[Dict[str, str]], Dict[str, str]],
-                  input_type: str):
+                  keywords: ParamType,
+                  input_type: str) -> Any:
         """
         Use appropriate get function to search for data in object store.
         """
@@ -188,7 +190,7 @@ class ModelScenario():
         num_checks = len(keywords)
         for i, keyword_set in enumerate(keywords):
             try:
-                data = get_fn(**keyword_set)
+                data = get_fn(**keyword_set)  # type:ignore
             except (ValueError, AttributeError):
                 num = i + 1
                 if num == num_checks:
@@ -218,7 +220,7 @@ class ModelScenario():
                 network: Optional[str] = None,
                 start_date: Optional[Union[str, Timestamp]] = None,
                 end_date: Optional[Union[str, Timestamp]] = None,
-                obs: Optional[ObsData] = None):
+                obs: Optional[ObsData] = None) -> None:
         """
         Add observation data based on keywords or direct ObsData object.
         """
@@ -254,7 +256,7 @@ class ModelScenario():
                       start_date: Optional[Union[str, Timestamp]] = None,
                       end_date: Optional[Union[str, Timestamp]] = None,
                       species: Optional[str] = None,
-                      footprint: Optional[FootprintData] = None):
+                      footprint: Optional[FootprintData] = None) -> None:
         """
         Add footprint data based on keywords or direct FootprintData object.
         """
@@ -296,10 +298,10 @@ class ModelScenario():
     def add_flux(self,
                  species: Optional[str] = None,
                  domain: Optional[str] = None,
-                 sources: Optional[Union[str, List]] = None,
+                 sources: Optional[Union[str, Sequence]] = None,
                  start_date: Optional[Union[str, Timestamp]] = None,
                  end_date: Optional[Union[str, Timestamp]] = None,
-                 flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None) -> Dict[str, FluxData]:
+                 flux: Optional[Union[FluxData, Dict[str, FluxData]]] = None) -> None:
         """
         Add flux data based on keywords or direct FluxData object.
         Can add flux datasets for multiple sources.
@@ -351,7 +353,8 @@ class ModelScenario():
 
         # TODO: Make this so flux.anthro can be called etc. - link in some way
         if self.fluxes is not None:
-            self.fluxes.update(flux)
+            if flux is not None:
+                self.fluxes.update(flux)
         else:
             self.fluxes = flux
 
@@ -364,7 +367,7 @@ class ModelScenario():
             self.flux_sources = list(self.fluxes.keys())
 
 
-    def _check_data_is_present(self, need=["obs", "footprint"]):
+    def _check_data_is_present(self, need: Union[str, Sequence] = ["obs", "footprint"]) -> None:
         """
         Check whether correct data types have been included. This should
         be used by functions to check whether they can perform the requested
@@ -379,6 +382,9 @@ class ModelScenario():
 
             Raises ValueError is necessary data is missing.
         """
+        if isinstance(need, str):
+            need = [need]
+
         need = ["fluxes" if value == "flux" else value for value in need]  # Make sure attributes match
         missing = []
         for attr in need:
@@ -394,7 +400,7 @@ class ModelScenario():
             raise ValueError(f"Missing necessary {' and '.join(missing)} data.")
 
 
-    def _get_platform(self) -> Union[str, None]:
+    def _get_platform(self) -> Optional[str]:
         """
         Find the platform for a site, if present.
 
@@ -414,12 +420,12 @@ class ModelScenario():
             except KeyError:
                 return None
             else:
-                platform = site_details.get("platform")
+                platform: str = site_details.get("platform")
                 return platform
 
 
     def _align_obs_footprint(self,
-                             resample_to: Optional[str] = "coarsest",
+                             resample_to: str = "coarsest",
                              platform: Optional[str] = None) -> Tuple:
         """
         Slice and resample obs and footprint data to align along time
@@ -443,10 +449,13 @@ class ModelScenario():
         import numpy as np
         from pandas import Timedelta
 
+        # Check data is present (not None) and cast to correct type
         self._check_data_is_present(need=["obs", "footprint"])
+        obs = cast(ObsData, self.obs)
+        footprint = cast(FootprintData, self.footprint)
 
-        obs_data = self.obs.data
-        footprint_data = self.footprint.data
+        obs_data = obs.data
+        footprint_data = footprint.data
 
         resample_keyword_choices = ("obs", "footprint", "coarsest")
 
@@ -556,7 +565,7 @@ class ModelScenario():
 
 
     def combine_obs_footprint(self,
-                              resample_to: Optional[str] = "coarsest",
+                              resample_to: str = "coarsest",
                               platform: Optional[str] = None,
                               cache: Optional[bool] = True,
                               recalculate: Optional[bool] = False) -> Dataset:
@@ -584,6 +593,8 @@ class ModelScenario():
         """
 
         self._check_data_is_present(need=["obs", "footprint"])
+        obs = cast(ObsData, self.obs)
+        footprint = cast(FootprintData, self.footprint)
 
         # Return any matching cached data
         if self.scenario is not None and not recalculate:
@@ -604,8 +615,8 @@ class ModelScenario():
 
         # Save the observation data units
         try:
-            mf = self.obs["mf"]
-            units = float(mf.attrs["units"])
+            mf = obs.data["mf"]
+            units: Optional[float] = float(mf.attrs["units"])
         except KeyError:
             units = None
         except AttributeError:
@@ -617,8 +628,8 @@ class ModelScenario():
                 combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes / units))})
 
         attributes = {}
-        attributes_obs = self.obs.data.attrs
-        attributes_footprint = self.footprint.data.attrs
+        attributes_obs = obs.data.attrs
+        attributes_footprint = footprint.data.attrs
         attributes.update(attributes_footprint)
         attributes.update(attributes_obs)
 
@@ -637,7 +648,8 @@ class ModelScenario():
         Check sources input and make sure this is a list. If None, this will extract
         all sources from self.fluxes.
         """
-        flux_dict = self.fluxes
+        self._check_data_is_present(need=["fluxes"])
+        flux_dict = cast(Dict[str, FluxData], self.fluxes)
 
         if sources is None:
             sources = list(flux_dict.keys())
@@ -663,9 +675,9 @@ class ModelScenario():
             Dataset: All flux sources stacked on the time dimension.
         """
         self._check_data_is_present(need=["fluxes"])
+        flux_dict = cast(Dict[str, FluxData], self.fluxes)
 
         time_dim = "time"
-        flux_dict = self.fluxes
 
         sources = self._clean_sources_input(sources)
         sources_str = ', '.join(sources)
@@ -698,16 +710,18 @@ class ModelScenario():
         return flux_stacked
 
 
-    def _check_footprint_resample(self, resample_to: str) -> FootprintData:
+    def _check_footprint_resample(self, resample_to: str) -> Dataset:
         '''
         Check whether footprint needs resampling based on resample_to input.
         Ignores resample_to keywords of ("coarsest", "obs", "footprint") as this is
         for comparison with observation data but uses pandas frequencies to resample.
         '''
+        footprint = cast(FootprintData, self.footprint)
+
         if resample_to in ("coarsest", "obs", "footprint"):
-            return self.footprint.data
+            return footprint.data
         else:
-            footprint_data = self.footprint.data
+            footprint_data = footprint.data
             time = footprint_data["time"].values
             start_date = Timestamp(time[0])
             base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
@@ -717,7 +731,7 @@ class ModelScenario():
 
     def calc_modelled_obs(self,
                           sources: Optional[Union[str, List]] = None,
-                          resample_to: Optional[str] = "coarsest",
+                          resample_to: str = "coarsest",
                           platform: Optional[str] = None,
                           cache: Optional[bool] = True,
                           recalculate: Optional[bool] = False) -> DataArray:
@@ -776,7 +790,7 @@ class ModelScenario():
 
         # Check species and use high time resolution steps if this is carbon dioxide
         if self.species == "co2":
-            modelled_obs = self._calc_modelled_obs_HiTRes(sources=sources, output_TS=True, output_fpXflux=False)
+            modelled_obs: DataArray = self._calc_modelled_obs_HiTRes(sources=sources, output_TS=True, output_fpXflux=False)
             name = "mf_mod_high_res"
         else:
             modelled_obs = self._calc_modelled_obs_integrated(sources=sources, output_TS=True, output_fpXflux=False)
@@ -823,6 +837,9 @@ class ModelScenario():
             If both output_TS and output_fpXflux are both True:
                 Both DataArrays are returned.
         """
+
+        if self.scenario is None:
+            raise ValueError("Combined data must have been defined before calling this function.")
 
         scenario = self.scenario
         flux = self.combine_flux_sources(sources)
@@ -897,6 +914,9 @@ class ModelScenario():
 
         # TODO: Need to work out how this fits in with high time resolution method
         # Do we need to flag low resolution to use a different method? natural / anthro for example
+
+        if self.scenario is None:
+            raise ValueError("Combined data must have been defined before calling this function.")
 
         fp_HiTRes = self.scenario.fp_HiTRes
         flux_ds = self.combine_flux_sources(sources)
@@ -1106,7 +1126,7 @@ class ModelScenario():
 
 
     def footprints_data_merge(self,
-                              resample_to: Optional[str] = "coarsest",
+                              resample_to: str = "coarsest",
                               platform: Optional[str] = None,
                               calc_timeseries: bool = True,
                               sources: Optional[Union[str, List]] = None,
@@ -1195,7 +1215,7 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 
 def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: Optional[str] = "ffill", tolerance: Optional[str] = None) -> Dataset:
+    dataset_A: Dataset, dataset_B: Dataset, method: Optional[str] = "ffill", tolerance: Optional[float] = None) -> Dataset:
     """
     Merges two datasets and re-indexes to the first dataset.
 
@@ -1229,11 +1249,11 @@ def combine_datasets(
     return merged_ds
 
 
-def match_dataset_dims(datasets: List[Dataset],
-                       dims: Union[str, List] = [],
+def match_dataset_dims(datasets: Sequence[Dataset],
+                       dims: Union[str, Sequence] = [],
                        method: str = "nearest",
                        tolerance: Union[float, Dict[str, float]] = 1e-5,
-                       ):
+                       ) -> List[Dataset]:
     """
     Aligns datasets to the selected dimensions within a tolerance.
     All datasets will be aligned to the first dataset within the list.
@@ -1253,7 +1273,7 @@ def match_dataset_dims(datasets: List[Dataset],
 
     # Nothing to be done if only one (or less) datasets are passed
     if len(datasets) <= 1:
-        return datasets
+        return list(datasets)
 
     ds0 = datasets[0]
 
@@ -1314,7 +1334,7 @@ def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
     return resolution
 
 
-def stack_datasets(datasets: List[Dataset],
+def stack_datasets(datasets: Sequence[Dataset],
                    dim: str = "time",
                    method: str = "ffill") -> Dataset:
     """
@@ -1326,7 +1346,7 @@ def stack_datasets(datasets: List[Dataset],
     other dimensions and variable names for these to be stacked.
 
     Args:
-        datasets : List of input datasets
+        datasets : Sequence of input datasets
         dim : Name of dimension to stack along. Default = "time"
         method: Method to use when aligning the datasets. Default = "ffill"
 
@@ -1358,43 +1378,43 @@ def stack_datasets(datasets: List[Dataset],
     return data_stacked
 
 
-def footprints_data_merge(data: Union[dict, ObsData],
-                          domain: str,
-                          met_model: Optional[str] = None,
-                          load_flux: bool = True,
-                          load_bc: bool = True,
-                          calc_timeseries: bool = True,
-                          calc_bc: bool = True,
-                          HiTRes: bool = False,
-                          site_modifier: Dict[str, str] = {},
-                          height: Optional[str] = None,
-                          emissions_name: Optional[str] = None,
-                          fp_directory: Optional[Union[Path, str]] = None,
-                          flux_directory: Optional[Union[Path, str]] = None,
-                          bc_directory: Optional[Union[Path, str]] = None,
-                          resample_to_data: bool = False,
-                          species_footprint: Optional[str] = None,
-                          chunks: bool = False,
-                          verbose: bool = True,
-                          ):
-    """
-    This will be a wrapper for footprints_data_merge function from acrg_name.name file written
-    """
+# def footprints_data_merge(data: Union[dict, ObsData],
+#                           domain: str,
+#                           met_model: Optional[str] = None,
+#                           load_flux: bool = True,
+#                           load_bc: bool = True,
+#                           calc_timeseries: bool = True,
+#                           calc_bc: bool = True,
+#                           HiTRes: bool = False,
+#                           site_modifier: Dict[str, str] = {},
+#                           height: Optional[str] = None,
+#                           emissions_name: Optional[str] = None,
+#                           fp_directory: Optional[Union[Path, str]] = None,
+#                           flux_directory: Optional[Union[Path, str]] = None,
+#                           bc_directory: Optional[Union[Path, str]] = None,
+#                           resample_to_data: bool = False,
+#                           species_footprint: Optional[str] = None,
+#                           chunks: bool = False,
+#                           verbose: bool = True,
+#                           ) -> Any:
+#     """
+#     This will be a wrapper for footprints_data_merge function from acrg_name.name file written
+#     """
 
-    # Write this a wrapper for footprints_data_merge function from acrg_name.name file
+#     # Write this a wrapper for footprints_data_merge function from acrg_name.name file
 
-    print("The footprint_data_merge() wrapper function will be deprecated.")
-    print("Please use the ModelScenario class to set up your data")
-    print("Then call the model.footprints_data_merge() method e.g.")
-    print(" model = ModelScenario(site, species, inlet, network, domain, ...)")
-    print(" combined_data = model.footprints_data_merge()")
+#     print("The footprint_data_merge() wrapper function will be deprecated.")
+#     print("Please use the ModelScenario class to set up your data")
+#     print("Then call the model.footprints_data_merge() method e.g.")
+#     print(" model = ModelScenario(site, species, inlet, network, domain, ...)")
+#     print(" combined_data = model.footprints_data_merge()")
 
-    # resample_to_data --> resample_to
-    # HiTRes --> linked to species as co2
-    # directories --> could link to adding new data to object store?
-    # height --> inlet
-    # species_footprint --> links to overall species?
-    # site_modifier --> link to footprint name - different site name for footprint?
+#     # resample_to_data --> resample_to
+#     # HiTRes --> linked to species as co2
+#     # directories --> could link to adding new data to object store?
+#     # height --> inlet
+#     # species_footprint --> links to overall species?
+#     # site_modifier --> link to footprint name - different site name for footprint?
 
 
 
