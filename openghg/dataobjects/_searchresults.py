@@ -287,6 +287,7 @@ class SearchResults:
 
         data_keys = specific_source["keys"]
         metadata = specific_source["metadata"]
+        
 
         # If cloud use the Retrieve object
         if self.cloud:
@@ -315,12 +316,15 @@ class SearchResults:
             else:
                 dataset_slices = []
 
+                inlet_ranges = specific_source["rank_metadata"]
+
                 metadata["rank_metadata"] = {}
 
                 ranked_keys = data_keys["ranked"]
-                ranked_dateranges = []
-
                 ranked_slices = []
+
+                inlets = set()
+
                 for daterange, keys in ranked_keys.items():
                     data_slice = recombine_datasets(keys=keys, sort=True, elevate_inlet=True)
 
@@ -333,12 +337,13 @@ class SearchResults:
                     ranked_slice = data_slice.sel(time=slice(str(slice_start), str(slice_end)))
 
                     if ranked_slice.time.size > 0:
+                        inlet = inlet_ranges[daterange]
+                        inlets.add(inlet)
+
                         ranked_slices.append(ranked_slice)
 
                     ranked_metadata = specific_source["rank_metadata"]
                     metadata["rank_metadata"]["ranked"] = ranked_metadata
-
-                    ranked_dateranges.append(daterange)
 
                 dataset_slices.extend(ranked_slices)
 
@@ -349,6 +354,7 @@ class SearchResults:
 
                     first_date, last_date = first_last_dates(keys=unranked_keys)
 
+                    ranked_dateranges = list(ranked_keys.keys())
                     unranked_dateranges = find_daterange_gaps(
                         start_search=first_date, end_search=last_date, dateranges=ranked_dateranges
                     )
@@ -361,14 +367,16 @@ class SearchResults:
                             unranked_slice = unranked_data.sel(time=slice(str(slice_start), str(slice_end)))
 
                             if unranked_slice.time.size > 0:
-                                unranked_metadata[dr] = unranked_slice["inlet"].values[0]
+                                inlet = unranked_slice["inlet"].values[0]
+                                inlets.add(inlet)
+                                unranked_metadata[dr] = inlet
                                 unranked_slices.append(unranked_slice)
 
                         dataset_slices.extend(unranked_slices)
                     else:
                         daterange_str = create_daterange_str(start=first_date, end=last_date)
                         inlet = unranked_data["inlet"].values[0]
-
+                        inlets.add(inlet)
                         unranked_metadata[daterange_str] = inlet
 
                         dataset_slices.extend(unranked_data)
@@ -377,36 +385,46 @@ class SearchResults:
 
                 final_dataset = concat(objs=dataset_slices, dim="time").sortby("time")
 
+                if len(inlets) == 1:
+                    inlet_tag = inlets.pop()
+                else:
+                    inlet_tag = "multiple"
+
+                inlet_attr = {"inlet": inlet_tag}
+
+                # Update the attributes for single / multiple inlet heights
+                final_dataset.attrs.update(inlet_attr)
+
         metadata = specific_source["metadata"]
 
         return ObsData(data=final_dataset, metadata=metadata)
 
-    def _metadata_checker(self, dataset: Dataset, metadata: dict) -> Dict:
-        """Make sure the metadata only contains data for the inlets the data contains.
-        Sometimes we might get metadata for inlets that cover dates outside the slice.
+    # def _metadata_checker(self, dataset: Dataset, metadata: dict) -> Dict:
+    #     """Make sure the metadata only contains data for the inlets the data contains.
+    #     Sometimes we might get metadata for inlets that cover dates outside the slice.
 
-        Only to be used for ranked data.
+    #     Only to be used for ranked data.
 
-        Args:
-            metadata: Dictionary of metadata for ranked data
-        Returns:
-            dict: Updated metadata dictionary
-        """
-        unique_inlets = list(np_unique(dataset["inlet"]))
-        multiple_inlets = len(unique_inlets) > 1
+    #     Args:
+    #         metadata: Dictionary of metadata for ranked data
+    #     Returns:
+    #         dict: Updated metadata dictionary
+    #     """
+    #     unique_inlets = list(np_unique(dataset["inlet"]))
+    #     multiple_inlets = len(unique_inlets) > 1
 
-        meta_copy = metadata.copy()
+    #     meta_copy = metadata.copy()
 
-        # Match the inlet height keys
-        r = re.compile(r"\d+.*m")
-        to_remove = [k for k in meta_copy if r.match(k) and k not in unique_inlets]
+    #     # Match the inlet height keys
+    #     r = re.compile(r"\d+.*m")
+    #     to_remove = [k for k in meta_copy if r.match(k) and k not in unique_inlets]
 
-        for k in to_remove:
-            meta_copy.pop(k)
+    #     for k in to_remove:
+    #         meta_copy.pop(k)
 
-        if multiple_inlets:
-            meta_copy["inlet"] = "multiple"
-        else:
-            meta_copy["inlet"] = unique_inlets[0]
+    #     if multiple_inlets:
+    #         meta_copy["inlet"] = "multiple"
+    #     else:
+    #         meta_copy["inlet"] = unique_inlets[0]
 
-        return meta_copy
+    #     return meta_copy
