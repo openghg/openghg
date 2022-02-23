@@ -172,6 +172,8 @@ def search(**kwargs):  # type: ignore
             species = metadata["species"]
             inlet = metadata["inlet"]
 
+            # Note that the keys here is just a list unlike the ranked keys dictionary
+            # which contains the dateranges covered.
             specific_sources[site][species][inlet]["keys"]["unranked"] = specific_keys
             specific_sources[site][species][inlet]["metadata"] = metadata
 
@@ -232,7 +234,7 @@ def search(**kwargs):  # type: ignore
     data_keys: Dict = aDict()
     for site, species in highest_ranked.items():
         for sp, data in species.items():
-            species_keys = []
+            species_keys = {}
             species_rank_data = {}
             species_metadata = {}
 
@@ -245,16 +247,14 @@ def search(**kwargs):  # type: ignore
                 metadata = datasource.metadata()
                 inlet = metadata["inlet"]
 
-                keys = []
                 for dr in match_dateranges:
-                    date_keys = datasource.keys_in_daterange_str(daterange=dr)
+                    keys = datasource.keys_in_daterange_str(daterange=dr)
 
-                    if date_keys:
-                        keys.extend(date_keys)
+                    if keys:
                         # We'll add this to the metadata in the search results we return at the end
                         species_rank_data[dr] = inlet
+                        species_keys[dr] = keys
 
-                species_keys.extend(keys)
                 species_metadata[inlet] = metadata
 
             # Only create the dictionary keys if we have some data keys

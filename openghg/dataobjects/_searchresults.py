@@ -320,28 +320,27 @@ class SearchResults:
                 ranked_keys = data_keys["ranked"]
                 ranked_dateranges = []
 
-                if ranked_keys:
-                    ranked_data = recombine_datasets(keys=ranked_keys, sort=True, elevate_inlet=True)
+                ranked_slices = []
+                for daterange, keys in ranked_keys.items():
+                    data_slice = recombine_datasets(keys=keys, sort=True, elevate_inlet=True)
+
+                    slice_start, slice_end = split_daterange_str(daterange_str=daterange, date_only=True)
+
+                    # We convert to str here as xarray has some weird behaviour that means
+                    # "2018-01-01" - "2018-06-01"
+                    # gets treated differently to
+                    # datetime.date(2018, 1, 1) - datetime.date(2018, 6, 1)
+                    ranked_slice = data_slice.sel(time=slice(str(slice_start), str(slice_end)))
+
+                    if ranked_slice.time.size > 0:
+                        ranked_slices.append(ranked_slice)
 
                     ranked_metadata = specific_source["rank_metadata"]
                     metadata["rank_metadata"]["ranked"] = ranked_metadata
 
-                    ranked_slices = []
-                    ranked_dateranges = sorted(list(ranked_metadata.keys()))
+                    ranked_dateranges.append(daterange)
 
-                    for dr in ranked_dateranges:
-                        slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
-
-                        # We convert to str here as xarray has some weird behaviour that means
-                        # "2018-01-01" - "2018-06-01"
-                        # gets treated differently to
-                        # datetime.date(2018, 1, 1) - datetime.date(2018, 6, 1)
-                        ranked_slice = ranked_data.sel(time=slice(str(slice_start), str(slice_end)))
-
-                        if ranked_slice.time.size > 0:
-                            ranked_slices.append(ranked_slice)
-
-                    dataset_slices.extend(ranked_slices)
+                dataset_slices.extend(ranked_slices)
 
                 unranked_keys = data_keys["unranked"]
 
@@ -361,9 +360,8 @@ class SearchResults:
                             slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
                             unranked_slice = unranked_data.sel(time=slice(str(slice_start), str(slice_end)))
 
-                            unranked_metadata[dr] = unranked_slice["inlet"].values[0]
-
                             if unranked_slice.time.size > 0:
+                                unranked_metadata[dr] = unranked_slice["inlet"].values[0]
                                 unranked_slices.append(unranked_slice)
 
                         dataset_slices.extend(unranked_slices)
@@ -380,8 +378,6 @@ class SearchResults:
                 final_dataset = concat(objs=dataset_slices, dim="time").sortby("time")
 
         metadata = specific_source["metadata"]
-        # Ensure the metadata matches the inlets in the data
-        # metadata = self._metadata_checker(dataset=final_dataset, metadata=metadata)
 
         return ObsData(data=final_dataset, metadata=metadata)
 
