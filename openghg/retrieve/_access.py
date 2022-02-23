@@ -1,4 +1,3 @@
-from multiprocessing.sharedctypes import Value
 from xarray import Dataset
 from typing import Dict, List, Optional, Union
 from pandas import Timestamp
@@ -356,6 +355,7 @@ def get_footprint(
     # else:
     #     results = search(
     #         site=site,
+    #         domain=domain,
     #         domain=domain,
     #         height=height,
     #         start_date=start_date,
