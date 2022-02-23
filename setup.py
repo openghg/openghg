@@ -1,4 +1,7 @@
 import setuptools
+import sys
+
+sys.path.insert(0, ".")  # noqa
 import versioneer
 
 with open("README.md", "r") as fh:
