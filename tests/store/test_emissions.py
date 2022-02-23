@@ -9,7 +9,7 @@ from helpers import get_emissions_datapath
 
 
 def test_read_file():
-    get_local_bucket(empty=True)
+    get_local_bucket()
 
     test_datapath = get_emissions_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
 
@@ -56,14 +56,15 @@ def test_read_file():
         "domain": "europe",
         "source": "gppcardamom",
         "date": "2012",
-        "start_date": "2012-12-01 00:00:00+00:00",
-        "end_date": "2012-12-01 00:00:00+00:00",
+        "start_date": "2012-01-01 00:00:00+00:00",
+        "end_date": "2012-12-31 23:59:59+00:00",
         "max_longitude": 39.38,
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
         "time_resolution": "standard",
         "data_type": "emissions",
+        "frequency": "annual",
     }
 
     del metadata["processed"]

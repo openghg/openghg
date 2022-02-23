@@ -1,4 +1,3 @@
-from multiprocessing.sharedctypes import Value
 from openghg.store.base import BaseStore
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union
@@ -113,7 +112,8 @@ class Emissions(BaseStore):
 
             start_date = year_start
             end_date = year_end
-        # We have values for each month
+            freq = "annual"
+        # We have values for each month / week
         elif n_dates == 12:
             # Check they're successive months
             timestamps = [timestamp_tzaware(t) for t in em_data.time.values]
@@ -132,8 +132,26 @@ class Emissions(BaseStore):
 
             start_date = year_start
             end_date = year_end
+            freq = "month"
+        # Work run through the timestamps and check for gap between them ?
+        # Add something to metadata for this?
         else:
-            raise ValueError("We currently only accept a single year of dates in the form of a single timestamp or monthly timestamps")
+            timestamps = [timestamp_tzaware(t) for t in em_data.time.values]
+            timestamps.sort()
+
+            frequency = set()
+
+            for a, b in pairwise(timestamps):
+                delta = b - a
+                frequency.add(delta)
+
+            start_date = timestamps[0]
+            end_date = timestamps[-1]
+
+            if len(frequency) == 1:
+                freq = str(frequency.pop())
+            else:
+                freq = "varies"
 
         metadata["start_date"] = str(start_date)
         metadata["end_date"] = str(end_date)
@@ -144,6 +162,7 @@ class Emissions(BaseStore):
         metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
 
         metadata["time_resolution"] = "high" if high_time_resolution else "standard"
+        metadata["frequency"] = freq
 
         if period is not None:
             metadata["time_period"] = period

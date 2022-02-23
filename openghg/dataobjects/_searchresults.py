@@ -11,9 +11,6 @@ from openghg.util import (
     split_daterange_str,
     create_daterange_str,
 )
-from xarray import Dataset
-from numpy import unique as np_unique
-import re
 
 __all__ = ["SearchResults"]
 
@@ -287,7 +284,6 @@ class SearchResults:
 
         data_keys = specific_source["keys"]
         metadata = specific_source["metadata"]
-        
 
         # If cloud use the Retrieve object
         if self.cloud:
@@ -386,45 +382,13 @@ class SearchResults:
                 final_dataset = concat(objs=dataset_slices, dim="time").sortby("time")
 
                 if len(inlets) == 1:
-                    inlet_tag = inlets.pop()
+                    inlet_tag = str(inlets.pop())
                 else:
                     inlet_tag = "multiple"
 
-                inlet_attr = {"inlet": inlet_tag}
-
                 # Update the attributes for single / multiple inlet heights
-                final_dataset.attrs.update(inlet_attr)
+                final_dataset.attrs["inlet"] = inlet_tag
 
         metadata = specific_source["metadata"]
 
         return ObsData(data=final_dataset, metadata=metadata)
-
-    # def _metadata_checker(self, dataset: Dataset, metadata: dict) -> Dict:
-    #     """Make sure the metadata only contains data for the inlets the data contains.
-    #     Sometimes we might get metadata for inlets that cover dates outside the slice.
-
-    #     Only to be used for ranked data.
-
-    #     Args:
-    #         metadata: Dictionary of metadata for ranked data
-    #     Returns:
-    #         dict: Updated metadata dictionary
-    #     """
-    #     unique_inlets = list(np_unique(dataset["inlet"]))
-    #     multiple_inlets = len(unique_inlets) > 1
-
-    #     meta_copy = metadata.copy()
-
-    #     # Match the inlet height keys
-    #     r = re.compile(r"\d+.*m")
-    #     to_remove = [k for k in meta_copy if r.match(k) and k not in unique_inlets]
-
-    #     for k in to_remove:
-    #         meta_copy.pop(k)
-
-    #     if multiple_inlets:
-    #         meta_copy["inlet"] = "multiple"
-    #     else:
-    #         meta_copy["inlet"] = unique_inlets[0]
-
-    #     return meta_copy

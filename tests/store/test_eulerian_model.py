@@ -11,7 +11,7 @@ def get_datapath(filename):
 
 
 def test_read_file():
-    get_local_bucket(empty=True)
+    get_local_bucket()
 
     test_datapath = get_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 

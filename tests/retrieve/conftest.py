@@ -46,22 +46,6 @@ def data_read():
         instrument="GCMD",
     )
 
-    # # Set ranking information for BSD
-    # obs = ObsSurface.load()
-
-    # uid_248 = bsd_results["processed"]["bsd.picarro.1minute.248m.min.dat"]["ch4"]
-    # obs.set_rank(uuid=uid_248, rank=1, date_range="2012-01-01_2013-01-01")
-
-    # uid_108 = bsd_results["processed"]["bsd.picarro.1minute.108m.min.dat"]["ch4"]
-    # obs.set_rank(uuid=uid_108, rank=1, date_range="2014-09-02_2014-11-01")
-
-    # obs.set_rank(uuid=uid_248, rank=1, date_range="2015-01-01_2015-11-01")
-
-    # obs.set_rank(uuid=uid_108, rank=1, date_range="2016-09-02_2018-11-01")
-
-    # uid_42 = bsd_results["processed"]["bsd.picarro.1minute.42m.min.dat"]["ch4"]
-    # obs.set_rank(uuid=uid_42, rank=1, date_range="2019-01-02_2021-01-01")
-
     obs = ObsSurface.load()
 
     uid_248 = bsd_results["processed"]["bsd.picarro.1minute.248m.min.dat"]["ch4"]

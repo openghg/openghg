@@ -112,7 +112,7 @@ class Datasource:
         elif data_type == "met":
             raise NotImplementedError()
         elif data_type == "eulerian_model":
-            return self.add_eulerian_model_data(data=data)
+            return self.add_eulerian_model_data(data=data, metadata=metadata)
 
     def add_timeseries_data(self, data: Dataset) -> None:
         """Add timeseries data to this Datasource
@@ -246,7 +246,7 @@ class Datasource:
         self.add_metadata_key(key="data_type", value=data_type)
         self.update_daterange()
 
-    def add_eulerian_model_data(self, data: Dataset) -> None:
+    def add_eulerian_model_data(self, data: Dataset, metadata: Dict) -> None:
         """Add Eulerian model data to this Datasource
 
         Args:
@@ -255,7 +255,7 @@ class Datasource:
         Returns:
             None
         """
-        self.add_field_data(data=data, data_type="eulerian_model")
+        self.add_field_data(data=data, metadata=metadata, data_type="eulerian_model")
 
     def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
         """Returns the daterange for the passed DataFrame
@@ -467,7 +467,7 @@ class Datasource:
 
             # Save the new keys and create a timestamp
             self._data_keys[version_str]["keys"] = new_keys
-            self._data_keys[version_str]["timestamp"] = str(timestamp_now())
+            self._data_keys[version_str]["timestamp"] = str(timestamp_now())  # type: ignore
 
             # Link latest to the newest version
             self._data_keys["latest"] = self._data_keys[version_str]
