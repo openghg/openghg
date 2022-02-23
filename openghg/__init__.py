@@ -40,6 +40,3 @@ __repository__ = v.get("repository")
 __revisionid__ = v.get("full-revisionid")
 
 del v, get_versions
-
-from . import _version
-__version__ = _version.get_versions()['version']
