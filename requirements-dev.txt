@@ -18,7 +18,7 @@ tqdm
 xarray >= 0.18.2
 urllib3 >= 1.26.3
 # Required for testing
-fdk
+fdk==0.1.24
 flake8
 pytest >= 6.2.5
 pytest-tornasync
