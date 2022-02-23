@@ -321,7 +321,6 @@ class ModelScenario():
                 sources = [sources]
 
             for source in sources:
-                # TODO: Make this into a    dictionary for each source
                 flux_keywords_1 = {"species": species,
                                    "source": source,
                                    "domain": domain}
@@ -1355,7 +1354,6 @@ def stack_datasets(datasets: Sequence[Dataset],
 
     TODO: Could update this to only allow DataArrays to be included to reduce the phase
     space here.
-    TODO: Try this out with different inputs to check this is sensibly robust
     """
 
     if len(datasets) == 1:
