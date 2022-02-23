@@ -217,26 +217,16 @@ def _read_data(
     Returns:
         dict: Dictionary of gas data keyed by species
     """
-    from datetime import datetime
-    from pandas import read_csv, to_datetime
+    from pandas import read_csv, to_datetime, Series
     from pandas import Timedelta as pd_Timedelta
-    import warnings
 
     # Read header
     header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
 
-    # Create a function to parse the datetime in the data file
-    def parser(date: str) -> datetime:
-        return datetime.strptime(date, "%Y %m %d %H %M")
-
     # Read the data in and automatically create a datetime column from the 5 columns
     # Dropping the yyyy', 'mm', 'dd', 'hh', 'mi' columns here
     data = read_csv(
-        data_filepath,
-        skiprows=4,
-        sep=r"\s+",
-        index_col=["yyyy_mm_dd_hh_mi"],
-        parse_dates=[[1, 2, 3, 4, 5]]        
+        data_filepath, skiprows=4, sep=r"\s+", index_col=["yyyy_mm_dd_hh_mi"], parse_dates=[[1, 2, 3, 4, 5]]
     )
 
     data.index = to_datetime(data.index, format="%Y %m %d %H %M")
@@ -271,6 +261,7 @@ def _read_data(
     units = {}
     scale = {}
 
+    flag_columns: List[Series] = []
     species = []
     columns_renamed = {}
     for column in data.columns:
@@ -282,11 +273,11 @@ def _read_data(
             # Add it to the dictionary for renaming later
             columns_renamed[column] = gas_name + "_flag"
 
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                # Create 2 new columns based on the flag columns
-                data[gas_name + " status_flag"] = (data[column].str[0] != "-").astype(int)
-                data[gas_name + " integration_flag"] = (data[column].str[1] != "-").astype(int)
+            # Create 2 new series based on the flag columns
+            status_flag = (data[column].str[0] != "-").astype(int).rename(f"{gas_name} status_flag")
+            integration_flag = (data[column].str[1] != "-").astype(int).rename(f"{gas_name} integration_flag")
+
+            flag_columns.extend((status_flag, integration_flag))
 
             col_shift = 4
             units[gas_name] = header.iloc[1, col_loc + col_shift]
@@ -300,6 +291,7 @@ def _read_data(
 
             species.append(gas_name)
 
+    data = data.join(flag_columns)
     # Rename columns to include the gas this flag represents
     data = data.rename(columns=columns_renamed, inplace=False)
 

@@ -10,14 +10,14 @@ sys.path.insert(0, os.path.abspath("services"))
 sys.path.insert(0, os.path.abspath("."))
 
 # We still require OpenGHG to be in the directory above OpenGHG when running the tests
-acquire_dir = "../acquire"
+# acquire_dir = "../acquire"
 
 # Use the local Acquire
-sys.path.insert(0, os.path.abspath(acquire_dir))
-sys.path.insert(0, os.path.abspath(f"{acquire_dir}/services"))
+# sys.path.insert(0, os.path.abspath(acquire_dir))
+# sys.path.insert(0, os.path.abspath(f"{acquire_dir}/services"))
 
-# load all of the common fixtures used by the mocked tests
-pytest_plugins = ["services.fixtures.mocked_services"]
+# # load all of the common fixtures used by the mocked tests
+# pytest_plugins = ["services.fixtures.mocked_services"]
 
 temporary_store = tempfile.TemporaryDirectory()
 temporary_store_path = temporary_store.name

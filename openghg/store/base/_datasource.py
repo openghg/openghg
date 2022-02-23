@@ -19,12 +19,12 @@ class Datasource:
     _data_root = "data"
 
     def __init__(self) -> None:
-        from Acquire.ObjectStore import get_datetime_now
+        from openghg.util import timestamp_now
         from collections import defaultdict
         from uuid import uuid4
 
         self._uuid: str = str(uuid4())
-        self._creation_datetime = get_datetime_now()
+        self._creation_datetime = timestamp_now()
         self._metadata: Dict[str, str] = {}
         # Dictionary keyed by daterange of data in each Dataset
         self._data: Dict[str, Dataset] = {}
@@ -335,11 +335,9 @@ class Datasource:
         Returns:
             dict: Dictionary version of object
         """
-        from Acquire.ObjectStore import datetime_to_string
-
         data: Dict[str, Union[str, Dict, bool]] = {}
         data["UUID"] = self._uuid
-        data["creation_datetime"] = datetime_to_string(self._creation_datetime)
+        data["creation_datetime"] = str(self._creation_datetime)
         data["metadata"] = self._metadata
         data["stored"] = self._stored
         data["data_keys"] = self._data_keys
@@ -393,11 +391,11 @@ class Datasource:
         Returns:
             Datasource: Datasource created from JSON
         """
-        from Acquire.ObjectStore import string_to_datetime
+        from openghg.util import timestamp_tzaware
 
         d = cls()
         d._uuid = data["UUID"]
-        d._creation_datetime = string_to_datetime(data["creation_datetime"])
+        d._creation_datetime = timestamp_tzaware(data["creation_datetime"])
         d._metadata = data["metadata"]
         d._stored = data["stored"]
         d._data_keys = data["data_keys"]
@@ -571,10 +569,8 @@ class Datasource:
         Returns:
             str: Daterange covered by this Datasource
         """
-        from Acquire.ObjectStore import datetime_to_string
-
         start, end = self.daterange()
-        return "".join([datetime_to_string(start), "_", datetime_to_string(end)])
+        return "".join([str(start), "_", str(end)])
 
     def search_metadata_old(
         self,
