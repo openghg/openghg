@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Retrieval functions &#8212; OpenGHG 0+untagged.3.g9ad887a.dirty documentation</title>
+    <title>Retrieval functions &#8212; OpenGHG 0+untagged.2.g291879c.dirty documentation</title>
     
     <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -267,7 +267,7 @@ with each Datasource.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.retrieve.get_flux">
-<span class="sig-prename descclassname"><span class="pre">openghg.retrieve.</span></span><span class="sig-name descname"><span class="pre">get_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/retrieve/_access.html#get_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.retrieve.get_flux" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.retrieve.</span></span><span class="sig-name descname"><span class="pre">get_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'standard'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/retrieve/_access.html#get_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.retrieve.get_flux" title="Permalink to this definition">¶</a></dt>
 <dd><p>The flux function reads in all flux files for the domain and species as an xarray Dataset.
 Note that at present ALL flux data is read in per species per domain or by emissions name.
 To be consistent with the footprints, fluxes should be in mol/m2/s.</p>
@@ -275,7 +275,7 @@ To be consistent with the footprints, fluxes should be in mol/m2/s.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species name</p></li>
-<li><p><strong>source</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Source name</p></li>
+<li><p><strong>sources</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – Source name</p></li>
 <li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Domain e.g. EUROPE</p></li>
 <li><p><strong>start_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>]) – Start date</p></li>
 <li><p><strong>end_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>]) – End date</p></li>
@@ -289,6 +289,11 @@ To be consistent with the footprints, fluxes should be in mol/m2/s.</p>
 <dd class="field-odd"><p><a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.FluxData" title="openghg.dataobjects.FluxData">FluxData</a></p>
 </dd>
 </dl>
+<p>TODO: Update this to output to a FluxData class?
+TODO: Update inputs to just accept a string and extract one flux file at a time?
+As it stands, this only extracts one flux at a time but is set up to be extended
+to to extract multiple. So if this is removed from this function the functionality
+itself would need to be wrapped up in another function call.</p>
 </dd></dl>
 
 <dl class="py function">

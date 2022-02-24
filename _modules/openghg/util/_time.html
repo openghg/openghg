@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._time &#8212; OpenGHG 0+untagged.3.g9ad887a.dirty documentation</title>
+    <title>openghg.util._time &#8212; OpenGHG 0+untagged.2.g291879c.dirty documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -389,12 +389,10 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        tuple (Timestamp, Timestamp): Tuple of start, end pandas Timestamps</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
-
     <span class="n">split</span> <span class="o">=</span> <span class="n">daterange_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
 
-    <span class="n">start</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tz</span><span class="o">=</span><span class="s2">&quot;UTC&quot;</span><span class="p">)</span>
-    <span class="n">end</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tz</span><span class="o">=</span><span class="s2">&quot;UTC&quot;</span><span class="p">)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span></div>
 
