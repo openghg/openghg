@@ -151,7 +151,7 @@ def footprints_data_merge(
     platform: Optional[str] = None,
     instrument: Optional[str] = None,
     load_flux: Optional[bool] = True,
-    flux_sources: Union[str, List] = None,
+    flux_source: Optional[str] = None,
     load_bc: Optional[bool] = True,
     calc_timeseries: Optional[bool] = True,
     calc_bc: Optional[bool] = True,
@@ -176,7 +176,7 @@ def footprints_data_merge(
         instrument: Instrument name
         species: Species name
         load_flux: Load flux
-        flux_sources: Flux source names
+        flux_source: Flux source name
         load_bc: Load boundary conditions (not currently implemented)
         calc_timeseries: Calculate timeseries data (not currently implemented)
         calc_bc: Calculate boundary conditions (not currently implemented)
@@ -205,13 +205,13 @@ def footprints_data_merge(
     # So here we iterate over the emissions types and get the fluxes
     flux_dict = {}
     if load_flux:
-        if flux_sources is None:
+        if flux_source is None:
             raise ValueError("If you want to load flux you must pass a flux source")
 
         flux_dict["standard"] = get_flux(
             species=species,
             domain=domain,
-            source=flux_sources,
+            source=flux_source,
             time_resolution=time_resolution,
             start_date=start_date,
             end_date=end_date,
@@ -232,7 +232,7 @@ def footprints_data_merge(
             flux_dict["high_time_res"] = get_flux(
                 species=species,
                 domain=domain,
-                source=flux_sources,
+                source=flux_source,
                 time_resolution=time_resolution,
                 start_date=start_date_hr,
                 end_date=end_date,
