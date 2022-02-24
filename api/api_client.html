@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>client API Detail &#8212; OpenGHG 0+untagged.3.g831b5c6.dirty documentation</title>
+    <title>client API Detail &#8212; OpenGHG 0+untagged.3.g9ad887a.dirty documentation</title>
     
     <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -35,6 +35,9 @@
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="../_static/custom.js"></script>
@@ -218,7 +221,7 @@ functions, if it is absent the call will the routed to a local function.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">process_files</span></code> function is used to upload data files for standardisation and storage in the object store</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.client.process_files">
-<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">process_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://fn.openghg.org/t'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_process.html#process_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.process_files" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">process_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_process.html#process_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.process_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process data files, standardise them and add the data to the object store</p>
 <blockquote>
 <div><dl class="simple">
@@ -343,62 +346,6 @@ object that can be used to set and modify ranking data.</p>
 <p class="admonition-title">Note</p>
 <p>This will currently raise a <code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code> if used.</p>
 </div>
-<dl class="py class">
-<dt class="sig sig-object py" id="openghg.client.JobRunner">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">JobRunner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_jobrunner.html#JobRunner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.JobRunner" title="Permalink to this definition">¶</a></dt>
-<dd><p>An interface to the the jobrunner service on the OpenGHG platform.</p>
-<p>This class is used to run jobs on both local and cloud based HPC clusters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>service_url</strong> (<em>str</em>) – URL of service</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.client.JobRunner.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_jobrunner.html#JobRunner.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.JobRunner.__init__" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.client.JobRunner.create_job">
-<span class="sig-name descname"><span class="pre">create_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">requirements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">openghg_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_jobrunner.html#JobRunner.create_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.JobRunner.create_job" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a job</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>auth_user</strong> (<em>Acquire.User</em>) – Authenticated Acquire user</p></li>
-<li><p><strong>required</strong> (<em>The following keys are</em>) – “hostname”, “username”, “name”, “run_command”, “partition”, “n_nodes”, “n_tasks_per_node”,
-“n_cpus_per_task”, “memory_req”, “job_duration”</p></li>
-<li><p><strong>of</strong> (<em>where partition must be one</em>) – “cpu_test”, “dcv”, “gpu”, “gpu_veryshort”, “hmem”, “serial”, “test”, “veryshort”</p></li>
-<li><p><strong>Example</strong> – <dl class="simple">
-<dt>requirements = {“hostname”: hostname, “username”: username, “name”: “test_job,</dt><dd><p>”n_nodes”: 2,”n_tasks_per_node”: 2,
-“n_cpus_per_task”: 2, “memory”: “128G”, …}</p>
-</dd>
-</dl>
-</p></li>
-<li><p><strong>requirements</strong> (<em>dict</em>) – Dictionary containing job details and requested resources</p></li>
-<li><p><strong>key_password</strong> (<em>str</em>) – Password for private key used to access the HPC</p></li>
-<li><p><strong>data_files</strong> (<em>dict</em>) – Data file(s) to be uploaded to the cloud drive to</p></li>
-<li><p><strong>data</strong> (<em>run the simulation. Simulation code files should be given in the &quot;app&quot; key and</em>) – </p></li>
-<li><p><strong>key</strong> (<em>files in the &quot;data&quot;</em>) – </p></li>
-<li><p><strong>seems</strong> (<em>TODO - having to pass in a password and get it through to Paramiko</em>) – </p></li>
-<li><p><strong>winded</strong> (<em>long</em>) – </p></li>
-<li><p><strong>this?</strong> (<em>is there a better way to do</em>) – </p></li>
-<li><p><strong>openghg_url</strong> (<em>str</em>) – URL of OpenGHG service</p></li>
-<li><p><strong>storage_url</strong> (<em>str</em>) – URL of storage service</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary containing information regarding job running on resource
-This will contain the PAR for access for data upload and download.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 <div class="toctree-wrapper compound">
 </div>
 </section>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._ranksources &#8212; OpenGHG 0+untagged.3.g831b5c6.dirty documentation</title>
+    <title>openghg.dataobjects._ranksources &#8212; OpenGHG 0+untagged.3.g9ad887a.dirty documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -34,6 +34,9 @@
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="../../../_static/custom.js"></script>
@@ -164,7 +167,7 @@
               <div>
                 
   <h1>Source code for openghg.dataobjects._ranksources</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">ObsSurface</span>
 <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
@@ -176,14 +179,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_cloud</span> <span class="o">=</span> <span class="n">cloud</span>
 
         <span class="k">if</span> <span class="n">cloud</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">Acquire.Client</span> <span class="kn">import</span> <span class="n">Wallet</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+            <span class="c1"># from Acquire.Client import Wallet</span>
 
-            <span class="n">wallet</span> <span class="o">=</span> <span class="n">Wallet</span><span class="p">()</span>
+            <span class="c1"># wallet = Wallet()</span>
 
-            <span class="k">if</span> <span class="n">service_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">service_url</span> <span class="o">=</span> <span class="s2">&quot;https://fn.openghg.org/t&quot;</span>
+            <span class="c1"># if service_url is None:</span>
+            <span class="c1">#     service_url = &quot;https://fn.openghg.org/t&quot;</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_service</span> <span class="o">=</span> <span class="n">wallet</span><span class="o">.</span><span class="n">get_service</span><span class="p">(</span><span class="n">service_url</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">service_url</span><span class="si">}</span><span class="s2">/openghg&quot;</span><span class="p">)</span></div>
+            <span class="c1"># self._service = wallet.get_service(service_url=f&quot;{service_url}/openghg&quot;)</span>
 
 <div class="viewcode-block" id="RankSources.raw"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.RankSources.raw">[docs]</a>    <span class="k">def</span> <span class="nf">raw</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return the raw ranking data</span>
@@ -205,28 +209,29 @@
 <span class="sd">            dict: Dictionary of datasource metadata</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_sources_cloud</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+            <span class="c1"># return self._get_sources_cloud(site=site, species=species)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_sources_local</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_get_sources_cloud</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="n">site</span> <span class="o">=</span> <span class="n">verify_site</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
+    <span class="c1"># def _get_sources_cloud(self, site: str, species: str) -&gt; Dict:</span>
+    <span class="c1">#     site = verify_site(site=site)</span>
 
-        <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span> <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">}</span>
+    <span class="c1">#     args = {&quot;site&quot;: site, &quot;species&quot;: species}</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">site</span> <span class="o">=</span> <span class="n">site</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">species</span> <span class="o">=</span> <span class="n">species</span>
+    <span class="c1">#     self.site = site</span>
+    <span class="c1">#     self.species = species</span>
 
-        <span class="n">response</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s2">&quot;rank.get_sources&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+    <span class="c1">#     response: Dict = self._service.call_function(function=&quot;rank.get_sources&quot;, args=args)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No sources found for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1">#     if not response:</span>
+    <span class="c1">#         raise ValueError(f&quot;No sources found for {species} at {site}&quot;)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_user_info</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;user_info&quot;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_key_lookup</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;key_lookup&quot;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_needs_update</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1">#     self._user_info: Dict = response[&quot;user_info&quot;]</span>
+    <span class="c1">#     self._key_lookup: Dict = response[&quot;key_lookup&quot;]</span>
+    <span class="c1">#     self._needs_update = False</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_info</span>
+    <span class="c1">#     return self._user_info</span>
 
     <span class="k">def</span> <span class="nf">_get_sources_local</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="n">site</span> <span class="o">=</span> <span class="n">verify_site</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
@@ -294,13 +299,7 @@
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_rank_cloud</span><span class="p">(</span>
-                <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
-                <span class="n">rank</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span>
-                <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
-                <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
-                <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_rank_local</span><span class="p">(</span>
                 <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
@@ -310,27 +309,27 @@
                 <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
             <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_set_rank_cloud</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">rank</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-        <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key_lookup</span><span class="p">[</span><span class="n">inlet</span><span class="p">]</span>
+    <span class="c1"># def _set_rank_cloud(</span>
+    <span class="c1">#     self,</span>
+    <span class="c1">#     inlet: str,</span>
+    <span class="c1">#     rank: Union[int, str],</span>
+    <span class="c1">#     start_date: str,</span>
+    <span class="c1">#     end_date: str,</span>
+    <span class="c1">#     overwrite: bool = False,</span>
+    <span class="c1"># ) -&gt; None:</span>
+    <span class="c1">#     inlet = inlet.lower()</span>
+    <span class="c1">#     uuid = self._key_lookup[inlet]</span>
 
-        <span class="n">dateranges</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
+    <span class="c1">#     dateranges = create_daterange_str(start=start_date, end=end_date)</span>
 
-        <span class="n">args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;rank&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank</span>
-        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">uuid</span>
-        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;dateranges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dateranges</span>
-        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;overwrite&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">overwrite</span>
+    <span class="c1">#     args: Dict[str, Union[str, int, List]] = {}</span>
+    <span class="c1">#     args[&quot;rank&quot;] = rank</span>
+    <span class="c1">#     args[&quot;uuid&quot;] = uuid</span>
+    <span class="c1">#     args[&quot;dateranges&quot;] = dateranges</span>
+    <span class="c1">#     args[&quot;overwrite&quot;] = overwrite</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s2">&quot;rank.set_rank&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_needs_update</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1">#     self._service.call_function(function=&quot;rank.set_rank&quot;, args=args)</span>
+    <span class="c1">#     self._needs_update = True</span>
 
     <span class="k">def</span> <span class="nf">_set_rank_local</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -360,7 +359,8 @@
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cloud</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clear_rank_cloud</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+            <span class="c1"># return self._clear_rank_cloud(inlet=inlet)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clear_rank_local</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span></div>
 
@@ -376,20 +376,20 @@
         <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key_lookup</span><span class="p">[</span><span class="n">inlet</span><span class="p">]</span>
         <span class="n">obs</span><span class="o">.</span><span class="n">clear_rank</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_needs_update</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="k">def</span> <span class="nf">_clear_rank_cloud</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Clear the ranking data for a Datasource</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            key: Key for specific source</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key_lookup</span><span class="p">[</span><span class="n">inlet</span><span class="p">]</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">uuid</span><span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s2">&quot;rank.clear_rank&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_needs_update</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+    <span class="c1"># def _clear_rank_cloud(self, inlet: str) -&gt; None:</span>
+    <span class="c1">#     &quot;&quot;&quot;Clear the ranking data for a Datasource</span>
+
+    <span class="c1">#     Args:</span>
+    <span class="c1">#         key: Key for specific source</span>
+    <span class="c1">#     Returns:</span>
+    <span class="c1">#         None</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     uuid = self._key_lookup[inlet]</span>
+    <span class="c1">#     args = {&quot;uuid&quot;: uuid}</span>
+    <span class="c1">#     self._service.call_function(function=&quot;rank.clear_rank&quot;, args=args)</span>
+    <span class="c1">#     self._needs_update = True</span>
 
     <span class="c1"># def visualise_rankings(self) -&gt; Network:</span>
     <span class="c1">#     &quot;&quot;&quot; Creates a small network graph of ranked data with each rank given a colour</span>

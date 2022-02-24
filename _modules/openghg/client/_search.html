@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.client._search &#8212; OpenGHG 0+untagged.3.g831b5c6.dirty documentation</title>
+    <title>openghg.client._search &#8212; OpenGHG 0+untagged.3.g9ad887a.dirty documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -34,6 +34,9 @@
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="../../../_static/custom.js"></script>
@@ -166,7 +169,7 @@
   <h1>Source code for openghg.client._search</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">Acquire.Client</span> <span class="kn">import</span> <span class="n">Wallet</span>
+<span class="c1"># from Acquire.Client import Wallet</span>
 <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span> <span class="k">as</span> <span class="n">_local_search</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">running_in_cloud</span>
 
@@ -197,14 +200,15 @@
     <span class="n">cloud</span> <span class="o">=</span> <span class="n">running_in_cloud</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">cloud</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_cloud_search</span><span class="p">(</span>
-            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-            <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-            <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
-            <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
-            <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
-            <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="c1"># return _cloud_search(</span>
+        <span class="c1">#     species=species,</span>
+        <span class="c1">#     site=site,</span>
+        <span class="c1">#     inlet=inlet,</span>
+        <span class="c1">#     instrument=instrument,</span>
+        <span class="c1">#     start_date=start_date,</span>
+        <span class="c1">#     end_date=end_date,</span>
+        <span class="c1"># )</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">results</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">SearchResults</span><span class="p">]</span> <span class="o">=</span> <span class="n">_local_search</span><span class="p">(</span>
             <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
@@ -241,44 +245,46 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        SearchResults:  SearchResults object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">SearchResults</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
-    <span class="n">wallet</span> <span class="o">=</span> <span class="n">Wallet</span><span class="p">()</span>
-    <span class="n">cloud_service</span> <span class="o">=</span> <span class="n">wallet</span><span class="o">.</span><span class="n">get_service</span><span class="p">(</span><span class="n">service_url</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">service_url</span><span class="si">}</span><span class="s2">/openghg&quot;</span><span class="p">)</span>
+    <span class="c1"># from openghg.dataobjects import SearchResults</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">((</span><span class="n">species</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">instrument</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;We must have at least one of  species, site, inlet or instrument&quot;</span><span class="p">)</span>
+    <span class="c1"># wallet = Wallet()</span>
+    <span class="c1"># cloud_service = wallet.get_service(service_url=f&quot;{service_url}/openghg&quot;)</span>
 
-    <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># if not any((species, site, inlet, instrument)):</span>
+    <span class="c1">#     raise ValueError(&quot;We must have at least one of  species, site, inlet or instrument&quot;)</span>
 
-    <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
+    <span class="c1"># args = {}</span>
 
-    <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
+    <span class="c1"># if species is not None:</span>
+    <span class="c1">#     args[&quot;species&quot;] = species</span>
 
-    <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
+    <span class="c1"># if site is not None:</span>
+    <span class="c1">#     args[&quot;site&quot;] = site</span>
 
-    <span class="k">if</span> <span class="n">instrument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
+    <span class="c1"># if inlet is not None:</span>
+    <span class="c1">#     args[&quot;inlet&quot;] = inlet</span>
 
-    <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_date</span>
-    <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">args</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_date</span>
+    <span class="c1"># if instrument is not None:</span>
+    <span class="c1">#     args[&quot;instrument&quot;] = instrument</span>
 
-    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;skip_ranking&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">skip_ranking</span><span class="p">)</span>
-    <span class="n">args</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+    <span class="c1"># if start_date is not None:</span>
+    <span class="c1">#     args[&quot;start_date&quot;] = start_date</span>
+    <span class="c1"># if end_date is not None:</span>
+    <span class="c1">#     args[&quot;end_date&quot;] = end_date</span>
 
-    <span class="n">response</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">cloud_service</span><span class="o">.</span><span class="n">call_function</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s2">&quot;search.search&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+    <span class="c1"># args[&quot;skip_ranking&quot;] = str(skip_ranking)</span>
+    <span class="c1"># args[&quot;data_type&quot;] = str(data_type)</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">results_data</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
-        <span class="n">search_results</span> <span class="o">=</span> <span class="n">SearchResults</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">results_data</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">search_results</span>
-    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">response</span>
+    <span class="c1"># response: Dict = cloud_service.call_function(function=&quot;search.search&quot;, args=args)</span>
+
+    <span class="c1"># try:</span>
+    <span class="c1">#     results_data = response[&quot;results&quot;]</span>
+    <span class="c1">#     search_results = SearchResults.from_data(results_data)</span>
+    <span class="c1">#     return search_results</span>
+    <span class="c1"># except KeyError:</span>
+    <span class="c1">#     return response</span>
 </pre></div>
 
               </div>
