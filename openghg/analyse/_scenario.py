@@ -44,7 +44,6 @@ on which data types are missing.
 from pandas import Timestamp
 from xarray import Dataset, DataArray
 from typing import Optional, Tuple, Union, List, Dict, Any, Sequence, cast
-from pathlib import Path
 from openghg.dataobjects import ObsData, FootprintData, FluxData
 from openghg.retrieve import get_obs_surface, get_footprint, get_flux, search
 
@@ -123,13 +122,13 @@ class ModelScenario():
         self.fluxes: Optional[Dict[str, FluxData]] = None
 
         # Add observation data (directly or through keywords)
-        self.add_obs(site = site,
-                     species = species,
-                     inlet = inlet,
-                     network = network,
-                     start_date = start_date,
-                     end_date = end_date,
-                     obs = obs)
+        self.add_obs(site=site,
+                     species=species,
+                     inlet=inlet,
+                     network=network,
+                     start_date=start_date,
+                     end_date=end_date,
+                     obs=obs)
 
         # Make sure obs data is present, make sure inputs match to metadata
         if self.obs is not None:
@@ -141,23 +140,23 @@ class ModelScenario():
             print(f"site: {site}, species: {species}, inlet: {inlet}")
 
         # Add footprint data (directly or through keywords)
-        self.add_footprint(site = site,
-                           inlet = inlet,
-                           domain = domain,
-                           model = model,
-                           metmodel = metmodel,
-                           start_date = start_date,
-                           end_date = end_date,
-                           species = species,
-                           footprint = footprint)
+        self.add_footprint(site=site,
+                           inlet=inlet,
+                           domain=domain,
+                           model=model,
+                           metmodel=metmodel,
+                           start_date=start_date,
+                           end_date=end_date,
+                           species=species,
+                           footprint=footprint)
 
         # Add flux data (directly or through keywords)
         self.add_flux(species=species,
                       domain=domain,
                       sources=sources,
-                      start_date = start_date,
-                      end_date = end_date,
-                      flux = flux)
+                      start_date=start_date,
+                      end_date=end_date,
+                      flux=flux)
 
         # Initialise attributes used for caching
         self.scenario: Optional[Dataset] = None
@@ -165,7 +164,6 @@ class ModelScenario():
         self.flux_stacked: Optional[Dataset] = None
 
         # TODO: Check species, site etc. values align between inputs?
-
 
     def _get_data(self,
                   keywords: ParamType,
@@ -212,7 +210,6 @@ class ModelScenario():
 
         return data
 
-
     def add_obs(self,
                 site: Optional[str] = None,
                 species: Optional[str] = None,
@@ -245,7 +242,6 @@ class ModelScenario():
         if self.obs is not None:
             self.site = self.obs.metadata["site"]
             self.species = self.obs.metadata["species"]
-
 
     def add_footprint(self,
                       site: Optional[str] = None,
@@ -293,7 +289,6 @@ class ModelScenario():
 
         if self.footprint is not None and not hasattr(self, "site"):
             self.site = self.footprint.metadata["site"]
-
 
     def add_flux(self,
                  species: Optional[str] = None,
@@ -365,7 +360,6 @@ class ModelScenario():
 
             self.flux_sources = list(self.fluxes.keys())
 
-
     def _check_data_is_present(self, need: Union[str, Sequence] = ["obs", "footprint"]) -> None:
         """
         Check whether correct data types have been included. This should
@@ -398,7 +392,6 @@ class ModelScenario():
         if missing:
             raise ValueError(f"Missing necessary {' and '.join(missing)} data.")
 
-
     def _get_platform(self) -> Optional[str]:
         """
         Find the platform for a site, if present.
@@ -421,7 +414,6 @@ class ModelScenario():
             else:
                 platform: str = site_details.get("platform")
                 return platform
-
 
     def _align_obs_footprint(self,
                              resample_to: str = "coarsest",
@@ -562,7 +554,6 @@ class ModelScenario():
 
         return obs_data, footprint_data
 
-
     def combine_obs_footprint(self,
                               resample_to: str = "coarsest",
                               platform: Optional[str] = None,
@@ -641,7 +632,6 @@ class ModelScenario():
 
         return combined_dataset
 
-
     def _clean_sources_input(self, sources: Optional[Union[str, List]] = None) -> List:
         """
         Check sources input and make sure this is a list. If None, this will extract
@@ -656,7 +646,6 @@ class ModelScenario():
             sources = [sources]
 
         return sources
-
 
     def combine_flux_sources(self,
                              sources: Optional[Union[str, List]] = None,
@@ -708,7 +697,6 @@ class ModelScenario():
 
         return flux_stacked
 
-
     def _check_footprint_resample(self, resample_to: str) -> Dataset:
         '''
         Check whether footprint needs resampling based on resample_to input.
@@ -726,7 +714,6 @@ class ModelScenario():
             base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
             footprint_data = footprint_data.resample(indexer={"time": resample_to}, base=base).mean()
             return footprint_data
-
 
     def calc_modelled_obs(self,
                           sources: Optional[Union[str, List]] = None,
@@ -809,7 +796,6 @@ class ModelScenario():
 
         return modelled_obs
 
-
     def _calc_modelled_obs_integrated(self,
                                       sources: Optional[Union[str, List]] = None,
                                       output_TS: Optional[bool] = True,
@@ -854,7 +840,6 @@ class ModelScenario():
             return timeseries
         elif output_fpXflux:
             return flux_modelled
-
 
     def _calc_modelled_obs_HiTRes(self,
                                   sources: Optional[Union[str, List]] = None,
@@ -1123,7 +1108,6 @@ class ModelScenario():
 
         return None
 
-
     def footprints_data_merge(self,
                               resample_to: str = "coarsest",
                               platform: Optional[str] = None,
@@ -1213,8 +1197,10 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
     return True
 
 
-def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: Optional[str] = "ffill", tolerance: Optional[float] = None) -> Dataset:
+def combine_datasets(dataset_A: Dataset, 
+                     dataset_B: Dataset, 
+                     method: Optional[str] = "ffill", 
+                     tolerance: Optional[float] = None) -> Dataset:
     """
     Merges two datasets and re-indexes to the first dataset.
 
@@ -1413,7 +1399,6 @@ def stack_datasets(datasets: Sequence[Dataset],
 #     # height --> inlet
 #     # species_footprint --> links to overall species?
 #     # site_modifier --> link to footprint name - different site name for footprint?
-
 
 
 # Blueprint from Issue #42 created for this
