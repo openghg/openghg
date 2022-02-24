@@ -613,7 +613,7 @@ class ModelScenario():
             raise AttributeError("Unable to read mf attribute from observation data.")
 
         if units:
-            combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset.fp / units))})
+            combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset["fp"].data / units))})
             if self.species == "co2":
                 combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes / units))})
 
