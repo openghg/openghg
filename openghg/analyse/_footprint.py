@@ -4,7 +4,7 @@ footprints_data_merge
 """
 from pandas import Timestamp
 from xarray import Dataset, DataArray
-from typing import List, Optional, Tuple, Union, Dict, Any
+from typing import Optional, Tuple, Union, Dict, Any
 from openghg.dataobjects import FootprintData
 
 # from openghg.dataobjects import FluxData
