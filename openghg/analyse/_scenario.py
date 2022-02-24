@@ -1148,7 +1148,6 @@ class ModelScenario():
                                                   cache=cache,
                                                   recalculate=recalculate)
 
-
             name = modelled_obs.name
             combined_dataset = combined_dataset.assign({name: modelled_obs})
 
