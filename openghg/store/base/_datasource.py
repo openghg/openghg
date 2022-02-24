@@ -562,8 +562,11 @@ class Datasource:
         Returns:
             str: Daterange covered by this Datasource
         """
+        from openghg.util import create_daterange_str
+
         start, end = self.daterange()
-        return "".join([str(start), "_", str(end)])
+
+        return create_daterange_str(start=start, end=end)
 
     def search_metadata_old(
         self,
