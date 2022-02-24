@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.2.gc5dabbb.dirty documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.3.gfdbe2d5.dirty documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -396,11 +396,11 @@
 
 <div class="viewcode-block" id="get_flux"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_flux">[docs]</a><span class="k">def</span> <span class="nf">get_flux</span><span class="p">(</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">sources</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">time_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard&quot;</span><span class="p">,</span>
+    <span class="n">time_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FluxData</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The flux function reads in all flux files for the domain and species as an xarray Dataset.</span>
@@ -409,19 +409,13 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        species: Species name</span>
-<span class="sd">        sources: Source name</span>
+<span class="sd">        source: Source name</span>
 <span class="sd">        domain: Domain e.g. EUROPE</span>
 <span class="sd">        start_date: Start date</span>
 <span class="sd">        end_date: End date</span>
 <span class="sd">        time_resolution: One of [&quot;standard&quot;, &quot;high&quot;]</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        FluxData: FluxData object</span>
-
-<span class="sd">    TODO: Update this to output to a FluxData class?</span>
-<span class="sd">    TODO: Update inputs to just accept a string and extract one flux file at a time?</span>
-<span class="sd">    As it stands, this only extracts one flux at a time but is set up to be extended</span>
-<span class="sd">    to to extract multiple. So if this is removed from this function the functionality</span>
-<span class="sd">    itself would need to be wrapped up in another function call.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
     <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
@@ -434,7 +428,7 @@
 
     <span class="n">results</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-        <span class="n">source</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
         <span class="n">time_resolution</span><span class="o">=</span><span class="n">time_resolution</span><span class="p">,</span>
         <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
@@ -443,9 +437,8 @@
     <span class="p">)</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to find flux data for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">sources</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to find flux data for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="c1"># TODO - more than one emissions file (but see above)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">em_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
