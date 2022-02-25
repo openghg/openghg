@@ -75,6 +75,7 @@ class ModelScenario():
                  domain: Optional[str] = None,
                  model: Optional[str] = None,
                  metmodel: Optional[str] = None,
+                 source: Optional[str] = None,
                  sources: Optional[Union[str, Sequence]] = None,
                  start_date: Optional[Union[str, Timestamp]] = None,
                  end_date: Optional[Union[str, Timestamp]] = None,
@@ -153,6 +154,7 @@ class ModelScenario():
         # Add flux data (directly or through keywords)
         self.add_flux(species=species,
                       domain=domain,
+                      source=source,
                       sources=sources,
                       start_date=start_date,
                       end_date=end_date,
@@ -293,6 +295,7 @@ class ModelScenario():
     def add_flux(self,
                  species: Optional[str] = None,
                  domain: Optional[str] = None,
+                 source: Optional[str] = None,
                  sources: Optional[Union[str, Sequence]] = None,
                  start_date: Optional[Union[str, Timestamp]] = None,
                  end_date: Optional[Union[str, Timestamp]] = None,
@@ -312,12 +315,14 @@ class ModelScenario():
         if species and flux is None:
             flux = {}
 
-            if sources is None or isinstance(sources, str):
+            if sources is None and source is not None:
+                sources = [source]
+            elif sources is None or isinstance(sources, str):
                 sources = [sources]
 
-            for source in sources:
+            for name in sources:
                 flux_keywords_1 = {"species": species,
-                                   "source": source,
+                                   "source": name,
                                    "domain": domain}
 
                 # For CO2 we need additional emissions data before a start_date to
@@ -338,12 +343,12 @@ class ModelScenario():
                 flux_source = self._get_data(flux_keywords, input_type="flux")
                 # TODO: May need to update this check if flux_source is empty FluxData() object
                 if flux_source is not None:
-                    flux[source] = flux_source
+                    flux[name] = flux_source
 
         elif flux is not None:
             if not isinstance(flux, dict):
-                source = flux.metadata["source"]
-                flux = {source: flux}
+                name = flux.metadata["source"]
+                flux = {name: flux}
 
         # TODO: Make this so flux.anthro can be called etc. - link in some way
         if self.fluxes is not None:
@@ -1159,6 +1164,78 @@ class ModelScenario():
             self.scenario = combined_dataset
 
         return combined_dataset
+
+    def plot_timeseries(self) -> Any:
+        """
+        Plot the observation timeseries data.
+
+        Returns:
+            Plotly Figure
+
+            Interactive plotly graph created with observations
+        """
+        self._check_data_is_present(need="obs")
+        obs = cast(ObsData, self.obs)
+
+        fig = obs.plot_timeseries()  # Calling method on ObsData class
+
+        return fig
+
+    def plot_comparison(self,
+                        sources: Optional[Union[str, List]] = None,
+                        resample_to: str = "coarsest",
+                        platform: Optional[str] = None,
+                        cache: Optional[bool] = True,
+                        recalculate: Optional[bool] = False) -> Any:
+        """
+        Plot comparison between observation and modelled timeseries data.
+
+        Args:
+            sources: Sources to use for flux. All will be used and stacked if not specified.
+            resample_to: Resample option to use for averaging:
+                          - either one of ["coarsest", "obs", "footprint"] to match to the datasets
+                          - or using a valid pandas resample period e.g. "2H".
+                         Default = "coarsest".
+            platform: Observation platform used to decide whether to resample e.g. "site", "satellite".
+            cache: Cache this data after calculation. Default = True.
+            recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+
+        Returns:
+            Plotly Figure
+
+            Interactive plotly graph created with observation and modelled observation data.
+        """
+        # Only import plotly when we need to - not needed if not plotting.
+        import plotly.graph_objects as go
+
+        self._check_data_is_present(need=["obs", "footprint", "flux"])
+        obs = cast(ObsData, self.obs)
+
+        fig = obs.plot_timeseries()
+
+        modelled_obs = self.calc_modelled_obs(sources=sources,
+                                              resample_to=resample_to,
+                                              platform=platform,
+                                              cache=cache,
+                                              recalculate=recalculate)
+        x_data = modelled_obs["time"]
+        y_data = modelled_obs.data
+
+        species = self.species
+        if sources is None:
+            sources = self.flux_sources
+        elif isinstance(sources, str):
+            sources = [sources]
+
+        if sources is not None:
+            source_str = ", ".join(sources)
+            label = f"Modelled {species.upper()}: {source_str}"
+        else:
+            label = f"Modelled {species.upper()}"
+
+        fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=label))
+
+        return fig
 
 
 def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
