@@ -1,7 +1,7 @@
 """ Utility functions that are used by multiple modules
 
 """
-from typing import Dict, Tuple, Iterator
+from typing import Any, Dict, Tuple, Iterator
 from collections.abc import Iterable
 
 
@@ -48,7 +48,7 @@ def unanimous(seq: Dict) -> bool:
         return all(i == first for i in it)
 
 
-def pairwise(iterable: Iterable) -> Iterator[Tuple[str, str]]:
+def pairwise(iterable: Iterable) -> Iterator[Tuple[Any, Any]]:
     """Return a zip of an iterable where a is the iterable
     and b is the iterable advanced one step.
 

@@ -67,8 +67,6 @@ def get_obs_surface(
     if not obs_results:
         raise ValueError(f"Unable to find results for {species} at {site}")
 
-    # TODO - for some reason mypy doesn't pick up the ObsData being returned here, look into this
-    # GJ - 2021-07-19
     retrieved_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
     data = retrieved_data.data
 
@@ -89,6 +87,8 @@ def get_obs_surface(
         end_date_data = timestamp_tzaware(data.time[-1].values)
     except AttributeError:
         raise AttributeError("This dataset does not have a time attribute, unable to read date range")
+    except IndexError:
+        return ObsData(data=Dataset(), metadata={})
 
     if average is not None:
         # GJ - 2021-03-09
@@ -348,6 +348,7 @@ def get_footprint(
     # else:
     #     results = search(
     #         site=site,
+    #         domain=domain,
     #         domain=domain,
     #         height=height,
     #         start_date=start_date,

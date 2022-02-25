@@ -1,3 +1,4 @@
+from datetime import date
 from pandas import Timestamp, DatetimeIndex
 from typing import Dict, List, Tuple, Optional, Union
 
@@ -21,6 +22,7 @@ __all__ = [
     "sanitise_daterange",
     "check_nan",
     "check_date",
+    "first_last_dates",
 ]
 
 
@@ -126,6 +128,9 @@ def create_daterange_str(start: Union[str, Timestamp], end: Union[str, Timestamp
     start = timestamp_tzaware(start)
     end = timestamp_tzaware(end)
 
+    if start > end:
+        raise ValueError(f"Invalid daterange, start ({start}) > end ({end})")
+
     start = str(start).replace(" ", "-")
     end = str(end).replace(" ", "-")
 
@@ -209,21 +214,29 @@ def combine_dateranges(dateranges: List[str]) -> List[str]:
     return combined_strings
 
 
-def split_daterange_str(daterange_str: str) -> Tuple[Timestamp, Timestamp]:
+def split_daterange_str(
+    daterange_str: str, date_only: bool = False
+) -> Tuple[Union[Timestamp, date], Union[Timestamp, date]]:
     """Split a daterange string to the component start and end
     Timestamps
 
     Args:
-        daterange_str (str): Daterange string of the form
+        daterange_str: Daterange string of the form
+        date_only: Return only the date portion of the Timestamp, removing
+        the hours / seconds component
 
         2019-01-01T00:00:00_2019-12-31T00:00:00
     Returns:
-        tuple (Timestamp, Timestamp): Tuple of start, end pandas Timestamps
+        tuple (Timestamp / datetime.date, Timestamp / datetime.date): Tuple of start, end timestamps / dates
     """
     split = daterange_str.split("_")
 
     start = timestamp_tzaware(split[0])
     end = timestamp_tzaware(split[1])
+
+    if date_only:
+        start = start.date()
+        end = end.date()
 
     return start, end
 
@@ -295,7 +308,7 @@ def closest_daterange(to_compare: str, dateranges: Union[str, List[str]]) -> str
         return closest_daterange_end
 
 
-def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, dateranges: List) -> List[str]:
+def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, dateranges: List[str]) -> List[str]:
     """Given a start and end date and a list of dateranges find the gaps.
 
     For example given a list of dateranges
@@ -321,28 +334,37 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
     from pandas import Timedelta
     from openghg.util import pairwise
 
+    if not dateranges:
+        return []
+
     sorted_dateranges = sorted(dateranges)
 
-    # The difference between the start and end of the successived dateranges
-    range_gap = "1day"
+    # The difference between the start and end of the successive dateranges
+    range_gap = Timedelta("1h")
+    min_gap = Timedelta("30m")
+
     # First find the gap between the start and the end
-    start_first, end_first = split_daterange_str(sorted_dateranges[0])
+    start_first, _ = split_daterange_str(sorted_dateranges[0])
 
     gaps = []
     if start_search < start_first:
         gap_start = start_search
-        gap_end = start_first - Timedelta(range_gap)
-        gap = create_daterange_str(start=gap_start, end=gap_end)
-        gaps.append(gap)
+        gap_end = start_first - range_gap
+
+        if gap_end - gap_start > min_gap:
+            gap = create_daterange_str(start=gap_start, end=gap_end)
+            gaps.append(gap)
 
     # Then find the gap between the end
-    start_last, end_last = split_daterange_str(sorted_dateranges[-1])
+    _, end_last = split_daterange_str(sorted_dateranges[-1])
 
     if end_search > end_last:
         gap_end = end_search
-        gap_start = end_last + Timedelta(range_gap)
-        gap = create_daterange_str(start=gap_start, end=gap_end)
-        gaps.append(gap)
+        gap_start = end_last + range_gap
+
+        if gap_end - gap_start > min_gap:
+            gap = create_daterange_str(start=gap_start, end=gap_end)
+            gaps.append(gap)
 
     for a, b in pairwise(sorted_dateranges):
         start_a, end_a = split_daterange_str(a)
@@ -353,9 +375,10 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
             continue
 
         diff = start_b - end_a
-        if diff > Timedelta(range_gap) and diff.value > 0:
-            gap_start = end_a + Timedelta(range_gap)
-            gap_end = start_b - Timedelta(range_gap)
+
+        if diff > min_gap:
+            gap_start = end_a + range_gap
+            gap_end = start_b - range_gap
 
             gap = create_daterange_str(start=gap_start, end=gap_end)
             gaps.append(gap)
@@ -541,3 +564,29 @@ def check_nan(data: Union[int, float]) -> Union[str, float, int]:
         return "NA"
     else:
         return round(data, 3)
+
+
+def first_last_dates(keys: List) -> Tuple[Timestamp, Timestamp]:
+    """Find the first and last timestamp from a list of keys
+
+    Args:
+        keys: List of keys
+    Returns:
+        tuple: First and last timestamp
+    """
+
+    def sorting_key(s: str) -> str:
+        return s.split("/")[-1]
+
+    sorted_keys = sorted(keys, key=sorting_key)
+
+    first_daterange = sorted_keys[0].split("/")[-1]
+    first_date = first_daterange.split("_")[0]
+
+    last_daterange = sorted_keys[-1].split("/")[-1]
+    last_date = last_daterange.split("_")[-1]
+
+    first = timestamp_tzaware(first_date)
+    last = timestamp_tzaware(last_date)
+
+    return first, last

@@ -6,7 +6,10 @@ def test_search_and_download(process_crds):
     results = search(species="co2", site="hfd")
 
     keys = results.keys(site="hfd", species="co2", inlet="100m")
-    assert len(keys) == 6
+
+    # We don't have any ranked data
+    unranked_keys = keys["unranked"]
+    assert len(unranked_keys) == 6
 
     metadata = results.metadata(site="hfd", species="co2", inlet="100m")
 
