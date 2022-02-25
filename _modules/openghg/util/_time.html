@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._time &#8212; OpenGHG 0+untagged.3.gfdbe2d5.dirty documentation</title>
+    <title>openghg.util._time &#8212; OpenGHG 0+untagged.3.g39a98a5.dirty documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -167,7 +167,8 @@
               <div>
                 
   <h1>Source code for openghg.util._time</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">DatetimeIndex</span>
+<span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">DatetimeIndex</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -190,6 +191,7 @@
     <span class="s2">&quot;sanitise_daterange&quot;</span><span class="p">,</span>
     <span class="s2">&quot;check_nan&quot;</span><span class="p">,</span>
     <span class="s2">&quot;check_date&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;first_last_dates&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -295,6 +297,9 @@
     <span class="n">start</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
     <span class="n">end</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">end</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid daterange, start (</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s2">) &gt; end (</span><span class="si">{</span><span class="n">end</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
     <span class="n">start</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
     <span class="n">end</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">end</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
@@ -378,21 +383,29 @@
     <span class="k">return</span> <span class="n">combined_strings</span></div>
 
 
-<div class="viewcode-block" id="split_daterange_str"><a class="viewcode-back" href="../../../api/api_util.html#openghg.util.split_daterange_str">[docs]</a><span class="k">def</span> <span class="nf">split_daterange_str</span><span class="p">(</span><span class="n">daterange_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]:</span>
+<div class="viewcode-block" id="split_daterange_str"><a class="viewcode-back" href="../../../api/api_util.html#openghg.util.split_daterange_str">[docs]</a><span class="k">def</span> <span class="nf">split_daterange_str</span><span class="p">(</span>
+    <span class="n">daterange_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">date_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">date</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">date</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;Split a daterange string to the component start and end</span>
 <span class="sd">    Timestamps</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        daterange_str (str): Daterange string of the form</span>
+<span class="sd">        daterange_str: Daterange string of the form</span>
+<span class="sd">        date_only: Return only the date portion of the Timestamp, removing</span>
+<span class="sd">        the hours / seconds component</span>
 
 <span class="sd">        2019-01-01T00:00:00_2019-12-31T00:00:00</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        tuple (Timestamp, Timestamp): Tuple of start, end pandas Timestamps</span>
+<span class="sd">        tuple (Timestamp / datetime.date, Timestamp / datetime.date): Tuple of start, end timestamps / dates</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">split</span> <span class="o">=</span> <span class="n">daterange_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
 
     <span class="n">start</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">end</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">date_only</span><span class="p">:</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">start</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">end</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span></div>
 
@@ -464,7 +477,7 @@
         <span class="k">return</span> <span class="n">closest_daterange_end</span></div>
 
 
-<div class="viewcode-block" id="find_daterange_gaps"><a class="viewcode-back" href="../../../api/api_util.html#openghg.util.find_daterange_gaps">[docs]</a><span class="k">def</span> <span class="nf">find_daterange_gaps</span><span class="p">(</span><span class="n">start_search</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">end_search</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">dateranges</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="find_daterange_gaps"><a class="viewcode-back" href="../../../api/api_util.html#openghg.util.find_daterange_gaps">[docs]</a><span class="k">def</span> <span class="nf">find_daterange_gaps</span><span class="p">(</span><span class="n">start_search</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">end_search</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">dateranges</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Given a start and end date and a list of dateranges find the gaps.</span>
 
 <span class="sd">    For example given a list of dateranges</span>
@@ -490,28 +503,37 @@
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">pairwise</span>
 
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dateranges</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
     <span class="n">sorted_dateranges</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dateranges</span><span class="p">)</span>
 
-    <span class="c1"># The difference between the start and end of the successived dateranges</span>
-    <span class="n">range_gap</span> <span class="o">=</span> <span class="s2">&quot;1day&quot;</span>
+    <span class="c1"># The difference between the start and end of the successive dateranges</span>
+    <span class="n">range_gap</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="s2">&quot;1h&quot;</span><span class="p">)</span>
+    <span class="n">min_gap</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="s2">&quot;30m&quot;</span><span class="p">)</span>
+
     <span class="c1"># First find the gap between the start and the end</span>
-    <span class="n">start_first</span><span class="p">,</span> <span class="n">end_first</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">sorted_dateranges</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">start_first</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">sorted_dateranges</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
     <span class="n">gaps</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">start_search</span> <span class="o">&lt;</span> <span class="n">start_first</span><span class="p">:</span>
         <span class="n">gap_start</span> <span class="o">=</span> <span class="n">start_search</span>
-        <span class="n">gap_end</span> <span class="o">=</span> <span class="n">start_first</span> <span class="o">-</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">range_gap</span><span class="p">)</span>
-        <span class="n">gap</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">gap_start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">gap_end</span><span class="p">)</span>
-        <span class="n">gaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gap</span><span class="p">)</span>
+        <span class="n">gap_end</span> <span class="o">=</span> <span class="n">start_first</span> <span class="o">-</span> <span class="n">range_gap</span>
+
+        <span class="k">if</span> <span class="n">gap_end</span> <span class="o">-</span> <span class="n">gap_start</span> <span class="o">&gt;</span> <span class="n">min_gap</span><span class="p">:</span>
+            <span class="n">gap</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">gap_start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">gap_end</span><span class="p">)</span>
+            <span class="n">gaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gap</span><span class="p">)</span>
 
     <span class="c1"># Then find the gap between the end</span>
-    <span class="n">start_last</span><span class="p">,</span> <span class="n">end_last</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">sorted_dateranges</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">end_last</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">sorted_dateranges</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">end_search</span> <span class="o">&gt;</span> <span class="n">end_last</span><span class="p">:</span>
         <span class="n">gap_end</span> <span class="o">=</span> <span class="n">end_search</span>
-        <span class="n">gap_start</span> <span class="o">=</span> <span class="n">end_last</span> <span class="o">+</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">range_gap</span><span class="p">)</span>
-        <span class="n">gap</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">gap_start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">gap_end</span><span class="p">)</span>
-        <span class="n">gaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gap</span><span class="p">)</span>
+        <span class="n">gap_start</span> <span class="o">=</span> <span class="n">end_last</span> <span class="o">+</span> <span class="n">range_gap</span>
+
+        <span class="k">if</span> <span class="n">gap_end</span> <span class="o">-</span> <span class="n">gap_start</span> <span class="o">&gt;</span> <span class="n">min_gap</span><span class="p">:</span>
+            <span class="n">gap</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">gap_start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">gap_end</span><span class="p">)</span>
+            <span class="n">gaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gap</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">pairwise</span><span class="p">(</span><span class="n">sorted_dateranges</span><span class="p">):</span>
         <span class="n">start_a</span><span class="p">,</span> <span class="n">end_a</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
@@ -522,9 +544,10 @@
             <span class="k">continue</span>
 
         <span class="n">diff</span> <span class="o">=</span> <span class="n">start_b</span> <span class="o">-</span> <span class="n">end_a</span>
-        <span class="k">if</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">range_gap</span><span class="p">)</span> <span class="ow">and</span> <span class="n">diff</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">gap_start</span> <span class="o">=</span> <span class="n">end_a</span> <span class="o">+</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">range_gap</span><span class="p">)</span>
-            <span class="n">gap_end</span> <span class="o">=</span> <span class="n">start_b</span> <span class="o">-</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">range_gap</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="n">min_gap</span><span class="p">:</span>
+            <span class="n">gap_start</span> <span class="o">=</span> <span class="n">end_a</span> <span class="o">+</span> <span class="n">range_gap</span>
+            <span class="n">gap_end</span> <span class="o">=</span> <span class="n">start_b</span> <span class="o">-</span> <span class="n">range_gap</span>
 
             <span class="n">gap</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">gap_start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">gap_end</span><span class="p">)</span>
             <span class="n">gaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gap</span><span class="p">)</span>
@@ -710,6 +733,32 @@
         <span class="k">return</span> <span class="s2">&quot;NA&quot;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">first_last_dates</span><span class="p">(</span><span class="n">keys</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Find the first and last timestamp from a list of keys</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        keys: List of keys</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: First and last timestamp</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">sorting_key</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">sorted_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">sorting_key</span><span class="p">)</span>
+
+    <span class="n">first_daterange</span> <span class="o">=</span> <span class="n">sorted_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">first_date</span> <span class="o">=</span> <span class="n">first_daterange</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">last_daterange</span> <span class="o">=</span> <span class="n">sorted_keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">last_date</span> <span class="o">=</span> <span class="n">last_daterange</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">first</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">first_date</span><span class="p">)</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">last_date</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">first</span><span class="p">,</span> <span class="n">last</span>
 </pre></div>
 
               </div>
