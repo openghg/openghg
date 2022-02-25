@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._emissions &#8212; OpenGHG 0+untagged.2.g86a78e1.dirty documentation</title>
+    <title>openghg.store._emissions &#8212; OpenGHG 0+untagged.3.g2eedf19.dirty documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -223,6 +223,7 @@
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
             <span class="n">clean_string</span><span class="p">,</span>
             <span class="n">hash_file</span><span class="p">,</span>
+            <span class="n">pairwise</span><span class="p">,</span>
             <span class="n">timestamp_tzaware</span><span class="p">,</span>
             <span class="n">timestamp_now</span><span class="p">,</span>
         <span class="p">)</span>
@@ -266,8 +267,63 @@
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;author&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">author_name</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_now</span><span class="p">())</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">em_data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">em_data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+        <span class="c1"># As emissions files handle things slightly differently we need to check the time values </span>
+        <span class="c1"># more carefully.</span>
+        <span class="c1"># e.g. a flux / emissions file could contain e.g. monthly data and be labelled as 2012 but </span>
+        <span class="c1"># contain 12 time points labelled as 2012-01-01, 2012-02-01, etc.</span>
+        <span class="n">n_dates</span> <span class="o">=</span> <span class="n">em_data</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="c1"># This covers the whole year</span>
+        <span class="k">if</span> <span class="n">n_dates</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">year</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">em_data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">year</span>
+            <span class="n">year_start</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">-1-1-00:00:00&quot;</span><span class="p">)</span>
+            <span class="n">year_end</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">-12-31-23:59:59&quot;</span><span class="p">)</span>
+
+            <span class="n">start_date</span> <span class="o">=</span> <span class="n">year_start</span>
+            <span class="n">end_date</span> <span class="o">=</span> <span class="n">year_end</span>
+            <span class="n">freq</span> <span class="o">=</span> <span class="s2">&quot;annual&quot;</span>
+        <span class="c1"># We have values for each month / week</span>
+        <span class="k">elif</span> <span class="n">n_dates</span> <span class="o">==</span> <span class="mi">12</span><span class="p">:</span>
+            <span class="c1"># Check they&#39;re successive months</span>
+            <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">em_data</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">pairwise</span><span class="p">(</span><span class="n">timestamps</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">month</span> <span class="o">!=</span> <span class="n">b</span><span class="o">.</span><span class="n">month</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;We expect successive months for the data&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">timestamps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">year</span> <span class="o">!=</span> <span class="n">timestamps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">year</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;We expect a single year of data&quot;</span><span class="p">)</span>
+
+            <span class="n">year</span> <span class="o">=</span> <span class="n">timestamps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">year</span>
+
+            <span class="n">year_start</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">-1-1-00:00:00&quot;</span><span class="p">)</span>
+            <span class="n">year_end</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">-12-31-23:59:59&quot;</span><span class="p">)</span>
+
+            <span class="n">start_date</span> <span class="o">=</span> <span class="n">year_start</span>
+            <span class="n">end_date</span> <span class="o">=</span> <span class="n">year_end</span>
+            <span class="n">freq</span> <span class="o">=</span> <span class="s2">&quot;month&quot;</span>
+        <span class="c1"># Work run through the timestamps and check for gap between them ?</span>
+        <span class="c1"># Add something to metadata for this?</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">em_data</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+            <span class="n">timestamps</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+            <span class="n">frequency</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">pairwise</span><span class="p">(</span><span class="n">timestamps</span><span class="p">):</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">a</span>
+                <span class="n">frequency</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+
+            <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">freq</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">frequency</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">freq</span> <span class="o">=</span> <span class="s2">&quot;varies&quot;</span>
+
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
 
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">em_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">em_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
@@ -275,6 +331,7 @@
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">em_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
 
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;high&quot;</span> <span class="k">if</span> <span class="n">high_time_resolution</span> <span class="k">else</span> <span class="s2">&quot;standard&quot;</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;frequency&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">freq</span>
 
         <span class="k">if</span> <span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">period</span>

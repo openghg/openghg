@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.2.g86a78e1.dirty documentation</title>
+    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.3.g2eedf19.dirty documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -204,6 +204,7 @@
     <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">Dict</span> <span class="k">as</span> <span class="n">aDict</span>
     <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
     <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span> <span class="k">as</span> <span class="n">iter_chain</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span> <span class="k">as</span> <span class="n">pd_Timedelta</span>
 
     <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">ObsSurface</span><span class="p">,</span> <span class="n">Footprints</span><span class="p">,</span> <span class="n">Emissions</span><span class="p">,</span> <span class="n">EulerianModel</span>
     <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
@@ -213,7 +214,6 @@
         <span class="n">timestamp_epoch</span><span class="p">,</span>
         <span class="n">timestamp_tzaware</span><span class="p">,</span>
         <span class="n">clean_string</span><span class="p">,</span>
-        <span class="n">closest_daterange</span><span class="p">,</span>
         <span class="n">find_daterange_gaps</span><span class="p">,</span>
         <span class="n">split_daterange_str</span><span class="p">,</span>
         <span class="n">load_json</span><span class="p">,</span>
@@ -230,12 +230,12 @@
     <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_epoch</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span> <span class="o">+</span> <span class="n">pd_Timedelta</span><span class="p">(</span><span class="s2">&quot;1s&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_now</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span> <span class="o">-</span> <span class="n">pd_Timedelta</span><span class="p">(</span><span class="s2">&quot;1s&quot;</span><span class="p">)</span>
 
     <span class="n">kwargs_copy</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_date</span>
     <span class="n">kwargs_copy</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_date</span>
@@ -341,7 +341,9 @@
             <span class="n">species</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
             <span class="n">inlet</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
 
-            <span class="n">specific_sources</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">specific_keys</span>
+            <span class="c1"># Note that the keys here is just a list unlike the ranked keys dictionary</span>
+            <span class="c1"># which contains the dateranges covered.</span>
+            <span class="n">specific_sources</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">][</span><span class="s2">&quot;unranked&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">specific_keys</span>
             <span class="n">specific_sources</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
 
         <span class="k">return</span> <span class="n">SearchResults</span><span class="p">(</span><span class="n">results</span><span class="o">=</span><span class="n">specific_sources</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">ranked_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -401,9 +403,7 @@
     <span class="n">data_keys</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">highest_ranked</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">sp</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">species</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="c1"># data_keys[site][sp][&quot;keys&quot;] = []</span>
-
-            <span class="n">species_keys</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">species_keys</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">species_rank_data</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">species_metadata</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -416,21 +416,19 @@
                 <span class="n">metadata</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span>
                 <span class="n">inlet</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
 
-                <span class="n">keys</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">dr</span> <span class="ow">in</span> <span class="n">match_dateranges</span><span class="p">:</span>
-                    <span class="n">date_keys</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">keys_in_daterange_str</span><span class="p">(</span><span class="n">daterange</span><span class="o">=</span><span class="n">dr</span><span class="p">)</span>
+                    <span class="n">keys</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">keys_in_daterange_str</span><span class="p">(</span><span class="n">daterange</span><span class="o">=</span><span class="n">dr</span><span class="p">)</span>
 
-                    <span class="k">if</span> <span class="n">date_keys</span><span class="p">:</span>
-                        <span class="n">keys</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">date_keys</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">keys</span><span class="p">:</span>
                         <span class="c1"># We&#39;ll add this to the metadata in the search results we return at the end</span>
                         <span class="n">species_rank_data</span><span class="p">[</span><span class="n">dr</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
+                        <span class="n">species_keys</span><span class="p">[</span><span class="n">dr</span><span class="p">]</span> <span class="o">=</span> <span class="n">keys</span>
 
-                <span class="n">species_keys</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
                 <span class="n">species_metadata</span><span class="p">[</span><span class="n">inlet</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
 
             <span class="c1"># Only create the dictionary keys if we have some data keys</span>
             <span class="k">if</span> <span class="n">species_keys</span><span class="p">:</span>
-                <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species_keys</span>
+                <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">][</span><span class="s2">&quot;ranked&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species_keys</span>
                 <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species_rank_data</span>
                 <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species_metadata</span>
             <span class="k">else</span><span class="p">:</span>
@@ -442,33 +440,29 @@
 
             <span class="c1"># Get the dateranges that are covered by ranking information</span>
             <span class="n">daterange_strs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">iter_chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">([</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;dateranges&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;matching&quot;</span><span class="p">]]))</span>
-            <span class="c1"># Find the gaps in the ranking coverage</span>
+            <span class="c1"># # Find the gaps in the ranking coverage</span>
             <span class="n">gap_dateranges</span> <span class="o">=</span> <span class="n">find_daterange_gaps</span><span class="p">(</span>
                 <span class="n">start_search</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_search</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span> <span class="n">dateranges</span><span class="o">=</span><span class="n">daterange_strs</span>
             <span class="p">)</span>
 
-            <span class="c1"># We want the dateranges and inlets for those dateranges</span>
-            <span class="n">inlet_dateranges</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span>
-            <span class="c1"># These are the dateranges for which we have ranking information for this site and species</span>
-            <span class="n">ranked_dateranges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="k">def</span> <span class="nf">max_key</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">))</span>
 
+            <span class="c1"># Here just select the highest inlet that&#39;s been ranked and use that</span>
+            <span class="n">highest_inlet</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())),</span> <span class="n">key</span><span class="o">=</span><span class="n">max_key</span><span class="p">)</span>
+
+            <span class="n">inlet_metadata</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span><span class="n">highest_inlet</span><span class="p">]</span>
+            <span class="n">inlet_instrument</span> <span class="o">=</span> <span class="n">inlet_metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
+            <span class="n">inlet_sampling_period</span> <span class="o">=</span> <span class="n">inlet_metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span>
+
+            <span class="n">unranked_keys</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">gap_daterange</span> <span class="ow">in</span> <span class="n">gap_dateranges</span><span class="p">:</span>
-                <span class="c1"># We want to select the inlet that&#39;s ranked for dates closest to the ones we have here</span>
-                <span class="n">closest_dr</span> <span class="o">=</span> <span class="n">closest_daterange</span><span class="p">(</span><span class="n">to_compare</span><span class="o">=</span><span class="n">gap_daterange</span><span class="p">,</span> <span class="n">dateranges</span><span class="o">=</span><span class="n">ranked_dateranges</span><span class="p">)</span>
-
                 <span class="n">gap_start</span><span class="p">,</span> <span class="n">gap_end</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">gap_daterange</span><span class="p">)</span>
-                <span class="c1"># Find the closest ranked inlet by date</span>
-                <span class="n">chosen_inlet</span> <span class="o">=</span> <span class="n">inlet_dateranges</span><span class="p">[</span><span class="n">closest_dr</span><span class="p">]</span>
 
-                <span class="n">inlet_metadata</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span><span class="n">chosen_inlet</span><span class="p">]</span>
-                <span class="n">inlet_instrument</span> <span class="o">=</span> <span class="n">inlet_metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
-                <span class="n">inlet_sampling_period</span> <span class="o">=</span> <span class="n">inlet_metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span>
-
-                <span class="c1"># Then we want to retrieve the correct metadata for those inlets</span>
                 <span class="n">results</span><span class="p">:</span> <span class="n">SearchResults</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span>
                     <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
                     <span class="n">species</span><span class="o">=</span><span class="n">sp</span><span class="p">,</span>
-                    <span class="n">inlet</span><span class="o">=</span><span class="n">chosen_inlet</span><span class="p">,</span>
+                    <span class="n">inlet</span><span class="o">=</span><span class="n">highest_inlet</span><span class="p">,</span>
                     <span class="n">instrument</span><span class="o">=</span><span class="n">inlet_instrument</span><span class="p">,</span>
                     <span class="n">sampling_period</span><span class="o">=</span><span class="n">inlet_sampling_period</span><span class="p">,</span>
                     <span class="n">start_date</span><span class="o">=</span><span class="n">gap_start</span><span class="p">,</span>
@@ -479,12 +473,12 @@
                     <span class="k">continue</span>
 
                 <span class="c1"># Retrieve the data keys</span>
-                <span class="n">inlet_data_keys</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">sp</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">chosen_inlet</span><span class="p">)</span>
+                <span class="n">inlet_data_keys</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">sp</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">highest_inlet</span><span class="p">)[</span><span class="s2">&quot;unranked&quot;</span><span class="p">]</span>
 
-                <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">inlet_data_keys</span><span class="p">)</span>
+                <span class="n">unranked_keys</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">inlet_data_keys</span><span class="p">)</span>
 
-            <span class="c1"># Remove any duplicate keys</span>
-            <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]))</span>
+            <span class="c1"># If we&#39;ve got keys that overlap two dateranges we&#39;ll get duplicates, remove those here</span>
+            <span class="n">data_keys</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">sp</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">][</span><span class="s2">&quot;unranked&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">unranked_keys</span><span class="p">))</span>
 
     <span class="c1"># TODO - create a stub for addict</span>
     <span class="n">dict_data_keys</span> <span class="o">=</span> <span class="n">data_keys</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>  <span class="c1"># type: ignore</span>

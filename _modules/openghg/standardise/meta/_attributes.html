@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.meta._attributes &#8212; OpenGHG 0+untagged.2.g86a78e1.dirty documentation</title>
+    <title>openghg.standardise.meta._attributes &#8212; OpenGHG 0+untagged.3.g2eedf19.dirty documentation</title>
     
     <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -444,16 +444,6 @@
             <span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="s2">&quot;GC peak integration method (by height or by area). Does not indicate data quality&quot;</span><span class="p">,</span>
         <span class="p">}</span>
 
-    <span class="c1"># Set time encoding</span>
-    <span class="c1"># Check if there are duplicate time stamps</span>
-
-    <span class="c1"># I feel there should be a more pandas way of doing this</span>
-    <span class="c1"># but xarray doesn&#39;t currently have a duplicates method</span>
-    <span class="c1"># See this https://github.com/pydata/xarray/issues/2108</span>
-
-    <span class="c1"># if len(set(ds.time.values)) &lt; len(ds.time.values):</span>
-    <span class="c1"># if len(np_unique(ds.time.values)) &lt; len(ds.time.values):</span>
-    <span class="c1">#     print(&quot;WARNING. Duplicate time stamps&quot;)</span>
     <span class="n">first_year</span> <span class="o">=</span> <span class="n">pd_Timestamp</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span><span class="o">.</span><span class="n">year</span>
 
     <span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;seconds since </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">first_year</span><span class="p">)</span><span class="si">}</span><span class="s2">-01-01 00:00:00&quot;</span><span class="p">}</span>
