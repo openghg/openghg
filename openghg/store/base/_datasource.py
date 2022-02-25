@@ -106,13 +106,13 @@ class Datasource:
         if data_type == "timeseries":
             return self.add_timeseries_data(data=data)
         elif data_type == "footprints":
-            return self.add_footprint_data(data=data)
+            return self.add_footprint_data(data=data, metadata=metadata)
         elif data_type == "emissions":
-            return self.add_emissions_data(data=data)
+            return self.add_emissions_data(data=data, metadata=metadata)
         elif data_type == "met":
             raise NotImplementedError()
         elif data_type == "eulerian_model":
-            return self.add_eulerian_model_data(data=data)
+            return self.add_eulerian_model_data(data=data, metadata=metadata)
 
     def add_timeseries_data(self, data: Dataset) -> None:
         """Add timeseries data to this Datasource
@@ -172,7 +172,7 @@ class Datasource:
         lowercased: Dict = to_lowercase(metadata)
         self._metadata.update(lowercased)
 
-    def add_emissions_data(self, data: Dataset) -> None:
+    def add_emissions_data(self, data: Dataset, metadata: Dict) -> None:
         """Add flux data to this Datasource
 
         Args:
@@ -181,9 +181,9 @@ class Datasource:
         Returns:
             None
         """
-        self.add_field_data(data=data, data_type="emissions")
+        self.add_field_data(data=data, metadata=metadata, data_type="emissions")
 
-    def add_footprint_data(self, data: Dataset) -> None:
+    def add_footprint_data(self, data: Dataset, metadata: Dict) -> None:
         """Add footprints data to this Datasource
 
         Args:
@@ -192,9 +192,9 @@ class Datasource:
         Returns:
             None
         """
-        self.add_field_data(data=data, data_type="footprints")
+        self.add_field_data(data=data, metadata=metadata, data_type="footprints")
 
-    def add_field_data(self, data: Dataset, data_type: str) -> None:
+    def add_field_data(self, data: Dataset, metadata: Dict, data_type: str) -> None:
         """Add footprints data to this Datasource
 
         TODO - unsure if add_field_data is the best name for this function
@@ -207,13 +207,20 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.util import daterange_overlap
+        from openghg.util import daterange_overlap, create_daterange_str
 
         # Use a dictionary keyed with the daterange covered by each segment of data
         new_data = {}
         # This daterange string covers the whole of the Dataset
         # For the moment we're not going to chunk footprints
-        daterange_str = self.get_dataset_daterange_str(dataset=data)
+
+        # As data is stored diffrently for footprint / emissions files we'll
+        # take the daterange from the metadata
+        start_date = metadata["start_date"]
+        end_date = metadata["end_date"]
+
+        daterange_str = create_daterange_str(start=start_date, end=end_date)
+
         new_data[daterange_str] = data
 
         if self._data:
@@ -239,7 +246,7 @@ class Datasource:
         self.add_metadata_key(key="data_type", value=data_type)
         self.update_daterange()
 
-    def add_eulerian_model_data(self, data: Dataset) -> None:
+    def add_eulerian_model_data(self, data: Dataset, metadata: Dict) -> None:
         """Add Eulerian model data to this Datasource
 
         Args:
@@ -248,7 +255,7 @@ class Datasource:
         Returns:
             None
         """
-        self.add_field_data(data=data, data_type="eulerian_model")
+        self.add_field_data(data=data, metadata=metadata, data_type="eulerian_model")
 
     def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
         """Returns the daterange for the passed DataFrame
@@ -540,8 +547,8 @@ class Datasource:
         start, _ = split_daterange_str(daterange_str=date_keys[0])
         _, end = split_daterange_str(daterange_str=date_keys[-1])
 
-        self._start_date = start
-        self._end_date = end
+        self._start_date = start  # type: ignore
+        self._end_date = end  # type: ignore
 
     def daterange(self) -> Tuple[Timestamp, Timestamp]:
         """Get the daterange the data in this Datasource covers as tuple
@@ -562,8 +569,11 @@ class Datasource:
         Returns:
             str: Daterange covered by this Datasource
         """
+        from openghg.util import create_daterange_str
+
         start, end = self.daterange()
-        return "".join([str(start), "_", str(end)])
+
+        return create_daterange_str(start=start, end=end)
 
     def search_metadata_old(
         self,
