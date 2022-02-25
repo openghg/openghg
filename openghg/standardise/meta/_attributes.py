@@ -275,16 +275,6 @@ def get_attributes(
             "comment": "GC peak integration method (by height or by area). Does not indicate data quality",
         }
 
-    # Set time encoding
-    # Check if there are duplicate time stamps
-
-    # I feel there should be a more pandas way of doing this
-    # but xarray doesn't currently have a duplicates method
-    # See this https://github.com/pydata/xarray/issues/2108
-
-    # if len(set(ds.time.values)) < len(ds.time.values):
-    # if len(np_unique(ds.time.values)) < len(ds.time.values):
-    #     print("WARNING. Duplicate time stamps")
     first_year = pd_Timestamp(str(ds.time[0].values)).year
 
     ds.time.encoding = {"units": f"seconds since {str(first_year)}-01-01 00:00:00"}
