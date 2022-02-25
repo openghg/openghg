@@ -9,9 +9,9 @@ def test_set_rank(process_crds):
     results = r.raw()
 
     expected_results = {
-        "248m": {"rank_data": "NA", "data_range": "2014-01-30T11:12:30_2020-12-01T22:31:30"},
-        "42m": {"rank_data": "NA", "data_range": "2014-01-30T11:12:30_2020-12-01T22:31:30"},
-        "108m": {"rank_data": "NA", "data_range": "2014-01-30T11:12:30_2020-12-01T22:31:30"},
+        "248m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
+        "42m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
+        "108m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
     }
 
     assert results == expected_results

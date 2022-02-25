@@ -229,12 +229,10 @@ def split_daterange_str(
     Returns:
         tuple (Timestamp / datetime.date, Timestamp / datetime.date): Tuple of start, end timestamps / dates
     """
-    from pandas import Timestamp
-
     split = daterange_str.split("_")
 
-    start = Timestamp(split[0], tz="UTC")
-    end = Timestamp(split[1], tz="UTC")
+    start = timestamp_tzaware(split[0])
+    end = timestamp_tzaware(split[1])
 
     if date_only:
         start = start.date()
