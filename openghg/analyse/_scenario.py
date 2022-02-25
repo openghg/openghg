@@ -224,7 +224,7 @@ class ModelScenario():
         from openghg.util import clean_string
 
         # Search for obs data based on keywords
-        if site and obs is None:
+        if site is not None and obs is None:
             site = clean_string(site)
             # search for obs based on suitable keywords - site, species, inlet
             obs_keywords = {"site": site,
@@ -260,7 +260,7 @@ class ModelScenario():
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs), model, metmodel
-        if site and footprint is None:
+        if site is not None and footprint is None:
             site = clean_string(site)
             if inlet is None and self.obs is not None:
                 inlet = self.obs.metadata["inlet"]
@@ -309,7 +309,7 @@ class ModelScenario():
                 if species != current_species:
                     raise ValueError(f"New data must match current species {current_species} in ModelScenario. Input value: {species}")
 
-        if species and flux is None:
+        if species is not None and flux is None:
             flux = {}
 
             if sources is None or isinstance(sources, str):
@@ -360,7 +360,7 @@ class ModelScenario():
 
             self.flux_sources = list(self.fluxes.keys())
 
-    def _check_data_is_present(self, need: Union[str, Sequence] = ["obs", "footprint"]) -> None:
+    def _check_data_is_present(self, need: Optional[Union[str, Sequence]] = None) -> None:
         """
         Check whether correct data types have been included. This should
         be used by functions to check whether they can perform the requested
@@ -375,7 +375,9 @@ class ModelScenario():
 
             Raises ValueError is necessary data is missing.
         """
-        if isinstance(need, str):
+        if need is None:
+            need = ["obs", "footprint"]
+        elif isinstance(need, str):
             need = [need]
 
         need = ["fluxes" if value == "flux" else value for value in need]  # Make sure attributes match
@@ -557,8 +559,8 @@ class ModelScenario():
     def combine_obs_footprint(self,
                               resample_to: str = "coarsest",
                               platform: Optional[str] = None,
-                              cache: Optional[bool] = True,
-                              recalculate: Optional[bool] = False) -> Dataset:
+                              cache: bool = True,
+                              recalculate: bool = False) -> Dataset:
         """
         Combine observation and footprint data so these are on the same time
         axis. This will both slice and resample the data to align this axis.
@@ -612,7 +614,7 @@ class ModelScenario():
         except AttributeError:
             raise AttributeError("Unable to read mf attribute from observation data.")
 
-        if units:
+        if units is not None:
             combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset["fp"].data / units))})
             if self.species == "co2":
                 combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes / units))})
@@ -719,8 +721,8 @@ class ModelScenario():
                           sources: Optional[Union[str, List]] = None,
                           resample_to: str = "coarsest",
                           platform: Optional[str] = None,
-                          cache: Optional[bool] = True,
-                          recalculate: Optional[bool] = False) -> DataArray:
+                          cache: bool = True,
+                          recalculate: bool = False) -> DataArray:
         """
         Calculate the modelled observation points based on site footprint and fluxes.
 
@@ -798,8 +800,8 @@ class ModelScenario():
 
     def _calc_modelled_obs_integrated(self,
                                       sources: Optional[Union[str, List]] = None,
-                                      output_TS: Optional[bool] = True,
-                                      output_fpXflux: Optional[bool] = False,
+                                      output_TS: bool = True,
+                                      output_fpXflux: bool = False,
                                       ) -> Any:
         """
         Calculate modelled mole fraction timeseries using integrated footprints data.
@@ -844,8 +846,8 @@ class ModelScenario():
     def _calc_modelled_obs_HiTRes(self,
                                   sources: Optional[Union[str, List]] = None,
                                   averaging: Optional[str] = None,
-                                  output_TS: Optional[bool] = True,
-                                  output_fpXflux: Optional[bool] = False,
+                                  output_TS: bool = True,
+                                  output_fpXflux: bool = False,
                                   ) -> Any:
         """
         Calculate modelled mole fraction timeseries using high time resolution
@@ -1153,7 +1155,8 @@ class ModelScenario():
 
         if calc_bc:
             # TODO: Add this in when BoundaryConditions have been incorporated
-            pass
+            print("WARNING: calc_bc keyword has not been used to create output")
+            print(" BoundaryConditions have not been implemented yet.")
 
         if cache:
             self.scenario = combined_dataset
@@ -1198,7 +1201,7 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 def combine_datasets(dataset_A: Dataset, 
                      dataset_B: Dataset, 
-                     method: Optional[str] = "ffill", 
+                     method: str = "ffill", 
                      tolerance: Optional[float] = None) -> Dataset:
     """
     Merges two datasets and re-indexes to the first dataset.
