@@ -10,7 +10,7 @@ from helpers import get_datapath
 
 @pytest.fixture(scope="session", autouse=True)
 def load_CRDS():
-    get_local_bucket(empty=True)
+    get_local_bucket()
 
     tac_100m = get_datapath("tac.picarro.1minute.100m.min.dat", data_type="CRDS")
     hfd_50m = get_datapath("hfd.picarro.1minute.50m.min.dat", data_type="CRDS")
@@ -39,9 +39,9 @@ def test_retrieve_complex_ranked():
     rank = rank_sources(site="bsd", species="co")
 
     expected_res = {
-        "42m": {"rank_data": "NA", "data_range": "2014-01-30 11:12:30+00:00_2020-12-01 22:31:30+00:00"},
-        "108m": {"rank_data": "NA", "data_range": "2014-01-30 11:12:30+00:00_2020-12-01 22:31:30+00:00"},
-        "248m": {"rank_data": "NA", "data_range": "2014-01-30 11:12:30+00:00_2020-12-01 22:31:30+00:00"},
+        "42m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
+        "108m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
+        "248m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
     }
 
     assert rank.raw() == expected_res
@@ -60,18 +60,18 @@ def test_retrieve_complex_ranked():
                 "2014-01-01-00:00:00+00:00_2015-03-01-00:00:00+00:00": 1,
                 "2016-08-02-00:00:00+00:00_2017-03-01-00:00:00+00:00": 1,
             },
-            "data_range": "2014-01-30 11:12:30+00:00_2020-12-01 22:31:30+00:00",
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
         },
         "108m": {
             "rank_data": {
                 "2015-03-02-00:00:00+00:00_2016-08-01-00:00:00+00:00": 1,
                 "2019-03-02-00:00:00+00:00_2021-12-01-00:00:00+00:00": 1,
             },
-            "data_range": "2014-01-30 11:12:30+00:00_2020-12-01 22:31:30+00:00",
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
         },
         "248m": {
             "rank_data": {"2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": 1},
-            "data_range": "2014-01-30 11:12:30+00:00_2020-12-01 22:31:30+00:00",
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
         },
     }
 
@@ -87,9 +87,8 @@ def test_retrieve_complex_ranked():
         "2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": "248m",
     }
 
-    
     data = search_res.retrieve(site="bsd", species="co")
-    
+
     assert data.metadata["rank_metadata"] == expected_rankings
 
     measurement_data = data.data
