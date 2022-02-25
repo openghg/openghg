@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Exporting &#8212; OpenGHG 0+untagged.3.g39a98a5.dirty documentation</title>
+    <title>Exporting &#8212; OpenGHG 0+untagged.2.g86a78e1.dirty documentation</title>
     
     <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -557,23 +557,21 @@ for use in searches and Datasource interactions</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.split_daterange_str">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">split_daterange_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#split_daterange_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.split_daterange_str" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">split_daterange_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#split_daterange_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.split_daterange_str" title="Permalink to this definition">¶</a></dt>
 <dd><p>Split a daterange string to the component start and end
 Timestamps</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>daterange_str</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Daterange string of the form</p></li>
-<li><p><strong>date_only</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Return only the date portion of the Timestamp, removing</p></li>
-<li><p><strong>component</strong> (<em>the hours / seconds</em>) – </p></li>
+<li><p><strong>daterange_str</strong> (<em>str</em>) – Daterange string of the form</p></li>
 <li><p><strong>2019-01-01T00</strong> – 00:00_2019-12-31T00:00:00</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Tuple of start, end timestamps / dates</p>
+<dd class="field-even"><p>Tuple of start, end pandas Timestamps</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple (Timestamp / datetime.date, Timestamp / datetime.date)</p>
+<dd class="field-odd"><p>tuple (Timestamp, Timestamp)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -634,7 +632,7 @@ end = timestamp_tzaware(“2019-09-01”)</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>start_search</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>) – Start timestamp</p></li>
 <li><p><strong>end_search</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>) – End timestamp</p></li>
-<li><p><strong>dateranges</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – List of daterange strings</p></li>
+<li><p><strong>dateranges</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>) – List of daterange strings</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
