@@ -26,8 +26,6 @@ def get_flux_datapath(filename):
 
 # @pytest.fixture()
 def co2_setup():
-    get_local_bucket(empty=True)
-
     data_type = "CRDS"
 
     tac_file = get_datapath(filename="tac.picarro.hourly.100m.test.dat", data_type=data_type)

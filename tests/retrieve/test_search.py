@@ -98,8 +98,11 @@ def test_unranked_location_search():
     tac_co2_keys = results.keys(site="tac", species="co2", inlet="100m")
     tac_ch4_keys = results.keys(site="tac", species="co2", inlet="100m")
 
-    assert len(tac_co2_keys) == 4
-    assert len(tac_ch4_keys) == 4
+    assert "ranked" not in tac_co2_keys
+    assert "ranked" not in tac_ch4_keys
+
+    assert len(tac_co2_keys["unranked"]) == 4
+    assert len(tac_ch4_keys["unranked"]) == 4
 
     with pytest.raises(ValueError):
         results.keys(site="bsd", species="co2")
@@ -142,7 +145,9 @@ def test_unranked_search_datetimes():
     )
 
     data_keys = results.keys(site="bsd", species="co2", inlet="248m")
-    assert len(data_keys) == 7
+
+    assert "ranked" not in data_keys
+    assert len(data_keys["unranked"]) == 7
 
 
 def test_search_find_any_unranked():
@@ -193,11 +198,13 @@ def test_ranked_bsd_search():
 
     raw_result = result.raw()
 
+    print(raw_result)
+
     expected_rank_metadata = {
-        "2015-01-01-00:00:00+00:00_2015-11-01-00:00:00+00:00": "248m",
-        "2014-09-02-00:00:00+00:00_2014-11-01-00:00:00+00:00": "108m",
-        "2016-09-02-00:00:00+00:00_2018-11-01-00:00:00+00:00": "108m",
-        "2019-01-02-00:00:00+00:00_2021-01-01-00:00:00+00:00": "42m",
+        "2014-01-30-00:00:00+00:00_2015-01-01-00:00:00+00:00": "248m",
+        "2016-04-01-00:00:00+00:00_2017-11-01-00:00:00+00:00": "248m",
+        "2015-01-02-00:00:00+00:00_2015-11-01-00:00:00+00:00": "108m",
+        "2019-01-01-00:00:00+00:00_2021-01-01-00:00:00+00:00": "42m",
     }
 
     assert expected_rank_metadata == raw_result["bsd"]["ch4"]["rank_metadata"]
@@ -217,7 +224,7 @@ def test_ranked_bsd_search():
     assert ch4_data["ch4"][-1] == pytest.approx(1955.93)
     assert ch4_data["ch4_variability"][0] == 0.79
     assert ch4_data["ch4_variability"][-1] == 0.232
-    assert len(ch4_data.time) == 196
+    assert len(ch4_data.time) == 140
 
 
 # @pytest.mark.skip(reason="Needs update for ranking search")

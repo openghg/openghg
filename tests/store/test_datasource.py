@@ -178,9 +178,9 @@ def test_save(mock_uuid2):
 
 
 def test_save_footprint():
-    bucket = get_local_bucket(empty=True)
+    bucket = get_local_bucket()
 
-    metadata = {"test": "testing123"}
+    metadata = {"test": "testing123", "start_date": "2013-06-02", "end_date": "2013-06-30"}
 
     dir_path = os.path.dirname(__file__)
     test_data = "../data/emissions"
@@ -329,7 +329,7 @@ def test_load_dataset():
 
     ds = xr.load_dataset(filepath)
 
-    metadata = {"some": "metadata"}
+    metadata = {"test": "testing123", "start_date": "2013-06-02", "end_date": "2013-06-30"}
 
     d = Datasource()
 

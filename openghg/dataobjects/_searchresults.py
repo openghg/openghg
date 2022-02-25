@@ -1,11 +1,16 @@
-from addict import Dict as aDict
 from dataclasses import dataclass
-from typing import Dict, Iterator, List, Optional, Union, TypeVar, Type
+from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
 
+from addict import Dict as aDict
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
-from openghg.util import clean_string
-
+from openghg.util import (
+    clean_string,
+    find_daterange_gaps,
+    first_last_dates,
+    split_daterange_str,
+    create_daterange_str,
+)
 
 __all__ = ["SearchResults"]
 
@@ -270,6 +275,8 @@ class SearchResults:
         Returns:
             ObsData: ObsData object
         """
+        from xarray import concat
+
         if self.ranked_data:
             specific_source = self.results[site][species]
         else:
@@ -299,11 +306,89 @@ class SearchResults:
 
             # data = open_dataset(response_data[key])
         else:
-            data = recombine_datasets(data_keys, sort=True)
+            if not self.ranked_data:
+                keys = data_keys["unranked"]
+                final_dataset = recombine_datasets(keys, sort=True)
+            else:
+                dataset_slices = []
+
+                inlet_ranges = specific_source["rank_metadata"]
+
+                metadata["rank_metadata"] = {}
+
+                ranked_keys = data_keys["ranked"]
+                ranked_slices = []
+
+                inlets = set()
+
+                for daterange, keys in ranked_keys.items():
+                    data_slice = recombine_datasets(keys=keys, sort=True, elevate_inlet=True)
+
+                    slice_start, slice_end = split_daterange_str(daterange_str=daterange, date_only=True)
+
+                    # We convert to str here as xarray has some weird behaviour that means
+                    # "2018-01-01" - "2018-06-01"
+                    # gets treated differently to
+                    # datetime.date(2018, 1, 1) - datetime.date(2018, 6, 1)
+                    ranked_slice = data_slice.sel(time=slice(str(slice_start), str(slice_end)))
+
+                    if ranked_slice.time.size > 0:
+                        inlet = inlet_ranges[daterange]
+                        inlets.add(inlet)
+
+                        ranked_slices.append(ranked_slice)
+
+                    ranked_metadata = specific_source["rank_metadata"]
+                    metadata["rank_metadata"]["ranked"] = ranked_metadata
+
+                dataset_slices.extend(ranked_slices)
+
+                unranked_keys = data_keys["unranked"]
+
+                if unranked_keys:
+                    unranked_data = recombine_datasets(keys=unranked_keys, sort=True, elevate_inlet=True)
+
+                    first_date, last_date = first_last_dates(keys=unranked_keys)
+
+                    ranked_dateranges = list(ranked_keys.keys())
+                    unranked_dateranges = find_daterange_gaps(
+                        start_search=first_date, end_search=last_date, dateranges=ranked_dateranges
+                    )
+
+                    unranked_metadata = {}
+                    if unranked_dateranges:
+                        unranked_slices = []
+                        for dr in unranked_dateranges:
+                            slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
+                            unranked_slice = unranked_data.sel(time=slice(str(slice_start), str(slice_end)))
+
+                            if unranked_slice.time.size > 0:
+                                inlet = unranked_slice["inlet"].values[0]
+                                inlets.add(inlet)
+                                unranked_metadata[dr] = inlet
+                                unranked_slices.append(unranked_slice)
+
+                        dataset_slices.extend(unranked_slices)
+                    else:
+                        daterange_str = create_daterange_str(start=first_date, end=last_date)
+                        inlet = unranked_data["inlet"].values[0]
+                        inlets.add(inlet)
+                        unranked_metadata[daterange_str] = inlet
+
+                        dataset_slices.extend(unranked_data)
+
+                    metadata["rank_metadata"]["unranked"] = unranked_metadata
+
+                final_dataset = concat(objs=dataset_slices, dim="time").sortby("time")
+
+                if len(inlets) == 1:
+                    inlet_tag = str(inlets.pop())
+                else:
+                    inlet_tag = "multiple"
+
+                # Update the attributes for single / multiple inlet heights
+                final_dataset.attrs["inlet"] = inlet_tag
 
         metadata = specific_source["metadata"]
 
-        if self.ranked_data:
-            metadata["rank_metadata"] = specific_source["rank_metadata"]
-
-        return ObsData(data=data, metadata=metadata)
+        return ObsData(data=final_dataset, metadata=metadata)
