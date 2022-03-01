@@ -335,6 +335,16 @@
     "short_name": "gauge ferry",
     "long_name": "gauge ferry uk"
   },
+  "GCI01": { "short_name": "monroe", "long_name": "louisana united states" },
+  "GCI02": {
+    "short_name": "grenada",
+    "long_name": "mississippi united states"
+  },
+  "GCI03": { "short_name": "magee", "long_name": "mississippi united states" },
+  "GCI04": {
+    "short_name": "millerville",
+    "long_name": "alabama united states"
+  },
   "GLA": {
     "short_name": "glatton",
     "long_name": "glatton uk"

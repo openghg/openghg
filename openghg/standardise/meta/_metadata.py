@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional
 from copy import deepcopy
+import math
+from openghg.util import is_number
 
 
 def surface_standardise(
@@ -25,8 +27,16 @@ def surface_standardise(
     for key, value in metadata.items():
         try:
             attr_value = attributes[key]
-            if str(value).lower() != str(attr_value).lower():
-                raise ValueError(f"Metadata mismatch, metadata: {value} - attributes: {attr_value}")
+
+            # This should mainly be used for lat/long
+            relative_tolerance = 1e-4
+
+            if is_number(attr_value):
+                if not math.isclose(float(attr_value), float(value), rel_tol=relative_tolerance):
+                    raise ValueError(f"Value not within tolerance, metadata: {value} - attributes: {attr_value}")
+            else:
+                if str(value).lower() != str(attr_value).lower():
+                    raise ValueError(f"Metadata mismatch, metadata: {value} - attributes: {attr_value}")
         except KeyError:
             # Key wasn't in attributes for comparison
             pass
@@ -47,6 +57,7 @@ def surface_standardise(
         "station_height_masl",
         "inlet_height_magl",
     ]
+
     if keys_to_add is None:
         keys_to_add = default_keys_to_add
 
