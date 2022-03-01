@@ -29,7 +29,7 @@ def surface_standardise(
             attr_value = attributes[key]
 
             # This should mainly be used for lat/long
-            relative_tolerance = 1e-4
+            relative_tolerance = 1e-3
 
             if is_number(attr_value):
                 if not math.isclose(float(attr_value), float(value), rel_tol=relative_tolerance):

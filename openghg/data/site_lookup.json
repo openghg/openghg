@@ -271,6 +271,10 @@
     "short_name": "dongsha island",
     "long_name": "dongsha island taiwan"
   },
+  "DVV": {
+    "short_name": "danville",
+    "long_name": "danville virgina"
+  },
   "EGB": {
     "short_name": "egbert",
     "long_name": "egbert ontario canada"
@@ -1216,6 +1220,10 @@
   "WSA": {
     "short_name": "sable island",
     "long_name": "sable island nova scotia canada"
+  },
+  "WSD": {
+    "short_name": "wessington",
+    "long_name": "wessington south dakota united states"
   },
   "YON": {
     "short_name": "yonagunijima",
