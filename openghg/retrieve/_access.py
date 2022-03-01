@@ -77,7 +77,9 @@ def get_obs_surface(
     if start_date is not None and end_date is not None:
         start_date_tzaware = timestamp_tzaware(start_date)
         end_date_tzaware = timestamp_tzaware(end_date)
-        end_date_tzaware_exclusive = end_date_tzaware - Timedelta(1, unit="nanosecond")  # Deduct 1 ns to make the end day (date) exclusive.
+        end_date_tzaware_exclusive = end_date_tzaware - Timedelta(
+            1, unit="nanosecond"
+        )  # Deduct 1 ns to make the end day (date) exclusive.
 
         # Slice the data to only cover the dates we're interested in
         data = data.sel(time=slice(start_date_tzaware, end_date_tzaware_exclusive))
@@ -159,11 +161,9 @@ def get_obs_surface(
         ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
             f"{species}_variability"
         ].median()
-        
+
         # Create attributes for variability variable
-        ds_resampled[f"{species}_variability"].attrs[
-            "long_name"
-        ] = f"{data.attrs['long_name']}_variability"
+        ds_resampled[f"{species}_variability"].attrs["long_name"] = f"{data.attrs['long_name']}_variability"
 
         ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
 

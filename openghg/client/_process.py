@@ -76,88 +76,88 @@ def process_files(
 
 #     return NotImplementedError
 
-    # wallet = Wallet()
-    # cloud_service = wallet.get_service(service_url=f"{service_url}/openghg")
+# wallet = Wallet()
+# cloud_service = wallet.get_service(service_url=f"{service_url}/openghg")
 
-    # data_type = data_type.upper()
+# data_type = data_type.upper()
 
-    # if not isinstance(files, list):
-    #     files = [files]
+# if not isinstance(files, list):
+#     files = [files]
 
-    # if data_type in ("GCWERKS", "GC"):
-    #     if not all(isinstance(item, tuple) for item in files):
-    #         raise TypeError(
-    #             "If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed"
-    #         )
+# if data_type in ("GCWERKS", "GC"):
+#     if not all(isinstance(item, tuple) for item in files):
+#         raise TypeError(
+#             "If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed"
+#         )
 
-    #     files = [(Path(f), Path(p)) for f, p in files]
-    # else:
-    #     files = [Path(f) for f in files]
+#     files = [(Path(f), Path(p)) for f, p in files]
+# else:
+#     files = [Path(f) for f in files]
 
-    # storage_url = f"{service_url}/storage"
-    # openghg_url = f"{service_url}/openghg"
+# storage_url = f"{service_url}/storage"
+# openghg_url = f"{service_url}/openghg"
 
-    # openghg = Service(service_url=openghg_url)
-    # creds = StorageCreds(user=user, service_url=storage_url)
-    # drive = Drive(creds=creds, name="openghg_drive")
-    # auth = Authorisation(resource="process", user=user)
+# openghg = Service(service_url=openghg_url)
+# creds = StorageCreds(user=user, service_url=storage_url)
+# drive = Drive(creds=creds, name="openghg_drive")
+# auth = Authorisation(resource="process", user=user)
 
-    # # TODO - this should also just upload all the files at once and get them processed
-    # results = {}
-    # for file in files:
-    #     if data_type in ("GCWERKS", "GC"):
+# # TODO - this should also just upload all the files at once and get them processed
+# results = {}
+# for file in files:
+#     if data_type in ("GCWERKS", "GC"):
 
-    #         if "-" in site:
-    #             site = site.split("-")[0]
+#         if "-" in site:
+#             site = site.split("-")[0]
 
-    #         filemeta = drive.upload(file[0])
-    #         par = PAR(location=filemeta.location(), user=user)
-    #         par_secret = openghg.encrypt_data(par.secret())
+#         filemeta = drive.upload(file[0])
+#         par = PAR(location=filemeta.location(), user=user)
+#         par_secret = openghg.encrypt_data(par.secret())
 
-    #         prec_meta = drive.upload(file[1])
-    #         prec_par = PAR(location=prec_meta.location(), user=user)
-    #         prec_par_secret = openghg.encrypt_data(prec_par.secret())
+#         prec_meta = drive.upload(file[1])
+#         prec_par = PAR(location=prec_meta.location(), user=user)
+#         prec_par_secret = openghg.encrypt_data(prec_par.secret())
 
-    #         args = {
-    #             "authorisation": auth.to_data(),
-    #             "par": {"data": par.to_data(), "precision": prec_par.to_data()},
-    #             "par_secret": {"data": par_secret, "precision": prec_par_secret},
-    #         }
-    #     else:
-    #         filemeta = drive.upload(file)
-    #         par = PAR(location=filemeta.location(), user=user)
-    #         par_secret = openghg.encrypt_data(par.secret())
+#         args = {
+#             "authorisation": auth.to_data(),
+#             "par": {"data": par.to_data(), "precision": prec_par.to_data()},
+#             "par_secret": {"data": par_secret, "precision": prec_par_secret},
+#         }
+#     else:
+#         filemeta = drive.upload(file)
+#         par = PAR(location=filemeta.location(), user=user)
+#         par_secret = openghg.encrypt_data(par.secret())
 
-    #         args = {
-    #             "authorisation": auth.to_data(),
-    #             "par": {"data": par.to_data()},
-    #             "par_secret": {"data": par_secret},
-    #         }
+#         args = {
+#             "authorisation": auth.to_data(),
+#             "par": {"data": par.to_data()},
+#             "par_secret": {"data": par_secret},
+#         }
 
-    #     all_types = {
-    #         "data_type": data_type,
-    #         "overwrite": overwrite,
-    #         "site": site,
-    #         "network": network,
-    #     }
+#     all_types = {
+#         "data_type": data_type,
+#         "overwrite": overwrite,
+#         "site": site,
+#         "network": network,
+#     }
 
-    #     args.update(all_types)
+#     args.update(all_types)
 
-    #     # If we try to upload many files we don't want it to fail if a single
-    #     # file contains overlapping data
-    #     response: Dict = cloud_service.call_function(function="process.process", args=args)
+#     # If we try to upload many files we don't want it to fail if a single
+#     # file contains overlapping data
+#     response: Dict = cloud_service.call_function(function="process.process", args=args)
 
-    #     if "Error" in response:
-    #         if data_type in ("GCWERKS", "GC"):
-    #             filename = file[0].name
-    #         else:
-    #             filename = file.name
+#     if "Error" in response:
+#         if data_type in ("GCWERKS", "GC"):
+#             filename = file[0].name
+#         else:
+#             filename = file.name
 
-    #         results[filename] = response["Error"]
-    #     elif "results" in response:
-    #         results.update(response["results"])
+#         results[filename] = response["Error"]
+#     elif "results" in response:
+#         results.update(response["results"])
 
-    # return results
+# return results
 
 
 def _process_files_local(
@@ -199,13 +199,15 @@ def _process_files_local(
     else:
         files = [Path(f) for f in files]
 
-    res = ObsSurface.read_file(filepath=files,
+    res = ObsSurface.read_file(
+        filepath=files,
         data_type=data_type,
         site=site,
         network=network,
         instrument=instrument,
         inlet=inlet,
-        overwrite=True)
+        overwrite=True,
+    )
 
     results.update(res)
 

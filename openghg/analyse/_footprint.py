@@ -405,7 +405,9 @@ def align_datasets(
     obs_startdate = Timestamp(obs_data.time[0].values)
     obs_enddate = Timestamp(obs_data.time[-1].values) + Timedelta(obs_data_timeperiod, unit="seconds")
     footprint_startdate = Timestamp(footprint_data.time[0].values)
-    footprint_enddate = Timestamp(footprint_data.time[-1].values) + Timedelta(footprint_data_timeperiod, unit="nanoseconds")
+    footprint_enddate = Timestamp(footprint_data.time[-1].values) + Timedelta(
+        footprint_data_timeperiod, unit="nanoseconds"
+    )
 
     start_date = max(obs_startdate, footprint_startdate)
     end_date = min(obs_enddate, footprint_enddate)

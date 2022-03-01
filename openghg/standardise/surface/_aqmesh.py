@@ -5,9 +5,11 @@ from pathlib import Path
 pathType = Union[str, Path]
 
 
-def parse_aqmesh(data_filepath: pathType, 
-                 metadata_filepath: pathType,
-                 sampling_period: Optional[str] = None,) -> Dict:
+def parse_aqmesh(
+    data_filepath: pathType,
+    metadata_filepath: pathType,
+    sampling_period: Optional[str] = None,
+) -> Dict:
     """Read AQMesh data files
 
     Args:
