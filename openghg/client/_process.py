@@ -17,8 +17,8 @@ def process_obs(
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
     overwrite: bool = False,
-):
-    """Process data files, standardise them and add the data to the object store
+) -> Dict:
+    """Process observation files, standardise them and add the data to the object store
 
      Args:
         files: Path of files to be processed
@@ -56,7 +56,7 @@ def process_flux(
     high_time_resolution: Optional[bool] = False,
     period: Optional[str] = None,
     overwrite: bool = False,
-):
+) -> Dict:
     """Process flux data
 
     Args:
@@ -99,7 +99,22 @@ def process_footprint(
     retrieve_met: bool = False,
     overwrite: bool = False,
     high_res: bool = False,
-):
+) -> Dict:
+    """Reads footprint data files and returns the UUIDs of the Datasources
+    the processed data has been assigned to
+
+    Args:
+        filepath: Path of file to load
+        site: Site name
+        network: Network name
+        height: Height above ground level in metres
+        domain: Domain of footprints
+        model_params: Model run parameters
+        retrieve_met: Whether to also download meterological data for this footprints area
+        overwrite: Overwrite any currently stored data
+    Returns:
+        dict: UUIDs of Datasources data has been assigned to
+    """
     cloud = running_in_cloud()
 
     if cloud:
@@ -129,7 +144,7 @@ def _process_obs_local(
     instrument: Optional[str] = None,
     overwrite: bool = False,
 ) -> Dict:
-    """Process the passed file(s)
+    """Process the passed observations file(s)
 
     Args:
         files: Path of files to be processed
@@ -187,6 +202,21 @@ def _process_footprint_local(
     overwrite: bool = False,
     high_res: bool = False,
 ) -> Dict:
+    """Reads footprints data files and returns the UUIDs of the Datasources
+    the processed data has been assigned to in the local object store.
+
+    Args:
+        filepath: Path of file to load
+        site: Site name
+        network: Network name
+        height: Height above ground level in metres
+        domain: Domain of footprints
+        model_params: Model run parameters
+        retrieve_met: Whether to also download meterological data for this footprints area
+        overwrite: Overwrite any currently stored data
+    Returns:
+        dict: Dictionary of Datasource UUIDs data assigned to
+    """
     return Footprints.read_file(
         filepath=filepath,
         site=site,
