@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.client._process &#8212; OpenGHG 0+untagged.3.g8993ec2.dirty documentation</title>
+    <title>openghg.client._process &#8212; OpenGHG 0+untagged.3.gc49c943.dirty documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -245,88 +245,88 @@
 
 <span class="c1">#     return NotImplementedError</span>
 
-    <span class="c1"># wallet = Wallet()</span>
-    <span class="c1"># cloud_service = wallet.get_service(service_url=f&quot;{service_url}/openghg&quot;)</span>
+<span class="c1"># wallet = Wallet()</span>
+<span class="c1"># cloud_service = wallet.get_service(service_url=f&quot;{service_url}/openghg&quot;)</span>
 
-    <span class="c1"># data_type = data_type.upper()</span>
+<span class="c1"># data_type = data_type.upper()</span>
 
-    <span class="c1"># if not isinstance(files, list):</span>
-    <span class="c1">#     files = [files]</span>
+<span class="c1"># if not isinstance(files, list):</span>
+<span class="c1">#     files = [files]</span>
 
-    <span class="c1"># if data_type in (&quot;GCWERKS&quot;, &quot;GC&quot;):</span>
-    <span class="c1">#     if not all(isinstance(item, tuple) for item in files):</span>
-    <span class="c1">#         raise TypeError(</span>
-    <span class="c1">#             &quot;If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed&quot;</span>
-    <span class="c1">#         )</span>
+<span class="c1"># if data_type in (&quot;GCWERKS&quot;, &quot;GC&quot;):</span>
+<span class="c1">#     if not all(isinstance(item, tuple) for item in files):</span>
+<span class="c1">#         raise TypeError(</span>
+<span class="c1">#             &quot;If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed&quot;</span>
+<span class="c1">#         )</span>
 
-    <span class="c1">#     files = [(Path(f), Path(p)) for f, p in files]</span>
-    <span class="c1"># else:</span>
-    <span class="c1">#     files = [Path(f) for f in files]</span>
+<span class="c1">#     files = [(Path(f), Path(p)) for f, p in files]</span>
+<span class="c1"># else:</span>
+<span class="c1">#     files = [Path(f) for f in files]</span>
 
-    <span class="c1"># storage_url = f&quot;{service_url}/storage&quot;</span>
-    <span class="c1"># openghg_url = f&quot;{service_url}/openghg&quot;</span>
+<span class="c1"># storage_url = f&quot;{service_url}/storage&quot;</span>
+<span class="c1"># openghg_url = f&quot;{service_url}/openghg&quot;</span>
 
-    <span class="c1"># openghg = Service(service_url=openghg_url)</span>
-    <span class="c1"># creds = StorageCreds(user=user, service_url=storage_url)</span>
-    <span class="c1"># drive = Drive(creds=creds, name=&quot;openghg_drive&quot;)</span>
-    <span class="c1"># auth = Authorisation(resource=&quot;process&quot;, user=user)</span>
+<span class="c1"># openghg = Service(service_url=openghg_url)</span>
+<span class="c1"># creds = StorageCreds(user=user, service_url=storage_url)</span>
+<span class="c1"># drive = Drive(creds=creds, name=&quot;openghg_drive&quot;)</span>
+<span class="c1"># auth = Authorisation(resource=&quot;process&quot;, user=user)</span>
 
-    <span class="c1"># # TODO - this should also just upload all the files at once and get them processed</span>
-    <span class="c1"># results = {}</span>
-    <span class="c1"># for file in files:</span>
-    <span class="c1">#     if data_type in (&quot;GCWERKS&quot;, &quot;GC&quot;):</span>
+<span class="c1"># # TODO - this should also just upload all the files at once and get them processed</span>
+<span class="c1"># results = {}</span>
+<span class="c1"># for file in files:</span>
+<span class="c1">#     if data_type in (&quot;GCWERKS&quot;, &quot;GC&quot;):</span>
 
-    <span class="c1">#         if &quot;-&quot; in site:</span>
-    <span class="c1">#             site = site.split(&quot;-&quot;)[0]</span>
+<span class="c1">#         if &quot;-&quot; in site:</span>
+<span class="c1">#             site = site.split(&quot;-&quot;)[0]</span>
 
-    <span class="c1">#         filemeta = drive.upload(file[0])</span>
-    <span class="c1">#         par = PAR(location=filemeta.location(), user=user)</span>
-    <span class="c1">#         par_secret = openghg.encrypt_data(par.secret())</span>
+<span class="c1">#         filemeta = drive.upload(file[0])</span>
+<span class="c1">#         par = PAR(location=filemeta.location(), user=user)</span>
+<span class="c1">#         par_secret = openghg.encrypt_data(par.secret())</span>
 
-    <span class="c1">#         prec_meta = drive.upload(file[1])</span>
-    <span class="c1">#         prec_par = PAR(location=prec_meta.location(), user=user)</span>
-    <span class="c1">#         prec_par_secret = openghg.encrypt_data(prec_par.secret())</span>
+<span class="c1">#         prec_meta = drive.upload(file[1])</span>
+<span class="c1">#         prec_par = PAR(location=prec_meta.location(), user=user)</span>
+<span class="c1">#         prec_par_secret = openghg.encrypt_data(prec_par.secret())</span>
 
-    <span class="c1">#         args = {</span>
-    <span class="c1">#             &quot;authorisation&quot;: auth.to_data(),</span>
-    <span class="c1">#             &quot;par&quot;: {&quot;data&quot;: par.to_data(), &quot;precision&quot;: prec_par.to_data()},</span>
-    <span class="c1">#             &quot;par_secret&quot;: {&quot;data&quot;: par_secret, &quot;precision&quot;: prec_par_secret},</span>
-    <span class="c1">#         }</span>
-    <span class="c1">#     else:</span>
-    <span class="c1">#         filemeta = drive.upload(file)</span>
-    <span class="c1">#         par = PAR(location=filemeta.location(), user=user)</span>
-    <span class="c1">#         par_secret = openghg.encrypt_data(par.secret())</span>
+<span class="c1">#         args = {</span>
+<span class="c1">#             &quot;authorisation&quot;: auth.to_data(),</span>
+<span class="c1">#             &quot;par&quot;: {&quot;data&quot;: par.to_data(), &quot;precision&quot;: prec_par.to_data()},</span>
+<span class="c1">#             &quot;par_secret&quot;: {&quot;data&quot;: par_secret, &quot;precision&quot;: prec_par_secret},</span>
+<span class="c1">#         }</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         filemeta = drive.upload(file)</span>
+<span class="c1">#         par = PAR(location=filemeta.location(), user=user)</span>
+<span class="c1">#         par_secret = openghg.encrypt_data(par.secret())</span>
 
-    <span class="c1">#         args = {</span>
-    <span class="c1">#             &quot;authorisation&quot;: auth.to_data(),</span>
-    <span class="c1">#             &quot;par&quot;: {&quot;data&quot;: par.to_data()},</span>
-    <span class="c1">#             &quot;par_secret&quot;: {&quot;data&quot;: par_secret},</span>
-    <span class="c1">#         }</span>
+<span class="c1">#         args = {</span>
+<span class="c1">#             &quot;authorisation&quot;: auth.to_data(),</span>
+<span class="c1">#             &quot;par&quot;: {&quot;data&quot;: par.to_data()},</span>
+<span class="c1">#             &quot;par_secret&quot;: {&quot;data&quot;: par_secret},</span>
+<span class="c1">#         }</span>
 
-    <span class="c1">#     all_types = {</span>
-    <span class="c1">#         &quot;data_type&quot;: data_type,</span>
-    <span class="c1">#         &quot;overwrite&quot;: overwrite,</span>
-    <span class="c1">#         &quot;site&quot;: site,</span>
-    <span class="c1">#         &quot;network&quot;: network,</span>
-    <span class="c1">#     }</span>
+<span class="c1">#     all_types = {</span>
+<span class="c1">#         &quot;data_type&quot;: data_type,</span>
+<span class="c1">#         &quot;overwrite&quot;: overwrite,</span>
+<span class="c1">#         &quot;site&quot;: site,</span>
+<span class="c1">#         &quot;network&quot;: network,</span>
+<span class="c1">#     }</span>
 
-    <span class="c1">#     args.update(all_types)</span>
+<span class="c1">#     args.update(all_types)</span>
 
-    <span class="c1">#     # If we try to upload many files we don&#39;t want it to fail if a single</span>
-    <span class="c1">#     # file contains overlapping data</span>
-    <span class="c1">#     response: Dict = cloud_service.call_function(function=&quot;process.process&quot;, args=args)</span>
+<span class="c1">#     # If we try to upload many files we don&#39;t want it to fail if a single</span>
+<span class="c1">#     # file contains overlapping data</span>
+<span class="c1">#     response: Dict = cloud_service.call_function(function=&quot;process.process&quot;, args=args)</span>
 
-    <span class="c1">#     if &quot;Error&quot; in response:</span>
-    <span class="c1">#         if data_type in (&quot;GCWERKS&quot;, &quot;GC&quot;):</span>
-    <span class="c1">#             filename = file[0].name</span>
-    <span class="c1">#         else:</span>
-    <span class="c1">#             filename = file.name</span>
+<span class="c1">#     if &quot;Error&quot; in response:</span>
+<span class="c1">#         if data_type in (&quot;GCWERKS&quot;, &quot;GC&quot;):</span>
+<span class="c1">#             filename = file[0].name</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             filename = file.name</span>
 
-    <span class="c1">#         results[filename] = response[&quot;Error&quot;]</span>
-    <span class="c1">#     elif &quot;results&quot; in response:</span>
-    <span class="c1">#         results.update(response[&quot;results&quot;])</span>
+<span class="c1">#         results[filename] = response[&quot;Error&quot;]</span>
+<span class="c1">#     elif &quot;results&quot; in response:</span>
+<span class="c1">#         results.update(response[&quot;results&quot;])</span>
 
-    <span class="c1"># return results</span>
+<span class="c1"># return results</span>
 
 
 <span class="k">def</span> <span class="nf">_process_files_local</span><span class="p">(</span>
@@ -368,13 +368,15 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
 
-    <span class="n">res</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">files</span><span class="p">,</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
+        <span class="n">filepath</span><span class="o">=</span><span class="n">files</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
         <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
         <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
         <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
-        <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 
