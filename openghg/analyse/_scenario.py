@@ -656,8 +656,8 @@ class ModelScenario():
 
     def combine_flux_sources(self,
                              sources: Optional[Union[str, List]] = None,
-                             cache: Optional[bool] = True,
-                             recalculate: Optional[bool] = False) -> Dataset:
+                             cache: bool = True,
+                             recalculate: bool = False) -> Dataset:
         """
         Combine together flux sources on the time dimension. This will align to
         the time of the highest frequency flux source both for time range and frequency.
@@ -1188,8 +1188,8 @@ class ModelScenario():
                         sources: Optional[Union[str, List]] = None,
                         resample_to: str = "coarsest",
                         platform: Optional[str] = None,
-                        cache: Optional[bool] = True,
-                        recalculate: Optional[bool] = False) -> Any:
+                        cache: bool = True,
+                        recalculate: bool = False) -> Any:
         """
         Plot comparison between observation and modelled timeseries data.
 
