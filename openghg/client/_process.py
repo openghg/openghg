@@ -1,24 +1,23 @@
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Optional, Union
 
-# from Acquire.Client import (PAR, Authorisation, Drive, Service, StorageCreds,
-#                             User, Wallet)
-from openghg.store import ObsSurface
+from openghg.store import ObsSurface, Emissions, Footprints
 from openghg.types import DataTypes
 from openghg.util import running_in_cloud
 
-filepathType = Union[str, Path, List, Tuple[Path, Path]]
+obsFilepathType = Union[str, Path, List, Tuple[Path, Path]]
+pathType = Union[str, Path]
 
 
-def process_files(
-    files: filepathType,
+def process_obs(
+    files: obsFilepathType,
     data_type: str,
     site: str,
     network: str,
-    inlet: str = None,
-    instrument: str = None,
+    inlet: Optional[str] = None,
+    instrument: Optional[str] = None,
     overwrite: bool = False,
-) -> Dict:
+):
     """Process data files, standardise them and add the data to the object store
 
      Args:
@@ -37,7 +36,7 @@ def process_files(
     if cloud:
         raise NotImplementedError
     else:
-        return _process_files_local(
+        return _process_obs_local(
             files=files,
             data_type=data_type,
             site=site,
@@ -48,125 +47,86 @@ def process_files(
         )
 
 
-# def _process_files_cloud(
-#     files: filepathType,
-#     data_type: str,
-#     site: str,
-#     network: str,
-#     inlet: str = None,
-#     instrument: str = None,
-#     overwrite: bool = False,
-#     service_url: str = "https://fn.openghg.org/t",
-#     user: User = None,
-# ) -> Dict:
-#     """Process the passed file(s)
+def process_flux(
+    files: Union[str, Path],
+    species: str,
+    source: str,
+    domain: str,
+    date: str,
+    high_time_resolution: Optional[bool] = False,
+    period: Optional[str] = None,
+    overwrite: bool = False,
+):
+    """Process flux data
 
-#     Args:
-#         user: Authenticated Acquire User
-#         files (str, list): Path of files to be processed
-#         data_type: Type of data to be processed (CRDS, GCWERKS etc)
-#         site: Site name
-#         network: Network name
-#         instrument: If no instrument name is passed we will attempt
-#         to find it from the filename.
-#         site: Name of site, three letter code or long name
-#     Returns:
-#         dict: UUIDs of Datasources storing data of processed files keyed by filename
-#     """
+    Args:
+        filepath: Path of emissions file
+        species: Species name
+        domain: Emissions domain
+        source: Emissions source
+        high_time_resolution: If this is a high resolution file
+        period: Period of measurements, if not passed this is inferred from the time coords
+        overwrite: Should this data overwrite currently stored data.
+    returns:
+        dict: Dictionary of Datasource UUIDs data assigned to
+    """
+    cloud = running_in_cloud()
 
-#     return NotImplementedError
-
-    # wallet = Wallet()
-    # cloud_service = wallet.get_service(service_url=f"{service_url}/openghg")
-
-    # data_type = data_type.upper()
-
-    # if not isinstance(files, list):
-    #     files = [files]
-
-    # if data_type in ("GCWERKS", "GC"):
-    #     if not all(isinstance(item, tuple) for item in files):
-    #         raise TypeError(
-    #             "If data type is GCWERKS, a tuple or list of tuples for data and precision filenames must be passed"
-    #         )
-
-    #     files = [(Path(f), Path(p)) for f, p in files]
-    # else:
-    #     files = [Path(f) for f in files]
-
-    # storage_url = f"{service_url}/storage"
-    # openghg_url = f"{service_url}/openghg"
-
-    # openghg = Service(service_url=openghg_url)
-    # creds = StorageCreds(user=user, service_url=storage_url)
-    # drive = Drive(creds=creds, name="openghg_drive")
-    # auth = Authorisation(resource="process", user=user)
-
-    # # TODO - this should also just upload all the files at once and get them processed
-    # results = {}
-    # for file in files:
-    #     if data_type in ("GCWERKS", "GC"):
-
-    #         if "-" in site:
-    #             site = site.split("-")[0]
-
-    #         filemeta = drive.upload(file[0])
-    #         par = PAR(location=filemeta.location(), user=user)
-    #         par_secret = openghg.encrypt_data(par.secret())
-
-    #         prec_meta = drive.upload(file[1])
-    #         prec_par = PAR(location=prec_meta.location(), user=user)
-    #         prec_par_secret = openghg.encrypt_data(prec_par.secret())
-
-    #         args = {
-    #             "authorisation": auth.to_data(),
-    #             "par": {"data": par.to_data(), "precision": prec_par.to_data()},
-    #             "par_secret": {"data": par_secret, "precision": prec_par_secret},
-    #         }
-    #     else:
-    #         filemeta = drive.upload(file)
-    #         par = PAR(location=filemeta.location(), user=user)
-    #         par_secret = openghg.encrypt_data(par.secret())
-
-    #         args = {
-    #             "authorisation": auth.to_data(),
-    #             "par": {"data": par.to_data()},
-    #             "par_secret": {"data": par_secret},
-    #         }
-
-    #     all_types = {
-    #         "data_type": data_type,
-    #         "overwrite": overwrite,
-    #         "site": site,
-    #         "network": network,
-    #     }
-
-    #     args.update(all_types)
-
-    #     # If we try to upload many files we don't want it to fail if a single
-    #     # file contains overlapping data
-    #     response: Dict = cloud_service.call_function(function="process.process", args=args)
-
-    #     if "Error" in response:
-    #         if data_type in ("GCWERKS", "GC"):
-    #             filename = file[0].name
-    #         else:
-    #             filename = file.name
-
-    #         results[filename] = response["Error"]
-    #     elif "results" in response:
-    #         results.update(response["results"])
-
-    # return results
+    if cloud:
+        raise NotImplementedError
+    else:
+        return _process_flux_local(
+            files=files,
+            species=species,
+            source=source,
+            domain=domain,
+            date=date,
+            high_time_resolution=high_time_resolution,
+            period=period,
+            overwrite=overwrite,
+        )
 
 
-def _process_files_local(
-    files: filepathType,
+def process_footprint(
+    files: pathType,
+    site: str,
+    height: str,
+    domain: str,
+    model: str,
+    metmodel: Optional[str] = None,
+    species: Optional[str] = None,
+    network: Optional[str] = None,
+    retrieve_met: bool = False,
+    overwrite: bool = False,
+    high_res: bool = False,
+):
+    cloud = running_in_cloud()
+
+    if cloud:
+        raise NotImplementedError
+    else:
+        return _process_footprint_local(
+            filepath=files,
+            site=site,
+            height=height,
+            domain=domain,
+            model=model,
+            metmodel=metmodel,
+            species=species,
+            network=network,
+            retrieve_met=retrieve_met,
+            overwrite=overwrite,
+            high_res=high_res,
+        )
+
+
+def _process_obs_local(
+    files: obsFilepathType,
     data_type: str,
     site: str,
     network: str,
-    inlet: str = None,
-    instrument: str = None,
+    inlet: Optional[str] = None,
+    instrument: Optional[str] = None,
     overwrite: bool = False,
 ) -> Dict:
     """Process the passed file(s)
@@ -199,14 +159,80 @@ def _process_files_local(
     else:
         files = [Path(f) for f in files]
 
-    res = ObsSurface.read_file(filepath=files,
+    res = ObsSurface.read_file(
+        filepath=files,
         data_type=data_type,
         site=site,
         network=network,
         instrument=instrument,
         inlet=inlet,
-        overwrite=True)
+        overwrite=overwrite,
+    )
 
     results.update(res)
 
     return results
+
+
+def _process_footprint_local(
+    filepath: pathType,
+    site: str,
+    height: str,
+    domain: str,
+    model: str,
+    metmodel: Optional[str] = None,
+    species: Optional[str] = None,
+    network: Optional[str] = None,
+    retrieve_met: bool = False,
+    overwrite: bool = False,
+    high_res: bool = False,
+) -> Dict:
+    return Footprints.read_file(
+        filepath=filepath,
+        site=site,
+        height=height,
+        domain=domain,
+        model=model,
+        metmodel=metmodel,
+        species=species,
+        network=network,
+        retrieve_met=retrieve_met,
+        overwrite=overwrite,
+        high_res=high_res,
+    )
+
+
+def _process_flux_local(
+    files: pathType,
+    species: str,
+    source: str,
+    domain: str,
+    date: str,
+    high_time_resolution: Optional[bool] = False,
+    period: Optional[str] = None,
+    overwrite: bool = False,
+) -> Dict:
+    """Process flux data for the local object store
+
+    Args:
+        filepath: Path of emissions file
+        species: Species name
+        domain: Emissions domain
+        source: Emissions source
+        high_time_resolution: If this is a high resolution file
+        period: Period of measurements, if not passed this is inferred from the time coords
+        overwrite: Should this data overwrite currently stored data.
+    returns:
+        dict: Dictionary of Datasource UUIDs data assigned to
+    """
+
+    return Emissions.read_file(
+        filepath=files,
+        species=species,
+        source=source,
+        domain=domain,
+        date=date,
+        high_time_resolution=high_time_resolution,
+        period=period,
+        overwrite=overwrite,
+    )

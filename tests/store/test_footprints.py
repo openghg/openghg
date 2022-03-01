@@ -7,7 +7,7 @@ from helpers import get_footprint_datapath
 
 
 def test_read_footprint():
-    get_local_bucket(empty=True)
+    get_local_bucket()
 
     datapath = get_footprint_datapath("footprint_test.nc")
     # model_params = {"simulation_params": "123"}
