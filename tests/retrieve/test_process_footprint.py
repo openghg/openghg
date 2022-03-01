@@ -88,7 +88,7 @@ def test_co2_footprint_data_merge():
         network=network,
         start_date=start_date,
         end_date=end_date,
-        flux_sources=source,
+        flux_source=source,
         species=species,
         load_flux=True,
         calc_timeseries=True,
