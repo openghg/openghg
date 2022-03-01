@@ -501,7 +501,8 @@ class ModelScenario():
         # TODO: Check regularity of the data - will need this to decide is resampling
         # is appropriate or need to do checks on a per time point basis
 
-        obs_data_timeperiod = Timedelta(seconds=obs_data_period_s)
+        obs_data_period_ns = obs_data_period_s*1e9
+        obs_data_timeperiod = Timedelta(obs_data_period_ns, unit="ns")
 
         # Derive the footprints period from the frequency of the data
         footprint_data_period_ns = np.nanmedian(
@@ -512,15 +513,21 @@ class ModelScenario():
         # Here we want timezone naive Timestamps
         # Add sampling period to end date to make sure resample includes these values when matching
         obs_startdate = Timestamp(obs_data.time[0].values)
-        obs_enddate = Timestamp(obs_data.time[-1].values) + Timedelta(obs_data_timeperiod, unit="seconds")
+        obs_enddate = Timestamp(obs_data.time[-1].values) + obs_data_timeperiod
         footprint_startdate = Timestamp(footprint_data.time[0].values)
-        footprint_enddate = Timestamp(footprint_data.time[-1].values) + Timedelta(footprint_data_timeperiod, unit="nanoseconds")
+        footprint_enddate = Timestamp(footprint_data.time[-1].values) + footprint_data_timeperiod
 
         start_date = max(obs_startdate, footprint_startdate)
         end_date = min(obs_enddate, footprint_enddate)
 
-        # Subtract half a second to ensure lower range covered
-        start_slice = start_date - Timedelta("0.5s")
+        # Calculate start time buffer for matching
+        if obs_data_period_ns > footprint_data_period_ns:
+            start_buffer = obs_data_timeperiod
+        else:
+            start_buffer = footprint_data_timeperiod
+
+        # Subtract larger time period to ensure lower range covered
+        start_slice = start_date - start_buffer
         # Subtract very small time increment (1 nanosecond) to make this an exclusive selection
         end_slice = end_date - Timedelta("1ns")
 
@@ -622,7 +629,7 @@ class ModelScenario():
         if units is not None:
             combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset["fp"].data / units))})
             if self.species == "co2":
-                combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes / units))})
+                combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes.data / units))})
 
         attributes = {}
         attributes_obs = obs.data.attrs
@@ -756,10 +763,13 @@ class ModelScenario():
         self._check_data_is_present(need=["footprint", "fluxes"])
 
         # Check if cached modelled observations exist
-        if self.modelled_obs is None:
+        if self.modelled_obs is None or recalculate:
             # Check if observations are present and use these for resampling
             if self.obs is not None:
-                self.combine_obs_footprint(resample_to, platform=platform, cache=True)
+                self.combine_obs_footprint(resample_to, 
+                                           platform=platform, 
+                                           recalculate=recalculate, 
+                                           cache=True)
             else:
                 self.scenario = self._check_footprint_resample(resample_to)
         else:
@@ -777,6 +787,8 @@ class ModelScenario():
             elif recalculate:
                 # Recalculate based on footprint data if obs not present
                 self.scenario = self._check_footprint_resample(resample_to)
+
+            ## TODO: Add check for matching sources and recalculate otherwise
             else:
                 # Return cached modelled observations if explicit recalculation not requested
                 return self.modelled_obs
@@ -913,6 +925,10 @@ class ModelScenario():
         flux_ds = self.combine_flux_sources(sources)
         fp_HiTRes, flux_ds = match_dataset_dims([fp_HiTRes, flux_ds], dims=["lat", "lon"])
 
+        # Make sure any NaN values are set to zero as this is a multiplicative and summing operation
+        fp_HiTRes = fp_HiTRes.fillna(0.0)
+        flux_ds["flux"] = flux_ds["flux"].fillna(0.0)
+
         # Calculate time resolution for both the flux and footprints data
         nanosecond_to_hour = 1 / (1e9 * 60.0 * 60.0)
         flux_res_H = int(flux_ds.time.diff(dim="time").values.mean() * nanosecond_to_hour)
@@ -969,7 +985,7 @@ class ModelScenario():
         # nh_back = len(hback)
 
         # Define maximum hour back
-        max_h_back = hback.values[-1]
+        max_h_back = int(hback.values[-1])
 
         # Define full range of dates to select from the flux input
         date_start = time_array[0]
@@ -1185,6 +1201,7 @@ class ModelScenario():
         return fig
 
     def plot_comparison(self,
+                        baseline: Optional[str] = None,
                         sources: Optional[Union[str, List]] = None,
                         resample_to: str = "coarsest",
                         platform: Optional[str] = None,
@@ -1235,6 +1252,14 @@ class ModelScenario():
             label = f"Modelled {species.upper()}: {source_str}"
         else:
             label = f"Modelled {species.upper()}"
+
+        if baseline == "percentile":
+            mf = obs.data["mf"]
+            baseline = mf.quantile(1.0, dim="time").values
+            y_data = y_data + baseline
+        elif baseline is not None:
+            print("Unable to use other methods than percentile to calculate baseline yet.")
+            print("Boundary conditions will be incorporated soon.")
 
         fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=label))
 
