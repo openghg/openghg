@@ -113,7 +113,7 @@ tac_data = retrieve_example_data(path="timeseries/tac_example.tar.gz")
 ```
 
 As this data is measured in-situ, this is classed as a surface site and we need to use the `ObsSurface` class to interpret this data. We can pass our list of files to the `read_file` method associated within the `ObsSurface` class, also providing details on:
- - site code - `"TAC"` for Billsdale
+ - site code - `"TAC"` for Tacolneston
  - type of data we want to process, known as the data type - `"CRDS"`
  - network - `"DECC"`
 
