@@ -517,7 +517,7 @@ class ModelScenario:
         # TODO: Check regularity of the data - will need this to decide is resampling
         # is appropriate or need to do checks on a per time point basis
 
-        obs_data_period_ns = obs_data_period_s*1e9
+        obs_data_period_ns = obs_data_period_s * 1e9
         obs_data_timeperiod = Timedelta(obs_data_period_ns, unit="ns")
 
         # Derive the footprints period from the frequency of the data
@@ -809,7 +809,7 @@ class ModelScenario:
                 # Recalculate based on footprint data if obs not present
                 self.scenario = self._check_footprint_resample(resample_to)
 
-            ## TODO: Add check for matching sources and recalculate otherwise
+            # TODO: Add check for matching sources and recalculate otherwise
             else:
                 # Return cached modelled observations if explicit recalculation not requested
                 return self.modelled_obs
