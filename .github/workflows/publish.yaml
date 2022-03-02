@@ -3,14 +3,14 @@ name: Publish Python distributions to PyPI and TestPyPI
 on:
   workflow_run:
     workflows: ["OpenGHG tests"]
-    types:
-      - completed
+    types: [completed]
   push:
     branches: master
 
 jobs:
   build-and-publish:
     name: Build and publish Python distributions 📦 to PyPI and TestPyPI
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
