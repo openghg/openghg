@@ -98,7 +98,6 @@ def find_matching_site(site_name: str, possible_sites: Dict) -> str:
     else:
         return f"Unknown site: {site_name}"
 
-
 def verify_site(site: str) -> str:
     """Check if the passed site is a valid one and returns the three
     letter site code if found. Otherwise we use fuzzy text matching to suggest
