@@ -560,8 +560,6 @@ class ModelScenario:
         obs_data = obs_data.sel(time=slice(start_obs_slice, end_slice))
         footprint_data = footprint_data.sel(time=slice(start_footprint_slice, end_slice))
 
-
-
         # Only non satellite datasets with different periods need to be resampled
         timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
         tolerance = 1e-9  # seconds
