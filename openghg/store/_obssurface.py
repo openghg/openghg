@@ -1,7 +1,7 @@
 from openghg.store.base import BaseStore
 from openghg.types import pathType, multiPathType, resultsType
 from pathlib import Path
-from typing import DefaultDict, Dict, Union
+from typing import DefaultDict, Dict, Optional, Union
 
 
 __all__ = ["ObsSurface"]
@@ -19,9 +19,9 @@ class ObsSurface(BaseStore):
         data_type: str,
         network: str,
         site: str,
-        inlet: str = None,
-        instrument: str = None,
-        sampling_period: str = None,
+        inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
         measurement_type: str = "insitu",
         overwrite: bool = False,
     ) -> Dict:
