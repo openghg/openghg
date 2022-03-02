@@ -46,9 +46,9 @@ def _extract_site_param(data_type: str) -> Dict:
         params_full = load_json(filename="process_gcwerks_parameters.json")
         site_params: Dict = params_full[data_type]["sites"]
     elif data_type == "CRDS":
-        # "process_gcwerks_parameters.json" - ["CRDS"], sites are keys
+        # "process_gcwerks_parameters.json" - ["CRDS"]["sites"], sites are keys
         params_full = load_json(filename="process_gcwerks_parameters.json")
-        crds_params = params_full[data_type]
+        crds_params = params_full[data_type]["sites"]
         site_params = {key: value for key, value in crds_params.items() if len(key) == 3 and key.isupper()}
     elif data_type in lghg_sites.keys():
         # TODO: May want to update this now new sites have been added to lghg_data.json

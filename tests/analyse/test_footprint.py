@@ -24,7 +24,7 @@ def test_ch4_tac_coarsest_merge():
         start_date=start_date,
         end_date=end_date,
         species=species,
-        flux_sources=source,
+        flux_source=source,
         resample_to="coarsest",
         load_flux=True,
         calc_timeseries=True,

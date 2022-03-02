@@ -47,6 +47,8 @@ class Emissions(BaseStore):
             high_time_resolution: If this is a high resolution file
             period: Period of measurements, if not passed this is inferred from the time coords
             overwrite: Should this data overwrite currently stored data.
+        Returns:
+            dict: Dictionary of datasource UUIDs data assigned to
         """
         from collections import defaultdict
         from xarray import open_dataset
