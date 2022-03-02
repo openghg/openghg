@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, Any
 
 # from Acquire.Client import Wallet
 from openghg.retrieve import search as _local_search
@@ -17,7 +17,7 @@ def search(
     measurement_type: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> Union[SearchResults, Dict]:
     """Cloud object store search
 
