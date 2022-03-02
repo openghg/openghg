@@ -1287,8 +1287,8 @@ class ModelScenario:
 
         if baseline == "percentile":
             mf = obs.data["mf"]
-            baseline = mf.quantile(1.0, dim="time").values
-            y_data = y_data + baseline
+            y_baseline = mf.quantile(1.0, dim="time").values
+            y_data = y_data + y_baseline
         elif baseline is not None:
             print("Unable to use other methods than percentile to calculate baseline yet.")
             print("Boundary conditions will be incorporated soon.")
