@@ -26,3 +26,15 @@ functions.
    :maxdepth: 1
 
    beginner_workflow/2_Ranking_for_observations
+
+Tutorial 3 - Comparing observations to emissions
+------------------------------------------------
+
+This tutorial covers the workflow comparing observations data to emissions using the new ``ModelScenario`` class. 
+This replaces the ``footprint_data_merge`` function with an object that can be used to retrieve and manipulate observations,
+emissions and footprint data (with boundary conditions in the pipeline).
+
+.. toctree::
+   :maxdepth: 1
+
+   beginner_workflow/3_Comparing_with_emissions
