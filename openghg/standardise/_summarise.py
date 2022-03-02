@@ -7,7 +7,7 @@ from openghg.types import SurfaceTypes
 
 
 def _extract_site_param(data_type: str) -> Dict:
-    '''
+    """
     Extract site data for a given data type based on the available data
     file.
 
@@ -31,14 +31,14 @@ def _extract_site_param(data_type: str) -> Dict:
             empty dictionary
 
     TODO: Create files of site details for other data types and incorporate here.
-    '''
+    """
     from openghg.util import load_json
 
     data_type = data_type.upper()
 
     lghg_sites = {"NPL": "NPL", "BTT": "BTT", "THAMESBARRIER": "TMB"}
 
-    # TODO: Could create another json / csv which includes links 
+    # TODO: Could create another json / csv which includes links
     # between GCWERKS and instruments (with a warning) if needed
 
     if data_type == "GCWERKS":
@@ -69,7 +69,7 @@ def _extract_site_param(data_type: str) -> Dict:
 
 
 def _extract_site_names(site_params: Dict, data_type: str) -> Dict:
-    '''
+    """
     Extracts long names from site parameters - expects output to
     match format from `_extract_site_param()` function.
 
@@ -80,7 +80,7 @@ def _extract_site_names(site_params: Dict, data_type: str) -> Dict:
 
     Returns:
         Dict: Long names for each site code
-    '''
+    """
     if data_type in ("GCWERKS", "CRDS"):
         name = "gcwerks_site_name"
     else:
@@ -94,7 +94,7 @@ def _extract_site_names(site_params: Dict, data_type: str) -> Dict:
 
 
 def summary_data_types() -> pd.DataFrame:
-    '''
+    """
     Create summary DataFrame of accepted input data types. This includes
     the site code, long name, platform and data type.
 
@@ -102,7 +102,7 @@ def summary_data_types() -> pd.DataFrame:
         pandas.DataFrame
 
     TODO: Add data_type details for mobile / column etc. when added
-    '''
+    """
     # Could include input for surface / mobile / column etc.?
     surface_data_types = list(SurfaceTypes.__members__)
 

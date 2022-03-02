@@ -19,7 +19,9 @@ def bilsdale_datapaths() -> List:
     return list(crds_path.glob("bsd.picarro.1minute.*.min.*"))
 
 
-def retrieve_example_data(path: str, output_filename: str = None, download_dir: str = None) -> Union[List, Path]:
+def retrieve_example_data(
+    path: str, output_filename: str = None, download_dir: str = None
+) -> Union[List, Path]:
     """Retrieve data from the OpenGHG example data repository and write it to a temporary file
     for reading.
     """
@@ -33,19 +35,19 @@ def retrieve_example_data(path: str, output_filename: str = None, download_dir: 
         download_dir = tempfile.mkdtemp()
 
     if output_filename is None:
-        output_filename = url.split('/')[-1]
+        output_filename = url.split("/")[-1]
 
     download_path = Path(download_dir).joinpath(output_filename)
 
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
 
-        with open(download_path, 'wb') as f:
+        with open(download_path, "wb") as f:
             shutil.copyfileobj(r.raw, f)
 
     shutil.unpack_archive(filename=download_path, extract_dir=download_dir)
 
-    extracted_filepaths = [f for f in Path(download_dir).glob("*") if not f.name.endswith("tar.gz")] 
+    extracted_filepaths = [f for f in Path(download_dir).glob("*") if not f.name.endswith("tar.gz")]
 
     if len(extracted_filepaths) == 1:
         return extracted_filepaths[0]

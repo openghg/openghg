@@ -271,6 +271,10 @@
     "short_name": "dongsha island",
     "long_name": "dongsha island taiwan"
   },
+  "DVV": {
+    "short_name": "danville",
+    "long_name": "danville virgina"
+  },
   "EGB": {
     "short_name": "egbert",
     "long_name": "egbert ontario canada"
@@ -334,6 +338,16 @@
   "GAUGE-FERRY": {
     "short_name": "gauge ferry",
     "long_name": "gauge ferry uk"
+  },
+  "GCI01": { "short_name": "monroe", "long_name": "louisana united states" },
+  "GCI02": {
+    "short_name": "grenada",
+    "long_name": "mississippi united states"
+  },
+  "GCI03": { "short_name": "magee", "long_name": "mississippi united states" },
+  "GCI04": {
+    "short_name": "millerville",
+    "long_name": "alabama united states"
   },
   "GLA": {
     "short_name": "glatton",
@@ -1206,6 +1220,10 @@
   "WSA": {
     "short_name": "sable island",
     "long_name": "sable island nova scotia canada"
+  },
+  "WSD": {
+    "short_name": "wessington",
+    "long_name": "wessington south dakota united states"
   },
   "YON": {
     "short_name": "yonagunijima",
