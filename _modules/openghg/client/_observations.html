@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.client._observations &#8212; OpenGHG 0+untagged.3.g418ee5b.dirty documentation</title>
+    <title>openghg.client._observations &#8212; OpenGHG v1.0.0-RC0+0.g5579deb.dirty documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -172,7 +172,6 @@
 <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">ObsData</span>
 <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span> <span class="k">as</span> <span class="n">proc_get_obs_surface</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">running_in_cloud</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 
 
 <div class="viewcode-block" id="get_obs_surface"><a class="viewcode-back" href="../../../api/api_client.html#openghg.client.get_obs_surface">[docs]</a><span class="k">def</span> <span class="nf">get_obs_surface</span><span class="p">(</span>
@@ -187,7 +186,7 @@
     <span class="n">calibration_scale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">keep_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">skip_ranking</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsData</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;This is the equivalent of the get_obs function from the ACRG repository.</span>
 
 <span class="sd">    Usage and return values are the same whilst implementation may differ.</span>
@@ -239,7 +238,7 @@
     <span class="n">calibration_scale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">keep_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">skip_ranking</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsData</span><span class="p">:</span>
 
     <span class="k">return</span> <span class="n">proc_get_obs_surface</span><span class="p">(</span>
         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
