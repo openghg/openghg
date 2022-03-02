@@ -9,8 +9,6 @@ from helpers import get_emissions_datapath
 
 
 def test_read_file():
-    get_local_bucket()
-
     test_datapath = get_emissions_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
 
     proc_results = Emissions.read_file(

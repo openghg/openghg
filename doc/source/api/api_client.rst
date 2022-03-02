@@ -11,9 +11,14 @@ functions, if it is absent the call will the routed to a local function.
 Processing and standardisation
 ==============================
 
-The ``process_files`` function is used to upload data files for standardisation and storage in the object store
+These functions handle the processing, standardisation and storage of data in the object store. Currently functions for
+observations, footprint and flux / emissions data are available.
 
-.. autofunction:: openghg.client.process_files
+.. autofunction:: openghg.client.process_obs
+
+.. autofunction:: openghg.client.process_footprint
+
+.. autofunction:: openghg.client.process_flux
 
 search (client)
 ===============
@@ -44,17 +49,3 @@ that data from that Datasource will be preferred when a user searches for data.
 .. autofunction:: openghg.client.rank_sources
 
 
-JobRunner
-=========
-
-The ``JobRunner`` class is used to run jobs on HPC clusters.
-
-.. note::
-    This will currently raise a ``NotImplementedError`` if used.
-
-.. autoclass:: openghg.client.JobRunner
-    :members:
-    :private-members:
-
-.. toctree::
-   :maxdepth: 1

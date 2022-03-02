@@ -47,6 +47,8 @@ class Emissions(BaseStore):
             high_time_resolution: If this is a high resolution file
             period: Period of measurements, if not passed this is inferred from the time coords
             overwrite: Should this data overwrite currently stored data.
+        Returns:
+            dict: Dictionary of datasource UUIDs data assigned to
         """
         from collections import defaultdict
         from xarray import open_dataset
@@ -98,9 +100,9 @@ class Emissions(BaseStore):
         metadata["author"] = author_name
         metadata["processed"] = str(timestamp_now())
 
-        # As emissions files handle things slightly differently we need to check the time values 
+        # As emissions files handle things slightly differently we need to check the time values
         # more carefully.
-        # e.g. a flux / emissions file could contain e.g. monthly data and be labelled as 2012 but 
+        # e.g. a flux / emissions file could contain e.g. monthly data and be labelled as 2012 but
         # contain 12 time points labelled as 2012-01-01, 2012-02-01, etc.
         n_dates = em_data.time.size
 
