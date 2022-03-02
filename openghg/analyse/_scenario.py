@@ -473,6 +473,12 @@ class ModelScenario:
 
         resample_keyword_choices = ("obs", "footprint", "coarsest")
 
+        # Check whether resample has been requested by specifying a specific period rather than a keyword
+        if resample_to in resample_keyword_choices:
+            force_resample = False
+        else:
+            force_resample = True
+
         if platform is not None:
             platform = platform.lower()
             # Do not apply resampling for "satellite" (but have re-included "flask" for now)
@@ -526,6 +532,13 @@ class ModelScenario:
         )
         footprint_data_timeperiod = Timedelta(footprint_data_period_ns, unit="ns")
 
+        # If resample_to is set to "coarsest", check whether "obs" or "footprint" have lower resolution
+        if resample_to == "coarsest":
+            if obs_data_timeperiod >= footprint_data_timeperiod:
+                resample_to = "obs"
+            elif obs_data_timeperiod < footprint_data_timeperiod:
+                resample_to = "footprint"
+
         # Here we want timezone naive Timestamps
         # Add sampling period to end date to make sure resample includes these values when matching
         obs_startdate = Timestamp(obs_data.time[0].values)
@@ -536,25 +549,18 @@ class ModelScenario:
         start_date = max(obs_startdate, footprint_startdate)
         end_date = min(obs_enddate, footprint_enddate)
 
-        # Calculate start time buffer for matching
-        if obs_data_period_ns > footprint_data_period_ns:
-            start_buffer = obs_data_timeperiod
-        else:
-            start_buffer = footprint_data_timeperiod
-
-        # Subtract larger time period to ensure lower range covered
-        start_slice = start_date - start_buffer
+        # Ensure lower range is covered for obs
+        start_obs_slice = start_date - Timedelta("1ns")
+        # Ensure extra buffer is added for footprint based on fp timeperiod.
+        # This is to ensure footprint can be forward-filled to obs (in later steps)
+        start_footprint_slice = start_date - (footprint_data_timeperiod - Timedelta("1ns"))
         # Subtract very small time increment (1 nanosecond) to make this an exclusive selection
         end_slice = end_date - Timedelta("1ns")
 
-        obs_data = obs_data.sel(time=slice(start_slice, end_slice))
-        footprint_data = footprint_data.sel(time=slice(start_slice, end_slice))
+        obs_data = obs_data.sel(time=slice(start_obs_slice, end_slice))
+        footprint_data = footprint_data.sel(time=slice(start_footprint_slice, end_slice))
 
-        # Check whether resample has been requested by specifying a specific period rather than a keyword
-        if resample_to in resample_keyword_choices:
-            force_resample = False
-        else:
-            force_resample = True
+
 
         # Only non satellite datasets with different periods need to be resampled
         timeperiod_diff_s = np.abs(obs_data_timeperiod - footprint_data_timeperiod).total_seconds()
@@ -562,12 +568,6 @@ class ModelScenario:
 
         if timeperiod_diff_s >= tolerance or force_resample:
             base = start_date.hour + start_date.minute / 60.0 + start_date.second / 3600.0
-
-            if resample_to == "coarsest":
-                if obs_data_timeperiod >= footprint_data_timeperiod:
-                    resample_to = "obs"
-                elif obs_data_timeperiod < footprint_data_timeperiod:
-                    resample_to = "footprint"
 
             if resample_to == "obs":
                 resample_period = str(round(obs_data_timeperiod / np.timedelta64(1, "h"), 5)) + "H"
@@ -1245,6 +1245,8 @@ class ModelScenario:
         Plot comparison between observation and modelled timeseries data.
 
         Args:
+            baseline: Add baseline to data. Only option is "percentile" for now but boundary
+                      conditions will be added soon.
             sources: Sources to use for flux. All will be used and stacked if not specified.
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
@@ -1258,6 +1260,8 @@ class ModelScenario:
             Plotly Figure
 
             Interactive plotly graph created with observation and modelled observation data.
+
+        TODO: Incorporate boundary conditions to use for baseline
         """
         # Only import plotly when we need to - not needed if not plotting.
         import plotly.graph_objects as go
