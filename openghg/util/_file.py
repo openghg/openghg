@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Any, Dict, List, Union, Optional, Callable
 
-import urllib.request
-from tqdm import tqdm
+# import urllib.request
+# from tqdm import tqdm
 
 
 # class _TqdmUpTo(tqdm):
