@@ -12,7 +12,7 @@ kernelspec:
   name: python3
 ---
 
-# Workflow: processing, searching and retrieving observations
+# Workflow 1: processing, searching and retrieving observations
 
 This tutorial demonstrates how OpenGHG can be used to process new measurement data, search the data present and to retrieve this for analysis and visualisation.
 
@@ -120,9 +120,9 @@ As this data is measured in-situ, this is classed as a surface site and we need 
 This is shown below:
 
 ```{code-cell} ipython3
-from openghg.client import process_files
+from openghg.client import process_obs
 
-decc_results = process_files(files=tac_data, data_type="CRDS", site="TAC", network="DECC")
+decc_results = process_obs(files=tac_data, data_type="CRDS", site="TAC", network="DECC")
 ```
 
 ```{code-cell} ipython3
@@ -172,7 +172,7 @@ We can add these files to the object store in the same way as the DECC data by i
  - network - `"AGAGE"`
 
 ```{code-cell} ipython3
-agage_results = process_files(files=capegrim_tuple, data_type="GCWERKS", site="CGO", 
+agage_results = process_obs(files=capegrim_tuple, data_type="GCWERKS", site="CGO", 
                               network="AGAGE", instrument="medusa")
 ```
 

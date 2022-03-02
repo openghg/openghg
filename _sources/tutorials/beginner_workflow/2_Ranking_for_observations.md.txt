@@ -12,7 +12,7 @@ kernelspec:
   name: python3
 ---
 
-# Workflow: handling overlapping observation data
+# Workflow 2: handling overlapping observation data
 
 +++
 
@@ -35,14 +35,15 @@ Often, when retrieving data for comparison there will be preferences between the
 To demonstrate this we will start by loading data from the Bilsdale ("BSD") site within the DECC network with measurements of the same species at multiple inlet heights.
 
 ```{code-cell} ipython3
-from openghg.store import ObsSurface
+from openghg.client import process_obs
 
 bsd_filepaths = ["../data/DECC/bsd.picarro.1minute.42m.min.dat", "../data/DECC/bsd.picarro.1minute.108m.min.dat", "../data/DECC/bsd.picarro.1minute.248m.min.dat"]
-decc_results = ObsSurface.read_file(filepath=bsd_filepaths, data_type="CRDS", site="bsd", network="DECC")
+decc_results = process_obs(files=bsd_filepaths, data_type="CRDS", site="bsd", network="DECC")
 ```
 
 ```{code-cell} ipython3
 from openghg.retrieve import search
+
 search(site="bsd", species="co")
 ```
 

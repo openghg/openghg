@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>client API Detail &#8212; OpenGHG 0+untagged.3.g01475dc.dirty documentation</title>
+    <title>client API Detail &#8212; OpenGHG 0+untagged.3.g8f6845a.dirty documentation</title>
     
     <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -219,32 +219,6 @@ functions, if it is absent the call will the routed to a local function.</p>
 <span class="target" id="module-openghg.client"></span><section id="processing-and-standardisation">
 <h2>Processing and standardisation<a class="headerlink" href="#processing-and-standardisation" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">process_files</span></code> function is used to upload data files for standardisation and storage in the object store</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.client.process_files">
-<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">process_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_process.html#process_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.process_files" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process data files, standardise them and add the data to the object store</p>
-<blockquote>
-<div><dl class="simple">
-<dt>Args:</dt><dd><p>files: Path of files to be processed
-data_type: Type of data to be processed (CRDS, GC etc)
-site: Site code or name
-network: Network name
-instrument: Instrument name
-overwrite: Should this data overwrite data
-stored for these datasources for existing dateranges</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>UUIDs of Datasources storing data of processed files keyed by filename</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
 <section id="search-client">
 <h2>search (client)<a class="headerlink" href="#search-client" title="Permalink to this headline">¶</a></h2>

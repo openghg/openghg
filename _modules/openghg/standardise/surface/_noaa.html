@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.3.g01475dc.dirty documentation</title>
+    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.3.g8f6845a.dirty documentation</title>
     
     <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -223,7 +223,7 @@
 
 
 <span class="k">def</span> <span class="nf">_format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Output inlet name in expected format. This will include 1 decimal place for floats with a fractional component</span>
 <span class="sd">    and 0 decimal places otherwise.</span>
 
@@ -240,12 +240,12 @@
 <span class="sd">        &quot;10m&quot;</span>
 <span class="sd">        &gt;&gt;&gt; _format_inlet(2.511432)</span>
 <span class="sd">        &quot;2.5m&quot;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inlet</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">inlet_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">inlet_values_str</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="n">inlet_values_str</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">inlet_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">inlet_values_str</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
@@ -264,7 +264,7 @@
 
 
 <span class="k">def</span> <span class="nf">_standarise_variables</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Converts data from NOAA ObsPack dataset into our standardised variables to be stored within the object store.</span>
 <span class="sd">    The species is also needed so this name can be used to label the variables in the new dataset.</span>
 
@@ -282,7 +282,7 @@
 <span class="sd">            xarray.Dataset(&quot;ch4&quot;:[...]</span>
 <span class="sd">                           &quot;ch4_variability&quot;:[...]</span>
 <span class="sd">                           &quot;ch4_number_of_observations&quot;: [...])</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">processed_ds</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
@@ -291,12 +291,10 @@
     <span class="c1"># &quot;value_unc&quot; --&gt; ??</span>
     <span class="c1"># TODO: Clarify what &quot;value_unc&quot; should be renamed to</span>
 
-    <span class="n">variable_names</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
-        <span class="s2">&quot;value_std_dev&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;value_unc&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">,</span>  <span class="c1"># May need to be updated</span>
-        <span class="s2">&quot;nvalue&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_number_of_observations&quot;</span><span class="p">,</span>
-    <span class="p">}</span>
+    <span class="n">variable_names</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
+                      <span class="s2">&quot;value_std_dev&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;value_unc&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_variability&quot;</span><span class="p">,</span>  <span class="c1"># May need to be updated</span>
+                      <span class="s2">&quot;nvalue&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_number_of_observations&quot;</span><span class="p">}</span>
 
     <span class="n">to_extract</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">variable_names</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">obspack_ds</span><span class="p">]</span>
 
@@ -342,8 +340,11 @@
     <span class="k">return</span> <span class="n">processed_ds</span>
 
 
-<span class="k">def</span> <span class="nf">_split_inlets</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">_split_inlets</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
+                  <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+                  <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+                  <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Splits the overall dataset by different inlet values, if present. The expected dataset input should be from the NOAA ObsPack.</span>
 
 <span class="sd">    Args:</span>
@@ -359,7 +360,7 @@
 <span class="sd">        or</span>
 <span class="sd">        {&quot;ch4_40m&quot;: {&quot;data&quot;: xr.Dataset(...), &quot;attributes&quot;: {...}, &quot;metadata&quot;: {...}}, &quot;ch4_60m&quot;: {...}, ...}</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">orig_attrs</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span>
     <span class="n">species</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
@@ -376,9 +377,7 @@
 
         <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># TODO: Add to logging?</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;WARNING: Ignoring inlet value of </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2"> since file has each data point has an associated height (contains &#39;intake_height&#39; variable)&quot;</span>
-            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING: Ignoring inlet value of </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2"> since file has each data point has an associated height (contains &#39;intake_height&#39; variable)&quot;</span><span class="p">)</span>
 
         <span class="c1"># Group dataset by the height values</span>
         <span class="c1"># Note: could use ds.groupby_bins(...) if necessary if there are lots of small height differences to group these</span>
@@ -431,13 +430,9 @@
             <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet_from_file</span>
         <span class="k">elif</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">inlet_from_file</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">inlet</span> <span class="o">!=</span> <span class="n">inlet_from_file</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;WARNING: Provided inlet </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2"> does not match inlet derived from the input file: </span><span class="si">{</span><span class="n">inlet_from_file</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING: Provided inlet </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2"> does not match inlet derived from the input file: </span><span class="si">{</span><span class="n">inlet_from_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass &#39;flask&#39; as inlet.&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass &#39;flask&#39; as inlet.&quot;</span><span class="p">)</span>
 
         <span class="n">id_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&quot;</span>
 
@@ -556,9 +551,7 @@
 
     <span class="c1"># Add additional sampling_period_estimate if sampling_period is not set</span>
     <span class="k">if</span> <span class="n">sampling_period_estimate</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">:</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period_estimate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
-            <span class="n">sampling_period_estimate</span>
-        <span class="p">)</span>  <span class="c1"># convert to string to keep consistent with &quot;sampling_period&quot;</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period_estimate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period_estimate</span><span class="p">)</span>  <span class="c1"># convert to string to keep consistent with &quot;sampling_period&quot;</span>
 
     <span class="c1"># Add instrument if present</span>
     <span class="k">if</span> <span class="n">instrument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -593,7 +586,9 @@
 
     <span class="n">gas_data</span> <span class="o">=</span> <span class="n">_split_inlets</span><span class="p">(</span><span class="n">processed_ds</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span>
 
-    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>
+    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span>
+        <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+        <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">gas_data</span>
 
@@ -804,7 +799,7 @@
 
 
 <span class="k">def</span> <span class="nf">_estimate_sampling_period</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">min_estimate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Estimate the sampling period for the NOAA data using either the &quot;data_selection_tag&quot;</span>
 <span class="sd">    attribute (this sometimes contains useful information such as &quot;HourlyData&quot;) or by using</span>
 <span class="sd">    the midpoint_time within the data itself.</span>
@@ -821,7 +816,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        int: Seconds for the estimated sampling period.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="c1"># Check useful attributes</span>
     <span class="n">data_selection</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;dataset_selection_tag&quot;</span><span class="p">]</span>
 
@@ -829,17 +824,11 @@
     <span class="n">daily_s</span> <span class="o">=</span> <span class="n">hourly_s</span> <span class="o">*</span> <span class="mi">24</span>
     <span class="n">weekly_s</span> <span class="o">=</span> <span class="n">daily_s</span> <span class="o">*</span> <span class="mi">7</span>
     <span class="n">monthly_s</span> <span class="o">=</span> <span class="n">weekly_s</span> <span class="o">*</span> <span class="mi">28</span>  <span class="c1"># approx</span>
-    <span class="n">yearly_s</span> <span class="o">=</span> <span class="n">daily_s</span> <span class="o">*</span> <span class="mi">365</span>  <span class="c1"># approx</span>
+    <span class="n">yearly_s</span> <span class="o">=</span> <span class="n">daily_s</span> <span class="o">*</span> <span class="mi">365</span>   <span class="c1"># approx</span>
 
     <span class="n">sampling_period_estimate</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># seconds</span>
 
-    <span class="n">frequency_keywords</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;hourly&quot;</span><span class="p">:</span> <span class="n">hourly_s</span><span class="p">,</span>
-        <span class="s2">&quot;daily&quot;</span><span class="p">:</span> <span class="n">daily_s</span><span class="p">,</span>
-        <span class="s2">&quot;weekly&quot;</span><span class="p">:</span> <span class="n">weekly_s</span><span class="p">,</span>
-        <span class="s2">&quot;monthly&quot;</span><span class="p">:</span> <span class="n">monthly_s</span><span class="p">,</span>
-        <span class="s2">&quot;yearly&quot;</span><span class="p">:</span> <span class="n">yearly_s</span><span class="p">,</span>
-    <span class="p">}</span>
+    <span class="n">frequency_keywords</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;hourly&quot;</span><span class="p">:</span> <span class="n">hourly_s</span><span class="p">,</span> <span class="s2">&quot;daily&quot;</span><span class="p">:</span> <span class="n">daily_s</span><span class="p">,</span> <span class="s2">&quot;weekly&quot;</span><span class="p">:</span> <span class="n">weekly_s</span><span class="p">,</span> <span class="s2">&quot;monthly&quot;</span><span class="p">:</span> <span class="n">monthly_s</span><span class="p">,</span> <span class="s2">&quot;yearly&quot;</span><span class="p">:</span> <span class="n">yearly_s</span><span class="p">}</span>
     <span class="k">for</span> <span class="n">freq</span><span class="p">,</span> <span class="n">time_s</span> <span class="ow">in</span> <span class="n">frequency_keywords</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">freq</span> <span class="ow">in</span> <span class="n">data_selection</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
             <span class="n">sampling_period_estimate</span> <span class="o">=</span> <span class="n">time_s</span>

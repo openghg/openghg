@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.meta._metadata &#8212; OpenGHG 0+untagged.3.g01475dc.dirty documentation</title>
+    <title>openghg.standardise.meta._metadata &#8212; OpenGHG 0+untagged.3.g8f6845a.dirty documentation</title>
     
     <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -169,8 +169,6 @@
   <h1>Source code for openghg.standardise.meta._metadata</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">is_number</span>
 
 
 <div class="viewcode-block" id="surface_standardise"><a class="viewcode-back" href="../../../../api/api_standardise.html#openghg.standardise.meta.surface_standardise">[docs]</a><span class="k">def</span> <span class="nf">surface_standardise</span><span class="p">(</span>
@@ -196,16 +194,8 @@
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">attr_value</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-
-            <span class="c1"># This should mainly be used for lat/long</span>
-            <span class="n">relative_tolerance</span> <span class="o">=</span> <span class="mf">1e-3</span>
-
-            <span class="k">if</span> <span class="n">is_number</span><span class="p">(</span><span class="n">attr_value</span><span class="p">):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">attr_value</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="n">relative_tolerance</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Value not within tolerance, metadata: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> - attributes: </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metadata mismatch, metadata: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> - attributes: </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metadata mismatch, metadata: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> - attributes: </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="c1"># Key wasn&#39;t in attributes for comparison</span>
             <span class="k">pass</span>
@@ -226,7 +216,6 @@
         <span class="s2">&quot;station_height_masl&quot;</span><span class="p">,</span>
         <span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">,</span>
     <span class="p">]</span>
-
     <span class="k">if</span> <span class="n">keys_to_add</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">keys_to_add</span> <span class="o">=</span> <span class="n">default_keys_to_add</span>
 
