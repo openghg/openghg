@@ -54,7 +54,7 @@ def parse_noaa(
 
 
 def _format_inlet(inlet: Union[str, float, int]) -> str:
-    '''
+    """
     Output inlet name in expected format. This will include 1 decimal place for floats with a fractional component
     and 0 decimal places otherwise.
 
@@ -71,12 +71,12 @@ def _format_inlet(inlet: Union[str, float, int]) -> str:
         "10m"
         >>> _format_inlet(2.511432)
         "2.5m"
-    '''
+    """
     if isinstance(inlet, str):
         try:
             inlet_value = float(inlet)
         except ValueError:
-            inlet_values_str = inlet.split('-')
+            inlet_values_str = inlet.split("-")
             try:
                 inlet_values = [float(value) for value in inlet_values_str]
             except ValueError:
@@ -95,7 +95,7 @@ def _format_inlet(inlet: Union[str, float, int]) -> str:
 
 
 def _standarise_variables(obspack_ds: Dataset, species: str) -> Dataset:
-    '''
+    """
     Converts data from NOAA ObsPack dataset into our standardised variables to be stored within the object store.
     The species is also needed so this name can be used to label the variables in the new dataset.
 
@@ -113,7 +113,7 @@ def _standarise_variables(obspack_ds: Dataset, species: str) -> Dataset:
             xarray.Dataset("ch4":[...]
                            "ch4_variability":[...]
                            "ch4_number_of_observations": [...])
-    '''
+    """
 
     processed_ds = obspack_ds.copy()
 
@@ -122,10 +122,12 @@ def _standarise_variables(obspack_ds: Dataset, species: str) -> Dataset:
     # "value_unc" --> ??
     # TODO: Clarify what "value_unc" should be renamed to
 
-    variable_names = {"value": species,
-                      "value_std_dev": f"{species}_variability",
-                      "value_unc": f"{species}_variability",  # May need to be updated
-                      "nvalue": f"{species}_number_of_observations"}
+    variable_names = {
+        "value": species,
+        "value_std_dev": f"{species}_variability",
+        "value_unc": f"{species}_variability",  # May need to be updated
+        "nvalue": f"{species}_number_of_observations",
+    }
 
     to_extract = [name for name in variable_names.keys() if name in obspack_ds]
 
@@ -171,11 +173,8 @@ def _standarise_variables(obspack_ds: Dataset, species: str) -> Dataset:
     return processed_ds
 
 
-def _split_inlets(obspack_ds: Dataset,
-                  attributes: Dict,
-                  metadata: Dict,
-                  inlet: Optional[str] = None) -> Dict:
-    '''
+def _split_inlets(obspack_ds: Dataset, attributes: Dict, metadata: Dict, inlet: Optional[str] = None) -> Dict:
+    """
     Splits the overall dataset by different inlet values, if present. The expected dataset input should be from the NOAA ObsPack.
 
     Args:
@@ -191,7 +190,7 @@ def _split_inlets(obspack_ds: Dataset,
         or
         {"ch4_40m": {"data": xr.Dataset(...), "attributes": {...}, "metadata": {...}}, "ch4_60m": {...}, ...}
 
-    '''
+    """
 
     orig_attrs = obspack_ds.attrs
     species = attributes["species"]
@@ -208,7 +207,9 @@ def _split_inlets(obspack_ds: Dataset,
 
         if inlet is not None:
             # TODO: Add to logging?
-            print(f"WARNING: Ignoring inlet value of {inlet} since file has each data point has an associated height (contains 'intake_height' variable)")
+            print(
+                f"WARNING: Ignoring inlet value of {inlet} since file has each data point has an associated height (contains 'intake_height' variable)"
+            )
 
         # Group dataset by the height values
         # Note: could use ds.groupby_bins(...) if necessary if there are lots of small height differences to group these
@@ -261,9 +262,13 @@ def _split_inlets(obspack_ds: Dataset,
             inlet = inlet_from_file
         elif inlet is not None and inlet_from_file:
             if inlet != inlet_from_file:
-                print(f"WARNING: Provided inlet {inlet} does not match inlet derived from the input file: {inlet_from_file}")
+                print(
+                    f"WARNING: Provided inlet {inlet} does not match inlet derived from the input file: {inlet_from_file}"
+                )
         else:
-            raise ValueError("Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass 'flask' as inlet.")
+            raise ValueError(
+                "Unable to derive inlet from NOAA file. Please pass as an input. If flask data pass 'flask' as inlet."
+            )
 
         id_key = f"{species}"
 
@@ -382,7 +387,9 @@ def _read_obspack(
 
     # Add additional sampling_period_estimate if sampling_period is not set
     if sampling_period_estimate >= 0.0:
-        metadata["sampling_period_estimate"] = str(sampling_period_estimate)  # convert to string to keep consistent with "sampling_period"
+        metadata["sampling_period_estimate"] = str(
+            sampling_period_estimate
+        )  # convert to string to keep consistent with "sampling_period"
 
     # Add instrument if present
     if instrument is not None:
@@ -417,9 +424,7 @@ def _read_obspack(
 
     gas_data = _split_inlets(processed_ds, attributes, metadata, inlet=inlet)
 
-    gas_data = assign_attributes(data=gas_data,
-        site=site,
-        network=network)
+    gas_data = assign_attributes(data=gas_data, site=site, network=network)
 
     return gas_data
 
@@ -630,7 +635,7 @@ def _read_raw_data(
 
 
 def _estimate_sampling_period(obspack_ds: Dataset, min_estimate: float = 10.0) -> float:
-    '''
+    """
     Estimate the sampling period for the NOAA data using either the "data_selection_tag"
     attribute (this sometimes contains useful information such as "HourlyData") or by using
     the midpoint_time within the data itself.
@@ -647,7 +652,7 @@ def _estimate_sampling_period(obspack_ds: Dataset, min_estimate: float = 10.0) -
 
     Returns:
         int: Seconds for the estimated sampling period.
-    '''
+    """
     # Check useful attributes
     data_selection = obspack_ds.attrs["dataset_selection_tag"]
 
@@ -655,11 +660,17 @@ def _estimate_sampling_period(obspack_ds: Dataset, min_estimate: float = 10.0) -
     daily_s = hourly_s * 24
     weekly_s = daily_s * 7
     monthly_s = weekly_s * 28  # approx
-    yearly_s = daily_s * 365   # approx
+    yearly_s = daily_s * 365  # approx
 
     sampling_period_estimate = 0.0  # seconds
 
-    frequency_keywords = {"hourly": hourly_s, "daily": daily_s, "weekly": weekly_s, "monthly": monthly_s, "yearly": yearly_s}
+    frequency_keywords = {
+        "hourly": hourly_s,
+        "daily": daily_s,
+        "weekly": weekly_s,
+        "monthly": monthly_s,
+        "yearly": yearly_s,
+    }
     for freq, time_s in frequency_keywords.items():
         if freq in data_selection.lower():
             sampling_period_estimate = time_s

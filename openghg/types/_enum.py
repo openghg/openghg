@@ -3,6 +3,7 @@ from enum import Enum
 
 class SurfaceTypes(Enum):
     """For standardising surface measurements"""
+
     BTT = "BTT"
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"

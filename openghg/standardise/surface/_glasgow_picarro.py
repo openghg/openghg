@@ -36,7 +36,7 @@ def parse_glasow_picarro(
     units = {"ch4": "ppb", "co2": "ppm"}
 
     if sampling_period is None:
-        sampling_period = "NOT_SET"    
+        sampling_period = "NOT_SET"
 
     gas_data = aDict()
     for s in species:
