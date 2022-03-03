@@ -186,15 +186,15 @@ class SearchResults:
         return data_dict
 
     def retrieve(
-        self, site: str = None, species: str = None, inlet: str = None
-    ) -> Union[Dict[str, ObsData], ObsData]:
+        self, site: Optional[str] = None, species: Optional[str] = None, inlet: Optional[str] = None
+    ) -> Union[Dict[str, ObsData], ObsData, None]:
         """Retrieve some or all of the data found in the object store.
 
         Args:
             site: Three letter site code
             species: Species name
         Returns:
-            ObsData or dict
+            ObsData or dictionary of ObsData objects
         """
         site = clean_string(site)
         species = clean_string(species)
@@ -258,7 +258,13 @@ class SearchResults:
             # if len(self.results) == 1 and not all((species, inlet)):
             #     raise ValueError("Please pass species and inlet")
             if not all((species, site, inlet)):
-                raise ValueError("Please pass site, species and inlet")
+                try:
+                    potential_inlets = ", ".join(self.results[site][species].keys())
+                    print(f"Please refine your search, potential inlets are: {potential_inlets}")
+                except KeyError:
+                    raise ValueError("We expect species, site and inlet to be passed.")
+                else:
+                    return None
 
             # TODO - how to do this in a cleaner way for mypy?
             site = str(site)
