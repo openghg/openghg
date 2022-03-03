@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-and-publish:
-    name: Build and publish Python distributions 📦 to PyPI and TestPyPI
+    name: Build and publish Python package 📦 to PyPI and TestPyPI
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
