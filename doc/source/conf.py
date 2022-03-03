@@ -273,6 +273,8 @@ nbsphinx_custom_formats = {
     ".md": ["jupytext.reads", {"fmt": "mystnb"}],
 }
 
+execution_excludepatterns = ["4_Working_with_co2.*", "5_Explore_NOAA_ObsPack.*"]
+
 # Napoleon settings
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
