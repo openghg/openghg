@@ -13,8 +13,7 @@ with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
 setuptools.setup(
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
+    version="1.0.0",
     install_requires=requirements,
     name="openghg",
     author="Gareth Jones",

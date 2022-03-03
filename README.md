@@ -18,22 +18,24 @@ You can login to our [OpenGHG Cloud JupyterHub](https://hub.openghg.org) and use
 
 To run OpenGHG locally you'll need Python 3.7 or later on Linux or MacOS, we don't currently support Windows.
 
-### Clone Acquire
-
-First we need to clone [Acquire](https://github.com/openghg/acquire) is required to be in the parent directory. To do this
-
-```
-$ git clone https://github.com/openghg/acquire.git
-```
-
 ### Install OpenGHG
 
-Next, in the same directory do
+You can install OpenGHG using `pip`. We recommend you create a virtual environment first
 
 ```
-$ git clone https://github.com/openghg/openghg.git
-$ cd openghg
-$ pip install .
+$ python -m venv openghg_env
+```
+
+Then activate the environment
+
+```
+$ source openghg_env/bin/activate
+```
+
+Then install OpenGHG
+
+```
+$ pip install openghg
 ```
 
 ### Set environment variable
@@ -46,16 +48,43 @@ Please add the following line to your shell profile (`~/.bashrc`, `~/.profile`, 
 OPENGHG_PATH=/your/selected/path
 ```
 
-### Run the tests
+We recommend a path such as `/home/your_username/openghg_store`.
 
-Making sure you're in the `openghg` directory we need to install the developer requirements, this makes sure we have everything
-we need to run the tests.
+## Developers
+
+If you'd like to contribute to OpenGHG please see the contributing section of our documentation. If you'd like to take a look at the source and run the tests follow the steps below.
+
+### Clone
 
 ```
+$ git clone https://github.com/openghg/openghg.git
+```
+
+### Install dependencies
+
+We recommend you create a virtual environment first
+
+```
+$ python -m venv openghg_env
+```
+
+Then activate the environment
+
+```
+$ source openghg_env/bin/activate
+```
+
+Then install the dependencies
+
+```
+$ cd openghg
+$ pip install --upgrade pip wheel
 $ pip install -r requirements-dev.txt
 ```
 
-Then
+### Run the tests
+
+To run the tests
 
 ```
 $ pytest -v tests/
@@ -63,7 +92,7 @@ $ pytest -v tests/
 
 > **_NOTE:_**  Some of the tests require the [udunits2](https://www.unidata.ucar.edu/software/udunits/) library to be installed.
 
-The `udunits` package is not `pip` installable but if you're on Debian / Ubuntu you can do
+The `udunits` package is not `pip` installable so we've added a separate flag to specifically run these tests. If you're on Debian / Ubuntu you can do
 
 ```
 $ sudo apt-get install libudunits2-0
