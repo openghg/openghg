@@ -9,7 +9,7 @@ __all__ = ["get_obs_surface", "get_footprint", "get_flux"]
 def get_obs_surface(
     site: str,
     species: str,
-    inlet: str = None,
+    inlet: Optional[str] = None,
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
     average: Optional[str] = None,
@@ -18,7 +18,7 @@ def get_obs_surface(
     calibration_scale: Optional[str] = None,
     keep_missing: Optional[bool] = False,
     skip_ranking: Optional[bool] = False,
-) -> ObsData:
+) -> Union[ObsData, None]:
     """Get measurements from one site.
 
     Args:
@@ -67,8 +67,13 @@ def get_obs_surface(
     if not obs_results:
         raise ValueError(f"Unable to find results for {species} at {site}")
 
-    retrieved_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
+    retrieved_data: Union[ObsData, None] = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
+    
+    if retrieved_data is None:
+        return None
+
     data = retrieved_data.data
+
 
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
