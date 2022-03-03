@@ -67,7 +67,7 @@ jobs:
       if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
     - name: Ensure notebooks can be executed correctly
       run: |
-        jupytext --sync --execute notebooks/tutorials/*/*.ipynb
+        jupytext --sync --execute notebooks/tutorials/beginner_workflow/{1,2,3}_*.ipynb
       if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
     - name: Build documentation
       run: |
