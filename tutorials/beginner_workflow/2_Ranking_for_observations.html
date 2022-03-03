@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 2: handling overlapping observation data &#8212; OpenGHG 0+untagged.2.ge7f79e7.dirty documentation</title>
+    <title>Workflow 2: handling overlapping observation data &#8212; OpenGHG 0+untagged.2.g3fd4c76.dirty documentation</title>
     
     <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -43,7 +43,7 @@
     <script src="../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Development" href="../../development/index_devel.html" />
+    <link rel="next" title="Workflow 3: comparing observations to emissions" href="3_Comparing_with_emissions.html" />
     <link rel="prev" title="Workflow 1: processing, searching and retrieving observations" href="1_Adding_observation_data.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="en">
@@ -159,6 +159,27 @@
   </a>
  </li>
 </ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="3_Comparing_with_emissions.html">
+   Workflow 3: comparing observations to emissions
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="4_Working_with_co2.html">
+   Workflow 4: Working with carbon dioxide
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="5_Explore_NOAA_ObsPack.html">
+   Workflow 5: Explore NOAA ObsPack
+  </a>
+ </li>
+</ul>
 
   </div>
 </nav>
@@ -264,22 +285,22 @@
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.42m.min.dat:   0%|          | 0/3 [00:00&lt;?, ?it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.42m.min.dat:  33%|███▎      | 1/3 [00:00&lt;00:00,  4.96it/s]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.42m.min.dat:  33%|███▎      | 1/3 [00:00&lt;00:00,  3.60it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.108m.min.dat:  33%|███▎      | 1/3 [00:00&lt;00:00,  4.96it/s]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.108m.min.dat:  33%|███▎      | 1/3 [00:00&lt;00:00,  3.60it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.108m.min.dat:  67%|██████▋   | 2/3 [00:00&lt;00:00,  4.99it/s]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.108m.min.dat:  67%|██████▋   | 2/3 [00:00&lt;00:00,  3.60it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat:  67%|██████▋   | 2/3 [00:00&lt;00:00,  4.99it/s]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat:  67%|██████▋   | 2/3 [00:00&lt;00:00,  3.60it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 3/3 [00:00&lt;00:00,  4.97it/s]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 3/3 [00:00&lt;00:00,  3.69it/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 3/3 [00:00&lt;00:00,  4.97it/s]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing: bsd.picarro.1minute.248m.min.dat: 100%|██████████| 3/3 [00:00&lt;00:00,  3.66it/s]
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -776,7 +797,7 @@ Attributes: (12/24)
     station_latitude:      54.35858
     station_long_name:     Bilsdale, UK
     station_height_masl:   380.0
-    scale:                 WMO-X2014A</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-afc1deb9-2f36-4c9f-99bb-135ce0f89ea2' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-afc1deb9-2f36-4c9f-99bb-135ce0f89ea2' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 140</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-163558f0-76a6-4eab-94df-153674c6bb91' class='xr-section-summary-in' type='checkbox'  checked><label for='section-163558f0-76a6-4eab-94df-153674c6bb91' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2014-01-30T11:12:30 ... 2020-12-...</div><input id='attrs-e77e45e9-2604-4be1-aa5b-380af33796e8' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-e77e45e9-2604-4be1-aa5b-380af33796e8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-26ceb91a-f53d-4d6a-98f1-a607bc6c461c' class='xr-var-data-in' type='checkbox'><label for='data-26ceb91a-f53d-4d6a-98f1-a607bc6c461c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>label :</span></dt><dd>left</dd><dt><span>standard_name :</span></dt><dd>time</dd><dt><span>comment :</span></dt><dd>Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.</dd><dt><span>sampling_period_seconds :</span></dt><dd>60</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2014-01-30T11:12:30.000000000&#x27;, &#x27;2014-01-30T11:13:30.000000000&#x27;,
+    scale:                 WMO-X2014A</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-4dfab441-9218-4519-8047-2fc2395008d4' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-4dfab441-9218-4519-8047-2fc2395008d4' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 140</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-47a825ef-3f6f-4bc6-81e7-d76a6bc39a2e' class='xr-section-summary-in' type='checkbox'  checked><label for='section-47a825ef-3f6f-4bc6-81e7-d76a6bc39a2e' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2014-01-30T11:12:30 ... 2020-12-...</div><input id='attrs-58091fd9-1a11-4b56-b2f2-03bba9f7340b' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-58091fd9-1a11-4b56-b2f2-03bba9f7340b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-01266287-ace8-4809-9854-ab5cb2876898' class='xr-var-data-in' type='checkbox'><label for='data-01266287-ace8-4809-9854-ab5cb2876898' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>label :</span></dt><dd>left</dd><dt><span>standard_name :</span></dt><dd>time</dd><dt><span>comment :</span></dt><dd>Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.</dd><dt><span>sampling_period_seconds :</span></dt><dd>60</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2014-01-30T11:12:30.000000000&#x27;, &#x27;2014-01-30T11:13:30.000000000&#x27;,
        &#x27;2014-01-30T11:14:30.000000000&#x27;, &#x27;2014-01-30T11:15:30.000000000&#x27;,
        &#x27;2014-01-30T11:16:30.000000000&#x27;, &#x27;2014-01-30T11:17:30.000000000&#x27;,
        &#x27;2014-01-30T11:18:30.000000000&#x27;, &#x27;2014-11-30T11:19:30.000000000&#x27;,
@@ -846,7 +867,7 @@ Attributes: (12/24)
        &#x27;2020-12-01T21:34:30.000000000&#x27;, &#x27;2020-12-01T21:35:30.000000000&#x27;,
        &#x27;2020-12-01T22:28:30.000000000&#x27;, &#x27;2020-12-01T22:29:30.000000000&#x27;,
        &#x27;2020-12-01T22:30:30.000000000&#x27;, &#x27;2020-12-01T22:31:30.000000000&#x27;],
-      dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-2d6a272a-2fcb-4792-b792-b105e8e95d20' class='xr-section-summary-in' type='checkbox'  checked><label for='section-2d6a272a-2fcb-4792-b792-b105e8e95d20' class='xr-section-summary' >Data variables: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mf</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>202.4 203.2 205.1 ... 114.5 114.2</div><input id='attrs-2d040cf0-79e0-4561-8bc1-3435e0b6c13c' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-2d040cf0-79e0-4561-8bc1-3435e0b6c13c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5070d9b2-f094-43de-b01d-427c2a145daa' class='xr-var-data-in' type='checkbox'><label for='data-5070d9b2-f094-43de-b01d-427c2a145daa' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_monoxide_in_air</dd><dt><span>units :</span></dt><dd>1e-9</dd></dl></div><div class='xr-var-data'><pre>array([202.44, 203.23, 205.1 , 202.88, 203.88, 201.73, 203.14, 204.18,
+      dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-de745438-48cd-4301-b218-d9786d726150' class='xr-section-summary-in' type='checkbox'  checked><label for='section-de745438-48cd-4301-b218-d9786d726150' class='xr-section-summary' >Data variables: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>mf</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>202.4 203.2 205.1 ... 114.5 114.2</div><input id='attrs-dd7c3973-2707-4d8e-8f53-ef603788c9b7' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-dd7c3973-2707-4d8e-8f53-ef603788c9b7' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-535e49bc-b8b1-499c-b83c-4b6abdc2e03e' class='xr-var-data-in' type='checkbox'><label for='data-535e49bc-b8b1-499c-b83c-4b6abdc2e03e' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_monoxide_in_air</dd><dt><span>units :</span></dt><dd>1e-9</dd></dl></div><div class='xr-var-data'><pre>array([202.44, 203.23, 205.1 , 202.88, 203.88, 201.73, 203.14, 204.18,
        204.96, 202.14, 203.67, 202.82, 202.44, 203.23, 205.1 , 202.88,
        203.88, 201.73, 203.14, 204.18, 204.96, 202.14, 203.67, 202.82,
        202.44, 203.23, 205.1 , 202.88, 203.88, 201.73, 203.14, 204.18,
@@ -863,7 +884,7 @@ Attributes: (12/24)
        125.78, 125.19, 125.01, 126.96, 125.78, 123.71, 126.91, 125.81,
        116.12, 116.88, 116.82, 116.1 , 119.01, 114.81, 115.39, 116.67,
        112.79, 114.04, 116.04, 114.86, 112.33, 113.44, 112.31, 116.25,
-       113.78, 113.92, 114.48, 114.24])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_variability</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>5.265 6.307 8.518 ... 7.339 5.405</div><input id='attrs-8e3137f9-d5bf-4a3b-8979-cfd4c26802b6' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-8e3137f9-d5bf-4a3b-8979-cfd4c26802b6' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0d5bc71d-4c0e-479d-a4d7-4d993017fc9b' class='xr-var-data-in' type='checkbox'><label for='data-0d5bc71d-4c0e-479d-a4d7-4d993017fc9b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_monoxide_in_air_variability</dd><dt><span>units :</span></dt><dd>1e-9</dd></dl></div><div class='xr-var-data'><pre>array([5.265, 6.307, 8.518, 8.091, 6.419, 7.476, 6.514, 6.619, 5.995,
+       113.78, 113.92, 114.48, 114.24])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_variability</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>5.265 6.307 8.518 ... 7.339 5.405</div><input id='attrs-34b05730-afdb-474b-9df3-fa8b4c1d613f' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-34b05730-afdb-474b-9df3-fa8b4c1d613f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-80122ee9-e9f4-49c3-9728-c2655e6bb65d' class='xr-var-data-in' type='checkbox'><label for='data-80122ee9-e9f4-49c3-9728-c2655e6bb65d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_monoxide_in_air_variability</dd><dt><span>units :</span></dt><dd>1e-9</dd></dl></div><div class='xr-var-data'><pre>array([5.265, 6.307, 8.518, 8.091, 6.419, 7.476, 6.514, 6.619, 5.995,
        6.213, 6.535, 7.029, 5.265, 6.307, 8.518, 8.091, 6.419, 7.476,
        6.514, 6.619, 5.995, 6.213, 6.535, 7.029, 5.265, 6.307, 8.518,
        8.091, 6.419, 7.476, 6.514, 6.619, 5.995, 6.213, 6.535, 7.029,
@@ -878,7 +899,7 @@ Attributes: (12/24)
        7.025, 6.201, 8.674, 7.595, 7.143, 6.453, 7.45 , 7.812, 5.788,
        7.835, 6.286, 4.229, 5.923, 5.756, 5.919, 6.72 , 5.064, 6.578,
        5.222, 5.873, 5.703, 6.447, 6.283, 7.224, 4.795, 6.312, 4.765,
-       6.168, 5.464, 5.645, 7.339, 5.405])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_number_of_observations</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>26.0 26.0 25.0 ... 23.0 24.0 23.0</div><input id='attrs-e7bad537-d024-4e3f-ae41-49f00859b6dc' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-e7bad537-d024-4e3f-ae41-49f00859b6dc' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d67a1a12-cf5e-4726-89b6-0d8ba3f197c5' class='xr-var-data-in' type='checkbox'><label for='data-d67a1a12-cf5e-4726-89b6-0d8ba3f197c5' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_monoxide_in_air_number_of_observations</dd></dl></div><div class='xr-var-data'><pre>array([26., 26., 25., 26., 26., 25., 26., 25., 26., 26., 25., 26., 26.,
+       6.168, 5.464, 5.645, 7.339, 5.405])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mf_number_of_observations</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>26.0 26.0 25.0 ... 23.0 24.0 23.0</div><input id='attrs-e747b640-e50b-4793-a6a5-9ad880d72e30' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-e747b640-e50b-4793-a6a5-9ad880d72e30' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-896bfd3f-59fa-4956-839b-61a0b2c47de2' class='xr-var-data-in' type='checkbox'><label for='data-896bfd3f-59fa-4956-839b-61a0b2c47de2' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>mole_fraction_of_carbon_monoxide_in_air_number_of_observations</dd></dl></div><div class='xr-var-data'><pre>array([26., 26., 25., 26., 26., 25., 26., 25., 26., 26., 25., 26., 26.,
        26., 25., 26., 26., 25., 26., 25., 26., 26., 25., 26., 26., 26.,
        25., 26., 26., 25., 26., 25., 26., 26., 25., 26., 19., 24., 20.,
        22., 22., 23., 23., 21., 22., 22., 17., 24., 20., 21., 17., 20.,
@@ -888,7 +909,7 @@ Attributes: (12/24)
        23., 24., 23., 23., 24., 23., 23., 24., 23., 25., 24., 25., 25.,
        25., 11., 25., 25., 25., 24., 25., 25., 24., 25., 25., 24., 25.,
        25., 25., 12., 24., 23., 23., 24., 23., 23., 24., 23., 24., 23.,
-       24., 23., 24., 23., 24., 23., 24., 23., 24., 23.])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>inlet</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>&lt;U4</div><div class='xr-var-preview xr-preview'>&#x27;248m&#x27; &#x27;248m&#x27; ... &#x27;108m&#x27; &#x27;108m&#x27;</div><input id='attrs-592e2953-b711-4b0a-b23b-2c2853794e9e' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-592e2953-b711-4b0a-b23b-2c2853794e9e' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8d587604-1a3b-47cd-8770-ca0156a6df3f' class='xr-var-data-in' type='checkbox'><label for='data-8d587604-1a3b-47cd-8770-ca0156a6df3f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
+       24., 23., 24., 23., 24., 23., 24., 23., 24., 23.])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>inlet</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>&lt;U4</div><div class='xr-var-preview xr-preview'>&#x27;248m&#x27; &#x27;248m&#x27; ... &#x27;108m&#x27; &#x27;108m&#x27;</div><input id='attrs-b7b74822-54ef-4f6b-b0a6-e34c4c9bc9eb' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-b7b74822-54ef-4f6b-b0a6-e34c4c9bc9eb' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-eedc1334-e8fb-45a3-8fe8-61ef11acb644' class='xr-var-data-in' type='checkbox'><label for='data-eedc1334-e8fb-45a3-8fe8-61ef11acb644' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
        &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
        &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
        &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;, &#x27;248m&#x27;,
@@ -905,7 +926,7 @@ Attributes: (12/24)
        &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;,
        &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;,
        &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;, &#x27;108m&#x27;],
-      dtype=&#x27;&lt;U4&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-ddc7f0d2-1b79-4a7b-af9f-8fe066cdfe39' class='xr-section-summary-in' type='checkbox'  ><label for='section-ddc7f0d2-1b79-4a7b-af9f-8fe066cdfe39' class='xr-section-summary' >Attributes: <span>(24)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>data_owner :</span></dt><dd>Simon O&#x27;Doherty</dd><dt><span>data_owner_email :</span></dt><dd>s.odoherty@bristol.ac.uk</dd><dt><span>inlet_height_magl :</span></dt><dd>multiple</dd><dt><span>comment :</span></dt><dd>Cavity ring-down measurements. Output from GCWerks</dd><dt><span>long_name :</span></dt><dd>bilsdale</dd><dt><span>site :</span></dt><dd>bsd</dd><dt><span>instrument :</span></dt><dd>picarro</dd><dt><span>sampling_period :</span></dt><dd>60</dd><dt><span>inlet :</span></dt><dd>multiple</dd><dt><span>port :</span></dt><dd>9</dd><dt><span>type :</span></dt><dd>air</dd><dt><span>network :</span></dt><dd>decc</dd><dt><span>species :</span></dt><dd>co</dd><dt><span>conditions_of_use :</span></dt><dd>Ensure that you contact the data owner at the outset of your project.</dd><dt><span>source :</span></dt><dd>In situ measurements of air</dd><dt><span>Conventions :</span></dt><dd>CF-1.8</dd><dt><span>file_created :</span></dt><dd>2022-03-03 14:35:12.316376+00:00</dd><dt><span>processed_by :</span></dt><dd>OpenGHG_Cloud</dd><dt><span>sampling_period_unit :</span></dt><dd>s</dd><dt><span>station_longitude :</span></dt><dd>-1.15033</dd><dt><span>station_latitude :</span></dt><dd>54.35858</dd><dt><span>station_long_name :</span></dt><dd>Bilsdale, UK</dd><dt><span>station_height_masl :</span></dt><dd>380.0</dd><dt><span>scale :</span></dt><dd>WMO-X2014A</dd></dl></div></li></ul></div></div></div></div>
+      dtype=&#x27;&lt;U4&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-6a78c8cb-3601-4eec-87a9-21815f06967c' class='xr-section-summary-in' type='checkbox'  ><label for='section-6a78c8cb-3601-4eec-87a9-21815f06967c' class='xr-section-summary' >Attributes: <span>(24)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>data_owner :</span></dt><dd>Simon O&#x27;Doherty</dd><dt><span>data_owner_email :</span></dt><dd>s.odoherty@bristol.ac.uk</dd><dt><span>inlet_height_magl :</span></dt><dd>multiple</dd><dt><span>comment :</span></dt><dd>Cavity ring-down measurements. Output from GCWerks</dd><dt><span>long_name :</span></dt><dd>bilsdale</dd><dt><span>site :</span></dt><dd>bsd</dd><dt><span>instrument :</span></dt><dd>picarro</dd><dt><span>sampling_period :</span></dt><dd>60</dd><dt><span>inlet :</span></dt><dd>multiple</dd><dt><span>port :</span></dt><dd>9</dd><dt><span>type :</span></dt><dd>air</dd><dt><span>network :</span></dt><dd>decc</dd><dt><span>species :</span></dt><dd>co</dd><dt><span>conditions_of_use :</span></dt><dd>Ensure that you contact the data owner at the outset of your project.</dd><dt><span>source :</span></dt><dd>In situ measurements of air</dd><dt><span>Conventions :</span></dt><dd>CF-1.8</dd><dt><span>file_created :</span></dt><dd>2022-03-03 14:44:51.357137+00:00</dd><dt><span>processed_by :</span></dt><dd>OpenGHG_Cloud</dd><dt><span>sampling_period_unit :</span></dt><dd>s</dd><dt><span>station_longitude :</span></dt><dd>-1.15033</dd><dt><span>station_latitude :</span></dt><dd>54.35858</dd><dt><span>station_long_name :</span></dt><dd>Bilsdale, UK</dd><dt><span>station_height_masl :</span></dt><dd>380.0</dd><dt><span>scale :</span></dt><dd>WMO-X2014A</dd></dl></div></li></ul></div></div></div></div>
 </div>
 <p>You can also see that because we extracted all the data for this site and species, this has also returned details of which inlet was applicable for each data point.</p>
 <p>We will also have additional metadata associated with our returned <code class="docutils literal notranslate"><span class="pre">co_data</span></code> object which includes the details of the ranking and applicable date ranges:</p>
@@ -952,10 +973,10 @@ Attributes: (12/24)
             <p class="prev-next-title">Workflow 1: processing, searching and retrieving observations</p>
         </div>
     </a>
-    <a class='right-next' id="next-link" href="../../development/index_devel.html" title="next page">
+    <a class='right-next' id="next-link" href="3_Comparing_with_emissions.html" title="next page">
     <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Development</p>
+        <p class="prev-next-title">Workflow 3: comparing observations to emissions</p>
     </div>
     <i class="fas fa-angle-right"></i>
     </a>
