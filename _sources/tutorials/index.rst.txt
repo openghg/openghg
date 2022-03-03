@@ -44,3 +44,19 @@ emissions and footprint data (with boundary conditions in the pipeline).
    :maxdepth: 1
 
    beginner_workflow/3_Comparing_with_emissions
+
+Tutorial 4 - Working with high time resolution CO2
+--------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   beginner_workflow/4_Working_with_co2
+
+Tutorial 5 - Exploring the NOAA ObsPack data
+--------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   beginner_workflow/5_Explore_NOAA_ObsPack
