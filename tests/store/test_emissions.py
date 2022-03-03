@@ -9,17 +9,22 @@ from helpers import get_emissions_datapath
 
 
 def test_read_file():
-    get_local_bucket(empty=True)
-
     test_datapath = get_emissions_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
 
     proc_results = Emissions.read_file(
-        filepath=test_datapath, species="co2", source="gpp-cardamom", date="2012", domain="europe", high_time_resolution=False
+        filepath=test_datapath,
+        species="co2",
+        source="gpp-cardamom",
+        date="2012",
+        domain="europe",
+        high_time_resolution=False,
     )
 
     assert "co2_gppcardamom_europe_2012" in proc_results
 
-    search_results = search(species="co2", source="gpp-cardamom", date="2012", domain="europe", data_type="emissions")
+    search_results = search(
+        species="co2", source="gpp-cardamom", date="2012", domain="europe", data_type="emissions"
+    )
 
     key = list(search_results.keys())[0]
 
@@ -49,29 +54,21 @@ def test_read_file():
         "domain": "europe",
         "source": "gppcardamom",
         "date": "2012",
-        "start_date": "2012-12-01 00:00:00+00:00",
-        "end_date": "2012-12-01 00:00:00+00:00",
+        "start_date": "2012-01-01 00:00:00+00:00",
+        "end_date": "2012-12-31 23:59:59+00:00",
         "max_longitude": 39.38,
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
         "time_resolution": "standard",
         "data_type": "emissions",
+        "frequency": "annual",
     }
 
     del metadata["processed"]
     del metadata["prior_file_1_version"]
 
     assert metadata == expected_metadata
-
-
-def test_read_same_file_twice_raises():
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
-
-    with pytest.raises(ValueError):
-        Emissions.read_file(
-            filepath=test_datapath, species="co2", source="gpp-cardamom", date="2012", domain="europe", high_time_resolution=False
-        )
 
 
 def test_set_lookup_uuids():

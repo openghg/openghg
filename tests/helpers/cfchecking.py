@@ -15,7 +15,8 @@ def check_cf_compliance(dataset: xr.Dataset, debug: bool = False) -> bool:
     Returns:
         bool: True if compliant
     """
-    checker = CFChecker(debug=debug)
+    checker = CFChecker(debug=debug, version="1.8")
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         with NamedTemporaryFile(suffix=".nc") as tmpfile:
@@ -26,7 +27,6 @@ def check_cf_compliance(dataset: xr.Dataset, debug: bool = False) -> bool:
 
             fatal = results["FATAL"]
             errors = results["ERROR"]
-            warn = results["WARN"]
 
             if fatal or errors:
                 return False

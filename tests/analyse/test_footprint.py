@@ -4,17 +4,17 @@ from openghg.analyse import footprints_data_merge
 
 
 def test_ch4_tac_coarsest_merge():
-    '''Test to check overall footprint data merge functionality
-    when resampling to coarsest (footprint in this case).'''
+    """Test to check overall footprint data merge functionality
+    when resampling to coarsest (footprint in this case)."""
     start_date = "2012-01-01"
     end_date = "2013-01-01"
 
     site = "tac"
-    domain="EUROPE"
-    species="ch4"
-    network="DECC"
-    height="100m"
-    source="anthro"
+    domain = "EUROPE"
+    species = "ch4"
+    network = "DECC"
+    height = "100m"
+    source = "anthro"
 
     CombinedData = footprints_data_merge(
         site=site,
@@ -24,10 +24,11 @@ def test_ch4_tac_coarsest_merge():
         start_date=start_date,
         end_date=end_date,
         species=species,
-        flux_sources=source,
+        flux_source=source,
         resample_to="coarsest",
         load_flux=True,
-        calc_timeseries=True)
+        calc_timeseries=True,
+    )
 
     data = CombinedData.data
 
@@ -43,17 +44,17 @@ def test_ch4_tac_coarsest_merge():
 
 @pytest.mark.skip(reason="Takes a long time to run with current data - skip for now")
 def test_ch4_tac_obs_merge():
-    '''Test to check overall footprint data merge functionality
-    when resampling to observation data.'''
+    """Test to check overall footprint data merge functionality
+    when resampling to observation data."""
     start_date = "2012-01-01"
     end_date = "2013-01-01"
 
     site = "tac"
-    domain="EUROPE"
-    species="ch4"
-    network="DECC"
-    height="100m"
-    source="anthro"
+    domain = "EUROPE"
+    species = "ch4"
+    network = "DECC"
+    height = "100m"
+    source = "anthro"
 
     CombinedData = footprints_data_merge(
         site=site,
@@ -66,7 +67,8 @@ def test_ch4_tac_obs_merge():
         flux_sources=source,
         resample_to="obs",
         load_flux=True,
-        calc_timeseries=True)
+        calc_timeseries=True,
+    )
 
     data = CombinedData.data
 

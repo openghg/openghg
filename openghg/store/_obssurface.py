@@ -1,7 +1,7 @@
 from openghg.store.base import BaseStore
 from openghg.types import pathType, multiPathType, resultsType
 from pathlib import Path
-from typing import DefaultDict, Dict, Union
+from typing import DefaultDict, Dict, Optional, Union
 
 
 __all__ = ["ObsSurface"]
@@ -19,9 +19,9 @@ class ObsSurface(BaseStore):
         data_type: str,
         network: str,
         site: str,
-        inlet: str = None,
-        instrument: str = None,
-        sampling_period: str = None,
+        inlet: Optional[str] = None,
+        instrument: Optional[str] = None,
+        sampling_period: Optional[str] = None,
         measurement_type: str = "insitu",
         overwrite: bool = False,
     ) -> Dict:
@@ -97,8 +97,8 @@ class ObsSurface(BaseStore):
                 # try:
                 file_hash = hash_file(filepath=data_filepath)
                 if file_hash in obs._file_hashes and overwrite is False:
-                    raise ValueError(
-                        f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
+                    print(
+                        f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]} - skipping."
                     )
 
                 progress_bar.set_description(f"Processing: {data_filepath.name}")

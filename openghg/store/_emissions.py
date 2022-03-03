@@ -47,6 +47,8 @@ class Emissions(BaseStore):
             high_time_resolution: If this is a high resolution file
             period: Period of measurements, if not passed this is inferred from the time coords
             overwrite: Should this data overwrite currently stored data.
+        Returns:
+            dict: Dictionary of datasource UUIDs data assigned to
         """
         from collections import defaultdict
         from xarray import open_dataset
@@ -54,6 +56,7 @@ class Emissions(BaseStore):
         from openghg.util import (
             clean_string,
             hash_file,
+            pairwise,
             timestamp_tzaware,
             timestamp_now,
         )
@@ -69,8 +72,8 @@ class Emissions(BaseStore):
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in em_store._file_hashes and not overwrite:
-            raise ValueError(
-                f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]}."
+            print(
+                f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]} - skipping."
             )
 
         em_data = open_dataset(filepath)
@@ -97,8 +100,63 @@ class Emissions(BaseStore):
         metadata["author"] = author_name
         metadata["processed"] = str(timestamp_now())
 
-        metadata["start_date"] = str(timestamp_tzaware(em_data.time[0].values))
-        metadata["end_date"] = str(timestamp_tzaware(em_data.time[-1].values))
+        # As emissions files handle things slightly differently we need to check the time values
+        # more carefully.
+        # e.g. a flux / emissions file could contain e.g. monthly data and be labelled as 2012 but
+        # contain 12 time points labelled as 2012-01-01, 2012-02-01, etc.
+        n_dates = em_data.time.size
+
+        # This covers the whole year
+        if n_dates == 1:
+            year = timestamp_tzaware(em_data.time[0].values).year
+            year_start = timestamp_tzaware(f"{year}-1-1-00:00:00")
+            year_end = timestamp_tzaware(f"{year}-12-31-23:59:59")
+
+            start_date = year_start
+            end_date = year_end
+            freq = "annual"
+        # We have values for each month / week
+        elif n_dates == 12:
+            # Check they're successive months
+            timestamps = [timestamp_tzaware(t) for t in em_data.time.values]
+
+            for a, b in pairwise(timestamps):
+                if a.month != b.month - 1:
+                    raise ValueError("We expect successive months for the data")
+
+            if timestamps[0].year != timestamps[-1].year:
+                raise ValueError("We expect a single year of data")
+
+            year = timestamps[0].year
+
+            year_start = timestamp_tzaware(f"{year}-1-1-00:00:00")
+            year_end = timestamp_tzaware(f"{year}-12-31-23:59:59")
+
+            start_date = year_start
+            end_date = year_end
+            freq = "month"
+        # Work run through the timestamps and check for gap between them ?
+        # Add something to metadata for this?
+        else:
+            timestamps = [timestamp_tzaware(t) for t in em_data.time.values]
+            timestamps.sort()
+
+            frequency = set()
+
+            for a, b in pairwise(timestamps):
+                delta = b - a
+                frequency.add(delta)
+
+            start_date = timestamps[0]
+            end_date = timestamps[-1]
+
+            if len(frequency) == 1:
+                freq = str(frequency.pop())
+            else:
+                freq = "varies"
+
+        metadata["start_date"] = str(start_date)
+        metadata["end_date"] = str(end_date)
 
         metadata["max_longitude"] = round(float(em_data["lon"].max()), 5)
         metadata["min_longitude"] = round(float(em_data["lon"].min()), 5)
@@ -106,6 +164,7 @@ class Emissions(BaseStore):
         metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
 
         metadata["time_resolution"] = "high" if high_time_resolution else "standard"
+        metadata["frequency"] = freq
 
         if period is not None:
             metadata["time_period"] = period

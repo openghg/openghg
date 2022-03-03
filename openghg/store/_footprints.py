@@ -64,8 +64,8 @@ class Footprints(BaseStore):
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in fp._file_hashes and not overwrite:
-            raise ValueError(
-                f"This file has been uploaded previously with the filename : {fp._file_hashes[file_hash]}."
+            print(
+                f"This file has been uploaded previously with the filename : {fp._file_hashes[file_hash]} - skipping."
             )
 
         fp_data = open_dataset(filepath)

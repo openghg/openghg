@@ -28,10 +28,10 @@ def assign_attributes(
         species = gas_data["metadata"]["species"]
 
         units = gas_data.get("metadata", {}).get("units")
-        scale = gas_data.get("metadata", {}).get("scale")
+        scale = gas_data.get("metadata", {}).get("calibration_scale")
 
         if sampling_period is None:
-            sampling_period = str(gas_data.get("metadata", {}).get("sampling_period"))
+            sampling_period = str(gas_data.get("metadata", {}).get("sampling_period", "NOT_SET"))
 
         gas_data["data"] = get_attributes(
             ds=gas_data["data"],
@@ -111,7 +111,7 @@ def get_attributes(
     if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
 
-    # Current CF Conventions (v1.7) demand that valid variable names
+    # Current CF Conventions (v1.8) demand that valid variable names
     # begin with a letter and be composed of letters, digits and underscores
     # Here variable names are also made lowercase to enable easier matching below
 
@@ -155,7 +155,7 @@ def get_attributes(
     global_attributes_default = {
         "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
         "source": "In situ measurements of air",
-        "Conventions": "CF-1.6",
+        "Conventions": "CF-1.8",
     }
 
     if global_attributes is not None:
@@ -172,6 +172,12 @@ def get_attributes(
         global_attributes["calibration_scale"] = "unknown"
     else:
         global_attributes["calibration_scale"] = scale
+
+    if sampling_period is None:
+        global_attributes["sampling_period"] = "NOT_SET"
+    else:
+        global_attributes["sampling_period"] = sampling_period
+        global_attributes["sampling_period_unit"] = "s"
 
     # Update the Dataset attributes
     ds.attrs.update(global_attributes)  # type: ignore
@@ -269,16 +275,6 @@ def get_attributes(
             "comment": "GC peak integration method (by height or by area). Does not indicate data quality",
         }
 
-    # Set time encoding
-    # Check if there are duplicate time stamps
-
-    # I feel there should be a more pandas way of doing this
-    # but xarray doesn't currently have a duplicates method
-    # See this https://github.com/pydata/xarray/issues/2108
-
-    # if len(set(ds.time.values)) < len(ds.time.values):
-    # if len(np_unique(ds.time.values)) < len(ds.time.values):
-    #     print("WARNING. Duplicate time stamps")
     first_year = pd_Timestamp(str(ds.time[0].values)).year
 
     ds.time.encoding = {"units": f"seconds since {str(first_year)}-01-01 00:00:00"}

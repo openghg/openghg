@@ -37,11 +37,28 @@ def parse_btt(
     # Take std-dev measurements from these columns for these species
     species_sd = {"CO2": "co2.sd.ppm", "CH4": "ch4.sd.ppb"}
 
+    site_data = load_json(filename="acrg_site_info.json")
+    site_info = site_data[site][network]
+
     param_data = load_json(filename="attributes.json")
     network_params = param_data["BTT"]
+    site_attributes = network_params["global_attributes"]
 
     sampling_period = int(network_params["sampling_period"])
     sampling_period_seconds = str(sampling_period) + "s"
+
+    metadata = {}
+    metadata["site"] = site
+    metadata["inlet"] = network_params["inlet"]
+    metadata["instrument"] = network_params["instrument"]
+    metadata["sampling_period"] = str(sampling_period)
+    metadata["station_longitude"] = site_info["longitude"]
+    metadata["station_latitude"] = site_info["latitude"]
+    metadata["station_long_name"] = site_info["long_name"]
+
+    attributes = network_params["global_attributes"]
+    attributes["inlet_height_magl"] = network_params["inlet"].strip("m")
+    attributes.update(metadata)
 
     data = read_csv(data_filepath)
     data["time"] = Timestamp("2019-01-01 00:00") + to_timedelta(data["DOY"] - 1, unit="D")
@@ -65,20 +82,14 @@ def parse_btt(
         # Convert to a Dataset
         processed_data = processed_data.to_xarray()
 
-        site_attributes = network_params["global_attributes"]
-        site_attributes["inlet_height_magl"] = network_params["inlet"]
-        site_attributes["instrument"] = network_params["instrument"]
-        site_attributes["sampling_period"] = sampling_period
+        species_attributes = attributes.copy()
+        species_attributes["species"] = clean_string(species)
 
-        # TODO - add in better metadata reading
-        metadata = {
-            "species": clean_string(species),
-            "sampling_period": str(sampling_period),
-            "site": "BTT",
-        }
+        species_metadata = metadata.copy()
+        species_metadata["species"] = clean_string(species)
 
         gas_data[species] = {
-            "metadata": metadata,
+            "metadata": species_metadata,
             "data": processed_data,
             "attributes": site_attributes,
         }

@@ -7,7 +7,7 @@ from helpers import get_footprint_datapath
 
 
 def test_read_footprint():
-    get_local_bucket(empty=True)
+    get_local_bucket()
 
     datapath = get_footprint_datapath("footprint_test.nc")
     # model_params = {"simulation_params": "123"}
@@ -119,20 +119,6 @@ def test_read_footprint():
     footprint_data["fp_low"].min().values == 0.0
     footprint_data["fp_high"].min().values == 0.0
     footprint_data["pressure"].min().values == pytest.approx(1011.92)
-
-
-def test_read_same_footprint_twice_raises():
-    datapath = get_footprint_datapath("footprint_test.nc")
-
-    with pytest.raises(ValueError):
-        Footprints.read_file(
-            filepath=datapath,
-            site="TMB",
-            model="test_model",
-            network="LGHG",
-            domain="EUROPE",
-            height="10magl",
-        )
 
 
 def test_set_lookup_uuids():

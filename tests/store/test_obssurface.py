@@ -87,63 +87,63 @@ def test_read_GC():
     # 30/11/2021: Species labels were updated to be standardised in line with variable naming
     # This list of expected labels was updated.
     expected_keys = [
-        'c2cl4_70m', 
-        'c2f6_70m', 
-        'c2h2_70m', 
-        'c2h6_70m', 
-        'c2hcl3_70m', 
-        'c3f8_70m', 
-        'c3h8_70m', 
-        'c4f10_70m', 
-        'c4f8_70m', 
-        'c6f14_70m', 
-        'c6h5ch3_70m', 
-        'c6h6_70m', 
-        'cc3h8_70m', 
-        'ccl4_70m', 
-        'cf4_70m', 
-        'cfc112_70m', 
-        'cfc113_70m', 
-        'cfc114_70m', 
-        'cfc115_70m', 
-        'cfc11_70m', 
-        'cfc12_70m', 
-        'cfc13_70m', 
-        'ch2br2_70m', 
-        'ch2cl2_70m', 
-        'ch3br_70m', 
-        'ch3ccl3_70m', 
-        'ch3cl_70m', 
-        'ch3i_70m', 
-        'chbr3_70m', 
-        'chcl3_70m', 
-        'cos_70m', 
-        'desflurane_70m', 
-        'halon1211_70m', 
-        'halon1301_70m', 
-        'halon2402_70m', 
-        'hcfc124_70m', 
-        'hcfc132b_70m', 
-        'hcfc133a_70m', 
-        'hcfc141b_70m', 
-        'hcfc142b_70m', 
-        'hcfc22_70m', 
-        'hfc125_70m', 
-        'hfc134a_70m', 
-        'hfc143a_70m', 
-        'hfc152a_70m', 
-        'hfc227ea_70m', 
-        'hfc236fa_70m', 
-        'hfc23_70m', 
-        'hfc245fa_70m', 
-        'hfc32_70m', 
-        'hfc365mfc_70m', 
-        'hfc4310mee_70m', 
-        'nf3_70m', 
-        'sf5cf3_70m', 
-        'sf6_70m', 
-        'so2f2_70m'
-        ]
+        "c2cl4_70m",
+        "c2f6_70m",
+        "c2h2_70m",
+        "c2h6_70m",
+        "c2hcl3_70m",
+        "c3f8_70m",
+        "c3h8_70m",
+        "c4f10_70m",
+        "c4f8_70m",
+        "c6f14_70m",
+        "c6h5ch3_70m",
+        "c6h6_70m",
+        "cc3h8_70m",
+        "ccl4_70m",
+        "cf4_70m",
+        "cfc112_70m",
+        "cfc113_70m",
+        "cfc114_70m",
+        "cfc115_70m",
+        "cfc11_70m",
+        "cfc12_70m",
+        "cfc13_70m",
+        "ch2br2_70m",
+        "ch2cl2_70m",
+        "ch3br_70m",
+        "ch3ccl3_70m",
+        "ch3cl_70m",
+        "ch3i_70m",
+        "chbr3_70m",
+        "chcl3_70m",
+        "cos_70m",
+        "desflurane_70m",
+        "halon1211_70m",
+        "halon1301_70m",
+        "halon2402_70m",
+        "hcfc124_70m",
+        "hcfc132b_70m",
+        "hcfc133a_70m",
+        "hcfc141b_70m",
+        "hcfc142b_70m",
+        "hcfc22_70m",
+        "hfc125_70m",
+        "hfc134a_70m",
+        "hfc143a_70m",
+        "hfc152a_70m",
+        "hfc227ea_70m",
+        "hfc236fa_70m",
+        "hfc23_70m",
+        "hfc245fa_70m",
+        "hfc32_70m",
+        "hfc365mfc_70m",
+        "hfc4310mee_70m",
+        "nf3_70m",
+        "sf5cf3_70m",
+        "sf6_70m",
+        "so2f2_70m",
+    ]
 
     assert sorted(list(results["processed"]["capegrim-medusa.18.C"].keys())) == expected_keys
 
@@ -303,7 +303,6 @@ def test_read_noaa_raw():
     assert co_data["co_selection_flag"][-1] == 0
 
 
-@pytest.mark.xfail(reason="Select which ObsPack attributes we want - currently have non JSON serialisable data - see #207")
 def test_read_noaa_obspack():
     data_filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
 
@@ -336,7 +335,6 @@ def test_read_noaa_obspack():
     assert data["ch4_variability"][0] == pytest.approx(2.093036e-09)
 
 
-
 def test_read_thames_barrier():
     get_local_bucket(empty=True)
 
@@ -365,25 +363,6 @@ def test_read_thames_barrier():
     obs = ObsSurface.load()
 
     assert sorted(obs._datasource_uuids.values()) == expected_keys
-
-
-def test_upload_same_file_twice_raises():
-    get_local_bucket(empty=True)
-
-    data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
-
-    ObsSurface.read_file(
-        filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60
-    )
-
-    # assert not res["error"]
-
-    with pytest.raises(ValueError):
-        ObsSurface.read_file(
-            filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60
-        )
-
-    # assert "tta.co2.1minute.222m.min.dat" in res["error"]
 
 
 def test_delete_Datasource():
@@ -430,8 +409,8 @@ def test_add_new_data_correct_datasource():
 
     sorted_keys = sorted(list(results["processed"]["capegrim-medusa.05.C"].keys()))
 
-    assert sorted_keys[:4] == ['c2cl4_10m', 'c2cl4_70m', 'c2f6_10m', 'c2f6_70m']
-    assert sorted_keys[-4:] == ['hfc32_70m', 'sf6_70m', 'so2f2_10m', 'so2f2_70m']
+    assert sorted_keys[:4] == ["c2cl4_10m", "c2cl4_70m", "c2f6_10m", "c2f6_70m"]
+    assert sorted_keys[-4:] == ["hfc32_70m", "sf6_70m", "so2f2_10m", "so2f2_70m"]
     assert len(sorted_keys) == 69
 
     data_filepath = get_datapath(filename="capegrim-medusa.06.C", data_type="GC")

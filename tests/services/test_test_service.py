@@ -13,5 +13,4 @@
 # @pytest.mark.skip("Marked for removal")
 # def test_test_service(authenticated_user, mock_timestamp):
 #     timestamp = call_test_service()
-
 #     assert timestamp == "Function run at 2001-01-01 00:00:00+00:00"

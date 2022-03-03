@@ -26,7 +26,6 @@
 #         filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS"
 #     )
 #     hfd_files = glob_files(search_str="hfd.picarro.1minute", data_type="CRDS")
-
 #     process_files(
 #         user=authenticated_user,
 #         files=bsd_file,
@@ -89,7 +88,6 @@
 # def test_search_and_retrieve(read_data, monkeypatch):
 #     # def fixed_init(self):
 #     #     from Acquire.Client import Wallet
-
 #     #     self._service_url = "openghg"
 #     #     wallet = Wallet()
 #     #     self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")

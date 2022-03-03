@@ -67,8 +67,6 @@ def get_obs_surface(
     if not obs_results:
         raise ValueError(f"Unable to find results for {species} at {site}")
 
-    # TODO - for some reason mypy doesn't pick up the ObsData being returned here, look into this
-    # GJ - 2021-07-19
     retrieved_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
     data = retrieved_data.data
 
@@ -79,7 +77,9 @@ def get_obs_surface(
     if start_date is not None and end_date is not None:
         start_date_tzaware = timestamp_tzaware(start_date)
         end_date_tzaware = timestamp_tzaware(end_date)
-        end_date_tzaware_exclusive = end_date_tzaware - Timedelta(1, unit="nanosecond")  # Deduct 1 ns to make the end day (date) exclusive.
+        end_date_tzaware_exclusive = end_date_tzaware - Timedelta(
+            1, unit="nanosecond"
+        )  # Deduct 1 ns to make the end day (date) exclusive.
 
         # Slice the data to only cover the dates we're interested in
         data = data.sel(time=slice(start_date_tzaware, end_date_tzaware_exclusive))
@@ -89,6 +89,8 @@ def get_obs_surface(
         end_date_data = timestamp_tzaware(data.time[-1].values)
     except AttributeError:
         raise AttributeError("This dataset does not have a time attribute, unable to read date range")
+    except IndexError:
+        return ObsData(data=Dataset(), metadata={})
 
     if average is not None:
         # GJ - 2021-03-09
@@ -159,11 +161,9 @@ def get_obs_surface(
         ds_resampled[f"{species}_variability"][ds_resampled[f"{species}_variability"] == 0.0] = ds_resampled[
             f"{species}_variability"
         ].median()
-        
+
         # Create attributes for variability variable
-        ds_resampled[f"{species}_variability"].attrs[
-            "long_name"
-        ] = f"{data.attrs['long_name']}_variability"
+        ds_resampled[f"{species}_variability"].attrs["long_name"] = f"{data.attrs['long_name']}_variability"
 
         ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
 
@@ -227,11 +227,11 @@ def get_obs_surface(
 
 def get_flux(
     species: str,
-    sources: Union[str, List[str]],
+    source: str,
     domain: str,
     start_date: Optional[Timestamp] = None,
     end_date: Optional[Timestamp] = None,
-    time_resolution: Optional[str] = "standard",
+    time_resolution: Optional[str] = None,
 ) -> FluxData:
     """
     The flux function reads in all flux files for the domain and species as an xarray Dataset.
@@ -240,19 +240,13 @@ def get_flux(
 
     Args:
         species: Species name
-        sources: Source name
+        source: Source name
         domain: Domain e.g. EUROPE
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
     Returns:
         FluxData: FluxData object
-
-    TODO: Update this to output to a FluxData class?
-    TODO: Update inputs to just accept a string and extract one flux file at a time?
-    As it stands, this only extracts one flux at a time but is set up to be extended
-    to to extract multiple. So if this is removed from this function the functionality
-    itself would need to be wrapped up in another function call.
     """
     from openghg.retrieve import search
     from openghg.store import recombine_datasets
@@ -265,7 +259,7 @@ def get_flux(
 
     results: Dict = search(
         species=species,
-        source=sources,
+        source=source,
         domain=domain,
         time_resolution=time_resolution,
         start_date=start_date,
@@ -274,9 +268,8 @@ def get_flux(
     )  # type: ignore
 
     if not results:
-        raise ValueError(f"Unable to find flux data for {species} from {sources}")
+        raise ValueError(f"Unable to find flux data for {species} from {source}")
 
-    # TODO - more than one emissions file (but see above)
     try:
         em_key = list(results.keys())[0]
     except IndexError:
@@ -355,6 +348,7 @@ def get_footprint(
     # else:
     #     results = search(
     #         site=site,
+    #         domain=domain,
     #         domain=domain,
     #         height=height,
     #         start_date=start_date,

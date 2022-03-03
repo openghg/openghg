@@ -11,7 +11,7 @@ def get_datapath(filename):
 
 
 def test_read_file():
-    get_local_bucket(empty=True)
+    get_local_bucket()
 
     test_datapath = get_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 
@@ -19,7 +19,9 @@ def test_read_file():
 
     assert "geoschem_ch4_2015-01-01" in proc_results
 
-    search_results = search(species="ch4", model="geoschem", start_date="2015-01-01", data_type="eulerian_model")
+    search_results = search(
+        species="ch4", model="geoschem", start_date="2015-01-01", data_type="eulerian_model"
+    )
 
     key = list(search_results.keys())[0]
 
