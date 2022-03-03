@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation instructions &#8212; OpenGHG 0+untagged.3.gf5028b5.dirty documentation</title>
+    <title>Installation instructions &#8212; OpenGHG 0+untagged.3.ga53442f.dirty documentation</title>
     
     <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -188,8 +188,8 @@
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#clone-and-install">
-     Clone and install
+    <a class="reference internal nav-link" href="#install">
+     Install
     </a>
    </li>
   </ul>
@@ -256,19 +256,17 @@ of libraries can be installed without making changes to versions of libraries ne
 </section>
 <section id="virtual-environment-conda">
 <h3>Virtual environment - conda<a class="headerlink" href="#virtual-environment-conda" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create -f environment.yml
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create -f environment.yaml
 <span class="c1"># Activate the environment</span>
 conda activate openghg
 </pre></div>
 </div>
 </section>
-<section id="clone-and-install">
-<h3>Clone and install<a class="headerlink" href="#clone-and-install" title="Permalink to this headline">¶</a></h3>
-<p>OpenGHG is currently early in its development process so the only way to install
-the library is by cloning the repository and installing manually using pip.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/openghg/openghg.git
-<span class="nb">cd</span> openghg
-pip install .
+<section id="install">
+<h3>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h3>
+<p>You can install OpenGHG using <code class="docutils literal notranslate"><span class="pre">pip</span></code>, using either a standard Python virtual environment or a <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade pip wheel
+pip install openghg
 </pre></div>
 </div>
 </section>
