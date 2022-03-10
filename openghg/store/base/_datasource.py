@@ -94,6 +94,7 @@ class Datasource:
             "emissions",
             "met",
             "footprints",
+            "boundary_conditions",
             "eulerian_model",
         )
 
@@ -111,6 +112,8 @@ class Datasource:
             return self.add_emissions_data(data=data, metadata=metadata)
         elif data_type == "met":
             raise NotImplementedError()
+        elif data_type == "boundary_conditions":
+            raise self.add_bc_data(data=data, metadata=metadata)
         elif data_type == "eulerian_model":
             return self.add_eulerian_model_data(data=data, metadata=metadata)
 
@@ -245,6 +248,17 @@ class Datasource:
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
         self.update_daterange()
+
+    def add_bc_data(self, data: Dataset, metadata: Dict) -> None:
+        """Add flux data to this Datasource
+
+        Args:
+            data: Boundary conditions as an xarray.Dataset
+            metadata: Metadata
+        Returns:
+            None
+        """
+        self.add_field_data(data=data, metadata=metadata, data_type="boundary_conditions")
 
     def add_eulerian_model_data(self, data: Dataset, metadata: Dict) -> None:
         """Add Eulerian model data to this Datasource
