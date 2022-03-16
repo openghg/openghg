@@ -4,8 +4,8 @@ footprints_data_merge
 """
 from pandas import Timestamp
 from xarray import Dataset, DataArray
-from typing import Optional, Tuple, Union, Dict, Any
-from openghg.dataobjects import FootprintData
+from typing import Optional, Tuple, Union, Dict, Any, cast
+from openghg.dataobjects import FootprintData, ObsData
 
 # from openghg.dataobjects import FluxData
 
@@ -73,6 +73,7 @@ def single_site_footprint(
         species=species,
         instrument=instrument,
     )
+    obs_results = cast(ObsData, obs_results)
 
     obs_data = obs_results.data
 

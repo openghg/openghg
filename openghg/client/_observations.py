@@ -3,6 +3,7 @@ from pandas import Timestamp
 from openghg.dataobjects import ObsData
 from openghg.retrieve import get_obs_surface as proc_get_obs_surface
 from openghg.util import running_in_cloud
+from typing import Optional
 
 
 def get_obs_surface(
@@ -17,7 +18,7 @@ def get_obs_surface(
     calibration_scale: str = None,
     keep_missing: bool = False,
     skip_ranking: bool = False,
-) -> ObsData:
+) -> Optional[ObsData]:
     """This is the equivalent of the get_obs function from the ACRG repository.
 
     Usage and return values are the same whilst implementation may differ.
@@ -69,7 +70,7 @@ def _get_obs_surface_local(
     calibration_scale: str = None,
     keep_missing: bool = False,
     skip_ranking: bool = False,
-) -> ObsData:
+) -> Optional[ObsData]:
 
     return proc_get_obs_surface(
         site=site,

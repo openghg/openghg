@@ -50,21 +50,19 @@ Virtual environment - conda
 
 .. code-block:: bash
 
-    conda create -f environment.yml
+    conda create -f environment.yaml
     # Activate the environment
     conda activate openghg
 
-Clone and install
+Install
 -----------------
 
-OpenGHG is currently early in its development process so the only way to install
-the library is by cloning the repository and installing manually using pip.
+You can install OpenGHG using ``pip``, using either a standard Python virtual environment or a ``conda`` environment.
 
 .. code-block:: bash
 
-   git clone https://github.com/openghg/openghg.git
-   cd openghg
-   pip install . 
+   pip install --upgrade pip wheel
+   pip install openghg
 
 Developers
 ==========

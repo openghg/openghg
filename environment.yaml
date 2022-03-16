@@ -1,4 +1,4 @@
-name: openghg
+name: openghg_env
 channels:
   - conda-forge
   - defaults
@@ -14,6 +14,7 @@ dependencies:
   - nc-time-axis
   - pandas
   - paramiko
+  - plotly
   - pyvis
   - rapidfuzz
   - requests>=2.25
