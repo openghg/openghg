@@ -145,7 +145,7 @@ def test_read_file_site_filename_read(scsn06_data):
     for key, value in expected_attrs.items():
         assert ch4_data.attrs[key] == value
 
-
+@pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_noaa_site_filename_cf_compliance(scsn06_data):
     ch4_data = scsn06_data["ch4"]["data"]

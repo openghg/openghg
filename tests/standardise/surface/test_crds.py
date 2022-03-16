@@ -39,7 +39,7 @@ def test_read_file(crds_data):
 
     parsed_surface_metachecker(data=crds_data)
 
-
+@pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_crds_cf_compliance(crds_data):
     ch4_data = crds_data["ch4"]["data"]

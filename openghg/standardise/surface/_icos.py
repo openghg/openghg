@@ -4,13 +4,14 @@ from pathlib import Path
 
 def parse_icos(
     data_filepath: Union[str, Path],
+    species: str,
     site: str,
-    network: str,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
+    inlet: str,
+    instrument: str,
+    network: str = "ICOS",
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
-):
+) -> Dict:
     """Parses an ICOS data file and creates a dictionary of xarray Datasets
     ready for storage in the object store.
 
@@ -31,18 +32,12 @@ def parse_icos(
     if not isinstance(data_filepath, Path):
         data_filepath = Path(data_filepath)
 
-    source_name = data_filepath.stem
-
-    if site is None:
-        site = source_name.split(".")[0]
-
-    species = source_name.split(".")[1]
-
     gas_data = _read_data(
         data_filepath=data_filepath,
+        species=species,
         site=site,
-        network=network,
         inlet=inlet,
+        network=network,
         instrument=instrument,
         sampling_period=sampling_period,
         measurement_type=measurement_type,
@@ -55,7 +50,14 @@ def parse_icos(
 
 
 def _read_data(
-    self, data_filepath: Path, species: str, sampling_period: str, site: Optional[str] = None
+    data_filepath: Path,
+    species: str,
+    site: str,
+    inlet: str,
+    network: str,
+    instrument: str,
+    sampling_period: Optional[str] = None,
+    measurement_type: Optional[str] = None,
 ) -> Dict:
     """Separates the gases stored in the dataframe in
     separate dataframes and returns a dictionary of gases
@@ -71,14 +73,21 @@ def _read_data(
         dict: Dictionary containing attributes, data and metadata keys
     """
     from pandas import read_csv, Timestamp
-    from openghg.util import read_header, compliant_string
+    from openghg.util import read_header, clean_string
 
     # metadata = read_metadata(filepath=data_filepath, data=data, data_type="ICOS")
     header = read_header(filepath=data_filepath)
     n_skip = len(header) - 1
-    species = "co2"
 
-    def date_parser(year, month, day, hour, minute):
+    species = clean_string(species)
+    site = clean_string(site)
+    inlet = clean_string(inlet)
+    instrument = clean_string(instrument)
+    network = clean_string(network)
+    sampling_period = clean_string(sampling_period)
+    measurement_type = clean_string(measurement_type)
+
+    def date_parser(year: str, month: str, day: str, hour: str, minute: str) -> Timestamp:
         return Timestamp(year, month, day, hour, minute)
 
     datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
@@ -139,24 +148,29 @@ def _read_data(
 
     combined_data = {}
 
-    site_attributes = {}
-
     # Read some metadata from the filename
     split_filename = data_filepath.name.split(".")
 
     try:
-        site = split_filename[0]
+        site_fname = split_filename[0]
+
+        if site_fname.lower() != site:
+            raise ValueError("Site mismatch between site argument passed and filename")
+
         file_sampling_period = split_filename[2]
         inlet_height = split_filename[3]
-    except KeyError:
+
+        if inlet_height.lower() != inlet:
+            raise ValueError("Mismatch between inlet height passed and in filename")
+    except IndexError:
         raise ValueError(
             "Unable to read metadata from filename. We expect a filename such as tta.co2.1minute.222m.dat"
         )
 
     if file_sampling_period == "1minute":
-        file_sampling_period = 60
+        file_sampling_period = "60"
     elif file_sampling_period == "1hour":
-        file_sampling_period = 3600
+        file_sampling_period = "3600"
 
     if sampling_period is not None:
         if file_sampling_period != sampling_period:
@@ -166,16 +180,19 @@ def _read_data(
 
     metadata = {
         "site": site,
-        "species": compliant_string(species),
+        "species": species,
         "inlet": inlet_height,
-        "sampling_period": str(sampling_period),
-        "network": "ICOS",
+        "sampling_period": sampling_period,
+        "network": network,
+        "instrument": instrument,
     }
+
+    if measurement_type is not None:
+        metadata["measurement_type"] = measurement_type
 
     combined_data[species] = {
         "metadata": metadata,
         "data": data,
-        "attributes": site_attributes,
     }
 
     return combined_data
