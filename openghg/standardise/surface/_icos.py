@@ -1,0 +1,181 @@
+from typing import Dict, Optional, Union
+from pathlib import Path
+
+
+def parse_icos(
+    data_filepath: Union[str, Path],
+    site: str,
+    network: str,
+    inlet: Optional[str] = None,
+    instrument: Optional[str] = None,
+    sampling_period: Optional[str] = None,
+    measurement_type: Optional[str] = None,
+):
+    """Parses an ICOS data file and creates a dictionary of xarray Datasets
+    ready for storage in the object store.
+
+    Args:
+        data_filepath: Path to file
+        site: Three letter site code
+        network: Network name
+        inlet: Inlet height
+        instrument: Instrument name
+        sampling_period: Sampling period e.g. 2 hour: 2H, 2 minute: 2m
+        measurement_type: Measurement type e.g. insitu, flask
+    Returns:
+        dict: Dictionary of gas data
+    """
+    from pathlib import Path
+    from openghg.standardise.meta import assign_attributes
+
+    if not isinstance(data_filepath, Path):
+        data_filepath = Path(data_filepath)
+
+    source_name = data_filepath.stem
+
+    if site is None:
+        site = source_name.split(".")[0]
+
+    species = source_name.split(".")[1]
+
+    gas_data = _read_data(
+        data_filepath=data_filepath,
+        site=site,
+        network=network,
+        inlet=inlet,
+        instrument=instrument,
+        sampling_period=sampling_period,
+        measurement_type=measurement_type,
+    )
+
+    # Ensure the data is CF compliant
+    gas_data = assign_attributes(data=gas_data, site=site, sampling_period=sampling_period)
+
+    return gas_data
+
+
+def _read_data(
+    self, data_filepath: Path, species: str, sampling_period: str, site: Optional[str] = None
+) -> Dict:
+    """Separates the gases stored in the dataframe in
+    separate dataframes and returns a dictionary of gases
+    with an assigned UUID as gas:UUID and a list of the processed
+    dataframes
+
+    TODO - update this to process multiple species here?
+
+    Args:
+        data_filepath : Path of datafile
+        species: Species to process
+    Returns:
+        dict: Dictionary containing attributes, data and metadata keys
+    """
+    from pandas import read_csv, Timestamp
+    from openghg.util import read_header, compliant_string
+
+    # metadata = read_metadata(filepath=data_filepath, data=data, data_type="ICOS")
+    header = read_header(filepath=data_filepath)
+    n_skip = len(header) - 1
+    species = "co2"
+
+    def date_parser(year, month, day, hour, minute):
+        return Timestamp(year, month, day, hour, minute)
+
+    datetime_columns = {"time": ["Year", "Month", "Day", "Hour", "Minute"]}
+
+    use_cols = [
+        "Year",
+        "Month",
+        "Day",
+        "Hour",
+        "Minute",
+        str(species.lower()),
+        "Stdev",
+        "NbPoints",
+    ]
+
+    dtypes = {
+        "Day": int,
+        "Month": int,
+        "Year": int,
+        "Hour": int,
+        "Minute": int,
+        species.lower(): float,
+        "Stdev": float,
+        "SamplingHeight": float,
+        "NbPoints": int,
+    }
+
+    data = read_csv(
+        data_filepath,
+        skiprows=n_skip,
+        parse_dates=datetime_columns,
+        index_col="time",
+        sep=" ",
+        usecols=use_cols,
+        dtype=dtypes,
+        na_values="-999.99",
+        date_parser=date_parser,
+    )
+
+    data = data[data[species.lower()] >= 0.0]
+
+    # Drop duplicate indices
+    data = data.loc[~data.index.duplicated(keep="first")]
+
+    # Check if the index is sorted
+    if not data.index.is_monotonic_increasing:
+        data = data.sort_index()
+
+    rename_dict = {
+        "Stdev": species + " variability",
+        "NbPoints": species + " number_of_observations",
+    }
+
+    data = data.rename(columns=rename_dict)
+
+    # Conver to xarray Dataset
+    data = data.to_xarray()
+
+    combined_data = {}
+
+    site_attributes = {}
+
+    # Read some metadata from the filename
+    split_filename = data_filepath.name.split(".")
+
+    try:
+        site = split_filename[0]
+        file_sampling_period = split_filename[2]
+        inlet_height = split_filename[3]
+    except KeyError:
+        raise ValueError(
+            "Unable to read metadata from filename. We expect a filename such as tta.co2.1minute.222m.dat"
+        )
+
+    if file_sampling_period == "1minute":
+        file_sampling_period = 60
+    elif file_sampling_period == "1hour":
+        file_sampling_period = 3600
+
+    if sampling_period is not None:
+        if file_sampling_period != sampling_period:
+            raise ValueError("Mismatch between sampling period read from filename and that passed in.")
+    else:
+        sampling_period = file_sampling_period
+
+    metadata = {
+        "site": site,
+        "species": compliant_string(species),
+        "inlet": inlet_height,
+        "sampling_period": str(sampling_period),
+        "network": "ICOS",
+    }
+
+    combined_data[species] = {
+        "metadata": metadata,
+        "data": data,
+        "attributes": site_attributes,
+    }
+
+    return combined_data

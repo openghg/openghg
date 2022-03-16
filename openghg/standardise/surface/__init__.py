@@ -7,6 +7,7 @@ from ._eurocom import parse_eurocom
 from ._gcwerks import parse_gcwerks
 from ._glasgow_licor import parse_glasow_licor
 from ._glasgow_picarro import parse_glasow_picarro
+from ._icos import parse_icos
 from ._noaa import parse_noaa
 from ._npl import parse_npl
 from ._thamesbarrier import parse_tmb
