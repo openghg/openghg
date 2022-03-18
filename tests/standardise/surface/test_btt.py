@@ -33,6 +33,7 @@ def test_read_file(btt_data):
     assert ch4_data["ch4"][-1] == pytest.approx(1961.72216725)
 
 
+@pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_btt_cf_compliance(btt_data):
     co2_data = btt_data["CO2"]["data"]

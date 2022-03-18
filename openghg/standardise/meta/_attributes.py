@@ -24,7 +24,7 @@ def assign_attributes(
     from openghg.standardise.meta import surface_standardise
 
     for key, gas_data in data.items():
-        site_attributes = gas_data["attributes"]
+        site_attributes = gas_data.get("attributes", {})
         species = gas_data["metadata"]["species"]
 
         units = gas_data.get("metadata", {}).get("units")
@@ -318,7 +318,7 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
     site_params = load_json(filename=data_filename)
 
     if network is None:
-        network = list(site_params[site].keys())[0]
+        network = next(iter(site_params[site]))
     else:
         network = network.upper()
 

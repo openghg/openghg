@@ -13,7 +13,8 @@ def parse_crds(
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
 ) -> Dict:
-    """Creates a CRDS object holding data stored within Datasources
+    """Parses a CRDS data file and creates a dictionary of xarray Datasets
+    ready for storage in the object store.
 
     Args:
         data_filepath: Path to file
