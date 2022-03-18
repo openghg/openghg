@@ -1,0 +1,90 @@
+package:
+  name: "openghg"
+  version: {{ GIT_DESCRIBE_TAG }}
+
+source:
+  git_url: https://github.com/openghg/openghg.git
+  git_rev: {{ GIT_DESCRIBE_TAG }}
+  git_depth: 1
+
+requirements:
+  build:
+    - python
+    - setuptools
+  host:
+    - addict
+    - cdsapi
+    - dask
+    - lazy_import
+    - matplotlib
+    - nc-time-axis
+    - netcdf4
+    - numexpr
+    - numpy
+    - pandas
+    - paramiko
+    - pip
+    - plotly
+    - python
+    - pyvis
+    - rapidfuzz
+    - requests >=2.25
+    - scipy
+    - tqdm
+    - urllib3 >=1.26.3
+    - xarray >=0.18.2
+  run:
+    - addict
+    - cdsapi
+    - dask
+    - lazy_import
+    - matplotlib
+    - nc-time-axis
+    - netcdf4
+    - numexpr
+    - numpy
+    - pandas
+    - paramiko
+    - plotly
+    - python
+    - pyvis
+    - python
+    - rapidfuzz
+    - requests >=2.25
+    - scipy
+    - tqdm
+    - urllib3 >=1.26.3
+    - xarray >=0.18.2
+
+test:
+  imports:
+    - openghg
+    - openghg.analyse
+    - openghg.client
+    - openghg.dataobjects
+    - openghg.jobs
+    - openghg.objectstore
+    - openghg.plotting
+    - openghg.retrieve
+    - openghg.retrieve.met
+    - openghg.service
+    - openghg.standardise
+    - openghg.standardise.meta
+    - openghg.standardise.surface
+    - openghg.store
+    - openghg.store.base
+    - openghg.types
+    - openghg.util
+
+about:
+  home: "https://github.com/openghg/openghg"
+  license: Apache Software
+  license_family: APACHE
+  license_file: 
+  summary: "OpenGHG - a cloud platform for greenhouse gas data analysis"
+  doc_url: https://docs.openghg.org
+  dev_url: "https://github.com/openghg/openghg"
+
+extra:
+  recipe-maintainers:
+    - gareth-j
