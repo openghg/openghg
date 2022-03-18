@@ -60,7 +60,7 @@ jobs:
         bash codecov || echo "Codecov did not collect coverage reports"
       if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
   docs:
-    name: Build and publish Python distributions 📦 to PyPI and TestPyPI
+    name: Run checks on tutorial notebooks and build docs
     runs-on: ubuntu-latest
     needs: ["test"]
     steps:
