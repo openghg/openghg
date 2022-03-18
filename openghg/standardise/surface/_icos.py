@@ -98,9 +98,41 @@ def _read_data_large_header(
     from pandas import read_csv, to_datetime
     from openghg.util import read_header
 
+    # Read metadata from the filename and cross check to make sure the passed
+    # arguments match
+    split_filename = data_filepath.name.split(".")
+
+    try:
+        site_fname = split_filename[0]
+        species_fname = split_filename[1]
+        file_sampling_period = split_filename[2]
+        instrument_fname = split_filename[3]
+        inlet_height_fname = split_filename[4]
+    except IndexError:
+        raise ValueError(
+            "Unable to read metadata from filename. We expect a filename such as mhd.ch4.hourly.g2401.15m.dat"
+        )
+
+    if site_fname.lower() != site:
+        raise ValueError("Site mismatch between site argument passed and filename.")
+
+    if species_fname.lower() != species:
+        raise ValueError("Mismatch in species between data, argument and filename.")
+
+    if inlet_height_fname.lower() != inlet:
+        raise ValueError("Mismatch between inlet height passed and in filename.")
+
+    if instrument_fname.lower() != instrument:
+        raise ValueError("Mismatch between instrument passed and that in filename.")
+
     # Read the header and check its length
     header = read_header(filepath=data_filepath)
     len_header = len(header)
+
+    if len_header != 40:
+        print(f"WARNING: We expect a header length of 40 but got {len_header}, \
+                note that some metadata may not be collected, \
+                please raise an issue on GitHub if this file format is to be expected.")
 
     dtypes = {
         "#Site": "string",
@@ -160,32 +192,11 @@ def _read_data_large_header(
     # Convert to xarray Dataset
     data = df.to_xarray()
 
-    # Read metadata from the filename and cross check to make sure the passed
-    # arguments match
-    split_filename = data_filepath.name.split(".")
+    if site != site_name_data.lower():
+        raise ValueError("Site mismatch between site argument passed and site in data.")
 
-    try:
-        site_fname = split_filename[0]
-        species_fname = split_filename[1]
-        file_sampling_period = split_filename[2]
-        instrument_fname = split_filename[3]
-        inlet_height_fname = split_filename[4]
-    except IndexError:
-        raise ValueError(
-            "Unable to read metadata from filename. We expect a filename such as tta.co2.1minute.222m.dat"
-        )
-
-    if site_fname.lower() != site != site_name_data.lower():
-        raise ValueError("Site mismatch between site argument passed and filename")
-
-    if species_name_data.lower() != species != species_fname.lower():
-        raise ValueError("Mismatch in species between data, argument and filename")
-
-    if inlet_height_fname.lower() != inlet:
-        raise ValueError("Mismatch between inlet height passed and in filename")
-
-    if instrument_fname.lower() != instrument:
-        raise ValueError("Mismatch between instrument passed and that in filename")
+    if species != species_name_data.lower():
+        raise ValueError("Speices mismatch between site passed and species in data.")
 
     if file_sampling_period == "1minute":
         file_sampling_period = "60"

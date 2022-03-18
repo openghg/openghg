@@ -41,6 +41,62 @@ def test_read_icos_large_header():
     assert data["co"]["data"]["co_variability"][-1] == pytest.approx(1.924)
 
 
+def test_read_icos_large_header_incorrect_species_raises():
+    filepath = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
+
+    with pytest.raises(ValueError):
+        parse_icos(
+            data_filepath=filepath,
+            species="ch4",
+            site="mhd",
+            instrument="g2401",
+            header_type="large",
+            inlet="15m",
+        )
+
+
+def test_read_icos_large_header_incorrect_site_raises():
+    filepath = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
+
+    with pytest.raises(ValueError):
+        parse_icos(
+            data_filepath=filepath,
+            species="co",
+            site="aaa",
+            instrument="g2401",
+            header_type="large",
+            inlet="15m",
+        )
+
+
+def test_read_icos_large_header_incorrect_instrument_raises():
+    filepath = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
+
+    with pytest.raises(ValueError):
+        parse_icos(
+            data_filepath=filepath,
+            species="co",
+            site="aaa",
+            instrument="sparrow",
+            header_type="large",
+            inlet="15m",
+        )
+
+
+def test_read_icos_large_header_incorrect_inlet_raises():
+    filepath = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
+
+    with pytest.raises(ValueError):
+        parse_icos(
+            data_filepath=filepath,
+            species="co",
+            site="aaa",
+            instrument="sparrow",
+            header_type="large",
+            inlet="888m",
+        )
+
+
 def test_read_icos_small_header_file():
     filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
 
