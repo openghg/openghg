@@ -1,0 +1,90 @@
+# TITLE: CO - L1 for Continuous air
+# FILE NAME: MHD_2018-03-01T09:00:00_2022-03-11T05:45:49_24.0_695_C_hour.CO
+# DATA FORMAT: Version 1.0
+# TOTAL LINES: 34399
+# HEADER LINES: 40
+# PROJECT DATA VERSION: Undefined
+# DATA PRODUCT TYPE: L1
+# STATION CODE: MHD
+# STATION NAME: Mace Head
+# STATION CATEGORY: Contributing
+# OBSERVATION CATEGORY: Air sampling observation at a Stationary platform
+# COUNTRY/TERRITORY: Ireland
+# CONTRIBUTOR: University of Ireland Galway (NUI)
+# LATITUDE: 53.3261 N
+# LONGITUDE: -9.9036 E
+# ALTITUDE: 5 m asl
+# NUMBER OF SAMPLING HEIGHTS: 1
+# SAMPLING HEIGHTS: 24.0 m agl
+# CONTACT POINT: marc.delmotte@lsce.ipsl.fr,morgan.lopez@lsce.ipsl.fr,michel.ramonet@lsce.ipsl.fr
+# PARAMETER: CO
+# COVERING PERIOD: 2018-03-01T09:00 2022-03-11T05:45
+# TIME INTERVAL: hourly
+# MEASUREMENT UNIT: nmol.mol-¹
+# MEASUREMENT METHOD: Cavity RingDown Spectrometer (instrument Id 695)
+# SAMPLING TYPE: continuous
+# TIME ZONE: UTC +0
+# MEASUREMENT SCALE: WMO CO_X2014A
+# DATA POLICY: ICOS DATA is licensed under a Creative Commons Attribution 4.0 international licence (http://creativecommons.org/licenses/by/4.0/.The ICOS data licence is described at https://data.icos-cp.eu/licence.
+# COMMENT:
+#   - Times are UTC
+#   - Time-averaged values are reported at the beginning of the averaging interval.
+#   - Flag 'U' = data correct before manual quality control
+#   - Flag 'N' = data incorrect before manual quality control
+#   - Flag 'O' = data correct after manual quality control
+#   - Flag 'K' = data incorrect after manual quality control
+#   - Flag 'R' = data correct after manual quality control and backwards propagation
+#   - Flag 'H' = data incorrect after manual quality control and backwards propagation
+#   - Data processing at ICOS ATC is described in [Hazan et al., 2016], doi:10.5194/amt-9-4719-2016
+#
+#Site;SamplingHeight;Year;Month;Day;Hour;Minute;DecimalDate;co;Stdev;NbPoints;Flag;InstrumentId;QualityId;InternalFlag;AutoDescriptiveFlag;ManualDescriptiveFlag
+MHD;24;2018;03;01;09;00;2018.16267123;-999.990;-9.990;0;N;695;92755;Unitary data,Cal period;;
+MHD;24;2018;03;01;10;00;2018.16278539;-999.990;-9.990;0;N;695;92755;Unitary data,Cal period;;
+MHD;24;2018;03;01;11;00;2018.16289954;-999.990;-9.990;0;N;695;92755;Unitary data,Cal period;;
+MHD;24;2018;03;01;12;00;2018.16301370;-999.990;-9.990;0;N;695;92755;Unitary data,Cal period;;
+MHD;24;2018;03;01;13;00;2018.16312785;-999.990;-9.990;0;N;695;92755;Unitary data,Cal period;;
+MHD;24;2018;03;01;14;00;2018.16324201;-999.990;-9.990;0;N;695;92755;Unitary data,Cal period;;
+MHD;24;2018;03;01;15;00;2018.16335616;-999.990;-9.990;0;N;695;92755;Unitary data,Cal period;;
+MHD;24;2018;03;01;16;00;2018.16347032;155.118;1.955;37;O;695;95043;Stabilization,Cavity pressure,Cavity temperature,Unitary data,Quality control;I-1,F-1;
+MHD;24;2018;03;01;17;00;2018.16358447;153.354;1.881;60;O;695;95043;Quality control;;
+MHD;24;2018;03;01;18;00;2018.16369863;149.730;1.687;60;O;695;95043;Quality control;;
+MHD;24;2018;03;01;19;00;2018.16381279;145.887;1.643;60;O;695;95043;Quality control;;
+MHD;24;2018;03;01;20;00;2018.16392694;142.324;1.251;60;O;695;95043;Quality control;;
+MHD;24;2018;03;01;21;00;2018.16404110;143.104;1.477;60;O;695;95043;Quality control;;
+MHD;24;2018;03;01;22;00;2018.16415525;144.543;1.177;36;O;695;95043;Stabilization,Cavity pressure,Unitary data,Quality control;I,F-1;
+MHD;24;2018;03;01;23;00;2018.16426941;142.828;1.297;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;00;00;2018.16438356;142.254;1.077;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;01;00;2018.16449772;140.337;1.125;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;02;00;2018.16461187;139.828;1.252;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;03;00;2018.16472603;140.349;1.126;56;O;695;95043;Quality control;;
+MHD;24;2018;03;02;04;00;2018.16484018;141.229;0.911;40;O;695;95043;Stabilization,Cavity pressure,Unitary data,Quality control;I,F-1;
+MHD;24;2018;03;02;05;00;2018.16495434;141.978;0.884;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;06;00;2018.16506849;142.699;1.016;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;07;00;2018.16518265;142.450;1.337;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;08;00;2018.16529680;140.289;1.274;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;09;00;2018.16541096;139.606;1.211;46;O;695;95043;Quality control;;
+MHD;24;2018;03;02;10;00;2018.16552511;141.419;1.789;50;O;695;95043;Stabilization,Cavity pressure,Unitary data,Quality control;I,F;
+MHD;24;2018;03;02;11;00;2018.16563927;150.788;3.852;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;12;00;2018.16575342;158.480;1.856;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;13;00;2018.16586758;162.403;1.692;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;14;00;2018.16598174;165.607;1.200;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;15;00;2018.16609589;166.522;1.118;36;O;695;95043;Stabilization,Cavity pressure,Unitary data,Quality control;F-1;
+MHD;24;2018;03;02;16;00;2018.16621005;168.472;1.097;60;O;695;95043;Stabilization,Quality control;F;
+MHD;24;2018;03;02;17;00;2018.16632420;169.449;1.634;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;18;00;2018.16643836;169.745;1.355;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;19;00;2018.16655251;169.528;1.234;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;20;00;2018.16666667;171.434;1.165;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;21;00;2018.16678082;174.785;1.592;36;O;695;95043;Stabilization,Cavity pressure,Unitary data,Quality control;I,F-1;
+MHD;24;2018;03;02;22;00;2018.16689498;177.718;1.190;60;O;695;95043;Quality control;;
+MHD;24;2018;03;02;23;00;2018.16700913;179.018;1.081;60;O;695;95043;Quality control;;
+MHD;24;2018;03;03;00;00;2018.16712329;181.866;1.343;60;O;695;95043;Quality control;;
+MHD;24;2018;03;03;01;00;2018.16723744;183.533;1.504;60;O;695;95043;Quality control;;
+MHD;24;2018;03;03;02;00;2018.16735160;183.687;1.521;60;O;695;95043;Quality control;;
+MHD;24;2018;03;03;03;00;2018.16746575;186.637;2.430;36;O;695;95043;Stabilization,Cavity pressure,Unitary data,Quality control;I,F-1;
+MHD;24;2018;03;03;04;00;2018.16757991;179.402;3.523;60;O;695;95043;Quality control;;
+MHD;24;2018;03;03;05;00;2018.16769406;173.067;1.311;60;O;695;95043;Quality control;;
+MHD;24;2018;03;03;06;00;2018.16780822;174.755;1.511;60;O;695;95043;Quality control;;
+MHD;24;2018;03;03;07;00;2018.16792237;181.527;3.336;60;O;695;95043;Quality control;;
+MHD;24;2018;03;03;08;00;2018.16803653;188.024;1.089;60;O;695;95043;Quality control;;
+MHD;24;2018;03;03;09;00;2018.16815068;191.746;1.843;36;O;695;95043;Stabilization,Cavity pressure,Unitary data,Quality control;I,F-1;
+MHD;24;2018;03;03;10;00;2018.16826484;196.383;1.924;60;O;695;95043;Quality control;;

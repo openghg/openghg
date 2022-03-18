@@ -3,7 +3,7 @@ import pytest
 from openghg.standardise.surface import parse_cranfield
 from helpers import get_datapath, parsed_surface_metachecker, check_cf_compliance
 
-
+@pytest.mark.skip_if_no_cfchecker
 @pytest.mark.xfail(reason="Bug: No attributes for Cranfield - see #201")
 def test_read_file():
     filepath = get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")

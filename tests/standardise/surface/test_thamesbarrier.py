@@ -35,7 +35,7 @@ def test_read_file(tmb_data):
     assert co_data["co"][0] == pytest.approx(0.08788712)
     assert co_data["co_variability"][0] == 0
 
-
+@pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_tmb_cf_compliance(tmb_data):
     co_data = tmb_data["CO"]["data"]

@@ -1,8 +1,4 @@
-from logging import warning
-from cfchecker import CFChecker
-from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Union
 import xarray as xr
 import warnings
 
@@ -15,6 +11,8 @@ def check_cf_compliance(dataset: xr.Dataset, debug: bool = False) -> bool:
     Returns:
         bool: True if compliant
     """
+    from cfchecker import CFChecker
+
     checker = CFChecker(debug=debug, version="1.8")
 
     with warnings.catch_warnings():

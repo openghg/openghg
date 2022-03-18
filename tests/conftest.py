@@ -1,7 +1,9 @@
+from ast import Import
 import os
 import sys
 import tempfile
 import pytest
+from warnings import warn
 
 # Added for import of services modules in tests
 sys.path.insert(0, os.path.abspath("services"))
@@ -21,6 +23,8 @@ sys.path.insert(0, os.path.abspath("."))
 
 temporary_store = tempfile.TemporaryDirectory()
 temporary_store_path = temporary_store.name
+
+
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -43,14 +47,26 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "cfchecks: mark mark test as needing CF related libs to run")
+    config.addinivalue_line(
+        "markers", "skip_if_no_cfchecker: skip test is cfchecker is not installed",
+    )
 
 
 def pytest_collection_modifyitems(config, items):
-    if config.getoption("--run-cfchecks"):
-        # --run-cfchecks given in cli: do not skip slow tests
+    messge_str = "need --run-cfchecks option to run"
+
+    try:
+        import cfchecker
+        cfchecker_imported = True
+    except (FileNotFoundError, ImportError) as e:
+        cfchecker_imported = False
+        messge_str = f"Cannot import CFChecker - {e}"
+
+    if config.getoption("--run-cfchecks") and cfchecker_imported:
+        # --run-cfchecks given in cli: do not skip cfchecks tests
         return
 
-    skip_cf = pytest.mark.skip(reason="need --run-cfchecks option to run")
+    skip_cf = pytest.mark.skip(reason=messge_str)
     for item in items:
         if "cfchecks" in item.keywords:
             item.add_marker(skip_cf)
