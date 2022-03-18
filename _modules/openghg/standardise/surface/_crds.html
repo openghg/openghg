@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.2.g3fd4c76.dirty documentation</title>
+    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.1.g3c13e68.dirty documentation</title>
     
     <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -182,7 +182,8 @@
     <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Creates a CRDS object holding data stored within Datasources</span>
+    <span class="sd">&quot;&quot;&quot;Parses a CRDS data file and creates a dictionary of xarray Datasets</span>
+<span class="sd">    ready for storage in the object store.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data_filepath: Path to file</span>
