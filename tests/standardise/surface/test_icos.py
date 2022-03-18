@@ -28,6 +28,7 @@ def test_read_icos_large_header():
         "station_latitude": 53.32611,
         "station_long_name": "Mace Head, Ireland",
         "station_height_masl": 5.0,
+        "data_owner_email": "morgan.lopez@lsce.ipsl.fr",
     }
 
     metadata = data["co"]["metadata"]
@@ -38,8 +39,6 @@ def test_read_icos_large_header():
     assert data["co"]["data"]["co"][-1] == pytest.approx(196.383)
     assert data["co"]["data"]["co_variability"][0] == pytest.approx(1.955)
     assert data["co"]["data"]["co_variability"][-1] == pytest.approx(1.924)
-
-    
 
 
 def test_read_icos_small_header_file():

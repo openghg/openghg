@@ -1,6 +1,5 @@
 from typing import Dict, Optional, Union
 from pathlib import Path
-from openghg.util import load_json
 
 
 def parse_icos(
@@ -31,6 +30,15 @@ def parse_icos(
     """
     from pathlib import Path
     from openghg.standardise.meta import assign_attributes
+    from openghg.util import clean_string
+
+    species = clean_string(species)
+    site = clean_string(site)
+    inlet = clean_string(inlet)
+    instrument = clean_string(instrument)
+    network = clean_string(network)
+    sampling_period = clean_string(sampling_period)
+    measurement_type = clean_string(measurement_type)
 
     if not isinstance(data_filepath, Path):
         data_filepath = Path(data_filepath)
@@ -88,15 +96,7 @@ def _read_data_large_header(
         dict: Dictionary of gas data
     """
     from pandas import read_csv, to_datetime
-    from openghg.util import read_header, clean_string
-
-    species = clean_string(species)
-    site = clean_string(site)
-    inlet = clean_string(inlet)
-    instrument = clean_string(instrument)
-    network = clean_string(network)
-    sampling_period = clean_string(sampling_period)
-    measurement_type = clean_string(measurement_type)
+    from openghg.util import read_header
 
     # Read the header and check its length
     header = read_header(filepath=data_filepath)
@@ -220,13 +220,15 @@ def _read_data_large_header(
         calibration_scale = scale_line.split(":")[1].lower().lstrip(" ").replace(" ", "_").strip()
         metadata["calibration_scale"] = calibration_scale
 
-    attrs = _retrieve_site_attrs(site=site, network=network)
+    data_owner_line = header[18]
+    if "CONTACT POINT" in data_owner_line:
+        data_owner_email = data_owner_line.split(":")[1].split(",")[1].strip()
+        metadata["data_owner_email"] = data_owner_email
 
     species_data = {
         species: {
             "metadata": metadata,
             "data": data,
-            "attributes": attrs,
         }
     }
 
@@ -363,33 +365,11 @@ def _read_data_small_header(
     if measurement_type is not None:
         metadata["measurement_type"] = measurement_type
 
-    attrs = _retrieve_site_attrs(site=site, network=network)
-
     species_data = {
         species: {
             "metadata": metadata,
             "data": data,
-            "attributes": attrs,
         }
     }
 
     return species_data
-
-
-def _retrieve_site_attrs(site: str, network: str = "ICOS") -> Dict:
-    """Retrieve site attributes from metadata file
-
-    Args:
-        site: Site code
-        network: Network name, defaults to ICOS
-    Returns:
-        dict: Dictionary of site metadata
-    """
-    site_metadata = load_json(filename="acrg_site_info.json")
-
-    site = site.upper()
-    network = network.upper()
-
-    site_attrs = site_metadata[site][network]
-
-    return site_attrs

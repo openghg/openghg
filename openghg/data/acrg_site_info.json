@@ -2925,6 +2925,14 @@
       "latitude": 56.55511,
       "long_name": "Angus Tower, UK",
       "longitude": -2.98598
+    },
+    "ICOS": {
+      "height": ["222m"],
+      "height_name": ["222magl"],
+      "height_station_masl": 300.0,
+      "latitude": 56.55511,
+      "long_name": "Angus Tower, UK",
+      "longitude": -2.98598
     }
   },
   "ULB": {
