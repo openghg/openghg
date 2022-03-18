@@ -113,7 +113,7 @@ class Datasource:
         elif data_type == "met":
             raise NotImplementedError()
         elif data_type == "boundary_conditions":
-            raise self.add_bc_data(data=data, metadata=metadata)
+            return self.add_bc_data(data=data, metadata=metadata)
         elif data_type == "eulerian_model":
             return self.add_eulerian_model_data(data=data, metadata=metadata)
 

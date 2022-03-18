@@ -2,6 +2,9 @@ from openghg.store.base import BaseStore
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union
 from xarray import Dataset
+import pandas as pd
+from pandas import Timestamp, DateOffset
+from dateutil.relativedelta import relativedelta
 
 __all__ = ["BoundaryConditions"]
 
@@ -32,8 +35,9 @@ class BoundaryConditions(BaseStore):
         species: str,
         bc_input: str,
         domain: str,
-        date: str,
-        period: Optional[str] = None,
+        # date: Union[str, Timestamp],
+        period: Optional[Union[str, tuple]] = None,
+        continuous: bool = True,
         overwrite: bool = False,
     ) -> Dict:
         """Read boundary conditions file
@@ -45,11 +49,18 @@ class BoundaryConditions(BaseStore):
               - a model name such as "MOZART" or "CAMS"
               - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
             domain: Region for boundary conditions
-            period: Period of measurements, if not passed this is inferred from the time coords
+            date: 
+            period: Period of measurements. Only needed if this can not be inferred from the time coords
+                    If specified, should be one of:
+                     - "yearly", "monthly"
+                     - suitable pandas Offset Alias
+                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
+            continuous: Whether time stamps have to be continuous.
             overwrite: Should this data overwrite currently stored data.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
+        import re
         from collections import defaultdict
         from xarray import open_dataset
         from openghg.store import assign_data
@@ -59,12 +70,16 @@ class BoundaryConditions(BaseStore):
             pairwise,
             timestamp_tzaware,
             timestamp_now,
+            parse_period,
+            create_frequency_str,
+            relative_time_offset,
+
         )
 
         species = clean_string(species)
         bc_input = clean_string(bc_input)
         domain = clean_string(domain)
-        date = clean_string(date)
+        # date = clean_string(date)
 
         filepath = Path(filepath)
 
@@ -96,66 +111,128 @@ class BoundaryConditions(BaseStore):
         metadata["species"] = species
         metadata["domain"] = domain
         metadata["boundary_condition_input"] = bc_input
-        metadata["date"] = date
+        # metadata["date"] = date
         metadata["author"] = author_name
         metadata["processed"] = str(timestamp_now())
 
-        ### TODO: Currently ACRG boundary conditions are split by month rather than yearly
+        # TODO: Decide what format (if any) we want the "date" input as?
+        # Surely this can be inferred from the time axis within the data?
+        # It's the period which would be useful as an input here
+
+        # Currently ACRG boundary conditions are split by month or year
         # Need to add in code to handle this below.
-        #  - Could do this based on filename? This is linked to stored data for 
-        # current ACRG data.
-        n_dates = bc_data.time.size
+        #  - Could do this based on filename? This is linked to stored data for current ACRG data.
+        bc_time = bc_data.time
+        n_dates = bc_time.size
+        start_date = timestamp_tzaware(bc_time.values[0])
 
-        # This covers the whole year
-        if n_dates == 1:
-            year = timestamp_tzaware(bc_data.time[0].values).year
-            year_start = timestamp_tzaware(f"{year}-1-1-00:00:00")
-            year_end = timestamp_tzaware(f"{year}-12-31-23:59:59")
+        # Usual filename format: "species"_"domain"_"date".nc
 
-            start_date = year_start
-            end_date = year_end
-            freq = "annual"
-        # We have values for each month / week
-        elif n_dates == 12:
-            # Check they're successive months
-            timestamps = [timestamp_tzaware(t) for t in bc_data.time.values]
-
-            for a, b in pairwise(timestamps):
-                if a.month != b.month - 1:
-                    raise ValueError("We expect successive months for the data")
-
-            if timestamps[0].year != timestamps[-1].year:
-                raise ValueError("We expect a single year of data")
-
-            year = timestamps[0].year
-
-            year_start = timestamp_tzaware(f"{year}-1-1-00:00:00")
-            year_end = timestamp_tzaware(f"{year}-12-31-23:59:59")
-
-            start_date = year_start
-            end_date = year_end
-            freq = "month"
-        # Work run through the timestamps and check for gap between them ?
-        # Add something to metadata for this?
+        # Find frequency from period, if specified
+        if period is not None:
+            freq = parse_period(period)
         else:
-            timestamps = [timestamp_tzaware(t) for t in bc_data.time.values]
-            timestamps.sort()
+            freq = None
 
-            frequency = set()
+        if n_dates == 1:
+            
+            filename = filepath.stem  # Filename without the extension
+            filename_identifiers = filename.split("_")
+            filename_identifiers.reverse()  # Date identifier usually at the end
 
-            for a, b in pairwise(timestamps):
-                delta = b - a
-                frequency.add(delta)
-
-            start_date = timestamps[0]
-            end_date = timestamps[-1]
-
-            if len(frequency) == 1:
-                freq = str(frequency.pop())
+            for id in filename_identifiers:
+                try:
+                    # Check if filename contains 6 ("yyyymm") or 4 ("yyyy") digit section
+                    date_match = re.search("^(\d{6}|\d{4})$", id).group()
+                except AttributeError:
+                    continue
+                else:
+                    break
             else:
-                freq = "varies"
+                date_match = ""
 
-        ###### Section above needs to be updated #######
+            if len(date_match) == 6:
+                # "yyyymm" format indicates monthly data
+                inferred_freq = "months"
+            elif len(date_match) == 4:
+                # "yyyy" format indicates yearly data
+                inferred_freq = "years"
+            else:
+                # Set as default as annual if this cannot be inferred from filename
+                inferred_freq = "years"
+
+            # Because frequency cannot be inferred from the data and only the filename,
+            # use the user specified input in preference of the inferred value
+            if freq is not None:
+                time_value = freq[0]
+                time_unit = freq[1]
+            else:
+                print(f"Only one time point, inferring frequency of {inferred_freq}")
+                time_value = 1
+                time_unit = inferred_freq
+
+            # Check input period against inferred period
+            if inferred_freq != time_unit:
+                print(f"Warning: Input period of {period} did not map to frequency inferred from filename: {inferred_freq} (date extracted: {date_match})")
+
+            # Create time offset and use to create start and end datetime
+            time_delta = relative_time_offset(unit=time_unit, value=time_value)
+            start_date = timestamp_tzaware(bc_data.time[0].values)
+            end_date = start_date + time_delta
+
+            # TODO: Aim to remove if date isn't needed as a key
+            if time_unit == "years":
+                date = str(start_date.year)
+            elif time_unit == "months":
+                date = str(start_date.year) + f"{start_date.month:02}"
+            else:
+                date = start_date.astype("datetime64[s]").astype(str)
+
+            period_str = create_frequency_str(time_value, time_unit)
+
+        else:
+            timestamps = pd.to_datetime([timestamp_tzaware(t) for t in bc_time.values])
+            timestamps = timestamps.sort_values()
+
+            inferred_period = pd.infer_freq(timestamps)
+            if inferred_period is None:
+                if continuous:
+                    raise ValueError("Continuous data with no gaps is expected but no time period can be inferred. Run with continous=False to remove this constraint.")
+                else:
+                    inferred_freq = ()
+                    time_value, time_unit = None, None
+            else:
+                inferred_freq = parse_period(inferred_period)
+                time_value, time_unit = inferred_freq
+
+            # Because frequency will be inferred from the data, use the inferred
+            # value in preference to any user specified input.
+            # Note: this is opposite to the other part of this branch.
+            if freq is not None:
+                if inferred_freq and freq != inferred_freq:
+                    print(f"Warning: Input period: {period} does not map to inferred frequency {inferred_freq}")
+                    freq = inferred_freq
+
+            # Create time offset, using inferred offset
+            start_date = timestamp_tzaware(bc_data.time[0].values)
+            if time_value is not None:
+                time_delta = DateOffset(**{time_unit:time_value})
+                end_date = timestamp_tzaware(bc_data.time[-1].values) + time_delta
+            else:
+                end_date = timestamp_tzaware(bc_data.time[-1].values)
+
+            # TODO: Aim to remove if date isn't needed as a key
+            date = str(start_date.year)
+            # date = start_date.astype("datetime64[s]").astype(str)
+
+            if inferred_period is not None:
+                period_str = create_frequency_str(time_value, time_unit)
+            else:
+                period_str = "varies"
+
+        # TODO: Add checking against expected format for boundary conditions
+        # Will probably want to do this for Emissions, Footprints as well
+        # - develop and use check_format() method
 
         metadata["start_date"] = str(start_date)
         metadata["end_date"] = str(end_date)
@@ -167,11 +244,11 @@ class BoundaryConditions(BaseStore):
         metadata["min_height"] = round(float(bc_data["height"].min()), 5)
         metadata["max_height"] = round(float(bc_data["height"].max()), 5)
 
-        metadata["frequency"] = freq
+        metadata["time_period"] = period_str
+        metadata["date"] = date
 
-        if period is not None:
-            metadata["time_period"] = period
-
+        # TODO: Remove reliance on date in the key - this should be dynamically
+        # split out as the obs data is.
         key = "_".join((species, bc_input, domain, date))
 
         boundary_conditions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
@@ -274,3 +351,8 @@ class BoundaryConditions(BaseStore):
             else:
                 self.set_uuid(species=species, bc_input=bc_input, domain=domain, date=date, uuid=uid)
                 self._datasource_uuids[uid] = key
+
+    def check_format(self):
+        # TODO: Create check_format() function to define and align format to
+        # expected values within database
+        pass

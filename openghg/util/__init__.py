@@ -27,6 +27,10 @@ from ._time import (
     timestamp_tzaware,
     trim_daterange,
     valid_daterange,
+    time_offset_definition,
+    parse_period,
+    create_frequency_str,
+    relative_time_offset
 )
 from ._tutorial import bilsdale_datapaths, retrieve_example_data
 from ._util import multiple_inlets, pairwise, running_in_cloud, unanimous, verify_site
