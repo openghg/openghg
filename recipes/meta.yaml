@@ -7,6 +7,9 @@ source:
   git_rev: {{ GIT_DESCRIBE_TAG }}
   git_depth: 1
 
+build:
+  preserve_egg_dir: True
+
 requirements:
   build:
     - python
@@ -62,7 +65,6 @@ test:
     - openghg.analyse
     - openghg.client
     - openghg.dataobjects
-    - openghg.jobs
     - openghg.objectstore
     - openghg.plotting
     - openghg.retrieve
