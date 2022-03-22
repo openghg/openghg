@@ -8,34 +8,15 @@ source:
   git_depth: 1
 
 build:
+  noarch: python
   preserve_egg_dir: True
+  script: "{{ PYTHON }} -m pip install . -vv"
 
 requirements:
-  build:
+  host:
+    - pip
     - python
     - setuptools
-  host:
-    - addict
-    - cdsapi
-    - dask
-    - lazy_import
-    - matplotlib
-    - nc-time-axis
-    - netcdf4
-    - numexpr
-    - numpy
-    - pandas
-    - paramiko
-    - pip
-    - plotly
-    - python
-    - pyvis
-    - rapidfuzz
-    - requests >=2.25
-    - scipy
-    - tqdm
-    - urllib3 >=1.26.3
-    - xarray >=0.18.2
   run:
     - addict
     - cdsapi
@@ -80,9 +61,8 @@ test:
 
 about:
   home: "https://github.com/openghg/openghg"
-  license: Apache Software
+  license: Apache-2.0
   license_family: APACHE
-  license_file: 
   summary: "OpenGHG - a cloud platform for greenhouse gas data analysis"
   doc_url: https://docs.openghg.org
   dev_url: "https://github.com/openghg/openghg"
