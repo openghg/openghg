@@ -22,7 +22,9 @@ To run OpenGHG locally you'll need Python 3.7 or later on Linux or MacOS, we don
 
 ### Install OpenGHG
 
-You can install OpenGHG using `pip`. We recommend you create a virtual environment first
+You can install OpenGHG using `pip` or `conda`. We recommend you create a virtual environment first
+
+#### pip
 
 ```
 $ python -m venv openghg_env
@@ -38,6 +40,27 @@ Then install OpenGHG
 
 ```
 $ pip install openghg
+```
+
+#### conda
+
+Create a conda environemnt called `openghg_env` and enable the use of conda-forge
+
+```
+$ conda create --name openghg_env
+```
+
+Activate the environment
+
+```
+$ conda activate openghg_env
+```
+
+Then install OpenGHG and its dependencies from our [conda channel](https://anaconda.org/openghg/openghg)
+and conda-forge.
+
+```
+$ conda install --channel conda-forge --channel openghg openghg
 ```
 
 ### Set environment variable
