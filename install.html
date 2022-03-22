@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation instructions &#8212; OpenGHG 0+untagged.1.gdcb1cd9.dirty documentation</title>
+    <title>Installation instructions &#8212; OpenGHG 0+untagged.1.gb14c668.dirty documentation</title>
     
     <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -178,18 +178,13 @@
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#virtual-environment-pip">
-     Virtual environment - pip
+    <a class="reference internal nav-link" href="#pip">
+     pip
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#virtual-environment-conda">
-     Virtual environment - conda
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#install">
-     Install
+    <a class="reference internal nav-link" href="#conda">
+     conda
     </a>
    </li>
   </ul>
@@ -246,27 +241,27 @@ If the version number is <code class="docutils literal notranslate"><span class=
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>We highly recommend creating a separate virtual environment for <code class="docutils literal notranslate"><span class="pre">openghg</span></code>. This ensures the correct versions
 of libraries can be installed without making changes to versions of libraries needed for other projects / programs.</p>
-<section id="virtual-environment-pip">
-<h3>Virtual environment - pip<a class="headerlink" href="#virtual-environment-pip" title="Permalink to this headline">¶</a></h3>
+<section id="pip">
+<h3>pip<a class="headerlink" href="#pip" title="Permalink to this headline">¶</a></h3>
+<p>First create a virtual environment</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m venv /path/to/env/openghg_env
 <span class="c1"># Activate the environment</span>
 <span class="nb">source</span> /path/to/env/bin/activate
 </pre></div>
 </div>
+<p>Here change <code class="docutils literal notranslate"><span class="pre">/path/to/env</span></code> with your own path.</p>
+<p>Next install OpenGHG</p>
 </section>
-<section id="virtual-environment-conda">
-<h3>Virtual environment - conda<a class="headerlink" href="#virtual-environment-conda" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create -f environment.yaml
+<section id="conda">
+<h3>conda<a class="headerlink" href="#conda" title="Permalink to this headline">¶</a></h3>
+<p>First create and activate a conda environment</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create --name openghg_env
 <span class="c1"># Activate the environment</span>
-conda activate openghg
+conda activate openghg_env
 </pre></div>
 </div>
-</section>
-<section id="install">
-<h3>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h3>
-<p>You can install OpenGHG using <code class="docutils literal notranslate"><span class="pre">pip</span></code>, using either a standard Python virtual environment or a <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade pip wheel
-pip install openghg
+<p>Next install OpenGHG from our conda channel</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install --channel conda-forge --channel openghg openghg
 </pre></div>
 </div>
 </section>
