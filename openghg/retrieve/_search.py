@@ -21,8 +21,9 @@ def metadata_lookup(database: TinyDB, **kwargs) -> Dict:
     """Searches the passed database for the given metadata
 
     Args:
-        metadata: Datasource metadata
-        database: The tinydb database for that storage object
+        database: The tinydb database for the storage object
+        **kwargs: Terms to pass to the search of the metastore
+        e.g. site="tac", inlet="15m"
     Returns:
         dict: Dictionary containing Datasource information
     """

@@ -133,10 +133,7 @@ class ObsSurface(BaseStore):
                 # Extract the metadata for each set of measurements to perform a Datasource lookup
                 metadata = {key: data["metadata"] for key, data in data.items()}
 
-                # Search the metadata store for matching Datasources
-                # lookup_results = metadata
-
-                lookup_results = obs.datasource_lookup(metadata=metadata)
+                lookup_results = obs.datasource_lookup(metadata=metadata, metastore=metastore)
 
                 # Create Datasources, save them to the object store and get their UUIDs
                 datasource_uuids = assign_data(
@@ -146,7 +143,7 @@ class ObsSurface(BaseStore):
                 results["processed"][data_filepath.name] = datasource_uuids
 
                 # Record the Datasources we've created / appended to
-                obs.add_datasources(datasource_uuids, metadata)
+                obs.add_datasources(uuids=datasource_uuids, metadata=metadata, metastore=metastore)
 
                 # Store the hash as the key for easy searching, store the filename as well for
                 # ease of checking by user
@@ -156,6 +153,9 @@ class ObsSurface(BaseStore):
 
                 progress_bar.update(1)
 
+        # Ensure we explicitly close the metadata store 
+        # as we're using the cached storage method
+        metastore.close()
         # Save this object back to the object store
         obs.save()
 
@@ -271,7 +271,7 @@ class ObsSurface(BaseStore):
 
         return lookup_results
 
-    def add_datasources(self, datasource_uuids: Dict, metadata: Dict) -> None:
+    def add_datasources(self, uuids: Dict, metadata: Dict, metastore: TinyDB) -> None:
         """Add the passed list of Datasources to the current list
 
         Args:
@@ -280,81 +280,13 @@ class ObsSurface(BaseStore):
         Returns:
             None
         """
-        for key, uid in datasource_uuids.items():
-            md = metadata[key]
-            site = md["site"]
-            network = md["network"]
-            inlet = md["inlet"]
-            species = md["species"]
-            sampling_period = md["sampling_period"]
+        for key, uid in uuids.items():
+            meta_copy = metadata[key].copy()
+            meta_copy["uuid"] = uid
 
-            # TODO - remove this check when improved input sanitisation is in place
-            if not any((site, network, inlet, species, sampling_period)):
-                raise ValueError(
-                    "Please ensure site, network, inlet, species and sampling_period are not None"
-                )
+            metastore.insert(meta_copy)
 
-            result = self.lookup_uuid(
-                site=site,
-                network=network,
-                inlet=inlet,
-                species=species,
-                sampling_period=sampling_period,
-            )
-
-            if result and result != uid:
-                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
-
-            self.set_uuid(
-                site=site,
-                network=network,
-                inlet=inlet,
-                species=species,
-                sampling_period=sampling_period,
-                uuid=uid,
-            )
             self._datasource_uuids[uid] = key
-
-    # def lookup_uuid(
-    #     self, site: str, network: str, inlet: str, species: str, sampling_period: int
-    # ) -> Union[str, bool]:
-    #     """Perform a lookup for the UUID of a Datasource
-
-    #     Args:
-    #         site: Site code
-    #         network: Network name
-    #         inlet: Inlet height
-    #         species: Species name
-    #         sampling_period: Sampling period in seconds
-    #     Returns:
-    #         str or bool: UUID if exists else False
-    #     """
-    #     uuid = self._datasource_table[site][network][species][inlet][sampling_period]
-
-    #     return uuid if uuid else False
-
-    def set_uuid(
-        self,
-        site: str,
-        network: str,
-        inlet: str,
-        species: str,
-        sampling_period: int,
-        uuid: str,
-    ) -> None:
-        """Record a UUID of a Datasource in the datasource table
-
-        Args:
-            site: Site code
-            network: Network name
-            inlet: Inlet height
-            species: Species name
-            sampling_period: Sampling period in seconds
-            uuid: UUID of Datasource
-        Returns:
-            None
-        """
-        self._datasource_table[site][network][species][inlet][sampling_period] = uuid
 
     def delete(self, uuid: str) -> None:
         """Delete a Datasource with the given UUID

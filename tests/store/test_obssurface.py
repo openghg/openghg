@@ -51,6 +51,10 @@ def test_read_CRDS():
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.future.dat", data_type="CRDS")
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
 
+    obs = ObsSurface.load()
+
+    assert len(obs.datasources()) == 3
+
     uuid_one = obs.datasources()[0]
     datasource = Datasource.load(uuid=uuid_one)
     data_keys = sorted(list(datasource.data().keys()))
