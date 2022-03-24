@@ -1,3 +1,4 @@
+from tinydb import TinyDB
 from openghg.store.base import BaseStore
 from openghg.types import pathType, multiPathType, resultsType
 from pathlib import Path
@@ -12,6 +13,7 @@ class ObsSurface(BaseStore):
 
     _root = "ObsSurface"
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
+    _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     @staticmethod
     def read_file(
@@ -50,7 +52,7 @@ class ObsSurface(BaseStore):
         from tqdm import tqdm
         from openghg.util import load_surface_parser, hash_file, clean_string, verify_site
         from openghg.types import SurfaceTypes
-        from openghg.store import assign_data
+        from openghg.store import assign_data, load_metastore
 
         if not isinstance(filepath, list):
             filepath = [filepath]
@@ -81,6 +83,9 @@ class ObsSurface(BaseStore):
         obs = ObsSurface.load()
 
         results: resultsType = defaultdict(dict)
+
+        # Load the store for the metadata
+        metastore = load_metastore(key=obs._metakey)
 
         # Create a progress bar object using the filepaths, iterate over this below
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
@@ -127,6 +132,9 @@ class ObsSurface(BaseStore):
 
                 # Extract the metadata for each set of measurements to perform a Datasource lookup
                 metadata = {key: data["metadata"] for key, data in data.items()}
+
+                # Search the metadata store for matching Datasources
+                # lookup_results = metadata
 
                 lookup_results = obs.datasource_lookup(metadata=metadata)
 
@@ -234,7 +242,7 @@ class ObsSurface(BaseStore):
 
         return results
 
-    def datasource_lookup(self, metadata: Dict) -> Dict:
+    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to
 
         Args:
@@ -242,27 +250,22 @@ class ObsSurface(BaseStore):
         Returns:
             dict: Dictionary of datasource information
         """
+        from openghg.retrieve import metadata_lookup
+
         lookup_results = {}
         for key, data in metadata.items():
             site = data["site"]
             network = data["network"]
             inlet = data["inlet"]
             sampling_period = data["sampling_period"]
-
-            # TODO - remove these once further checks for metadata inputs are in place
-            if inlet is None:
-                raise ValueError("No valid inlet height.")
-
-            if sampling_period is None:
-                raise ValueError("No valid sampling period.")
-
             species = data["species"]
 
-            lookup_results[key] = self.lookup_uuid(
+            lookup_results[key] = metadata_lookup(
+                database=metastore,
                 site=site,
+                species=species,
                 network=network,
                 inlet=inlet,
-                species=species,
                 sampling_period=sampling_period,
             )
 
@@ -312,23 +315,23 @@ class ObsSurface(BaseStore):
             )
             self._datasource_uuids[uid] = key
 
-    def lookup_uuid(
-        self, site: str, network: str, inlet: str, species: str, sampling_period: int
-    ) -> Union[str, bool]:
-        """Perform a lookup for the UUID of a Datasource
+    # def lookup_uuid(
+    #     self, site: str, network: str, inlet: str, species: str, sampling_period: int
+    # ) -> Union[str, bool]:
+    #     """Perform a lookup for the UUID of a Datasource
 
-        Args:
-            site: Site code
-            network: Network name
-            inlet: Inlet height
-            species: Species name
-            sampling_period: Sampling period in seconds
-        Returns:
-            str or bool: UUID if exists else None
-        """
-        uuid = self._datasource_table[site][network][species][inlet][sampling_period]
+    #     Args:
+    #         site: Site code
+    #         network: Network name
+    #         inlet: Inlet height
+    #         species: Species name
+    #         sampling_period: Sampling period in seconds
+    #     Returns:
+    #         str or bool: UUID if exists else False
+    #     """
+    #     uuid = self._datasource_table[site][network][species][inlet][sampling_period]
 
-        return uuid if uuid else False
+    #     return uuid if uuid else False
 
     def set_uuid(
         self,

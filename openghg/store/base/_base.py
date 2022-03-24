@@ -29,9 +29,6 @@ class BaseStore:
         # Keyed by UUID
         self._rank_data = aDict()
 
-    def is_null(self) -> bool:
-        return not self.datasources
-
     @classmethod
     def exists(cls: Type[T], bucket: Optional[str] = None) -> bool:
         """Check if the object is already saved in the object
