@@ -215,12 +215,14 @@ class Footprints(BaseStore):
         Returns:
             None
         """
-        for key, uid in datasource_uuids.items():
+        for key, data in datasource_uuids.items():
             md = metadata[key]
             site = md["site"]
             model = md["model"]
             height = md["height"]
             domain = md["domain"]
+
+            uid = data["uuid"]
 
             result = self.lookup_uuid(site=site, domain=domain, model=model, height=height)
 

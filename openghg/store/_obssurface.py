@@ -179,7 +179,7 @@ class ObsSurface(BaseStore):
         This data is different in that it contains multiple sites in the same file.
         """
         from openghg.standardise.surface import parse_aqmesh
-        from openghg.store import assign_data
+        from openghg.store import assign_data, load_metastore
         from openghg.util import hash_file
         from collections import defaultdict
         from tqdm import tqdm
@@ -189,6 +189,8 @@ class ObsSurface(BaseStore):
 
         # Load the ObsSurface object for retrieve
         obs = ObsSurface.load()
+        # Load the metadata store
+        metastore = load_metastore(key=obs._metakey)
         # Get a dict of data and metadata
         processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
 
@@ -197,9 +199,6 @@ class ObsSurface(BaseStore):
             metadata = site_data["metadata"]
             measurement_data = site_data["data"]
 
-            inlet = metadata["inlet"]
-            species = metadata["species"]
-
             file_hash = hash_file(filepath=data_filepath)
 
             if obs.seen_hash(file_hash=file_hash) and overwrite is False:
@@ -207,13 +206,10 @@ class ObsSurface(BaseStore):
                     f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
                 )
 
-            uuid = obs.lookup_uuid(
-                site=site,
-                network=network,
-                inlet=inlet,
-                species=species,
-                sampling_period=sampling_period,
-            )
+            site_metadata = {site: metadata}
+            lookup_results = obs.datasource_lookup(metadata=site_metadata, metastore=metastore)
+
+            uuid = lookup_results[site]
 
             # Jump through these hoops until we can rework the data assignment functionality to split it out
             # into more sensible functions
@@ -228,17 +224,16 @@ class ObsSurface(BaseStore):
 
             results[site] = datasource_uuids
 
-            # TODO - fix add_datasources as well
-            _metadata = {site: metadata}
-
             # Record the Datasources we've created / appended to
-            obs.add_datasources(datasource_uuids=datasource_uuids, metadata=_metadata)
+            obs.add_datasources(uuids=datasource_uuids, metadata=site_metadata, metastore=metastore)
 
             # Store the hash as the key for easy searching, store the filename as well for
             # ease of checking by user
             obs.set_hash(file_hash=file_hash, filename=data_filepath.name)
 
         obs.save()
+        # Close the metadata store and write new records
+        metastore.close()
 
         return results
 
@@ -280,13 +275,16 @@ class ObsSurface(BaseStore):
         Returns:
             None
         """
-        for key, uid in uuids.items():
-            meta_copy = metadata[key].copy()
-            meta_copy["uuid"] = uid
+        for key, data in uuids.items():
+            new = data["new"]
+            # Only add if this is a new Datasource
+            if new:
+                meta_copy = metadata[key].copy()
+                uid = data["uuid"]
+                meta_copy["uuid"] = data["uuid"]
 
-            metastore.insert(meta_copy)
-
-            self._datasource_uuids[uid] = key
+                metastore.insert(meta_copy)
+                self._datasource_uuids[uid] = key
 
     def delete(self, uuid: str) -> None:
         """Delete a Datasource with the given UUID

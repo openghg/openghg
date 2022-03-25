@@ -244,11 +244,13 @@ class EulerianModel(BaseStore):
         Returns:
             None
         """
-        for key, uid in datasource_uuids.items():
+        for key, data in datasource_uuids.items():
             md = metadata[key]
             model = md["model"]
             species = md["species"]
             date = md["date"]
+
+            uid = data["uuid"]
 
             result = self.lookup_uuid(model=model, species=species, date=date)
 

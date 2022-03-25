@@ -257,12 +257,14 @@ class Emissions(BaseStore):
         Returns:
             None
         """
-        for key, uid in datasource_uuids.items():
+        for key, data in datasource_uuids.items():
             md = metadata[key]
             species = md["species"]
             source = md["source"]
             domain = md["domain"]
             date = md["date"]
+
+            uid = data["uuid"]
 
             result = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
 
