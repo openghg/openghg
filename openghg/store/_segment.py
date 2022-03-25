@@ -11,7 +11,7 @@ def assign_data(
     lookup_results: Dict,
     overwrite: bool,
     data_type: str = "timeseries",
-) -> Dict[str, str]:
+) -> Dict[str, Dict]:
     """Assign data to a Datasource. This will either create a new Datasource
     Create or get an existing Datasource for each gas in the file
 
