@@ -102,7 +102,7 @@ def test_datasource_add_lookup():
         }
     }
 
-    e.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
+    e.add_datasources(uuids=fake_datasource, metadata=fake_metadata)
 
     assert e.datasources() == ["mock-uuid-123456"]
 
@@ -125,11 +125,11 @@ def test_wrong_uuid_raises():
         }
     }
 
-    e.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
+    e.add_datasources(uuids=fake_datasource, metadata=fake_metadata)
 
     assert e.datasources() == ["mock-uuid-123456"]
 
     changed_datasource = {"co2_gppcardamom_europe_2012": "mock-uuid-8888888"}
 
     with pytest.raises(ValueError):
-        e.add_datasources(datasource_uuids=changed_datasource, metadata=fake_metadata)
+        e.add_datasources(uuids=changed_datasource, metadata=fake_metadata)

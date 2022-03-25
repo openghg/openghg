@@ -3,6 +3,7 @@
 """
 from typing import Dict, List, Optional, Union, Type, TypeVar
 from pandas import Timestamp
+from tinydb import TinyDB
 
 __all__ = ["BaseStore"]
 
@@ -159,6 +160,29 @@ class BaseStore:
             None
         """
         del self._datasource_uuids[uuid]
+
+    def add_datasources(self, uuids: Dict, metadata: Dict, metastore: TinyDB) -> None:
+        """Add the passed list of Datasources to the current list
+
+        Args:
+            datasource_uuids: Datasource UUIDs
+            metadata: Metadata for each species
+        Returns:
+            None
+        """
+        for key, data in uuids.items():
+            new = data["new"]
+
+            # Should we do a UUID lookup here to check we're assigning to
+            # the correct UUID? Would that just be covered by the duplicate check?
+            # Only add if this is a new Datasource
+            if new:
+                meta_copy = metadata[key].copy()
+                uid = data["uuid"]
+                meta_copy["uuid"] = data["uuid"]
+
+                metastore.insert(meta_copy)
+                self._datasource_uuids[uid] = key
 
     def get_rank(self: T, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
         """Get the rank for the given Datasource for a given date range

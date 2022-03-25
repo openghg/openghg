@@ -154,7 +154,7 @@ def test_datasource_add_lookup():
         }
     }
 
-    f.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
+    f.add_datasources(uuids=fake_datasource, metadata=fake_metadata)
 
     assert f.datasources() == ["mock-uuid-123456"]
 
@@ -179,11 +179,11 @@ def test_wrong_uuid_raises():
         }
     }
 
-    f.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
+    f.add_datasources(uuids=fake_datasource, metadata=fake_metadata)
 
     assert f.datasources() == ["mock-uuid-123456"]
 
     changed_datasource = {"tmb_lghg_10m_europe": "mock-uuid-8888888"}
 
     with pytest.raises(ValueError):
-        f.add_datasources(datasource_uuids=changed_datasource, metadata=fake_metadata)
+        f.add_datasources(uuids=changed_datasource, metadata=fake_metadata)
