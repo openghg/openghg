@@ -1,8 +1,9 @@
+from curses import meta
 import pytest
 
 from openghg.store import Emissions
 from openghg.retrieve import search
-from openghg.store import recombine_datasets
+from openghg.store import recombine_datasets, metastore_manager
 from openghg.objectstore import get_local_bucket
 from xarray import open_dataset
 from helpers import get_emissions_datapath
@@ -91,7 +92,7 @@ def test_set_lookup_uuids():
 def test_datasource_add_lookup():
     e = Emissions()
 
-    fake_datasource = {"co2_gppcardamom_europe_2012": "mock-uuid-123456"}
+    fake_datasource = {"co2_gppcardamom_europe_2012": {"uuid": "mock-uuid-123456", "new": True}}
 
     fake_metadata = {
         "co2_gppcardamom_europe_2012": {
@@ -102,34 +103,12 @@ def test_datasource_add_lookup():
         }
     }
 
-    e.add_datasources(uuids=fake_datasource, metadata=fake_metadata)
+    with metastore_manager(key="test-key-123") as metastore:
+        e.add_datasources(uuids=fake_datasource, metadata=fake_metadata, metastore=metastore)
 
-    assert e.datasources() == ["mock-uuid-123456"]
+        assert e.datasources() == ["mock-uuid-123456"]
 
-    lookup = e.datasource_lookup(fake_metadata)
+        lookup = e.datasource_lookup(fake_metadata, metastore=metastore)
 
-    assert lookup == fake_datasource
+        assert lookup["co2_gppcardamom_europe_2012"] == fake_datasource["co2_gppcardamom_europe_2012"]["uuid"]
 
-
-def test_wrong_uuid_raises():
-    e = Emissions()
-
-    fake_datasource = {"co2_gppcardamom_europe_2012": "mock-uuid-123456"}
-
-    fake_metadata = {
-        "co2_gppcardamom_europe_2012": {
-            "species": "co2",
-            "domain": "europe",
-            "source": "gppcardamom",
-            "date": "2012",
-        }
-    }
-
-    e.add_datasources(uuids=fake_datasource, metadata=fake_metadata)
-
-    assert e.datasources() == ["mock-uuid-123456"]
-
-    changed_datasource = {"co2_gppcardamom_europe_2012": "mock-uuid-8888888"}
-
-    with pytest.raises(ValueError):
-        e.add_datasources(uuids=changed_datasource, metadata=fake_metadata)

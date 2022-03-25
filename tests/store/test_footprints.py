@@ -1,6 +1,6 @@
 import pytest
 
-from openghg.store import Footprints, recombine_datasets
+from openghg.store import Footprints, recombine_datasets, metastore_manager
 from openghg.retrieve import search
 from openghg.objectstore import get_local_bucket
 from helpers import get_footprint_datapath
@@ -121,27 +121,10 @@ def test_read_footprint():
     footprint_data["pressure"].min().values == pytest.approx(1011.92)
 
 
-def test_set_lookup_uuids():
-    f = Footprints()
-
-    fake_uuid = "123456789"
-
-    site = "test_site"
-    domain = "test_domain"
-    model = "test_model"
-    height = "test_height"
-
-    f.set_uuid(site=site, domain=domain, model=model, height=height, uuid=fake_uuid)
-
-    found_uid = f.lookup_uuid(site=site, domain=domain, model=model, height=height)
-
-    assert f._datasource_table[site][domain][model][height] == found_uid == fake_uuid
-
-
 def test_datasource_add_lookup():
     f = Footprints()
 
-    fake_datasource = {"tmb_lghg_10m_europe": "mock-uuid-123456"}
+    fake_datasource = {"tmb_lghg_10m_europe": {"uuid": "mock-uuid-123456", "new": True}}
 
     fake_metadata = {
         "tmb_lghg_10m_europe": {
@@ -154,36 +137,13 @@ def test_datasource_add_lookup():
         }
     }
 
-    f.add_datasources(uuids=fake_datasource, metadata=fake_metadata)
+    with metastore_manager(key="test-metastore-123") as metastore:
+        f.add_datasources(uuids=fake_datasource, metadata=fake_metadata, metastore=metastore)
 
-    assert f.datasources() == ["mock-uuid-123456"]
+        assert f.datasources() == ["mock-uuid-123456"]
 
-    lookup = f.datasource_lookup(fake_metadata)
+        lookup = f.datasource_lookup(metadata=fake_metadata, metastore=metastore)
 
-    assert lookup == fake_datasource
+        assert lookup["tmb_lghg_10m_europe"] == fake_datasource["tmb_lghg_10m_europe"]["uuid"]
 
 
-def test_wrong_uuid_raises():
-    f = Footprints()
-
-    fake_datasource = {"tmb_lghg_10m_europe": "mock-uuid-123456"}
-
-    fake_metadata = {
-        "tmb_lghg_10m_europe": {
-            "data_type": "footprints",
-            "site": "tmb",
-            "height": "10m",
-            "domain": "europe",
-            "model": "test_model",
-            "network": "lghg",
-        }
-    }
-
-    f.add_datasources(uuids=fake_datasource, metadata=fake_metadata)
-
-    assert f.datasources() == ["mock-uuid-123456"]
-
-    changed_datasource = {"tmb_lghg_10m_europe": "mock-uuid-8888888"}
-
-    with pytest.raises(ValueError):
-        f.add_datasources(uuids=changed_datasource, metadata=fake_metadata)
