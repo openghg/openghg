@@ -6,31 +6,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Packaging releases &#8212; OpenGHG 0+untagged.1.gb14c668.dirty documentation</title>
+    <title>Packaging releases &#8212; OpenGHG 0+untagged.1.ge68b575.dirty documentation</title>
     
-    <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-  
+
     
-    <link rel="stylesheet"
-      href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
-  
-    
-      
-  
-    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/pydata-sphinx-theme.css" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
     
-    <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
-  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
@@ -50,7 +47,7 @@
     <!-- Google Analytics -->
     
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
     <div class="container-fluid" id="banner"></div>
 
@@ -159,7 +156,7 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage pt-5 pb-3">
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
 
@@ -217,7 +214,7 @@
               <div>
                 
   <section id="packaging-releases">
-<h1>Packaging releases<a class="headerlink" href="#packaging-releases" title="Permalink to this headline">¶</a></h1>
+<h1>Packaging releases<a class="headerlink" href="#packaging-releases" title="Permalink to this headline">#</a></h1>
 <p>Pack and Doc is now fully tested and deployed using GitHub actions.
 The development process should be;</p>
 <ul class="simple">
@@ -235,7 +232,7 @@ request can be merged into <code class="docutils literal notranslate"><span clas
 tested, and most up-to-date version of <code class="docutils literal notranslate"><span class="pre">pack</span> <span class="pre">and</span> <span class="pre">doc</span></code>. However, this
 version should not be used for production runs.</p>
 <section id="defining-a-release">
-<h2>Defining a release<a class="headerlink" href="#defining-a-release" title="Permalink to this headline">¶</a></h2>
+<h2>Defining a release<a class="headerlink" href="#defining-a-release" title="Permalink to this headline">#</a></h2>
 <p>We will release <code class="docutils literal notranslate"><span class="pre">pack</span> <span class="pre">and</span> <span class="pre">doc</span></code> regularly. Releases aim to be backwards
 compatible and capable of being used for production runs, at least for
 the functionality that is fully described in the tutorial.</p>
@@ -243,7 +240,7 @@ the functionality that is fully described in the tutorial.</p>
 not to cause breaking changes in the public API.</p>
 </section>
 <section id="creating-a-release">
-<h2>Creating a release<a class="headerlink" href="#creating-a-release" title="Permalink to this headline">¶</a></h2>
+<h2>Creating a release<a class="headerlink" href="#creating-a-release" title="Permalink to this headline">#</a></h2>
 <p>To create a release first checkout the “main” branch.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout main
 git pull
@@ -274,7 +271,7 @@ Windows, Mac and Linux for Python 3.7 and 3.8. Everything should work,
 as “devel” should have been in a release-ready state.</p>
 </section>
 <section id="testing-the-packages">
-<h2>Testing the packages<a class="headerlink" href="#testing-the-packages" title="Permalink to this headline">¶</a></h2>
+<h2>Testing the packages<a class="headerlink" href="#testing-the-packages" title="Permalink to this headline">#</a></h2>
 <p><a class="reference external" href="https://github.com/metawards/MetaWards/actions">GitHub actions</a> will
 produce the source and binary wheels for <code class="docutils literal notranslate"><span class="pre">metawards</span></code> on all supported
 platforms. This will be in an artifact called <code class="docutils literal notranslate"><span class="pre">dist</span></code> which you should
@@ -308,7 +305,7 @@ pytest tests
 </div>
 </section>
 <section id="tagging-a-new-release">
-<h2>Tagging a new release<a class="headerlink" href="#tagging-a-new-release" title="Permalink to this headline">¶</a></h2>
+<h2>Tagging a new release<a class="headerlink" href="#tagging-a-new-release" title="Permalink to this headline">#</a></h2>
 <p>Now that you are happy that the release is ready, you can tag the new
 version. Do this using the <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">tag</span></code> command, e.g.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git tag -a <span class="o">{</span>VERSION<span class="o">}</span> -m <span class="s2">&quot;{VERSION} release&quot;</span>
@@ -332,7 +329,7 @@ Again, it should work as this tag was taken from your fully-tested
 “main” branch.</p>
 </section>
 <section id="uploading-packages-to-pypi">
-<h2>Uploading packages to pypi<a class="headerlink" href="#uploading-packages-to-pypi" title="Permalink to this headline">¶</a></h2>
+<h2>Uploading packages to pypi<a class="headerlink" href="#uploading-packages-to-pypi" title="Permalink to this headline">#</a></h2>
 <p>While you are waiting for the CI/CD GitHub Actions to complete, make sure
 that your version of twine is fully up to date;</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade twine
@@ -366,7 +363,7 @@ join the release management team then please get in touch.</p>
 </div>
 </section>
 <section id="testing-the-final-release">
-<h2>Testing the final release<a class="headerlink" href="#testing-the-final-release" title="Permalink to this headline">¶</a></h2>
+<h2>Testing the final release<a class="headerlink" href="#testing-the-final-release" title="Permalink to this headline">#</a></h2>
 <p>Finally(!) test the release on a range of different machines by logging
 in and typing;</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="nv">metawards</span><span class="o">=={</span>VERSION<span class="o">}</span>
@@ -395,8 +392,9 @@ work as you have performed lots of prior testing to get to this stage.</p>
       </div>
     </div>
   
-    <script src="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
   <div class="container">
     
     <div class="footer-item">
@@ -407,7 +405,7 @@ work as you have performed lots of prior testing to get to this stage.</p>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
 </p>
     </div>
     

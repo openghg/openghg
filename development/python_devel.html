@@ -6,31 +6,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Development &#8212; OpenGHG 0+untagged.1.gb14c668.dirty documentation</title>
+    <title>Development &#8212; OpenGHG 0+untagged.1.ge68b575.dirty documentation</title>
     
-    <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-  
+
     
-    <link rel="stylesheet"
-      href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
-  
-    
-      
-  
-    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/pydata-sphinx-theme.css" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
     
-    <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
-  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
@@ -52,7 +49,7 @@
     <!-- Google Analytics -->
     
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
     <div class="container-fluid" id="banner"></div>
 
@@ -180,7 +177,7 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage pt-5 pb-3">
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
 
@@ -296,14 +293,14 @@
               <div>
                 
   <section id="development">
-<h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
+<h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">#</a></h1>
 <p>The source code for OpenGHG is available on <a class="reference external" href="https://github.com/openghg/openghg">GitHub</a>.</p>
 <section id="setting-up-your-computer">
-<h2>Setting up your computer<a class="headerlink" href="#setting-up-your-computer" title="Permalink to this headline">¶</a></h2>
+<h2>Setting up your computer<a class="headerlink" href="#setting-up-your-computer" title="Permalink to this headline">#</a></h2>
 <p>OpenGHG requires Python &gt;= 3.7, so please install this before continuing
 further.</p>
 <section id="virtual-environment">
-<h3>Virtual environment<a class="headerlink" href="#virtual-environment" title="Permalink to this headline">¶</a></h3>
+<h3>Virtual environment<a class="headerlink" href="#virtual-environment" title="Permalink to this headline">#</a></h3>
 <p>It is recommended that you develop OpenGHG in a Python
 <a class="reference external" href="https://docs.python.org/3/tutorial/venv.html">virtual environment</a>.
 Here we’ll create a new folder called <code class="docutils literal notranslate"><span class="pre">envs</span></code> in our home directory and create
@@ -327,7 +324,7 @@ deactivate the environment and return to your system Python using;</p>
 </div>
 </section>
 <section id="clone-openghg">
-<h3>Clone OpenGHG<a class="headerlink" href="#clone-openghg" title="Permalink to this headline">¶</a></h3>
+<h3>Clone OpenGHG<a class="headerlink" href="#clone-openghg" title="Permalink to this headline">#</a></h3>
 <p>As OpenGHG is currently in its very early stages and is not yet available on <code class="docutils literal notranslate"><span class="pre">pip</span></code> we need
 clone the OpenGHG repository and then move into it and install the required dependencies.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/openghg/openghg.git
@@ -339,7 +336,7 @@ pip install -r requirements-dev.txt
 <p>OpenGHG should now be installed within your virtual environment.</p>
 </section>
 <section id="clone-acquire">
-<h3>Clone Acquire<a class="headerlink" href="#clone-acquire" title="Permalink to this headline">¶</a></h3>
+<h3>Clone Acquire<a class="headerlink" href="#clone-acquire" title="Permalink to this headline">#</a></h3>
 <p>OpenGHG currently relies on Acquire being in the directory about <code class="docutils literal notranslate"><span class="pre">OpenGHG</span></code> for tests to be run correctly. To do this</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ..
 git clone https://github.com/openghg/acquire.git
@@ -347,7 +344,7 @@ git clone https://github.com/openghg/acquire.git
 </div>
 </section>
 <section id="run-tests">
-<h3>Run tests<a class="headerlink" href="#run-tests" title="Permalink to this headline">¶</a></h3>
+<h3>Run tests<a class="headerlink" href="#run-tests" title="Permalink to this headline">#</a></h3>
 <p>To ensure everything is working on your system running the tests is a good idea. To do this run</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest -v tests
 </pre></div>
@@ -355,7 +352,7 @@ git clone https://github.com/openghg/acquire.git
 </section>
 </section>
 <section id="coding-style">
-<h2>Coding Style<a class="headerlink" href="#coding-style" title="Permalink to this headline">¶</a></h2>
+<h2>Coding Style<a class="headerlink" href="#coding-style" title="Permalink to this headline">#</a></h2>
 <p>OpenGHG is written in Python 3 (&gt;= 3.7). We aim as much as possible to follow a
 <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">PEP8</a> python coding style and
 recommend that use a linter such as <a class="reference external" href="https://flake8.pycqa.org/en/latest/">flake8</a>.</p>
@@ -364,7 +361,7 @@ systems and machines - some of which don’t have any graphic libraries,
 so please be careful when adding a dependency.</p>
 <p>With this in mind, we use the following coding conventions:</p>
 <section id="naming">
-<h3>Naming<a class="headerlink" href="#naming" title="Permalink to this headline">¶</a></h3>
+<h3>Naming<a class="headerlink" href="#naming" title="Permalink to this headline">#</a></h3>
 <p>We follow a Python style naming convention.</p>
 <ul class="simple">
 <li><p>Packages: lowercase, singleword</p></li>
@@ -379,7 +376,7 @@ underscore. This prevents them from being prominantly visible in Python’s
 help and tab completion.</p>
 </section>
 <section id="modules">
-<h3>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h3>
+<h3>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">#</a></h3>
 <p>OpenGHG consists of the main module, e.g. <code class="docutils literal notranslate"><span class="pre">openghg</span></code>, plus
 a <code class="docutils literal notranslate"><span class="pre">openghg.submodule</span></code> module.</p>
 <p>In addition, there is a <code class="docutils literal notranslate"><span class="pre">openghg.scripts</span></code> module which contains the
@@ -412,7 +409,7 @@ expose further implementation detail can, of course, type an underscore to
 show the hidden names when searching.</p>
 </section>
 <section id="type-hinting">
-<h3>Type hinting<a class="headerlink" href="#type-hinting" title="Permalink to this headline">¶</a></h3>
+<h3>Type hinting<a class="headerlink" href="#type-hinting" title="Permalink to this headline">#</a></h3>
 <p>Throughout the OpenGHG project we use type hinting which allows us to declare the type of the objects
 that are going to be passed to and returned from functions. This helps improve user understanding of the code
 and when used in conjunction with tools like <a class="reference external" href="https://mypy.readthedocs.io/en/stable/">mypy</a> can help
@@ -444,9 +441,9 @@ catch bugs.</p>
 </section>
 </section>
 <section id="workflow">
-<h2>Workflow<a class="headerlink" href="#workflow" title="Permalink to this headline">¶</a></h2>
+<h2>Workflow<a class="headerlink" href="#workflow" title="Permalink to this headline">#</a></h2>
 <section id="feature-branches">
-<h3>Feature branches<a class="headerlink" href="#feature-branches" title="Permalink to this headline">¶</a></h3>
+<h3>Feature branches<a class="headerlink" href="#feature-branches" title="Permalink to this headline">#</a></h3>
 <p>First make sure that you are on the development branch of OpenGHG:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout devel
 </pre></div>
@@ -459,7 +456,7 @@ catch bugs.</p>
 </section>
 </section>
 <section id="testing">
-<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">#</a></h2>
 <p>When working on your feature it is important to write tests to ensure that it
 does what is expected and doesn’t break any existing functionality. All code added to the
 project must be covered by tests and tests should be placed inside the <code class="docutils literal notranslate"><span class="pre">tests</span></code> directory, creating an appropriately
@@ -484,7 +481,7 @@ or end with <em>test</em>, e.g.:</p>
 </div>
 <p>We use the convention of <code class="docutils literal notranslate"><span class="pre">test_*</span></code> when naming files and functions.</p>
 <section id="running-tests">
-<h3>Running tests<a class="headerlink" href="#running-tests" title="Permalink to this headline">¶</a></h3>
+<h3>Running tests<a class="headerlink" href="#running-tests" title="Permalink to this headline">#</a></h3>
 <p>To run the full test suite, simply type:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest tests/
 </pre></div>
@@ -498,7 +495,7 @@ or end with <em>test</em>, e.g.:</p>
 <a class="reference external" href="https://docs.pytest.org/en/stable/contents.html">pytest documentation</a>.</p>
 </section>
 <section id="continuous-integration-and-delivery">
-<h3>Continuous integration and delivery<a class="headerlink" href="#continuous-integration-and-delivery" title="Permalink to this headline">¶</a></h3>
+<h3>Continuous integration and delivery<a class="headerlink" href="#continuous-integration-and-delivery" title="Permalink to this headline">#</a></h3>
 <p>We use GitHub Actions to run a full continuous integration (CI)
 on all pull requests to devel and
 master, and all pushes to devel and master. We will not merge a pull
@@ -506,7 +503,7 @@ request until all tests pass. We only accept pull requests to devel.</p>
 </section>
 </section>
 <section id="documentation">
-<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">#</a></h2>
 <p>OpenGHG is fully documented using a combination of hand-written files
 (in the <code class="docutils literal notranslate"><span class="pre">doc</span></code> folder) and auto-generated api documentation created from
 Google <a class="reference external" href="https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html">style docstrings</a>.
@@ -534,7 +531,7 @@ This allows the library to be used easily without the need for reinstallation af
 <p>When finished, point your browser to <code class="docutils literal notranslate"><span class="pre">build/html/index.html</span></code>.</p>
 </section>
 <section id="committing">
-<h2>Committing<a class="headerlink" href="#committing" title="Permalink to this headline">¶</a></h2>
+<h2>Committing<a class="headerlink" href="#committing" title="Permalink to this headline">#</a></h2>
 <p>If you create new tests, please make sure that they pass locally before
 commiting. When happy, commit your changes, e.g.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git commit openghg/_new_feature.py tests/test_feature <span class="se">\</span>
@@ -593,8 +590,9 @@ For information, see the documentation
       </div>
     </div>
   
-    <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
   <div class="container">
     
     <div class="footer-item">
@@ -605,7 +603,7 @@ For information, see the documentation
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
 </p>
     </div>
     

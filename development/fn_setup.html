@@ -6,31 +6,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Fn setup &#8212; OpenGHG 0+untagged.1.gb14c668.dirty documentation</title>
+    <title>Fn setup &#8212; OpenGHG 0+untagged.1.ge68b575.dirty documentation</title>
     
-    <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-  
+
     
-    <link rel="stylesheet"
-      href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
-  
-    
-      
-  
-    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/pydata-sphinx-theme.css" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
     
-    <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
-  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
@@ -50,7 +47,7 @@
     <!-- Google Analytics -->
     
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
     <div class="container-fluid" id="banner"></div>
 
@@ -159,7 +156,7 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage pt-5 pb-3">
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
 
@@ -227,17 +224,17 @@
               <div>
                 
   <section id="fn-setup">
-<h1>Fn setup<a class="headerlink" href="#fn-setup" title="Permalink to this headline">¶</a></h1>
+<h1>Fn setup<a class="headerlink" href="#fn-setup" title="Permalink to this headline">#</a></h1>
 <p>This guide will help you get a basic Fn server setup and ready to be given functions for invocation. In future tutorials
 we will cover getting Fn setup using Kubernetes.</p>
 <section id="server">
-<h2>Server<a class="headerlink" href="#server" title="Permalink to this headline">¶</a></h2>
+<h2>Server<a class="headerlink" href="#server" title="Permalink to this headline">#</a></h2>
 <p>In this tutorial we’ll be using a virtual machine cloud instance on the Oracle cloud, but any cloud provider
 will work. Although we’ll use a CentOS 8 image on our VM any Docker capable image should work, though setup steps will difference
 from those given here.</p>
 </section>
 <section id="installing-docker">
-<h2>Installing Docker<a class="headerlink" href="#installing-docker" title="Permalink to this headline">¶</a></h2>
+<h2>Installing Docker<a class="headerlink" href="#installing-docker" title="Permalink to this headline">#</a></h2>
 <p>We’ll install Docker from their repos for CentOS. For the complete
 installation instructions please see the <a class="reference external" href="https://docs.docker.com/engine/install/centos/">Docker documentation</a>
 but we will summarise the steps below.</p>
@@ -270,7 +267,7 @@ are <em class="xref py py-obj">outlined here</em>.</p>
 </div>
 </section>
 <section id="install-fn">
-<h2>Install Fn<a class="headerlink" href="#install-fn" title="Permalink to this headline">¶</a></h2>
+<h2>Install Fn<a class="headerlink" href="#install-fn" title="Permalink to this headline">#</a></h2>
 <p>We can now install Fn</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget -O install_fn.sh https://raw.githubusercontent.com/fnproject/cli/master/install
 <span class="nb">echo</span> a02456b8c8aba8b727d35f704cbca9234e40d2731f200b94abeceb9467973a13 install_fn.sh <span class="p">|</span> sha256sum -c
@@ -286,7 +283,7 @@ bash install_fn.sh
 </div>
 </section>
 <section id="setup-nginx-proxy">
-<h2>Setup NGINX proxy<a class="headerlink" href="#setup-nginx-proxy" title="Permalink to this headline">¶</a></h2>
+<h2>Setup NGINX proxy<a class="headerlink" href="#setup-nginx-proxy" title="Permalink to this headline">#</a></h2>
 <p>So that we’re not exposing Fn directly to the internet we’ll use nginx as a reverse-proxy. First install nginx
 using</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo yum -y install nginx
@@ -354,7 +351,7 @@ sudo systemctl <span class="nb">enable</span> nginx
 </div>
 </section>
 <section id="setup-firewall-rules">
-<h2>Setup Firewall Rules<a class="headerlink" href="#setup-firewall-rules" title="Permalink to this headline">¶</a></h2>
+<h2>Setup Firewall Rules<a class="headerlink" href="#setup-firewall-rules" title="Permalink to this headline">#</a></h2>
 <p>First we enable and then start the <code class="docutils literal notranslate"><span class="pre">firewalld</span></code></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo systemctl <span class="nb">enable</span> firewalld
 sudo systemctl start firewalld
@@ -391,7 +388,7 @@ num  target     prot opt <span class="nb">source</span>               destinatio
 </div>
 </section>
 <section id="get-a-letsencrypt-certificate-with-certbot">
-<h2>Get a LetsEncrypt certificate with Certbot<a class="headerlink" href="#get-a-letsencrypt-certificate-with-certbot" title="Permalink to this headline">¶</a></h2>
+<h2>Get a LetsEncrypt certificate with Certbot<a class="headerlink" href="#get-a-letsencrypt-certificate-with-certbot" title="Permalink to this headline">#</a></h2>
 <p>To get a LetsEncrypt certificate for https we’ll use Certbot. First, make sure you’ve setup the subdomain for the
 server and pointed it at the IP address of the server. Then follow the commands below.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo dnf install epel-release
@@ -413,7 +410,7 @@ sudo dnf install certbot python3-certbot-nginx
 <p>This adds a cron job to <code class="docutils literal notranslate"><span class="pre">/etc/crontab</span></code>.</p>
 </section>
 <section id="deploy-fn-functions">
-<h2>Deploy Fn Functions<a class="headerlink" href="#deploy-fn-functions" title="Permalink to this headline">¶</a></h2>
+<h2>Deploy Fn Functions<a class="headerlink" href="#deploy-fn-functions" title="Permalink to this headline">#</a></h2>
 <p>We now want to deploy our functions. We’ll first need to make sure we’ve got <code class="docutils literal notranslate"><span class="pre">git</span></code> and <code class="docutils literal notranslate"><span class="pre">python</span></code> installed.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo yum install python38 git
 </pre></div>
@@ -434,7 +431,7 @@ step unless our dependencies change.</p>
 </div>
 </section>
 <section id="manually-triggering-functions">
-<h2>Manually Triggering Functions<a class="headerlink" href="#manually-triggering-functions" title="Permalink to this headline">¶</a></h2>
+<h2>Manually Triggering Functions<a class="headerlink" href="#manually-triggering-functions" title="Permalink to this headline">#</a></h2>
 </section>
 </section>
 
@@ -452,8 +449,9 @@ step unless our dependencies change.</p>
       </div>
     </div>
   
-    <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
   <div class="container">
     
     <div class="footer-item">
@@ -464,7 +462,7 @@ step unless our dependencies change.</p>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
 </p>
     </div>
     

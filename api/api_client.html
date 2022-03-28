@@ -6,31 +6,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>client API Detail &#8212; OpenGHG 0+untagged.1.gb14c668.dirty documentation</title>
+    <title>client API Detail &#8212; OpenGHG 0+untagged.1.ge68b575.dirty documentation</title>
     
-    <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-  
+
     
-    <link rel="stylesheet"
-      href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
-  
-    
-      
-  
-    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/pydata-sphinx-theme.css" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
     
-    <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
-  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
@@ -50,7 +47,7 @@
     <!-- Google Analytics -->
     
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
     <div class="container-fluid" id="banner"></div>
 
@@ -159,7 +156,7 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage pt-5 pb-3">
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
 
@@ -207,17 +204,17 @@
               <div>
                 
   <section id="client-api-detail">
-<h1>client API Detail<a class="headerlink" href="#client-api-detail" title="Permalink to this headline">¶</a></h1>
+<h1>client API Detail<a class="headerlink" href="#client-api-detail" title="Permalink to this headline">#</a></h1>
 <p>These functions are used to call either remote serverless functions in the OpenGHG Cloud or local processes if OpenGHG is being used as a local
 install. Calls are routed depending on the setting of the <code class="docutils literal notranslate"><span class="pre">OPENGHG_CLOUD</span></code> environment variable. If found it will attempt to call the remote
 functions, if it is absent the call will the routed to a local function.</p>
 <span class="target" id="module-openghg.client"></span><section id="processing-and-standardisation">
-<h2>Processing and standardisation<a class="headerlink" href="#processing-and-standardisation" title="Permalink to this headline">¶</a></h2>
+<h2>Processing and standardisation<a class="headerlink" href="#processing-and-standardisation" title="Permalink to this headline">#</a></h2>
 <p>These functions handle the processing, standardisation and storage of data in the object store. Currently functions for
 observations, footprint and flux / emissions data are available.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.client.process_obs">
-<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">process_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_process.html#process_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.process_obs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">process_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_process.html#process_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.process_obs" title="Permalink to this definition">#</a></dt>
 <dd><p>Process observation files, standardise them and add the data to the object store</p>
 <blockquote>
 <div><dl class="simple">
@@ -243,7 +240,7 @@ stored for these datasources for existing dateranges</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.client.process_footprint">
-<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">process_footprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metmodel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retrieve_met</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_process.html#process_footprint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.process_footprint" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">process_footprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metmodel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retrieve_met</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_process.html#process_footprint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.process_footprint" title="Permalink to this definition">#</a></dt>
 <dd><p>Reads footprint data files and returns the UUIDs of the Datasources
 the processed data has been assigned to</p>
 <dl class="field-list simple">
@@ -270,7 +267,7 @@ the processed data has been assigned to</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.client.process_flux">
-<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">process_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_process.html#process_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.process_flux" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">process_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_process.html#process_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.process_flux" title="Permalink to this definition">#</a></dt>
 <dd><p>Process flux data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -295,12 +292,12 @@ the processed data has been assigned to</p>
 
 </section>
 <section id="search-client">
-<h2>search (client)<a class="headerlink" href="#search-client" title="Permalink to this headline">¶</a></h2>
+<h2>search (client)<a class="headerlink" href="#search-client" title="Permalink to this headline">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">search</span></code> function is used to search for and retrieve data from the object store. The <a class="reference internal" href="api_dataobjects.html#searchresults"><span class="std std-ref">SearchResults</span></a> object that
 it returns can then be used to retrieve data from the object store.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.client.search">
-<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_search.html#search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.search" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_search.html#search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.search" title="Permalink to this definition">#</a></dt>
 <dd><p>Cloud object store search</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -324,12 +321,12 @@ it returns can then be used to retrieve data from the object store.</p>
 
 </section>
 <section id="get-obs-surface">
-<h2>get_obs_surface<a class="headerlink" href="#get-obs-surface" title="Permalink to this headline">¶</a></h2>
+<h2>get_obs_surface<a class="headerlink" href="#get-obs-surface" title="Permalink to this headline">#</a></h2>
 <p>A helper function for those familiar with the Bristol ACRG repository. This attempts to provide the same interface as the
 equivalnet to the <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code> as available in that repository. This returns a list of <a class="reference internal" href="api_dataobjects.html#obsdata"><span class="std std-ref">ObsData</span></a> objects</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.client.get_obs_surface">
-<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">get_obs_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_ranking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_observations.html#get_obs_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.get_obs_surface" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">get_obs_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_ranking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_observations.html#get_obs_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.get_obs_surface" title="Permalink to this definition">#</a></dt>
 <dd><p>This is the equivalent of the get_obs function from the ACRG repository.</p>
 <p>Usage and return values are the same whilst implementation may differ.</p>
 <dl class="field-list simple">
@@ -360,14 +357,14 @@ equivalnet to the <code class="docutils literal notranslate"><span class="pre">g
 
 </section>
 <section id="rank-sources">
-<h2>rank_sources<a class="headerlink" href="#rank-sources" title="Permalink to this headline">¶</a></h2>
+<h2>rank_sources<a class="headerlink" href="#rank-sources" title="Permalink to this headline">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">rank_sources</span></code> is used to rank sources of data. Provided with a site and a species the <code class="docutils literal notranslate"><span class="pre">rank_sources</span></code> function will search for the given
 site and species and return a <a class="reference internal" href="api_dataobjects.html#ranksources"><span class="std std-ref">RankSources</span></a> object</p>
 <p>Setting a high rank for a Datasource across a specific daterange means
 that data from that Datasource will be preferred when a user searches for data.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.client.rank_sources">
-<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">rank_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_rank_sources.html#rank_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.rank_sources" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">rank_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_rank_sources.html#rank_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.rank_sources" title="Permalink to this definition">#</a></dt>
 <dd><p>Retrieve datasources for a specific site and species. Returns a RankSources
 object that can be used to set and modify ranking data.</p>
 <dl class="field-list simple">
@@ -403,8 +400,9 @@ object that can be used to set and modify ranking data.</p>
       </div>
     </div>
   
-    <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
   <div class="container">
     
     <div class="footer-item">
@@ -415,7 +413,7 @@ object that can be used to set and modify ranking data.</p>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
 </p>
     </div>
     

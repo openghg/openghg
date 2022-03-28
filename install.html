@@ -6,31 +6,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation instructions &#8212; OpenGHG 0+untagged.1.gb14c668.dirty documentation</title>
+    <title>Installation instructions &#8212; OpenGHG 0+untagged.1.ge68b575.dirty documentation</title>
     
-    <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-  
+
     
-    <link rel="stylesheet"
-      href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
-  
-    
-      
-  
-    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/pydata-sphinx-theme.css" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css" />
     
-    <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
-  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
@@ -52,7 +49,7 @@
     <!-- Google Analytics -->
     
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
     <div class="container-fluid" id="banner"></div>
 
@@ -161,7 +158,7 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage pt-5 pb-3">
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
 
@@ -216,11 +213,11 @@
               <div>
                 
   <section id="installation-instructions">
-<h1>Installation instructions<a class="headerlink" href="#installation-instructions" title="Permalink to this headline">¶</a></h1>
+<h1>Installation instructions<a class="headerlink" href="#installation-instructions" title="Permalink to this headline">#</a></h1>
 <p>The easiest way to install OpenGHG is using pip, first ensure you have a recent version of
 Python installed.</p>
 <section id="checking-your-python-installation">
-<h2>Checking your Python installation<a class="headerlink" href="#checking-your-python-installation" title="Permalink to this headline">¶</a></h2>
+<h2>Checking your Python installation<a class="headerlink" href="#checking-your-python-installation" title="Permalink to this headline">#</a></h2>
 <p>OpenGHG is developed and <a class="reference external" href="https://github.com/openghg/openghg/actions">tested on Linux and MacOS</a>,
 support for Windows is planned.</p>
 <p>To install OpenGHG, you first need to install Python &gt;= 3.7. To check
@@ -238,11 +235,11 @@ If the version number is <code class="docutils literal notranslate"><span class=
 <a class="reference external" href="https://docs.brew.sh/Homebrew-and-Python">Homebrew on MacOS</a>. An alternative for both platforms is <a class="reference external" href="https://anaconda.org">anaconda</a>.</p>
 </section>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h2>
 <p>We highly recommend creating a separate virtual environment for <code class="docutils literal notranslate"><span class="pre">openghg</span></code>. This ensures the correct versions
 of libraries can be installed without making changes to versions of libraries needed for other projects / programs.</p>
 <section id="pip">
-<h3>pip<a class="headerlink" href="#pip" title="Permalink to this headline">¶</a></h3>
+<h3>pip<a class="headerlink" href="#pip" title="Permalink to this headline">#</a></h3>
 <p>First create a virtual environment</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m venv /path/to/env/openghg_env
 <span class="c1"># Activate the environment</span>
@@ -253,7 +250,7 @@ of libraries can be installed without making changes to versions of libraries ne
 <p>Next install OpenGHG</p>
 </section>
 <section id="conda">
-<h3>conda<a class="headerlink" href="#conda" title="Permalink to this headline">¶</a></h3>
+<h3>conda<a class="headerlink" href="#conda" title="Permalink to this headline">#</a></h3>
 <p>First create and activate a conda environment</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create --name openghg_env
 <span class="c1"># Activate the environment</span>
@@ -267,7 +264,7 @@ conda activate openghg_env
 </section>
 </section>
 <section id="developers">
-<h2>Developers<a class="headerlink" href="#developers" title="Permalink to this headline">¶</a></h2>
+<h2>Developers<a class="headerlink" href="#developers" title="Permalink to this headline">#</a></h2>
 <p>For developers please see the <a class="reference internal" href="development/python_devel.html"><span class="doc">Development</span></a> documentation.</p>
 </section>
 </section>
@@ -300,8 +297,9 @@ conda activate openghg_env
       </div>
     </div>
   
-    <script src="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
   <div class="container">
     
     <div class="footer-item">
@@ -312,7 +310,7 @@ conda activate openghg_env
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
 </p>
     </div>
     

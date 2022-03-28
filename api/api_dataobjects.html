@@ -6,31 +6,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>dataobjects API detail &#8212; OpenGHG 0+untagged.1.gb14c668.dirty documentation</title>
+    <title>dataobjects API detail &#8212; OpenGHG 0+untagged.1.ge68b575.dirty documentation</title>
     
-    <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-  
+
     
-    <link rel="stylesheet"
-      href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
-  
-    
-      
-  
-    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/pydata-sphinx-theme.css" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
     
-    <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
-  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
@@ -50,7 +47,7 @@
     <!-- Google Analytics -->
     
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
     <div class="container-fluid" id="banner"></div>
 
@@ -159,7 +156,7 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage pt-5 pb-3">
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
 
@@ -222,51 +219,51 @@
               <div>
                 
   <section id="dataobjects-api-detail">
-<h1>dataobjects API detail<a class="headerlink" href="#dataobjects-api-detail" title="Permalink to this headline">¶</a></h1>
+<h1>dataobjects API detail<a class="headerlink" href="#dataobjects-api-detail" title="Permalink to this headline">#</a></h1>
 <section id="basedata">
-<h2>_BaseData<a class="headerlink" href="#basedata" title="Permalink to this headline">¶</a></h2>
+<h2>_BaseData<a class="headerlink" href="#basedata" title="Permalink to this headline">#</a></h2>
 <p>The base dataclass inherited by (most of) the dataclasses below.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.dataobjects._BaseData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">_BaseData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_basedata.html#_BaseData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects._BaseData" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">_BaseData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_basedata.html#_BaseData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects._BaseData" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects._BaseData.__delattr__">
-<span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects._BaseData.__delattr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects._BaseData.__delattr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Implement delattr(self, name).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects._BaseData.__eq__">
-<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects._BaseData.__eq__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects._BaseData.__eq__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return self==value.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects._BaseData.__hash__">
-<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects._BaseData.__hash__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects._BaseData.__hash__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return hash(self).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects._BaseData.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects._BaseData.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects._BaseData.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects._BaseData.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects._BaseData.__repr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects._BaseData.__repr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return repr(self).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects._BaseData.__setattr__">
-<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects._BaseData.__setattr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects._BaseData.__setattr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Implement setattr(self, name, value).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects._BaseData.__str__">
-<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_basedata.html#_BaseData.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects._BaseData.__str__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_basedata.html#_BaseData.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects._BaseData.__str__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return str(self).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -279,12 +276,12 @@
 
 </section>
 <section id="searchresults">
-<h2>SearchResults<a class="headerlink" href="#searchresults" title="Permalink to this headline">¶</a></h2>
+<h2>SearchResults<a class="headerlink" href="#searchresults" title="Permalink to this headline">#</a></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">dataclass</span></code> is returned by the <code class="docutils literal notranslate"><span class="pre">openghg.client.search</span></code> function and allows easy retrieval and querying of metadata retrieved
 by the <code class="docutils literal notranslate"><span class="pre">search</span></code> function.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">SearchResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranked_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">SearchResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranked_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults" title="Permalink to this definition">#</a></dt>
 <dd><p>This class is used to return data from the search function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -296,23 +293,23 @@ by the <code class="docutils literal notranslate"><span class="pre">search</span
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.__eq__">
-<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.SearchResults.__eq__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.SearchResults.__eq__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return self==value.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.__hash__">
-<span class="sig-name descname"><span class="pre">__hash__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#openghg.dataobjects.SearchResults.__hash__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__hash__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#openghg.dataobjects.SearchResults.__hash__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranked_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.SearchResults.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranked_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.SearchResults.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.__repr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.__repr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return repr(self).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -323,7 +320,7 @@ by the <code class="docutils literal notranslate"><span class="pre">search</span
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.__str__">
-<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.__str__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.__str__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return str(self).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -334,7 +331,7 @@ by the <code class="docutils literal notranslate"><span class="pre">search</span
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.from_data">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.from_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.from_data" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.from_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.from_data" title="Permalink to this definition">#</a></dt>
 <dd><p>Create a SearchResults object from a dictionary</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -351,7 +348,7 @@ by the <code class="docutils literal notranslate"><span class="pre">search</span
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.keys">
-<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.keys" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.keys" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the data keys for the specified site and species.
 This is intended mainly for use in the search function when filling
 gaps of unranked dateranges.</p>
@@ -374,7 +371,7 @@ inlet: Inlet height, required for unranked data</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.metadata">
-<span class="sig-name descname"><span class="pre">metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.metadata" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.metadata" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the metadata for the specified site and species</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -395,7 +392,7 @@ inlet: Inlet height, required for unranked data</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.raw">
-<span class="sig-name descname"><span class="pre">raw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.raw" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">raw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.raw" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns the raw results data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -409,7 +406,7 @@ inlet: Inlet height, required for unranked data</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.retrieve">
-<span class="sig-name descname"><span class="pre">retrieve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.retrieve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.retrieve" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">retrieve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.retrieve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.retrieve" title="Permalink to this definition">#</a></dt>
 <dd><p>Retrieve some or all of the data found in the object store.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -429,7 +426,7 @@ inlet: Inlet height, required for unranked data</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.retrieve_all">
-<span class="sig-name descname"><span class="pre">retrieve_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.retrieve_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.retrieve_all" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">retrieve_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.retrieve_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.retrieve_all" title="Permalink to this definition">#</a></dt>
 <dd><p>Retrieve all the data found during the serch</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -443,7 +440,7 @@ inlet: Inlet height, required for unranked data</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.to_data">
-<span class="sig-name descname"><span class="pre">to_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.to_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.to_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.to_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.to_data" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert this object to a dictionary for JSON serialisation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -459,12 +456,12 @@ inlet: Inlet height, required for unranked data</p>
 
 </section>
 <section id="obsdata">
-<h2>ObsData<a class="headerlink" href="#obsdata" title="Permalink to this headline">¶</a></h2>
+<h2>ObsData<a class="headerlink" href="#obsdata" title="Permalink to this headline">#</a></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">dataclass</span></code> is returned by data retrieval functions such as <a class="reference internal" href="api_client.html#get-obs-surface"><span class="std std-ref">get_obs_surface</span></a> and the <a class="reference internal" href="#searchresults"><span class="std std-ref">SearchResults</span></a>
 retrieve function.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.dataobjects.ObsData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">ObsData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_obsdata.html#ObsData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.ObsData" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">ObsData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_obsdata.html#ObsData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.ObsData" title="Permalink to this definition">#</a></dt>
 <dd><p>This class is used to return observations data from the get_observations function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -476,19 +473,19 @@ retrieve function.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.ObsData.__delattr__">
-<span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.ObsData.__delattr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.ObsData.__delattr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Implement delattr(self, name).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.ObsData.__eq__">
-<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.ObsData.__eq__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.ObsData.__eq__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return self==value.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.ObsData.__getitem__">
-<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_obsdata.html#ObsData.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.ObsData.__getitem__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_obsdata.html#ObsData.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.ObsData.__getitem__" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns the data attribute (xarray Dataset) when the site name is
 specified.
 Included as a compatability layer for legacy format as a dictionary
@@ -503,18 +500,18 @@ containing a Dataset for each site code.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.ObsData.__hash__">
-<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.ObsData.__hash__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.ObsData.__hash__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return hash(self).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.ObsData.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.ObsData.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.ObsData.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.ObsData.__iter__">
-<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_obsdata.html#ObsData.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.ObsData.__iter__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_obsdata.html#ObsData.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.ObsData.__iter__" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns site code as the key for the dictionary as would be expected.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -525,7 +522,7 @@ containing a Dataset for each site code.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.ObsData.__len__">
-<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_obsdata.html#ObsData.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.ObsData.__len__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_obsdata.html#ObsData.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.ObsData.__len__" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns number of key values (fixed at 1 at present)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -536,19 +533,19 @@ containing a Dataset for each site code.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.ObsData.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.ObsData.__repr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.ObsData.__repr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return repr(self).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.ObsData.__setattr__">
-<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.ObsData.__setattr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.ObsData.__setattr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Implement setattr(self, name, value).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.ObsData.plot_timeseries">
-<span class="sig-name descname"><span class="pre">plot_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_obsdata.html#ObsData.plot_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.ObsData.plot_timeseries" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_obsdata.html#ObsData.plot_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.ObsData.plot_timeseries" title="Permalink to this definition">#</a></dt>
 <dd><p>Plot a timeseries</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -561,11 +558,11 @@ containing a Dataset for each site code.</p>
 
 </section>
 <section id="fluxdata">
-<h2>FluxData<a class="headerlink" href="#fluxdata" title="Permalink to this headline">¶</a></h2>
+<h2>FluxData<a class="headerlink" href="#fluxdata" title="Permalink to this headline">#</a></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">dataclass</span></code> is used to return observations data from the get_flux function</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.dataobjects.FluxData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">FluxData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_flux_data.html#FluxData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.FluxData" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">FluxData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_flux_data.html#FluxData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.FluxData" title="Permalink to this definition">#</a></dt>
 <dd><p>This class is used to return observations data from the get_flux function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -582,42 +579,42 @@ containing a Dataset for each site code.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FluxData.__delattr__">
-<span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__delattr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__delattr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Implement delattr(self, name).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FluxData.__eq__">
-<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__eq__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__eq__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return self==value.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FluxData.__hash__">
-<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__hash__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__hash__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return hash(self).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FluxData.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FluxData.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__repr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__repr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return repr(self).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FluxData.__setattr__">
-<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__setattr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__setattr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Implement setattr(self, name, value).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FluxData.__str__">
-<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_flux_data.html#FluxData.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.FluxData.__str__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_flux_data.html#FluxData.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.FluxData.__str__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return str(self).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -630,11 +627,11 @@ containing a Dataset for each site code.</p>
 
 </section>
 <section id="footprintdata">
-<h2>FootprintData<a class="headerlink" href="#footprintdata" title="Permalink to this headline">¶</a></h2>
+<h2>FootprintData<a class="headerlink" href="#footprintdata" title="Permalink to this headline">#</a></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">dataclass</span></code> is used to return observations data from the get_footprint function</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.dataobjects.FootprintData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">FootprintData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_footprint_data.html#FootprintData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.FootprintData" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">FootprintData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_footprint_data.html#FootprintData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.FootprintData" title="Permalink to this definition">#</a></dt>
 <dd><p>This class is used to return observations data from the get_footprint function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -651,42 +648,42 @@ containing a Dataset for each site code.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FootprintData.__delattr__">
-<span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__delattr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__delattr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Implement delattr(self, name).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FootprintData.__eq__">
-<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__eq__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__eq__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return self==value.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FootprintData.__hash__">
-<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__hash__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__hash__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return hash(self).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FootprintData.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FootprintData.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__repr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__repr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return repr(self).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FootprintData.__setattr__">
-<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__setattr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__setattr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Implement setattr(self, name, value).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FootprintData.__str__">
-<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_footprint_data.html#FootprintData.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.FootprintData.__str__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_footprint_data.html#FootprintData.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.FootprintData.__str__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return str(self).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -699,43 +696,43 @@ containing a Dataset for each site code.</p>
 
 </section>
 <section id="metdata">
-<h2>METData<a class="headerlink" href="#metdata" title="Permalink to this headline">¶</a></h2>
+<h2>METData<a class="headerlink" href="#metdata" title="Permalink to this headline">#</a></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">dataclass</span></code> is used to return observations data from the Met data retrieval function</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.dataobjects.METData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">METData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_metdata.html#METData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.METData" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">METData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_metdata.html#METData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.METData" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.METData.__delattr__">
-<span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__delattr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__delattr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Implement delattr(self, name).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.METData.__eq__">
-<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__eq__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__eq__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return self==value.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.METData.__hash__">
-<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__hash__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__hash__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return hash(self).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.METData.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.METData.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__repr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__repr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Return repr(self).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.METData.__setattr__">
-<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__setattr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__setattr__" title="Permalink to this definition">#</a></dt>
 <dd><p>Implement setattr(self, name, value).</p>
 </dd></dl>
 
@@ -743,20 +740,20 @@ containing a Dataset for each site code.</p>
 
 </section>
 <section id="ranksources">
-<h2>RankSources<a class="headerlink" href="#ranksources" title="Permalink to this headline">¶</a></h2>
+<h2>RankSources<a class="headerlink" href="#ranksources" title="Permalink to this headline">#</a></h2>
 <p>This <code class="docutils literal notranslate"><span class="pre">dataclass</span></code> is returned by the <code class="docutils literal notranslate"><span class="pre">openghg.client.rank_sources</span></code> function and allows easy setting of ranking attributes for data stored in the
 object store.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.dataobjects.RankSources">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">RankSources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">RankSources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.RankSources.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.RankSources.clear_rank">
-<span class="sig-name descname"><span class="pre">clear_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.clear_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.clear_rank" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">clear_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.clear_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.clear_rank" title="Permalink to this definition">#</a></dt>
 <dd><p>Clear the ranking data for a Datasource</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -773,7 +770,7 @@ object store.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.RankSources.get_sources">
-<span class="sig-name descname"><span class="pre">get_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.get_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.get_sources" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.get_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.get_sources" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the datasources for this site and species to allow a ranking to be set</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -793,7 +790,7 @@ object store.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.RankSources.get_specific_source">
-<span class="sig-name descname"><span class="pre">get_specific_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.get_specific_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.get_specific_source" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_specific_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.get_specific_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.get_specific_source" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the ranking data of a specific key</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -810,7 +807,7 @@ object store.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.RankSources.raw">
-<span class="sig-name descname"><span class="pre">raw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.raw" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">raw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.raw" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the raw ranking data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -827,7 +824,7 @@ object store.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.RankSources.set_rank">
-<span class="sig-name descname"><span class="pre">set_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.set_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.set_rank" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.set_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.set_rank" title="Permalink to this definition">#</a></dt>
 <dd><p>Set the rank data for the</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -867,8 +864,9 @@ object store.</p>
       </div>
     </div>
   
-    <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
   <div class="container">
     
     <div class="footer-item">
@@ -879,7 +877,7 @@ object store.</p>
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
 </p>
     </div>
     

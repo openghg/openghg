@@ -6,31 +6,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 4: Working with carbon dioxide &#8212; OpenGHG 0+untagged.1.gb14c668.dirty documentation</title>
+    <title>Workflow 4: Working with carbon dioxide &#8212; OpenGHG 0+untagged.1.ge68b575.dirty documentation</title>
     
-    <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-  
+
     
-    <link rel="stylesheet"
-      href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
-  
-    
-      
-  
-    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/pydata-sphinx-theme.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
     
-    <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
-  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
@@ -54,7 +51,7 @@
     <!-- Google Analytics -->
     
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
     <div class="container-fluid" id="banner"></div>
 
@@ -198,7 +195,7 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage pt-5 pb-3">
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
 
@@ -241,7 +238,7 @@
               <div>
                 
   <section class="tex2jax_ignore mathjax_ignore" id="workflow-4-working-with-carbon-dioxide">
-<h1>Workflow 4: Working with carbon dioxide<a class="headerlink" href="#workflow-4-working-with-carbon-dioxide" title="Permalink to this headline">¶</a></h1>
+<h1>Workflow 4: Working with carbon dioxide<a class="headerlink" href="#workflow-4-working-with-carbon-dioxide" title="Permalink to this headline">#</a></h1>
 <p>For carbon dioxide data, the natural diurnal cycle must be taken into account when comparing any expected measurements against our observations.</p>
 <p>In order to compare our measurements to modelled data for carbon dioxide (<span class="math notranslate nohighlight">\(\mathrm{CO_2}\)</span>), we need high frequency inputs for both the footprint and flux files. For NAME footprints these should contain an additional “H_back” dimension to store hourly footprints overall an initial time period for each release time. For any natural flux data to compare against, this should have a frequency of less than 24 hours.</p>
 <p><em>Operations around <span class="math notranslate nohighlight">\(CO_2\)</span> and high resolution data may run slow at the moment, the plan is to profile this so we can optimise performance.</em></p>
@@ -263,7 +260,7 @@
 </div>
 </div>
 <section id="loading-data-sources-into-the-object-store">
-<h2>1. Loading data sources into the object store<a class="headerlink" href="#loading-data-sources-into-the-object-store" title="Permalink to this headline">¶</a></h2>
+<h2>1. Loading data sources into the object store<a class="headerlink" href="#loading-data-sources-into-the-object-store" title="Permalink to this headline">#</a></h2>
 <p>For this tutorial we will again set up a temporary object store to store our data. See <a class="reference internal" href="1_Adding_observation_data.html"><span class="doc std std-doc">1_Adding_observation_data.ipynb</span></a> for more details around this.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -340,7 +337,7 @@
 </div>
 </section>
 <section id="creating-a-model-scenario">
-<h2>2. Creating a model scenario<a class="headerlink" href="#creating-a-model-scenario" title="Permalink to this headline">¶</a></h2>
+<h2>2. Creating a model scenario<a class="headerlink" href="#creating-a-model-scenario" title="Permalink to this headline">#</a></h2>
 <p>To link together our observations to our ancillary data we can create a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object, as shown in the previous tutorial <a class="reference internal" href="3_Comparing_with_emissions.html"><span class="doc std std-doc">3_Comparing_with_emissions.ipynb</span></a>, using suitable keywords to grab the data from the object store.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -380,7 +377,7 @@
 </div>
 </section>
 <section id="comparing-data-sources">
-<h2>3. Comparing data sources<a class="headerlink" href="#comparing-data-sources" title="Permalink to this headline">¶</a></h2>
+<h2>3. Comparing data sources<a class="headerlink" href="#comparing-data-sources" title="Permalink to this headline">#</a></h2>
 <p>Once the correct high frequency emissions and footprints have been linked for our carbon dioxide data, we can start to plot comparisons between the sources and our measurement data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -446,8 +443,9 @@
       </div>
     </div>
   
-    <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-  <footer class="footer mt-5 mt-md-0">
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
   <div class="container">
     
     <div class="footer-item">
@@ -458,7 +456,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
 </p>
     </div>
     
