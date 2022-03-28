@@ -29,7 +29,7 @@ class Footprints(BaseStore):
         overwrite: bool = False,
         high_res: bool = False,
         # model_params: Optional[Dict] = None,
-    ) -> Dict[str, str]:
+    ) -> Dict[str, Dict]:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 
@@ -138,7 +138,7 @@ class Footprints(BaseStore):
         lookup_results = fp.datasource_lookup(metadata=keyed_metadata, metastore=metastore)
 
         data_type = "footprints"
-        datasource_uuids: Dict[str, str] = assign_data(
+        datasource_uuids: Dict[str, Dict] = assign_data(
             data_dict=footprint_data,
             lookup_results=lookup_results,
             overwrite=overwrite,

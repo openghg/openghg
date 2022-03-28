@@ -50,8 +50,8 @@ class ObjectStorage(Storage):
         data = get_object(bucket=bucket, key=self._key)
 
         try:
-            data = json.loads(data)
-            return data
+            json_data: Dict = json.loads(data)
+            return json_data
         except json.JSONDecodeError:
             return None
 
