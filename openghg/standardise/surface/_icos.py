@@ -4,7 +4,6 @@ from pathlib import Path
 
 def parse_icos(
     data_filepath: Union[str, Path],
-    species: str,
     site: str,
     inlet: str,
     instrument: str,
@@ -32,7 +31,6 @@ def parse_icos(
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string
 
-    species = clean_string(species)
     site = clean_string(site)
     inlet = clean_string(inlet)
     instrument = clean_string(instrument)
@@ -46,7 +44,6 @@ def parse_icos(
     if header_type == "large":
         gas_data = _read_data_large_header(
             data_filepath=data_filepath,
-            species=species,
             site=site,
             inlet=inlet,
             network=network,
@@ -57,7 +54,6 @@ def parse_icos(
     else:
         gas_data = _read_data_small_header(
             data_filepath=data_filepath,
-            species=species,
             site=site,
             inlet=inlet,
             network=network,
@@ -74,7 +70,6 @@ def parse_icos(
 
 def _read_data_large_header(
     data_filepath: Path,
-    species: str,
     site: str,
     inlet: str,
     network: str,
@@ -116,9 +111,6 @@ def _read_data_large_header(
     if site_fname.lower() != site:
         raise ValueError("Site mismatch between site argument passed and filename.")
 
-    if species_fname.lower() != species:
-        raise ValueError("Mismatch in species between data, argument and filename.")
-
     if inlet_height_fname.lower() != inlet:
         raise ValueError("Mismatch between inlet height passed and in filename.")
 
@@ -130,9 +122,11 @@ def _read_data_large_header(
     len_header = len(header)
 
     if len_header != 40:
-        print(f"WARNING: We expect a header length of 40 but got {len_header}, \
+        print(
+            f"WARNING: We expect a header length of 40 but got {len_header}, \
                 note that some metadata may not be collected, \
-                please raise an issue on GitHub if this file format is to be expected.")
+                please raise an issue on GitHub if this file format is to be expected."
+        )
 
     dtypes = {
         "#Site": "string",
@@ -168,6 +162,12 @@ def _read_data_large_header(
     site_name_data = df["#site"][0]
     species_name_data = df.columns[3]
 
+    if site != site_name_data.lower():
+        raise ValueError("Site mismatch between site argument passed and site in data.")
+
+    if species_fname != species_name_data.lower():
+        raise ValueError("Speices mismatch between site passed and species in data.")
+
     # Drop the columns we don't want
     cols_to_keep = [species_name_data, "stdev", "nbpoints", "flag", "instrumentid"]
     df = df[cols_to_keep]
@@ -183,20 +183,14 @@ def _read_data_large_header(
         df = df.sort_index()
 
     rename_dict = {
-        "stdev": species + " variability",
-        "nbpoints": species + " number_of_observations",
+        "stdev": species_name_data + " variability",
+        "nbpoints": species_name_data + " number_of_observations",
     }
 
     df = df.rename(columns=rename_dict)
 
     # Convert to xarray Dataset
     data = df.to_xarray()
-
-    if site != site_name_data.lower():
-        raise ValueError("Site mismatch between site argument passed and site in data.")
-
-    if species != species_name_data.lower():
-        raise ValueError("Speices mismatch between site passed and species in data.")
 
     if file_sampling_period == "1minute":
         file_sampling_period = "60"
@@ -211,7 +205,7 @@ def _read_data_large_header(
 
     metadata = {
         "site": site,
-        "species": species,
+        "species": species_name_data,
         "inlet": inlet,
         "sampling_period": sampling_period,
         "network": network,
@@ -237,7 +231,7 @@ def _read_data_large_header(
         metadata["data_owner_email"] = data_owner_email
 
     species_data = {
-        species: {
+        species_name_data: {
             "metadata": metadata,
             "data": data,
         }
@@ -248,7 +242,6 @@ def _read_data_large_header(
 
 def _read_data_small_header(
     data_filepath: Path,
-    species: str,
     site: str,
     inlet: str,
     network: str,
@@ -272,6 +265,19 @@ def _read_data_small_header(
     from pandas import read_csv, Timestamp
     from openghg.util import read_header
 
+    # Read some metadata from the filename
+    split_filename = data_filepath.name.split(".")
+
+    try:
+        site_fname = split_filename[0]
+        species_fname = split_filename[1]
+        file_sampling_period = split_filename[2]
+        inlet_height = split_filename[3]
+    except IndexError:
+        raise ValueError(
+            "Unable to read metadata from filename. We expect a filename such as tta.co2.1minute.222m.dat"
+        )
+
     # metadata = read_metadata(filepath=data_filepath, data=data, data_type="ICOS")
     header = read_header(filepath=data_filepath)
     n_skip = len(header) - 1
@@ -287,7 +293,7 @@ def _read_data_small_header(
         "Day",
         "Hour",
         "Minute",
-        str(species.lower()),
+        str(species_fname.lower()),
         "Stdev",
         "NbPoints",
     ]
@@ -298,7 +304,7 @@ def _read_data_small_header(
         "Year": int,
         "Hour": int,
         "Minute": int,
-        species.lower(): float,
+        species_fname.lower(): float,
         "Stdev": float,
         "SamplingHeight": float,
         "NbPoints": int,
@@ -316,7 +322,7 @@ def _read_data_small_header(
         date_parser=date_parser,
     )
 
-    data = data[data[species.lower()] >= 0.0]
+    data = data[data[species_fname.lower()] >= 0.0]
 
     # Drop duplicate indices
     data = data.loc[~data.index.duplicated(keep="first")]
@@ -326,26 +332,14 @@ def _read_data_small_header(
         data = data.sort_index()
 
     rename_dict = {
-        "Stdev": species + " variability",
-        "NbPoints": species + " number_of_observations",
+        "Stdev": species_fname + " variability",
+        "NbPoints": species_fname + " number_of_observations",
     }
 
     data = data.rename(columns=rename_dict)
 
     # Convert to xarray Dataset
     data = data.to_xarray()
-
-    # Read some metadata from the filename
-    split_filename = data_filepath.name.split(".")
-
-    try:
-        site_fname = split_filename[0]
-        file_sampling_period = split_filename[2]
-        inlet_height = split_filename[3]
-    except IndexError:
-        raise ValueError(
-            "Unable to read metadata from filename. We expect a filename such as tta.co2.1minute.222m.dat"
-        )
 
     if site_fname.lower() != site:
         raise ValueError("Site mismatch between site argument passed and filename")
@@ -366,7 +360,7 @@ def _read_data_small_header(
 
     metadata = {
         "site": site,
-        "species": species,
+        "species": species_fname,
         "inlet": inlet_height,
         "sampling_period": sampling_period,
         "network": network,
@@ -377,7 +371,7 @@ def _read_data_small_header(
         metadata["measurement_type"] = measurement_type
 
     species_data = {
-        species: {
+        species_fname: {
             "metadata": metadata,
             "data": data,
         }
