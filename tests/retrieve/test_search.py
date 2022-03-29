@@ -200,8 +200,6 @@ def test_ranked_bsd_search():
 
     raw_result = result.raw()
 
-    print(raw_result)
-
     expected_rank_metadata = {
         "2014-01-30-00:00:00+00:00_2015-01-01-00:00:00+00:00": "248m",
         "2016-04-01-00:00:00+00:00_2017-11-01-00:00:00+00:00": "248m",
