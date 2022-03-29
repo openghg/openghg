@@ -1,9 +1,11 @@
 import pytest
 
-from openghg.retrieve import search
+from openghg.retrieve import search, metadata_lookup
+from openghg.store import metastore_manager
 from openghg.util import timestamp_tzaware
 from pandas import Timestamp
 from helpers import metadata_checker_obssurface
+from openghg.types import DatasourceLookupError
 
 
 def test_specific_keyword_search():
@@ -297,3 +299,37 @@ def test_search_nonsense_terms():
     results = search(species=species, locations=locations)
 
     assert not results
+
+
+def test_metadata_lookup():
+    with metastore_manager(key="test-key-888") as metastore:
+        metadata = {
+            "site": "shop",
+            "species": "parrot",
+            "status": "six-feet-under",
+            "pining_for": "fjords",
+            "uuid": "uuid-888",
+        }
+
+        metastore.insert(metadata)
+
+        result = metadata_lookup(database=metastore, species="parrot", site="shop")
+
+        assert result == "uuid-888"
+
+        result = metadata_lookup(database=metastore, species="turtle")
+
+        assert result is False
+
+        metadata = {
+            "site": "shop",
+            "species": "parrot",
+            "status": "six-feet-under",
+            "pining_for": "fjords",
+            "uuid": "uuid-777",
+        }
+
+        metastore.insert(metadata)
+
+        with pytest.raises(DatasourceLookupError):
+            metadata_lookup(database=metastore, species="parrot", site="shop")

@@ -1,3 +1,4 @@
+from tinydb import TinyDB
 from openghg.store.base import BaseStore
 from openghg.types import pathType, multiPathType, resultsType
 from pathlib import Path
@@ -12,6 +13,7 @@ class ObsSurface(BaseStore):
 
     _root = "ObsSurface"
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
+    _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     @staticmethod
     def read_file(
@@ -50,7 +52,7 @@ class ObsSurface(BaseStore):
         from tqdm import tqdm
         from openghg.util import load_surface_parser, hash_file, clean_string, verify_site
         from openghg.types import SurfaceTypes
-        from openghg.store import assign_data
+        from openghg.store import assign_data, load_metastore
 
         if not isinstance(filepath, list):
             filepath = [filepath]
@@ -80,6 +82,9 @@ class ObsSurface(BaseStore):
         obs = ObsSurface.load()
 
         results: resultsType = defaultdict(dict)
+
+        # Load the store for the metadata
+        metastore = load_metastore(key=obs._metakey)
 
         # Create a progress bar object using the filepaths, iterate over this below
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
@@ -127,7 +132,7 @@ class ObsSurface(BaseStore):
                 # Extract the metadata for each set of measurements to perform a Datasource lookup
                 metadata = {key: data["metadata"] for key, data in data.items()}
 
-                lookup_results = obs.datasource_lookup(metadata=metadata)
+                lookup_results = obs.datasource_lookup(metadata=metadata, metastore=metastore)
 
                 # Create Datasources, save them to the object store and get their UUIDs
                 datasource_uuids = assign_data(
@@ -137,7 +142,7 @@ class ObsSurface(BaseStore):
                 results["processed"][data_filepath.name] = datasource_uuids
 
                 # Record the Datasources we've created / appended to
-                obs.add_datasources(datasource_uuids, metadata)
+                obs.add_datasources(uuids=datasource_uuids, metadata=metadata, metastore=metastore)
 
                 # Store the hash as the key for easy searching, store the filename as well for
                 # ease of checking by user
@@ -147,6 +152,9 @@ class ObsSurface(BaseStore):
 
                 progress_bar.update(1)
 
+        # Ensure we explicitly close the metadata store 
+        # as we're using the cached storage method
+        metastore.close()
         # Save this object back to the object store
         obs.save()
 
@@ -170,7 +178,7 @@ class ObsSurface(BaseStore):
         This data is different in that it contains multiple sites in the same file.
         """
         from openghg.standardise.surface import parse_aqmesh
-        from openghg.store import assign_data
+        from openghg.store import assign_data, load_metastore
         from openghg.util import hash_file
         from collections import defaultdict
         from tqdm import tqdm
@@ -180,6 +188,8 @@ class ObsSurface(BaseStore):
 
         # Load the ObsSurface object for retrieve
         obs = ObsSurface.load()
+        # Load the metadata store
+        metastore = load_metastore(key=obs._metakey)
         # Get a dict of data and metadata
         processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
 
@@ -188,9 +198,6 @@ class ObsSurface(BaseStore):
             metadata = site_data["metadata"]
             measurement_data = site_data["data"]
 
-            inlet = metadata["inlet"]
-            species = metadata["species"]
-
             file_hash = hash_file(filepath=data_filepath)
 
             if obs.seen_hash(file_hash=file_hash) and overwrite is False:
@@ -198,13 +205,10 @@ class ObsSurface(BaseStore):
                     f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
                 )
 
-            uuid = obs.lookup_uuid(
-                site=site,
-                network=network,
-                inlet=inlet,
-                species=species,
-                sampling_period=sampling_period,
-            )
+            site_metadata = {site: metadata}
+            lookup_results = obs.datasource_lookup(metadata=site_metadata, metastore=metastore)
+
+            uuid = lookup_results[site]
 
             # Jump through these hoops until we can rework the data assignment functionality to split it out
             # into more sensible functions
@@ -219,21 +223,20 @@ class ObsSurface(BaseStore):
 
             results[site] = datasource_uuids
 
-            # TODO - fix add_datasources as well
-            _metadata = {site: metadata}
-
             # Record the Datasources we've created / appended to
-            obs.add_datasources(datasource_uuids=datasource_uuids, metadata=_metadata)
+            obs.add_datasources(uuids=datasource_uuids, metadata=site_metadata, metastore=metastore)
 
             # Store the hash as the key for easy searching, store the filename as well for
             # ease of checking by user
             obs.set_hash(file_hash=file_hash, filename=data_filepath.name)
 
         obs.save()
+        # Close the metadata store and write new records
+        metastore.close()
 
         return results
 
-    def datasource_lookup(self, metadata: Dict) -> Dict:
+    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to
 
         Args:
@@ -241,33 +244,28 @@ class ObsSurface(BaseStore):
         Returns:
             dict: Dictionary of datasource information
         """
+        from openghg.retrieve import metadata_lookup
+
         lookup_results = {}
         for key, data in metadata.items():
             site = data["site"]
             network = data["network"]
             inlet = data["inlet"]
             sampling_period = data["sampling_period"]
-
-            # TODO - remove these once further checks for metadata inputs are in place
-            if inlet is None:
-                raise ValueError("No valid inlet height.")
-
-            if sampling_period is None:
-                raise ValueError("No valid sampling period.")
-
             species = data["species"]
 
-            lookup_results[key] = self.lookup_uuid(
+            lookup_results[key] = metadata_lookup(
+                database=metastore,
                 site=site,
+                species=species,
                 network=network,
                 inlet=inlet,
-                species=species,
                 sampling_period=sampling_period,
             )
 
         return lookup_results
 
-    def add_datasources(self, datasource_uuids: Dict, metadata: Dict) -> None:
+    def add_datasources(self, uuids: Dict, metadata: Dict, metastore: TinyDB) -> None:
         """Add the passed list of Datasources to the current list
 
         Args:
@@ -276,81 +274,16 @@ class ObsSurface(BaseStore):
         Returns:
             None
         """
-        for key, uid in datasource_uuids.items():
-            md = metadata[key]
-            site = md["site"]
-            network = md["network"]
-            inlet = md["inlet"]
-            species = md["species"]
-            sampling_period = md["sampling_period"]
+        for key, data in uuids.items():
+            new = data["new"]
+            # Only add if this is a new Datasource
+            if new:
+                meta_copy = metadata[key].copy()
+                uid = data["uuid"]
+                meta_copy["uuid"] = data["uuid"]
 
-            # TODO - remove this check when improved input sanitisation is in place
-            if not any((site, network, inlet, species, sampling_period)):
-                raise ValueError(
-                    "Please ensure site, network, inlet, species and sampling_period are not None"
-                )
-
-            result = self.lookup_uuid(
-                site=site,
-                network=network,
-                inlet=inlet,
-                species=species,
-                sampling_period=sampling_period,
-            )
-
-            if result and result != uid:
-                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
-
-            self.set_uuid(
-                site=site,
-                network=network,
-                inlet=inlet,
-                species=species,
-                sampling_period=sampling_period,
-                uuid=uid,
-            )
-            self._datasource_uuids[uid] = key
-
-    def lookup_uuid(
-        self, site: str, network: str, inlet: str, species: str, sampling_period: int
-    ) -> Union[str, bool]:
-        """Perform a lookup for the UUID of a Datasource
-
-        Args:
-            site: Site code
-            network: Network name
-            inlet: Inlet height
-            species: Species name
-            sampling_period: Sampling period in seconds
-        Returns:
-            str or bool: UUID if exists else None
-        """
-        uuid = self._datasource_table[site][network][species][inlet][sampling_period]
-
-        return uuid if uuid else False
-
-    def set_uuid(
-        self,
-        site: str,
-        network: str,
-        inlet: str,
-        species: str,
-        sampling_period: int,
-        uuid: str,
-    ) -> None:
-        """Record a UUID of a Datasource in the datasource table
-
-        Args:
-            site: Site code
-            network: Network name
-            inlet: Inlet height
-            species: Species name
-            sampling_period: Sampling period in seconds
-            uuid: UUID of Datasource
-        Returns:
-            None
-        """
-        self._datasource_table[site][network][species][inlet][sampling_period] = uuid
+                metastore.insert(meta_copy)
+                self._datasource_uuids[uid] = key
 
     def delete(self, uuid: str) -> None:
         """Delete a Datasource with the given UUID

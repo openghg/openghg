@@ -1,5 +1,3 @@
-__all__ = ["InvalidSiteError", "UnknownDataError", "FunctionError"]
-
 
 class InvalidSiteError(Exception):
     """Raised if an invalid site is passed"""
@@ -15,3 +13,7 @@ class FunctionError(Exception):
 
 class ObjectStoreError(Exception):
     """Raised if an error accessing an object at a key in the object store occurs"""
+
+
+class DatasourceLookupError(Exception):
+    """Raised if Datasource lookup fails"""

@@ -2,6 +2,7 @@ from openghg.store.base import BaseStore
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union
 from xarray import Dataset
+from tinydb import TinyDB
 
 __all__ = ["Emissions"]
 
@@ -11,20 +12,7 @@ class Emissions(BaseStore):
 
     _root = "Emissions"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
-
-    def save(self) -> None:
-        """Save the object to the object store
-
-        Returns:
-            None
-        """
-        from openghg.objectstore import get_bucket, set_object_from_json
-
-        bucket = get_bucket()
-        obs_key = f"{Emissions._root}/uuid/{Emissions._uuid}"
-
-        self._stored = True
-        set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
+    _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     @staticmethod
     def read_file(
@@ -52,7 +40,7 @@ class Emissions(BaseStore):
         """
         from collections import defaultdict
         from xarray import open_dataset
-        from openghg.store import assign_data
+        from openghg.store import assign_data, load_metastore
         from openghg.util import (
             clean_string,
             hash_file,
@@ -69,6 +57,9 @@ class Emissions(BaseStore):
         filepath = Path(filepath)
 
         em_store = Emissions.load()
+
+        # Load in the metadata store
+        metastore = load_metastore(key=em_store._metakey)
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in em_store._file_hashes and not overwrite:
@@ -177,7 +168,7 @@ class Emissions(BaseStore):
 
         keyed_metadata = {key: metadata}
 
-        lookup_results = em_store.datasource_lookup(metadata=keyed_metadata)
+        lookup_results = em_store.datasource_lookup(metadata=keyed_metadata, metastore=metastore)
 
         data_type = "emissions"
         datasource_uuids = assign_data(
@@ -187,12 +178,14 @@ class Emissions(BaseStore):
             data_type=data_type,
         )
 
-        em_store.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
+        em_store.add_datasources(uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore)
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
 
         em_store.save()
+
+        metastore.close()
 
         return datasource_uuids
 
@@ -225,7 +218,7 @@ class Emissions(BaseStore):
         """
         self._datasource_table[species][source][domain][date] = uuid
 
-    def datasource_lookup(self, metadata: Dict) -> Dict[str, Union[str, bool]]:
+    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to
 
         Args:
@@ -233,9 +226,8 @@ class Emissions(BaseStore):
         Returns:
             dict: Dictionary of datasource information
         """
-        # TODO - I'll leave this as a function for now as the way we read emissions may
-        # change in the near future
-        # GJ - 2021-04-20
+        from openghg.retrieve import metadata_lookup
+
         lookup_results = {}
 
         for key, data in metadata.items():
@@ -244,30 +236,10 @@ class Emissions(BaseStore):
             domain = data["domain"]
             date = data["date"]
 
-            lookup_results[key] = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
+            result = metadata_lookup(
+                database=metastore, species=species, source=source, domain=domain, date=date
+            )
+
+            lookup_results[key] = result
 
         return lookup_results
-
-    def add_datasources(self, datasource_uuids: Dict, metadata: Dict) -> None:
-        """Add the passed list of Datasources to the current list
-
-        Args:
-            datasource_uuids: Datasource UUIDs
-            metadata: Metadata for each species
-        Returns:
-            None
-        """
-        for key, uid in datasource_uuids.items():
-            md = metadata[key]
-            species = md["species"]
-            source = md["source"]
-            domain = md["domain"]
-            date = md["date"]
-
-            result = self.lookup_uuid(species=species, source=source, domain=domain, date=date)
-
-            if result and result != uid:
-                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
-            else:
-                self.set_uuid(species=species, source=source, domain=domain, date=date, uuid=uid)
-                self._datasource_uuids[uid] = key
