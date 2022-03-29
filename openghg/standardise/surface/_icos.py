@@ -111,10 +111,10 @@ def _read_data_large_header(
     if site_fname.lower() != site:
         raise ValueError("Site mismatch between site argument passed and filename.")
 
-    if inlet_height_fname.lower() != inlet:
+    if inlet is not None and inlet_height_fname.lower() != inlet:
         raise ValueError("Mismatch between inlet height passed and in filename.")
 
-    if instrument_fname.lower() != instrument:
+    if instrument is not None and instrument_fname.lower() != instrument:
         raise ValueError("Mismatch between instrument passed and that in filename.")
 
     # Read the header and check its length
@@ -206,10 +206,10 @@ def _read_data_large_header(
     metadata = {
         "site": site,
         "species": species_name_data,
-        "inlet": inlet,
-        "sampling_period": sampling_period,
+        "inlet": inlet_height_fname,
+        "sampling_period": file_sampling_period,
         "network": network,
-        "instrument": instrument,
+        "instrument": instrument_fname,
     }
 
     if measurement_type is not None:

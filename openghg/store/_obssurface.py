@@ -64,7 +64,6 @@ class ObsSurface(BaseStore):
         # Check validity of site, instrument, inlet etc in acrg_site_info.json
         # Clean the strings
         site = verify_site(site=site)
-
         network = clean_string(network)
         inlet = clean_string(inlet)
         instrument = clean_string(instrument)

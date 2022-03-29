@@ -15,6 +15,14 @@ def test_process_obs():
     assert "ch4" in results
     assert "co2" in results
 
+    mhd_path = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
+
+    results = process_obs(
+        files=mhd_path, site="mhd", inlet="15m", instrument="g2401", network="ICOS", data_type="ICOS", overwrite=True
+    )
+
+    assert "co" in results["processed"]["mhd.co.hourly.g2401.15m.dat"]
+
 
 def test_process_footprint():
     datapath = get_footprint_datapath("footprint_test.nc")
