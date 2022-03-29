@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>store API detail &#8212; OpenGHG 0+untagged.1.g41be328.dirty documentation</title>
+    <title>store API detail &#8212; OpenGHG 0+untagged.1.g602d2f3.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -228,28 +228,8 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">Emissions</span></span><a class="reference internal" href="../_modules/openghg/store/_emissions.html#Emissions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Emissions" title="Permalink to this definition">#</a></dt>
 <dd><p>This class is used to process emissions / flux data</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.Emissions.add_datasources">
-<span class="sig-name descname"><span class="pre">add_datasources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_uuids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_emissions.html#Emissions.add_datasources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Emissions.add_datasources" title="Permalink to this definition">#</a></dt>
-<dd><p>Add the passed list of Datasources to the current list</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>datasource_uuids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Datasource UUIDs</p></li>
-<li><p><strong>metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Metadata for each species</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.Emissions.datasource_lookup">
-<span class="sig-name descname"><span class="pre">datasource_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_emissions.html#Emissions.datasource_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Emissions.datasource_lookup" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">datasource_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metastore</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_emissions.html#Emissions.datasource_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Emissions.datasource_lookup" title="Permalink to this definition">#</a></dt>
 <dd><p>Find the Datasource we should assign the data to</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -312,20 +292,6 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.Emissions.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_emissions.html#Emissions.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Emissions.save" title="Permalink to this definition">#</a></dt>
-<dd><p>Save the object to the object store</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.Emissions.set_uuid">
 <span class="sig-name descname"><span class="pre">set_uuid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uuid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_emissions.html#Emissions.set_uuid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Emissions.set_uuid" title="Permalink to this definition">#</a></dt>
 <dd><p>Record a UUID of a Datasource in the datasource table</p>
@@ -361,28 +327,8 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">EulerianModel</span></span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel" title="Permalink to this definition">#</a></dt>
 <dd><p>This class is used to process Eulerian model data</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.EulerianModel.add_datasources">
-<span class="sig-name descname"><span class="pre">add_datasources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_uuids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel.add_datasources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel.add_datasources" title="Permalink to this definition">#</a></dt>
-<dd><p>Add the passed list of Datasources to the current list</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>datasource_uuids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Datasource UUIDs</p></li>
-<li><p><strong>metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Metadata for each species</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.EulerianModel.datasource_lookup">
-<span class="sig-name descname"><span class="pre">datasource_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel.datasource_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel.datasource_lookup" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">datasource_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metastore</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel.datasource_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel.datasource_lookup" title="Permalink to this definition">#</a></dt>
 <dd><p>Find the Datasource we should assign the data to</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -441,23 +387,6 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.EulerianModel.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel.save" title="Permalink to this definition">#</a></dt>
-<dd><p>Save the object to the object store</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>bucket</strong> – Bucket for data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.EulerianModel.set_uuid">
 <span class="sig-name descname"><span class="pre">set_uuid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uuid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_eulerian_model.html#EulerianModel.set_uuid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.EulerianModel.set_uuid" title="Permalink to this definition">#</a></dt>
 <dd><p>Record a UUID of a Datasource in the datasource table</p>
@@ -504,28 +433,8 @@ Some data may be cached locally for quicker access.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.Footprints.add_datasources">
-<span class="sig-name descname"><span class="pre">add_datasources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_uuids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.add_datasources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.add_datasources" title="Permalink to this definition">#</a></dt>
-<dd><p>Add the passed list of Datasources to the current list</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>datasource_uuids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Datasource UUIDs</p></li>
-<li><p><strong>metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Metadata for each species</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.Footprints.datasource_lookup">
-<span class="sig-name descname"><span class="pre">datasource_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.datasource_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.datasource_lookup" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">datasource_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metastore</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.datasource_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.datasource_lookup" title="Permalink to this definition">#</a></dt>
 <dd><p>Find the Datasource we should assign the data to</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -536,28 +445,6 @@ Some data may be cached locally for quicker access.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.Footprints.lookup_uuid">
-<span class="sig-name descname"><span class="pre">lookup_uuid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.lookup_uuid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.lookup_uuid" title="Permalink to this definition">#</a></dt>
-<dd><p>Perform a lookup for the UUID of a Datasource</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site code</p></li>
-<li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Domain</p></li>
-<li><p><strong>model</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Model name</p></li>
-<li><p><strong>height</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Height</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>UUID or False if no entry</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>str or dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -590,20 +477,6 @@ the processed data has been assigned to</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.Footprints.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.save" title="Permalink to this definition">#</a></dt>
-<dd><p>Save the object to the object store</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.Footprints.search">
 <span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.search" title="Permalink to this definition">#</a></dt>
 <dd><p>Search for a footprints from a specific site and network, return a dictionary of data
@@ -611,29 +484,6 @@ so the user can choose</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">NoReturn</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.Footprints.set_uuid">
-<span class="sig-name descname"><span class="pre">set_uuid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uuid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_footprints.html#Footprints.set_uuid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Footprints.set_uuid" title="Permalink to this definition">#</a></dt>
-<dd><p>Record a UUID of a Datasource in the datasource table</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site code</p></li>
-<li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Domain</p></li>
-<li><p><strong>model</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Model name</p></li>
-<li><p><strong>height</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Height</p></li>
-<li><p><strong>uuid</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – UUID of Datasource</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -748,12 +598,12 @@ remote store if we don’t have it locally</p>
 <dd><p>This class is used to process surface observation data</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.ObsSurface.add_datasources">
-<span class="sig-name descname"><span class="pre">add_datasources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasource_uuids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.add_datasources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.add_datasources" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_datasources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uuids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metastore</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.add_datasources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.add_datasources" title="Permalink to this definition">#</a></dt>
 <dd><p>Add the passed list of Datasources to the current list</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>datasource_uuids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Datasource UUIDs</p></li>
+<li><p><strong>datasource_uuids</strong> – Datasource UUIDs</p></li>
 <li><p><strong>metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Metadata for each species</p></li>
 </ul>
 </dd>
@@ -768,7 +618,7 @@ remote store if we don’t have it locally</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.ObsSurface.datasource_lookup">
-<span class="sig-name descname"><span class="pre">datasource_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.datasource_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.datasource_lookup" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">datasource_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metastore</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.datasource_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.datasource_lookup" title="Permalink to this definition">#</a></dt>
 <dd><p>Find the Datasource we should assign the data to</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -797,29 +647,6 @@ remote store if we don’t have it locally</p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.ObsSurface.lookup_uuid">
-<span class="sig-name descname"><span class="pre">lookup_uuid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.lookup_uuid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.lookup_uuid" title="Permalink to this definition">#</a></dt>
-<dd><p>Perform a lookup for the UUID of a Datasource</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site code</p></li>
-<li><p><strong>network</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Network name</p></li>
-<li><p><strong>inlet</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Inlet height</p></li>
-<li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species name</p></li>
-<li><p><strong>sampling_period</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Sampling period in seconds</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>UUID if exists else None</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>str or bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -866,30 +693,6 @@ we’ll be retrieve in the future.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultDict</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.store.ObsSurface.set_uuid">
-<span class="sig-name descname"><span class="pre">set_uuid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uuid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.set_uuid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.set_uuid" title="Permalink to this definition">#</a></dt>
-<dd><p>Record a UUID of a Datasource in the datasource table</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site code</p></li>
-<li><p><strong>network</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Network name</p></li>
-<li><p><strong>inlet</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Inlet height</p></li>
-<li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species name</p></li>
-<li><p><strong>sampling_period</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Sampling period in seconds</p></li>
-<li><p><strong>uuid</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – UUID of Datasource</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -969,7 +772,7 @@ overwrite: If True overwrite current data stored</p>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>

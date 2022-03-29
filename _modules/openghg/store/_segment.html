@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._segment &#8212; OpenGHG 0+untagged.1.g41be328.dirty documentation</title>
+    <title>openghg.store._segment &#8212; OpenGHG 0+untagged.1.g602d2f3.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -177,7 +177,7 @@
     <span class="n">lookup_results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Assign data to a Datasource. This will either create a new Datasource</span>
 <span class="sd">    Create or get an existing Datasource for each gas in the file</span>
 
@@ -199,9 +199,6 @@
         <span class="c1"># Our lookup results and gas data have the same keys</span>
         <span class="n">uuid</span> <span class="o">=</span> <span class="n">lookup_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
-        <span class="c1"># TODO - Could this be done somewhere else? It doesn&#39;t feel quite right it</span>
-        <span class="c1"># being here</span>
-
         <span class="c1"># Add the read metadata to the Dataset attributes being careful</span>
         <span class="c1"># not to overwrite any attributes that are already there</span>
         <span class="n">to_add</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">}</span>
@@ -219,7 +216,8 @@
         <span class="c1"># Save Datasource to object store</span>
         <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
-        <span class="n">uuids</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">()</span>
+        <span class="n">new_datasource</span> <span class="o">=</span> <span class="n">uuid</span> <span class="ow">is</span> <span class="kc">False</span>
+        <span class="n">uuids</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">(),</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span> <span class="n">new_datasource</span><span class="p">}</span>
 
     <span class="k">return</span> <span class="n">uuids</span></div>
 
