@@ -3,7 +3,7 @@ import pytest
 from openghg.retrieve import search
 from openghg.util import timestamp_tzaware
 from pandas import Timestamp
-from helpers import metadata_checker_obssurface, attributes_checker_obssurface
+from helpers import metadata_checker_obssurface
 
 
 def test_specific_keyword_search():
@@ -197,8 +197,6 @@ def test_ranked_bsd_search():
     result = search(site=site, species=species)
 
     raw_result = result.raw()
-
-    print(raw_result)
 
     expected_rank_metadata = {
         "2014-01-30-00:00:00+00:00_2015-01-01-00:00:00+00:00": "248m",

@@ -16,6 +16,7 @@ def process_obs(
     network: str,
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
+    sampling_period: Optional[str] = None,
     overwrite: bool = False,
 ) -> Dict:
     """Process observation files, standardise them and add the data to the object store
@@ -26,6 +27,7 @@ def process_obs(
         site: Site code or name
         network: Network name
         instrument: Instrument name
+        sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
         overwrite: Should this data overwrite data
         stored for these datasources for existing dateranges
     Returns:
@@ -142,6 +144,7 @@ def _process_obs_local(
     network: str,
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
+    sampling_period: Optional[str] = None,
     overwrite: bool = False,
 ) -> Dict:
     """Process the passed observations file(s)
@@ -152,6 +155,7 @@ def _process_obs_local(
         site: Site code or name
         network: Network name
         instrument: Instrument name
+        sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
         overwrite: Should this data overwrite data
         stored for these datasources for existing dateranges
     Returns:
@@ -180,6 +184,7 @@ def _process_obs_local(
         site=site,
         network=network,
         instrument=instrument,
+        sampling_period=sampling_period,
         inlet=inlet,
         overwrite=overwrite,
     )
