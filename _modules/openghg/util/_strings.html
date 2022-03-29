@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._strings &#8212; OpenGHG 0+untagged.1.gc088d25.dirty documentation</title>
+    <title>openghg.util._strings &#8212; OpenGHG 0+untagged.1.gf4f0c15.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -181,7 +181,7 @@
 
 <div class="viewcode-block" id="clean_string"><a class="viewcode-back" href="../../../api/api_util.html#openghg.util.clean_string">[docs]</a><span class="k">def</span> <span class="nf">clean_string</span><span class="p">(</span><span class="n">to_clean</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Returns a lowercase string with only alphanumeric</span>
-<span class="sd">    characters.</span>
+<span class="sd">    characters and underscores.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        to_clean: String to clean</span>
@@ -191,12 +191,16 @@
     <span class="kn">import</span> <span class="nn">re</span>
 
     <span class="k">if</span> <span class="n">to_clean</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">to_clean</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># This might be used with numbers</span>
+        <span class="k">if</span> <span class="n">is_number</span><span class="p">(</span><span class="n">to_clean</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">to_clean</span><span class="p">)</span>
+
         <span class="c1"># Removes all whitespace</span>
         <span class="n">cleaner</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">to_clean</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">UNICODE</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="c1"># Removes non-alphanumeric characters</span>
+        <span class="c1"># Removes non-alphanumeric characters but keep underscores</span>
         <span class="n">cleanest</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\W+&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">cleaner</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">to_clean</span>
@@ -254,11 +258,16 @@
 <span class="k">def</span> <span class="nf">is_number</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Is it a number?</span>
 
+<span class="sd">    https://stackoverflow.com/q/354038</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        s: String which may be a number</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        bool</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>

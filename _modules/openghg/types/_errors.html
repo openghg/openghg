@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.types._errors &#8212; OpenGHG 0+untagged.1.gc088d25.dirty documentation</title>
+    <title>openghg.types._errors &#8212; OpenGHG 0+untagged.1.gf4f0c15.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -164,7 +164,9 @@
               <div>
                 
   <h1>Source code for openghg.types._errors</h1><div class="highlight"><pre>
-<span></span>
+<span></span><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;InvalidSiteError&quot;</span><span class="p">,</span> <span class="s2">&quot;UnknownDataError&quot;</span><span class="p">,</span> <span class="s2">&quot;FunctionError&quot;</span><span class="p">]</span>
+
+
 <div class="viewcode-block" id="InvalidSiteError"><a class="viewcode-back" href="../../../api/api_types.html#openghg.types.InvalidSiteError">[docs]</a><span class="k">class</span> <span class="nc">InvalidSiteError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Raised if an invalid site is passed&quot;&quot;&quot;</span></div>
 
@@ -179,10 +181,6 @@
 
 <div class="viewcode-block" id="ObjectStoreError"><a class="viewcode-back" href="../../../api/api_types.html#openghg.types.ObjectStoreError">[docs]</a><span class="k">class</span> <span class="nc">ObjectStoreError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Raised if an error accessing an object at a key in the object store occurs&quot;&quot;&quot;</span></div>
-
-
-<span class="k">class</span> <span class="nc">DatasourceLookupError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Raised if Datasource lookup fails&quot;&quot;&quot;</span>
 </pre></div>
 
               </div>

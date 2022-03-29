@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>client API Detail &#8212; OpenGHG 0+untagged.1.gc088d25.dirty documentation</title>
+    <title>client API Detail &#8212; OpenGHG 0+untagged.1.gf4f0c15.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -214,7 +214,7 @@ functions, if it is absent the call will the routed to a local function.</p>
 observations, footprint and flux / emissions data are available.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.client.process_obs">
-<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">process_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_process.html#process_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.process_obs" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.client.</span></span><span class="sig-name descname"><span class="pre">process_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/client/_process.html#process_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.client.process_obs" title="Permalink to this definition">#</a></dt>
 <dd><p>Process observation files, standardise them and add the data to the object store</p>
 <blockquote>
 <div><dl class="simple">
@@ -223,6 +223,7 @@ data_type: Type of data to be processed (CRDS, GC etc)
 site: Site code or name
 network: Network name
 instrument: Instrument name
+sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
 overwrite: Should this data overwrite data
 stored for these datasources for existing dateranges</p>
 </dd>
