@@ -115,4 +115,4 @@ def test_retrieve_complex_ranked():
         assert all_inlets.size == 1
         assert all_inlets[0] == inlet
 
-    assert measurement_data.time.size == 140
+    assert measurement_data.time.size == 126

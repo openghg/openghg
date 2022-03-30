@@ -1,6 +1,9 @@
+from multiprocessing.sharedctypes import Value
 import pytest
 import numpy as np
 from pandas import Timestamp
+import pandas as pd
+from xarray import Dataset
 from openghg.util import (
     create_daterange,
     daterange_from_str,
@@ -16,6 +19,7 @@ from openghg.util import (
     daterange_contains,
     check_nan,
     check_date,
+    find_duplicate_timestamps,
 )
 
 
@@ -338,3 +342,22 @@ def test_check_nan():
     with pytest.raises(TypeError):
         check_nan(data="123") == "123"
         assert check_nan(data=None)
+
+
+def test_check_duplicate_timestamps():
+    dr = pd.date_range("2021-1-1", "2021-1-15").tolist()
+    with_dupes = dr + dr
+    df_dupes = pd.DataFrame(with_dupes, columns=["dates"], index=with_dupes)
+    dupes = find_duplicate_timestamps(df_dupes)
+
+    assert dupes
+
+    df_nodupes = pd.DataFrame(dr, columns=["dates"], index=dr)
+    dupes = find_duplicate_timestamps(df_nodupes)
+
+    assert not dupes
+
+    empty_ds = Dataset()
+
+    with pytest.raises(ValueError):
+        find_duplicate_timestamps(empty_ds)

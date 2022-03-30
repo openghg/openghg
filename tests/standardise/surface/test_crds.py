@@ -20,6 +20,13 @@ def crds_data():
     return gas_data
 
 
+def test_file_with_dupes_raises():
+    dupe_file = get_datapath(filename="bsd.picarro.1minute.42m.dupes.dat", data_type="CRDS")
+
+    with pytest.raises(ValueError):
+        parse_crds(data_filepath=dupe_file, site="bsd", inlet="42m", network="DECC")
+
+
 def test_read_file(crds_data):
     ch4_data = crds_data["ch4"]["data"]
     co2_data = crds_data["co2"]["data"]
@@ -38,6 +45,7 @@ def test_read_file(crds_data):
     assert co_data["co_number_of_observations"][0] == pytest.approx(19.0)
 
     parsed_surface_metachecker(data=crds_data)
+
 
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
