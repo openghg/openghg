@@ -1,13 +1,13 @@
 import pytest
 
 from openghg.store import BoundaryConditions
-# from openghg.retrieve import search
-# from openghg.store import recombine_datasets
-# from xarray import open_dataset
+from openghg.retrieve import search
+from openghg.store import recombine_datasets
+from xarray import open_dataset
 from helpers import get_bc_datapath
 
 
-def test_read_file():
+def test_read_file_monthly():
     test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
 
     proc_results = BoundaryConditions.read_file(
@@ -18,119 +18,108 @@ def test_read_file():
         period="monthly",
     )
 
-    print(proc_results)
-
     assert "ch4_mozart_europe_201208" in proc_results
 
-    # search_results = search(
-    #     species="co2", source="gpp-cardamom", date="2012", domain="europe", data_type="emissions"
-    # )
+    search_results = search(
+        species="ch4", bc_input="MOZART", domain="europe", data_type="boundary_conditions"
+    )
 
-    # key = list(search_results.keys())[0]
+    key = list(search_results.keys())[0]
 
-    # data_keys = search_results[key]["keys"]
-    # emissions_data = recombine_datasets(keys=data_keys, sort=False)
+    data_keys = search_results[key]["keys"]
+    bc_data = recombine_datasets(keys=data_keys, sort=False)
 
-    # metadata = search_results[key]["metadata"]
+    metadata = search_results[key]["metadata"]
 
-    # orig_data = open_dataset(test_datapath)
+    orig_data = open_dataset(test_datapath)
 
-    # assert orig_data.lat.equals(emissions_data.lat)
-    # assert orig_data.lon.equals(emissions_data.lon)
-    # assert orig_data.time.equals(emissions_data.time)
-    # assert orig_data.flux.equals(emissions_data.flux)
+    assert orig_data.lat.equals(bc_data.lat)
+    assert orig_data.lon.equals(bc_data.lon)
+    assert orig_data.time.equals(bc_data.time)
+    
+    data_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
+    for dv in data_vars:
+        assert orig_data[dv].equals(bc_data[dv])
 
-    # expected_metadata = {
-    #     "title": "gross primary productivity co2",
-    #     "author": "openghg cloud",
-    #     "date_created": "2018-05-20 19:44:14.968710",
-    #     "number_of_prior_files_used": 1,
-    #     "prior_file_1": "cardamom gpp",
-    #     "prior_file_1_raw_resolution": "25x25km",
-    #     "prior_file_1_reference": "t.l. smallman, jgr biogeosciences, 2017",
-    #     "regridder_used": "acrg_grid.regrid.regrid_3d",
-    #     "comments": "fluxes copied from year 2013. december 2012 values copied from january 2013 values.",
-    #     "species": "co2",
-    #     "domain": "europe",
-    #     "source": "gppcardamom",
-    #     "date": "2012",
-    #     "start_date": "2012-01-01 00:00:00+00:00",
-    #     "end_date": "2012-12-31 23:59:59+00:00",
-    #     "max_longitude": 39.38,
-    #     "min_longitude": -97.9,
-    #     "max_latitude": 79.057,
-    #     "min_latitude": 10.729,
-    #     "time_resolution": "standard",
-    #     "data_type": "emissions",
-    #     "frequency": "annual",
-    # }
+    expected_metadata = {
+        "title": "mozart volume mixing ratios at domain edges",
+        "author": "openghg cloud",
+        "date_created": "2018-05-18 15:39:53.392826",
+        "species": "ch4",
+        "domain": "europe",
+        "bc_input": "mozart",
+        "start_date": "2012-08-01 00:00:00+00:00",
+        "end_date": "2012-08-31 23:59:59+00:00",
+        "max_longitude": 39.38,
+        "min_longitude": -97.9,
+        "max_latitude": 79.057,
+        "min_latitude": 10.729,
+        "data_type": "boundary_conditions",
+        "time_period": "1 month",
+    }
 
-    # del metadata["processed"]
-    # del metadata["prior_file_1_version"]
+    for key in expected_metadata.keys():
+        assert metadata[key] == expected_metadata[key]
 
-    # assert metadata == expected_metadata
 
 def test_read_file_yearly():
     test_datapath = get_bc_datapath("n2o_EUROPE_2012.nc")
 
+    species = "n2o"
+    bc_input = "MOZART"
+    domain = "EUROPE"
+
     proc_results = BoundaryConditions.read_file(
         filepath=test_datapath,
-        species="n2o",
-        bc_input="MOZART",
-        domain="EUROPE",
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
     )
-
-    print(proc_results)
 
     assert "n2o_mozart_europe_2012" in proc_results
 
-    # search_results = search(
-    #     species="co2", source="gpp-cardamom", date="2012", domain="europe", data_type="emissions"
-    # )
+    search_results = search(
+        species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
+    )
 
-    # key = list(search_results.keys())[0]
+    key = list(search_results.keys())[0]
 
-    # data_keys = search_results[key]["keys"]
-    # emissions_data = recombine_datasets(keys=data_keys, sort=False)
+    data_keys = search_results[key]["keys"]
+    bc_data = recombine_datasets(keys=data_keys, sort=False)
 
-    # metadata = search_results[key]["metadata"]
+    metadata = search_results[key]["metadata"]
 
-    # orig_data = open_dataset(test_datapath)
+    orig_data = open_dataset(test_datapath)
 
-    # assert orig_data.lat.equals(emissions_data.lat)
-    # assert orig_data.lon.equals(emissions_data.lon)
-    # assert orig_data.time.equals(emissions_data.time)
-    # assert orig_data.flux.equals(emissions_data.flux)
+    assert orig_data.lat.equals(bc_data.lat)
+    assert orig_data.lon.equals(bc_data.lon)
+    assert orig_data.time.equals(bc_data.time)
 
-    # expected_metadata = {
-    #     "title": "gross primary productivity co2",
-    #     "author": "openghg cloud",
-    #     "date_created": "2018-05-20 19:44:14.968710",
-    #     "number_of_prior_files_used": 1,
-    #     "prior_file_1": "cardamom gpp",
-    #     "prior_file_1_raw_resolution": "25x25km",
-    #     "prior_file_1_reference": "t.l. smallman, jgr biogeosciences, 2017",
-    #     "regridder_used": "acrg_grid.regrid.regrid_3d",
-    #     "comments": "fluxes copied from year 2013. december 2012 values copied from january 2013 values.",
-    #     "species": "co2",
-    #     "domain": "europe",
-    #     "source": "gppcardamom",
-    #     "date": "2012",
-    #     "start_date": "2012-01-01 00:00:00+00:00",
-    #     "end_date": "2012-12-31 23:59:59+00:00",
-    #     "max_longitude": 39.38,
-    #     "min_longitude": -97.9,
-    #     "max_latitude": 79.057,
-    #     "min_latitude": 10.729,
-    #     "time_resolution": "standard",
-    #     "data_type": "emissions",
-    #     "frequency": "annual",
-    # }
+    data_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
+    for dv in data_vars:
+        assert orig_data[dv].equals(bc_data[dv])
 
-    # del metadata["processed"]
-    # del metadata["prior_file_1_version"]
+    expected_metadata = {
+        "title": "mozart volume mixing ratios at domain edges",
+        "author": "openghg cloud",
+        "date_created": "2018-04-30 09:15:29.472284",
+        "species": "n2o",
+        "domain": "europe",
+        "bc_input": "mozart",
+        "start_date": "2012-01-01 00:00:00+00:00",
+        "end_date": "2012-12-31 23:59:59+00:00",
+        "max_longitude": 39.38,
+        "min_longitude": -97.9,
+        "max_latitude": 79.057,
+        "min_latitude": 10.729,
+        "data_type": "boundary_conditions",
+        "time_period": "1 year",
+        'time period': 'climatology from 200901-201407 mozart output',
+        'copied from': '2000',
+    }
 
-    # assert metadata == expected_metadata
+    for key in expected_metadata.keys():
+        assert metadata[key] == expected_metadata[key]
 
 
 # TODO: Add test for co2 data - need to create TEST region to match other data for this
@@ -138,65 +127,65 @@ def test_read_file_yearly():
 # TODO: Add test around non-continuous data and key word?
 
 
-# def test_set_lookup_uuids():
-#     e = Emissions()
+def test_set_lookup_uuids():
+    bc = BoundaryConditions()
 
-#     fake_uuid = "123456789"
+    fake_uuid = "123456789"
 
-#     species = "test_species"
-#     source = "test_source"
-#     domain = "test_domain"
-#     date = "test_date"
+    species = "test_species"
+    bc_input = "test_bc_input"
+    domain = "test_domain"
+    date = "test_date"
 
-#     e.set_uuid(species=species, source=source, domain=domain, date=date, uuid=fake_uuid)
+    bc.set_uuid(species=species, bc_input=bc_input, domain=domain, date=date, uuid=fake_uuid)
 
-#     found_uid = e.lookup_uuid(species=species, source=source, domain=domain, date=date)
+    found_uid = bc.lookup_uuid(species=species, bc_input=bc_input, domain=domain, date=date)
 
-#     assert e._datasource_table[species][source][domain][date] == found_uid == fake_uuid
-
-
-# def test_datasource_add_lookup():
-#     e = Emissions()
-
-#     fake_datasource = {"co2_gppcardamom_europe_2012": "mock-uuid-123456"}
-
-#     fake_metadata = {
-#         "co2_gppcardamom_europe_2012": {
-#             "species": "co2",
-#             "domain": "europe",
-#             "source": "gppcardamom",
-#             "date": "2012",
-#         }
-#     }
-
-#     e.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
-
-#     assert e.datasources() == ["mock-uuid-123456"]
-
-#     lookup = e.datasource_lookup(fake_metadata)
-
-#     assert lookup == fake_datasource
+    assert bc._datasource_table[species][bc_input][domain][date] == found_uid == fake_uuid
 
 
-# def test_wrong_uuid_raises():
-#     e = Emissions()
+def test_datasource_add_lookup():
+    bc = BoundaryConditions()
 
-#     fake_datasource = {"co2_gppcardamom_europe_2012": "mock-uuid-123456"}
+    fake_datasource = {"ch4_mozart_europe_201208": "mock-uuid-123456"}
 
-#     fake_metadata = {
-#         "co2_gppcardamom_europe_2012": {
-#             "species": "co2",
-#             "domain": "europe",
-#             "source": "gppcardamom",
-#             "date": "2012",
-#         }
-#     }
+    fake_metadata = {
+        "ch4_mozart_europe_201208": {
+            "species": "ch4",
+            "domain": "europe",
+            "bc_input": "mozart",
+            "date": "201208",
+        }
+    }
 
-#     e.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
+    bc.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
 
-#     assert e.datasources() == ["mock-uuid-123456"]
+    assert bc.datasources() == ["mock-uuid-123456"]
 
-#     changed_datasource = {"co2_gppcardamom_europe_2012": "mock-uuid-8888888"}
+    lookup = bc.datasource_lookup(fake_metadata)
 
-#     with pytest.raises(ValueError):
-#         e.add_datasources(datasource_uuids=changed_datasource, metadata=fake_metadata)
+    assert lookup == fake_datasource
+
+
+def test_wrong_uuid_raises():
+    bc = BoundaryConditions()
+
+    fake_datasource = {"ch4_mozart_europe_201208": "mock-uuid-123456"}
+
+    fake_metadata = {
+        "ch4_mozart_europe_201208": {
+            "species": "ch4",
+            "domain": "europe",
+            "bc_input": "mozart",
+            "date": "201208",
+        }
+    }
+
+    bc.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
+
+    assert bc.datasources() == ["mock-uuid-123456"]
+
+    changed_datasource = {"ch4_mozart_europe_201208": "mock-uuid-8888888"}
+
+    with pytest.raises(ValueError):
+        bc.add_datasources(datasource_uuids=changed_datasource, metadata=fake_metadata)

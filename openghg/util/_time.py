@@ -1,5 +1,5 @@
 from datetime import date
-from pandas import Timestamp, DatetimeIndex
+from pandas import Timestamp, DatetimeIndex, DateOffset, Timedelta
 from typing import Dict, List, Tuple, Optional, Union
 
 __all__ = [
@@ -596,8 +596,25 @@ def first_last_dates(keys: List) -> Tuple[Timestamp, Timestamp]:
     return first, last
 
 
-def time_offset_definition():
+def time_offset_definition() -> Dict[str, List]:
+    """
+    Returns synonym definition for time offset inputs.
 
+    Accepted inputs are as follows:
+        - "months": "monthly", "months", "month", "MS"
+        - "years": "yearly", "years", "annual", "year", "AS", "YS"
+        - "weeks": "weekly", "weeks", "week", "W"
+        - "days": "daily", "days", "day", "D"
+        - "hours": "hourly", "hours", "hour", "hr", "h", "H"
+        - "minutes": "minutely", "minutes", "minute", "min", "m", "T"
+        - "seconds": "secondly", "seconds", "second", "sec", "s", "S"
+
+    This is to ensure the correct keyword for using the DataOffset and TimeDelta
+    functions can be supplied (want this to be "years", "months" etc.)
+
+    Returns:
+        dict: containing list of values of synonym values
+    """
     offset_naming = {"months": ["monthly", "months", "month", "MS"],
                      "years": ["yearly", "years", "annual", "year", "AS", "YS"],
                      "weeks": ["weekly", "weeks", "week", "W"],
@@ -610,8 +627,31 @@ def time_offset_definition():
     return offset_naming
 
 
-def parse_period(period: Union[str, tuple]):
+def parse_period(period: Union[str, tuple]) -> Tuple[str]:
     """
+    Parses period input and converts to a value, unit pair.
+
+    Check time_offset_definition() for accepted input units.
+
+    Args:
+        period: Period of measurements.
+                Should be one of:
+                    - "yearly", "monthly"
+                    - suitable pandas Offset Alias
+                    - tuple of (value, unit) as would be passed to pandas.Timedelta function
+    
+    Returns:
+        int, str: value and associated time period
+    
+        Examples:
+        >>> parse_period("12H")
+            (12, "hours")
+        >>> parse_period("yearly")
+            (1, "years")
+        >>> parse_period("monthly")
+            (1, "months")
+        >>> parse_period((1, "minute"))
+            (1, "minutes")
     """
     import re
 
@@ -623,8 +663,8 @@ def parse_period(period: Union[str, tuple]):
             unit = str(period[1])
     else:
         try:
-            value = int(re.match("\d+", period).group())
-            unit = period.lstrip(value)
+            value = int(re.match("\d+[.]?\d*", period).group())
+            unit = period.lstrip(str(value)).strip()
         except AttributeError:
             value = 1
             unit = period
@@ -641,40 +681,74 @@ def parse_period(period: Union[str, tuple]):
 
 def create_frequency_str(value: Optional[int] = None,
                          unit: Optional[str] = None,
-                         period: Optional[Union[str, tuple]] = None):
+                         period: Optional[Union[str, tuple]] = None) -> str:
     """
+    Create a suitable frequency string based either a value and unit pair
+    or a period value. The unit will be made singular if the value is 1.
+
+    Check time_offset_definition() for accepted input units.
+
+    Args:
+        value, unit: Value and unit pair to use
+        period: Suitable input for period (see parse_period() for more details)
+
+    Returns:
+        str : Formatted string
+
+        Examples:
+        >>> create_frequency_str(unit=1, value="hour")
+            "1 hour"
+        >>> create_frequency(period="3MS")
+            "3 months"
+        >>> create_frequency(period="yearly")
+            "1 year"
     """
     if period is not None:
         value, unit = parse_period(period)
     elif value is None or unit is None:
         raise ValueError("If period is not included, both value and unit must be specified.")
 
-    offset_naming = time_offset_definition()
-    unit_str = offset_naming[unit][0]
-
     if value == 1:
-        frequency_str = unit_str
+        frequency_str = f"{value} {unit.rstrip('s')}"
     else:
-        frequency_str = f"{value}{unit_str}"
-    
+        frequency_str = f"{value} {unit}"
+
     return frequency_str
 
 
 def relative_time_offset(value: Optional[int] = None,
                          unit: Optional[str] = None,
-                         period: Optional[Union[str, tuple]] = None):
+                         period: Optional[Union[str, tuple]] = None) -> Union[DateOffset, Timedelta]:
     """
+    Create relative time offset based on inputs. This is based on the pandas
+    DateOffset and Timedelta functions.
+
+    Check time_offset_definition() for accepted input units.
+
+    If the input is "years" or "months" a relative offset (DateOffset) will 
+    be created since these are variable units. For example:
+     - "2013-01-01" + 1 year relative offset = "2014-01-01"
+     - "2012-05-01" + 2 months relative offset = "2012-07-01"
+
+    Otherwise the Timedelta function will be used.
+
+    Args:
+        value, unit: Value and unit pair to use
+        period: Suitable input for period (see parse_period() for more details)
+
+    Returns:
+        DateOffset/Timedelta : Time offset object, appropriate for the period type
     """
-    from pandas import DateOffset, Timedelta
 
     if period is not None:
         value, unit = parse_period(period)
     elif value is None or unit is None:
         raise ValueError("If period is not included, both value and unit must be specified.")
-    
+
     if unit == "months" or unit == "years":
-        time_delta = DateOffset(value, unit)
+        time_delta = DateOffset(**{unit: value})
     else:
         time_delta = Timedelta(value, unit)
 
     return time_delta
+
