@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._time &#8212; OpenGHG 0+untagged.1.g9fcfae3.dirty documentation</title>
+    <title>openghg.util._time &#8212; OpenGHG 0+untagged.1.g936e68d.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -165,8 +165,9 @@
                 
   <h1>Source code for openghg.util._time</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">DatetimeIndex</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">DatetimeIndex</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;timestamp_tzaware&quot;</span><span class="p">,</span>
@@ -189,7 +190,32 @@
     <span class="s2">&quot;check_nan&quot;</span><span class="p">,</span>
     <span class="s2">&quot;check_date&quot;</span><span class="p">,</span>
     <span class="s2">&quot;first_last_dates&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;find_duplicate_timestamps&quot;</span><span class="p">,</span>
 <span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">find_duplicate_timestamps</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">DataFrame</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Check for duplicates</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Data object to check. Should have a time attribute or index</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of duplicates</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">unique</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">time_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">time</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">time_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to read time data&quot;</span><span class="p">)</span>
+
+    <span class="n">uniq</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">time_data</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">dupes</span> <span class="o">=</span> <span class="n">uniq</span><span class="p">[</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">dupes</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="timestamp_tzaware"><a class="viewcode-back" href="../../../api/api_util.html#openghg.util.timestamp_tzaware">[docs]</a><span class="k">def</span> <span class="nf">timestamp_tzaware</span><span class="p">(</span><span class="n">timestamp</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Timestamp</span><span class="p">:</span>
