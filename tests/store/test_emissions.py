@@ -9,7 +9,7 @@ from helpers import get_emissions_datapath
 
 
 def test_read_file():
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
+    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = Emissions.read_file(
         filepath=test_datapath,
@@ -62,7 +62,7 @@ def test_read_file():
         "min_latitude": 10.729,
         "time_resolution": "standard",
         "data_type": "emissions",
-        "frequency": "annual",
+        "time_period": "1 year",
     }
 
     del metadata["processed"]

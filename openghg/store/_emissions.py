@@ -32,9 +32,10 @@ class Emissions(BaseStore):
         species: str,
         source: str,
         domain: str,
-        date: str,
+        date: Optional[str] = None,
         high_time_resolution: Optional[bool] = False,
-        period: Optional[str] = None,
+        period: Optional[Union[str, tuple]] = None,
+        continuous: bool = True,
         overwrite: bool = False,
     ) -> Dict:
         """Read emissions file
@@ -45,7 +46,12 @@ class Emissions(BaseStore):
             domain: Emissions domain
             source: Emissions source
             high_time_resolution: If this is a high resolution file
-            period: Period of measurements, if not passed this is inferred from the time coords
+            period: Period of measurements. Only needed if this can not be inferred from the time coords
+                    If specified, should be one of:
+                     - "yearly", "monthly"
+                     - suitable pandas Offset Alias
+                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
+            continuous: Whether time stamps have to be continuous.
             overwrite: Should this data overwrite currently stored data.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
@@ -56,10 +62,9 @@ class Emissions(BaseStore):
         from openghg.util import (
             clean_string,
             hash_file,
-            pairwise,
-            timestamp_tzaware,
             timestamp_now,
         )
+        from openghg.store import infer_date_range
 
         species = clean_string(species)
         source = clean_string(source)
@@ -104,56 +109,23 @@ class Emissions(BaseStore):
         # more carefully.
         # e.g. a flux / emissions file could contain e.g. monthly data and be labelled as 2012 but
         # contain 12 time points labelled as 2012-01-01, 2012-02-01, etc.
-        n_dates = em_data.time.size
+        
+        em_time = em_data.time
 
-        # This covers the whole year
-        if n_dates == 1:
-            year = timestamp_tzaware(em_data.time[0].values).year
-            year_start = timestamp_tzaware(f"{year}-1-1-00:00:00")
-            year_end = timestamp_tzaware(f"{year}-12-31-23:59:59")
+        start_date, end_date, period_str \
+            = infer_date_range(em_time, 
+                               filepath=filepath, 
+                               period=period, 
+                               continuous=continuous)
 
-            start_date = year_start
-            end_date = year_end
-            freq = "annual"
-        # We have values for each month / week
-        elif n_dates == 12:
-            # Check they're successive months
-            timestamps = [timestamp_tzaware(t) for t in em_data.time.values]
-
-            for a, b in pairwise(timestamps):
-                if a.month != b.month - 1:
-                    raise ValueError("We expect successive months for the data")
-
-            if timestamps[0].year != timestamps[-1].year:
-                raise ValueError("We expect a single year of data")
-
-            year = timestamps[0].year
-
-            year_start = timestamp_tzaware(f"{year}-1-1-00:00:00")
-            year_end = timestamp_tzaware(f"{year}-12-31-23:59:59")
-
-            start_date = year_start
-            end_date = year_end
-            freq = "month"
-        # Work run through the timestamps and check for gap between them ?
-        # Add something to metadata for this?
-        else:
-            timestamps = [timestamp_tzaware(t) for t in em_data.time.values]
-            timestamps.sort()
-
-            frequency = set()
-
-            for a, b in pairwise(timestamps):
-                delta = b - a
-                frequency.add(delta)
-
-            start_date = timestamps[0]
-            end_date = timestamps[-1]
-
-            if len(frequency) == 1:
-                freq = str(frequency.pop())
+        if date is None:
+            # Check for how granular we should make the date label
+            if "year" in period_str:
+                date = f"{start_date.year}"
+            elif "month" in period_str:
+                date = f"{start_date.year}{start_date.month:02}"
             else:
-                freq = "varies"
+                date = start_date.astype("datetime64[s]").astype(str)
 
         metadata["start_date"] = str(start_date)
         metadata["end_date"] = str(end_date)
@@ -164,10 +136,7 @@ class Emissions(BaseStore):
         metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
 
         metadata["time_resolution"] = "high" if high_time_resolution else "standard"
-        metadata["frequency"] = freq
-
-        if period is not None:
-            metadata["time_period"] = period
+        metadata["time_period"] = period_str
 
         key = "_".join((species, source, domain, date))
 
