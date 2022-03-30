@@ -37,7 +37,7 @@ def search(**kwargs):  # type: ignore
     from itertools import chain as iter_chain
     from pandas import Timedelta as pd_Timedelta
 
-    from openghg.store import ObsSurface, Footprints, Emissions, EulerianModel
+    from openghg.store import ObsSurface, Footprints, Emissions, BoundaryConditions, EulerianModel
     from openghg.store.base import Datasource
 
     from openghg.util import (
@@ -107,7 +107,7 @@ def search(**kwargs):  # type: ignore
 
     data_type = search_kwargs.get("data_type", "timeseries")
 
-    valid_data_types = ("timeseries", "footprints", "emissions", "eulerian_model")
+    valid_data_types = ("timeseries", "footprints", "emissions", "boundary_conditions", "eulerian_model")
     if data_type not in valid_data_types:
         raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
 
@@ -120,6 +120,8 @@ def search(**kwargs):  # type: ignore
         obj = Emissions.load()
     elif data_type == "eulerian_model":
         obj = EulerianModel.load()
+    elif data_type == "boundary_conditions":
+        obj = BoundaryConditions.load()
 
     datasource_uuids = obj.datasources()
 
@@ -128,7 +130,7 @@ def search(**kwargs):  # type: ignore
 
     # For the time being this will return a dict until we know how best to represent
     # the footprints and emissions results in a SearchResult object
-    if data_type in {"emissions", "footprints", "eulerian_model"}:
+    if data_type in {"emissions", "footprints", "boundary_conditions", "eulerian_model"}:
         sources: Dict = aDict()
         for datasource in datasources:
             if datasource.search_metadata(**search_kwargs):
