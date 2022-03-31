@@ -13,10 +13,10 @@ jobs:
     runs-on: ${{ matrix.operating-system }}
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
-      max-parallel: 4
+      max-parallel: 8
       fail-fast: false
       matrix:
-        operating-system: [ubuntu-latest]
+        operating-system: [ubuntu-latest, macos-latest]
         python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
     - name: Checkout
