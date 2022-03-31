@@ -348,9 +348,9 @@ def _read_data_small_header(
         raise ValueError("Mismatch between inlet height passed and in filename")
 
     if file_sampling_period == "1minute":
-        file_sampling_period = "60"
+        file_sampling_period = "60.0"
     elif file_sampling_period == "1hour":
-        file_sampling_period = "3600"
+        file_sampling_period = "3600.0"
 
     if sampling_period is not None:
         if file_sampling_period != sampling_period:
