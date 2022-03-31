@@ -19,7 +19,7 @@ def test_read_icos_large_header():
         "site": "mhd",
         "species": "co",
         "inlet": "15m",
-        "sampling_period": "3600",
+        "sampling_period": "3600.0",
         "network": "icos",
         "instrument": "g2401",
         "units": "nmol.mol-¹",

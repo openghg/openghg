@@ -224,7 +224,7 @@ def test_ranked_bsd_search():
     assert ch4_data["ch4"][-1] == pytest.approx(1955.93)
     assert ch4_data["ch4_variability"][0] == 0.79
     assert ch4_data["ch4_variability"][-1] == 0.232
-    assert len(ch4_data.time) == 140
+    assert len(ch4_data.time) == 126
 
 
 # @pytest.mark.skip(reason="Needs update for ranking search")

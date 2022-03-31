@@ -193,9 +193,9 @@ def _read_data_large_header(
     data = df.to_xarray()
 
     if file_sampling_period == "1minute":
-        file_sampling_period = "60"
+        file_sampling_period = "60.0"
     elif file_sampling_period == "hourly":
-        file_sampling_period = "3600"
+        file_sampling_period = "3600.0"
 
     if sampling_period is not None:
         if file_sampling_period != sampling_period:

@@ -1,6 +1,7 @@
 from datetime import date
-from pandas import Timestamp, DatetimeIndex
+from pandas import DataFrame, Timestamp, DatetimeIndex
 from typing import Dict, List, Tuple, Optional, Union
+from xarray import Dataset
 
 __all__ = [
     "timestamp_tzaware",
@@ -23,7 +24,32 @@ __all__ = [
     "check_nan",
     "check_date",
     "first_last_dates",
+    "find_duplicate_timestamps",
 ]
+
+
+def find_duplicate_timestamps(data: Union[Dataset, DataFrame]) -> List:
+    """ Check for duplicates
+
+    Args:
+        data: Data object to check. Should have a time attribute or index
+    Returns:
+        list: A list of duplicates
+    """
+    from numpy import unique
+
+    try:
+        time_data = data.time
+    except AttributeError:
+        try:
+            time_data = data.index
+        except AttributeError:
+            raise ValueError("Unable to read time data")
+
+    uniq, count = unique(time_data, return_counts=True)
+    dupes = uniq[count > 1]
+
+    return list(dupes)
 
 
 def timestamp_tzaware(timestamp: Union[str, Timestamp]) -> Timestamp:

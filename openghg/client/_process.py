@@ -45,6 +45,7 @@ def process_obs(
             network=network,
             inlet=inlet,
             instrument=instrument,
+            sampling_period=sampling_period,
             overwrite=overwrite,
         )
 

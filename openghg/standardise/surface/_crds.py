@@ -75,7 +75,7 @@ def _read_data(
     """
     from pandas import RangeIndex, read_csv, to_datetime
     import warnings
-    from openghg.util import clean_string
+    from openghg.util import clean_string, find_duplicate_timestamps
 
     split_fname = data_filepath.stem.split(".")
     site = site.lower()
@@ -115,6 +115,11 @@ def _read_data(
     # Drop any rows with NaNs
     # This is now done before creating metadata
     data = data.dropna(axis="rows", how="any")
+
+    dupes = find_duplicate_timestamps(data=data)
+
+    if dupes:
+        raise ValueError(f"Duplicate dates detected: {dupes}")
 
     # Get the number of gases in dataframe and number of columns of data present for each gas
     n_gases, n_cols = _gas_info(data=data)

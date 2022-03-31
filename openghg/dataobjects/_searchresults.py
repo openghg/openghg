@@ -178,7 +178,7 @@ class SearchResults:
         # Can we just traverse the dict without looping?
         for site, species_data in self.results.items():
             for species, inlet_data in species_data.items():
-                for inlet, keys in inlet_data.items():
+                for inlet in inlet_data:
                     data[site][species][inlet] = self._create_obsdata(site=site, species=species, inlet=inlet)
 
         # TODO - update this once addict is stubbed
