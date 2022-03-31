@@ -79,7 +79,7 @@ jobs:
           pip install -r requirements-doc.txt
       - name: Ensure notebooks can be executed correctly
         run: |
-          jupytext --sync --execute notebooks/tutorials/beginner_workflow/{1,2,3}_*.ipynb
+          jupytext --sync --execute notebooks/tutorials/beginner_workflow/{1,2}_*.ipynb
       - name: Build documentation
         run: |
           cd doc

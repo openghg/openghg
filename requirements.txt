@@ -2,6 +2,8 @@ addict
 cdsapi
 dask
 lazy_import
+h5netcdf
+h5py
 matplotlib
 netcdf4
 numexpr
