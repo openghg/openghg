@@ -74,7 +74,7 @@ class ObsSurface(BaseStore):
         sampling_period_seconds: Union[str, None] = None
         # If we have a sampling period passed we want the number of seconds
         if sampling_period is not None:
-            sampling_period_seconds = str(Timedelta(sampling_period).total_seconds())
+            sampling_period_seconds = str(float(Timedelta(sampling_period).total_seconds()))
 
         # Load the data retrieve object
         parser_fn = load_surface_parser(data_type=data_type)

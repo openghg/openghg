@@ -42,7 +42,7 @@ def test_crds_attributes():
         "long_name": "tacolneston",
         "site": "tac",
         "instrument": "picarro",
-        "sampling_period": "60",
+        "sampling_period": "60.0",
         "inlet": "100m",
         "port": "9",
         "type": "air",
@@ -67,7 +67,7 @@ def test_crds_attributes():
     expected_ch4_metadata = {
         "site": "tac",
         "instrument": "picarro",
-        "sampling_period": "60",
+        "sampling_period": "60.0",
         "inlet": "100m",
         "port": "9",
         "type": "air",
@@ -91,7 +91,7 @@ def test_crds_attributes():
         "label": "left",
         "standard_name": "time",
         "comment": "Time stamp corresponds to beginning of sampling period. Time since midnight UTC of reference date. Note that sampling periods are approximate.",
-        "sampling_period_seconds": "60",
+        "sampling_period_seconds": "60.0",
     }
 
     assert ch4_data.time.attrs == time_attributes

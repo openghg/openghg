@@ -42,7 +42,7 @@ def test_specific_keyword_search():
         "station_height_masl": 380.0,
         "site": "bsd",
         "instrument": "picarro",
-        "sampling_period": "60",
+        "sampling_period": "60.0",
         "sampling_period_unit": "s",
         "inlet": "248m",
         "port": "9",

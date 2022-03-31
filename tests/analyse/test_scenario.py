@@ -9,6 +9,7 @@ from openghg.retrieve import get_obs_surface, get_footprint, get_flux
 
 #%% Test ModelScenario initialisation and update options
 
+
 def test_scenario_direct_objects():
     """
     Test ModelScenario class can be created with direct objects
@@ -18,21 +19,19 @@ def test_scenario_direct_objects():
     end_date = "2013-01-01"
 
     site = "tac"
-    domain="EUROPE"
-    species="ch4"
-    network="DECC"
-    inlet="100m"
-    source="anthro"
+    domain = "EUROPE"
+    species = "ch4"
+    network = "DECC"
+    inlet = "100m"
+    source = "anthro"
 
-    obs_surface = get_obs_surface(site=site,
-                                  species=species,
-                                  start_date=start_date,
-                                  end_date=end_date,
-                                  inlet=inlet,
-                                  network=network)
+    obs_surface = get_obs_surface(
+        site=site, species=species, start_date=start_date, end_date=end_date, inlet=inlet, network=network
+    )
 
-    footprint = get_footprint(site=site, domain=domain, height=inlet,
-               start_date=start_date, end_date=end_date)
+    footprint = get_footprint(
+        site=site, domain=domain, height=inlet, start_date=start_date, end_date=end_date
+    )
 
     flux = get_flux(species=species, domain=domain, source=source)
 
@@ -64,14 +63,16 @@ def test_scenario_infer_inputs_ch4():
     species = "ch4"
     source = "anthro"
 
-    model_scenario = ModelScenario(site=site,
-                                   species=species,
-                                   inlet=inlet,
-                                   network=network,
-                                   domain=domain,
-                                   sources=source,
-                                   start_date=start_date,
-                                   end_date=end_date)
+    model_scenario = ModelScenario(
+        site=site,
+        species=species,
+        inlet=inlet,
+        network=network,
+        domain=domain,
+        sources=source,
+        start_date=start_date,
+        end_date=end_date,
+    )
 
     # Check data is being found and stored
     assert model_scenario.obs is not None
@@ -130,14 +131,16 @@ def test_scenario_infer_inputs_co2():
     species = "co2"
     source = "natural-rtot"
 
-    model_scenario = ModelScenario(site=site,
-                                   species=species,
-                                   inlet=inlet,
-                                   network=network,
-                                   domain=domain,
-                                   sources=source,
-                                   start_date=start_date,
-                                   end_date=end_date)
+    model_scenario = ModelScenario(
+        site=site,
+        species=species,
+        inlet=inlet,
+        network=network,
+        domain=domain,
+        sources=source,
+        start_date=start_date,
+        end_date=end_date,
+    )
 
     # Check data is being found and stored
     assert model_scenario.obs is not None
@@ -192,12 +195,9 @@ def test_scenario_infer_inlet():
     source = "anthro"
 
     # Explicitly not including inlet to test this can be inferred from obs data.
-    model_scenario = ModelScenario(site=site,
-                                   species=species,
-                                   domain=domain,
-                                   sources=source,
-                                   start_date=start_date,
-                                   end_date=end_date)
+    model_scenario = ModelScenario(
+        site=site, species=species, domain=domain, sources=source, start_date=start_date, end_date=end_date
+    )
 
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
@@ -218,13 +218,15 @@ def test_scenario_mult_fluxes():
     species = "ch4"
     sources = ["anthro", "waste"]
 
-    model_scenario = ModelScenario(site=site,
-                                   species=species,
-                                   domain=domain,
-                                   inlet=inlet,
-                                   sources=sources,
-                                   start_date=start_date,
-                                   end_date=end_date)
+    model_scenario = ModelScenario(
+        site=site,
+        species=species,
+        domain=domain,
+        inlet=inlet,
+        sources=sources,
+        start_date=start_date,
+        end_date=end_date,
+    )
 
     for source in sources:
         assert source in model_scenario.fluxes
@@ -270,7 +272,9 @@ def test_add_data():
     assert model_scenario.footprint is not None
     assert model_scenario.fluxes is not None
 
+
 #%% Test ModelScenario methods with real data
+
 
 @pytest.fixture(scope="function")
 def model_scenario_1():
@@ -286,14 +290,16 @@ def model_scenario_1():
     network = "DECC"
     source = "anthro"
 
-    model_scenario = ModelScenario(site=site,
-                                   species=species,
-                                   inlet=inlet,
-                                   network=network,
-                                   domain=domain,
-                                   sources=source,
-                                   start_date=start_date,
-                                   end_date=end_date)
+    model_scenario = ModelScenario(
+        site=site,
+        species=species,
+        inlet=inlet,
+        network=network,
+        domain=domain,
+        sources=source,
+        start_date=start_date,
+        end_date=end_date,
+    )
 
     return model_scenario
 
@@ -398,7 +404,9 @@ def test_footprints_data_merge(model_scenario_1):
     attributes = combined_dataset.attrs
     assert attributes["resample_to"] == "coarsest"
 
+
 #%% Test method functionality with dummy data (CH4)
+
 
 @pytest.fixture
 def obs_ch4_dummy():
@@ -418,14 +426,11 @@ def obs_ch4_dummy():
     species = "ch4"
     site = "TEST_SITE"
     inlet = "10m"
-    sampling_period = "60"
+    sampling_period = "60.0"
 
-    attributes = {"species":species, "site":site, "inlet":inlet, "sampling_period": sampling_period}
+    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
 
-    data = xr.Dataset({"mf":("time", values)},
-                       coords={"time":time},
-                       attrs=attributes
-                       )
+    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
 
     # Potential metadata:
     # - site, instrument, sampling_period, inlet, port, type, network, species, calibration_scale
@@ -456,22 +461,22 @@ def footprint_dummy():
     shape = (ntime, nlat, nlon)
     values = np.ones(shape)
 
-    data = xr.Dataset({"fp":(("time", "lat", "lon"), values)},
-                       coords={"lat":lat, "lon":lon, "time":time})
+    data = xr.Dataset({"fp": (("time", "lat", "lon"), values)}, coords={"lat": lat, "lon": lon, "time": time})
 
     # Potential metadata:
     # - site, height, domain, model, network, start_date, end_date, heights, ...
     # - data_type="footprints"
-    metadata = {"site":"TESTSITE", "height":"10m", "domain":"TESTDOMAIN", "data_type":"footprints"}
+    metadata = {"site": "TESTSITE", "height": "10m", "domain": "TESTDOMAIN", "data_type": "footprints"}
 
-    footprintdata = FootprintData(data=data,
-                                 metadata=metadata,
-                                 flux={},
-                                 bc={},
-                                 species="INERT",
-                                 scales="",
-                                 units="",
-                                 )
+    footprintdata = FootprintData(
+        data=data,
+        metadata=metadata,
+        flux={},
+        bc={},
+        species="INERT",
+        scales="",
+        units="",
+    )
 
     return footprintdata
 
@@ -498,23 +503,25 @@ def flux_ch4_dummy():
     values[0, ...] *= 2
     values[1, ...] *= 3
 
-    flux = xr.Dataset({"flux":(("time", "lat", "lon"), values)},
-                       coords={"lat":lat, "lon":lon, "time":time})
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), values)}, coords={"lat": lat, "lon": lon, "time": time}
+    )
 
     # Potential metadata:
     # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
     # - data_type?
     species = "ch4"
-    metadata = {"species":species, "source":"TESTSOURCE", "domain":"TESTDOMAIN"}
+    metadata = {"species": species, "source": "TESTSOURCE", "domain": "TESTDOMAIN"}
 
-    fluxdata = FluxData(data=flux,
-                        metadata=metadata,
-                        flux={},
-                        bc={},
-                        species=species,
-                        scales="",
-                        units="",
-                        )
+    fluxdata = FluxData(
+        data=flux,
+        metadata=metadata,
+        flux={},
+        bc={},
+        species=species,
+        scales="",
+        units="",
+    )
 
     return fluxdata
 
@@ -522,9 +529,7 @@ def flux_ch4_dummy():
 @pytest.fixture
 def model_scenario_ch4_dummy(obs_ch4_dummy, footprint_dummy, flux_ch4_dummy):
     """Create ModelScenario with input dummy data"""
-    model_scenario = ModelScenario(obs=obs_ch4_dummy,
-                                   footprint=footprint_dummy,
-                                   flux=flux_ch4_dummy)
+    model_scenario = ModelScenario(obs=obs_ch4_dummy, footprint=footprint_dummy, flux=flux_ch4_dummy)
 
     return model_scenario
 
@@ -571,13 +576,14 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
     input_flux_values = flux["flux"].reindex_like(footprint, method="ffill")
     input_fp_values = footprint["fp"]
 
-    expected_modelled_mf = (input_fp_values*input_flux_values).sum(dim=("lat", "lon")).values
+    expected_modelled_mf = (input_fp_values * input_flux_values).sum(dim=("lat", "lon")).values
 
     modelled_mf = combined_dataset["mf_mod"].values
     assert np.allclose(modelled_mf, expected_modelled_mf)
 
 
 #%% Test method functionality with dummy data (CO2)
+
 
 @pytest.fixture
 def obs_co2_dummy():
@@ -597,14 +603,11 @@ def obs_co2_dummy():
     species = "co2"
     site = "TEST_SITE"
     inlet = "10m"
-    sampling_period = "60"
+    sampling_period = "60.0"
 
-    attributes = {"species":species, "site":site, "inlet":inlet, "sampling_period": sampling_period}
+    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
 
-    data = xr.Dataset({"mf":("time", values)},
-                       coords={"time": time},
-                       attrs=attributes
-                       )
+    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
 
     # Potential metadata:
     # - site, instrument, sampling_period, inlet, port, type, network, species, calibration_scale
@@ -623,7 +626,7 @@ def footprint_co2_dummy():
     Create example FootprintData object with dummy data:
      - Carbon dioxide high time resolution footprint
      - Includes two sets of footprint data
-     - Integrated footprint, fp 
+     - Integrated footprint, fp
         - Daily frequency from 2011-12-31T23:00:00 to 2012-01-01T02:00:00 (inclusive) (4 points)
         - "fp" values are all 1 **May change**
      - High time resolution fp, fp_HiTRes
@@ -654,7 +657,7 @@ def footprint_co2_dummy():
     expand_axes = (0, 1, 2)
     for i in expand_axes:
         fp_HiTRes_values = np.repeat(fp_HiTRes_values, shape[i], axis=i)
-    
+
     # Build on this to set distinct values along time dimension as well
     # Add to each array - 0.0-24.0, 1.0-25.0, 2.0-26.0, 3.0-27.0, ... (all inclusive)
     add = 0
@@ -662,26 +665,36 @@ def footprint_co2_dummy():
         fp_HiTRes_values[i, ...] += add
         add += 1
 
-    data = xr.Dataset({"fp":(("time", "lat", "lon"), fp_values),
-                       "fp_HiTRes": (("time", "lat", "lon", "H_back"), fp_HiTRes_values)},
-                       coords={"lat":lat, "lon":lon, "time":time, "H_back":H_back})
+    data = xr.Dataset(
+        {
+            "fp": (("time", "lat", "lon"), fp_values),
+            "fp_HiTRes": (("time", "lat", "lon", "H_back"), fp_HiTRes_values),
+        },
+        coords={"lat": lat, "lon": lon, "time": time, "H_back": H_back},
+    )
 
     # Potential metadata:
     # - site, height, domain, model, network, start_date, end_date, heights, ...
     # - species (if applicable)
     # - data_type="footprints"
     species = "co2"
-    metadata = {"site":"TESTSITE", "height":"10m", "domain":"TESTDOMAIN", 
-                "data_type":"footprints", "species":species}
+    metadata = {
+        "site": "TESTSITE",
+        "height": "10m",
+        "domain": "TESTDOMAIN",
+        "data_type": "footprints",
+        "species": species,
+    }
 
-    footprintdata = FootprintData(data=data,
-                                  metadata=metadata,
-                                  species=species,
-                                  flux={},
-                                  bc={},
-                                  scales="",
-                                  units="",
-                                  )
+    footprintdata = FootprintData(
+        data=data,
+        metadata=metadata,
+        species=species,
+        flux={},
+        bc={},
+        scales="",
+        units="",
+    )
 
     return footprintdata
 
@@ -703,30 +716,32 @@ def flux_co2_dummy():
 
     nlat, nlon, ntime = len(lat), len(lon), len(time)
     shape = (ntime, nlat, nlon)
-    values = np.arange(1.0, ntime+1, 1.0)
+    values = np.arange(1.0, ntime + 1, 1.0)
 
     expand_axes = (1, 2)
     values = np.expand_dims(values, axis=expand_axes)
     for j in expand_axes:
         values = np.repeat(values, shape[j], axis=j)
 
-    flux = xr.Dataset({"flux":(("time", "lat", "lon"), values)},
-                       coords={"lat":lat, "lon":lon, "time":time})
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), values)}, coords={"lat": lat, "lon": lon, "time": time}
+    )
 
     # Potential metadata:
     # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
     # - data_type?
     species = "co2"
-    metadata = {"species":species, "source":"TESTSOURCE", "domain":"TESTDOMAIN"}
+    metadata = {"species": species, "source": "TESTSOURCE", "domain": "TESTDOMAIN"}
 
-    fluxdata = FluxData(data=flux,
-                        metadata=metadata,
-                        flux={},
-                        bc={},
-                        species=species,
-                        scales="",
-                        units="",
-                        )
+    fluxdata = FluxData(
+        data=flux,
+        metadata=metadata,
+        flux={},
+        bc={},
+        species=species,
+        scales="",
+        units="",
+    )
 
     return fluxdata
 
@@ -734,9 +749,7 @@ def flux_co2_dummy():
 @pytest.fixture
 def model_scenario_co2_dummy(obs_co2_dummy, footprint_co2_dummy, flux_co2_dummy):
     """Create ModelScenario with input dummy data for co2"""
-    model_scenario = ModelScenario(obs=obs_co2_dummy,
-                                   footprint=footprint_co2_dummy,
-                                   flux=flux_co2_dummy)
+    model_scenario = ModelScenario(obs=obs_co2_dummy, footprint=footprint_co2_dummy, flux=flux_co2_dummy)
 
     return model_scenario
 
@@ -762,27 +775,36 @@ def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, f
         release_time = aligned_time[t].values
         back_time = release_time - Timedelta(max_hours_back, "hours")
         flux_hitres = flux["flux"].sel(time=slice(back_time, release_time))
-        flux_integrated = flux["flux"].resample({"time":"1MS"}).mean().sel(time=aligned_time[0])  # This may need to be updated
+        flux_integrated = (
+            flux["flux"].resample({"time": "1MS"}).mean().sel(time=aligned_time[0])
+        )  # This may need to be updated
 
         # Update footprint data to use number of hours back to derive a time
         footprint_at_release = footprint["fp_HiTRes"].sel(time=release_time)
-        h_back_time = np.array([release_time - Timedelta(hour, "hours") for hour in footprint["H_back"].values], dtype=np.datetime64)
-        footprint_at_release = footprint_at_release.assign_coords({"H_back_time":("H_back", h_back_time)})
-        footprint_at_release = footprint_at_release.swap_dims({"H_back":"H_back_time"})
-        footprint_at_release = footprint_at_release.rename({"time":"release_time"})  # Rename original time parameter
-        footprint_at_release = footprint_at_release.rename({"H_back_time":"time"})  # Set new time parameter based on H_back
+        h_back_time = np.array(
+            [release_time - Timedelta(hour, "hours") for hour in footprint["H_back"].values],
+            dtype=np.datetime64,
+        )
+        footprint_at_release = footprint_at_release.assign_coords({"H_back_time": ("H_back", h_back_time)})
+        footprint_at_release = footprint_at_release.swap_dims({"H_back": "H_back_time"})
+        footprint_at_release = footprint_at_release.rename(
+            {"time": "release_time"}
+        )  # Rename original time parameter
+        footprint_at_release = footprint_at_release.rename(
+            {"H_back_time": "time"}
+        )  # Set new time parameter based on H_back
 
         # Extract footprint data covering correct time period
         back_time_exclude = back_time + Timedelta(1, "s")  # Time to go up to but not include back_time
-        footprint_hitres = footprint_at_release.sel({"time":slice(release_time, back_time_exclude)})
-        footprint_integrated = footprint_at_release.sel({"time":back_time})
-        
+        footprint_hitres = footprint_at_release.sel({"time": slice(release_time, back_time_exclude)})
+        footprint_integrated = footprint_at_release.sel({"time": back_time})
+
         # Align flux to footprint data (flux is 2 hourly, footprint H_back is 1 hourly)
         flux_hitres = flux_hitres.reindex_like(footprint_hitres, method="ffill")
 
         # Calculate high time resolution and residual components of modelled mole fraction
-        modelled_mf_htres = (flux_hitres*footprint_hitres).sum().values
-        modelled_mf_residual = (flux_integrated*footprint_integrated).sum().values
+        modelled_mf_htres = (flux_hitres * footprint_hitres).sum().values
+        modelled_mf_residual = (flux_integrated * footprint_integrated).sum().values
         # Combine to create expected modelled mole fraction
         expected_modelled_mf_hr = modelled_mf_htres + modelled_mf_residual
 
@@ -791,6 +813,7 @@ def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, f
 
 
 #%% Test generic dataset functions
+
 
 @pytest.fixture
 def flux_daily():
@@ -803,8 +826,9 @@ def flux_daily():
     nlat, nlon, ntime = len(lat), len(lon), len(time)
     shape = (ntime, nlat, nlon)
 
-    flux = xr.Dataset({"flux":(("time", "lat", "lon"), np.ones(shape))},
-                       coords={"lat":lat, "lon":lon, "time":time})
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), np.ones(shape))}, coords={"lat": lat, "lon": lon, "time": time}
+    )
 
     return flux
 
@@ -820,8 +844,9 @@ def flux_single_time():
     nlat, nlon, ntime = len(lat), len(lon), len(time)
     shape = (ntime, nlat, nlon)
 
-    flux = xr.Dataset({"flux":(("time", "lat", "lon"), np.ones(shape))},
-                       coords={"lat":lat, "lon":lon, "time":time})
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), np.ones(shape))}, coords={"lat": lat, "lon": lon, "time": time}
+    )
 
     return flux
 
@@ -832,15 +857,16 @@ def flux_daily_small_dim_diff():
 
     time = pd.date_range("2012-01-01", "2012-02-01", freq="D")
     small_mismatch = 1e-6
-    lat = [1. + small_mismatch, 2. + small_mismatch]
-    lon = [10. + small_mismatch, 20. + small_mismatch]
+    lat = [1.0 + small_mismatch, 2.0 + small_mismatch]
+    lon = [10.0 + small_mismatch, 20.0 + small_mismatch]
 
     nlat, nlon, ntime = len(lat), len(lon), len(time)
     shape = (ntime, nlat, nlon)
-    flux_values = np.ones(shape) + 10.
+    flux_values = np.ones(shape) + 10.0
 
-    flux = xr.Dataset({"flux":(("time", "lat", "lon"), flux_values)},
-                       coords={"lat":lat, "lon":lon, "time":time})
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), flux_values)}, coords={"lat": lat, "lon": lon, "time": time}
+    )
 
     return flux
 

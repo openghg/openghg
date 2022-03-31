@@ -232,11 +232,9 @@ def _read_metadata(filepath: Path, data: DataFrame) -> Dict:
     inlet = split_filename[3]
 
     if sampling_period_str == "1minute":
-        # sampling_period = "1min"
-        sampling_period = 60
+        sampling_period = "60.0"
     elif sampling_period_str == "hourly":
-        # sampling_period = "1H"
-        sampling_period = 60 * 60
+        sampling_period = "3600.0"
     else:
         raise ValueError("Unable to read sampling period from filename.")
 
