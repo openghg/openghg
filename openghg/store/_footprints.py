@@ -1,8 +1,9 @@
-from openghg.store.base import BaseStore
 from typing import DefaultDict, Dict, List, Optional, Union, NoReturn
 from pathlib import Path
 from pandas import Timestamp
 from xarray import Dataset
+
+from openghg.store.base import BaseStore
 
 __all__ = ["Footprints"]
 
@@ -23,6 +24,8 @@ class Footprints(BaseStore):
         metmodel: Optional[str] = None,
         species: Optional[str] = None,
         network: Optional[str] = None,
+        period: Optional[Union[str, tuple]] = None,
+        continuous: bool = True,
         retrieve_met: bool = False,
         overwrite: bool = False,
         high_res: bool = False,
@@ -34,12 +37,18 @@ class Footprints(BaseStore):
         Args:
             filepath: Path of file to load
             site: Site name
-            network: Network name
             height: Height above ground level in metres
             domain: Domain of footprints
-            model_params: Model run parameters
+            model: Model used to create footprint (e.g. NAME or FLEXPART)
+            metmodel: Underlying meteorlogical model used (e.g. UKV)
+            species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
+            network: Network name
+            period: Period of measurements. Only needed if this can not be inferred from the time coords
+            continuous: Whether time stamps have to be continuous.
             retrieve_met: Whether to also download meterological data for this footprints area
             overwrite: Overwrite any currently stored data
+            high_res: ***
+
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -47,11 +56,10 @@ class Footprints(BaseStore):
         from xarray import open_dataset
         from openghg.util import (
             hash_file,
-            timestamp_tzaware,
             timestamp_now,
             clean_string,
         )
-        from openghg.store import assign_data
+        from openghg.store import assign_data, infer_date_range
 
         filepath = Path(filepath)
 
@@ -89,8 +97,18 @@ class Footprints(BaseStore):
         if metmodel is not None:
             metadata["metmodel"] = clean_string(metmodel)
 
-        metadata["start_date"] = str(timestamp_tzaware(fp_data.time[0].values))
-        metadata["end_date"] = str(timestamp_tzaware(fp_data.time[-1].values))
+        fp_time = fp_data.time
+
+        start_date, end_date, period_str \
+            = infer_date_range(fp_time,
+                               filepath=filepath,
+                               period=period,
+                               continuous=continuous)
+
+
+        metadata["start_date"] = str(start_date)
+        metadata["end_date"] = str(end_date)
+        metadata["time_period"] = period_str
 
         metadata["max_longitude"] = round(float(fp_data["lon"].max()), 5)
         metadata["min_longitude"] = round(float(fp_data["lon"].min()), 5)
@@ -98,7 +116,12 @@ class Footprints(BaseStore):
         metadata["min_latitude"] = round(float(fp_data["lat"].min()), 5)
         metadata["time_resolution"] = "standard_time_resolution"
 
-        # If it's a high resolution footprints file we'll have two sets of lat/long values
+        # TODO: Fix confusion around high time and high spatial resolution.
+        # Do we need these as inputs or can we infer them from the data?
+        # Should we check if data is for co2 that this is high resolution?
+        # Should we check high resolution data is labelled as "co2" or just allow this to be added anyway?
+
+        # If the footprints have high spatial resolution we'll have two sets of lat/long values
         if high_res:
             try:
                 metadata["max_longitude_high"] = round(float(fp_data["lon_high"].max()), 5)
