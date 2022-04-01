@@ -1,5 +1,4 @@
 from tinydb import TinyDB
-from openghg.store.base import BaseStore
 from typing import DefaultDict, Dict, List, Optional, Union, NoReturn
 from pathlib import Path
 from pandas import Timestamp
@@ -110,7 +109,6 @@ class Footprints(BaseStore):
                                filepath=filepath,
                                period=period,
                                continuous=continuous)
-
 
         metadata["start_date"] = str(start_date)
         metadata["end_date"] = str(end_date)

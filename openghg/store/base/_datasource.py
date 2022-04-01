@@ -1,4 +1,4 @@
-from pandas import DataFrame, Timestamp
+from pandas import DataFrame
 from typing import DefaultDict, Dict, List, Optional, Tuple, Union, TypeVar, Type
 from xarray import Dataset
 
@@ -118,7 +118,7 @@ class Datasource:
             None
         """
         from openghg.util import daterange_overlap, create_daterange_str, relative_time_offset
-        from pandas import Timedelta, Timestamp
+        from pandas import Timedelta
 
         # Group by year
         year_group = data.groupby("time.year")
@@ -150,11 +150,11 @@ class Datasource:
                 else:
                     # Expect period data to include value and time unit
                     period = value
-                
+
                 break
         else:
             period = None
-        
+
         for _, data in year_group:
             # Extract start and end dates from grouped data
             start_date, end_date = self.get_dataset_daterange(data)

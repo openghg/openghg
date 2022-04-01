@@ -101,7 +101,7 @@ class Emissions(BaseStore):
         # more carefully.
         # e.g. a flux / emissions file could contain e.g. monthly data and be labelled as 2012 but
         # contain 12 time points labelled as 2012-01-01, 2012-02-01, etc.
-        
+
         em_time = em_data.time
 
         start_date, end_date, period_str \

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union, Any
+from typing import DefaultDict, Dict, Optional, Union
 from xarray import Dataset
 from tinydb import TinyDB
 import numpy as np
@@ -194,7 +194,7 @@ class BoundaryConditions(BaseStore):
                       "vmr_e": np.float64,
                       "vmr_s": np.float64,
                       "vmr_w": np.float64,
-                     }
+                      }
 
         data_format = {"dims": dims, "data_vars": data_vars, "data_types": data_types}
 

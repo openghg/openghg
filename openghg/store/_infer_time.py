@@ -11,6 +11,7 @@ from openghg.util import (
     relative_time_offset,
 )
 
+
 def infer_date_range(time: DataArray,
                      filepath: Optional[Union[str, Path]] = None,
                      period: Optional[Union[str, tuple]] = None,
@@ -132,7 +133,7 @@ def infer_date_range(time: DataArray,
         # Create time offset, using inferred offset
         start_date = timestamp_tzaware(time[0].values)
         if time_value is not None:
-            time_delta = DateOffset(**{time_unit:time_value})
+            time_delta = DateOffset(**{time_unit: time_value})
             end_date = timestamp_tzaware(time[-1].values) + time_delta - Timedelta(seconds=1)
         else:
             end_date = timestamp_tzaware(time[-1].values)
