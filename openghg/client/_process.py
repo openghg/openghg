@@ -80,15 +80,15 @@ def process_flux(
         raise NotImplementedError
     else:
         return _process_flux_local(
-                files=files,
-                species=species,
-                source=source,
-                domain=domain,
-                date=date,
-                high_time_resolution=high_time_resolution,
-                period=period,
-                continuous=continuous,
-                overwrite=overwrite,
+            files=files,
+            species=species,
+            source=source,
+            domain=domain,
+            date=date,
+            high_time_resolution=high_time_resolution,
+            period=period,
+            continuous=continuous,
+            overwrite=overwrite,
         )
 
 
@@ -145,7 +145,7 @@ def process_footprint(
 
 
 def process_bc(
-   files: pathType,
+    files: pathType,
     species: str,
     bc_input: str,
     domain: str,
