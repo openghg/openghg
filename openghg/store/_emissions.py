@@ -1,7 +1,8 @@
-from openghg.store.base import BaseStore
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union
 from xarray import Dataset
+
+from openghg.store.base import BaseStore
 
 __all__ = ["Emissions"]
 
@@ -113,9 +114,9 @@ class Emissions(BaseStore):
         em_time = em_data.time
 
         start_date, end_date, period_str \
-            = infer_date_range(em_time, 
-                               filepath=filepath, 
-                               period=period, 
+            = infer_date_range(em_time,
+                               filepath=filepath,
+                               period=period,
                                continuous=continuous)
 
         if date is None:

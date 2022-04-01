@@ -1,11 +1,9 @@
-from openghg.store.base import BaseStore
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Union, Any
 from xarray import Dataset
 import numpy as np
-import pandas as pd
-from pandas import Timestamp, DateOffset
-from dateutil.relativedelta import relativedelta
+
+from openghg.store.base import BaseStore
 
 __all__ = ["BoundaryConditions"]
 
@@ -36,7 +34,6 @@ class BoundaryConditions(BaseStore):
         species: str,
         bc_input: str,
         domain: str,
-        # date: Union[str, Timestamp],
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
         overwrite: bool = False,
@@ -50,7 +47,6 @@ class BoundaryConditions(BaseStore):
               - a model name such as "MOZART" or "CAMS"
               - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
             domain: Region for boundary conditions
-            date: 
             period: Period of measurements. Only needed if this can not be inferred from the time coords
                     If specified, should be one of:
                      - "yearly", "monthly"
@@ -61,7 +57,6 @@ class BoundaryConditions(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        import re
         from collections import defaultdict
         from xarray import open_dataset
         from openghg.store import assign_data
@@ -113,9 +108,9 @@ class BoundaryConditions(BaseStore):
         bc_time = bc_data.time
 
         start_date, end_date, period_str \
-            = infer_date_range(bc_time, 
-                               filepath=filepath, 
-                               period=period, 
+            = infer_date_range(bc_time,
+                               filepath=filepath,
+                               period=period,
                                continuous=continuous)
 
         if "year" in period_str:
@@ -139,7 +134,7 @@ class BoundaryConditions(BaseStore):
         metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
         metadata["min_height"] = round(float(bc_data["height"].min()), 5)
         metadata["max_height"] = round(float(bc_data["height"].max()), 5)
-        
+
         metadata["input_filename"] = filepath.name
 
         metadata["time_period"] = period_str
@@ -173,8 +168,10 @@ class BoundaryConditions(BaseStore):
         return datasource_uuids
 
     @staticmethod
-    def format():
+    def format() -> dict:
         """
+        Define format for boundary conditions Dataset.
+        TODO: Implement this!
         """
         dims = ["lat", "lon", "time", "height"]
         data_vars = {"vmr_n": ("time", "height", "lon"),
@@ -191,10 +188,15 @@ class BoundaryConditions(BaseStore):
                       "vmr_s": np.float64,
                       "vmr_w": np.float64,
                      }
-        
+
         data_format = {"dims": dims, "data_vars": data_vars, "data_types": data_types}
 
         return data_format
+
+    def check_format(self) -> None:
+        # TODO: Create check_format() function to define and align format to
+        # expected values within database
+        pass
 
     def lookup_uuid(self, species: str, bc_input: str, domain: str, date: str) -> Union[str, bool]:
         """Perform a lookup for the UUID of a Datasource
@@ -233,7 +235,7 @@ class BoundaryConditions(BaseStore):
         Returns:
             dict: Dictionary of datasource information
         """
-        # TODO - I'll leave this as a function for now as the way we read emissions may
+        # TODO - I'll leave this as a function for now as the way we read emissions/boundary conditions may
         # change in the near future
         # GJ - 2021-04-20
         lookup_results = {}
@@ -271,8 +273,3 @@ class BoundaryConditions(BaseStore):
             else:
                 self.set_uuid(species=species, bc_input=bc_input, domain=domain, date=date, uuid=uid)
                 self._datasource_uuids[uid] = key
-
-    def check_format(self):
-        # TODO: Create check_format() function to define and align format to
-        # expected values within database
-        pass

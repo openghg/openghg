@@ -39,7 +39,6 @@ def timestamp_tzaware(timestamp: Union[str, Timestamp]) -> Timestamp:
     Returns:
         pandas.Timestamp: Timezone aware
     """
-    from pandas import Timestamp
 
     if not isinstance(timestamp, Timestamp):
         timestamp = Timestamp(timestamp)
@@ -457,7 +456,6 @@ def split_encompassed_daterange(container: str, contained: str) -> Dict:
     Returns:
         dict: Dictionary of results
     """
-    from pandas import Timedelta
 
     container_start, container_end = split_daterange_str(daterange_str=container)
     contained_start, contained_end = split_daterange_str(daterange_str=contained)
@@ -627,7 +625,7 @@ def time_offset_definition() -> Dict[str, List]:
     return offset_naming
 
 
-def parse_period(period: Union[str, tuple]) -> Tuple[str]:
+def parse_period(period: Union[str, tuple]) -> Tuple[int, str]:
     """
     Parses period input and converts to a value, unit pair.
 
@@ -639,10 +637,10 @@ def parse_period(period: Union[str, tuple]) -> Tuple[str]:
                     - "yearly", "monthly"
                     - suitable pandas Offset Alias
                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
-    
+
     Returns:
         int, str: value and associated time period
-    
+
         Examples:
         >>> parse_period("12H")
             (12, "hours")
@@ -662,10 +660,11 @@ def parse_period(period: Union[str, tuple]) -> Tuple[str]:
             value = int(period[0])
             unit = str(period[1])
     else:
-        try:
-            value = int(re.match("\d+[.]?\d*", period).group())
-            unit = period.lstrip(str(value)).strip()
-        except AttributeError:
+        match = re.match(r"\d+[.]?\d*", period)
+        if match is not None:
+            value = int(match.group())
+            unit = period.lstrip(str(value)).strip()  # Strip found value and any whitespace.
+        else:
             value = 1
             unit = period
 
@@ -675,7 +674,7 @@ def parse_period(period: Union[str, tuple]) -> Tuple[str]:
         if unit in values:
             unit = key
             break
-    
+
     return value, unit
 
 
@@ -725,7 +724,7 @@ def relative_time_offset(value: Optional[int] = None,
 
     Check time_offset_definition() for accepted input units.
 
-    If the input is "years" or "months" a relative offset (DateOffset) will 
+    If the input is "years" or "months" a relative offset (DateOffset) will
     be created since these are variable units. For example:
      - "2013-01-01" + 1 year relative offset = "2014-01-01"
      - "2012-05-01" + 2 months relative offset = "2012-07-01"
@@ -745,10 +744,9 @@ def relative_time_offset(value: Optional[int] = None,
     elif value is None or unit is None:
         raise ValueError("If period is not included, both value and unit must be specified.")
 
-    if unit == "months" or unit == "years":
+    if unit in ("months", "years"):
         time_delta = DateOffset(**{unit: value})
     else:
         time_delta = Timedelta(value, unit)
 
     return time_delta
-
