@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union, Any
 from xarray import Dataset
+from tinydb import TinyDB
 import numpy as np
 
 from openghg.store.base import BaseStore
@@ -13,6 +14,7 @@ class BoundaryConditions(BaseStore):
 
     _root = "BoundaryConditions"
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
+    _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     def save(self) -> None:
         """Save the object to the object store
@@ -65,7 +67,7 @@ class BoundaryConditions(BaseStore):
             hash_file,
             timestamp_now,
         )
-        from openghg.store import infer_date_range
+        from openghg.store import infer_date_range, load_metastore
 
         species = clean_string(species)
         bc_input = clean_string(bc_input)
@@ -74,6 +76,9 @@ class BoundaryConditions(BaseStore):
         filepath = Path(filepath)
 
         bc_store = BoundaryConditions.load()
+
+        # Load in the metadata store
+        metastore = load_metastore(key=bc_store._metakey)
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in bc_store._file_hashes and not overwrite:
@@ -123,7 +128,7 @@ class BoundaryConditions(BaseStore):
         # TODO: Add checking against expected format for boundary conditions
         # Will probably want to do this for Emissions, Footprints as well
         # - develop and use check_format() method
-        expected_data_format = BoundaryConditions.format()
+        # expected_data_format = BoundaryConditions.format()
 
         metadata["start_date"] = str(start_date)
         metadata["end_date"] = str(end_date)
@@ -148,7 +153,7 @@ class BoundaryConditions(BaseStore):
 
         keyed_metadata = {key: metadata}
 
-        lookup_results = bc_store.datasource_lookup(metadata=keyed_metadata)
+        lookup_results = bc_store.datasource_lookup(metadata=keyed_metadata, metastore=metastore)
 
         data_type = "boundary_conditions"
         datasource_uuids = assign_data(
@@ -158,12 +163,14 @@ class BoundaryConditions(BaseStore):
             data_type=data_type,
         )
 
-        bc_store.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
+        bc_store.add_datasources(uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore)
 
         # Record the file hash in case we see this file again
         bc_store._file_hashes[file_hash] = filepath.name
 
         bc_store.save()
+
+        metastore.close()
 
         return datasource_uuids
 
@@ -227,7 +234,7 @@ class BoundaryConditions(BaseStore):
         """
         self._datasource_table[species][bc_input][domain][date] = uuid
 
-    def datasource_lookup(self, metadata: Dict) -> Dict[str, Union[str, bool]]:
+    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to
 
         Args:
@@ -235,9 +242,8 @@ class BoundaryConditions(BaseStore):
         Returns:
             dict: Dictionary of datasource information
         """
-        # TODO - I'll leave this as a function for now as the way we read emissions/boundary conditions may
-        # change in the near future
-        # GJ - 2021-04-20
+        from openghg.retrieve import metadata_lookup
+
         lookup_results = {}
 
         for key, data in metadata.items():
@@ -246,30 +252,10 @@ class BoundaryConditions(BaseStore):
             domain = data["domain"]
             date = data["date"]
 
-            lookup_results[key] = self.lookup_uuid(species=species, bc_input=bc_input, domain=domain, date=date)
+            result = metadata_lookup(
+                database=metastore, species=species, bc_input=bc_input, domain=domain, date=date
+            )
+
+            lookup_results[key] = result
 
         return lookup_results
-
-    def add_datasources(self, datasource_uuids: Dict, metadata: Dict) -> None:
-        """Add the passed list of Datasources to the current list
-
-        Args:
-            datasource_uuids: Datasource UUIDs
-            metadata: Metadata for each species
-        Returns:
-            None
-        """
-        for key, uid in datasource_uuids.items():
-            md = metadata[key]
-            species = md["species"]
-            bc_input = md["bc_input"]
-            domain = md["domain"]
-            date = md["date"]
-
-            result = self.lookup_uuid(species=species, bc_input=bc_input, domain=domain, date=date)
-
-            if result and result != uid:
-                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
-            else:
-                self.set_uuid(species=species, bc_input=bc_input, domain=domain, date=date, uuid=uid)
-                self._datasource_uuids[uid] = key

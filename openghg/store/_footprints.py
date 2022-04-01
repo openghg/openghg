@@ -180,34 +180,34 @@ class Footprints(BaseStore):
 
         return datasource_uuids
 
-    # def lookup_uuid(self, site: str, domain: str, model: str, height: str) -> Union[str, bool]:
-    #     """Perform a lookup for the UUID of a Datasource
+    def lookup_uuid(self, site: str, domain: str, model: str, height: str) -> Union[str, bool]:
+        """Perform a lookup for the UUID of a Datasource
 
-    #     Args:
-    #         site: Site code
-    #         domain: Domain
-    #         model: Model name
-    #         height: Height
-    #     Returns:
-    #         str or dict: UUID or False if no entry
-    #     """
-    #     uuid = self._datasource_table[site][domain][model][height]
+        Args:
+            site: Site code
+            domain: Domain
+            model: Model name
+            height: Height
+        Returns:
+            str or dict: UUID or False if no entry
+        """
+        uuid = self._datasource_table[site][domain][model][height]
 
-    #     return uuid if uuid else False
+        return uuid if uuid else False
 
-    # def set_uuid(self, site: str, domain: str, model: str, height: str, uuid: str) -> None:
-    #     """Record a UUID of a Datasource in the datasource table
+    def set_uuid(self, site: str, domain: str, model: str, height: str, uuid: str) -> None:
+        """Record a UUID of a Datasource in the datasource table
 
-    #     Args:
-    #         site: Site code
-    #         domain: Domain
-    #         model: Model name
-    #         height: Height
-    #         uuid: UUID of Datasource
-    #     Returns:
-    #         None
-    #     """
-    #     self._datasource_table[site][domain][model][height] = uuid
+        Args:
+            site: Site code
+            domain: Domain
+            model: Model name
+            height: Height
+            uuid: UUID of Datasource
+        Returns:
+            None
+        """
+        self._datasource_table[site][domain][model][height] = uuid
 
     def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to

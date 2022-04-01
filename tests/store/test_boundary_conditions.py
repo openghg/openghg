@@ -2,7 +2,7 @@ import pytest
 
 from openghg.store import BoundaryConditions
 from openghg.retrieve import search
-from openghg.store import recombine_datasets
+from openghg.store import recombine_datasets, metastore_manager
 from xarray import open_dataset
 from helpers import get_bc_datapath
 
@@ -147,7 +147,7 @@ def test_set_lookup_uuids():
 def test_datasource_add_lookup():
     bc = BoundaryConditions()
 
-    fake_datasource = {"ch4_mozart_europe_201208": "mock-uuid-123456"}
+    fake_datasource = {"ch4_mozart_europe_201208": {"uuid": "mock-uuid-123456", "new": True}}
 
     fake_metadata = {
         "ch4_mozart_europe_201208": {
@@ -158,34 +158,11 @@ def test_datasource_add_lookup():
         }
     }
 
-    bc.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
+    with metastore_manager(key="test-key-123") as metastore:
+        bc.add_datasources(uuids=fake_datasource, metadata=fake_metadata, metastore=metastore)
 
-    assert bc.datasources() == ["mock-uuid-123456"]
+        assert bc.datasources() == ["mock-uuid-123456"]
 
-    lookup = bc.datasource_lookup(fake_metadata)
+        lookup = bc.datasource_lookup(fake_metadata, metastore=metastore)
 
-    assert lookup == fake_datasource
-
-
-def test_wrong_uuid_raises():
-    bc = BoundaryConditions()
-
-    fake_datasource = {"ch4_mozart_europe_201208": "mock-uuid-123456"}
-
-    fake_metadata = {
-        "ch4_mozart_europe_201208": {
-            "species": "ch4",
-            "domain": "europe",
-            "bc_input": "mozart",
-            "date": "201208",
-        }
-    }
-
-    bc.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
-
-    assert bc.datasources() == ["mock-uuid-123456"]
-
-    changed_datasource = {"ch4_mozart_europe_201208": "mock-uuid-8888888"}
-
-    with pytest.raises(ValueError):
-        bc.add_datasources(datasource_uuids=changed_datasource, metadata=fake_metadata)
+        assert lookup["ch4_mozart_europe_201208"] == fake_datasource["ch4_mozart_europe_201208"]["uuid"]

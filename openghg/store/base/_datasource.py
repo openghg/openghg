@@ -240,8 +240,8 @@ class Datasource:
         from openghg.util import timestamp_tzaware
 
         try:
-            start = timestamp_tzaware(dataset.time[0].values)
-            end = timestamp_tzaware(dataset.time[-1].values)
+            start = timestamp_tzaware(dataset.time.min().values)
+            end = timestamp_tzaware(dataset.time.max().values)
 
             return start, end
         except AttributeError:
