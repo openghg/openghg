@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Union
 
-from openghg.store import ObsSurface, Emissions, Footprints
+from openghg.store import ObsSurface, Emissions, Footprints, BoundaryConditions
 from openghg.types import DataTypes
 from openghg.util import running_in_cloud
 
@@ -337,7 +337,7 @@ def _process_bc_local(
         dict: Dictionary of Datasource UUIDs data assigned to
     """
 
-    return Emissions.read_file(
+    return BoundaryConditions.read_file(
         filepath=files,
         species=species,
         bc_input=bc_input,
