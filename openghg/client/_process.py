@@ -55,9 +55,10 @@ def process_flux(
     species: str,
     source: str,
     domain: str,
-    date: str,
+    date: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
-    period: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
     overwrite: bool = False,
 ) -> Dict:
     """Process flux data
@@ -79,14 +80,15 @@ def process_flux(
         raise NotImplementedError
     else:
         return _process_flux_local(
-            files=files,
-            species=species,
-            source=source,
-            domain=domain,
-            date=date,
-            high_time_resolution=high_time_resolution,
-            period=period,
-            overwrite=overwrite,
+                files=files,
+                species=species,
+                source=source,
+                domain=domain,
+                date=date,
+                high_time_resolution=high_time_resolution,
+                period=period,
+                continuous=continuous,
+                overwrite=overwrite,
         )
 
 
@@ -99,6 +101,8 @@ def process_footprint(
     metmodel: Optional[str] = None,
     species: Optional[str] = None,
     network: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
     retrieve_met: bool = False,
     overwrite: bool = False,
     high_res: bool = False,
@@ -124,7 +128,7 @@ def process_footprint(
         raise NotImplementedError
     else:
         return _process_footprint_local(
-            filepath=files,
+            files=files,
             site=site,
             height=height,
             domain=domain,
@@ -132,6 +136,8 @@ def process_footprint(
             metmodel=metmodel,
             species=species,
             network=network,
+            period=period,
+            continuous=continuous,
             retrieve_met=retrieve_met,
             overwrite=overwrite,
             high_res=high_res,
@@ -139,12 +145,12 @@ def process_footprint(
 
 
 def process_bc(
-    files: pathType,
+   files: pathType,
     species: str,
     bc_input: str,
     domain: str,
-    date: str,
-    period: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
     overwrite: bool = False,
 ) -> Dict:
     """Process flux data
@@ -171,8 +177,8 @@ def process_bc(
             species=species,
             bc_input=bc_input,
             domain=domain,
-            date=date,
             period=period,
+            continuous=continuous,
             overwrite=overwrite,
         )
 
@@ -235,7 +241,7 @@ def _process_obs_local(
 
 
 def _process_footprint_local(
-    filepath: pathType,
+    files: pathType,
     site: str,
     height: str,
     domain: str,
@@ -265,7 +271,7 @@ def _process_footprint_local(
         dict: Dictionary of Datasource UUIDs data assigned to
     """
     return Footprints.read_file(
-        filepath=filepath,
+        filepath=files,
         site=site,
         height=height,
         domain=domain,
