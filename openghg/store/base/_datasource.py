@@ -1,4 +1,4 @@
-from pandas import DataFrame
+from pandas import DataFrame, Timestamp
 from typing import DefaultDict, Dict, List, Optional, Tuple, Union, TypeVar, Type
 from xarray import Dataset
 
