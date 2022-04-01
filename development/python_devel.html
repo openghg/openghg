@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Development &#8212; OpenGHG 0+untagged.1.g5e2e43e.dirty documentation</title>
+    <title>Development &#8212; OpenGHG 0+untagged.1.g718e205.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -199,6 +199,11 @@
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#clone-acquire">
+     Clone Acquire
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#run-tests">
      Run tests
     </a>
@@ -235,11 +240,6 @@
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#feature-branches">
      Feature branches
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#pre-commit">
-     Pre-commit
     </a>
    </li>
   </ul>
@@ -335,6 +335,14 @@ pip install -r requirements-dev.txt
 </div>
 <p>OpenGHG should now be installed within your virtual environment.</p>
 </section>
+<section id="clone-acquire">
+<h3>Clone Acquire<a class="headerlink" href="#clone-acquire" title="Permalink to this headline">#</a></h3>
+<p>OpenGHG currently relies on Acquire being in the directory about <code class="docutils literal notranslate"><span class="pre">OpenGHG</span></code> for tests to be run correctly. To do this</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ..
+git clone https://github.com/openghg/acquire.git
+</pre></div>
+</div>
+</section>
 <section id="run-tests">
 <h3>Run tests<a class="headerlink" href="#run-tests" title="Permalink to this headline">#</a></h3>
 <p>To ensure everything is working on your system running the tests is a good idea. To do this run</p>
@@ -371,6 +379,8 @@ help and tab completion.</p>
 <h3>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">#</a></h3>
 <p>OpenGHG consists of the main module, e.g. <code class="docutils literal notranslate"><span class="pre">openghg</span></code>, plus
 a <code class="docutils literal notranslate"><span class="pre">openghg.submodule</span></code> module.</p>
+<p>In addition, there is a <code class="docutils literal notranslate"><span class="pre">openghg.scripts</span></code> module which contains the
+code for the various command-line applications.</p>
 <p>To make OpenGHG easy for new developers
 to understand, we have a set of rules that will ensure that only
 necessary public functions, classes and implementation details are
@@ -443,15 +453,6 @@ catch bugs.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout -b feature-process
 </pre></div>
 </div>
-</section>
-<section id="pre-commit">
-<h3>Pre-commit<a class="headerlink" href="#pre-commit" title="Permalink to this headline">#</a></h3>
-<p>This project uses <a class="reference external" href="https://pre-commit.com/">pre-commit</a> to ensure code is linted and formatted. This ensures
-errors are caught before the code is checked in the CI pipeline. To install the hook</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit install
-</pre></div>
-</div>
-<p>The hook should now run each time you make a commit.</p>
 </section>
 </section>
 <section id="testing">

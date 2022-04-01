@@ -13,7 +13,7 @@ further.
 Virtual environment
 --------------------
 
-It is recommended that you develop OpenGHG in a Python
+It is recommended that you develop OpenGHG in a Python 
 `virtual environment <https://docs.python.org/3/tutorial/venv.html>`__.
 Here we'll create a new folder called ``envs`` in our home directory and create
 a new ``openghg_devel`` environment in it.
@@ -22,7 +22,7 @@ a new ``openghg_devel`` environment in it.
 
     mkdir -p ~/envs/openghg_devel
     python -m venv ~/envs/openghg_devel
-
+    
 Virtual environments provide sandboxes which make it easier to develop
 and test code. They also allow you to install Python modules without
 interfering with other Python installations.
@@ -54,7 +54,17 @@ clone the OpenGHG repository and then move into it and install the required depe
     pip install -r requirements.txt
     pip install -r requirements-dev.txt
 
-OpenGHG should now be installed within your virtual environment.
+OpenGHG should now be installed within your virtual environment. 
+
+Clone Acquire
+-------------
+
+OpenGHG currently relies on Acquire being in the directory about ``OpenGHG`` for tests to be run correctly. To do this 
+
+.. code-block:: bash
+
+    cd ..
+    git clone https://github.com/openghg/acquire.git
 
 Run tests
 ---------
@@ -100,6 +110,9 @@ Modules
 
 OpenGHG consists of the main module, e.g. ``openghg``, plus
 a ``openghg.submodule`` module.
+
+In addition, there is a ``openghg.scripts`` module which contains the
+code for the various command-line applications.
 
 To make OpenGHG easy for new developers
 to understand, we have a set of rules that will ensure that only
@@ -187,18 +200,6 @@ Now create and switch to a feature branch. This should be prefixed with
 
    git checkout -b feature-process
 
-Pre-commit
-----------
-
-This project uses `pre-commit <https://pre-commit.com/>`__ to ensure code is linted and formatted. This ensures
-errors are caught before the code is checked in the CI pipeline. To install the hook
-
-.. code-block:: bash
-
-   pre-commit install
-
-The hook should now run each time you make a commit.
-
 Testing
 =======
 
@@ -247,7 +248,7 @@ To get more detailed information about each test, run pytests using the
 
    pytest -v tests/
 
-For more information on the capabilties of ``pytest`` please see the
+For more information on the capabilties of ``pytest`` please see the 
 `pytest documentation <https://docs.pytest.org/en/stable/contents.html>`__.
 
 Continuous integration and delivery
@@ -304,7 +305,7 @@ commiting. When happy, commit your changes, e.g.
    git commit openghg/_new_feature.py tests/test_feature \
        -m "Implementation and test for new feature."
 
-If your edits don't change the OpenGHG source code e.g. fixing typos in the documentation,
+If your edits don't change the OpenGHG source code e.g. fixing typos in the documentation, 
 then please add ``[skip ci]`` to your commit message.
 
 .. code-block:: bash
@@ -314,7 +315,7 @@ then please add ``[skip ci]`` to your commit message.
 This will avoid unnecessarily running the
 `GitHub Actions <https://github.com/openghg/openghg/actions>`__, e.g. running all the tests
 and rebuilding the documentation of the OpenGHG package etc. GitHub actions are configured in the file
-``.github/workflows/main.yaml``).
+``.github/workflows/main.yaml``). 
 
 Next, push your changes to the remote server:
 

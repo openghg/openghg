@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._time &#8212; OpenGHG 0+untagged.1.g5e2e43e.dirty documentation</title>
+    <title>openghg.util._time &#8212; OpenGHG 0+untagged.1.g718e205.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -165,7 +165,7 @@
                 
   <h1>Source code for openghg.util._time</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">DatetimeIndex</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">DatetimeIndex</span><span class="p">,</span> <span class="n">DateOffset</span><span class="p">,</span> <span class="n">Timedelta</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
@@ -190,6 +190,10 @@
     <span class="s2">&quot;check_nan&quot;</span><span class="p">,</span>
     <span class="s2">&quot;check_date&quot;</span><span class="p">,</span>
     <span class="s2">&quot;first_last_dates&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;time_offset_definition&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;parse_period&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;create_frequency_str&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;relative_time_offset&quot;</span><span class="p">,</span>
     <span class="s2">&quot;find_duplicate_timestamps&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
@@ -227,7 +231,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        pandas.Timestamp: Timezone aware</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">):</span>
         <span class="n">timestamp</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
@@ -645,7 +648,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of results</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span>
 
     <span class="n">container_start</span><span class="p">,</span> <span class="n">container_end</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">daterange_str</span><span class="o">=</span><span class="n">container</span><span class="p">)</span>
     <span class="n">contained_start</span><span class="p">,</span> <span class="n">contained_end</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">daterange_str</span><span class="o">=</span><span class="n">contained</span><span class="p">)</span>
@@ -782,6 +784,164 @@
     <span class="n">last</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">last_date</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">first</span><span class="p">,</span> <span class="n">last</span>
+
+
+<span class="k">def</span> <span class="nf">time_offset_definition</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns synonym definition for time offset inputs.</span>
+
+<span class="sd">    Accepted inputs are as follows:</span>
+<span class="sd">        - &quot;months&quot;: &quot;monthly&quot;, &quot;months&quot;, &quot;month&quot;, &quot;MS&quot;</span>
+<span class="sd">        - &quot;years&quot;: &quot;yearly&quot;, &quot;years&quot;, &quot;annual&quot;, &quot;year&quot;, &quot;AS&quot;, &quot;YS&quot;</span>
+<span class="sd">        - &quot;weeks&quot;: &quot;weekly&quot;, &quot;weeks&quot;, &quot;week&quot;, &quot;W&quot;</span>
+<span class="sd">        - &quot;days&quot;: &quot;daily&quot;, &quot;days&quot;, &quot;day&quot;, &quot;D&quot;</span>
+<span class="sd">        - &quot;hours&quot;: &quot;hourly&quot;, &quot;hours&quot;, &quot;hour&quot;, &quot;hr&quot;, &quot;h&quot;, &quot;H&quot;</span>
+<span class="sd">        - &quot;minutes&quot;: &quot;minutely&quot;, &quot;minutes&quot;, &quot;minute&quot;, &quot;min&quot;, &quot;m&quot;, &quot;T&quot;</span>
+<span class="sd">        - &quot;seconds&quot;: &quot;secondly&quot;, &quot;seconds&quot;, &quot;second&quot;, &quot;sec&quot;, &quot;s&quot;, &quot;S&quot;</span>
+
+<span class="sd">    This is to ensure the correct keyword for using the DataOffset and TimeDelta</span>
+<span class="sd">    functions can be supplied (want this to be &quot;years&quot;, &quot;months&quot; etc.)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: containing list of values of synonym values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">offset_naming</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;months&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;monthly&quot;</span><span class="p">,</span> <span class="s2">&quot;months&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;MS&quot;</span><span class="p">],</span>
+                     <span class="s2">&quot;years&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;yearly&quot;</span><span class="p">,</span> <span class="s2">&quot;years&quot;</span><span class="p">,</span> <span class="s2">&quot;annual&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;AS&quot;</span><span class="p">,</span> <span class="s2">&quot;YS&quot;</span><span class="p">],</span>
+                     <span class="s2">&quot;weeks&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;weeks&quot;</span><span class="p">,</span> <span class="s2">&quot;week&quot;</span><span class="p">,</span> <span class="s2">&quot;W&quot;</span><span class="p">],</span>
+                     <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">,</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">],</span>
+                     <span class="s2">&quot;hours&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;hourly&quot;</span><span class="p">,</span> <span class="s2">&quot;hours&quot;</span><span class="p">,</span> <span class="s2">&quot;hour&quot;</span><span class="p">,</span> <span class="s2">&quot;hr&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">],</span>
+                     <span class="s2">&quot;minutes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;minutely&quot;</span><span class="p">,</span> <span class="s2">&quot;minutes&quot;</span><span class="p">,</span> <span class="s2">&quot;minute&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;T&quot;</span><span class="p">],</span>
+                     <span class="s2">&quot;seconds&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;secondly&quot;</span><span class="p">,</span> <span class="s2">&quot;seconds&quot;</span><span class="p">,</span> <span class="s2">&quot;second&quot;</span><span class="p">,</span> <span class="s2">&quot;sec&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">],</span>
+                     <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">offset_naming</span>
+
+
+<span class="k">def</span> <span class="nf">parse_period</span><span class="p">(</span><span class="n">period</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses period input and converts to a value, unit pair.</span>
+
+<span class="sd">    Check time_offset_definition() for accepted input units.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        period: Period of measurements.</span>
+<span class="sd">                Should be one of:</span>
+<span class="sd">                    - &quot;yearly&quot;, &quot;monthly&quot;</span>
+<span class="sd">                    - suitable pandas Offset Alias</span>
+<span class="sd">                    - tuple of (value, unit) as would be passed to pandas.Timedelta function</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int, str: value and associated time period</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">        &gt;&gt;&gt; parse_period(&quot;12H&quot;)</span>
+<span class="sd">            (12, &quot;hours&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; parse_period(&quot;yearly&quot;)</span>
+<span class="sd">            (1, &quot;years&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; parse_period(&quot;monthly&quot;)</span>
+<span class="sd">            (1, &quot;months&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; parse_period((1, &quot;minute&quot;))</span>
+<span class="sd">            (1, &quot;minutes&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">re</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">period</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input for period not recognised: </span><span class="si">{period}</span><span class="s2">. For tuple input requires (value, unit).&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">period</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">period</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\d+[.]?\d*&quot;</span><span class="p">,</span> <span class="n">period</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">())</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">period</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># Strip found value and any whitespace.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">period</span>
+
+    <span class="n">offset_naming</span> <span class="o">=</span> <span class="n">time_offset_definition</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">offset_naming</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">key</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span>
+
+
+<span class="k">def</span> <span class="nf">create_frequency_str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">unit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a suitable frequency string based either a value and unit pair</span>
+<span class="sd">    or a period value. The unit will be made singular if the value is 1.</span>
+
+<span class="sd">    Check time_offset_definition() for accepted input units.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value, unit: Value and unit pair to use</span>
+<span class="sd">        period: Suitable input for period (see parse_period() for more details)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str : Formatted string</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">        &gt;&gt;&gt; create_frequency_str(unit=1, value=&quot;hour&quot;)</span>
+<span class="sd">            &quot;1 hour&quot;</span>
+<span class="sd">        &gt;&gt;&gt; create_frequency(period=&quot;3MS&quot;)</span>
+<span class="sd">            &quot;3 months&quot;</span>
+<span class="sd">        &gt;&gt;&gt; create_frequency(period=&quot;yearly&quot;)</span>
+<span class="sd">            &quot;1 year&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">value</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">parse_period</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">unit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If period is not included, both value and unit must be specified.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">frequency_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">frequency_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">frequency_str</span>
+
+
+<span class="k">def</span> <span class="nf">relative_time_offset</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">unit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">DateOffset</span><span class="p">,</span> <span class="n">Timedelta</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create relative time offset based on inputs. This is based on the pandas</span>
+<span class="sd">    DateOffset and Timedelta functions.</span>
+
+<span class="sd">    Check time_offset_definition() for accepted input units.</span>
+
+<span class="sd">    If the input is &quot;years&quot; or &quot;months&quot; a relative offset (DateOffset) will</span>
+<span class="sd">    be created since these are variable units. For example:</span>
+<span class="sd">     - &quot;2013-01-01&quot; + 1 year relative offset = &quot;2014-01-01&quot;</span>
+<span class="sd">     - &quot;2012-05-01&quot; + 2 months relative offset = &quot;2012-07-01&quot;</span>
+
+<span class="sd">    Otherwise the Timedelta function will be used.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value, unit: Value and unit pair to use</span>
+<span class="sd">        period: Suitable input for period (see parse_period() for more details)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        DateOffset/Timedelta : Time offset object, appropriate for the period type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">value</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">parse_period</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">unit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If period is not included, both value and unit must be specified.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">unit</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;months&quot;</span><span class="p">,</span> <span class="s2">&quot;years&quot;</span><span class="p">):</span>
+        <span class="n">time_delta</span> <span class="o">=</span> <span class="n">DateOffset</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">unit</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">time_delta</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">time_delta</span>
 </pre></div>
 
               </div>
