@@ -75,7 +75,7 @@ def test_add_data(data):
     expected_metadata = {
         "site": "bsd",
         "instrument": "picarro",
-        "sampling_period": "60",
+        "sampling_period": "60.0",
         "inlet": "248m",
         "port": "9",
         "type": "air",
@@ -257,7 +257,7 @@ def test_to_data(data):
     metadata = obj_data["metadata"]
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
-    assert metadata["sampling_period"] == "60"
+    assert metadata["sampling_period"] == "60.0"
     assert metadata["inlet"] == "248m"
     assert metadata["data_type"] == "timeseries"
     assert len(obj_data["data_keys"]) == 0
@@ -282,7 +282,7 @@ def test_from_data(data):
     metadata = d_2.metadata()
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
-    assert metadata["sampling_period"] == "60"
+    assert metadata["sampling_period"] == "60.0"
     assert metadata["inlet"] == "248m"
 
     assert sorted(d_2.data_keys()) == sorted(d.data_keys())

@@ -36,8 +36,10 @@ Installation
 We highly recommend creating a separate virtual environment for ``openghg``. This ensures the correct versions
 of libraries can be installed without making changes to versions of libraries needed for other projects / programs.
 
-Virtual environment - pip
--------------------------
+pip
+---
+
+First create a virtual environment
 
 .. code-block:: bash
 
@@ -45,24 +47,32 @@ Virtual environment - pip
     # Activate the environment
     source /path/to/env/bin/activate
 
-Virtual environment - conda
----------------------------
+Here change ``/path/to/env`` with your own path.
+
+Next install OpenGHG
+
+.. cocde-block:: bash
+
+    pip install openghg
+
+
+conda
+-----
+
+First create and activate a conda environment
 
 .. code-block:: bash
 
-    conda create -f environment.yaml
+    conda create --name openghg_env
     # Activate the environment
-    conda activate openghg
+    conda activate openghg_env
 
-Install
------------------
-
-You can install OpenGHG using ``pip``, using either a standard Python virtual environment or a ``conda`` environment.
+Next install OpenGHG from our conda channel
 
 .. code-block:: bash
 
-   pip install --upgrade pip wheel
-   pip install openghg
+    conda install --channel conda-forge --channel openghg openghg
+
 
 Developers
 ==========

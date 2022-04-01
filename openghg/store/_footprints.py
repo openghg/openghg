@@ -1,3 +1,5 @@
+from tinydb import TinyDB
+from openghg.store.base import BaseStore
 from typing import DefaultDict, Dict, List, Optional, Union, NoReturn
 from pathlib import Path
 from pandas import Timestamp
@@ -13,6 +15,7 @@ class Footprints(BaseStore):
 
     _root = "Footprints"
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
+    _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     @staticmethod
     def read_file(
@@ -30,7 +33,7 @@ class Footprints(BaseStore):
         overwrite: bool = False,
         high_res: bool = False,
         # model_params: Optional[Dict] = None,
-    ) -> Dict[str, str]:
+    ) -> Dict[str, Dict]:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 
@@ -59,7 +62,7 @@ class Footprints(BaseStore):
             timestamp_now,
             clean_string,
         )
-        from openghg.store import assign_data, infer_date_range
+        from openghg.store import assign_data, infer_date_range, load_metastore
 
         filepath = Path(filepath)
 
@@ -69,6 +72,9 @@ class Footprints(BaseStore):
         domain = clean_string(domain)
 
         fp = Footprints.load()
+
+        # Load in the metadata store
+        metastore = load_metastore(key=fp._metakey)
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in fp._file_hashes and not overwrite:
@@ -153,55 +159,57 @@ class Footprints(BaseStore):
         # This will be removed when we process multiple files
         keyed_metadata = {key: metadata}
 
-        lookup_results = fp.datasource_lookup(metadata=keyed_metadata)
+        lookup_results = fp.datasource_lookup(metadata=keyed_metadata, metastore=metastore)
 
         data_type = "footprints"
-        datasource_uuids: Dict[str, str] = assign_data(
+        datasource_uuids: Dict[str, Dict] = assign_data(
             data_dict=footprint_data,
             lookup_results=lookup_results,
             overwrite=overwrite,
             data_type=data_type,
         )
 
-        fp.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
+        fp.add_datasources(uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore)
 
         # Record the file hash in case we see this file again
         fp._file_hashes[file_hash] = filepath.name
 
         fp.save()
 
+        metastore.close()
+
         return datasource_uuids
 
-    def lookup_uuid(self, site: str, domain: str, model: str, height: str) -> Union[str, bool]:
-        """Perform a lookup for the UUID of a Datasource
+    # def lookup_uuid(self, site: str, domain: str, model: str, height: str) -> Union[str, bool]:
+    #     """Perform a lookup for the UUID of a Datasource
 
-        Args:
-            site: Site code
-            domain: Domain
-            model: Model name
-            height: Height
-        Returns:
-            str or dict: UUID or False if no entry
-        """
-        uuid = self._datasource_table[site][domain][model][height]
+    #     Args:
+    #         site: Site code
+    #         domain: Domain
+    #         model: Model name
+    #         height: Height
+    #     Returns:
+    #         str or dict: UUID or False if no entry
+    #     """
+    #     uuid = self._datasource_table[site][domain][model][height]
 
-        return uuid if uuid else False
+    #     return uuid if uuid else False
 
-    def set_uuid(self, site: str, domain: str, model: str, height: str, uuid: str) -> None:
-        """Record a UUID of a Datasource in the datasource table
+    # def set_uuid(self, site: str, domain: str, model: str, height: str, uuid: str) -> None:
+    #     """Record a UUID of a Datasource in the datasource table
 
-        Args:
-            site: Site code
-            domain: Domain
-            model: Model name
-            height: Height
-            uuid: UUID of Datasource
-        Returns:
-            None
-        """
-        self._datasource_table[site][domain][model][height] = uuid
+    #     Args:
+    #         site: Site code
+    #         domain: Domain
+    #         model: Model name
+    #         height: Height
+    #         uuid: UUID of Datasource
+    #     Returns:
+    #         None
+    #     """
+    #     self._datasource_table[site][domain][model][height] = uuid
 
-    def datasource_lookup(self, metadata: Dict) -> Dict:
+    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to
 
         Args:
@@ -209,9 +217,8 @@ class Footprints(BaseStore):
         Returns:
             dict: Dictionary of datasource information
         """
-        # TODO - I'll leave this as a function for now as the way we read footprints may
-        # change in the near future
-        # GJ - 2021-04-20
+        from openghg.retrieve import metadata_lookup
+
         lookup_results = {}
 
         for key, data in metadata.items():
@@ -220,53 +227,11 @@ class Footprints(BaseStore):
             height = data["height"]
             domain = data["domain"]
 
-            result = self.lookup_uuid(site=site, domain=domain, model=model, height=height)
-
-            if not result:
-                result = False
+            result = metadata_lookup(database=metastore, site=site, domain=domain, model=model, height=height)
 
             lookup_results[key] = result
 
         return lookup_results
-
-    def add_datasources(self, datasource_uuids: Dict, metadata: Dict) -> None:
-        """Add the passed list of Datasources to the current list
-
-        Args:
-            datasource_uuids: Datasource UUIDs
-            metadata: Metadata for each species
-        Returns:
-            None
-        """
-        for key, uid in datasource_uuids.items():
-            md = metadata[key]
-            site = md["site"]
-            model = md["model"]
-            height = md["height"]
-            domain = md["domain"]
-
-            result = self.lookup_uuid(site=site, domain=domain, model=model, height=height)
-
-            if result and result != uid:
-                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
-            else:
-                self.set_uuid(site=site, domain=domain, model=model, height=height, uuid=uid)
-                self._datasource_uuids[uid] = key
-
-    def save(self) -> None:
-        """Save the object to the object store
-
-        Returns:
-            None
-        """
-        from openghg.objectstore import get_bucket, set_object_from_json
-
-        bucket = get_bucket()
-
-        obs_key = f"{Footprints._root}/uuid/{Footprints._uuid}"
-
-        self._stored = True
-        set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
     def search(
         self,

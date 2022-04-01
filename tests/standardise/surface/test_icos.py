@@ -12,14 +12,14 @@ def test_read_icos_large_header():
     filepath = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
 
     data = parse_icos(
-        data_filepath=filepath, species="co", site="mhd", instrument="g2401", header_type="large", inlet="15m"
+        data_filepath=filepath, site="mhd", instrument="g2401", header_type="large", inlet="15m"
     )
 
     expected_metadata = {
         "site": "mhd",
         "species": "co",
         "inlet": "15m",
-        "sampling_period": "3600",
+        "sampling_period": "3600.0",
         "network": "icos",
         "instrument": "g2401",
         "units": "nmol.mol-¹",
@@ -41,27 +41,12 @@ def test_read_icos_large_header():
     assert data["co"]["data"]["co_variability"][-1] == pytest.approx(1.924)
 
 
-def test_read_icos_large_header_incorrect_species_raises():
-    filepath = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
-
-    with pytest.raises(ValueError):
-        parse_icos(
-            data_filepath=filepath,
-            species="ch4",
-            site="mhd",
-            instrument="g2401",
-            header_type="large",
-            inlet="15m",
-        )
-
-
 def test_read_icos_large_header_incorrect_site_raises():
     filepath = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
 
     with pytest.raises(ValueError):
         parse_icos(
             data_filepath=filepath,
-            species="co",
             site="aaa",
             instrument="g2401",
             header_type="large",
@@ -75,7 +60,6 @@ def test_read_icos_large_header_incorrect_instrument_raises():
     with pytest.raises(ValueError):
         parse_icos(
             data_filepath=filepath,
-            species="co",
             site="aaa",
             instrument="sparrow",
             header_type="large",
@@ -89,7 +73,6 @@ def test_read_icos_large_header_incorrect_inlet_raises():
     with pytest.raises(ValueError):
         parse_icos(
             data_filepath=filepath,
-            species="co",
             site="aaa",
             instrument="sparrow",
             header_type="large",
@@ -102,7 +85,6 @@ def test_read_icos_small_header_file():
 
     data = parse_icos(
         data_filepath=filepath,
-        species="co2",
         site="tta",
         network="ICOS",
         instrument="test_instrument",
@@ -121,7 +103,7 @@ def test_read_icos_small_header_file():
         "processed_by": "OpenGHG_Cloud",
         "species": "co2",
         "calibration_scale": "unknown",
-        "sampling_period": "60",
+        "sampling_period": "60.0",
         "sampling_period_unit": "s",
         "station_longitude": -2.98598,
         "station_latitude": 56.55511,
@@ -143,7 +125,7 @@ def test_read_icos_small_header_file():
         "site": "tta",
         "species": "co2",
         "inlet": "222m",
-        "sampling_period": "60",
+        "sampling_period": "60.0",
         "network": "icos",
         "instrument": "test_instrument",
         "calibration_scale": "unknown",

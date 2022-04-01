@@ -16,7 +16,7 @@ def test_search_and_download(process_crds):
     expected_metadata = {
         "site": "hfd",
         "instrument": "picarro",
-        "sampling_period": "60",
+        "sampling_period": "60.0",
         "inlet": "100m",
         "port": "10",
         "type": "air",

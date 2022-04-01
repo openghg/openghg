@@ -3,9 +3,48 @@
 
 """
 
-from typing import Dict, Union
+from typing import Any, Dict, Union
+from tinydb.database import TinyDB
 
 __all__ = ["search"]
+
+
+def _find_and(x: Any, y: Any) -> Any:
+    return x & y
+
+
+def _find_or(x: Any, y: Any) -> Any:
+    return x | y
+
+
+def metadata_lookup(database: TinyDB, **kwargs: Dict) -> Union[bool, str]:
+    """Searches the passed database for the given metadata
+
+    Args:
+        database: The tinydb database for the storage object
+        **kwargs: Terms to pass to the search of the metastore
+        e.g. site="tac", inlet="15m"
+    Returns:
+        str or bool: UUID string if matching Datasource found, otherwise False
+    """
+    from tinydb import Query
+    from functools import reduce
+    from openghg.types import DatasourceLookupError
+
+    q = Query()
+
+    search_attrs = [getattr(q, k) == v for k, v in kwargs.items()]
+    result = database.search(reduce(_find_and, search_attrs))
+
+    if not result:
+        return False
+
+    if len(result) > 1:
+        raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
+
+    uuid: str = result[0]["uuid"]
+
+    return uuid
 
 
 # TODO

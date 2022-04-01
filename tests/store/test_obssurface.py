@@ -21,7 +21,9 @@ def test_read_CRDS():
     # Load up the assigned Datasources and check they contain the correct data
     data = results["processed"]["bsd.picarro.1minute.248m.min.dat"]
 
-    ch4_data = Datasource.load(uuid=data["ch4"]).data()
+    uid = data["ch4"]["uuid"]
+
+    ch4_data = Datasource.load(uuid=uid).data()
     ch4_data = ch4_data["2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00"]
 
     assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")
@@ -33,6 +35,8 @@ def test_read_CRDS():
     obs = ObsSurface.load()
     uuid_one = obs.datasources()[0]
     datasource = Datasource.load(uuid=uuid_one)
+
+    first_set_datasources = obs.datasources()
 
     data_keys = list(datasource.data().keys())
 
@@ -51,9 +55,15 @@ def test_read_CRDS():
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.future.dat", data_type="CRDS")
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
 
+    obs = ObsSurface.load()
+
+    assert len(obs.datasources()) == 3
+
     uuid_one = obs.datasources()[0]
     datasource = Datasource.load(uuid=uuid_one)
     data_keys = sorted(list(datasource.data().keys()))
+
+    assert first_set_datasources == obs.datasources()
 
     new_expected_keys = [
         "2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00",
@@ -67,11 +77,6 @@ def test_read_CRDS():
     ]
 
     assert data_keys == new_expected_keys
-
-    table = obs._datasource_table
-    assert table["bsd"]["decc"]["ch4"]["248m"]
-    assert table["bsd"]["decc"]["co2"]["248m"]
-    assert table["bsd"]["decc"]["co"]["248m"]
 
 
 def test_read_GC():
@@ -148,7 +153,7 @@ def test_read_GC():
     assert sorted(list(results["processed"]["capegrim-medusa.18.C"].keys())) == expected_keys
 
     # Load in some data
-    uuid = results["processed"]["capegrim-medusa.18.C"]["hfc152a_70m"]
+    uuid = results["processed"]["capegrim-medusa.18.C"]["hfc152a_70m"]["uuid"]
 
     hfc152a_data = Datasource.load(uuid=uuid, shallow=False).data()
     hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
@@ -200,28 +205,6 @@ def test_read_GC():
         "2023-01-01-02:24:00+00:00_2023-01-31-23:52:59+00:00",
     ]
 
-    data_filepath = get_datapath(filename="trinidadhead.01.C", data_type="GC")
-    precision_filepath = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
-
-    ObsSurface.read_file(
-        filepath=(data_filepath, precision_filepath),
-        data_type="GCWERKS",
-        site="THD",
-        instrument="gcmd",
-        network="AGAGE",
-    )
-
-    obs = ObsSurface.load()
-    table = obs._datasource_table
-
-    assert table["cgo"]["agage"]["nf3"]["70m"]
-    assert table["cgo"]["agage"]["hfc236fa"]["70m"]
-    assert table["cgo"]["agage"]["halon1211"]["70m"]
-
-    assert table["thd"]["agage"]["cfc11"]["10m"]
-    assert table["thd"]["agage"]["n2o"]["10m"]
-    assert table["thd"]["agage"]["ccl4"]["10m"]
-
 
 def test_read_cranfield():
     get_local_bucket(empty=True)
@@ -236,7 +219,7 @@ def test_read_cranfield():
 
     assert sorted(results["processed"]["THB_hourly_means_test.csv"].keys()) == expected_keys
 
-    uuid = results["processed"]["THB_hourly_means_test.csv"]["ch4"]
+    uuid = results["processed"]["THB_hourly_means_test.csv"]["ch4"]["uuid"]
 
     ch4_data = Datasource.load(uuid=uuid, shallow=False).data()
     ch4_data = ch4_data["2018-05-05-00:00:00+00:00_2018-05-13-16:00:00+00:00"]
@@ -259,7 +242,7 @@ def test_read_beaco2n():
         filepath=data_filepath, data_type="BEACO2N", site="CCC", network="BEACO2N", overwrite=True
     )
 
-    uuid = results["processed"]["Charlton_Community_Center.csv"]["co2"]
+    uuid = results["processed"]["Charlton_Community_Center.csv"]["co2"]["uuid"]
 
     co2_data = Datasource.load(uuid=uuid, shallow=False).data()
     co2_data = co2_data["2015-04-18-04:00:00+00:00_2015-04-18-10:00:00+00:00"]
@@ -278,7 +261,7 @@ def test_read_noaa_raw():
         filepath=data_filepath, data_type="NOAA", site="POCN25", network="NOAA", inlet="flask"
     )
 
-    uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]
+    uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]["uuid"]
 
     co_data = Datasource.load(uuid=uuid, shallow=False).data()
 
@@ -310,7 +293,7 @@ def test_read_noaa_obspack():
         filepath=data_filepath, inlet="flask", data_type="NOAA", site="esp", network="NOAA", overwrite=True
     )
 
-    uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]
+    uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]["uuid"]
 
     ch4_data = Datasource.load(uuid=uuid, shallow=False).data()
 
@@ -348,7 +331,7 @@ def test_read_thames_barrier():
 
     assert sorted(list(results["processed"]["thames_test_20190707.csv"].keys())) == expected_keys
 
-    uuid = results["processed"]["thames_test_20190707.csv"]["CO2"]
+    uuid = results["processed"]["thames_test_20190707.csv"]["CO2"]["uuid"]
 
     data = Datasource.load(uuid=uuid, shallow=False).data()
     data = data["2019-07-01-00:39:55+00:00_2019-08-01-01:10:29+00:00"]
@@ -427,7 +410,9 @@ def test_add_new_data_correct_datasource():
     assert len(shared_keys) == 67
 
     for key in shared_keys:
-        assert first_results[key] == second_results[key]
+        assert first_results[key]["uuid"] == second_results[key]["uuid"]
+        assert first_results[key]["new"] is True
+        assert second_results[key]["new"] is False
 
 
 def test_set_rank():
@@ -583,7 +568,7 @@ def test_read_multiside_aqmesh():
     )
 
     # This crazy structure will be fixed when add_datsources is updated
-    raith_uuid = result["raith"]["raith"]
+    raith_uuid = result["raith"]["raith"]["uuid"]
 
     d = Datasource.load(uuid=raith_uuid, shallow=False)
 

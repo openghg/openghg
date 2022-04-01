@@ -15,7 +15,7 @@ def clean_string(to_clean: None) -> None:
 
 def clean_string(to_clean: Optional[str]) -> Union[str, None]:
     """Returns a lowercase string with only alphanumeric
-    characters.
+    characters and underscores.
 
     Args:
         to_clean: String to clean
@@ -25,12 +25,16 @@ def clean_string(to_clean: Optional[str]) -> Union[str, None]:
     import re
 
     if to_clean is None:
-        return to_clean
+        return None
 
     try:
+        # This might be used with numbers
+        if is_number(to_clean):
+            return str(to_clean)
+
         # Removes all whitespace
         cleaner = re.sub(r"\s+", "", to_clean, flags=re.UNICODE).lower()
-        # Removes non-alphanumeric characters
+        # Removes non-alphanumeric characters but keep underscores
         cleanest = re.sub(r"\W+", "", cleaner)
     except TypeError:
         return to_clean
@@ -88,11 +92,16 @@ def to_lowercase(d: Union[Dict, List, Tuple, Set, str]) -> Union[Dict, List, Tup
 def is_number(s: str) -> bool:
     """Is it a number?
 
+    https://stackoverflow.com/q/354038
+
     Args:
         s: String which may be a number
     Returns:
         bool
     """
+    if isinstance(s, bool):
+        return False
+
     try:
         float(s)
         return True

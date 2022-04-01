@@ -1,9 +1,11 @@
 import pytest
 
-from openghg.retrieve import search
+from openghg.retrieve import search, metadata_lookup
+from openghg.store import metastore_manager
 from openghg.util import timestamp_tzaware
 from pandas import Timestamp
-from helpers import metadata_checker_obssurface, attributes_checker_obssurface
+from helpers import metadata_checker_obssurface
+from openghg.types import DatasourceLookupError
 
 
 def test_specific_keyword_search():
@@ -40,7 +42,7 @@ def test_specific_keyword_search():
         "station_height_masl": 380.0,
         "site": "bsd",
         "instrument": "picarro",
-        "sampling_period": "60",
+        "sampling_period": "60.0",
         "sampling_period_unit": "s",
         "inlet": "248m",
         "port": "9",
@@ -198,8 +200,6 @@ def test_ranked_bsd_search():
 
     raw_result = result.raw()
 
-    print(raw_result)
-
     expected_rank_metadata = {
         "2014-01-30-00:00:00+00:00_2015-01-01-00:00:00+00:00": "248m",
         "2016-04-01-00:00:00+00:00_2017-11-01-00:00:00+00:00": "248m",
@@ -224,7 +224,7 @@ def test_ranked_bsd_search():
     assert ch4_data["ch4"][-1] == pytest.approx(1955.93)
     assert ch4_data["ch4_variability"][0] == 0.79
     assert ch4_data["ch4_variability"][-1] == 0.232
-    assert len(ch4_data.time) == 140
+    assert len(ch4_data.time) == 126
 
 
 # @pytest.mark.skip(reason="Needs update for ranking search")
@@ -299,3 +299,37 @@ def test_search_nonsense_terms():
     results = search(species=species, locations=locations)
 
     assert not results
+
+
+def test_metadata_lookup():
+    with metastore_manager(key="test-key-888") as metastore:
+        metadata = {
+            "site": "shop",
+            "species": "parrot",
+            "status": "six-feet-under",
+            "pining_for": "fjords",
+            "uuid": "uuid-888",
+        }
+
+        metastore.insert(metadata)
+
+        result = metadata_lookup(database=metastore, species="parrot", site="shop")
+
+        assert result == "uuid-888"
+
+        result = metadata_lookup(database=metastore, species="turtle")
+
+        assert result is False
+
+        metadata = {
+            "site": "shop",
+            "species": "parrot",
+            "status": "six-feet-under",
+            "pining_for": "fjords",
+            "uuid": "uuid-777",
+        }
+
+        metastore.insert(metadata)
+
+        with pytest.raises(DatasourceLookupError):
+            metadata_lookup(database=metastore, species="parrot", site="shop")
