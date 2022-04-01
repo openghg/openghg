@@ -2,7 +2,7 @@ from typing import Optional, Union, Tuple
 from pathlib import Path
 import re
 import pandas as pd
-from pandas import DateOffset, Timedelta
+from pandas import DateOffset, Timedelta, Timestamp
 from xarray import DataArray
 from openghg.util import (
     timestamp_tzaware,
@@ -15,7 +15,7 @@ from openghg.util import (
 def infer_date_range(time: DataArray,
                      filepath: Optional[Union[str, Path]] = None,
                      period: Optional[Union[str, tuple]] = None,
-                     continuous: bool = True) -> Tuple[str, str, str]:
+                     continuous: bool = True) -> Tuple[Timestamp, Timestamp, str]:
     """
     Infer the date range from the time dimension. If the time dimension
     only includes one value the date range will be:
