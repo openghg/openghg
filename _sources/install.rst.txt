@@ -51,7 +51,7 @@ Here change ``/path/to/env`` with your own path.
 
 Next install OpenGHG
 
-.. code-block:: bash
+.. cocde-block:: bash
 
     pip install openghg
 
