@@ -243,6 +243,8 @@ def _process_footprint_local(
     metmodel: Optional[str] = None,
     species: Optional[str] = None,
     network: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
     retrieve_met: bool = False,
     overwrite: bool = False,
     high_res: bool = False,
@@ -271,6 +273,8 @@ def _process_footprint_local(
         metmodel=metmodel,
         species=species,
         network=network,
+        period=period,
+        continuous=continuous,
         retrieve_met=retrieve_met,
         overwrite=overwrite,
         high_res=high_res,
@@ -282,9 +286,10 @@ def _process_flux_local(
     species: str,
     source: str,
     domain: str,
-    date: str,
+    date: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
-    period: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
     overwrite: bool = False,
 ) -> Dict:
     """Process flux data for the local object store
@@ -309,6 +314,7 @@ def _process_flux_local(
         date=date,
         high_time_resolution=high_time_resolution,
         period=period,
+        continuous=continuous,
         overwrite=overwrite,
     )
 
@@ -318,8 +324,8 @@ def _process_bc_local(
     species: str,
     bc_input: str,
     domain: str,
-    date: str,
-    period: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
     overwrite: bool = False,
 ) -> Dict:
     """Process boundary condition data for the local object store
@@ -342,7 +348,7 @@ def _process_bc_local(
         species=species,
         bc_input=bc_input,
         domain=domain,
-        date=date,
         period=period,
+        continuous=continuous,
         overwrite=overwrite,
     )
