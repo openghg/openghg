@@ -26,8 +26,9 @@ class Footprints(BaseStore):
         species: Optional[str] = None,
         network: Optional[str] = None,
         retrieve_met: bool = False,
+        high_spatial_res: bool = False,
+        high_time_res: bool = False,
         overwrite: bool = False,
-        high_res: bool = False,
         # model_params: Optional[Dict] = None,
     ) -> Dict[str, Dict]:
         """Reads footprints data files and returns the UUIDS of the Datasources
@@ -41,6 +42,9 @@ class Footprints(BaseStore):
             domain: Domain of footprints
             model_params: Model run parameters
             retrieve_met: Whether to also download meterological data for this footprints area
+            high_spatial_res : Indicate footprints include both a low and high spatial resolution.
+            high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+                           Note this will be set to True automatically for Carbon Dioxide data.
             overwrite: Overwrite any currently stored data
         Returns:
             dict: UUIDs of Datasources data has been assigned to
@@ -101,18 +105,35 @@ class Footprints(BaseStore):
         metadata["min_longitude"] = round(float(fp_data["lon"].min()), 5)
         metadata["max_latitude"] = round(float(fp_data["lat"].max()), 5)
         metadata["min_latitude"] = round(float(fp_data["lat"].min()), 5)
-        metadata["time_resolution"] = "standard_time_resolution"
 
-        # If it's a high resolution footprints file we'll have two sets of lat/long values
-        if high_res:
+        # TODO: Pull out links to underlying data format into a separate format function
+        #  - high_spatial_res - data vars - "fp_low", "fp_high", coords - "lat_high", "lon_high"
+        #  - high_time_res - data vars - "fp_HiTRes", coords - "H_back"
+
+        metadata["spatial_resolution"] = "standard_spatial_resolution"
+
+        if high_spatial_res:
             try:
                 metadata["max_longitude_high"] = round(float(fp_data["lon_high"].max()), 5)
                 metadata["min_longitude_high"] = round(float(fp_data["lon_high"].min()), 5)
                 metadata["max_latitude_high"] = round(float(fp_data["lat_high"].max()), 5)
                 metadata["min_latitude_high"] = round(float(fp_data["lat_high"].min()), 5)
-                metadata["time_resolution"] = "high_time_resolution"
+
+                metadata["spatial_resolution"] = "high_spatial_resolution"
             except KeyError:
-                raise KeyError("Unable to find lat_high or lon_high data.")
+                raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
+
+        if species == "co2":
+            # Expect co2 data to have high time resolution
+            high_time_res = True
+
+        metadata["time_resolution"] = "standard_time_resolution"
+
+        if high_time_res:
+            if "fp_HiTRes" in fp_data:
+                metadata["time_resolution"] = "high_time_resolution"
+            else:
+                raise KeyError("Expected high time resolution. Unable to find fp_HiTRes data.")
 
         metadata["heights"] = [float(h) for h in fp_data.height.values]
         # Do we also need to save all the variables we have available in this footprints?
