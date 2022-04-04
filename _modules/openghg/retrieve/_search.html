@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.ga46697f.dirty documentation</title>
+    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.g90038a7.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -242,7 +242,7 @@
     <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span> <span class="k">as</span> <span class="n">iter_chain</span>
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span> <span class="k">as</span> <span class="n">pd_Timedelta</span>
 
-    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">ObsSurface</span><span class="p">,</span> <span class="n">Footprints</span><span class="p">,</span> <span class="n">Emissions</span><span class="p">,</span> <span class="n">EulerianModel</span>
+    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">ObsSurface</span><span class="p">,</span> <span class="n">Footprints</span><span class="p">,</span> <span class="n">Emissions</span><span class="p">,</span> <span class="n">BoundaryConditions</span><span class="p">,</span> <span class="n">EulerianModel</span>
     <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
 
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
@@ -312,7 +312,7 @@
 
     <span class="n">data_type</span> <span class="o">=</span> <span class="n">search_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data_type&quot;</span><span class="p">,</span> <span class="s2">&quot;timeseries&quot;</span><span class="p">)</span>
 
-    <span class="n">valid_data_types</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="s2">&quot;emissions&quot;</span><span class="p">,</span> <span class="s2">&quot;eulerian_model&quot;</span><span class="p">)</span>
+    <span class="n">valid_data_types</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;timeseries&quot;</span><span class="p">,</span> <span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="s2">&quot;emissions&quot;</span><span class="p">,</span> <span class="s2">&quot;boundary_conditions&quot;</span><span class="p">,</span> <span class="s2">&quot;eulerian_model&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">data_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_data_types</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> is not a valid data type, please select one of </span><span class="si">{</span><span class="n">valid_data_types</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -325,6 +325,8 @@
         <span class="n">obj</span> <span class="o">=</span> <span class="n">Emissions</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;eulerian_model&quot;</span><span class="p">:</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="n">EulerianModel</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;boundary_conditions&quot;</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 
     <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">datasources</span><span class="p">()</span>
 
@@ -333,7 +335,7 @@
 
     <span class="c1"># For the time being this will return a dict until we know how best to represent</span>
     <span class="c1"># the footprints and emissions results in a SearchResult object</span>
-    <span class="k">if</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;emissions&quot;</span><span class="p">,</span> <span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="s2">&quot;eulerian_model&quot;</span><span class="p">}:</span>
+    <span class="k">if</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;emissions&quot;</span><span class="p">,</span> <span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="s2">&quot;boundary_conditions&quot;</span><span class="p">,</span> <span class="s2">&quot;eulerian_model&quot;</span><span class="p">}:</span>
         <span class="n">sources</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">datasource</span> <span class="ow">in</span> <span class="n">datasources</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">datasource</span><span class="o">.</span><span class="n">search_metadata</span><span class="p">(</span><span class="o">**</span><span class="n">search_kwargs</span><span class="p">):</span>
