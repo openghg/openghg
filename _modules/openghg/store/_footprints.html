@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.g90038a7.dirty documentation</title>
+    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.g7467756.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -165,12 +165,11 @@
                 
   <h1>Source code for openghg.store._footprints</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">TinyDB</span>
+<span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">NoReturn</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
-
-<span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Footprints&quot;</span><span class="p">]</span>
 
@@ -192,11 +191,10 @@
         <span class="n">metmodel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">continuous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">retrieve_met</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">high_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="c1"># model_params: Optional[Dict] = None,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Reads footprints data files and returns the UUIDS of the Datasources</span>
@@ -205,18 +203,15 @@
 <span class="sd">        Args:</span>
 <span class="sd">            filepath: Path of file to load</span>
 <span class="sd">            site: Site name</span>
+<span class="sd">            network: Network name</span>
 <span class="sd">            height: Height above ground level in metres</span>
 <span class="sd">            domain: Domain of footprints</span>
-<span class="sd">            model: Model used to create footprint (e.g. NAME or FLEXPART)</span>
-<span class="sd">            metmodel: Underlying meteorlogical model used (e.g. UKV)</span>
-<span class="sd">            species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)</span>
-<span class="sd">            network: Network name</span>
-<span class="sd">            period: Period of measurements. Only needed if this can not be inferred from the time coords</span>
-<span class="sd">            continuous: Whether time stamps have to be continuous.</span>
+<span class="sd">            model_params: Model run parameters</span>
 <span class="sd">            retrieve_met: Whether to also download meterological data for this footprints area</span>
+<span class="sd">            high_spatial_res : Indicate footprints include both a low and high spatial resolution.</span>
+<span class="sd">            high_time_res: Indicate footprints are high time resolution (include H_back dimension)</span>
+<span class="sd">                           Note this will be set to True automatically for Carbon Dioxide data.</span>
 <span class="sd">            overwrite: Overwrite any currently stored data</span>
-<span class="sd">            high_res: ***</span>
-
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: UUIDs of Datasources data has been assigned to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -224,10 +219,11 @@
         <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">open_dataset</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
             <span class="n">hash_file</span><span class="p">,</span>
+            <span class="n">timestamp_tzaware</span><span class="p">,</span>
             <span class="n">timestamp_now</span><span class="p">,</span>
             <span class="n">clean_string</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">infer_date_range</span><span class="p">,</span> <span class="n">load_metastore</span>
+        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">load_metastore</span>
 
         <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
@@ -268,39 +264,42 @@
         <span class="k">if</span> <span class="n">metmodel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;metmodel&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">metmodel</span><span class="p">)</span>
 
-        <span class="n">fp_time</span> <span class="o">=</span> <span class="n">fp_data</span><span class="o">.</span><span class="n">time</span>
-
-        <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">period_str</span> \
-            <span class="o">=</span> <span class="n">infer_date_range</span><span class="p">(</span><span class="n">fp_time</span><span class="p">,</span>
-                               <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
-                               <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
-                               <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">)</span>
-
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">period_str</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">fp_data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">fp_data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
 
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_time_resolution&quot;</span>
 
-        <span class="c1"># TODO: Fix confusion around high time and high spatial resolution.</span>
-        <span class="c1"># Do we need these as inputs or can we infer them from the data?</span>
-        <span class="c1"># Should we check if data is for co2 that this is high resolution?</span>
-        <span class="c1"># Should we check high resolution data is labelled as &quot;co2&quot; or just allow this to be added anyway?</span>
+        <span class="c1"># TODO: Pull out links to underlying data format into a separate format function</span>
+        <span class="c1">#  - high_spatial_res - data vars - &quot;fp_low&quot;, &quot;fp_high&quot;, coords - &quot;lat_high&quot;, &quot;lon_high&quot;</span>
+        <span class="c1">#  - high_time_res - data vars - &quot;fp_HiTRes&quot;, coords - &quot;H_back&quot;</span>
 
-        <span class="c1"># If the footprints have high spatial resolution we&#39;ll have two sets of lat/long values</span>
-        <span class="k">if</span> <span class="n">high_res</span><span class="p">:</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;spatial_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_spatial_resolution&quot;</span>
+
+        <span class="k">if</span> <span class="n">high_spatial_res</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_longitude_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lon_high&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
                 <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_longitude_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lon_high&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
                 <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_latitude_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lat_high&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
                 <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_latitude_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lat_high&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
-                <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;high_time_resolution&quot;</span>
+
+                <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;spatial_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;high_spatial_resolution&quot;</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Unable to find lat_high or lon_high data.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Expected high spatial resolution. Unable to find lat_high or lon_high data.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span>
+            <span class="c1"># Expect co2 data to have high time resolution</span>
+            <span class="n">high_time_res</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_time_resolution&quot;</span>
+
+        <span class="k">if</span> <span class="n">high_time_res</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;fp_HiTRes&quot;</span> <span class="ow">in</span> <span class="n">fp_data</span><span class="p">:</span>
+                <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;high_time_resolution&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Expected high time resolution. Unable to find fp_HiTRes data.&quot;</span><span class="p">)</span>
 
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;heights&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">fp_data</span><span class="o">.</span><span class="n">height</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
         <span class="c1"># Do we also need to save all the variables we have available in this footprints?</span>
@@ -344,34 +343,34 @@
 
         <span class="k">return</span> <span class="n">datasource_uuids</span></div>
 
-<div class="viewcode-block" id="Footprints.lookup_uuid"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Footprints.lookup_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">lookup_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Perform a lookup for the UUID of a Datasource</span>
+    <span class="c1"># def lookup_uuid(self, site: str, domain: str, model: str, height: str) -&gt; Union[str, bool]:</span>
+    <span class="c1">#     &quot;&quot;&quot;Perform a lookup for the UUID of a Datasource</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            site: Site code</span>
-<span class="sd">            domain: Domain</span>
-<span class="sd">            model: Model name</span>
-<span class="sd">            height: Height</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            str or dict: UUID or False if no entry</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">domain</span><span class="p">][</span><span class="n">model</span><span class="p">][</span><span class="n">height</span><span class="p">]</span>
+    <span class="c1">#     Args:</span>
+    <span class="c1">#         site: Site code</span>
+    <span class="c1">#         domain: Domain</span>
+    <span class="c1">#         model: Model name</span>
+    <span class="c1">#         height: Height</span>
+    <span class="c1">#     Returns:</span>
+    <span class="c1">#         str or dict: UUID or False if no entry</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     uuid = self._datasource_table[site][domain][model][height]</span>
 
-        <span class="k">return</span> <span class="n">uuid</span> <span class="k">if</span> <span class="n">uuid</span> <span class="k">else</span> <span class="kc">False</span></div>
+    <span class="c1">#     return uuid if uuid else False</span>
 
-<div class="viewcode-block" id="Footprints.set_uuid"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Footprints.set_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">set_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Record a UUID of a Datasource in the datasource table</span>
+    <span class="c1"># def set_uuid(self, site: str, domain: str, model: str, height: str, uuid: str) -&gt; None:</span>
+    <span class="c1">#     &quot;&quot;&quot;Record a UUID of a Datasource in the datasource table</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            site: Site code</span>
-<span class="sd">            domain: Domain</span>
-<span class="sd">            model: Model name</span>
-<span class="sd">            height: Height</span>
-<span class="sd">            uuid: UUID of Datasource</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">domain</span><span class="p">][</span><span class="n">model</span><span class="p">][</span><span class="n">height</span><span class="p">]</span> <span class="o">=</span> <span class="n">uuid</span></div>
+    <span class="c1">#     Args:</span>
+    <span class="c1">#         site: Site code</span>
+    <span class="c1">#         domain: Domain</span>
+    <span class="c1">#         model: Model name</span>
+    <span class="c1">#         height: Height</span>
+    <span class="c1">#         uuid: UUID of Datasource</span>
+    <span class="c1">#     Returns:</span>
+    <span class="c1">#         None</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     self._datasource_table[site][domain][model][height] = uuid</span>
 
 <div class="viewcode-block" id="Footprints.datasource_lookup"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Footprints.datasource_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">datasource_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">metastore</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Find the Datasource we should assign the data to</span>
