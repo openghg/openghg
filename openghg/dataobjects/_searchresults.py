@@ -2,14 +2,15 @@ from dataclasses import dataclass
 from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
 
 from addict import Dict as aDict
+
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
 from openghg.util import (
     clean_string,
+    create_daterange_str,
     find_daterange_gaps,
     first_last_dates,
     split_daterange_str,
-    create_daterange_str,
 )
 
 __all__ = ["SearchResults"]
@@ -134,7 +135,7 @@ class SearchResults:
             else:
                 keys = self.results[site][species][inlet]["keys"]
         except KeyError:
-            raise ValueError(f"No keys found for {species} at {site}")
+            print(f"No keys found for {species} at {site}")
 
         return keys
 
@@ -161,9 +162,9 @@ class SearchResults:
             if self.ranked_data:
                 metadata: Dict = self.results[site][species]["metadata"]
             else:
-                metadata = self.results[site][species][inlet]["metadata"]
+                metadata: Dict = self.results[site][species][inlet]["metadata"]
         except KeyError:
-            raise KeyError(f"No metadata found for {species} at {site}")
+            print(f"No metadata found for {species} at {site}")
 
         return metadata
 
@@ -186,8 +187,11 @@ class SearchResults:
         return data_dict
 
     def retrieve(
-        self, site: Optional[str] = None, species: Optional[str] = None, inlet: Optional[str] = None
-    ) -> Union[Dict[str, ObsData], ObsData, None]:
+        self,
+        site: Optional[str] = None,
+        species: Optional[str] = None,
+        inlet: Optional[str] = None,
+    ) -> Union[ObsData, List[ObsData], None]:
         """Retrieve some or all of the data found in the object store.
 
         Args:
@@ -200,79 +204,133 @@ class SearchResults:
         species = clean_string(species)
         inlet = clean_string(inlet)
 
-        # If inlet is not specified, check if this is unambiguous
-        # If so, set inlet to be the only value and continue.
-        if inlet is None:
-            try:
-                potential_inlets = self.results[site][species].keys()
-            except KeyError:
-                pass
+        if not self.ranked_data:
+            results = []
+            for _site, site_data in self.results.items():
+                if site is not None and _site != site:
+                    continue
+                for _species, species_data in site_data.items():
+                    if species is not None and _species != species:
+                        continue
+                    for _inlet in species_data:
+                        if inlet is not None and _inlet != inlet:
+                            continue
+
+                        obsdata = self._create_obsdata(site=_site, species=_species, inlet=_inlet)
+
+                        if obsdata is not None:
+                            results.append(obsdata)
+
+            if not results:
+                return None
+            if len(results) == 1:
+                return results[0]
             else:
-                if len(potential_inlets) == 1:
-                    inlet = list(potential_inlets)[0]
-
-        if self.ranked_data:
-            if all((site, species, inlet)):
-                # TODO - how to do this in a cleaner way?
-                site = str(site)
-                species = str(species)
-                inlet = str(inlet)
-                return self._create_obsdata(site=site, species=species, inlet=inlet)
-
-            results = {}
-            if site is not None and species is not None:
-                try:
-                    _ = self.results[site][species]["keys"]
-                except KeyError:
-                    raise KeyError(f"Unable to find data keys for {species} at {site}.")
-
-                return self._create_obsdata(site=site, species=species)
-
-            # Get the data for all the species at that site
-            if site is not None and species is None:
-                for sp in self.results[site]:
-                    key = "_".join((site, sp))
-                    results[key] = self._create_obsdata(site=site, species=sp)
-
                 return results
 
-            # Get the data for all the species at that site
-            if site is None and species is not None:
-                for a_site in self.results:
-                    key = "_".join((a_site, species))
+        # if not self.ranked_data:
+        #     results = []
+        #     # If we've only got site
+        #     if site is not None and species is None and inlet is None:
+        #         try:
+        #             site_data = self.results[site]
+        #         except KeyError:
+        #             pass
+        #         else:
+        #             for _species, inlet_data in site_data.items():
+        #                 for _inlet in inlet_data:
+        #                     obsdata = self._create_obsdata(site=site, species=_species, inlet=_inlet)
+        #                     results.append(obsdata)
 
-                    try:
-                        results[key] = self._create_obsdata(site=a_site, species=species)
-                    except KeyError:
-                        pass
+        #     # If we've only got species
+        #     if site is None and species is not None and inlet is None:
+        #         for _site, site_data in self.results.items():
+        #             for _species, species_data in site_data.items():
+        #                 # Do this as not all sites may have this species
+        #                 if _species == species:
+        #                     for _inlet in species_data:
+        #                         obsdata = self._create_obsdata(site=_site, species=species, inlet=_inlet)
+        #                         results.append(obsdata)
 
-                return results
+        #     # If we've only got inlet
+        #     if site is None and species is None and inlet is not None:
+        #         for _site, site_data in self.results.items():
+        #             for _species, species_data in site_data.items():
+        #                 for _inlet in species_data:
+        #                     # Do this as not all sites may have this inlet
+        #                     if _inlet == inlet:
+        #                         obsdata = self._create_obsdata(site=_site, species=_species, inlet=inlet)
+        #                         results.append(obsdata)
 
-            for a_site, species_list in self.results.items():
-                for sp in species_list:
-                    key = "_".join((a_site, sp))
-                    results[key] = self._create_obsdata(site=a_site, species=sp)
+        #     # If we've got site and species
+        #     if site is not None and species is not None and inlet is None:
+        #         results = []
+        #         try:
+        #             inlet_data = self.results[site][species]
+        #         except KeyError:
+        #             pass
+        #         else:
+        #             for _inlet in inlet_data:
+        #                 obsdata = self._create_obsdata(site=site, species=species, inlet=_inlet)
+        #                 results.append(obsdata)
 
-            return results
+        #     # If we've got site and inlet
+        #     if site is not None and species is None and inlet is not None:
+        #         try:
+        #             site_data = self.results[site]
+        #         except KeyError:
+        #             pass
+        #         else:
+        #             for _species, species_data in self.results[site].items():
+        #                 obsdata = self._create_obsdata(site=site, species=_species, inlet=inlet)
+        #                 results.append(obsdata)
+
+        #     # If we've got species and inlet
+        #     if site is None and species is not None and inlet is not None:
+        #         for _site, site_data in self.results.items():
+        #             try:
+        #                 obsdata = self._create_obsdata(site=_site, species=species, inlet=inlet)
+        #             except KeyError:
+        #                 continue
+        #             else:
+        #                 results.append(obsdata)
+
+        #     if not results:
+        #         return None
+        #     if len(results) == 1:
+        #         return results[0]
+        #     else:
+        #         return results
         else:
-            # if len(self.results) == 1 and not all((species, inlet)):
-            #     raise ValueError("Please pass species and inlet")
-            if not all((species, site, inlet)):
-                try:
-                    potential_inlets = ", ".join(self.results[site][species].keys())
-                    print(f"Please refine your search, potential inlets are: {potential_inlets}")
-                except KeyError:
-                    raise ValueError("We expect species, site and inlet to be passed.")
-                else:
-                    return None
+            if inlet is not None:
+                print(
+                    "Unable to accept inlet argument with ranked data, please pass only site and/or species"
+                )
+                return None
 
-            # TODO - how to do this in a cleaner way for mypy?
-            site = str(site)
-            species = str(species)
-            inlet = str(inlet)
-            return self._create_obsdata(site=site, species=species, inlet=inlet)
+            # Do the above but we don't need to worry about inlet
+            # If we've only got site
+            if site is not None and species is None:
+                results = []
+                for _species in self.results[site]:
+                    obsdata = self._create_obsdata(site=site, species=_species)
+                    results.append(obsdata)
 
-    def _create_obsdata(self, site: str, species: str, inlet: str = None) -> ObsData:
+                return results
+
+            # If we've only got species
+            if site is None and species is not None:
+                results = []
+                for _site, site_data in self.results.items():
+                    for _species, species_data in site_data.items():
+                        # Do this as not all sites may have this species
+                        if _species == species:
+                            obsdata = self._create_obsdata(site=_site, species=species)
+                            results.append(obsdata)
+
+                return results
+
+    def _create_obsdata(self, site: str, species: str, inlet: Optional[str]) -> Optional[ObsData]:
         """Creates an ObsData object for return to the user
 
         Args:
@@ -283,10 +341,13 @@ class SearchResults:
         """
         from xarray import concat
 
-        if self.ranked_data:
-            specific_source = self.results[site][species]
-        else:
-            specific_source = self.results[site][species][inlet]
+        try:
+            if self.ranked_data:
+                specific_source = self.results[site][species]
+            else:
+                specific_source = self.results[site][species][inlet]
+        except KeyError:
+            return None
 
         data_keys = specific_source["keys"]
         metadata = specific_source["metadata"]
@@ -358,7 +419,9 @@ class SearchResults:
 
                     ranked_dateranges = list(ranked_keys.keys())
                     unranked_dateranges = find_daterange_gaps(
-                        start_search=first_date, end_search=last_date, dateranges=ranked_dateranges
+                        start_search=first_date,
+                        end_search=last_date,
+                        dateranges=ranked_dateranges,
                     )
 
                     unranked_metadata = {}
