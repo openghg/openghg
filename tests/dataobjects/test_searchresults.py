@@ -141,86 +141,85 @@ def test_retrieve_bad_search_terms():
     assert data_invalid is None
 
 
+def test_retrieve_complex_ranked():
+    # Clear the ObsSurface ranking data
+    obs = ObsSurface.load()
+    obs._rank_data.clear()
+    obs.save()
 
-# def test_retrieve_complex_ranked():
-#     # Clear the ObsSurface ranking data
-#     obs = ObsSurface.load()
-#     obs._rank_data.clear()
-#     obs.save()
+    rank = rank_sources(site="bsd", species="co")
 
-#     rank = rank_sources(site="bsd", species="co")
+    expected_res = {
+        "42m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
+        "108m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
+        "248m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
+    }
 
-#     expected_res = {
-#         "42m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
-#         "108m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
-#         "248m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
-#     }
+    assert rank.raw() == expected_res
 
-#     assert rank.raw() == expected_res
+    rank.set_rank(inlet="42m", rank=1, start_date="2014-01-01", end_date="2015-03-01")
+    rank.set_rank(inlet="108m", rank=1, start_date="2015-03-02", end_date="2016-08-01")
+    rank.set_rank(inlet="42m", rank=1, start_date="2016-08-02", end_date="2017-03-01")
+    rank.set_rank(inlet="248m", rank=1, start_date="2017-03-02", end_date="2019-03-01")
+    rank.set_rank(inlet="108m", rank=1, start_date="2019-03-02", end_date="2021-12-01")
 
-#     rank.set_rank(inlet="42m", rank=1, start_date="2014-01-01", end_date="2015-03-01")
-#     rank.set_rank(inlet="108m", rank=1, start_date="2015-03-02", end_date="2016-08-01")
-#     rank.set_rank(inlet="42m", rank=1, start_date="2016-08-02", end_date="2017-03-01")
-#     rank.set_rank(inlet="248m", rank=1, start_date="2017-03-02", end_date="2019-03-01")
-#     rank.set_rank(inlet="108m", rank=1, start_date="2019-03-02", end_date="2021-12-01")
+    updated_res = rank.get_sources(site="bsd", species="co")
 
-#     updated_res = rank.get_sources(site="bsd", species="co")
+    expected_updated_res = {
+        "42m": {
+            "rank_data": {
+                "2014-01-01-00:00:00+00:00_2015-03-01-00:00:00+00:00": 1,
+                "2016-08-02-00:00:00+00:00_2017-03-01-00:00:00+00:00": 1,
+            },
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
+        },
+        "108m": {
+            "rank_data": {
+                "2015-03-02-00:00:00+00:00_2016-08-01-00:00:00+00:00": 1,
+                "2019-03-02-00:00:00+00:00_2021-12-01-00:00:00+00:00": 1,
+            },
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
+        },
+        "248m": {
+            "rank_data": {"2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": 1},
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
+        },
+    }
 
-#     expected_updated_res = {
-#         "42m": {
-#             "rank_data": {
-#                 "2014-01-01-00:00:00+00:00_2015-03-01-00:00:00+00:00": 1,
-#                 "2016-08-02-00:00:00+00:00_2017-03-01-00:00:00+00:00": 1,
-#             },
-#             "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
-#         },
-#         "108m": {
-#             "rank_data": {
-#                 "2015-03-02-00:00:00+00:00_2016-08-01-00:00:00+00:00": 1,
-#                 "2019-03-02-00:00:00+00:00_2021-12-01-00:00:00+00:00": 1,
-#             },
-#             "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
-#         },
-#         "248m": {
-#             "rank_data": {"2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": 1},
-#             "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
-#         },
-#     }
+    assert updated_res == expected_updated_res
 
-#     assert updated_res == expected_updated_res
+    search_res = search(site="bsd", species="co")
 
-#     search_res = search(site="bsd", species="co")
+    obsdata = search_res.retrieve(site="bsd", species="co")
 
-#     obsdata = search_res.retrieve(site="bsd", species="co")
+    metadata = obsdata.metadata
 
-#     metadata = obsdata.metadata
+    expected_rank_metadata = {
+        "ranked": {
+            "2014-01-01-00:00:00+00:00_2015-03-01-00:00:00+00:00": "42m",
+            "2016-08-02-00:00:00+00:00_2017-03-01-00:00:00+00:00": "42m",
+            "2015-03-02-00:00:00+00:00_2016-08-01-00:00:00+00:00": "108m",
+            "2019-03-02-00:00:00+00:00_2021-12-01-00:00:00+00:00": "108m",
+            "2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": "248m",
+        },
+        "unranked": {},
+    }
+    assert metadata["rank_metadata"] == expected_rank_metadata
 
-#     expected_rank_metadata = {
-#         "ranked": {
-#             "2014-01-01-00:00:00+00:00_2015-03-01-00:00:00+00:00": "42m",
-#             "2016-08-02-00:00:00+00:00_2017-03-01-00:00:00+00:00": "42m",
-#             "2015-03-02-00:00:00+00:00_2016-08-01-00:00:00+00:00": "108m",
-#             "2019-03-02-00:00:00+00:00_2021-12-01-00:00:00+00:00": "108m",
-#             "2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": "248m",
-#         },
-#         "unranked": {},
-#     }
-#     assert metadata["rank_metadata"] == expected_rank_metadata
+    measurement_data = obsdata.data
 
-#     measurement_data = obsdata.data
+    unique, count = np.unique(measurement_data.time, return_counts=True)
+    # Ensure there are no duplicates
+    assert unique[count > 1].size == 0
 
-#     unique, count = np.unique(measurement_data.time, return_counts=True)
-#     # Ensure there are no duplicates
-#     assert unique[count > 1].size == 0
+    # Make sure the inlets have been written to the Dataset correctly
+    for daterange, inlet in expected_rank_metadata["ranked"].items():
+        start, end = split_daterange_str(daterange, date_only=True)
+        d = measurement_data.sel(time=slice(str(start), str(end)))
 
-#     # Make sure the inlets have been written to the Dataset correctly
-#     for daterange, inlet in expected_rank_metadata["ranked"].items():
-#         start, end = split_daterange_str(daterange, date_only=True)
-#         d = measurement_data.sel(time=slice(str(start), str(end)))
+        all_inlets = np.unique(d["inlet"])
 
-#         all_inlets = np.unique(d["inlet"])
+        assert all_inlets.size == 1
+        assert all_inlets[0] == inlet
 
-#         assert all_inlets.size == 1
-#         assert all_inlets[0] == inlet
-
-#     assert measurement_data.time.size == 126
+    assert measurement_data.time.size == 126

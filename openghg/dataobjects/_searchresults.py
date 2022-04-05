@@ -134,10 +134,10 @@ class SearchResults:
                 keys: List = self.results[site][species]["keys"]
             else:
                 keys = self.results[site][species][inlet]["keys"]
+
+            return keys
         except KeyError:
             print(f"No keys found for {species} at {site}")
-
-        return keys
 
     def metadata(self, site: str, species: str, inlet: Optional[str] = None) -> Dict:
         """Return the metadata for the specified site and species
@@ -234,29 +234,49 @@ class SearchResults:
                 )
                 return None
 
-            # Do the above but we don't need to worry about inlet
-            # If we've only got site
-            if site is not None and species is None:
-                results = []
-                for _species in self.results[site]:
-                    obsdata = self._create_obsdata(site=site, species=_species)
-                    results.append(obsdata)
+            results = []
+            for _site, site_data in self.results.items():
+                if site is not None and _site != site:
+                    continue
+                for _species, species_data in site_data.items():
+                    if species is not None and _species != species:
+                        continue
 
+                    obsdata = self._create_obsdata(site=_site, species=_species)
+
+                    if obsdata is not None:
+                        results.append(obsdata)
+
+            if not results:
+                return None
+            if len(results) == 1:
+                return results[0]
+            else:
                 return results
 
-            # If we've only got species
-            if site is None and species is not None:
-                results = []
-                for _site, site_data in self.results.items():
-                    for _species, species_data in site_data.items():
-                        # Do this as not all sites may have this species
-                        if _species == species:
-                            obsdata = self._create_obsdata(site=_site, species=species)
-                            results.append(obsdata)
+            # # Do the above but we don't need to worry about inlet
+            # # If we've only got site
+            # if site is not None and species is None:
+            #     results = []
+            #     for _species in self.results[site]:
+            #         obsdata = self._create_obsdata(site=site, species=_species)
+            #         results.append(obsdata)
 
-                return results
+            #     return results
 
-    def _create_obsdata(self, site: str, species: str, inlet: Optional[str]) -> Optional[ObsData]:
+            # # If we've only got species
+            # if site is None and species is not None:
+            #     results = []
+            #     for _site, site_data in self.results.items():
+            #         for _species, species_data in site_data.items():
+            #             # Do this as not all sites may have this species
+            #             if _species == species:
+            #                 obsdata = self._create_obsdata(site=_site, species=species)
+            #                 results.append(obsdata)
+
+            #     return results
+
+    def _create_obsdata(self, site: str, species: str, inlet: Optional[str] = None) -> Optional[ObsData]:
         """Creates an ObsData object for return to the user
 
         Args:
