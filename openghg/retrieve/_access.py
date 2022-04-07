@@ -1,9 +1,9 @@
 from xarray import Dataset
 from typing import Dict, List, Optional, Union
 from pandas import Timestamp
-from openghg.dataobjects import ObsData, FootprintData, FluxData
+from openghg.dataobjects import ObsData, FootprintData, FluxData, BoundaryConditionsData
 
-__all__ = ["get_obs_surface", "get_footprint", "get_flux"]
+__all__ = ["get_obs_surface", "get_footprint", "get_flux", "get_bc"]
 
 
 def get_obs_surface(
@@ -255,7 +255,10 @@ def get_flux(
     """
     from openghg.retrieve import search
     from openghg.store import recombine_datasets
-    from openghg.util import timestamp_epoch, timestamp_now
+    from openghg.util import clean_string, timestamp_epoch, timestamp_now
+
+    # Find the correct synonym for the passed species
+    species = clean_string(_synonyms(species))
 
     if start_date is None:
         start_date = timestamp_epoch()
@@ -306,6 +309,70 @@ def get_flux(
     )
 
 
+def get_bc(
+    species: str,
+    domain: str,
+    bc_input: Optional[str] = None,
+    start_date: Optional[Timestamp] = None,
+    end_date: Optional[Timestamp] = None,
+) -> BoundaryConditionsData:
+    """
+    Get boundary conditions for a given species, domain and bc_input name.
+
+    Args:
+        species: Species name
+        bc_input: Input used to create boundary conditions. For example:
+            - a model name such as "MOZART" or "CAMS"
+            - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
+        domain: Region for boundary conditions e.g. EUROPE
+        start_date: Start date
+        end_date: End date
+    Returns:
+        BoundaryConditionsData: BoundaryConditionsData object
+    """
+    from openghg.retrieve import search
+    from openghg.store import recombine_datasets
+    from openghg.util import clean_string, timestamp_epoch, timestamp_now
+
+    # Find the correct synonym for the passed species
+    species = clean_string(_synonyms(species))
+
+    if start_date is None:
+        start_date = timestamp_epoch()
+    if end_date is None:
+        end_date = timestamp_now()
+
+    results: Dict = search(
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+        start_date=start_date,
+        end_date=end_date,
+        data_type="boundary_conditions",
+    )  # type: ignore
+
+    if not results:
+        raise ValueError(f"Unable to find boundary conditions data for {species} for {bc_input}")
+
+    try:
+        bc_key = list(results.keys())[0]
+    except IndexError:
+        raise ValueError(f"Unable to find any boundary conditions data for {domain} for {species}.")
+
+    data_keys = results[bc_key]["keys"]
+    metadata = results[bc_key]["metadata"]
+
+    bc_ds = recombine_datasets(keys=data_keys, sort=False)
+
+    if species is None:
+        species = metadata.get("species", "NA")
+
+    return BoundaryConditionsData(
+        data=bc_ds,
+        metadata=metadata,
+    )
+
+
 def get_footprint(
     site: str,
     domain: str,
@@ -338,6 +405,10 @@ def get_footprint(
     from openghg.store import recombine_datasets
     from openghg.retrieve import search
     from openghg.dataobjects import FootprintData
+    from openghg.util import clean_string
+
+    # Find the correct synonym for the passed species
+    species = clean_string(_synonyms(species))
 
     results = search(
         site=site,
