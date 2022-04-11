@@ -168,23 +168,34 @@ class SearchResults:
 
         return metadata
 
-    def retrieve_all(self) -> Dict:
+    def retrieve_all(self) -> Union[ObsData, List[ObsData], None]:
         """Retrieve all the data found during the serch
 
         Returns:
-            dict: Dictionary of all data
+            list: List of ObsData objects
         """
-        data = aDict()
+        results = []
 
-        # Can we just traverse the dict without looping?
-        for site, species_data in self.results.items():
-            for species, inlet_data in species_data.items():
-                for inlet in inlet_data:
-                    data[site][species][inlet] = self._create_obsdata(site=site, species=species, inlet=inlet)
+        if self.ranked_data:
+            # Can we just traverse the dict without looping?
+            for site, species_data in self.results.items():
+                for species, inlet_data in species_data.items():
+                    obsdata = self._create_obsdata(site=site, species=species)
+                    results.append(obsdata)
+        else:
+            # Can we just traverse the dict without looping?
+            for site, species_data in self.results.items():
+                for species, inlet_data in species_data.items():
+                    for inlet in inlet_data:
+                        obsdata = self._create_obsdata(site=site, species=species, inlet=inlet)
+                        results.append(obsdata)
 
-        # TODO - update this once addict is stubbed
-        data_dict: Dict = data.to_dict()
-        return data_dict
+        if not results:
+            return None
+        if len(results) == 1:
+            return results[0]
+        else:
+            return results
 
     def retrieve(
         self,
@@ -204,8 +215,8 @@ class SearchResults:
         species = clean_string(species)
         inlet = clean_string(inlet)
 
+        results = []
         if not self.ranked_data:
-            results = []
             for _site, site_data in self.results.items():
                 if site is not None and _site != site:
                     continue
@@ -220,13 +231,6 @@ class SearchResults:
 
                         if obsdata is not None:
                             results.append(obsdata)
-
-            if not results:
-                return None
-            if len(results) == 1:
-                return results[0]
-            else:
-                return results
         else:
             if inlet is not None:
                 print(
@@ -234,7 +238,6 @@ class SearchResults:
                 )
                 return None
 
-            results = []
             for _site, site_data in self.results.items():
                 if site is not None and _site != site:
                     continue
@@ -247,34 +250,12 @@ class SearchResults:
                     if obsdata is not None:
                         results.append(obsdata)
 
-            if not results:
-                return None
-            if len(results) == 1:
-                return results[0]
-            else:
-                return results
-
-            # # Do the above but we don't need to worry about inlet
-            # # If we've only got site
-            # if site is not None and species is None:
-            #     results = []
-            #     for _species in self.results[site]:
-            #         obsdata = self._create_obsdata(site=site, species=_species)
-            #         results.append(obsdata)
-
-            #     return results
-
-            # # If we've only got species
-            # if site is None and species is not None:
-            #     results = []
-            #     for _site, site_data in self.results.items():
-            #         for _species, species_data in site_data.items():
-            #             # Do this as not all sites may have this species
-            #             if _species == species:
-            #                 obsdata = self._create_obsdata(site=_site, species=species)
-            #                 results.append(obsdata)
-
-            #     return results
+        if not results:
+            return None
+        if len(results) == 1:
+            return results[0]
+        else:
+            return results
 
     def _create_obsdata(self, site: str, species: str, inlet: Optional[str] = None) -> Optional[ObsData]:
         """Creates an ObsData object for return to the user

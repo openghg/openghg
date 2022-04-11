@@ -97,7 +97,7 @@ def test_add_data(data):
     assert d.metadata() == expected_metadata
 
 
-def test_versioning():
+def test_versioning(capfd):
     min_tac_filepath = get_datapath(filename="tac.picarro.1minute.100m.min.dat", data_type="CRDS")
     detailed_tac_filepath = get_datapath(filename="tac.picarro.1minute.100m.201407.dat", data_type="CRDS")
 

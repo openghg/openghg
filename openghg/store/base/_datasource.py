@@ -155,8 +155,6 @@ class Datasource:
                     new = new_data.pop(new_daterange)
 
                     print("NOTE: Combining overlapping data dateranges")
-
-                    print(f"DEBUG: {existing_daterange} - {new_daterange}")
                     # Concatenate datasets along time dimension
                     combined = xr_concat((ex, new), dim="time")
                     combined = combined.sortby("time")

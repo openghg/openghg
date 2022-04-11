@@ -2,43 +2,11 @@ import numpy as np
 import pytest
 from helpers import get_datapath
 
+from openghg.dataobjects import SearchResults
 from openghg.client import rank_sources
 from openghg.retrieve import search
 from openghg.store import ObsSurface
 from openghg.util import split_daterange_str
-
-
-def test_overlap_searchresults():
-    # import os
-
-    # os.environ["OPENGHG_PATH"] = "/tmp/test_path"
-
-    site = "tac"
-    network = "DECC"
-    data_type = "CRDS"
-
-    tac_path1 = get_datapath(filename="tac.picarro.1minute.100m.201208.dat", data_type="CRDS")
-    tac_path2 = get_datapath(filename="tac.picarro.1minute.100m.201407.dat", data_type="CRDS")
-    tac_filepaths = [tac_path1, tac_path2]
-    ObsSurface.read_file(filepath=tac_filepaths, data_type=data_type, site=site, network=network)
-
-    tac_100m = get_datapath("tac.picarro.1minute.100m.min.dat", data_type="CRDS")
-
-    ObsSurface.read_file(filepath=tac_100m, data_type="CRDS", site="tac", network="DECC")
-
-    results = search(site="tac")
-
-    tac_data = results.retrieve(site="tac", inlet="100m")
-
-    species = ["co2", "ch4"]
-
-    assert len(tac_data) == 2
-
-    for obs in tac_data:
-        s = obs.metadata["species"]
-
-        species.remove(s)
-
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -174,6 +142,20 @@ def test_retrieve_bad_search_terms():
     assert data_invalid is None
 
 
+def test_retrieve_all_unranked():
+    results = search(site=["bsd", "tac"], species=["ch4", "co"], inlet=["100m", "108m"])
+
+    all_data = results.retrieve_all()
+
+    expected = [("tac", "ch4", "100m"), ("bsd", "ch4", "108m"), ("bsd", "co", "108m")]
+    for obs in all_data:
+        site = obs.metadata["site"]
+        species = obs.metadata["species"]
+        inlet = obs.metadata["inlet"]
+
+        assert (site, species, inlet) in expected
+
+
 def test_retrieve_complex_ranked():
     # Clear the ObsSurface ranking data
     obs = ObsSurface.load()
@@ -256,3 +238,75 @@ def test_retrieve_complex_ranked():
         assert all_inlets[0] == inlet
 
     assert measurement_data.time.size == 126
+
+    # Now we test that retrieve_all works correctly with ranked data
+    results = search(site=["bsd"], species="co")
+
+    all_data = results.retrieve_all()
+
+    metadata = all_data.metadata
+
+    expected_ranking_data = {
+        "ranked": {
+            "2014-01-01-00:00:00+00:00_2015-03-01-00:00:00+00:00": "42m",
+            "2016-08-02-00:00:00+00:00_2017-03-01-00:00:00+00:00": "42m",
+            "2015-03-02-00:00:00+00:00_2016-08-01-00:00:00+00:00": "108m",
+            "2019-03-02-00:00:00+00:00_2021-12-01-00:00:00+00:00": "108m",
+            "2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": "248m",
+        },
+        "unranked": {},
+    }
+
+    assert metadata["rank_metadata"] == expected_ranking_data
+
+    ranking_data = results.rankings()
+
+    expected_rankings = {
+        "bsd": {
+            "co": {
+                "2014-01-01-00:00:00+00:00_2015-03-01-00:00:00+00:00": "42m",
+                "2016-08-02-00:00:00+00:00_2017-03-01-00:00:00+00:00": "42m",
+                "2015-03-02-00:00:00+00:00_2016-08-01-00:00:00+00:00": "108m",
+                "2019-03-02-00:00:00+00:00_2021-12-01-00:00:00+00:00": "108m",
+                "2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": "248m",
+            }
+        }
+    }
+
+    assert ranking_data == expected_rankings
+
+
+def test_retrieve_empty_object():
+    empty = SearchResults(results={}, ranked_data=False, cloud=False)
+
+    result = empty.retrieve(site="test", species="hawk", inlet="888m")
+
+    assert result is None
+
+    result = empty.retrieve_all()
+
+    assert result is None
+
+    empty = SearchResults(results={}, ranked_data=True, cloud=False)
+
+    result_ranked = empty.retrieve(site="test", species="hawk")
+
+    assert result_ranked is None
+
+    result_ranked = empty.retrieve_all()
+
+    assert result_ranked is None
+
+
+def test_retrieve_cloud_raises():
+    results = search(site="bsd")
+
+    results.cloud = True
+
+    with pytest.raises(NotImplementedError):
+        _ = results.retrieve_all()
+
+    results.ranked_data = True
+
+    with pytest.raises(NotImplementedError):
+        _ = results.retrieve_all()
