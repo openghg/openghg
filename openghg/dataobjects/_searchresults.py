@@ -111,7 +111,7 @@ class SearchResults:
         """
         return self.results
 
-    def keys(self, site: str, species: str, inlet: Optional[str] = None) -> List[str]:
+    def keys(self, site: str, species: str, inlet: Optional[str] = None) -> Optional[List[str]]:
         """Return the data keys for the specified site and species.
         This is intended mainly for use in the search function when filling
         gaps of unranked dateranges.
@@ -138,8 +138,9 @@ class SearchResults:
             return keys
         except KeyError:
             print(f"No keys found for {species} at {site}")
+            return None
 
-    def metadata(self, site: str, species: str, inlet: Optional[str] = None) -> Dict:
+    def metadata(self, site: str, species: str, inlet: Optional[str] = None) -> Optional[Dict]:
         """Return the metadata for the specified site and species
 
         Args:
@@ -162,11 +163,12 @@ class SearchResults:
             if self.ranked_data:
                 metadata: Dict = self.results[site][species]["metadata"]
             else:
-                metadata: Dict = self.results[site][species][inlet]["metadata"]
+                metadata = self.results[site][species][inlet]["metadata"]
         except KeyError:
             print(f"No metadata found for {species} at {site}")
-
-        return metadata
+            return None
+        else:
+            return metadata
 
     def retrieve_all(self) -> Union[ObsData, List[ObsData], None]:
         """Retrieve all the data found during the serch
@@ -257,7 +259,7 @@ class SearchResults:
         else:
             return results
 
-    def _create_obsdata(self, site: str, species: str, inlet: Optional[str] = None) -> Optional[ObsData]:
+    def _create_obsdata(self, site: str, species: str, inlet: Optional[str] = None) -> ObsData:
         """Creates an ObsData object for return to the user
 
         Args:
@@ -274,7 +276,7 @@ class SearchResults:
             else:
                 specific_source = self.results[site][species][inlet]
         except KeyError:
-            return None
+            raise ValueError("Error: We can't create an ObsData object using these parameters.")
 
         data_keys = specific_source["keys"]
         metadata = specific_source["metadata"]

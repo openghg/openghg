@@ -310,3 +310,10 @@ def test_retrieve_cloud_raises():
 
     with pytest.raises(NotImplementedError):
         _ = results.retrieve_all()
+
+
+def test_create_obsdata_no_data_raises():
+    empty = SearchResults(results={}, ranked_data=True, cloud=False)
+
+    with pytest.raises(ValueError):
+        _ = empty._create_obsdata(site="rome", inlet="-85m", species="ptarmigan")

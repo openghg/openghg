@@ -616,7 +616,3 @@ def first_last_dates(keys: List) -> Tuple[Timestamp, Timestamp]:
     last = timestamp_tzaware(last_date)
 
     return first, last
-
-
-def check_daterange_overlap(dateranges: List):
-    pass
