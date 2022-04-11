@@ -8,6 +8,39 @@ from openghg.store import ObsSurface
 from openghg.util import split_daterange_str
 
 
+def test_overlap_searchresults():
+    # import os
+
+    # os.environ["OPENGHG_PATH"] = "/tmp/test_path"
+
+    site = "tac"
+    network = "DECC"
+    data_type = "CRDS"
+
+    tac_path1 = get_datapath(filename="tac.picarro.1minute.100m.201208.dat", data_type="CRDS")
+    tac_path2 = get_datapath(filename="tac.picarro.1minute.100m.201407.dat", data_type="CRDS")
+    tac_filepaths = [tac_path1, tac_path2]
+    ObsSurface.read_file(filepath=tac_filepaths, data_type=data_type, site=site, network=network)
+
+    tac_100m = get_datapath("tac.picarro.1minute.100m.min.dat", data_type="CRDS")
+
+    ObsSurface.read_file(filepath=tac_100m, data_type="CRDS", site="tac", network="DECC")
+
+    results = search(site="tac")
+
+    tac_data = results.retrieve(site="tac", inlet="100m")
+
+    species = ["co2", "ch4"]
+
+    assert len(tac_data) == 2
+
+    for obs in tac_data:
+        s = obs.metadata["species"]
+
+        species.remove(s)
+
+
+
 @pytest.fixture(scope="session", autouse=True)
 def load_CRDS():
     tac_100m = get_datapath("tac.picarro.1minute.100m.min.dat", data_type="CRDS")

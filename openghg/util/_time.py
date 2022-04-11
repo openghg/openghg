@@ -29,7 +29,7 @@ __all__ = [
 
 
 def find_duplicate_timestamps(data: Union[Dataset, DataFrame]) -> List:
-    """ Check for duplicates
+    """Check for duplicates
 
     Args:
         data: Data object to check. Should have a time attribute or index
@@ -616,3 +616,7 @@ def first_last_dates(keys: List) -> Tuple[Timestamp, Timestamp]:
     last = timestamp_tzaware(last_date)
 
     return first, last
+
+
+def check_daterange_overlap(dateranges: List):
+    pass
