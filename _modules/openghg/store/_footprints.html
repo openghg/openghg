@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.g7467756.dirty documentation</title>
+    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.gb4d782a.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -192,9 +192,8 @@
         <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">retrieve_met</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">high_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="c1"># model_params: Optional[Dict] = None,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Reads footprints data files and returns the UUIDS of the Datasources</span>
@@ -208,9 +207,6 @@
 <span class="sd">            domain: Domain of footprints</span>
 <span class="sd">            model_params: Model run parameters</span>
 <span class="sd">            retrieve_met: Whether to also download meterological data for this footprints area</span>
-<span class="sd">            high_spatial_res : Indicate footprints include both a low and high spatial resolution.</span>
-<span class="sd">            high_time_res: Indicate footprints are high time resolution (include H_back dimension)</span>
-<span class="sd">                           Note this will be set to True automatically for Carbon Dioxide data.</span>
 <span class="sd">            overwrite: Overwrite any currently stored data</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: UUIDs of Datasources data has been assigned to</span>
@@ -271,35 +267,18 @@
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_time_resolution&quot;</span>
 
-        <span class="c1"># TODO: Pull out links to underlying data format into a separate format function</span>
-        <span class="c1">#  - high_spatial_res - data vars - &quot;fp_low&quot;, &quot;fp_high&quot;, coords - &quot;lat_high&quot;, &quot;lon_high&quot;</span>
-        <span class="c1">#  - high_time_res - data vars - &quot;fp_HiTRes&quot;, coords - &quot;H_back&quot;</span>
-
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;spatial_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_spatial_resolution&quot;</span>
-
-        <span class="k">if</span> <span class="n">high_spatial_res</span><span class="p">:</span>
+        <span class="c1"># If it&#39;s a high resolution footprints file we&#39;ll have two sets of lat/long values</span>
+        <span class="k">if</span> <span class="n">high_res</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_longitude_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lon_high&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
                 <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_longitude_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lon_high&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
                 <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_latitude_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lat_high&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
                 <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_latitude_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lat_high&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
-
-                <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;spatial_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;high_spatial_resolution&quot;</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Expected high spatial resolution. Unable to find lat_high or lon_high data.&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span>
-            <span class="c1"># Expect co2 data to have high time resolution</span>
-            <span class="n">high_time_res</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_time_resolution&quot;</span>
-
-        <span class="k">if</span> <span class="n">high_time_res</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;fp_HiTRes&quot;</span> <span class="ow">in</span> <span class="n">fp_data</span><span class="p">:</span>
                 <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;high_time_resolution&quot;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Expected high time resolution. Unable to find fp_HiTRes data.&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Unable to find lat_high or lon_high data.&quot;</span><span class="p">)</span>
 
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;heights&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">fp_data</span><span class="o">.</span><span class="n">height</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
         <span class="c1"># Do we also need to save all the variables we have available in this footprints?</span>
