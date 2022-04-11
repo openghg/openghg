@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Union, Any
 from xarray import Dataset
 from tinydb import TinyDB
 import numpy as np
@@ -175,7 +175,7 @@ class BoundaryConditions(BaseStore):
         return datasource_uuids
 
     @staticmethod
-    def format() -> dict:
+    def format() -> Dict[str, Any]:
         """
         Define format for boundary conditions Dataset.
         TODO: Implement this!
@@ -204,35 +204,6 @@ class BoundaryConditions(BaseStore):
         # TODO: Create check_format() function to define and align format to
         # expected values within database
         pass
-
-    def lookup_uuid(self, species: str, bc_input: str, domain: str, date: str) -> Union[str, bool]:
-        """Perform a lookup for the UUID of a Datasource
-
-        Args:
-            species: Site code
-            bc_input: Input identifier for boundary conditions
-            domain: Domain
-            date: Date of original file
-        Returns:
-            str or dict: UUID or False if no entry
-        """
-        uuid = self._datasource_table[species][bc_input][domain][date]
-
-        return uuid if uuid else False
-
-    def set_uuid(self, species: str, bc_input: str, domain: str, date: str, uuid: str) -> None:
-        """Record a UUID of a Datasource in the datasource table
-
-        Args:
-            species: Site code
-            bc_input: Input identifier for boundary conditions
-            domain: Domain
-            date: Date of original file
-            uuid: UUID of Datasource
-        Returns:
-            None
-        """
-        self._datasource_table[species][bc_input][domain][date] = uuid
 
     def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to

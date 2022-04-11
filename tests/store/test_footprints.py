@@ -6,7 +6,7 @@ from openghg.objectstore import get_local_bucket
 from helpers import get_footprint_datapath
 
 
-def test_read_footprint():
+def test_read_footprint_high_spatial_res():
     get_local_bucket()
 
     datapath = get_footprint_datapath("footprint_test.nc")
@@ -19,13 +19,14 @@ def test_read_footprint():
     model = "test_model"
 
     Footprints.read_file(
-        filepath=datapath, 
-        site=site, 
-        model=model, 
-        network=network, 
-        height=height, 
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
         domain=domain,
         period="monthly",
+        high_spatial_res=True,
     )
 
     # Get the footprints data
@@ -115,98 +116,146 @@ def test_read_footprint():
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
+        "spatial_resolution": "high_spatial_resolution",
+        "max_latitude_high": 52.01937,
+        "max_longitude_high": 0.468,
+        "min_latitude_high": 50.87064,
+        "min_longitude_high": -1.26,
         "time_resolution": "standard_time_resolution",
     }
 
     assert footprint_data.attrs == expected_attrs
 
-    footprint_data["fp_low"].max().values == pytest.approx(0.43350983)
-    footprint_data["fp_high"].max().values == pytest.approx(0.11853027)
-    footprint_data["pressure"].max().values == pytest.approx(1011.92)
-    footprint_data["fp_low"].min().values == 0.0
-    footprint_data["fp_high"].min().values == 0.0
-    footprint_data["pressure"].min().values == pytest.approx(1011.92)
+    assert footprint_data["fp_low"].max().values == pytest.approx(0.43350983)
+    assert footprint_data["fp_high"].max().values == pytest.approx(0.11853027)
+    assert footprint_data["pressure"].max().values == pytest.approx(1011.92)
+    assert footprint_data["fp_low"].min().values == 0.0
+    assert footprint_data["fp_high"].min().values == 0.0
+    assert footprint_data["pressure"].min().values == pytest.approx(1011.92)
 
 
-# def test_read_footprint_co2():
-#     get_local_bucket()
+def test_read_footprint_co2():
+    get_local_bucket()
 
-#     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
 
-#     site = "TAC"
-#     height = "100m"
-#     domain = "TEST"
-#     model = "NAME"
-#     metmodel = "UKV"
-#     species = "co2"
+    site = "TAC"
+    height = "100m"
+    domain = "TEST"
+    model = "NAME"
+    metmodel = "UKV"
+    species = "co2"
 
-#     Footprints.read_file(
-#         filepath=datapath, 
-#         site=site, 
-#         model=model,
-#         metmodel=metmodel,
-#         height=height,
-#         species=species,
-#         domain=domain,
-#         # high_res=True,
-#     )
+    # Expect co2 data to be high time resolution
+    # - could include high_time_res=True but don't need to as this will be set automatically
 
-#     # Get the footprints data
-#     footprint_results = search(site=site, domain=domain, species=species, data_type="footprints")
+    Footprints.read_file(
+        filepath=datapath,
+        site=site,
+        model=model,
+        metmodel=metmodel,
+        height=height,
+        species=species,
+        domain=domain,
+    )
 
-#     fp_site_key = list(footprint_results.keys())[0]
+    # Get the footprints data
+    footprint_results = search(site=site, domain=domain, species=species, data_type="footprints")
 
-#     footprint_keys = footprint_results[fp_site_key]["keys"]
-#     footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
+    fp_site_key = list(footprint_results.keys())[0]
 
-#     footprint_coords = list(footprint_data.coords.keys())
+    footprint_keys = footprint_results[fp_site_key]["keys"]
+    footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
 
-#     # Sorting to allow comparison - coords / dims can be stored in different orders
-#     # depending on how the Dataset has been manipulated
-#     footprint_coords.sort()
-#     assert footprint_coords == ["H_back", "height", "lat", "lev", "lon", "time"]
+    footprint_coords = list(footprint_data.coords.keys())
 
-#     assert "fp" in footprint_data.data_vars
-#     assert "fp_HiTRes" in footprint_data.data_vars
+    # Sorting to allow comparison - coords / dims can be stored in different orders
+    # depending on how the Dataset has been manipulated
+    footprint_coords.sort()
+    assert footprint_coords == ["H_back", "height", "lat", "lev", "lon", "time"]
 
-#     expected_attrs = {
-#         "author": "OpenGHG Cloud",
-#         "data_type": "footprints",
-#         "site": "tac",
-#         "height": "100m",
-#         "model": "NAME",
-#         "species": "co2",
-#         "metmodel": "ukv",
-#         "domain": "test",
-#         "start_date": "2014-07-01 00:00:00+00:00",
-#         "end_date": "2014-07-04 00:59:59+00:00",
-#         "time_period": "1 hour",
-#         "max_longitude": 3.476,
-#         "min_longitude": -0.396,
-#         "max_latitude": 53.785,
-#         "min_latitude": 51.211,
-#         # "time_resolution": "high_time_resolution",
-#     }
+    assert "fp" in footprint_data.data_vars
+    assert "fp_HiTRes" in footprint_data.data_vars
 
-#     for key in expected_attrs:
-#         assert footprint_data.attrs[key] == expected_attrs[key]
+    expected_attrs = {
+        "author": "OpenGHG Cloud",
+        "data_type": "footprints",
+        "site": "tac",
+        "height": "100m",
+        "model": "NAME",
+        "species": "co2",
+        "metmodel": "ukv",
+        "domain": "test",
+        "start_date": "2014-07-01 00:00:00+00:00",
+        "end_date": "2014-07-04 00:59:59+00:00",
+        "max_longitude": 3.476,
+        "min_longitude": -0.396,
+        "max_latitude": 53.785,
+        "min_latitude": 51.211,
+        "spatial_resolution" : "standard_spatial_resolution",
+        "time_resolution": "high_time_resolution",
+        "time_period": "1 hour",
+    }
+
+    for key in expected_attrs:
+        assert footprint_data.attrs[key] == expected_attrs[key]
 
 
-def test_set_lookup_uuids():
-    f = Footprints()
+def test_read_footprint_standard():
+    get_local_bucket()
 
-    fake_uuid = "123456789"
+    datapath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
 
-    site = "test_site"
-    domain = "test_domain"
-    model = "test_model"
-    height = "test_height"
+    site = "TAC"
+    height = "100m"
+    domain = "EUROPE"
+    model = "NAME"
 
-    f.set_uuid(site=site, domain=domain, model=model, height=height, uuid=fake_uuid)
+    Footprints.read_file(
+        filepath=datapath,
+        site=site,
+        model=model,
+        height=height,
+        domain=domain,
+    )
 
-    found_uid = f.lookup_uuid(site=site, domain=domain, model=model, height=height)
+    # Get the footprints data
+    footprint_results = search(site=site, domain=domain, data_type="footprints")
 
-    assert f._datasource_table[site][domain][model][height] == found_uid == fake_uuid
+    fp_site_key = list(footprint_results.keys())[0]
+
+    footprint_keys = footprint_results[fp_site_key]["keys"]
+    footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
+
+    footprint_coords = list(footprint_data.coords.keys())
+
+    # Sorting to allow comparison - coords / dims can be stored in different orders
+    # depending on how the Dataset has been manipulated
+    footprint_coords.sort()
+    assert footprint_coords == ["height", "lat", "lev", "lon", "time"]
+
+    assert "fp" in footprint_data.data_vars
+
+    expected_attrs = {
+        "author": "OpenGHG Cloud",
+        "data_type": "footprints",
+        "site": "tac",
+        "height": "100m",
+        "model": "NAME",
+        "domain": "europe",
+        "start_date": "2012-08-01 00:00:00+00:00",
+        "end_date": "2012-08-31 23:59:59+00:00",
+        "max_longitude": 39.38,
+        "min_longitude": -97.9,
+        "max_latitude": 79.057,
+        "min_latitude": 10.729,
+        "spatial_resolution" : "standard_spatial_resolution",
+        "time_resolution": "standard_time_resolution",
+        "time_period": "2 hours",
+    }
+
+    for key in expected_attrs:
+        assert footprint_data.attrs[key] == expected_attrs[key]
 
 
 def test_datasource_add_lookup():
@@ -233,5 +282,3 @@ def test_datasource_add_lookup():
         lookup = f.datasource_lookup(metadata=fake_metadata, metastore=metastore)
 
         assert lookup["tmb_lghg_10m_europe"] == fake_datasource["tmb_lghg_10m_europe"]["uuid"]
-
-
