@@ -36,7 +36,7 @@ def infer_date_range(time: DataArray,
         continuous: Whether time stamps have to be continuous.
 
     Returns:
-        str, str, str:
+        Timestamp, Timestamp, str:
             Derived start date, end date and period (containing the value and unit).
     """
 
