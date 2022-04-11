@@ -187,15 +187,14 @@ def test_read_footprint_co2():
         "metmodel": "ukv",
         "domain": "test",
         "start_date": "2014-07-01 00:00:00+00:00",
-        "end_date": "2014-07-04 00:00:00+00:00",
-        # "end_date": "2014-07-04 00:59:59+00:00",
+        "end_date": "2014-07-04 00:59:59+00:00",
         "max_longitude": 3.476,
         "min_longitude": -0.396,
         "max_latitude": 53.785,
         "min_latitude": 51.211,
         "spatial_resolution" : "standard_spatial_resolution",
         "time_resolution": "high_time_resolution",
-        # "time_period": "1 hour",
+        "time_period": "1 hour",
     }
 
     for key in expected_attrs:
@@ -245,83 +244,18 @@ def test_read_footprint_standard():
         "model": "NAME",
         "domain": "europe",
         "start_date": "2012-08-01 00:00:00+00:00",
-        "end_date": "2012-08-31 22:00:00+00:00",
-        # "end_date": "2012-08-31 23:59:59+00:00",
+        "end_date": "2012-08-31 23:59:59+00:00",
         "max_longitude": 39.38,
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
         "spatial_resolution" : "standard_spatial_resolution",
         "time_resolution": "standard_time_resolution",
-        # "time_period": "2 hours",
+        "time_period": "2 hours",
     }
 
     for key in expected_attrs:
         assert footprint_data.attrs[key] == expected_attrs[key]
-
-
-# def test_read_footprint_co2():
-#     get_local_bucket()
-
-#     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
-
-#     site = "TAC"
-#     height = "100m"
-#     domain = "TEST"
-#     model = "NAME"
-#     metmodel = "UKV"
-#     species = "co2"
-
-#     Footprints.read_file(
-#         filepath=datapath, 
-#         site=site, 
-#         model=model,
-#         metmodel=metmodel,
-#         height=height,
-#         species=species,
-#         domain=domain,
-#         # high_res=True,
-#     )
-
-#     # Get the footprints data
-#     footprint_results = search(site=site, domain=domain, species=species, data_type="footprints")
-
-#     fp_site_key = list(footprint_results.keys())[0]
-
-#     footprint_keys = footprint_results[fp_site_key]["keys"]
-#     footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
-
-#     footprint_coords = list(footprint_data.coords.keys())
-
-#     # Sorting to allow comparison - coords / dims can be stored in different orders
-#     # depending on how the Dataset has been manipulated
-#     footprint_coords.sort()
-#     assert footprint_coords == ["H_back", "height", "lat", "lev", "lon", "time"]
-
-#     assert "fp" in footprint_data.data_vars
-#     assert "fp_HiTRes" in footprint_data.data_vars
-
-#     expected_attrs = {
-#         "author": "OpenGHG Cloud",
-#         "data_type": "footprints",
-#         "site": "tac",
-#         "height": "100m",
-#         "model": "NAME",
-#         "species": "co2",
-#         "metmodel": "ukv",
-#         "domain": "test",
-#         "start_date": "2014-07-01 00:00:00+00:00",
-#         "end_date": "2014-07-04 00:59:59+00:00",
-#         "time_period": "1 hour",
-#         "max_longitude": 3.476,
-#         "min_longitude": -0.396,
-#         "max_latitude": 53.785,
-#         "min_latitude": 51.211,
-#         # "time_resolution": "high_time_resolution",
-#     }
-
-#     for key in expected_attrs:
-#         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
 def test_datasource_add_lookup():
