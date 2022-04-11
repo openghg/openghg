@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._recombination &#8212; OpenGHG 0+untagged.1.gb4d782a.dirty documentation</title>
+    <title>openghg.store._recombination &#8212; OpenGHG 0+untagged.1.gdb13170.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -269,11 +269,7 @@
     <span class="n">unique</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">combined</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">n_dupes</span> <span class="o">=</span> <span class="n">unique</span><span class="p">[</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
 
-    <span class="n">dupes</span> <span class="o">=</span> <span class="n">unique</span><span class="p">[</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
-
     <span class="k">if</span> <span class="n">n_dupes</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">dupes</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Large number of duplicate timestamps, check data overlap.&quot;</span><span class="p">)</span>
 
     <span class="n">combined</span> <span class="o">=</span> <span class="n">combined</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>

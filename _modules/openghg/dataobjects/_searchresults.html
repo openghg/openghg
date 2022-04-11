@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._searchresults &#8212; OpenGHG 0+untagged.1.gb4d782a.dirty documentation</title>
+    <title>openghg.dataobjects._searchresults &#8212; OpenGHG 0+untagged.1.gdb13170.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -168,15 +168,14 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">Dict</span> <span class="k">as</span> <span class="n">aDict</span>
-
 <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">ObsData</span>
 <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">clean_string</span><span class="p">,</span>
-    <span class="n">create_daterange_str</span><span class="p">,</span>
     <span class="n">find_daterange_gaps</span><span class="p">,</span>
     <span class="n">first_last_dates</span><span class="p">,</span>
     <span class="n">split_daterange_str</span><span class="p">,</span>
+    <span class="n">create_daterange_str</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;SearchResults&quot;</span><span class="p">]</span>
@@ -277,7 +276,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span></div>
 
-<div class="viewcode-block" id="SearchResults.keys"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<div class="viewcode-block" id="SearchResults.keys"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Return the data keys for the specified site and species.</span>
 <span class="sd">        This is intended mainly for use in the search function when filling</span>
 <span class="sd">        gaps of unranked dateranges.</span>
@@ -300,13 +299,12 @@
                 <span class="n">keys</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
-
-            <span class="k">return</span> <span class="n">keys</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No keys found for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No keys found for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SearchResults.metadata"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults.metadata">[docs]</a>    <span class="k">def</span> <span class="nf">metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">keys</span></div>
+
+<div class="viewcode-block" id="SearchResults.metadata"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults.metadata">[docs]</a>    <span class="k">def</span> <span class="nf">metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return the metadata for the specified site and species</span>
 
 <span class="sd">        Args:</span>
@@ -331,46 +329,31 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No metadata found for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">metadata</span></div>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No metadata found for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SearchResults.retrieve_all"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults.retrieve_all">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">metadata</span></div>
+
+<div class="viewcode-block" id="SearchResults.retrieve_all"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults.retrieve_all">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Retrieve all the data found during the serch</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            list: List of ObsData objects</span>
+<span class="sd">            dict: Dictionary of all data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">aDict</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ranked_data</span><span class="p">:</span>
-            <span class="c1"># Can we just traverse the dict without looping?</span>
-            <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">species_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">for</span> <span class="n">species</span><span class="p">,</span> <span class="n">inlet_data</span> <span class="ow">in</span> <span class="n">species_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">obsdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_obsdata</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
-                    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obsdata</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Can we just traverse the dict without looping?</span>
-            <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">species_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">for</span> <span class="n">species</span><span class="p">,</span> <span class="n">inlet_data</span> <span class="ow">in</span> <span class="n">species_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">for</span> <span class="n">inlet</span> <span class="ow">in</span> <span class="n">inlet_data</span><span class="p">:</span>
-                        <span class="n">obsdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_obsdata</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span>
-                        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obsdata</span><span class="p">)</span>
+        <span class="c1"># Can we just traverse the dict without looping?</span>
+        <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">species_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">species</span><span class="p">,</span> <span class="n">inlet_data</span> <span class="ow">in</span> <span class="n">species_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">inlet</span> <span class="ow">in</span> <span class="n">inlet_data</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="n">inlet</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_obsdata</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">results</span></div>
+        <span class="c1"># TODO - update this once addict is stubbed</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">data_dict</span></div>
 
 <div class="viewcode-block" id="SearchResults.retrieve"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults.retrieve">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ObsData</span><span class="p">],</span> <span class="n">ObsData</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Retrieve some or all of the data found in the object store.</span>
 
 <span class="sd">        Args:</span>
@@ -383,49 +366,79 @@
         <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
         <span class="n">inlet</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
 
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ranked_data</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">_site</span><span class="p">,</span> <span class="n">site_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_site</span> <span class="o">!=</span> <span class="n">site</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                <span class="k">for</span> <span class="n">_species</span><span class="p">,</span> <span class="n">species_data</span> <span class="ow">in</span> <span class="n">site_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_species</span> <span class="o">!=</span> <span class="n">species</span><span class="p">:</span>
-                        <span class="k">continue</span>
-                    <span class="k">for</span> <span class="n">_inlet</span> <span class="ow">in</span> <span class="n">species_data</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_inlet</span> <span class="o">!=</span> <span class="n">inlet</span><span class="p">:</span>
-                            <span class="k">continue</span>
+        <span class="c1"># If inlet is not specified, check if this is unambiguous</span>
+        <span class="c1"># If so, set inlet to be the only value and continue.</span>
+        <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">potential_inlets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">potential_inlets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">inlet</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">potential_inlets</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-                        <span class="n">obsdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_obsdata</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">_site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">_species</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">_inlet</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ranked_data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">((</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">inlet</span><span class="p">)):</span>
+                <span class="c1"># TODO - how to do this in a cleaner way?</span>
+                <span class="n">site</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+                <span class="n">species</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+                <span class="n">inlet</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_obsdata</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span>
 
-                        <span class="k">if</span> <span class="n">obsdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obsdata</span><span class="p">)</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to find data keys for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_obsdata</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
+
+            <span class="c1"># Get the data for all the species at that site</span>
+            <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">]:</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">site</span><span class="p">,</span> <span class="n">sp</span><span class="p">))</span>
+                    <span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_obsdata</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">sp</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="n">results</span>
+
+            <span class="c1"># Get the data for all the species at that site</span>
+            <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">a_site</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">a_site</span><span class="p">,</span> <span class="n">species</span><span class="p">))</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_obsdata</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">a_site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                <span class="k">return</span> <span class="n">results</span>
+
+            <span class="k">for</span> <span class="n">a_site</span><span class="p">,</span> <span class="n">species_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">species_list</span><span class="p">:</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">a_site</span><span class="p">,</span> <span class="n">sp</span><span class="p">))</span>
+                    <span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_obsdata</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">a_site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">sp</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">results</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span>
-                    <span class="s2">&quot;Unable to accept inlet argument with ranked data, please pass only site and/or species&quot;</span>
-                <span class="p">)</span>
-                <span class="k">return</span> <span class="kc">None</span>
+            <span class="c1"># if len(self.results) == 1 and not all((species, inlet)):</span>
+            <span class="c1">#     raise ValueError(&quot;Please pass species and inlet&quot;)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">((</span><span class="n">species</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">inlet</span><span class="p">)):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">potential_inlets</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Please refine your search, potential inlets are: </span><span class="si">{</span><span class="n">potential_inlets</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;We expect species, site and inlet to be passed.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">None</span>
 
-            <span class="k">for</span> <span class="n">_site</span><span class="p">,</span> <span class="n">site_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_site</span> <span class="o">!=</span> <span class="n">site</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                <span class="k">for</span> <span class="n">_species</span><span class="p">,</span> <span class="n">species_data</span> <span class="ow">in</span> <span class="n">site_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_species</span> <span class="o">!=</span> <span class="n">species</span><span class="p">:</span>
-                        <span class="k">continue</span>
+            <span class="c1"># TODO - how to do this in a cleaner way for mypy?</span>
+            <span class="n">site</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+            <span class="n">species</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+            <span class="n">inlet</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_obsdata</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span></div>
 
-                    <span class="n">obsdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_obsdata</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">_site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">_species</span><span class="p">)</span>
-
-                    <span class="k">if</span> <span class="n">obsdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obsdata</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">results</span></div>
-
-    <span class="k">def</span> <span class="nf">_create_obsdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsData</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_create_obsdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsData</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates an ObsData object for return to the user</span>
 
 <span class="sd">        Args:</span>
@@ -436,13 +449,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">concat</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ranked_data</span><span class="p">:</span>
-                <span class="n">specific_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">specific_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="n">inlet</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error: We can&#39;t create an ObsData object using these parameters.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ranked_data</span><span class="p">:</span>
+            <span class="n">specific_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">specific_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">species</span><span class="p">][</span><span class="n">inlet</span><span class="p">]</span>
 
         <span class="n">data_keys</span> <span class="o">=</span> <span class="n">specific_source</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
         <span class="n">metadata</span> <span class="o">=</span> <span class="n">specific_source</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
@@ -514,9 +524,7 @@
 
                     <span class="n">ranked_dateranges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ranked_keys</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
                     <span class="n">unranked_dateranges</span> <span class="o">=</span> <span class="n">find_daterange_gaps</span><span class="p">(</span>
-                        <span class="n">start_search</span><span class="o">=</span><span class="n">first_date</span><span class="p">,</span>
-                        <span class="n">end_search</span><span class="o">=</span><span class="n">last_date</span><span class="p">,</span>
-                        <span class="n">dateranges</span><span class="o">=</span><span class="n">ranked_dateranges</span><span class="p">,</span>
+                        <span class="n">start_search</span><span class="o">=</span><span class="n">first_date</span><span class="p">,</span> <span class="n">end_search</span><span class="o">=</span><span class="n">last_date</span><span class="p">,</span> <span class="n">dateranges</span><span class="o">=</span><span class="n">ranked_dateranges</span>
                     <span class="p">)</span>
 
                     <span class="n">unranked_metadata</span> <span class="o">=</span> <span class="p">{}</span>
