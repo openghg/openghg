@@ -12,7 +12,7 @@ import xarray as xr
 from openghg.store.base import Datasource
 from openghg.standardise.surface import parse_crds
 from openghg.objectstore import get_local_bucket, get_object_names
-from openghg.util import create_daterange_str, timestamp_tzaware
+from openghg.util import create_daterange_str, timestamp_tzaware, pairwise, daterange_overlap
 from helpers import get_datapath
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
@@ -97,7 +97,12 @@ def test_add_data(data):
     assert d.metadata() == expected_metadata
 
 
-def test_versioning(data):
+def test_versioning():
+    min_tac_filepath = get_datapath(filename="tac.picarro.1minute.100m.min.dat", data_type="CRDS")
+    detailed_tac_filepath = get_datapath(filename="tac.picarro.1minute.100m.201407.dat", data_type="CRDS")
+
+    min_data = parse_crds(data_filepath=min_tac_filepath, site="tac", inlet="100m", network="decc")
+
     # Take head of data
     # Then add the full data, check versioning works correctly
     metadata = {"foo": "bar"}
@@ -106,44 +111,51 @@ def test_versioning(data):
     # Fix the UUID for the tests
     d._uuid = "4b91f73e-3d57-47e4-aa13-cb28c35d3b3d"
 
-    ch4_data = data["ch4"]["data"]
+    min_ch4_data = min_data["ch4"]["data"]
 
-    v1 = ch4_data.head(20)
-    v2 = ch4_data.head(30)
-    v3 = ch4_data.head(40)
-
-    d.add_data(metadata=metadata, data=v1, data_type="timeseries")
+    d.add_data(metadata=metadata, data=min_ch4_data, data_type="timeseries")
 
     d.save()
 
-    d.add_data(metadata=metadata, data=v2, data_type="timeseries")
+    min_keys = d.versions()
+
+    expected_v1 = {
+        "2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00",
+        "2013-07-28-06:25:30+00:00_2013-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2013-07-28-06:25:30+00:00_2013-07-28-02:45:30+00:00",
+        "2014-07-28-06:25:30+00:00_2014-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2014-07-28-06:25:30+00:00_2014-07-28-02:45:30+00:00",
+        "2015-07-28-06:25:30+00:00_2015-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2015-07-28-06:25:30+00:00_2015-07-28-02:45:30+00:00",
+        "2016-07-28-06:25:30+00:00_2016-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2016-07-28-06:25:30+00:00_2016-07-28-02:45:30+00:00",
+        "2017-07-28-06:25:30+00:00_2017-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2017-07-28-06:25:30+00:00_2017-07-28-02:45:30+00:00",
+        "2018-07-28-06:25:30+00:00_2018-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2018-07-28-06:25:30+00:00_2018-07-28-02:45:30+00:00",
+        "2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00",
+        "2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00",
+    }
+
+    assert min_keys["v1"]["keys"] == expected_v1
+
+    detailed_data = parse_crds(data_filepath=detailed_tac_filepath, site="tac", inlet="100m", network="decc")
+
+    detailed_ch4_data = detailed_data["ch4"]["data"]
+
+    d.add_data(metadata=metadata, data=detailed_ch4_data, data_type="timeseries")
 
     d.save()
 
-    d.add_data(metadata=metadata, data=v3, data_type="timeseries")
+    detailed_keys = d.versions()
 
-    d.save()
-
-    keys = d.versions()
-
-    assert keys["v1"]["keys"] == {
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00",
-    }
-    assert keys["v2"]["keys"] == {
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:17:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2015-01-30-11:12:30+00:00_2015-11-30-11:17:30+00:00",
-    }
-    assert keys["v3"]["keys"] == {
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:17:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2015-01-30-11:12:30+00:00_2015-11-30-11:17:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
-        "2016-04-02-06:52:30+00:00_2016-04-02-06:55:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2016-04-02-06:52:30+00:00_2016-04-02-06:55:30+00:00",
+    expected_v2 = {
+        "2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00",
+        "2013-07-28-06:25:30+00:00_2013-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2013-07-28-06:25:30+00:00_2013-07-28-02:45:30+00:00",
+        "2015-07-28-06:25:30+00:00_2015-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2015-07-28-06:25:30+00:00_2015-07-28-02:45:30+00:00",
+        "2016-07-28-06:25:30+00:00_2016-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2016-07-28-06:25:30+00:00_2016-07-28-02:45:30+00:00",
+        "2017-07-28-06:25:30+00:00_2017-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2017-07-28-06:25:30+00:00_2017-07-28-02:45:30+00:00",
+        "2018-07-28-06:25:30+00:00_2018-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2018-07-28-06:25:30+00:00_2018-07-28-02:45:30+00:00",
+        "2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00",
+        "2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00",
+        "2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00",
     }
 
-    assert keys["v3"]["keys"] == keys["latest"]["keys"]
+    assert detailed_keys["v2"]["keys"] == expected_v2
 
 
 def test_get_dataframe_daterange():
