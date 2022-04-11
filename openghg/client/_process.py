@@ -104,8 +104,9 @@ def process_footprint(
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
     retrieve_met: bool = False,
+    high_spatial_res: bool = False,
+    high_time_res: bool = False,
     overwrite: bool = False,
-    high_res: bool = False,
 ) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -118,6 +119,9 @@ def process_footprint(
         domain: Domain of footprints
         model_params: Model run parameters
         retrieve_met: Whether to also download meterological data for this footprints area
+        high_spatial_res : Indicate footprints include both a low and high spatial resolution.
+        high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+                        Note this will be set to True automatically for Carbon Dioxide data.
         overwrite: Overwrite any currently stored data
     Returns:
         dict: UUIDs of Datasources data has been assigned to
@@ -139,8 +143,9 @@ def process_footprint(
             period=period,
             continuous=continuous,
             retrieve_met=retrieve_met,
+            high_spatial_res=high_spatial_res,
+            high_time_res=high_time_res,
             overwrite=overwrite,
-            high_res=high_res,
         )
 
 
@@ -252,8 +257,9 @@ def _process_footprint_local(
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
     retrieve_met: bool = False,
+    high_spatial_res: bool = False,
+    high_time_res: bool = False,
     overwrite: bool = False,
-    high_res: bool = False,
 ) -> Dict:
     """Reads footprints data files and returns the UUIDs of the Datasources
     the processed data has been assigned to in the local object store.
@@ -266,6 +272,9 @@ def _process_footprint_local(
         domain: Domain of footprints
         model_params: Model run parameters
         retrieve_met: Whether to also download meterological data for this footprints area
+        high_spatial_res : Indicate footprints include both a low and high spatial resolution.
+        high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+                        Note this will be set to True automatically for Carbon Dioxide data.
         overwrite: Overwrite any currently stored data
     Returns:
         dict: Dictionary of Datasource UUIDs data assigned to
@@ -282,8 +291,9 @@ def _process_footprint_local(
         period=period,
         continuous=continuous,
         retrieve_met=retrieve_met,
+        high_spatial_res=high_spatial_res,
+        high_time_res=high_time_res,
         overwrite=overwrite,
-        high_res=high_res,
     )
 
 
