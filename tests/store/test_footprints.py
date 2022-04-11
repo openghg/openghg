@@ -192,23 +192,6 @@ def test_read_footprint():
 #         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
-def test_set_lookup_uuids():
-    f = Footprints()
-
-    fake_uuid = "123456789"
-
-    site = "test_site"
-    domain = "test_domain"
-    model = "test_model"
-    height = "test_height"
-
-    f.set_uuid(site=site, domain=domain, model=model, height=height, uuid=fake_uuid)
-
-    found_uid = f.lookup_uuid(site=site, domain=domain, model=model, height=height)
-
-    assert f._datasource_table[site][domain][model][height] == found_uid == fake_uuid
-
-
 def test_datasource_add_lookup():
     f = Footprints()
 

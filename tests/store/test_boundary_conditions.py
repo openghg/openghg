@@ -121,28 +121,9 @@ def test_read_file_yearly():
     for key in expected_metadata.keys():
         assert metadata[key] == expected_metadata[key]
 
-
 # TODO: Add test for co2 data - need to create TEST region to match other data for this
 # TODO: Add test for multiple values within a file - continuous (maybe monthly)
 # TODO: Add test around non-continuous data and key word?
-
-
-def test_set_lookup_uuids():
-    bc = BoundaryConditions()
-
-    fake_uuid = "123456789"
-
-    species = "test_species"
-    bc_input = "test_bc_input"
-    domain = "test_domain"
-    date = "test_date"
-
-    bc.set_uuid(species=species, bc_input=bc_input, domain=domain, date=date, uuid=fake_uuid)
-
-    found_uid = bc.lookup_uuid(species=species, bc_input=bc_input, domain=domain, date=date)
-
-    assert bc._datasource_table[species][bc_input][domain][date] == found_uid == fake_uuid
-
 
 def test_datasource_add_lookup():
     bc = BoundaryConditions()
