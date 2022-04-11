@@ -94,6 +94,7 @@ class Datasource:
             "emissions",
             "met",
             "footprints",
+            "boundary_conditions",
             "eulerian_model",
         )
 
@@ -103,37 +104,73 @@ class Datasource:
 
         self.add_metadata(metadata=metadata)
 
-        if data_type == "timeseries":
-            return self.add_timeseries_data(data=data)
-        elif data_type == "footprints":
-            return self.add_footprint_data(data=data, metadata=metadata)
-        elif data_type == "emissions":
-            return self.add_emissions_data(data=data, metadata=metadata)
-        elif data_type == "met":
+        if "time" in data.coords:
+            return self.add_timed_data(data=data, data_type=data_type)
+        else:
             raise NotImplementedError()
-        elif data_type == "eulerian_model":
-            return self.add_eulerian_model_data(data=data, metadata=metadata)
 
-    def add_timeseries_data(self, data: Dataset) -> None:
-        """Add timeseries data to this Datasource
+    def add_timed_data(self, data: Dataset, data_type: str) -> None:
+        """Add data to this Datasource, splitting along the time axis
 
         Args:
             data: An xarray.Dataset
         Returns:
             None
         """
-        from openghg.util import daterange_overlap
+        from openghg.util import daterange_overlap, create_daterange_str, relative_time_offset
+        from pandas import Timedelta
 
         # Group by year
         year_group = data.groupby("time.year")
-        year_data = [data for _, data in year_group if data]
 
         # Use a dictionary keyed with the daterange covered by each segment of data
         additional_data = {}
 
-        for year in year_data:
-            daterange_str = self.get_dataset_daterange_str(dataset=year)
-            additional_data[daterange_str] = year
+        # Extract period associated with data from metadata
+        # This will be the "sampling_period" for obs and "time_period" for other
+        metadata = self._metadata
+        time_period_attrs = ["sampling_period", "time_period"]
+        for attr in time_period_attrs:
+            value = metadata.get(attr)
+            if value is not None:
+                # For sampling period data, expect this to be in seconds
+                if attr == "sampling_period":
+                    if value.endswith("s"):  # Check if str includes "s"
+                        period = value
+                    else:
+                        try:
+                            value_num = int(value)
+                        except ValueError:
+                            try:
+                                value_num = int(float(value))
+                            except ValueError:
+                                value_num = None
+                                continue
+                        period = f"{value_num}s"
+                else:
+                    # Expect period data to include value and time unit
+                    period = value
+
+                break
+        else:
+            period = None
+
+        for _, data in year_group:
+            # Extract start and end dates from grouped data
+            start_date, end_date = self.get_dataset_daterange(data)
+
+            # If period is defined add this to the end date
+            # This ensure start-end range includes time period covered by data
+            if period is not None:
+                period_td = relative_time_offset(period=period)
+                end_date = end_date + period_td - Timedelta(seconds=1)  # Subtract 1 second to make this exclusive end.
+
+            # If start and end times are identical add 1 second to ensure the range duration is > 0 seconds
+            if start_date == end_date:
+                end_date += Timedelta(seconds=1)
+
+            daterange_str = create_daterange_str(start=start_date, end=end_date)
+            additional_data[daterange_str] = data
 
         if self._data:
             # We don't want the same data twice, this will be stored in previous versions
@@ -154,7 +191,6 @@ class Datasource:
         else:
             self._data = additional_data
 
-        data_type = "timeseries"
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
         self.update_daterange()
@@ -171,91 +207,6 @@ class Datasource:
 
         lowercased: Dict = to_lowercase(metadata)
         self._metadata.update(lowercased)
-
-    def add_emissions_data(self, data: Dataset, metadata: Dict) -> None:
-        """Add flux data to this Datasource
-
-        Args:
-            data: Flux data as an xarray.Dataset
-            metadata: Metadata
-        Returns:
-            None
-        """
-        self.add_field_data(data=data, metadata=metadata, data_type="emissions")
-
-    def add_footprint_data(self, data: Dataset, metadata: Dict) -> None:
-        """Add footprints data to this Datasource
-
-        Args:
-            data: Footprint data in an xarray.Dataset
-            metadata: Metadata
-        Returns:
-            None
-        """
-        self.add_field_data(data=data, metadata=metadata, data_type="footprints")
-
-    def add_field_data(self, data: Dataset, metadata: Dict, data_type: str) -> None:
-        """Add footprints data to this Datasource
-
-        TODO - unsure if add_field_data is the best name for this function
-        Could add a more general function that allows toggle of chunking
-
-        Args:
-            data: Footprint data in an xarray.Dataset
-            metadata: Metadata
-            data_type: Type of data (footprints, flux, met)
-        Returns:
-            None
-        """
-        from openghg.util import daterange_overlap, create_daterange_str
-
-        # Use a dictionary keyed with the daterange covered by each segment of data
-        new_data = {}
-        # This daterange string covers the whole of the Dataset
-        # For the moment we're not going to chunk footprints
-
-        # As data is stored diffrently for footprint / emissions files we'll
-        # take the daterange from the metadata
-        start_date = metadata["start_date"]
-        end_date = metadata["end_date"]
-
-        daterange_str = create_daterange_str(start=start_date, end=end_date)
-
-        new_data[daterange_str] = data
-
-        if self._data:
-            # We don't want the same data twice, this will be stored in previous versions
-            # Check for overlap between exisiting and new dateranges
-            to_keep = []
-            for current_daterange in self._data:
-                for new_daterange in new_data:
-                    if not daterange_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
-                        to_keep.append(current_daterange)
-
-            updated_data = {}
-            for k in to_keep:
-                updated_data[k] = self._data[k]
-            # Add in the additional new data
-            updated_data.update(new_data)
-
-            self._data = updated_data
-        else:
-            self._data = new_data
-
-        self._data_type = data_type
-        self.add_metadata_key(key="data_type", value=data_type)
-        self.update_daterange()
-
-    def add_eulerian_model_data(self, data: Dataset, metadata: Dict) -> None:
-        """Add Eulerian model data to this Datasource
-
-        Args:
-            data: Eulerian model data as an xarray.Dataset
-            metadata: Metadata
-        Returns:
-            None
-        """
-        self.add_field_data(data=data, metadata=metadata, data_type="eulerian_model")
 
     def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
         """Returns the daterange for the passed DataFrame
@@ -289,8 +240,8 @@ class Datasource:
         from openghg.util import timestamp_tzaware
 
         try:
-            start = timestamp_tzaware(dataset.time[0].values)
-            end = timestamp_tzaware(dataset.time[-1].values)
+            start = timestamp_tzaware(dataset.time.min().values)
+            end = timestamp_tzaware(dataset.time.max().values)
 
             return start, end
         except AttributeError:

@@ -1,9 +1,10 @@
 from tinydb import TinyDB
-from openghg.store.base import BaseStore
 from typing import DefaultDict, Dict, List, Optional, Union, NoReturn
 from pathlib import Path
 from pandas import Timestamp
 from xarray import Dataset
+
+from openghg.store.base import BaseStore
 
 __all__ = ["Footprints"]
 
@@ -25,6 +26,8 @@ class Footprints(BaseStore):
         metmodel: Optional[str] = None,
         species: Optional[str] = None,
         network: Optional[str] = None,
+        period: Optional[Union[str, tuple]] = None,
+        continuous: bool = True,
         retrieve_met: bool = False,
         high_spatial_res: bool = False,
         high_time_res: bool = False,
@@ -37,15 +40,21 @@ class Footprints(BaseStore):
         Args:
             filepath: Path of file to load
             site: Site name
-            network: Network name
             height: Height above ground level in metres
             domain: Domain of footprints
-            model_params: Model run parameters
+            model: Model used to create footprint (e.g. NAME or FLEXPART)
+            metmodel: Underlying meteorlogical model used (e.g. UKV)
+            species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
+            network: Network name
+            period: Period of measurements. Only needed if this can not be inferred from the time coords
+            continuous: Whether time stamps have to be continuous.
             retrieve_met: Whether to also download meterological data for this footprints area
             high_spatial_res : Indicate footprints include both a low and high spatial resolution.
             high_time_res: Indicate footprints are high time resolution (include H_back dimension)
                            Note this will be set to True automatically for Carbon Dioxide data.
             overwrite: Overwrite any currently stored data
+            high_res: ***
+
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -53,11 +62,10 @@ class Footprints(BaseStore):
         from xarray import open_dataset
         from openghg.util import (
             hash_file,
-            timestamp_tzaware,
             timestamp_now,
             clean_string,
         )
-        from openghg.store import assign_data, load_metastore
+        from openghg.store import assign_data, infer_date_range, load_metastore
 
         filepath = Path(filepath)
 
@@ -98,8 +106,17 @@ class Footprints(BaseStore):
         if metmodel is not None:
             metadata["metmodel"] = clean_string(metmodel)
 
-        metadata["start_date"] = str(timestamp_tzaware(fp_data.time[0].values))
-        metadata["end_date"] = str(timestamp_tzaware(fp_data.time[-1].values))
+        fp_time = fp_data.time
+
+        start_date, end_date, period_str \
+            = infer_date_range(fp_time,
+                               filepath=filepath,
+                               period=period,
+                               continuous=continuous)
+
+        metadata["start_date"] = str(start_date)
+        metadata["end_date"] = str(end_date)
+        metadata["time_period"] = period_str
 
         metadata["max_longitude"] = round(float(fp_data["lon"].max()), 5)
         metadata["min_longitude"] = round(float(fp_data["lon"].min()), 5)
@@ -176,35 +193,6 @@ class Footprints(BaseStore):
         metastore.close()
 
         return datasource_uuids
-
-    # def lookup_uuid(self, site: str, domain: str, model: str, height: str) -> Union[str, bool]:
-    #     """Perform a lookup for the UUID of a Datasource
-
-    #     Args:
-    #         site: Site code
-    #         domain: Domain
-    #         model: Model name
-    #         height: Height
-    #     Returns:
-    #         str or dict: UUID or False if no entry
-    #     """
-    #     uuid = self._datasource_table[site][domain][model][height]
-
-    #     return uuid if uuid else False
-
-    # def set_uuid(self, site: str, domain: str, model: str, height: str, uuid: str) -> None:
-    #     """Record a UUID of a Datasource in the datasource table
-
-    #     Args:
-    #         site: Site code
-    #         domain: Domain
-    #         model: Model name
-    #         height: Height
-    #         uuid: UUID of Datasource
-    #     Returns:
-    #         None
-    #     """
-    #     self._datasource_table[site][domain][model][height] = uuid
 
     def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to

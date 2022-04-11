@@ -6,6 +6,7 @@ from typing import List
 __all__ = [
     "get_datapath",
     "get_emissions_datapath",
+    "get_bc_datapath",
     "get_footprint_datapath",
     "glob_files",
     "get_datapath_mobile",
@@ -39,6 +40,11 @@ def get_mobile_datapath(filename: str) -> Path:
 def get_emissions_datapath(filename: str) -> Path:
     """Return the path to the emissions test data file"""
     return get_datapath_base(data_type="emissions", filename=filename)
+
+
+def get_bc_datapath(filename: str) -> Path:
+    """Return the path to the boundary conditions test data file"""
+    return get_datapath_base(data_type="boundary_conditions", filename=filename)
 
 
 def get_footprint_datapath(filename: str) -> Path:

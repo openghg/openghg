@@ -25,6 +25,7 @@ def test_read_footprint_high_spatial_res():
         network=network,
         height=height,
         domain=domain,
+        period="monthly",
         high_spatial_res=True,
     )
 
@@ -109,7 +110,8 @@ def test_read_footprint_high_spatial_res():
         "model": "test_model",
         "domain": "europe",
         "start_date": "2020-08-01 00:00:00+00:00",
-        "end_date": "2020-08-01 00:00:00+00:00",
+        "end_date": "2020-08-31 23:59:59+00:00",
+        "time_period": "1 month",
         "max_longitude": 39.38,
         "min_longitude": -97.9,
         "max_latitude": 79.057,
@@ -185,15 +187,14 @@ def test_read_footprint_co2():
         "metmodel": "ukv",
         "domain": "test",
         "start_date": "2014-07-01 00:00:00+00:00",
-        "end_date": "2014-07-04 00:00:00+00:00",
-        # "end_date": "2014-07-04 00:59:59+00:00",
+        "end_date": "2014-07-04 00:59:59+00:00",
         "max_longitude": 3.476,
         "min_longitude": -0.396,
         "max_latitude": 53.785,
         "min_latitude": 51.211,
         "spatial_resolution" : "standard_spatial_resolution",
         "time_resolution": "high_time_resolution",
-        # "time_period": "1 hour",
+        "time_period": "1 hour",
     }
 
     for key in expected_attrs:
@@ -243,15 +244,14 @@ def test_read_footprint_standard():
         "model": "NAME",
         "domain": "europe",
         "start_date": "2012-08-01 00:00:00+00:00",
-        "end_date": "2012-08-31 22:00:00+00:00",
-        # "end_date": "2012-08-31 23:59:59+00:00",
+        "end_date": "2012-08-31 23:59:59+00:00",
         "max_longitude": 39.38,
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
         "spatial_resolution" : "standard_spatial_resolution",
         "time_resolution": "standard_time_resolution",
-        # "time_period": "2 hours",
+        "time_period": "2 hours",
     }
 
     for key in expected_attrs:

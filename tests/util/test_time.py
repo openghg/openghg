@@ -1,7 +1,7 @@
 from multiprocessing.sharedctypes import Value
 import pytest
 import numpy as np
-from pandas import Timestamp
+from pandas import Timestamp, DateOffset, Timedelta
 import pandas as pd
 from xarray import Dataset
 from openghg.util import (
@@ -20,6 +20,9 @@ from openghg.util import (
     check_nan,
     check_date,
     find_duplicate_timestamps,
+    parse_period,
+    create_frequency_str,
+    relative_time_offset,
 )
 
 
@@ -361,3 +364,53 @@ def test_check_duplicate_timestamps():
 
     with pytest.raises(ValueError):
         find_duplicate_timestamps(empty_ds)
+
+
+@pytest.mark.parametrize("test_input,expected",
+                         [("12H", (12, "hours")),
+                          ("yearly", (1, "years")),
+                          ("monthly", (1, "months")),
+                          ((1, "minute"), (1, "minutes"))
+                          ]
+                        )
+def test_parse_period(test_input, expected):
+    """
+    Testing known inputs and expected outputs for parse_period function
+    This function reads in different "period" inputs and converts them
+    to something which can be used to create a Timedelta or DateOffset object
+    """
+    assert parse_period(test_input) == expected
+
+
+@pytest.mark.parametrize("kwargs,expected",
+                         [({"value": 1, "unit": "hour"}, "1 hour"),
+                          ({"period": "3MS"}, "3 months"),
+                          ({"period": "yearly"}, "1 year"),
+                          ]
+                        )
+def test_create_frequency_str(kwargs, expected):
+    """
+    Testing known inputs and expected outputs for create_frequency_str function
+    """
+    assert create_frequency_str(**kwargs) == expected
+
+
+def test_create_frequency_str_needs_unit():
+    """
+    Testing ValueError raised when value is specified but unit is omitted.
+    """
+    with pytest.raises(ValueError):
+        create_frequency_str(value=1)
+
+
+@pytest.mark.parametrize("kwargs,expected",
+                         [({"value": 1, "unit": "hour"}, Timedelta(hours=1)),
+                          ({"value": 3, "unit": "months"}, DateOffset(months=3)),
+                          ({"period": "yearly"}, DateOffset(years=1)),
+                          ]
+                        )
+def test_relative_time_offset(kwargs, expected):
+    """
+    Testing known inputs and expected outputs for relative_time_offset function
+    """
+    assert relative_time_offset(**kwargs) == expected
