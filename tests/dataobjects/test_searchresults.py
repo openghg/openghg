@@ -7,6 +7,7 @@ from openghg.client import rank_sources
 from openghg.retrieve import search
 from openghg.store import ObsSurface
 from openghg.util import split_daterange_str
+from pandas import Timestamp
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -20,6 +21,30 @@ def load_CRDS():
     ObsSurface.read_file(filepath=tac_100m, data_type="CRDS", site="tac", network="DECC")
     ObsSurface.read_file(filepath=hfd_50m, data_type="CRDS", site="hfd", network="DECC")
     ObsSurface.read_file(filepath=[bsd_42m, bsd_108m, bsd_248m], data_type="CRDS", site="bsd", network="DECC")
+
+
+@pytest.fixture(scope="session", autouse=False)
+def with_ranking():
+    # Clear the ObsSurface ranking data
+    obs = ObsSurface.load()
+    obs._rank_data.clear()
+    obs.save()
+
+    rank = rank_sources(site="bsd", species="co")
+
+    expected_res = {
+        "42m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
+        "108m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
+        "248m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
+    }
+
+    assert rank.raw() == expected_res
+
+    rank.set_rank(inlet="42m", rank=1, start_date="2014-01-01", end_date="2015-03-01")
+    rank.set_rank(inlet="108m", rank=1, start_date="2015-03-02", end_date="2016-08-01")
+    rank.set_rank(inlet="42m", rank=1, start_date="2016-08-02", end_date="2017-03-01")
+    rank.set_rank(inlet="248m", rank=1, start_date="2017-03-02", end_date="2019-03-01")
+    rank.set_rank(inlet="108m", rank=1, start_date="2019-03-02", end_date="2021-12-01")
 
 
 def test_retrieve_unranked():
@@ -156,28 +181,9 @@ def test_retrieve_all_unranked():
         assert (site, species, inlet) in expected
 
 
-def test_retrieve_complex_ranked():
-    # Clear the ObsSurface ranking data
-    obs = ObsSurface.load()
-    obs._rank_data.clear()
-    obs.save()
+def test_retrieve_complex_ranked(with_ranking):
 
     rank = rank_sources(site="bsd", species="co")
-
-    expected_res = {
-        "42m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
-        "108m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
-        "248m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00"},
-    }
-
-    assert rank.raw() == expected_res
-
-    rank.set_rank(inlet="42m", rank=1, start_date="2014-01-01", end_date="2015-03-01")
-    rank.set_rank(inlet="108m", rank=1, start_date="2015-03-02", end_date="2016-08-01")
-    rank.set_rank(inlet="42m", rank=1, start_date="2016-08-02", end_date="2017-03-01")
-    rank.set_rank(inlet="248m", rank=1, start_date="2017-03-02", end_date="2019-03-01")
-    rank.set_rank(inlet="108m", rank=1, start_date="2019-03-02", end_date="2021-12-01")
-
     updated_res = rank.get_sources(site="bsd", species="co")
 
     expected_updated_res = {
@@ -274,6 +280,24 @@ def test_retrieve_complex_ranked():
     }
 
     assert ranking_data == expected_rankings
+
+
+def test_inlet_gets_data_with_ranking(with_ranking):
+    results = search(species="co")
+
+    assert results.ranked_data is True
+
+    obsdata = results.retrieve(site="bsd", inlet="42m", species="co")
+
+    co_data = obsdata.data
+    metadata = obsdata.metadata
+
+    assert metadata["inlet"] == "42m"
+    assert metadata["site"] == "bsd"
+    assert metadata["species"] == "co"
+
+    assert co_data.time[0] == Timestamp("2014-01-30T11:12:30")
+    assert co_data.time[-1] == Timestamp("2020-12-01T22:31:30")
 
 
 def test_retrieve_empty_object():
