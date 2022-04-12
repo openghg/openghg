@@ -27,6 +27,7 @@ __all__ = [
     "time_offset_definition",
     "parse_period",
     "create_frequency_str",
+    "time_offset",
     "relative_time_offset",
     "find_duplicate_timestamps",
 ]
@@ -651,7 +652,7 @@ def time_offset_definition() -> Dict[str, List]:
     return offset_naming
 
 
-def parse_period(period: Union[str, tuple]) -> Tuple[int, str]:
+def parse_period(period: Union[str, tuple]) -> Tuple[Union[int, float], str]:
     """
     Parses period input and converts to a value, unit pair.
 
@@ -683,13 +684,24 @@ def parse_period(period: Union[str, tuple]) -> Tuple[int, str]:
         if len(period) != 2:
             raise ValueError("Input for period not recognised: {period}. For tuple input requires (value, unit).")
         else:
-            value = int(period[0])
+            value_in = period[0]
+            if isinstance(value_in, str):
+                try:
+                    value = int(value_in)
+                except ValueError:
+                    value = float(value_in)
+            else:
+                value = int(value_in)
             unit = str(period[1])
     else:
         match = re.match(r"\d+[.]?\d*", period)
         if match is not None:
-            value = int(match.group())
-            unit = period.lstrip(str(value)).strip()  # Strip found value and any whitespace.
+            try:
+                value_str = match.group()
+                value = int(value_str)
+            except ValueError:
+                value = float(value_str)
+            unit = period.lstrip(value_str).strip()  # Strip found value and any whitespace.
         else:
             value = 1
             unit = period
@@ -704,7 +716,7 @@ def parse_period(period: Union[str, tuple]) -> Tuple[int, str]:
     return value, unit
 
 
-def create_frequency_str(value: Optional[int] = None,
+def create_frequency_str(value: Optional[Union[int, float]] = None,
                          unit: Optional[str] = None,
                          period: Optional[Union[str, tuple]] = None) -> str:
     """
@@ -741,7 +753,35 @@ def create_frequency_str(value: Optional[int] = None,
     return frequency_str
 
 
-def relative_time_offset(value: Optional[int] = None,
+def time_offset(value: Optional[Union[int, float]] = None,
+                unit: Optional[str] = None,
+                period: Optional[Union[str, tuple]] = None) -> Timedelta:
+    """
+    Create time offset based on inputs. This will return a Timedelta object
+    and cannot create relative offsets (this includes "weeks", "months", "years").
+
+    Args:
+        value, unit: Value and unit pair to use
+        period: Suitable input for period (see parse_period() for more details)
+
+    Returns:
+        Timedelta : Time offset object
+    """
+
+    if period is not None:
+        value, unit = parse_period(period)
+    elif value is None or unit is None:
+        raise ValueError("If period is not included, both value and unit must be specified.")
+
+    if unit in ("weeks", "months", "years"):
+        raise ValueError("Unable to calculate time offset with unit of {unit}. Try relative_time_offset() function instead")
+
+    time_delta = Timedelta(value, unit)
+
+    return time_delta
+
+
+def relative_time_offset(value: Optional[Union[int, float]] = None,
                          unit: Optional[str] = None,
                          period: Optional[Union[str, tuple]] = None) -> Union[DateOffset, Timedelta]:
     """
@@ -770,9 +810,11 @@ def relative_time_offset(value: Optional[int] = None,
     elif value is None or unit is None:
         raise ValueError("If period is not included, both value and unit must be specified.")
 
-    if unit in ("months", "years"):
+    relative_units = ("weeks", "months", "years")
+
+    if unit in relative_units:
         time_delta = DateOffset(**{unit: value})
     else:
-        time_delta = Timedelta(value, unit)
+        time_delta = time_offset(value, unit)
 
     return time_delta

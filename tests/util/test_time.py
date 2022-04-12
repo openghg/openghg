@@ -23,6 +23,7 @@ from openghg.util import (
     parse_period,
     create_frequency_str,
     relative_time_offset,
+    time_offset,
 )
 
 
@@ -370,7 +371,8 @@ def test_check_duplicate_timestamps():
                          [("12H", (12, "hours")),
                           ("yearly", (1, "years")),
                           ("monthly", (1, "months")),
-                          ((1, "minute"), (1, "minutes"))
+                          ((1, "minute"), (1, "minutes")),
+                          ("1.5H", (1.5, "hours")),
                           ]
                         )
 def test_parse_period(test_input, expected):
@@ -405,6 +407,21 @@ def test_create_frequency_str_needs_unit():
 
 @pytest.mark.parametrize("kwargs,expected",
                          [({"value": 1, "unit": "hour"}, Timedelta(hours=1)),
+                          ({"value": 1.5, "unit": "hours"}, Timedelta(hours=1.5)),
+                          ({"period": "3D"}, Timedelta(days=3)),
+                          ({"period": "7.5D"}, Timedelta(days=7.5)),
+                          ]
+                        )
+def test_time_offset(kwargs, expected):
+    """
+    Testing known inputs and expected outputs for time_offset function
+    """
+    assert time_offset(**kwargs) == expected
+
+
+@pytest.mark.parametrize("kwargs,expected",
+                         [({"value": 1, "unit": "hour"}, Timedelta(hours=1)),
+                          ({"value": 1.5, "unit": "hours"}, Timedelta(hours=1.5)),
                           ({"value": 3, "unit": "months"}, DateOffset(months=3)),
                           ({"period": "yearly"}, DateOffset(years=1)),
                           ]
