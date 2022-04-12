@@ -1,8 +1,8 @@
 import os
 import tempfile
 import pytest
-from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
-from openghg.store import ObsSurface, Emissions, Footprints
+from helpers import get_datapath, get_emissions_datapath, get_bc_datapath, get_footprint_datapath
+from openghg.store import ObsSurface, Emissions, BoundaryConditions, Footprints
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -84,6 +84,20 @@ def data_read():
         domain="TEST",
         high_time_resolution=False,
     )
+
+    # Boundary conditions data
+    # CH4
+    bc_filepath1 = get_bc_datapath("ch4_EUROPE_201208.nc")
+
+    BoundaryConditions.read_file(
+        filepath=bc_filepath1,
+        species="ch4",
+        domain="EUROPE",
+        bc_input="MOZART",
+        period="monthly",
+    )
+
+    # TODO: Make and add bc file for co2 which matched TEST domain
 
     # Footprint data
     # TAC footprint from 2012-08 - 2012-09 at 100m

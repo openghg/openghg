@@ -5,7 +5,7 @@ import pandas as pd
 from pandas import Timestamp, Timedelta
 from openghg.analyse import ModelScenario
 from openghg.analyse import match_dataset_dims, calc_dim_resolution, stack_datasets
-from openghg.retrieve import get_obs_surface, get_footprint, get_flux
+from openghg.retrieve import get_obs_surface, get_footprint, get_flux, get_bc
 
 #%% Test ModelScenario initialisation and update options
 
@@ -24,6 +24,7 @@ def test_scenario_direct_objects():
     network = "DECC"
     inlet = "100m"
     source = "anthro"
+    bc_input = "MOZART"
 
     obs_surface = get_obs_surface(
         site=site, species=species, start_date=start_date, end_date=end_date, inlet=inlet, network=network
@@ -35,17 +36,21 @@ def test_scenario_direct_objects():
 
     flux = get_flux(species=species, domain=domain, source=source)
 
-    model_scenario = ModelScenario(obs=obs_surface, footprint=footprint, flux=flux)
+    bc = get_bc(species=species, domain=domain, bc_input=bc_input)
+
+    model_scenario = ModelScenario(obs=obs_surface, footprint=footprint, flux=flux, bc=bc)
 
     # Check values have been stored in ModelScenario object correctly
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
     assert model_scenario.fluxes is not None
+    assert model_scenario.bc is not None
 
     # Check values stored within model_scenario object match inputs
     xr.testing.assert_equal(model_scenario.obs.data, obs_surface.data)
     xr.testing.assert_equal(model_scenario.footprint.data, footprint.data)
     xr.testing.assert_equal(model_scenario.fluxes[source].data, flux.data)
+    xr.testing.assert_equal(model_scenario.bc.data, bc.data)
 
 
 def test_scenario_infer_inputs_ch4():
@@ -63,6 +68,8 @@ def test_scenario_infer_inputs_ch4():
     species = "ch4"
     source = "anthro"
 
+    bc_input = "mozart"
+
     model_scenario = ModelScenario(
         site=site,
         species=species,
@@ -70,6 +77,7 @@ def test_scenario_infer_inputs_ch4():
         network=network,
         domain=domain,
         sources=source,
+        bc_input=bc_input,
         start_date=start_date,
         end_date=end_date,
     )
@@ -78,6 +86,7 @@ def test_scenario_infer_inputs_ch4():
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
     assert model_scenario.fluxes is not None
+    assert model_scenario.bc is not None
 
     # Check attributes are being assigned correctly
     assert model_scenario.site == site
@@ -113,6 +122,11 @@ def test_scenario_infer_inputs_ch4():
 
     # Note: flux is allowed to be outside imposed time bounds as this is often
     # of lower frequency than obs and footprint but can be forward-filled
+
+    # Boundary conditions data - time point
+    bc_data = model_scenario.bc.data
+    bc_time = bc_data["time"]
+    assert bc_time[0] == Timestamp("2012-08-01T00:00:00")
 
 
 def test_scenario_infer_inputs_co2():
@@ -267,10 +281,12 @@ def test_add_data():
     model_scenario.add_obs(site=site, species=species, inlet=inlet)
     model_scenario.add_footprint(site=site, inlet=inlet, domain=domain, species=species)
     model_scenario.add_flux(species=species, domain=domain, sources=source)
+    model_scenario.add_bc(species=species, domain=domain)
 
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
     assert model_scenario.fluxes is not None
+    assert model_scenario.bc is not None
 
 
 #%% Test ModelScenario methods with real data
@@ -524,6 +540,9 @@ def flux_ch4_dummy():
     )
 
     return fluxdata
+
+#TODO: Create dummy data and tests for boundary conditions
+#TODO: Create dummy data and tests for short-lived species (different footprint)
 
 
 @pytest.fixture

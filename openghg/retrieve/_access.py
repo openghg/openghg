@@ -408,7 +408,8 @@ def get_footprint(
     from openghg.util import clean_string
 
     # Find the correct synonym for the passed species
-    species = clean_string(_synonyms(species))
+    if species is not None:
+        species = clean_string(_synonyms(species))
 
     results = search(
         site=site,
