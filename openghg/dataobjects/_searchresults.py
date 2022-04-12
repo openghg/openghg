@@ -235,10 +235,11 @@ class SearchResults:
                             results.append(obsdata)
         else:
             if inlet is not None:
-                print(
-                    "Unable to accept inlet argument with ranked data, please pass only site and/or species"
-                )
-                return None
+                from openghg.retrieve import search
+
+                with_inlet = search(site=site, species=species, inlet=inlet)
+                inlet_data: ObsData = with_inlet.retrieve(site=site, species=species, inlet=inlet)
+                return inlet_data
 
             for _site, site_data in self.results.items():
                 if site is not None and _site != site:
