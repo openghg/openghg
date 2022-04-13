@@ -62,7 +62,7 @@ def data_read():
     obs.save()
 
     # Emissions data
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
+    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     Emissions.read_file(
         filepath=test_datapath,
