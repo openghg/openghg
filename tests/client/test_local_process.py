@@ -42,7 +42,7 @@ def test_process_footprint():
 
 
 def test_process_emissions():
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
+    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = process_flux(
         files=test_datapath,

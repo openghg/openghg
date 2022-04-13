@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Union
 
-from openghg.store import ObsSurface, Emissions, Footprints
+from openghg.store import ObsSurface, Emissions, Footprints, BoundaryConditions
 from openghg.types import DataTypes
 from openghg.util import running_in_cloud
 
@@ -51,13 +51,14 @@ def process_obs(
 
 
 def process_flux(
-    files: Union[str, Path],
+    files: pathType,
     species: str,
     source: str,
     domain: str,
-    date: str,
+    date: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
-    period: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
     overwrite: bool = False,
 ) -> Dict:
     """Process flux data
@@ -86,6 +87,7 @@ def process_flux(
             date=date,
             high_time_resolution=high_time_resolution,
             period=period,
+            continuous=continuous,
             overwrite=overwrite,
         )
 
@@ -99,9 +101,12 @@ def process_footprint(
     metmodel: Optional[str] = None,
     species: Optional[str] = None,
     network: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
     retrieve_met: bool = False,
+    high_spatial_res: bool = False,
+    high_time_res: bool = False,
     overwrite: bool = False,
-    high_res: bool = False,
 ) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -114,6 +119,9 @@ def process_footprint(
         domain: Domain of footprints
         model_params: Model run parameters
         retrieve_met: Whether to also download meterological data for this footprints area
+        high_spatial_res : Indicate footprints include both a low and high spatial resolution.
+        high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+                        Note this will be set to True automatically for Carbon Dioxide data.
         overwrite: Overwrite any currently stored data
     Returns:
         dict: UUIDs of Datasources data has been assigned to
@@ -124,7 +132,7 @@ def process_footprint(
         raise NotImplementedError
     else:
         return _process_footprint_local(
-            filepath=files,
+            files=files,
             site=site,
             height=height,
             domain=domain,
@@ -132,9 +140,51 @@ def process_footprint(
             metmodel=metmodel,
             species=species,
             network=network,
+            period=period,
+            continuous=continuous,
             retrieve_met=retrieve_met,
+            high_spatial_res=high_spatial_res,
+            high_time_res=high_time_res,
             overwrite=overwrite,
-            high_res=high_res,
+        )
+
+
+def process_bc(
+    files: pathType,
+    species: str,
+    bc_input: str,
+    domain: str,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
+    overwrite: bool = False,
+) -> Dict:
+    """Process flux data
+
+    Args:
+        filepath: Path of boundary conditions file
+        species: Species name
+        bc_input: Input used to create boundary conditions. For example:
+            - a model name such as "MOZART" or "CAMS"
+            - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
+        domain: Region for boundary conditions
+        period: Period of measurements, if not passed this is inferred from the time coords
+        overwrite: Should this data overwrite currently stored data.
+    returns:
+        dict: Dictionary of Datasource UUIDs data assigned to
+    """
+    cloud = running_in_cloud()
+
+    if cloud:
+        raise NotImplementedError
+    else:
+        return _process_bc_local(
+            files=files,
+            species=species,
+            bc_input=bc_input,
+            domain=domain,
+            period=period,
+            continuous=continuous,
+            overwrite=overwrite,
         )
 
 
@@ -196,7 +246,7 @@ def _process_obs_local(
 
 
 def _process_footprint_local(
-    filepath: pathType,
+    files: pathType,
     site: str,
     height: str,
     domain: str,
@@ -204,9 +254,12 @@ def _process_footprint_local(
     metmodel: Optional[str] = None,
     species: Optional[str] = None,
     network: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
     retrieve_met: bool = False,
+    high_spatial_res: bool = False,
+    high_time_res: bool = False,
     overwrite: bool = False,
-    high_res: bool = False,
 ) -> Dict:
     """Reads footprints data files and returns the UUIDs of the Datasources
     the processed data has been assigned to in the local object store.
@@ -219,12 +272,15 @@ def _process_footprint_local(
         domain: Domain of footprints
         model_params: Model run parameters
         retrieve_met: Whether to also download meterological data for this footprints area
+        high_spatial_res : Indicate footprints include both a low and high spatial resolution.
+        high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+                        Note this will be set to True automatically for Carbon Dioxide data.
         overwrite: Overwrite any currently stored data
     Returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
     return Footprints.read_file(
-        filepath=filepath,
+        filepath=files,
         site=site,
         height=height,
         domain=domain,
@@ -232,9 +288,12 @@ def _process_footprint_local(
         metmodel=metmodel,
         species=species,
         network=network,
+        period=period,
+        continuous=continuous,
         retrieve_met=retrieve_met,
+        high_spatial_res=high_spatial_res,
+        high_time_res=high_time_res,
         overwrite=overwrite,
-        high_res=high_res,
     )
 
 
@@ -243,9 +302,10 @@ def _process_flux_local(
     species: str,
     source: str,
     domain: str,
-    date: str,
+    date: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
-    period: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
     overwrite: bool = False,
 ) -> Dict:
     """Process flux data for the local object store
@@ -270,5 +330,41 @@ def _process_flux_local(
         date=date,
         high_time_resolution=high_time_resolution,
         period=period,
+        continuous=continuous,
+        overwrite=overwrite,
+    )
+
+
+def _process_bc_local(
+    files: pathType,
+    species: str,
+    bc_input: str,
+    domain: str,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
+    overwrite: bool = False,
+) -> Dict:
+    """Process boundary condition data for the local object store
+
+    Args:
+        filepath: Path of boundary conditions file
+        species: Species name
+        bc_input: Input used to create boundary conditions. For example:
+            - a model name such as "MOZART" or "CAMS"
+            - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
+        domain: Region for boundary conditions
+        period: Period of measurements, if not passed this is inferred from the time coords
+        overwrite: Should this data overwrite currently stored data.
+    returns:
+        dict: Dictionary of Datasource UUIDs data assigned to
+    """
+
+    return BoundaryConditions.read_file(
+        filepath=files,
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+        period=period,
+        continuous=continuous,
         overwrite=overwrite,
     )
