@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._time &#8212; OpenGHG 0+untagged.1.g1c5641f.dirty documentation</title>
+    <title>openghg.util._time &#8212; OpenGHG 0+untagged.1.g35f2c3b.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -199,7 +199,7 @@
 
 
 <span class="k">def</span> <span class="nf">find_duplicate_timestamps</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">DataFrame</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Check for duplicates</span>
+    <span class="sd">&quot;&quot;&quot;Check for duplicates</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: Data object to check. Should have a time attribute or index</span>
@@ -805,14 +805,15 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: containing list of values of synonym values</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">offset_naming</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;months&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;monthly&quot;</span><span class="p">,</span> <span class="s2">&quot;months&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;MS&quot;</span><span class="p">],</span>
-                     <span class="s2">&quot;years&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;yearly&quot;</span><span class="p">,</span> <span class="s2">&quot;years&quot;</span><span class="p">,</span> <span class="s2">&quot;annual&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;AS&quot;</span><span class="p">,</span> <span class="s2">&quot;YS&quot;</span><span class="p">],</span>
-                     <span class="s2">&quot;weeks&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;weeks&quot;</span><span class="p">,</span> <span class="s2">&quot;week&quot;</span><span class="p">,</span> <span class="s2">&quot;W&quot;</span><span class="p">],</span>
-                     <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">,</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">],</span>
-                     <span class="s2">&quot;hours&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;hourly&quot;</span><span class="p">,</span> <span class="s2">&quot;hours&quot;</span><span class="p">,</span> <span class="s2">&quot;hour&quot;</span><span class="p">,</span> <span class="s2">&quot;hr&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">],</span>
-                     <span class="s2">&quot;minutes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;minutely&quot;</span><span class="p">,</span> <span class="s2">&quot;minutes&quot;</span><span class="p">,</span> <span class="s2">&quot;minute&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;T&quot;</span><span class="p">],</span>
-                     <span class="s2">&quot;seconds&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;secondly&quot;</span><span class="p">,</span> <span class="s2">&quot;seconds&quot;</span><span class="p">,</span> <span class="s2">&quot;second&quot;</span><span class="p">,</span> <span class="s2">&quot;sec&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">],</span>
-                     <span class="p">}</span>
+    <span class="n">offset_naming</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;months&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;monthly&quot;</span><span class="p">,</span> <span class="s2">&quot;months&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;MS&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;years&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;yearly&quot;</span><span class="p">,</span> <span class="s2">&quot;years&quot;</span><span class="p">,</span> <span class="s2">&quot;annual&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;AS&quot;</span><span class="p">,</span> <span class="s2">&quot;YS&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;weeks&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;weeks&quot;</span><span class="p">,</span> <span class="s2">&quot;week&quot;</span><span class="p">,</span> <span class="s2">&quot;W&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">,</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;hours&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;hourly&quot;</span><span class="p">,</span> <span class="s2">&quot;hours&quot;</span><span class="p">,</span> <span class="s2">&quot;hour&quot;</span><span class="p">,</span> <span class="s2">&quot;hr&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;minutes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;minutely&quot;</span><span class="p">,</span> <span class="s2">&quot;minutes&quot;</span><span class="p">,</span> <span class="s2">&quot;minute&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;T&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;seconds&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;secondly&quot;</span><span class="p">,</span> <span class="s2">&quot;seconds&quot;</span><span class="p">,</span> <span class="s2">&quot;second&quot;</span><span class="p">,</span> <span class="s2">&quot;sec&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">],</span>
+    <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">offset_naming</span>
 
@@ -847,7 +848,9 @@
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">period</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input for period not recognised: </span><span class="si">{period}</span><span class="s2">. For tuple input requires (value, unit).&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Input for period not recognised: </span><span class="si">{period}</span><span class="s2">. For tuple input requires (value, unit).&quot;</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">period</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">unit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">period</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -870,9 +873,9 @@
     <span class="k">return</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span>
 
 
-<span class="k">def</span> <span class="nf">create_frequency_str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                         <span class="n">unit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                         <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">create_frequency_str</span><span class="p">(</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a suitable frequency string based either a value and unit pair</span>
 <span class="sd">    or a period value. The unit will be made singular if the value is 1.</span>
@@ -907,9 +910,9 @@
     <span class="k">return</span> <span class="n">frequency_str</span>
 
 
-<span class="k">def</span> <span class="nf">relative_time_offset</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                         <span class="n">unit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                         <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">DateOffset</span><span class="p">,</span> <span class="n">Timedelta</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">relative_time_offset</span><span class="p">(</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">DateOffset</span><span class="p">,</span> <span class="n">Timedelta</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create relative time offset based on inputs. This is based on the pandas</span>
 <span class="sd">    DateOffset and Timedelta functions.</span>

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>dataobjects API detail &#8212; OpenGHG 0+untagged.1.g1c5641f.dirty documentation</title>
+    <title>dataobjects API detail &#8212; OpenGHG 0+untagged.1.g35f2c3b.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -364,7 +364,7 @@ inlet: Inlet height, required for unranked data</p>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -416,7 +416,7 @@ inlet: Inlet height, required for unranked data</p>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="#openghg.dataobjects.ObsData" title="openghg.dataobjects._obsdata.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a>], <a class="reference internal" href="#openghg.dataobjects.ObsData" title="openghg.dataobjects._obsdata.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</p>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="#openghg.dataobjects.ObsData" title="openghg.dataobjects._obsdata.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#openghg.dataobjects.ObsData" title="openghg.dataobjects._obsdata.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a>], <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>ObsData or dictionary of ObsData objects</p>
@@ -430,10 +430,10 @@ inlet: Inlet height, required for unranked data</p>
 <dd><p>Retrieve all the data found during the serch</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Dictionary of all data</p>
+<dd class="field-odd"><p>List of ObsData objects</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict</p>
+<dd class="field-even"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
