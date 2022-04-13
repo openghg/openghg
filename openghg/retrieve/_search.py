@@ -120,8 +120,7 @@ def search(**kwargs):  # type: ignore
     # As we might have kwargs that are None we want to get rid of those
     search_kwargs = {k: clean_string(v) for k, v in kwargs_copy.items() if v is not None}
 
-    # Speices translation
-
+    # Species translation
     species = search_kwargs.get("species")
 
     if species is not None:

@@ -25,26 +25,7 @@ def load_CRDS():
 
 @pytest.fixture(scope="session", autouse=False)
 def with_ranking():
-    # Clear the ObsSurface ranking data
-    obs = ObsSurface.load()
-    obs._rank_data.clear()
-    obs.save()
-
-    rank = rank_sources(site="bsd", species="co")
-
-    expected_res = {
-        "42m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"},
-        "108m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"},
-        "248m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"},
-    }
-
-    assert rank.raw() == expected_res
-
-    rank.set_rank(inlet="42m", rank=1, start_date="2014-01-01", end_date="2015-03-01")
-    rank.set_rank(inlet="108m", rank=1, start_date="2015-03-02", end_date="2016-08-01")
-    rank.set_rank(inlet="42m", rank=1, start_date="2016-08-02", end_date="2017-03-01")
-    rank.set_rank(inlet="248m", rank=1, start_date="2017-03-02", end_date="2019-03-01")
-    rank.set_rank(inlet="108m", rank=1, start_date="2019-03-02", end_date="2021-12-01")
+    pass
 
 
 def test_retrieve_unranked():
@@ -181,33 +162,44 @@ def test_retrieve_all_unranked():
         assert (site, species, inlet) in expected
 
 
-def test_retrieve_complex_ranked(with_ranking):
+def test_retrieve_complex_ranked():
+    obs = ObsSurface.load()
+    obs._rank_data.clear()
+    obs.save()
+
+    rank = rank_sources(site="bsd", species="co")
+
+    rank.set_rank(inlet="42m", rank=1, start_date="2014-01-01", end_date="2015-03-01")
+    rank.set_rank(inlet="108m", rank=1, start_date="2015-03-02", end_date="2016-08-01")
+    rank.set_rank(inlet="42m", rank=1, start_date="2016-08-02", end_date="2017-03-01")
+    rank.set_rank(inlet="248m", rank=1, start_date="2017-03-02", end_date="2019-03-01")
+    rank.set_rank(inlet="108m", rank=1, start_date="2019-03-02", end_date="2021-12-01")
 
     rank = rank_sources(site="bsd", species="co")
     updated_res = rank.get_sources(site="bsd", species="co")
 
-    expected_updated_res = {
+    expected = {
         "42m": {
             "rank_data": {
                 "2014-01-01-00:00:00+00:00_2015-03-01-00:00:00+00:00": 1,
                 "2016-08-02-00:00:00+00:00_2017-03-01-00:00:00+00:00": 1,
             },
-            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
         },
         "108m": {
             "rank_data": {
                 "2015-03-02-00:00:00+00:00_2016-08-01-00:00:00+00:00": 1,
                 "2019-03-02-00:00:00+00:00_2021-12-01-00:00:00+00:00": 1,
             },
-            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
         },
         "248m": {
             "rank_data": {"2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": 1},
-            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
         },
     }
 
-    assert updated_res == expected_updated_res
+    assert updated_res == expected
 
     search_res = search(site="bsd", species="co")
 
@@ -246,7 +238,7 @@ def test_retrieve_complex_ranked(with_ranking):
     assert measurement_data.time.size == 126
 
     # Now we test that retrieve_all works correctly with ranked data
-    results = search(site=["bsd"], species="co")
+    results = search(site="bsd", species="co")
 
     all_data = results.retrieve_all()
 
@@ -282,7 +274,20 @@ def test_retrieve_complex_ranked(with_ranking):
     assert ranking_data == expected_rankings
 
 
-def test_inlet_gets_data_with_ranking(with_ranking):
+def test_inlet_gets_data_with_ranking():
+    # Clear the ObsSurface ranking data
+    obs = ObsSurface.load()
+    obs._rank_data.clear()
+    obs.save()
+
+    rank = rank_sources(site="bsd", species="co")
+
+    rank.set_rank(inlet="42m", rank=1, start_date="2014-01-01", end_date="2015-03-01")
+    rank.set_rank(inlet="108m", rank=1, start_date="2015-03-02", end_date="2016-08-01")
+    rank.set_rank(inlet="42m", rank=1, start_date="2016-08-02", end_date="2017-03-01")
+    rank.set_rank(inlet="248m", rank=1, start_date="2017-03-02", end_date="2019-03-01")
+    rank.set_rank(inlet="108m", rank=1, start_date="2019-03-02", end_date="2021-12-01")
+
     results = search(species="co")
 
     assert results.ranked_data is True
@@ -326,11 +331,6 @@ def test_retrieve_cloud_raises():
     results = search(site="bsd")
 
     results.cloud = True
-
-    with pytest.raises(NotImplementedError):
-        _ = results.retrieve_all()
-
-    results.ranked_data = True
 
     with pytest.raises(NotImplementedError):
         _ = results.retrieve_all()
