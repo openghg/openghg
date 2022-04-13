@@ -120,8 +120,7 @@ def search(**kwargs):  # type: ignore
     # As we might have kwargs that are None we want to get rid of those
     search_kwargs = {k: clean_string(v) for k, v in kwargs_copy.items() if v is not None}
 
-    # Speices translation
-
+    # Species translation
     species = search_kwargs.get("species")
 
     if species is not None:
@@ -278,6 +277,8 @@ def search(**kwargs):  # type: ignore
             species_keys = {}
             species_rank_data = {}
             species_metadata = {}
+            # Save the inlets so we can find the highest later
+            inlets = []
 
             for match_data in data["matching"]:
                 uuid = match_data["uuid"]
@@ -287,6 +288,7 @@ def search(**kwargs):  # type: ignore
                 datasource = matching_sources[uuid]
                 metadata = datasource.metadata()
                 inlet = metadata["inlet"]
+                inlets.append(inlet)
 
                 for dr in match_dateranges:
                     keys = datasource.keys_in_daterange_str(daterange=dr)
@@ -321,7 +323,7 @@ def search(**kwargs):  # type: ignore
                 return float(s.rstrip("m"))
 
             # Here just select the highest inlet that's been ranked and use that
-            highest_inlet = max(sorted(list(data_keys[site][sp]["metadata"].keys())), key=max_key)
+            highest_inlet = max(inlets, key=max_key)
 
             inlet_metadata = data_keys[site][sp]["metadata"][highest_inlet]
             inlet_instrument = inlet_metadata["instrument"]

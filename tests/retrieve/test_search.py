@@ -80,7 +80,7 @@ def test_specific_search_translator():
     assert metadata["species"] == "c6h5ch3"
 
 
-def test_unranked_location_search():
+def test_unranked_location_search(capfd):
     species = ["co2", "ch4"]
     sites = ["hfd", "tac", "bsd"]
 
@@ -94,8 +94,11 @@ def test_unranked_location_search():
     assert sorted(list(tac_data.keys())) == ["ch4", "co2"]
     assert sorted(list(hfd_data.keys())) == ["ch4", "co2"]
 
-    with pytest.raises(ValueError):
-        tac_co2_keys = results.keys(site="tac", species="co2", inlet="105m")
+    tac_co2_keys = results.keys(site="tac", species="co2", inlet="105m")
+
+    out, err = capfd.readouterr()
+
+    assert out.strip() == "No keys found for co2 at tac"
 
     tac_co2_keys = results.keys(site="tac", species="co2", inlet="100m")
     tac_ch4_keys = results.keys(site="tac", species="co2", inlet="100m")
@@ -106,11 +109,17 @@ def test_unranked_location_search():
     assert len(tac_co2_keys["unranked"]) == 4
     assert len(tac_ch4_keys["unranked"]) == 4
 
-    with pytest.raises(ValueError):
-        results.keys(site="bsd", species="co2")
+    results.keys(site="bsd", species="co2")
 
-    with pytest.raises(ValueError):
-        results.keys(site="bsd", species="ch4")
+    out, _ = capfd.readouterr()
+
+    assert out.strip() == "No keys found for co2 at bsd"
+
+    results.keys(site="bsd", species="ch4")
+
+    out, _ = capfd.readouterr()
+
+    assert out.strip() == "No keys found for ch4 at bsd"
 
 
 def test_unranked_search_datetimes():
