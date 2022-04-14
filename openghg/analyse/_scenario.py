@@ -200,8 +200,8 @@ class ModelScenario:
         Use appropriate get function to search for data in object store.
         """
 
-        get_functions = {"obs_surface": get_obs_surface, 
-                         "footprint": get_footprint, 
+        get_functions = {"obs_surface": get_obs_surface,
+                         "footprint": get_footprint,
                          "flux": get_flux,
                          "boundary_conditions": get_bc,
                          }
@@ -513,7 +513,6 @@ class ModelScenario:
         Returns:
             tuple: Two xarray.Dataset with aligned time dimensions
         """
-        import numpy as np
         from pandas import Timedelta
 
         # Check data is present (not None) and cast to correct type
@@ -803,10 +802,10 @@ class ModelScenario:
                      param: str = "modelled_obs",
                      resample_to: str = "coarsest",
                      platform: Optional[str] = None,
-                     recalculate: bool = False) -> None:
+                     recalculate: bool = False) -> bool:
         """
-        Decide if calculation is needed for input parameter and set up 
-        underlying parameters accordingly. This will populate the 
+        Decide if calculation is needed for input parameter and set up
+        underlying parameters accordingly. This will populate the
         self.scenario attribute if not already present or if this needs
         to be recalculated.
 
@@ -837,9 +836,9 @@ class ModelScenario:
         if parameter is None or recalculate:
             # Check if observations are present and use these for resampling
             if self.obs is not None:
-                self.combine_obs_footprint(resample_to, 
-                                           platform=platform, 
-                                           recalculate=recalculate, 
+                self.combine_obs_footprint(resample_to,
+                                           platform=platform,
+                                           recalculate=recalculate,
                                            cache=True)
             else:
                 self.scenario = self._check_footprint_resample(resample_to)
@@ -910,11 +909,12 @@ class ModelScenario:
                                             recalculate=recalculate)
 
         if not param_calculate:
-            return self.modelled_obs
+            modelled_obs = cast(DataArray, self.modelled_obs)
+            return modelled_obs
 
         # Check species and use high time resolution steps if this is carbon dioxide
         if self.species == "co2":
-            modelled_obs: DataArray = self._calc_modelled_obs_HiTRes(
+            modelled_obs = self._calc_modelled_obs_HiTRes(
                 sources=sources, output_TS=True, output_fpXflux=False
             )
             name = "mf_mod_high_res"
@@ -1300,12 +1300,13 @@ class ModelScenario:
                                             recalculate=recalculate)
 
         if not param_calculate:
-            return self.modelled_baseline
+            modelled_baseline = cast(DataArray, self.modelled_baseline)
+            return modelled_baseline
 
+        scenario = cast(Dataset, self.scenario)
         bc_data = bc.data
-        scenario = self.scenario
 
-        bc_data = bc_data.reindex_like(scenario, "ffill")        
+        bc_data = bc_data.reindex_like(scenario, "ffill")
 
         species = self.species
         species_upper = species.upper()
@@ -1321,17 +1322,17 @@ class ModelScenario:
                 lifetime_monthly = lifetime
                 lifetime = None
             else:
-                raise ValueError(f"Did not recognise input for lifetime for {species_upper} from 'acrg_species_info.json'")            
+                raise ValueError(f"Did not recognise input for lifetime for {species_upper} from 'acrg_species_info.json'")
 
         if lifetime is not None:
             short_lifetime = True
-            lt_time_delta = time_offset(lt)
-            lifetime_hrs: Union[float, np.array] = lt_time_delta.total_seconds() / 3600.
+            lt_time_delta = time_offset(period=lifetime)
+            lifetime_hrs: Union[float, np.ndarray] = lt_time_delta.total_seconds() / 3600.
         elif lifetime_monthly:
             short_lifetime = True
             lifetime_monthly_hrs = []
-            for lt in lifetime:
-                lt_time_delta = time_offset(lt)
+            for lt in lifetime_monthly:
+                lt_time_delta = time_offset(period=lt)
                 lt_hrs = lt_time_delta.total_seconds() / 3600.
                 lifetime_monthly_hrs.append(lt_hrs)
 
@@ -1346,13 +1347,14 @@ class ModelScenario:
         if short_lifetime:
             expected_vars = ("mean_age_particles_n", "mean_age_particles_e", "mean_age_particles_s", "mean_age_particles_w")
             for var in expected_vars:
-                if var not in scenario.data_vars():
+                if var not in scenario.data_vars:
                     raise ValueError("Unable to calculate baseline for short-lived species {species} without species specific footprint.")
 
-            loss_n: Union[np.array, float] = np.exp(-1*scenario["mean_age_particles_n"]/lifetime_hrs).rename('loss_n')
-            loss_e: Union[np.array, float] = np.exp(-1*scenario["mean_age_particles_e"]/lifetime_hrs).rename('loss_e')
-            loss_s: Union[np.array, float] = np.exp(-1*scenario["mean_age_particles_s"]/lifetime_hrs).rename('loss_s')
-            loss_w: Union[np.array, float] = np.exp(-1*scenario["mean_age_particles_w"]/lifetime_hrs).rename('loss_w')
+            # TODO: Check what type this will create - not aligning with expectations in mypy at present
+            loss_n: Union[DataArray, float] = np.exp(-1*scenario["mean_age_particles_n"]/lifetime_hrs).rename('loss_n')
+            loss_e: Union[DataArray, float] = np.exp(-1*scenario["mean_age_particles_e"]/lifetime_hrs).rename('loss_e')
+            loss_s: Union[DataArray, float] = np.exp(-1*scenario["mean_age_particles_s"]/lifetime_hrs).rename('loss_s')
+            loss_w: Union[DataArray, float] = np.exp(-1*scenario["mean_age_particles_w"]/lifetime_hrs).rename('loss_w')
 
         else:
 
@@ -1595,8 +1597,6 @@ def combine_datasets(
     Returns:
         xarray.Dataset: Combined dataset indexed to dataset_A
     """
-    import numpy as np
-
     if _indexes_match(dataset_A, dataset_B):
         dataset_B_temp = dataset_B
     else:
@@ -1685,8 +1685,6 @@ def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
         NaT : If unsuccessful and input dtype is np.datetime64
         NaN : If unsuccessful for all other dtypes.
     """
-    import numpy as np
-
     try:
         resolution = dataset[dim].diff(dim=dim).mean().values
     except ValueError:
