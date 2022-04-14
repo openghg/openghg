@@ -805,9 +805,32 @@ class ModelScenario:
                      platform: Optional[str] = None,
                      recalculate: bool = False) -> None:
         """
+        Decide if calculation is needed for input parameter and set up 
+        underlying parameters accordingly. This will populate the 
+        self.scenario attribute if not already present or if this needs
+        to be recalculated.
+
+        Args:
+            param : Name of the parameter being calculated.
+                    Should be one of "modelled_obs", "modelled_baseline"
+            resample_to: Resample option to use for averaging:
+                          - either one of ["coarsest", "obs", "footprint"] to match to the datasets
+                          - or using a valid pandas resample period e.g. "2H".
+                         Default = "coarsest".
+            platform: Observation platform used to decide whether to resample e.g. "site", "satellite".
+            cache: Cache this data after calculation. Default = True.
+            recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+
+        Returns:
+            bool: True if param should be calculated, False otherwise
+
+            Populates details of ModelScenario.scenario to use in calculation.
         """
 
-        parameter = exec(f"self.{param}")
+        try:
+            parameter = exec(f"self.{param}")
+        except ValueError:
+            raise ValueError(f"Did not recognise input for {param}")
 
         # Check if cached modelled observations exist
         # if self.modelled_obs is None or recalculate:
@@ -1236,8 +1259,6 @@ class ModelScenario:
 
         return None
 
-    # TODO: Add calc_bc (and add_bc?) functions
-
     def calc_modelled_baseline(self,
                                resample_to: str = "coarsest",
                                platform: Optional[str] = None,
@@ -1245,16 +1266,28 @@ class ModelScenario:
                                recalculate: bool = False,
                                ) -> DataArray:
         """
-        Add boundary condition mole fraction values in footprint_data_merge
-        Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species
-        
+        Calculate the modelled baseline points based on site footprint and boundary conditions.
+        Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species.
+
+        The time points returned are dependent on the resample_to option chosen.
+        If obs data is also linked to the ModelScenario instance, this will be used
+        to derive the time points where appropriate.
+
         Args:
-            fp_and_data [dict]:
-                output created during footprint_data_merge
-            load_bc [boolean]:
-                whether the boundary conditon was loaded
-            species [str]
-                name of species in the dataset
+            resample_to: Resample option to use for averaging:
+                          - either one of ["coarsest", "obs", "footprint"] to match to the datasets
+                          - or using a valid pandas resample period e.g. "2H".
+                         Default = "coarsest".
+            platform: Observation platform used to decide whether to resample e.g. "site", "satellite".
+            cache: Cache this data after calculation. Default = True.
+            recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
+
+        Returns:
+            xarray.DataArray: Modelled baselined values along the time axis
+
+            If cache is True:
+                This data will also be cached as the ModelScenario.modelled_baseline attribute.
+                The associated scenario data will be cached as the ModelScenario.scenario attribute.
         """
         from openghg.util import load_json, time_offset
 
@@ -1275,16 +1308,20 @@ class ModelScenario:
         bc_data = bc_data.reindex_like(scenario, "ffill")        
 
         species = self.species
+        species_upper = species.upper()
         species_info = load_json(filename="acrg_species_info.json")
-        species_data = species_info[species]
+        species_data = species_info[species_upper]
 
         # Check for lifetime details
         lifetime: Optional[str] = species_data.get("lifetime", None)
         lifetime_monthly: Optional[list] = species_data.get("lifetime_monthly", None)
 
-        if isinstance(lifetime, list):
-            lifetime_monthly = lifetime
-            lifetime = None
+        if isinstance(lifetime, list) and len(lifetime) == 12:
+            if len(lifetime) == 12:
+                lifetime_monthly = lifetime
+                lifetime = None
+            else:
+                raise ValueError(f"Did not recognise input for lifetime for {species_upper} from 'acrg_species_info.json'")            
 
         if lifetime is not None:
             short_lifetime = True
@@ -1330,6 +1367,7 @@ class ModelScenario:
                             (scenario["particle_locations_w"]*bc_data["vmr_w"]*loss_w).sum(["height", "lat"])
 
         modelled_baseline.attrs["resample_to"] = resample_to
+        modelled_baseline = modelled_baseline.rename("bc_mod")
 
         # Cache output from calculations
         if cache:
@@ -1342,43 +1380,11 @@ class ModelScenario:
 
         return modelled_baseline
 
-        # def _calc_modelled_baseline_long_lived():
+    # def _calc_modelled_baseline_long_lived():
+    #     pass
 
-        #     pass
-
-        # def _calc_modelled_baseline_short_lived():
-
-        #     pass
-
-
-
-
-
-
-        #     # calculate the lifetime_hrs associated with each time point in fp_and_data
-        #     # this is because lifetime can be a list of monthly values
-            
-        #     time_month = fp_and_data[site].time.dt.month
-        #     if type(lifetime_hrs_list_or_float) is list:
-        #         lifetime_hrs = [lifetime_hrs_list_or_float[item-1] for item in time_month.values]
-        #     else:
-        #         lifetime_hrs = lifetime_hrs_list_or_float
-                            
-        #     loss_n = np.exp(-1*fp_and_data[site].mean_age_particles_n/lifetime_hrs).rename('loss_n')
-        #     loss_e = np.exp(-1*fp_and_data[site].mean_age_particles_e/lifetime_hrs).rename('loss_e')
-        #     loss_s = np.exp(-1*fp_and_data[site].mean_age_particles_s/lifetime_hrs).rename('loss_s')
-        #     loss_w = np.exp(-1*fp_and_data[site].mean_age_particles_w/lifetime_hrs).rename('loss_w')
-        # else:
-        #     loss_n = 1
-        #     loss_e = 1
-        #     loss_s = 1
-        #     loss_w = 1
-
-        # fp_and_data[site]['bc'] = (fp_and_data[site].particle_locations_n*bc_reindex.vmr_n*loss_n).sum(["height", "lon"]) + \
-        #                             (fp_and_data[site].particle_locations_e*bc_reindex.vmr_e*loss_e).sum(["height", "lat"]) + \
-        #                             (fp_and_data[site].particle_locations_s*bc_reindex.vmr_s*loss_s).sum(["height", "lon"]) + \
-        #                             (fp_and_data[site].particle_locations_w*bc_reindex.vmr_w*loss_w).sum(["height", "lat"])
-        # return fp_and_data
+    # def _calc_modelled_baseline_short_lived():
+    #     pass
 
     def footprints_data_merge(
         self,
@@ -1403,7 +1409,7 @@ class ModelScenario:
             calc_timeseries: Calculate modelled timeseries based on flux sources.
             sources: Sources to use for flux if calc_timseries is True.
                      All will be used and stacked if not specified.
-            calc_bc: Calculate boundary conditions (not currently implemented)
+            calc_baseline: Calculate modelled baseline.
             cache: Cache this data after calculation. Default = True.
             recalculate: Make sure to recalculate this data rather than return from cache. Default = False.
 
@@ -1427,9 +1433,17 @@ class ModelScenario:
             combined_dataset = combined_dataset.assign({name: modelled_obs})
 
         if calc_bc:
-            # TODO: Add this in when BoundaryConditions have been incorporated
-            print("WARNING: calc_bc keyword has not been used to create output")
-            print(" BoundaryConditions have not been implemented yet.")
+            if self.bc is not None:
+                modelled_baseline = self.calc_modelled_baseline(
+                    resample_to=resample_to,
+                    platform=platform,
+                    cache=cache,
+                    recalculate=recalculate,
+                )
+                name = modelled_baseline.name
+                combined_dataset = combined_dataset.assign({name: modelled_baseline})
+            else:
+                print("Unable to calculate baseline data. Add boundary conditions using ModelScenarion.add_bc(...) to do this.")
 
         if cache:
             self.scenario = combined_dataset
@@ -1453,7 +1467,7 @@ class ModelScenario:
         return fig
 
     def plot_comparison(self,
-                        baseline: Optional[str] = None,
+                        baseline: Optional[str] = "boundary_conditions",
                         sources: Optional[Union[str, List]] = None,
                         resample_to: str = "coarsest",
                         platform: Optional[str] = None,
@@ -1463,8 +1477,8 @@ class ModelScenario:
         Plot comparison between observation and modelled timeseries data.
 
         Args:
-            baseline: Add baseline to data. Only option is "percentile" for now but boundary
-                      conditions will be added soon.
+            baseline: Add baseline to data. One of "boundary_conditions" or "percentile".
+                      Include None to only plot the modelled obs and not include a baseline.
             sources: Sources to use for flux. All will be used and stacked if not specified.
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
@@ -1478,8 +1492,6 @@ class ModelScenario:
             Plotly Figure
 
             Interactive plotly graph created with observation and modelled observation data.
-
-        TODO: Incorporate boundary conditions to use for baseline
         """
         # Only import plotly when we need to - not needed if not plotting.
         import plotly.graph_objects as go
@@ -1507,13 +1519,18 @@ class ModelScenario:
         else:
             label = f"Modelled {species.upper()}"
 
-        if baseline == "percentile":
+        if baseline == "boundary_conditions":
+            if self.bc is not None:
+                modelled_baseline = self.calc_modelled_obs(
+                    resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate)
+                y_baseline = modelled_baseline.data
+                y_data = y_data + y_baseline
+            else:
+                print("Unable to calculate baseline from boundary conditions")
+        elif baseline == "percentile":
             mf = obs.data["mf"]
             y_baseline = mf.quantile(1.0, dim="time").values
             y_data = y_data + y_baseline
-        elif baseline is not None:
-            print("Unable to use other methods than percentile to calculate baseline yet.")
-            print("Boundary conditions will be incorporated soon.")
 
         fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=label))
 

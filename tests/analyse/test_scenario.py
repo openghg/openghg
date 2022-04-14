@@ -305,6 +305,7 @@ def model_scenario_1():
     inlet = "100m"
     network = "DECC"
     source = "anthro"
+    bc_input = "mozart"
 
     model_scenario = ModelScenario(
         site=site,
@@ -313,6 +314,7 @@ def model_scenario_1():
         network=network,
         domain=domain,
         sources=source,
+        bc_input=bc_input,
         start_date=start_date,
         end_date=end_date,
     )
@@ -409,6 +411,23 @@ def test_combine_flux_sources(model_scenario_1):
     assert flux_stacked.attrs["sources"] == f"anthro, {source}"
 
 
+def test_calc_modelled_baseline(model_scenario_1):
+    """ """
+    modelled_baseline = model_scenario_1.calc_modelled_baseline(resample_to="coarsest")
+    cached_modelled_baseline = model_scenario_1.modelled_baseline
+
+    # Check returned value and cache associated with class
+    data_to_check = [modelled_baseline, cached_modelled_baseline]
+
+    for data in data_to_check:
+        # Check times align with expected values based on resample_to input
+        time = data.time
+        assert time[0] == Timestamp("2012-08-01T00:00:00")
+        assert time[-1] == Timestamp("2012-08-31T22:00:00")
+
+        # Could add more checks here but may be better doing this with mocked data
+
+
 def test_footprints_data_merge(model_scenario_1):
     """Test footprints_data_merge method can be run"""
     combined_dataset = model_scenario_1.footprints_data_merge(resample_to="coarsest")
@@ -465,19 +484,42 @@ def footprint_dummy():
     Create example FootprintData object with dummy data:
      - Daily frequency from 2011-12-31 to 2012-01-03 (inclusive) (4 time points)
      - Small lat, lon (TEST_DOMAIN)
+     - Small height
      - "fp" values are all 1 **May change**
+     - "particle_locations_*" are 2, 3, 4, 5 for "n", "e", "s", "w"
     """
     from openghg.dataobjects import FootprintData
 
     time = pd.date_range("2011-12-31", "2012-01-03", freq="D")
     lat = [1.0, 2.0]
     lon = [10.0, 20.0]
+    height = [10.0, 100.0]
 
+    # Add dummy footprint values
     nlat, nlon, ntime = len(lat), len(lon), len(time)
     shape = (ntime, nlat, nlon)
     values = np.ones(shape)
 
-    data = xr.Dataset({"fp": (("time", "lat", "lon"), values)}, coords={"lat": lat, "lon": lon, "time": time})
+    data_vars = {}
+    data_vars["fp"] = (("time", "lat", "lon"), values)
+
+    # Add dummy particle location values for NESW boundaries of domain
+    nheight = len(height)
+    shape_ns = (ntime, nlon, nheight)
+    shape_ew = (ntime, nlat, nheight)
+    values_n = np.ones(shape_ns)*2
+    values_e = np.ones(shape_ew)*3
+    values_s = np.ones(shape_ns)*4
+    values_w = np.ones(shape_ew)*5
+
+    data_vars["particle_locations_n"] = (("time", "lon", "height"), values_n)
+    data_vars["particle_locations_e"] = (("time", "lat", "height"), values_e)
+    data_vars["particle_locations_s"] = (("time", "lon", "height"), values_s)
+    data_vars["particle_locations_w"] = (("time", "lat", "height"), values_w)
+
+    coords = {"lat": lat, "lon": lon, "time": time, "height": height}
+
+    data = xr.Dataset(data_vars, coords=coords)
 
     # Potential metadata:
     # - site, height, domain, model, network, start_date, end_date, heights, ...
@@ -541,14 +583,72 @@ def flux_ch4_dummy():
 
     return fluxdata
 
+
+@pytest.fixture
+def bc_ch4_dummy():
+    """
+    Create example BoundaryConditionsData object with dummy data
+     - Annual frequency (2011-01-01, 2012-01-01) (2 time points)
+     - Small lat, lon (TEST_DOMAIN)
+     - "flux" values are:
+       - 2011-01-01 - all 2
+       - 2012-01-01 - all 3
+    """
+    from openghg.dataobjects import BoundaryConditionsData
+
+    time = pd.date_range("2011-01-01", "2012-12-31", freq="AS")
+    lat = [1.0, 2.0]
+    lon = [10.0, 20.0]
+    height = [10.0, 100.0]
+
+    nheight, nlat, nlon, ntime = len(height), len(lat), len(lon), len(time)
+     
+    shape_ns = (ntime, nlon, nheight)
+    shape_ew = (ntime, nlat, nheight)
+ 
+    dims_ns = ("time", "lon", "height")
+    dims_ew = ("time", "lat", "height")
+
+    param = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
+    data_vars = {}
+    for i, dv in enumerate(param):
+        direction = dv.split("_")[-1]
+        if direction in ("n", "s"):
+            shape = shape_ns
+            dims = dims_ns
+        elif direction in ("e", "w"):
+            shape = shape_ew
+            dims = dims_ew
+        values = np.ones(shape)
+        values[0, ...] *= (2+i)  # 2, 3, 4, 5
+        values[1, ...] *= (3+i)  # 3, 4, 5, 6
+        data_vars[dv] = (dims, values)
+
+    coords = {"lat": lat, "lon": lon, "time": time, "height": height}
+
+    bc = xr.Dataset(data_vars, coords=coords)
+
+    # Potential metadata:
+    # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
+    # - data_type?
+    species = "ch4"
+    metadata = {"species": species, "bc_input": "TESTINPUT", "domain": "TESTDOMAIN"}
+
+    bc_data = BoundaryConditionsData(data=bc, metadata=metadata)
+
+    return bc_data
+
 #TODO: Create dummy data and tests for boundary conditions
 #TODO: Create dummy data and tests for short-lived species (different footprint)
 
 
 @pytest.fixture
-def model_scenario_ch4_dummy(obs_ch4_dummy, footprint_dummy, flux_ch4_dummy):
+def model_scenario_ch4_dummy(obs_ch4_dummy, footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
     """Create ModelScenario with input dummy data"""
-    model_scenario = ModelScenario(obs=obs_ch4_dummy, footprint=footprint_dummy, flux=flux_ch4_dummy)
+    model_scenario = ModelScenario(obs=obs_ch4_dummy, 
+                                   footprint=footprint_dummy, 
+                                   flux=flux_ch4_dummy,
+                                   bc=bc_ch4_dummy)
 
     return model_scenario
 
@@ -599,6 +699,40 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
 
     modelled_mf = combined_dataset["mf_mod"].values
     assert np.allclose(modelled_mf, expected_modelled_mf)
+
+
+def test_model_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4_dummy):
+    """Test expected modelled baseline with known dummy data"""
+    modelled_baseline = model_scenario_ch4_dummy.calc_modelled_baseline()
+
+    aligned_time = modelled_baseline["time"]
+    assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
+    assert aligned_time[-1] == Timestamp("2012-01-02T00:00:00")
+
+    # Create expected value(s) for modelled_mf
+    # In our case:
+    # - dummy particle_locations_* contains 2, 3, 4, 5 for n, e, s, w
+    # - dummy boundary conditions, vmr_* contains 3, 4, 5, 6 at the correct time for n, e, s, w
+    # Expect same modelled baseline for both times 2012/01/01 and 2012/01/02 since bc is annual
+    time_slice = slice(aligned_time[0], aligned_time[-1])
+    footprint = footprint_dummy.data.sel(time=time_slice)
+    bc = bc_ch4_dummy.data.sel(time=time_slice)
+
+    fp_vars = ["particle_locations_n", "particle_locations_e", "particle_locations_s", "particle_locations_w"]
+    bc_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
+    dims = {"vmr_n": ["height", "lon"], "vmr_e": ["height", "lat"], "vmr_s": ["height", "lon"], "vmr_w": ["height", "lat"]}
+    expected_modelled_baseline = 0
+    for i, bc_var, fp_var in zip(range(len(bc_vars)), bc_vars, fp_vars):
+        input_bc_values = bc[bc_var].reindex_like(footprint, method="ffill")
+        input_fp_values = footprint[fp_var]
+
+        baseline_component = (input_fp_values * input_bc_values).sum(dim=dims[bc_var]).values
+        if i == 0:
+            expected_modelled_baseline = baseline_component
+        else:
+            expected_modelled_baseline += baseline_component
+
+    assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
 
 #%% Test method functionality with dummy data (CO2)
