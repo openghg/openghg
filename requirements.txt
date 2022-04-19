@@ -1,6 +1,7 @@
 addict
 cdsapi
 dask
+icoscp
 lazy_import
 matplotlib
 netcdf4
