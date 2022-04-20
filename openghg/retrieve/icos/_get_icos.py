@@ -54,13 +54,32 @@ def retrieve_icos(
     # Now extract the PIDs along with some data about them
     dobj_urls = filtered_sources["dobj"].tolist()
 
-    dobjs = []
+    measurement_data = {}
     for url in dobj_urls:
         dobj = Dobj(url)
         metadata = extract_metadata(meta=dobj.info)
         dataframe = dobj.data
 
-        # Now we want to tidy this and convert it into a format we expect
+        dataframe.columns = [x.lower() for x in dataframe.columns]
+
+        spec = metadata["species"]
+
+        rename_cols = {
+            "stdev": spec + " variability",
+            "nbpoints": spec + " number_of_observations",
+        }
+
+        dataset = dataframe.rename(columns=rename_cols).set_index("timestamp").to_xarray()
+        dataset.attrs.update(metadata)
+
+        # TODO - do we need both attributes and metadata here?
+        measurement_data[species] = {
+            "metadata": metadata,
+            "data": dataset,
+            "attributes": metadata,
+        }
+
+    return measurement_data
 
 
 def extract_metadata(meta: List) -> Dict:
@@ -83,19 +102,18 @@ def extract_metadata(meta: List) -> Dict:
 
     metadata = {}
 
-    metadata["dobj_pid"] = spec_data["dobj"][0]
-    metadata["filename"] = spec_data["fileName"][0]
+    metadata["dobj_pid"] = _get_value(df=spec_data, col="dobj", index=0)
+    metadata["species"] = _get_value(df=measurement_data, col="colName", index=4)
 
-    metadata["species"] = measurement_data["colName"][4]
-    metadata["meas_type"] = measurement_data["valueType"][4]
-    metadata["units"] = measurement_data["unit"][4]
+    metadata["meas_type"] = _get_value(df=measurement_data, col="valueType", index=4)
+    metadata["units"] = _get_value(df=measurement_data, col="unit", index=4)
 
-    metadata["site"] = site_data["stationName"][0]
-    metadata["stationId"] = site_data["stationId"][0]
-    metadata["sampling_height"] = site_data["samplingHeight"][0]
-    metadata["latitude"] = site_data["latitude"][0]
-    metadata["longitude"] = site_data["longitude"][0]
-    metadata["elevation"] = site_data["elevation"][0]
+    metadata["site"] = _get_value(df=site_data, col="stationName", index=0)
+    metadata["station_id"] = _get_value(df=site_data, col="stationId", index=0)
+    metadata["sampling_height"] = _get_value(df=site_data, col="samplingHeight", index=0)
+    metadata["latitude"] = _get_value(df=site_data, col="latitude", index=0)
+    metadata["longitude"] = _get_value(df=site_data, col="longitude", index=0)
+    metadata["elevation"] = _get_value(df=site_data, col="elevation", index=0)
 
     return metadata
 
@@ -111,7 +129,6 @@ def _get_value(df: DataFrame, col: str, index: int) -> str:
         str: Metadata value
     """
     try:
-        val = df[col][index]
-        return val
+        return str(df[col][index]).lower()
     except KeyError:
         return "NA"
