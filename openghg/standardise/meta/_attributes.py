@@ -4,9 +4,9 @@ from xarray import Dataset
 
 def assign_attributes(
     data: Dict,
-    site: str,
-    network: str = None,
-    sampling_period: str = None,
+    site: Optional[str] = None,
+    network: Optional[str] = None,
+    sampling_period: Optional[str] = None,
 ) -> Dict:
     """Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
     are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
@@ -26,6 +26,9 @@ def assign_attributes(
     for key, gas_data in data.items():
         site_attributes = gas_data.get("attributes", {})
         species = gas_data["metadata"]["species"]
+
+        if site is None:
+            site = gas_data.get("metadata", {}).get("site")
 
         units = gas_data.get("metadata", {}).get("units")
         scale = gas_data.get("metadata", {}).get("calibration_scale")

@@ -6,28 +6,68 @@ from typing import Dict, List, Optional, Union
 from openghg.dataobjects import ObsData
 
 
-def retrieve_icos(
+def retrieve(
+    site: str, species: Union[str, List], start_date: str, end_date: str
+) -> Union[ObsData, List[ObsData]]:
+    """Retrieve ICOS data. If data is found in the object store it is returned. Otherwise
+    data will be retrieved from the ICOS Carbon Portal. This may take more time.
+
+    Args:
+        site: Site code
+        species: Species name
+        start_date: Start date
+        end_date: End date
+    Returns:
+        ObsData or list
+    """
+    from openghg.retrieve import search
+    from openghg.store import ObsSurface
+    from openghg.dataobjects import ObsData
+
+    results = search(site=site, species=species, network="ICOS")
+
+    if results is not None:
+        return results
+    else:
+        standardised_data = _retrieve_remote(site=site, species=species)
+
+        # How to best handle this? Static method seems ?
+        obs = ObsSurface.load()
+        obs.store_data(data=standardised_data)
+        obs.save()
+
+        # Create the expected ObsData type
+        obs_data = []
+        for data in standardised_data.values():
+            measurement_data = data["data"]
+            metadata = data["metadata"]
+            obs_data.append(ObsData(data=measurement_data, metadata=metadata))
+
+        if len(obs_data) == 1:
+            return obs_data[0]
+        else:
+            return obs_data
+
+
+def _retrieve_remote(
     site: str,
     species: Union[str, List],
     sampling_height: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-) -> ObsData:
-    """Retrieve ICOS data from the ICOS Carbon Portal
+) -> Dict:
+    """Retrieve ICOS data from the ICOS Carbon Portal and standardise it into
+    a format expected by OpenGHG. A dictionary of metadata and Datasets
 
     Args:
         site: ICOS site code, for site codes see
         https://www.icos-cp.eu/observations/atmosphere/stations
         sampling_height: Sampling height in metres
     Returns:
-        ObsData: ObsData object
+        dict: Dictionary of processed data and metadata
     """
-    # Check if the site passed is valid?
     from icoscp.station import station
     from icoscp.cpb.dobj import Dobj
+    from openghg.standardise.meta import assign_attributes
     import re
-
-    # terms = ["CO", "CO2", "CH4"]
 
     if not isinstance(species, list):
         species = [species]
@@ -54,16 +94,20 @@ def retrieve_icos(
     # Now extract the PIDs along with some data about them
     dobj_urls = filtered_sources["dobj"].tolist()
 
-    measurement_data = {}
-    for url in dobj_urls:
-        dobj = Dobj(url)
-        metadata = extract_metadata(meta=dobj.info)
+    standardised_data = {}
+
+    for dobj_url in dobj_urls:
+        dobj = Dobj(dobj_url)
+        metadata = _extract_metadata(meta=dobj.info)
         dataframe = dobj.data
 
         dataframe.columns = [x.lower() for x in dataframe.columns]
+        dataframe = dataframe.dropna(axis="index")
+
+        if not dataframe.index.is_monotonic_increasing:
+            dataframe = dataframe.sort_index()
 
         spec = metadata["species"]
-
         rename_cols = {
             "stdev": spec + " variability",
             "nbpoints": spec + " number_of_observations",
@@ -73,16 +117,19 @@ def retrieve_icos(
         dataset.attrs.update(metadata)
 
         # TODO - do we need both attributes and metadata here?
-        measurement_data[species] = {
+        standardised_data[spec] = {
             "metadata": metadata,
             "data": dataset,
             "attributes": metadata,
         }
 
-    return measurement_data
+    # Make sure everything is CF compliant
+    standardised_data = assign_attributes(data=standardised_data)
+
+    return standardised_data
 
 
-def extract_metadata(meta: List) -> Dict:
+def _extract_metadata(meta: List) -> Dict:
     """Extract metadata from the list of pandas DataFrames that are
     returned by the ICOS-CP pylib Dobj method.
 

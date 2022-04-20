@@ -152,7 +152,7 @@ class ObsSurface(BaseStore):
 
                 progress_bar.update(1)
 
-        # Ensure we explicitly close the metadata store 
+        # Ensure we explicitly close the metadata store
         # as we're using the cached storage method
         metastore.close()
         # Save this object back to the object store
@@ -235,6 +235,11 @@ class ObsSurface(BaseStore):
         metastore.close()
 
         return results
+
+    @staticmethod
+    def store_data(data: Dict):
+        """This expects already standardised data such as ICOS / CEDA"""
+        raise NotImplementedError
 
     def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to
