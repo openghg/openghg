@@ -1,6 +1,8 @@
 # I'm creating this submodule as I'm not quite sure where else to put this for now
 # we can always move it in the future
+from pandas import DataFrame
 from typing import Dict, List, Optional, Union
+
 from openghg.dataobjects import ObsData
 
 
@@ -82,7 +84,6 @@ def extract_metadata(meta: List) -> Dict:
     metadata = {}
 
     metadata["dobj_pid"] = spec_data["dobj"][0]
-
     metadata["filename"] = spec_data["fileName"][0]
 
     metadata["species"] = measurement_data["colName"][4]
@@ -97,3 +98,20 @@ def extract_metadata(meta: List) -> Dict:
     metadata["elevation"] = site_data["elevation"][0]
 
     return metadata
+
+
+def _get_value(df: DataFrame, col: str, index: int) -> str:
+    """Wrap the retrieval of data from the metadata DataFrame in a try/except
+
+    Args:
+        df: Metadata DataFrame
+        col: Column name
+        index: Index number
+    Returns:
+        str: Metadata value
+    """
+    try:
+        val = df[col][index]
+        return val
+    except KeyError:
+        return "NA"
