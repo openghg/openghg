@@ -36,7 +36,7 @@ functions.
 Tutorial 3 - Comparing observations to emissions
 ------------------------------------------------
 
-This tutorial covers the workflow comparing observations data to emissions using the new ``ModelScenario`` class.
+This tutorial covers the workflow comparing observations data to emissions using the new ``ModelScenario`` class. 
 This replaces the ``footprint_data_merge`` function with an object that can be used to retrieve and manipulate observations,
 emissions and footprint data (with boundary conditions in the pipeline).
 
@@ -60,11 +60,3 @@ Tutorial 5 - Exploring the NOAA ObsPack data
    :maxdepth: 1
 
    beginner_workflow/5_Explore_NOAA_ObsPack
-
-Tutorial 6 - Using the plotting submodule
------------------------------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   beginner_workflow/6_Searching_and_plotting
