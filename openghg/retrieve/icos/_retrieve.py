@@ -27,8 +27,11 @@ def retrieve(
     results = search(site=site, species=species, network="ICOS")
 
     if results is not None:
+        # TODO - if date is later than the data we have force a retrieval
+        raise NotImplementedError
         return results
     else:
+        # We'll also need to check we have current data
         standardised_data = _retrieve_remote(site=site, species=species)
 
         # How to best handle this? Static method seems ?
