@@ -29,6 +29,8 @@ def assign_attributes(
 
         if site is None:
             site = gas_data.get("metadata", {}).get("site")
+        if network is None:
+            network = gas_data.get("metadata", {}).get("network")
 
         units = gas_data.get("metadata", {}).get("units")
         scale = gas_data.get("metadata", {}).get("calibration_scale")
@@ -335,11 +337,19 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
     attributes = {}
     if site in site_params:
         for attr in attributes_dict:
-            if attr in site_params[site][network]:
-                attr_key = attributes_dict[attr]
+            try:
+                if attr in site_params[site][network]:
+                    attr_key = attributes_dict[attr]
 
-                attributes[attr_key] = site_params[site][network][attr]
+                    attributes[attr_key] = site_params[site][network][attr]
+            except KeyError:
+                pass
     else:
-        raise ValueError(f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale")
+        print(
+            f"We haven't seen site {site} before, please let us know so we can update our records."
+            + "\nYou can help us by opening an issue on GitHub: https://github.com/openghg/openghg/issues"
+        )
+        # TODO - log not seen site message here
+        # raise ValueError(f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale")
 
     return attributes

@@ -237,31 +237,34 @@ class ObsSurface(BaseStore):
         return results
 
     @staticmethod
-    def store_data(standardised_data: Dict, overwrite: bool = False) -> Dict:
+    def store_data(data: Dict, overwrite: bool = False) -> Dict:
         """This expects already standardised data such as ICOS / CEDA
 
         Args:
-            standardised_data: Dictionary of data in fr
+            standardised_data: Dictionary of data in standard format
+            # TODO - add link to docs here
+            See the data spec under Development -> Data specifications
+            in the documentation
         """
         from openghg.store import assign_data, load_metastore
 
         obs = ObsSurface.load()
         metastore = load_metastore(key=obs._metakey)
 
-        metadata = {k: data["metadata"] for k, data in standardised_data.items()}
+        metadata = {k: _data["metadata"] for k, _data in data.items()}
 
         lookup_results = obs.datasource_lookup(metadata=metadata, metastore=metastore)
 
         # Create Datasources, save them to the object store and get their UUIDs
-        datasource_uuids = assign_data(
-            data_dict=standardised_data, lookup_results=lookup_results, overwrite=overwrite
-        )
+        datasource_uuids = assign_data(data_dict=data, lookup_results=lookup_results, overwrite=overwrite)
 
         # Record the Datasources we've created / appended to
         obs.add_datasources(uuids=datasource_uuids, metadata=metadata, metastore=metastore)
 
-        metastore.clos()
+        metastore.close()
         obs.save()
+
+        return datasource_uuids
 
     def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to

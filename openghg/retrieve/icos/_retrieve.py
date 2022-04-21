@@ -7,7 +7,11 @@ from openghg.dataobjects import ObsData
 
 
 def retrieve(
-    site: str, species: Union[str, List], start_date: str, end_date: str
+    site: str,
+    species: Optional[Union[str, List]] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    data_level: int = 2,
 ) -> Union[ObsData, List[ObsData]]:
     """Retrieve ICOS data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. This may take more time.
@@ -17,6 +21,8 @@ def retrieve(
         species: Species name
         start_date: Start date
         end_date: End date
+        data_level: Data level of ICOS data to retrieve, see
+        https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
     Returns:
         ObsData or list
     """
@@ -26,7 +32,7 @@ def retrieve(
 
     results = search(site=site, species=species, network="ICOS")
 
-    if results is not None:
+    if results:
         # TODO - if date is later than the data we have force a retrieval
         raise NotImplementedError
         return results
@@ -54,7 +60,7 @@ def retrieve(
 
 def _retrieve_remote(
     site: str,
-    species: Union[str, List],
+    species: Optional[Union[str, List]] = None,
     sampling_height: Optional[str] = None,
 ) -> Dict:
     """Retrieve ICOS data from the ICOS Carbon Portal and standardise it into
@@ -67,10 +73,14 @@ def _retrieve_remote(
     Returns:
         dict: Dictionary of processed data and metadata
     """
-    from icoscp.station import station
-    from icoscp.cpb.dobj import Dobj
+    from icoscp.station import station  # type: ignore
+    from icoscp.cpb.dobj import Dobj  # type: ignore
     from openghg.standardise.meta import assign_attributes
+    from openghg.util import load_json
     import re
+
+    if species is None:
+        species = ["CO", "CO2", "N2O"]
 
     if not isinstance(species, list):
         species = [species]
@@ -78,8 +88,12 @@ def _retrieve_remote(
     # We should first check if it's stored in the object store
     # Will need to make sure ObsSurface can accept the datasets we
     # create from the ICOS data
-    stat = station.get(stationId=site)
-    data_pids = stat.data(level=2)
+    stat = station.get(stationId=site.upper())
+    # See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+    # - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
+    #  to be distributed through the Carbon Portal.
+    data_level = 2
+    data_pids = stat.data(level=data_level)
 
     # We want to get the PIDs of the data for each species here
     species_upper = [s.upper() for s in species]
@@ -97,12 +111,18 @@ def _retrieve_remote(
     # Now extract the PIDs along with some data about them
     dobj_urls = filtered_sources["dobj"].tolist()
 
+    site_metadata = load_json("icos_atmos_site_metadata.json")
+
     standardised_data = {}
 
     for dobj_url in dobj_urls:
         dobj = Dobj(dobj_url)
-        metadata = _extract_metadata(meta=dobj.info)
+        # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.data
+        metadata = _extract_metadata(meta=dobj.info, site_metadata=site_metadata)
+
+        # Add ICOS in directly here for now
+        metadata["network"] = "ICOS"
 
         dataframe.columns = [x.lower() for x in dataframe.columns]
         dataframe = dataframe.dropna(axis="index")
@@ -116,7 +136,10 @@ def _retrieve_remote(
             "nbpoints": spec + " number_of_observations",
         }
 
-        dataset = dataframe.rename(columns=rename_cols).set_index("timestamp").to_xarray()
+        dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
+        dataframe.index.name = "time"
+
+        dataset = dataframe.to_xarray()
         dataset.attrs.update(metadata)
 
         # TODO - do we need both attributes and metadata here?
@@ -132,12 +155,13 @@ def _retrieve_remote(
     return standardised_data
 
 
-def _extract_metadata(meta: List) -> Dict:
+def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
     """Extract metadata from the list of pandas DataFrames that are
     returned by the ICOS-CP pylib Dobj method.
 
     Args:
-        metadataframes: List of dataframes containing metadata
+        meta: List of dataframes containing metadata
+        site_metadata: Dictionary of site metadata
     Returns:
         dict: Dictionary of metadata
     """
@@ -158,12 +182,25 @@ def _extract_metadata(meta: List) -> Dict:
     metadata["meas_type"] = _get_value(df=measurement_data, col="valueType", index=4)
     metadata["units"] = _get_value(df=measurement_data, col="unit", index=4)
 
-    metadata["site"] = _get_value(df=site_data, col="stationName", index=0)
-    metadata["station_id"] = _get_value(df=site_data, col="stationId", index=0)
+    site = _get_value(df=site_data, col="stationId", index=0)
+
+    metadata["site"] = site
+    metadata["station_long_name"] = _get_value(df=site_data, col="stationName", index=0)
     metadata["sampling_height"] = _get_value(df=site_data, col="samplingHeight", index=0)
-    metadata["latitude"] = _get_value(df=site_data, col="latitude", index=0)
-    metadata["longitude"] = _get_value(df=site_data, col="longitude", index=0)
+    metadata["inlet"] = _get_value(df=site_data, col="samplingHeight", index=0)
+    metadata["station_latitude"] = _get_value(df=site_data, col="latitude", index=0)
+    metadata["station_longitude"] = _get_value(df=site_data, col="longitude", index=0)
     metadata["elevation"] = _get_value(df=site_data, col="elevation", index=0)
+
+    site_specific = site_metadata[site.upper()]
+    metadata["data_owner"] = f"{site_specific['firstName']} {site_specific['lastName']}"
+    metadata["data_owner_email"] = site_specific["email"]
+    metadata["station_height_masl"] = site_specific["eas"]
+
+    #     WARNING: instrument key not in attributes or metadata
+    # WARNING: data_owner key not in attributes or metadata
+    # WARNING: data_owner_email key not in attributes or metadata
+    # WARNING: station_height_masl key not in attributes or metadata
 
     return metadata
 
@@ -180,5 +217,6 @@ def _get_value(df: DataFrame, col: str, index: int) -> str:
     """
     try:
         return str(df[col][index]).lower()
-    except KeyError:
+    except (KeyError, TypeError):
+        print(f"DEBUG: line 190 _retrieve.py: Can't find {col} {index}")
         return "NA"
