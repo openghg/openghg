@@ -10,9 +10,10 @@ from icoscp.cpb.dobj import Dobj  # type: ignore
 
 
 def test_icos_retrieve_no_local_no_species(mocker):
-    mock_pid = mocker.Mock()
     mock_pid_file = get_icos_test_file(filename="test_pids_icos.csv.gz")
-    mock_pid.return_value = pd.read_csv(mock_pid_file)
+    mock_data = pd.read_csv(mock_pid_file)
+    mock_pid = mocker.Mock(return_value=mock_data)
+    # mock_data =
 
     mock_dobj = mocker.Mock()
     mock_dobj_file = get_icos_test_file(filename="sample_icos_site.csv.gz")
