@@ -6,22 +6,16 @@ from helpers import get_icos_test_file
 # import icoscp.station.station
 from icoscp.station import station
 from icoscp.station.station import Station
-from icoscp.cpb.dobj import Dobj  # type: ignore
 
 
 def test_icos_retrieve_no_local_no_species(mocker):
+    fake_data = mocker.Mock
     mock_pid_file = get_icos_test_file(filename="test_pids_icos.csv.gz")
-    mock_data = pd.read_csv(mock_pid_file)
-    mock_pid = mocker.Mock(return_value=mock_data)
-    # mock_data =
-
-    mock_dobj = mocker.Mock()
-    mock_dobj_file = get_icos_test_file(filename="sample_icos_site.csv.gz")
-    mock_dobj.return_value = pd.read_csv(mock_dobj_file)
+    datas = pd.read_csv(mock_pid_file)
+    fake_data.return_value = datas
 
     mocker.patch.object(station, "get", mocker.Mock)
-    mocker.patch.object(Station, "data", mock_pid)
-    mocker.patch.object(Dobj, "data", mock_dobj)
+    mocker.patch.object(Station, "data", fake_data)
 
     retrieve(site="ABC")
 
