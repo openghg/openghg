@@ -4,7 +4,7 @@ from openghg.store import ObsSurface, Emissions, Footprints
 from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="module", autouse=False)
 def data_read():
     get_local_bucket(empty=True)
 

@@ -12,6 +12,7 @@ def retrieve(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     data_level: int = 2,
+    force_retrieval: bool = False,
 ) -> Union[ObsData, List[ObsData]]:
     """Retrieve ICOS data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. This may take more time.
@@ -23,6 +24,7 @@ def retrieve(
         end_date: End date
         data_level: Data level of ICOS data to retrieve, see
         https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
     Returns:
         ObsData or list
     """
@@ -32,7 +34,7 @@ def retrieve(
 
     results = search(site=site, species=species, network="ICOS")
 
-    if results:
+    if results and not force_retrieval:
         # TODO - if date is later than the data we have force a retrieval
         raise NotImplementedError
         return results
@@ -113,10 +115,14 @@ def _retrieve_remote(
 
     site_metadata = load_json("icos_atmos_site_metadata.json")
 
-    standardised_data = {}
+    standardised_data: Dict[str, Dict] = {}
 
     for dobj_url in dobj_urls:
         dobj = Dobj(dobj_url)
+
+        print(dobj)
+
+        continue
         # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.data
         metadata = _extract_metadata(meta=dobj.info, site_metadata=site_metadata)
@@ -196,11 +202,6 @@ def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
     metadata["data_owner"] = f"{site_specific['firstName']} {site_specific['lastName']}"
     metadata["data_owner_email"] = site_specific["email"]
     metadata["station_height_masl"] = site_specific["eas"]
-
-    #     WARNING: instrument key not in attributes or metadata
-    # WARNING: data_owner key not in attributes or metadata
-    # WARNING: data_owner_email key not in attributes or metadata
-    # WARNING: station_height_masl key not in attributes or metadata
 
     return metadata
 

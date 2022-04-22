@@ -29,5 +29,4 @@ mypy==0.930
 types-paramiko
 types-PyYAML
 types-requests
-# Pre-commit
 pre-commit
