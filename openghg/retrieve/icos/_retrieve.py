@@ -13,7 +13,7 @@ def retrieve(
     end_date: Optional[str] = None,
     data_level: int = 2,
     force_retrieval: bool = False,
-) -> Union[ObsData, List[ObsData]]:
+) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. This may take more time.
 
@@ -32,7 +32,8 @@ def retrieve(
     from openghg.store import ObsSurface
     from openghg.dataobjects import ObsData
 
-    results = search(site=site, species=species, network="ICOS")
+    # NOTE - we skip ranking here, will we be ranking ICOS data? - GJ
+    results = search(site=site, species=species, network="ICOS", skip_ranking=True)
 
     if results and not force_retrieval:
         # TODO - if date is later than the data we have force a retrieval
@@ -42,10 +43,11 @@ def retrieve(
         # We'll also need to check we have current data
         standardised_data = _retrieve_remote(site=site, species=species)
 
+        if standardised_data is None:
+            return None
+
         # How to best handle this? Static method seems ?
-        obs = ObsSurface.load()
-        obs.store_data(data=standardised_data)
-        obs.save()
+        ObsSurface.store_data(data=standardised_data)
 
         # Create the expected ObsData type
         obs_data = []
@@ -64,7 +66,7 @@ def _retrieve_remote(
     site: str,
     species: Optional[Union[str, List]] = None,
     sampling_height: Optional[str] = None,
-) -> Dict:
+) -> Optional[Dict]:
     """Retrieve ICOS data from the ICOS Carbon Portal and standardise it into
     a format expected by OpenGHG. A dictionary of metadata and Datasets
 
@@ -73,16 +75,17 @@ def _retrieve_remote(
         https://www.icos-cp.eu/observations/atmosphere/stations
         sampling_height: Sampling height in metres
     Returns:
-        dict: Dictionary of processed data and metadata
+        dict or None: Dictionary of processed data and metadata if found
     """
     from icoscp.station import station  # type: ignore
     from icoscp.cpb.dobj import Dobj  # type: ignore
     from openghg.standardise.meta import assign_attributes
     from openghg.util import load_json
+    from pandas import to_datetime
     import re
 
     if species is None:
-        species = ["CO", "CO2", "N2O"]
+        species = ["CO", "CO2", "CH4"]
 
     if not isinstance(species, list):
         species = [species]
@@ -91,6 +94,11 @@ def _retrieve_remote(
     # Will need to make sure ObsSurface can accept the datasets we
     # create from the ICOS data
     stat = station.get(stationId=site.upper())
+
+    if not stat.valid:
+        print("Please check you have passed a valid ICOS site.")
+        return None
+
     # See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
     # - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
     #  to be distributed through the Carbon Portal.
@@ -110,6 +118,12 @@ def _retrieve_remote(
             [sampling_height in x for x in filtered_sources["samplingheight"]]
         ]
 
+    if filtered_sources.empty:
+        print(
+            f"No sources found for {species} at {site}. Please check with the ICOS Carbon Portal that this data is available."
+        )
+        return None
+
     # Now extract the PIDs along with some data about them
     dobj_urls = filtered_sources["dobj"].tolist()
 
@@ -119,16 +133,19 @@ def _retrieve_remote(
 
     for dobj_url in dobj_urls:
         dobj = Dobj(dobj_url)
-
-        print(dobj)
-
-        continue
         # We need to pull the data down as .info (metadata) is populated further on this step
-        dataframe = dobj.data
-        metadata = _extract_metadata(meta=dobj.info, site_metadata=site_metadata)
+        dataframe = dobj.get()
+        # This is the metadata
+        dobj_info = dobj.info
+
+        metadata = _extract_metadata(meta=dobj_info, site_metadata=site_metadata)
 
         # Add ICOS in directly here for now
         metadata["network"] = "ICOS"
+        # The instrument doesn't seem to be in the
+        # metadata returned from the ICOS CP,
+        # How should we handle this?
+        metadata["instrument"] = "NA"
 
         dataframe.columns = [x.lower() for x in dataframe.columns]
         dataframe = dataframe.dropna(axis="index")
@@ -142,8 +159,9 @@ def _retrieve_remote(
             "nbpoints": spec + " number_of_observations",
         }
 
-        dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
+        dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp").astype({"flag": str})
         dataframe.index.name = "time"
+        dataframe.index = to_datetime(dataframe.index, format="%Y-%m-%d %H:%M:%S")
 
         dataset = dataframe.to_xarray()
         dataset.attrs.update(metadata)

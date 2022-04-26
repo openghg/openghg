@@ -1,5 +1,7 @@
 import pytest
 from pandas import Timestamp
+import xarray as xr
+import json
 
 from openghg.store.base import Datasource
 from openghg.store import ObsSurface
@@ -599,3 +601,22 @@ def test_read_multiside_aqmesh():
     }
 
     assert data.attrs == expected_attrs
+
+
+def test_store_data():
+    # First we need to jump through some hoops to get the correct data dict
+    # I feel like there must be a simpler way of doing this but xarray.to_json
+    # doesn't convert datetimes correctly
+    test_data_nc = get_datapath(filename="icos_toh_co2_147m.nc", data_type="ICOS")
+    ds = xr.open_dataset(test_data_nc)
+
+    metadata_path = get_datapath(filename="toh_metadata.json", data_type="ICOS")
+
+    with open(metadata_path, "r") as f:
+        data = json.load(f)
+
+    data["co2"]["data"] = ds
+
+    result = ObsSurface.store_data(data=data)
+
+    print(result)

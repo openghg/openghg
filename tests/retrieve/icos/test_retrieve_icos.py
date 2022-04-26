@@ -1,38 +1,75 @@
 import pytest
+
 import pandas as pd
 from openghg.retrieve.icos import retrieve
-from helpers import get_icos_test_file
+from helpers import get_icos_test_file, metadata_checker_obssurface
+from helpers import attributes_checker_obssurface, attributes_checker_obssurface
 
-# import icoscp.station.station
-from icoscp.station import station
 from icoscp.station.station import Station
+from icoscp.cpb.dobj import Dobj  # type: ignore
+from openghg.store import ObsSurface
+
+example_metadata = {
+    "0": '{"dobj":{"0":"https:\\/\\/meta.icos-cp.eu\\/objects\\/zYxCcjFqcV0gmfMiO4NTUrAg"},"objSpec":{"0":"http:\\/\\/meta.icos-cp.eu\\/resources\\/cpmeta\\/atcCo2L2DataObject"},"nRows":{"0":"27468"},"fileName":{"0":"ICOS_ATC_L2_L2-2021.1_TOH_10.0_CTS_CO2.zip"},"specLabel":{"0":"ICOS ATC CO2 Release"},"columnNames":{"0":null}}',
+    "1": '{"objFormat":{"0":"http:\\/\\/meta.icos-cp.eu\\/ontologies\\/cpmeta\\/asciiAtcProductTimeSer","1":"http:\\/\\/meta.icos-cp.eu\\/ontologies\\/cpmeta\\/asciiAtcProductTimeSer","2":"http:\\/\\/meta.icos-cp.eu\\/ontologies\\/cpmeta\\/asciiAtcProductTimeSer","3":"http:\\/\\/meta.icos-cp.eu\\/ontologies\\/cpmeta\\/asciiAtcProductTimeSer","4":"http:\\/\\/meta.icos-cp.eu\\/ontologies\\/cpmeta\\/asciiAtcProductTimeSer"},"colName":{"0":"Flag","1":"NbPoints","2":"Stdev","3":"TIMESTAMP","4":"co2"},"valueType":{"0":"quality flag","1":"number of points","2":"standard deviation of gas mole fraction","3":"time instant, UTC","4":"CO2 mixing ratio (dry mole fraction)"},"valFormat":{"0":"http:\\/\\/meta.icos-cp.eu\\/ontologies\\/cpmeta\\/bmpChar","1":"http:\\/\\/meta.icos-cp.eu\\/ontologies\\/cpmeta\\/int32","2":"http:\\/\\/meta.icos-cp.eu\\/ontologies\\/cpmeta\\/float32","3":"http:\\/\\/meta.icos-cp.eu\\/ontologies\\/cpmeta\\/iso8601dateTime","4":"http:\\/\\/meta.icos-cp.eu\\/ontologies\\/cpmeta\\/float32"},"unit":{"0":null,"1":null,"2":"\\u00b5mol mol-1","3":null,"4":"\\u00b5mol mol-1"},"qKind":{"0":null,"1":null,"2":"portion","3":null,"4":"portion"},"colTip":{"0":"single-letter quality flag","1":null,"2":null,"3":null,"4":null},"isRegex":{"0":null,"1":null,"2":null,"3":null,"4":null}}',
+    "2": '{"dobj":{"0":"https:\\/\\/meta.icos-cp.eu\\/objects\\/zYxCcjFqcV0gmfMiO4NTUrAg"},"stationName":{"0":"Torfhaus"},"stationId":{"0":"TOH"},"samplingHeight":{"0":"10.0"},"longitude":{"0":"10.535"},"latitude":{"0":"51.8088"},"elevation":{"0":"801.0"},"theme":{"0":"Atmospheric data"}}',
+}
 
 
-def test_icos_retrieve_no_local_no_species(mocker):
-    fake_data = mocker.Mock
-    mock_pid_file = get_icos_test_file(filename="test_pids_icos.csv.gz")
-    datas = pd.read_csv(mock_pid_file)
-    fake_data.return_value = datas
+def test_icos_retrieve_no_local(mocker):
+    pid_csv = get_icos_test_file(filename="test_pids_icos.csv.gz")
+    pid_df = pd.read_csv(pid_csv)
 
-    mocker.patch.object(station, "get", mocker.Mock)
-    mocker.patch.object(Station, "data", fake_data)
+    valid_station = Station()
+    valid_station._valid = True
 
-    retrieve(site="ABC")
+    mocker.patch("icoscp.station.station.get", return_value=valid_station)
+    mocker.patch.object(Station, "data", return_value=pid_df)
 
-    return
-    # Create a mock Station the function can read from
-    # datetime.datetime.today.return_value = tuesday
+    mock_dobj_file = get_icos_test_file(filename="sample_icos_site.csv.gz")
+    sample_icos_data = pd.read_csv(mock_dobj_file)
 
-    # st = create_station()
+    metadata = []
+    for i, df_data in sorted(example_metadata.items()):
+        df = pd.read_json(df_data)
+        metadata.append(df)
 
-    # mock_station = station.Station
+    # Mock the info property on the Dobj class
+    mocker.patch("icoscp.cpb.dobj.Dobj.info", return_value=metadata, new_callable=mocker.PropertyMock)
 
-    # stat = station.get(stationId=site.upper())
-    # data_pids = stat.data(level=data_level)
-    # dobj = Dobj(dobj_url)
+    mock_Dobj = Dobj()
+
+    dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", return_value=mock_Dobj)
+    get_mock = mocker.patch.object(Dobj, "get", return_value=sample_icos_data)
+    osbsurface_store = mocker.patch.object(ObsSurface, "store_data")
+
+    retrieved_data = retrieve(site="TOH")
+
+    assert dobj_mock.call_count == 12
+    assert get_mock.called_once_with()
+    assert osbsurface_store.call_count == 1
+
+    data = retrieved_data.data
+    metadata = retrieved_data.metadata
+
+    assert metadata_checker_obssurface(metadata=metadata, species="co2")
+
+    data.time[0] == pd.Timestamp("2017-12-13T00:00:00")
+    data["co2"][0] == pytest.approx(420.37399)
+    data["co2_variability"][0] == 0.118
+    data["co2_number_of_observations"][0] == 4
 
 
-#
+def test_icos_retrieve_invalid_site(mocker, capfd):
+    s = Station()
+    s._valid = False
 
-# requests_mock.post(ANY, json=mock_return, status_code=200)
-# requests_mock.get("https://www.example.com", content=mock_data, status_code=503)
+    mocker.patch("icoscp.station.station.get", return_value=s)
+
+    no_data = retrieve(site="ABC123")
+
+    assert no_data is None
+
+    out, _ = capfd.readouterr()
+
+    assert out.rstrip() == "Please check you have passed a valid ICOS site."
