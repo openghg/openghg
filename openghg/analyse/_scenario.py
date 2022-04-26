@@ -1354,12 +1354,11 @@ class ModelScenario:
                 if var not in scenario.data_vars:
                     raise ValueError(f"Unable to calculate baseline for short-lived species {species} without species specific footprint.")
 
-            # TODO: Check what type this will create - not aligning with expectations in mypy at present
-            # Could include: https://xarray.pydata.org/en/stable/generated/xarray.ufuncs.exp.html
-            loss_n: Union[DataArray, float] = np.exp(-1*scenario["mean_age_particles_n"]/lifetime_hrs).rename('loss_n')
-            loss_e: Union[DataArray, float] = np.exp(-1*scenario["mean_age_particles_e"]/lifetime_hrs).rename('loss_e')
-            loss_s: Union[DataArray, float] = np.exp(-1*scenario["mean_age_particles_s"]/lifetime_hrs).rename('loss_s')
-            loss_w: Union[DataArray, float] = np.exp(-1*scenario["mean_age_particles_w"]/lifetime_hrs).rename('loss_w')
+            # Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray
+            loss_n: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename('loss_n')  # type:ignore
+            loss_e: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename('loss_e')  # type:ignore
+            loss_s: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename('loss_s')  # type:ignore
+            loss_w: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename('loss_w')  # type:ignore
 
         else:
 
@@ -1368,10 +1367,10 @@ class ModelScenario:
             loss_s = 1.0
             loss_w = 1.0
 
-        modelled_baseline = (scenario["particle_locations_n"]*bc_data["vmr_n"]*loss_n).sum(["height", "lon"]) + \
-                            (scenario["particle_locations_e"]*bc_data["vmr_e"]*loss_e).sum(["height", "lat"]) + \
-                            (scenario["particle_locations_s"]*bc_data["vmr_s"]*loss_s).sum(["height", "lon"]) + \
-                            (scenario["particle_locations_w"]*bc_data["vmr_w"]*loss_w).sum(["height", "lat"])
+        modelled_baseline = (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n).sum(["height", "lon"]) + \
+                            (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e).sum(["height", "lat"]) + \
+                            (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s).sum(["height", "lon"]) + \
+                            (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w).sum(["height", "lat"])
 
         modelled_baseline.attrs["resample_to"] = resample_to
         modelled_baseline = modelled_baseline.rename("bc_mod")
