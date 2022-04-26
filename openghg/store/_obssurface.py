@@ -251,6 +251,9 @@ class ObsSurface(BaseStore):
         obs = ObsSurface.load()
         metastore = load_metastore(key=obs._metakey)
 
+        # Very rudimentary hash of the data and associated metadata
+        # hash_data()
+
         metadata = {k: _data["metadata"] for k, _data in data.items()}
 
         lookup_results = obs.datasource_lookup(metadata=metadata, metastore=metastore)

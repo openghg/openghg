@@ -154,6 +154,8 @@ def _retrieve_remote(
             dataframe = dataframe.sort_index()
 
         spec = metadata["species"]
+        inlet = metadata["inlet"]
+
         rename_cols = {
             "stdev": spec + " variability",
             "nbpoints": spec + " number_of_observations",
@@ -166,8 +168,12 @@ def _retrieve_remote(
         dataset = dataframe.to_xarray()
         dataset.attrs.update(metadata)
 
+        # So there isn't an easy way of getting a hash of a Dataset, can we do something
+        # simple here we can compare data that's being added? Then we'll be able to make sure
+        # ObsSurface.store_data won't accept data it's already seen
+        data_key = f"{spec}_{inlet}"
         # TODO - do we need both attributes and metadata here?
-        standardised_data[spec] = {
+        standardised_data[data_key] = {
             "metadata": metadata,
             "data": dataset,
             "attributes": metadata,
@@ -207,11 +213,15 @@ def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
     metadata["units"] = _get_value(df=measurement_data, col="unit", index=4)
 
     site = _get_value(df=site_data, col="stationId", index=0)
+    sampling_height = _get_value(df=site_data, col="samplingHeight", index=0)
 
     metadata["site"] = site
     metadata["station_long_name"] = _get_value(df=site_data, col="stationName", index=0)
-    metadata["sampling_height"] = _get_value(df=site_data, col="samplingHeight", index=0)
-    metadata["inlet"] = _get_value(df=site_data, col="samplingHeight", index=0)
+    # ICOS have sampling height as a float, we usually work with ints and an m on the end
+    # should we have a separate sampling_height_units record
+    metadata["sampling_height"] = sampling_height
+    metadata["sampling_height_units"] = "metres"
+    metadata["inlet"] = f"{str(int(sampling_height))}m"
     metadata["station_latitude"] = _get_value(df=site_data, col="latitude", index=0)
     metadata["station_longitude"] = _get_value(df=site_data, col="longitude", index=0)
     metadata["elevation"] = _get_value(df=site_data, col="elevation", index=0)
