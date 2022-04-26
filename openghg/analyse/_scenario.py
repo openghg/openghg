@@ -46,6 +46,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
 from openghg.dataobjects import FluxData, BoundaryConditionsData, FootprintData, ObsData
 from openghg.retrieve import get_flux, get_footprint, get_bc, get_obs_surface, search
 import numpy as np
+import xarray as xr
 from pandas import Timestamp
 from xarray import DataArray, Dataset
 
@@ -1308,10 +1309,13 @@ class ModelScenario:
 
         bc_data = bc_data.reindex_like(scenario, "ffill")
 
-        species = self.species
-        species_upper = species.upper()
         species_info = load_json(filename="acrg_species_info.json")
-        species_data = species_info[species_upper]
+        species = self.species
+        try:
+            species_data = species_info[species]
+        except KeyError:
+            species_upper = species.upper()
+            species_data = species_info[species_upper]
 
         # Check for lifetime details
         lifetime: Optional[str] = species_data.get("lifetime", None)
@@ -1480,8 +1484,10 @@ class ModelScenario:
         Plot comparison between observation and modelled timeseries data.
 
         Args:
-            baseline: Add baseline to data. One of "boundary_conditions" or "percentile".
-                      Include None to only plot the modelled obs and not include a baseline.
+            baseline: Add baseline to data. One of:
+                          - "boundary_conditions" - Uses added boundary conditions to calculate modelled baseline
+                          - "percentile" - Calculates the 1% value across the whole time period
+                          - None - don't add a baseline and only plot the modelled observations
             sources: Sources to use for flux. All will be used and stacked if not specified.
             resample_to: Resample option to use for averaging:
                           - either one of ["coarsest", "obs", "footprint"] to match to the datasets
@@ -1524,7 +1530,7 @@ class ModelScenario:
 
         if baseline == "boundary_conditions":
             if self.bc is not None:
-                modelled_baseline = self.calc_modelled_obs(
+                modelled_baseline = self.calc_modelled_baseline(
                     resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate)
                 y_baseline = modelled_baseline.data
                 y_data = y_data + y_baseline

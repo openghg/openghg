@@ -1,7 +1,9 @@
+from typing import Optional
 import pytest
 import numpy as np
 import xarray as xr
 import pandas as pd
+from xarray import Dataset
 from pandas import Timestamp, Timedelta
 from openghg.analyse import ModelScenario
 from openghg.analyse import match_dataset_dims, calc_dim_resolution, stack_datasets
@@ -412,7 +414,7 @@ def test_combine_flux_sources(model_scenario_1):
 
 
 def test_calc_modelled_baseline(model_scenario_1):
-    """ """
+    """Test modelled baselin can be calculated from ModelScenario"""
     modelled_baseline = model_scenario_1.calc_modelled_baseline(resample_to="coarsest")
     cached_modelled_baseline = model_scenario_1.modelled_baseline
 
@@ -439,9 +441,14 @@ def test_footprints_data_merge(model_scenario_1):
     attributes = combined_dataset.attrs
     assert attributes["resample_to"] == "coarsest"
 
+# TODO: Dummy tests included below but may want to add checks which use real
+# data for short-lived species (different footprint)
+# - species with single lifetime (e.g. "Rn")
+#    - e.g. WAO-20magl_UKV_rn_EUROPE_201801.nc
+# - species with monthly lifetime (e.g. "HFO-1234zee")
+#    - e.g. MHD-10magl_UKV_hfo-1234zee_EUROPE_201401.nc
 
 #%% Test method functionality with dummy data (CH4)
-
 
 @pytest.fixture
 def obs_ch4_dummy():
@@ -487,6 +494,7 @@ def footprint_dummy():
      - Small height
      - "fp" values are all 1 **May change**
      - "particle_locations_*" are 2, 3, 4, 5 for "n", "e", "s", "w"
+     - "INERT" species
     """
     from openghg.dataobjects import FootprintData
 
@@ -589,10 +597,10 @@ def bc_ch4_dummy():
     """
     Create example BoundaryConditionsData object with dummy data
      - Annual frequency (2011-01-01, 2012-01-01) (2 time points)
-     - Small lat, lon (TEST_DOMAIN)
-     - "flux" values are:
-       - 2011-01-01 - all 2
-       - 2012-01-01 - all 3
+     - Small lat, lon (TEST_DOMAIN); dummy height values
+     - 'vmr_X' values for 'n', 'e', 's', 'w' are:
+       - 2011-01-01 all points - 2, 3, 4, 5 (i.e. 'vmr_n' is 2)
+       - 2012-01-01 all points - 3, 4, 5, 6 (i.e. 'vmr_w' is 6)
     """
     from openghg.dataobjects import BoundaryConditionsData
 
@@ -602,10 +610,10 @@ def bc_ch4_dummy():
     height = [500, 1500]
 
     nheight, nlat, nlon, ntime = len(height), len(lat), len(lon), len(time)
-     
+
     shape_ns = (ntime, nlon, nheight)
     shape_ew = (ntime, nlat, nheight)
- 
+
     dims_ns = ("time", "lon", "height")
     dims_ew = ("time", "lat", "height")
 
@@ -642,8 +650,8 @@ def bc_ch4_dummy():
 @pytest.fixture
 def model_scenario_ch4_dummy(obs_ch4_dummy, footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
     """Create ModelScenario with input dummy data"""
-    model_scenario = ModelScenario(obs=obs_ch4_dummy, 
-                                   footprint=footprint_dummy, 
+    model_scenario = ModelScenario(obs=obs_ch4_dummy,
+                                   footprint=footprint_dummy,
                                    flux=flux_ch4_dummy,
                                    bc=bc_ch4_dummy)
 
@@ -673,7 +681,7 @@ def test_model_resample_ch4(model_scenario_ch4_dummy):
 
 
 def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_ch4_dummy):
-    """Test expected modelled observations with known dummy data"""
+    """Test expected modelled observations within footprints_data_merge method with known dummy data"""
     combined_dataset = model_scenario_ch4_dummy.footprints_data_merge()
 
     aligned_time = combined_dataset["time"]
@@ -698,7 +706,38 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
     assert np.allclose(modelled_mf, expected_modelled_mf)
 
 
-def test_model_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4_dummy):
+def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None):
+
+    fp_vars = ["particle_locations_n", "particle_locations_e", "particle_locations_s", "particle_locations_w"]
+    bc_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
+
+    # Only relevant if lifetime_hrs input is set
+    mean_age_vars = ["mean_age_particles_n", "mean_age_particles_e", "mean_age_particles_s", "mean_age_particles_w"]
+    
+    dims = {"N": ["height", "lon"], "E": ["height", "lat"], "S": ["height", "lon"], "W": ["height", "lat"]}
+
+    for i, bc_var, fp_var, age_var in zip(range(len(bc_vars)), bc_vars, fp_vars, mean_age_vars):
+        input_bc_values = bc[bc_var].reindex_like(footprint, method="ffill")
+        input_fp_values = footprint[fp_var]
+        
+        direction = bc_var.split('_')[-1].upper()
+
+        if lifetime_hrs is not None:
+            input_age_values = footprint[age_var]
+            loss = np.exp(-1*input_age_values/lifetime_hrs)
+        else:
+            loss = 1.0
+
+        baseline_component = (input_fp_values * input_bc_values * loss).sum(dim=dims[direction]).values
+        if i == 0:
+            expected_modelled_baseline = baseline_component
+        else:
+            expected_modelled_baseline += baseline_component
+
+    return expected_modelled_baseline
+
+
+def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4_dummy):
     """Test expected modelled baseline with known dummy data"""
     modelled_baseline = model_scenario_ch4_dummy.calc_modelled_baseline()
 
@@ -715,19 +754,7 @@ def test_model_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, 
     footprint = footprint_dummy.data.sel(time=time_slice)
     bc = bc_ch4_dummy.data.sel(time=time_slice)
 
-    fp_vars = ["particle_locations_n", "particle_locations_e", "particle_locations_s", "particle_locations_w"]
-    bc_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
-    dims = {"vmr_n": ["height", "lon"], "vmr_e": ["height", "lat"], "vmr_s": ["height", "lon"], "vmr_w": ["height", "lat"]}
-    expected_modelled_baseline = 0
-    for i, bc_var, fp_var in zip(range(len(bc_vars)), bc_vars, fp_vars):
-        input_bc_values = bc[bc_var].reindex_like(footprint, method="ffill")
-        input_fp_values = footprint[fp_var]
-
-        baseline_component = (input_fp_values * input_bc_values).sum(dim=dims[bc_var]).values
-        if i == 0:
-            expected_modelled_baseline = baseline_component
-        else:
-            expected_modelled_baseline += baseline_component
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=None)
 
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
@@ -905,7 +932,7 @@ def model_scenario_co2_dummy(obs_co2_dummy, footprint_co2_dummy, flux_co2_dummy)
 
 
 def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, flux_co2_dummy):
-    """Test expected modelled observations with known dummy data for co2"""
+    """Test expected modelled observations within footprints_dat_merge() method with known dummy data for co2"""
     combined_dataset = model_scenario_co2_dummy.footprints_data_merge()
 
     aligned_time = combined_dataset["time"]
@@ -963,29 +990,215 @@ def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, f
 
 
 #%% Test baseline calculation for short-lived species
+# Radon (Rn) - currently has one lifetime value defined
+# HFO-1234zee - currently has monthly lifetimes defined
+# - see openghg/data/acrg_species_info.json for details
 
-# TODO: Create dummy data and tests for short-lived species (different footprint)
-# - need to check species with single lifetime (e.g. "Rn")
-#    - e.g. WAO-20magl_UKV_rn_EUROPE_201801.nc
-# - need to check species with monthly lifetime (e.g. "HFO-1234zee")
-#    - e.g. MHD-10magl_UKV_hfo-1234zee_EUROPE_201401.nc
+def replace_species(data_object, species):
+    """
+    Create new dummy data based on the original but with a new species label
+    """
+    data = data_object  # Can we copy this?
+
+    data.data.attrs["species"] = species
+    data.metadata["species"] = species
+
+    return data
+
 
 @pytest.fixture
-def footprint_short_lived_dummy(footprint_dummy):
+def obs_radon_dummy(obs_ch4_dummy):
+    """
+    Create example ObsData object with dummy data
+     - Values match to obs_ch4_dummy
+     - Species is Radon (rn)
+    Same values as obs_ch4_dummy fixture but updated species to be "Rn"
+    """
+    species = "Rn"
+    return replace_species(obs_ch4_dummy, species)
 
+
+@pytest.fixture
+def footprint_radon_dummy(footprint_dummy):
+    """
+    Create example footprint data for Rn (short-lived species)
+     - Footprint values ('fp') match to footprint_dummy
+     - Additional parameters for short-lived species
+      - mean_age_particles_X for 'n','e','s','w'
+        - time point 0 all points - 10, 11, 12, 13
+        - time point 1 all points - 11, 12, 13, 14
+    """
     from openghg.dataobjects import FootprintData
 
-    footprint_data = footprint_dummy.data
-    footprint_metadata = footprint_dummy.metadata
+    footprint_ds = footprint_dummy.data  # Can we copy this?
+    footprint_metadata = footprint_dummy.metadata  # Can we copy this?
 
-    # Define:
-    # float mean_age_particles_n(height, lon, time)
-    # float mean_age_particles_e(height, lat, time)
-    # float mean_age_particles_s(height, lon, time)
-    # float mean_age_particles_w(height, lat, time)
+    species = "Rn"
+    footprint_metadata["species"] = species
+    footprint_ds.attrs["species"] = species
 
-    metadata = footprint_metadata.copy()
-    metadata["species"] = "Rn"
+    fp_dims = footprint_ds.dims
+    nlat = fp_dims["lat"]
+    nlon = fp_dims["lon"]
+    nheight = fp_dims["height"]
+    ntime = fp_dims["time"]
+
+    shape_ns = (ntime, nlon, nheight)
+    shape_ew = (ntime, nlat, nheight)
+
+    dims_ns = ("time", "lon", "height")
+    dims_ew = ("time", "lat", "height")
+
+    param = ["mean_age_particles_n",
+             "mean_age_particles_e",
+             "mean_age_particles_s",
+             "mean_age_particles_w"]
+    data_vars = {}
+    for i, dv in enumerate(param):
+        direction = dv.split("_")[-1]
+        if direction in ("n", "s"):
+            shape = shape_ns
+            dims = dims_ns
+        elif direction in ("e", "w"):
+            shape = shape_ew
+            dims = dims_ew
+        values = np.ones(shape)
+        # Assuming dim 0 is time and has length 2...
+        values[0, ...] *= (10.0 + i)  # 10, 11, 12, 13
+        values[1, ...] *= (11.0 + i)  # 11, 12, 13, 14
+        data_vars[dv] = (dims, values)
+
+    footprint_ds = footprint_ds.assign(data_vars)
+
+    footprintdata = FootprintData(
+        data=footprint_ds,
+        metadata=footprint_metadata,
+        flux={},
+        bc={},
+        species=species,
+        scales="",
+        units="",
+    )
+
+    return footprintdata
+
+
+@pytest.fixture
+def bc_radon_dummy(bc_ch4_dummy):
+    """
+    Create example BoundaryConditionsData object with dummy data
+     - Values match to bc_ch4_dummy
+     - Species is Radon (rn)
+    Same values as bc_ch4_dummy fixture but updated species to be "Rn"
+
+    """
+    species = "Rn"
+    return replace_species(bc_ch4_dummy, species)
+
+
+@pytest.fixture
+def model_scenario_radon_dummy(obs_radon_dummy, footprint_radon_dummy, bc_radon_dummy):
+    """Create ModelScenario with input dummy data for Radon (a short-lived species)"""
+    model_scenario = ModelScenario(obs=obs_radon_dummy, footprint=footprint_radon_dummy, bc=bc_radon_dummy)
+
+    return model_scenario
+
+
+def test_modelled_baseline_radon(model_scenario_radon_dummy, footprint_radon_dummy, bc_radon_dummy):
+    """Test expected modelled baseline for Rn (short-lived species) with known dummy data"""
+    modelled_baseline = model_scenario_radon_dummy.calc_modelled_baseline()
+
+    aligned_time = modelled_baseline["time"]
+    assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
+    assert aligned_time[-1] == Timestamp("2012-01-02T00:00:00")
+
+    # Create expected value(s) for modelled_baseline for short-lived species
+    # This includes a loss component vased on mean_age_particles for each direction
+    # In our case:
+    # - dummy particle_locations_* contains 2, 3, 4, 5 for n, e, s, w
+    # - dummy boundary conditions, vmr_* contains 3, 4, 5, 6 at the correct time for n, e, s, w
+    # - dummy mean age, mean_age_particles_* contains 11, 12, 13, 14 at the correct time for n, e, s, w
+    time_slice = slice(aligned_time[0], aligned_time[-1])
+    footprint = footprint_radon_dummy.data.sel(time=time_slice)
+    bc = bc_radon_dummy.data.sel(time=time_slice)
+
+    lifetime_rn_days = 5.5157  # Should match value within acrg_species_info.json file
+    lifetime_rn_hrs = lifetime_rn_days*24.0
+
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_rn_hrs)
+
+    assert np.allclose(modelled_baseline, expected_modelled_baseline)
+
+
+@pytest.fixture
+def obs_short_life_dummy(obs_ch4_dummy):
+    """
+    Create example ObsData object with dummy data
+     - Values match to obs_ch4_dummy
+     - Species is HFO-1234zee
+    Same values as obs_ch4_dummy fixture but updated species to be "HFO-1234zee"
+    """
+    species = "HFO-1234zee"
+    return replace_species(obs_ch4_dummy, species)
+
+
+@pytest.fixture
+def footprint_short_life_dummy(footprint_radon_dummy):
+    """
+    Create example FootprintData object with dummy data
+     - Values match to footprint_radon_dummy
+     - Species is HFO-1234zee
+    Same values as footprint_radon_dummy fixture but updated species to be "HFO-1234zee"
+    """
+    species = "HFO-1234zee"
+    return replace_species(footprint_radon_dummy, species)
+
+
+@pytest.fixture
+def bc_short_life_dummy(bc_ch4_dummy):
+    """
+    Create example BoundaryConditionsData object with dummy data
+     - Values match to bc_ch4_dummy
+     - Species is HFO-1234zee
+    Same values as bc_ch4_dummy fixture but updated species to be "HFO-1234zee"
+
+    """
+    species = "HFO-1234zee"
+    return replace_species(bc_ch4_dummy, species)
+
+
+@pytest.fixture
+def model_scenario_short_life_dummy(obs_short_life_dummy, footprint_short_life_dummy, bc_short_life_dummy):
+    """Create ModelScenario with input dummy data for short-lived species 'HFO-1234zee' """
+    model_scenario = ModelScenario(obs=obs_short_life_dummy, footprint=footprint_short_life_dummy, bc=bc_short_life_dummy)
+
+    return model_scenario
+
+
+def test_modelled_baseline_short_life(model_scenario_short_life_dummy, footprint_short_life_dummy, bc_short_life_dummy):
+    """Test expected modelled baseline for short-lived species 'HFO-1234zee' with known dummy data"""
+    modelled_baseline = model_scenario_short_life_dummy.calc_modelled_baseline()
+
+    aligned_time = modelled_baseline["time"]
+    assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
+    assert aligned_time[-1] == Timestamp("2012-01-02T00:00:00")
+
+    # Create expected value(s) for modelled_baseline for short-lived species
+    # This includes a loss component vased on mean_age_particles for each direction
+    # In our case:
+    # - dummy particle_locations_* contains 2, 3, 4, 5 for n, e, s, w
+    # - dummy boundary conditions, vmr_* contains 3, 4, 5, 6 at the correct time for n, e, s, w
+    # - dummy mean age, mean_age_particles_* contains 11, 12, 13, 14 at the correct time for n, e, s, w
+    time_slice = slice(aligned_time[0], aligned_time[-1])
+    footprint = footprint_short_life_dummy.data.sel(time=time_slice)
+    bc = bc_short_life_dummy.data.sel(time=time_slice)
+
+    lifetime_days_HFO1234zee_jan = 56.3  # Should match value within acrg_species_info.json file
+    lifetime_HFO1234zee_hrs = lifetime_days_HFO1234zee_jan*24.0
+
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_HFO1234zee_hrs)
+
+    assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
 
 #%% Test generic dataset functions
