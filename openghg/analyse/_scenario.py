@@ -1348,9 +1348,10 @@ class ModelScenario:
             expected_vars = ("mean_age_particles_n", "mean_age_particles_e", "mean_age_particles_s", "mean_age_particles_w")
             for var in expected_vars:
                 if var not in scenario.data_vars:
-                    raise ValueError("Unable to calculate baseline for short-lived species {species} without species specific footprint.")
+                    raise ValueError(f"Unable to calculate baseline for short-lived species {species} without species specific footprint.")
 
             # TODO: Check what type this will create - not aligning with expectations in mypy at present
+            # Could include: https://xarray.pydata.org/en/stable/generated/xarray.ufuncs.exp.html
             loss_n: Union[DataArray, float] = np.exp(-1*scenario["mean_age_particles_n"]/lifetime_hrs).rename('loss_n')
             loss_e: Union[DataArray, float] = np.exp(-1*scenario["mean_age_particles_e"]/lifetime_hrs).rename('loss_e')
             loss_s: Union[DataArray, float] = np.exp(-1*scenario["mean_age_particles_s"]/lifetime_hrs).rename('loss_s')

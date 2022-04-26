@@ -493,7 +493,7 @@ def footprint_dummy():
     time = pd.date_range("2011-12-31", "2012-01-03", freq="D")
     lat = [1.0, 2.0]
     lon = [10.0, 20.0]
-    height = [10.0, 100.0]
+    height = [500, 1500]
 
     # Add dummy footprint values
     nlat, nlon, ntime = len(lat), len(lon), len(time)
@@ -599,7 +599,7 @@ def bc_ch4_dummy():
     time = pd.date_range("2011-01-01", "2012-12-31", freq="AS")
     lat = [1.0, 2.0]
     lon = [10.0, 20.0]
-    height = [10.0, 100.0]
+    height = [500, 1500]
 
     nheight, nlat, nlon, ntime = len(height), len(lat), len(lon), len(time)
      
@@ -637,9 +637,6 @@ def bc_ch4_dummy():
     bc_data = BoundaryConditionsData(data=bc, metadata=metadata)
 
     return bc_data
-
-#TODO: Create dummy data and tests for boundary conditions
-#TODO: Create dummy data and tests for short-lived species (different footprint)
 
 
 @pytest.fixture
@@ -963,6 +960,32 @@ def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, f
 
         modelled_mf_hr = combined_dataset["mf_mod_high_res"].sel(time=release_time).values
         assert np.isclose(modelled_mf_hr, expected_modelled_mf_hr)
+
+
+#%% Test baseline calculation for short-lived species
+
+# TODO: Create dummy data and tests for short-lived species (different footprint)
+# - need to check species with single lifetime (e.g. "Rn")
+#    - e.g. WAO-20magl_UKV_rn_EUROPE_201801.nc
+# - need to check species with monthly lifetime (e.g. "HFO-1234zee")
+#    - e.g. MHD-10magl_UKV_hfo-1234zee_EUROPE_201401.nc
+
+@pytest.fixture
+def footprint_short_lived_dummy(footprint_dummy):
+
+    from openghg.dataobjects import FootprintData
+
+    footprint_data = footprint_dummy.data
+    footprint_metadata = footprint_dummy.metadata
+
+    # Define:
+    # float mean_age_particles_n(height, lon, time)
+    # float mean_age_particles_e(height, lat, time)
+    # float mean_age_particles_s(height, lon, time)
+    # float mean_age_particles_w(height, lat, time)
+
+    metadata = footprint_metadata.copy()
+    metadata["species"] = "Rn"
 
 
 #%% Test generic dataset functions
