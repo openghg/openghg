@@ -70,7 +70,7 @@ def test_scenario_infer_inputs_ch4():
     species = "ch4"
     source = "anthro"
 
-    bc_input = "mozart"
+    bc_input = "MOZART"
 
     model_scenario = ModelScenario(
         site=site,
@@ -135,6 +135,9 @@ def test_scenario_infer_inputs_co2():
     """
     Test ModelScenario can find data for co2 including specific co2 footprint.
     """
+
+    # TODO: Incorporate boundary conditions
+    # - need to add appropriate BC file on TEST domain
 
     start_date = "2014-07-01"
     end_date = "2014-08-01"
