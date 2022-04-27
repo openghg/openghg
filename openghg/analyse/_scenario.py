@@ -46,7 +46,6 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
 from openghg.dataobjects import FluxData, BoundaryConditionsData, FootprintData, ObsData
 from openghg.retrieve import get_flux, get_footprint, get_bc, get_obs_surface, search
 import numpy as np
-import xarray as xr
 from pandas import Timestamp
 from xarray import DataArray, Dataset
 
@@ -418,7 +417,6 @@ class ModelScenario:
         """
         Add boundary conditions data based on keywords or direct BoundaryConditionsData object.
         """
-        from openghg.util import clean_string
 
         # Search for boundary conditions data based on keywords
         # - domain, species, bc_input
@@ -1343,7 +1341,7 @@ class ModelScenario:
             # calculate the lifetime_hrs associated with each time point in scenario data
             # this is because lifetime can be a list of monthly values
             time_month = scenario["time"].dt.month
-            lifetime_hrs = np.array([lifetime_monthly_hrs[item-1] for item in time_month.values])
+            lifetime_hrs = np.array([lifetime_monthly_hrs[item - 1] for item in time_month.values])
         else:
             short_lifetime = False
 
