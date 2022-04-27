@@ -9,9 +9,9 @@ from openghg.dataobjects import ObsData
 def retrieve(
     site: str,
     species: Optional[Union[str, List]] = None,
+    sampling_height: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    data_level: int = 2,
     force_retrieval: bool = False,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS data. If data is found in the object store it is returned. Otherwise
@@ -22,8 +22,6 @@ def retrieve(
         species: Species name
         start_date: Start date
         end_date: End date
-        data_level: Data level of ICOS data to retrieve, see
-        https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
     Returns:
         ObsData or list
@@ -31,14 +29,21 @@ def retrieve(
     from openghg.retrieve import search
     from openghg.store import ObsSurface
     from openghg.dataobjects import ObsData
+    from openghg.util import to_lowercase
 
-    # NOTE - we skip ranking here, will we be ranking ICOS data? - GJ
-    results = search(site=site, species=species, network="ICOS", skip_ranking=True)
+    # NOTE - we skip ranking here, will we be ranking ICOS data?
+    results = search(
+        site=site,
+        species=species,
+        sampling_height=sampling_height,
+        network="ICOS",
+        start_date=start_date,
+        end_date=end_date,
+        skip_ranking=True,
+    )
 
     if results and not force_retrieval:
-        # TODO - if date is later than the data we have force a retrieval
-        raise NotImplementedError
-        return results
+        obs_data: Union[ObsData, List[ObsData]] = results.retrieve_all()
     else:
         # We'll also need to check we have current data
         standardised_data = _retrieve_remote(site=site, species=species)
@@ -46,20 +51,19 @@ def retrieve(
         if standardised_data is None:
             return None
 
-        # How to best handle this? Static method seems ?
         ObsSurface.store_data(data=standardised_data)
 
         # Create the expected ObsData type
         obs_data = []
         for data in standardised_data.values():
             measurement_data = data["data"]
-            metadata = data["metadata"]
+            metadata = to_lowercase(data["metadata"])
             obs_data.append(ObsData(data=measurement_data, metadata=metadata))
 
-        if len(obs_data) == 1:
-            return obs_data[0]
-        else:
-            return obs_data
+    if isinstance(obs_data, list) and len(obs_data) == 1:
+        return obs_data[0]
+    else:
+        return obs_data
 
 
 def _retrieve_remote(
@@ -146,6 +150,7 @@ def _retrieve_remote(
         # metadata returned from the ICOS CP,
         # How should we handle this?
         metadata["instrument"] = "NA"
+        metadata["data_type"] = "timeseries"
 
         dataframe.columns = [x.lower() for x in dataframe.columns]
         dataframe = dataframe.dropna(axis="index")
@@ -219,7 +224,7 @@ def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
     metadata["station_long_name"] = _get_value(df=site_data, col="stationName", index=0)
     # ICOS have sampling height as a float, we usually work with ints and an m on the end
     # should we have a separate sampling_height_units record
-    metadata["sampling_height"] = sampling_height
+    metadata["sampling_height"] = f"{str(int(sampling_height))}m"
     metadata["sampling_height_units"] = "metres"
     metadata["inlet"] = f"{str(int(sampling_height))}m"
     metadata["station_latitude"] = _get_value(df=site_data, col="latitude", index=0)

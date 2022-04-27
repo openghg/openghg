@@ -2,8 +2,8 @@ import pytest
 
 import pandas as pd
 from openghg.retrieve.icos import retrieve
+from openghg.dataobjects import SearchResults
 from helpers import get_icos_test_file, metadata_checker_obssurface
-from helpers import attributes_checker_obssurface, attributes_checker_obssurface
 
 from icoscp.station.station import Station
 from icoscp.cpb.dobj import Dobj  # type: ignore
@@ -46,7 +46,7 @@ def test_icos_retrieve_no_local(mocker):
     retrieved_data = retrieve(site="TOH")
 
     assert dobj_mock.call_count == 12
-    assert get_mock.called_once_with()
+    assert get_mock.call_count == 12
     assert osbsurface_store.call_count == 1
 
     data = retrieved_data.data
@@ -58,6 +58,16 @@ def test_icos_retrieve_no_local(mocker):
     data["co2"][0] == pytest.approx(420.37399)
     data["co2_variability"][0] == 0.118
     data["co2_number_of_observations"][0] == 4
+
+    # Now disable the store_data mock and store the data,
+    # then check we get the data
+    osbsurface_store.stop()
+
+    # Now we store the data
+    retrieved_data_once = retrieve(site="TOH")
+
+    assert dobj_mock.call_count == 24
+    assert get_mock.call_count == 24
 
 
 def test_icos_retrieve_invalid_site(mocker, capfd):
@@ -73,3 +83,49 @@ def test_icos_retrieve_invalid_site(mocker, capfd):
     out, _ = capfd.readouterr()
 
     assert out.rstrip() == "Please check you have passed a valid ICOS site."
+
+
+def test_icos_retrieve_and_store(mocker):
+    pid_csv = get_icos_test_file(filename="test_pids_icos.csv.gz")
+    pid_df = pd.read_csv(pid_csv)
+
+    valid_station = Station()
+    valid_station._valid = True
+
+    mocker.patch("icoscp.station.station.get", return_value=valid_station)
+    mocker.patch.object(Station, "data", return_value=pid_df)
+
+    mock_dobj_file = get_icos_test_file(filename="sample_icos_site.csv.gz")
+    sample_icos_data = pd.read_csv(mock_dobj_file)
+
+    metadata = []
+    for i, df_data in sorted(example_metadata.items()):
+        df = pd.read_json(df_data)
+        metadata.append(df)
+
+    # Mock the info property on the Dobj class
+    mocker.patch("icoscp.cpb.dobj.Dobj.info", return_value=metadata, new_callable=mocker.PropertyMock)
+
+    mock_Dobj = Dobj()
+
+    dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", return_value=mock_Dobj)
+    get_mock = mocker.patch.object(Dobj, "get", return_value=sample_icos_data)
+    # We patch this here so we can make sure we're getting the result from retrieve_all and not from
+    # search
+    retrieve_all = mocker.patch.object(
+        SearchResults, "retrieve_all", side_effect=SearchResults.retrieve_all, autospec=True
+    )
+
+    retrieved_data_first = retrieve(site="TOH")
+
+    assert retrieve_all.call_count == 0
+
+    retrieved_data_second = retrieve(site="TOH")
+
+    assert retrieve_all.call_count == 1
+
+    assert dobj_mock.call_count == 12
+    assert get_mock.call_count == 12
+
+    assert retrieved_data_first.metadata == retrieved_data_second.metadata
+    assert retrieved_data_first.data.co2.equals(retrieved_data_second.data.co2)

@@ -51,6 +51,12 @@ class ObsData(_BaseData, abc.Mapping):
         # values are added.
         return 1
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ObsData):
+            return NotImplemented
+
+        return self.data.equals(other.data) and self.metadata == other.metadata
+
     def plot_timeseries(
         self, title: str = None, xlabel: str = None, ylabel: str = None, units: str = None
     ) -> go.Figure:
