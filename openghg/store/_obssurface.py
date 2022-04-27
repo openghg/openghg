@@ -237,7 +237,7 @@ class ObsSurface(BaseStore):
         return results
 
     @staticmethod
-    def store_data(data: Dict, overwrite: bool = False) -> Dict:
+    def store_data(data: Dict, overwrite: bool = False) -> Optional[Dict]:
         """This expects already standardised data such as ICOS / CEDA
 
         Args:
@@ -245,21 +245,39 @@ class ObsSurface(BaseStore):
             # TODO - add link to docs here
             See the data spec under Development -> Data specifications
             in the documentation
+        Returns:
+            Dict or None:
         """
         from openghg.store import assign_data, load_metastore
+        from openghg.util import hash_retrieved_data
 
         obs = ObsSurface.load()
         metastore = load_metastore(key=obs._metakey)
 
         # Very rudimentary hash of the data and associated metadata
-        # hash_data()
+        hashes = hash_retrieved_data(to_hash=data)
+        # Find the keys in data we've seen before
+        seen_before = {next(iter(v)) for k, v in hashes.items() if k in obs._retrieved_hashes}
 
-        metadata = {k: _data["metadata"] for k, _data in data.items()}
+        if len(seen_before) == len(data):
+            print("There is no new data to process.")
+            return None
+
+        keys_to_process = set(data.keys())
+        if seen_before:
+            # TODO - add this to log
+            print(f"We've seen {seen_before} before. Processing new data only.")
+            keys_to_process -= seen_before
+
+        to_process = {k: v for k, v in data.items() if k in keys_to_process}
+        metadata = {k: _data["metadata"] for k, _data in to_process.items()}
 
         lookup_results = obs.datasource_lookup(metadata=metadata, metastore=metastore)
 
         # Create Datasources, save them to the object store and get their UUIDs
-        datasource_uuids = assign_data(data_dict=data, lookup_results=lookup_results, overwrite=overwrite)
+        datasource_uuids = assign_data(
+            data_dict=to_process, lookup_results=lookup_results, overwrite=overwrite
+        )
 
         # Record the Datasources we've created / appended to
         obs.add_datasources(uuids=datasource_uuids, metadata=metadata, metastore=metastore)

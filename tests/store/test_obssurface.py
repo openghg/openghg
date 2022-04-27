@@ -603,10 +603,13 @@ def test_read_multiside_aqmesh():
     assert data.attrs == expected_attrs
 
 
-def test_store_icos_carbonportal_data():
+def test_store_icos_carbonportal_data(mocker):
     # First we need to jump through some hoops to get the correct data dict
     # I feel like there must be a simpler way of doing this but xarray.to_json
     # doesn't convert datetimes correctly
+    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
+
     test_data_nc = get_datapath(filename="test_toh_co2_147m.nc", data_type="ICOS")
     ds = xr.open_dataset(test_data_nc)
 
@@ -617,6 +620,10 @@ def test_store_icos_carbonportal_data():
 
     data["co2"]["data"] = ds
 
-    result = ObsSurface.store_data(data=data)
+    first_result = ObsSurface.store_data(data=data)
 
-    print(result)
+    assert first_result == {'co2': {'uuid': 'test-uuid-1', 'new': True}}
+
+    second_result = ObsSurface.store_data(data=data)
+
+    assert second_result == {'co2': {'uuid': 'test-uuid-1', 'new': False}}

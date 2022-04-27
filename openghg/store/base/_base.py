@@ -27,6 +27,8 @@ class BaseStore:
         self._datasource_uuids: Dict[str, str] = {}
         # Hashes of previously uploaded files
         self._file_hashes: Dict[str, str] = {}
+        # Hashes of previously stored data from other data platforms
+        self._retrieved_hashes: Dict[str, Dict] = {}
         # Keyed by UUID
         self._rank_data = aDict()
 
@@ -70,6 +72,7 @@ class BaseStore:
         c._creation_datetime = timestamp_tzaware(data["creation_datetime"])
         c._datasource_uuids = data["datasource_uuids"]
         c._file_hashes = data["file_hashes"]
+        c._retrieved_hashes = data["retrieved_hashes"]
         c._datasource_table = aDict(data["datasource_table"])
         c._rank_data = aDict(data["rank_data"])
         c._stored = False
@@ -89,6 +92,7 @@ class BaseStore:
         data["datasource_table"] = self._datasource_table
         data["datasource_uuids"] = self._datasource_uuids
         data["file_hashes"] = self._file_hashes
+        data["retrieved_hashes"] = self._retrieved_hashes
         data["rank_data"] = self._rank_data
 
         return data

@@ -56,8 +56,10 @@ def hash_retrieved_data(to_hash: Dict[str, Dict]) -> Dict:
     """
     from hashlib import sha1
     from json import dumps
+    from openghg.util import timestamp_now
 
-    hashes: Dict[str, str] = {}
+    current_timestamp = str(timestamp_now())
+    hashes: Dict[str, Dict] = {}
     for key, data in to_hash.items():
         metadata = data["metadata"]
         metadata_hash = sha1(dumps(metadata, sort_keys=True).encode("utf8")).hexdigest()
@@ -74,10 +76,6 @@ def hash_retrieved_data(to_hash: Dict[str, Dict]) -> Dict:
         combo = (metadata_hash + time_hash).encode("utf8")
         combo_hash = sha1(combo).hexdigest()
 
-        site = metadata["site"]
-        species = metadata["species"]
-        inlet = metadata["inlet"]
-
-        hashes[combo_hash] = f"{site}_{species}_{inlet}"
+        hashes[combo_hash] = {key: current_timestamp}
 
     return hashes
