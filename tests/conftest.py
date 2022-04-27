@@ -25,8 +25,6 @@ temporary_store = tempfile.TemporaryDirectory()
 temporary_store_path = temporary_store.name
 
 
-
-
 @pytest.fixture(autouse=True, scope="session")
 def set_envs():
     os.environ["ACQUIRE_HOST"] = "localhost:8080"
@@ -48,7 +46,8 @@ def pytest_addoption(parser):
 def pytest_configure(config):
     config.addinivalue_line("markers", "cfchecks: mark mark test as needing CF related libs to run")
     config.addinivalue_line(
-        "markers", "skip_if_no_cfchecker: skip test is cfchecker is not installed",
+        "markers",
+        "skip_if_no_cfchecker: skip test is cfchecker is not installed",
     )
 
 
@@ -57,6 +56,7 @@ def pytest_collection_modifyitems(config, items):
 
     try:
         import cfchecker
+
         cfchecker_imported = True
     except (FileNotFoundError, ImportError) as e:
         cfchecker_imported = False

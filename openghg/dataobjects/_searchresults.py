@@ -2,14 +2,15 @@ from dataclasses import dataclass
 from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
 
 from addict import Dict as aDict
+
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
 from openghg.util import (
     clean_string,
+    create_daterange_str,
     find_daterange_gaps,
     first_last_dates,
     split_daterange_str,
-    create_daterange_str,
 )
 
 __all__ = ["SearchResults"]
@@ -110,7 +111,7 @@ class SearchResults:
         """
         return self.results
 
-    def keys(self, site: str, species: str, inlet: Optional[str] = None) -> List[str]:
+    def keys(self, site: str, species: str, inlet: Optional[str] = None) -> Optional[List[str]]:
         """Return the data keys for the specified site and species.
         This is intended mainly for use in the search function when filling
         gaps of unranked dateranges.
@@ -133,12 +134,13 @@ class SearchResults:
                 keys: List = self.results[site][species]["keys"]
             else:
                 keys = self.results[site][species][inlet]["keys"]
+
+            return keys
         except KeyError:
-            raise ValueError(f"No keys found for {species} at {site}")
+            print(f"No keys found for {species} at {site}")
+            return None
 
-        return keys
-
-    def metadata(self, site: str, species: str, inlet: Optional[str] = None) -> Dict:
+    def metadata(self, site: str, species: str, inlet: Optional[str] = None) -> Optional[Dict]:
         """Return the metadata for the specified site and species
 
         Args:
@@ -163,31 +165,46 @@ class SearchResults:
             else:
                 metadata = self.results[site][species][inlet]["metadata"]
         except KeyError:
-            raise KeyError(f"No metadata found for {species} at {site}")
+            print(f"No metadata found for {species} at {site}")
+            return None
+        else:
+            return metadata
 
-        return metadata
-
-    def retrieve_all(self) -> Dict:
+    def retrieve_all(self) -> Union[ObsData, List[ObsData], None]:
         """Retrieve all the data found during the serch
 
         Returns:
-            dict: Dictionary of all data
+            list: List of ObsData objects
         """
-        data = aDict()
+        results = []
 
-        # Can we just traverse the dict without looping?
-        for site, species_data in self.results.items():
-            for species, inlet_data in species_data.items():
-                for inlet in inlet_data:
-                    data[site][species][inlet] = self._create_obsdata(site=site, species=species, inlet=inlet)
+        if self.ranked_data:
+            # Can we just traverse the dict without looping?
+            for site, species_data in self.results.items():
+                for species, inlet_data in species_data.items():
+                    obsdata = self._create_obsdata(site=site, species=species)
+                    results.append(obsdata)
+        else:
+            # Can we just traverse the dict without looping?
+            for site, species_data in self.results.items():
+                for species, inlet_data in species_data.items():
+                    for inlet in inlet_data:
+                        obsdata = self._create_obsdata(site=site, species=species, inlet=inlet)
+                        results.append(obsdata)
 
-        # TODO - update this once addict is stubbed
-        data_dict: Dict = data.to_dict()
-        return data_dict
+        if not results:
+            return None
+        if len(results) == 1:
+            return results[0]
+        else:
+            return results
 
     def retrieve(
-        self, site: Optional[str] = None, species: Optional[str] = None, inlet: Optional[str] = None
-    ) -> Union[Dict[str, ObsData], ObsData, None]:
+        self,
+        site: Optional[str] = None,
+        species: Optional[str] = None,
+        inlet: Optional[str] = None,
+    ) -> Union[ObsData, List[ObsData], None]:
         """Retrieve some or all of the data found in the object store.
 
         Args:
@@ -200,79 +217,50 @@ class SearchResults:
         species = clean_string(species)
         inlet = clean_string(inlet)
 
-        # If inlet is not specified, check if this is unambiguous
-        # If so, set inlet to be the only value and continue.
-        if inlet is None:
-            try:
-                potential_inlets = self.results[site][species].keys()
-            except KeyError:
-                pass
-            else:
-                if len(potential_inlets) == 1:
-                    inlet = list(potential_inlets)[0]
+        results = []
+        if not self.ranked_data:
+            for _site, site_data in self.results.items():
+                if site is not None and _site != site:
+                    continue
+                for _species, species_data in site_data.items():
+                    if species is not None and _species != species:
+                        continue
+                    for _inlet in species_data:
+                        if inlet is not None and _inlet != inlet:
+                            continue
 
-        if self.ranked_data:
-            if all((site, species, inlet)):
-                # TODO - how to do this in a cleaner way?
-                site = str(site)
-                species = str(species)
-                inlet = str(inlet)
-                return self._create_obsdata(site=site, species=species, inlet=inlet)
+                        obsdata = self._create_obsdata(site=_site, species=_species, inlet=_inlet)
 
-            results = {}
-            if site is not None and species is not None:
-                try:
-                    _ = self.results[site][species]["keys"]
-                except KeyError:
-                    raise KeyError(f"Unable to find data keys for {species} at {site}.")
-
-                return self._create_obsdata(site=site, species=species)
-
-            # Get the data for all the species at that site
-            if site is not None and species is None:
-                for sp in self.results[site]:
-                    key = "_".join((site, sp))
-                    results[key] = self._create_obsdata(site=site, species=sp)
-
-                return results
-
-            # Get the data for all the species at that site
-            if site is None and species is not None:
-                for a_site in self.results:
-                    key = "_".join((a_site, species))
-
-                    try:
-                        results[key] = self._create_obsdata(site=a_site, species=species)
-                    except KeyError:
-                        pass
-
-                return results
-
-            for a_site, species_list in self.results.items():
-                for sp in species_list:
-                    key = "_".join((a_site, sp))
-                    results[key] = self._create_obsdata(site=a_site, species=sp)
-
-            return results
+                        if obsdata is not None:
+                            results.append(obsdata)
         else:
-            # if len(self.results) == 1 and not all((species, inlet)):
-            #     raise ValueError("Please pass species and inlet")
-            if not all((species, site, inlet)):
-                try:
-                    potential_inlets = ", ".join(self.results[site][species].keys())
-                    print(f"Please refine your search, potential inlets are: {potential_inlets}")
-                except KeyError:
-                    raise ValueError("We expect species, site and inlet to be passed.")
-                else:
-                    return None
+            if inlet is not None:
+                from openghg.retrieve import search
 
-            # TODO - how to do this in a cleaner way for mypy?
-            site = str(site)
-            species = str(species)
-            inlet = str(inlet)
-            return self._create_obsdata(site=site, species=species, inlet=inlet)
+                with_inlet = search(site=site, species=species, inlet=inlet)
+                inlet_data: ObsData = with_inlet.retrieve(site=site, species=species, inlet=inlet)
+                return inlet_data
 
-    def _create_obsdata(self, site: str, species: str, inlet: str = None) -> ObsData:
+            for _site, site_data in self.results.items():
+                if site is not None and _site != site:
+                    continue
+                for _species, species_data in site_data.items():
+                    if species is not None and _species != species:
+                        continue
+
+                    obsdata = self._create_obsdata(site=_site, species=_species)
+
+                    if obsdata is not None:
+                        results.append(obsdata)
+
+        if not results:
+            return None
+        if len(results) == 1:
+            return results[0]
+        else:
+            return results
+
+    def _create_obsdata(self, site: str, species: str, inlet: Optional[str] = None) -> ObsData:
         """Creates an ObsData object for return to the user
 
         Args:
@@ -283,10 +271,13 @@ class SearchResults:
         """
         from xarray import concat
 
-        if self.ranked_data:
-            specific_source = self.results[site][species]
-        else:
-            specific_source = self.results[site][species][inlet]
+        try:
+            if self.ranked_data:
+                specific_source = self.results[site][species]
+            else:
+                specific_source = self.results[site][species][inlet]
+        except KeyError:
+            raise ValueError("Error: We can't create an ObsData object using these parameters.")
 
         data_keys = specific_source["keys"]
         metadata = specific_source["metadata"]
@@ -358,7 +349,9 @@ class SearchResults:
 
                     ranked_dateranges = list(ranked_keys.keys())
                     unranked_dateranges = find_daterange_gaps(
-                        start_search=first_date, end_search=last_date, dateranges=ranked_dateranges
+                        start_search=first_date,
+                        end_search=last_date,
+                        dateranges=ranked_dateranges,
                     )
 
                     unranked_metadata = {}

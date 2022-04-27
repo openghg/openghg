@@ -118,13 +118,15 @@ class Datasource:
             None
         """
         from openghg.util import daterange_overlap, create_daterange_str, relative_time_offset
+        from xarray import concat as xr_concat
+        from numpy import unique as np_unique
         from pandas import Timedelta
 
         # Group by year
         year_group = data.groupby("time.year")
 
         # Use a dictionary keyed with the daterange covered by each segment of data
-        additional_data = {}
+        new_data = {}
 
         # Extract period associated with data from metadata
         # This will be the "sampling_period" for obs and "time_period" for other
@@ -163,33 +165,56 @@ class Datasource:
             # This ensure start-end range includes time period covered by data
             if period is not None:
                 period_td = relative_time_offset(period=period)
-                end_date = end_date + period_td - Timedelta(seconds=1)  # Subtract 1 second to make this exclusive end.
+                end_date = (
+                    end_date + period_td - Timedelta(seconds=1)
+                )  # Subtract 1 second to make this exclusive end.
 
             # If start and end times are identical add 1 second to ensure the range duration is > 0 seconds
             if start_date == end_date:
                 end_date += Timedelta(seconds=1)
 
             daterange_str = create_daterange_str(start=start_date, end=end_date)
-            additional_data[daterange_str] = data
+            new_data[daterange_str] = data
 
         if self._data:
-            # We don't want the same data twice, this will be stored in previous versions
-            # Check for overlap between exisiting and new dateranges
-            to_keep = []
-            for current_daterange in self._data:
-                for new_daterange in additional_data:
-                    if not daterange_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
-                        to_keep.append(current_daterange)
+            # We need to remove them from the curre
+            # pop the current daterange from
+            overlapping = []
+            for existing_daterange in self._data:
+                for new_daterange in new_data:
+                    if daterange_overlap(daterange_a=existing_daterange, daterange_b=new_daterange):
+                        overlapping.append((existing_daterange, new_daterange))
 
-            updated_data = {}
-            for k in to_keep:
-                updated_data[k] = self._data[k]
-            # Add in the additional new data
-            updated_data.update(additional_data)
+            # If we have overlapping data, we print a warning and then combine the datasets
+            # if we have duplicate timestamps, we first check if the data is just the same
+            # or if it's not, we keep the first value and drop the others, we also
+            # print that we've done this
+            if overlapping:
+                combined_datasets = {}
+                for existing_daterange, new_daterange in overlapping:
+                    ex = self._data.pop(existing_daterange)
+                    new = new_data.pop(new_daterange)
 
-            self._data = updated_data
+                    print("NOTE: Combining overlapping data dateranges")
+                    # Concatenate datasets along time dimension
+                    combined = xr_concat((ex, new), dim="time")
+                    combined = combined.sortby("time")
+
+                    unique, index, count = np_unique(combined.time, return_counts=True, return_index=True)
+
+                    # We may have overlapping dates but not duplicate times
+                    if unique[count > 1].size > 0:
+                        print("NOTE: Dropping measurements at duplicate timestamps")
+                        combined = combined.isel(time=index)
+
+                    combined_daterange = self.get_dataset_daterange_str(dataset=combined)
+                    combined_datasets[combined_daterange] = combined
+
+                self._data.update(combined_datasets)
+            else:
+                self._data.update(new_data)
         else:
-            self._data = additional_data
+            self._data = new_data
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
