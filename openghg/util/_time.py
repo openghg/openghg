@@ -719,15 +719,9 @@ def parse_period(period: Union[str, tuple]) -> Tuple[Union[int, float], str]:
     return value, unit
 
 
-<<<<<<< HEAD
 def create_frequency_str(value: Optional[Union[int, float]] = None,
                          unit: Optional[str] = None,
                          period: Optional[Union[str, tuple]] = None) -> str:
-=======
-def create_frequency_str(
-    value: Optional[int] = None, unit: Optional[str] = None, period: Optional[Union[str, tuple]] = None
-) -> str:
->>>>>>> devel
     """
     Create a suitable frequency string based either a value and unit pair
     or a period value. The unit will be made singular if the value is 1.
@@ -762,7 +756,6 @@ def create_frequency_str(
     return frequency_str
 
 
-<<<<<<< HEAD
 def time_offset(value: Optional[Union[int, float]] = None,
                 unit: Optional[str] = None,
                 period: Optional[Union[str, tuple]] = None) -> Timedelta:
@@ -794,11 +787,6 @@ def time_offset(value: Optional[Union[int, float]] = None,
 def relative_time_offset(value: Optional[Union[int, float]] = None,
                          unit: Optional[str] = None,
                          period: Optional[Union[str, tuple]] = None) -> Union[DateOffset, Timedelta]:
-=======
-def relative_time_offset(
-    value: Optional[int] = None, unit: Optional[str] = None, period: Optional[Union[str, tuple]] = None
-) -> Union[DateOffset, Timedelta]:
->>>>>>> devel
     """
     Create relative time offset based on inputs. This is based on the pandas
     DateOffset and Timedelta functions.
