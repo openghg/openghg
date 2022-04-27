@@ -32,6 +32,7 @@ __all__ = [
     "find_duplicate_timestamps",
 ]
 
+TupleTimeType = Tuple[Union[int, float], str]
 
 def find_duplicate_timestamps(data: Union[Dataset, DataFrame]) -> List:
     """Check for duplicates
@@ -653,7 +654,7 @@ def time_offset_definition() -> Dict[str, List]:
     return offset_naming
 
 
-def parse_period(period: Union[str, tuple]) -> Tuple[Union[int, float], str]:
+def parse_period(period: Union[str, tuple]) -> TupleTimeType:
     """
     Parses period input and converts to a value, unit pair.
 
@@ -690,7 +691,7 @@ def parse_period(period: Union[str, tuple]) -> Tuple[Union[int, float], str]:
             value_in = period[0]
             if isinstance(value_in, str):
                 try:
-                    value = int(value_in)
+                    value: Union[int, float] = int(value_in)
                 except ValueError:
                     value = float(value_in)
             else:

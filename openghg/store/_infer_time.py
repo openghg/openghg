@@ -11,6 +11,7 @@ from openghg.util import (
     relative_time_offset,
 )
 
+TupleTimeType = Tuple[Union[int, float], str]
 
 def infer_date_range(time: DataArray,
                      filepath: Optional[Union[str, Path]] = None,
@@ -45,7 +46,7 @@ def infer_date_range(time: DataArray,
 
     # Find frequency from period, if specified
     if period is not None:
-        freq: Optional[Tuple[int, str]] = parse_period(period)
+        freq: Optional[TupleTimeType] = parse_period(period)
     else:
         freq = None
 
@@ -70,7 +71,7 @@ def infer_date_range(time: DataArray,
                 date_match = ""
 
             # Set as default as annual if unable to derive from filepath
-            inferred_freq: Optional[Tuple[int, str]] = (1, "years")
+            inferred_freq: Optional[TupleTimeType] = (1, "years")
 
             if len(date_match) == 6:
                 # "yyyymm" format indicates monthly data
@@ -90,7 +91,7 @@ def infer_date_range(time: DataArray,
         # Because frequency cannot be inferred from the data and only the filename,
         # use the user specified input in preference of the inferred value
         if freq is not None:
-            time_value: Optional[int] = freq[0]
+            time_value: Optional[Union[int, float]] = freq[0]
             time_unit: Optional[str] = freq[1]
         else:
             if inferred_freq is not None:
