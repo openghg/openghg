@@ -1,12 +1,13 @@
+import numpy as np
 import pytest
-from pandas import Timestamp
-from openghg.retrieve import search
+from helpers import get_datapath
+
+from openghg.dataobjects import SearchResults
 from openghg.client import rank_sources
+from openghg.retrieve import search
 from openghg.store import ObsSurface
 from openghg.util import split_daterange_str
-import numpy as np
-
-from helpers import get_datapath
+from pandas import Timestamp
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -22,6 +23,11 @@ def load_CRDS():
     ObsSurface.read_file(filepath=[bsd_42m, bsd_108m, bsd_248m], data_type="CRDS", site="bsd", network="DECC")
 
 
+@pytest.fixture(scope="session", autouse=False)
+def with_ranking():
+    pass
+
+
 def test_retrieve_unranked():
     results = search(species="ch4", skip_ranking=True)
 
@@ -34,21 +40,134 @@ def test_retrieve_unranked():
     assert raw_results["bsd"]["ch4"]["42m"]
 
 
+def test_inlet_retrieve_only_unranked():
+    results = search(species="ch4")
+
+    data_50m = results.retrieve(inlet="50m")
+
+    metadata = data_50m.metadata
+    assert metadata["inlet_height_magl"] == "50m"
+    assert metadata["site"] == "hfd"
+
+
+def test_site_retrieve_only_unranked():
+    results = search(species="ch4")
+
+    data_bsd = results.retrieve(site="bsd")
+
+    assert len(data_bsd) == 3
+
+    for obs in data_bsd:
+        assert obs.metadata["site"] == "bsd"
+
+
+def test_species_retrieve_only_unranked():
+    sites = ["tac", "bsd"]
+    results = search(site=sites)
+
+    co2_data = results.retrieve(species="co2")
+
+    assert len(co2_data) == 4
+
+    for obs in co2_data:
+        assert obs.metadata["site"] in sites
+
+
+def test_species_site_retrieve_only_unranked():
+    results = search(site="bsd")
+
+    bsd_data = results.retrieve(site="bsd", species="co2")
+
+    heights = ["108m", "248m", "42m"]
+
+    assert len(bsd_data) == 3
+
+    for obs in bsd_data:
+        inlet = obs.metadata["inlet"]
+        heights.remove(inlet)
+
+
+def test_site_inlet_retrieve_only_unranked():
+    results = search(site="tac")
+
+    tac_data = results.retrieve(site="tac", inlet="100m")
+
+    species = ["co2", "ch4"]
+
+    assert len(tac_data) == 2
+
+    for obs in tac_data:
+        s = obs.metadata["species"]
+
+        species.remove(s)
+
+
+def test_species_inlet_retrieve_only_unranked():
+    results = search(site=["bsd", "tac", "hfd"])
+
+    data_42m = results.retrieve(species="co2", inlet="42m")
+
+    assert len(data_42m) == 1
+
+    metadata = data_42m.metadata
+
+    assert metadata["site"] == "bsd"
+    assert metadata["inlet"] == "42m"
+    assert metadata["species"] == "co2"
+
+
+def test_retrieve_bad_search_terms():
+    results = search(site=["bsd", "hfd", "tac"])
+
+    data_invalid = results.retrieve(inlet="888m")
+
+    assert data_invalid is None
+
+    data_invalid = results.retrieve(site="londinium")
+
+    assert data_invalid is None
+
+    data_invalid = results.retrieve(species="sparrow")
+
+    assert data_invalid is None
+
+    data_invalid = results.retrieve(species="co2", site="londinium")
+
+    assert data_invalid is None
+
+    data_invalid = results.retrieve(species="co2", inlet="888m")
+
+    assert data_invalid is None
+
+    data_invalid = results.retrieve(site="londinium", inlet="42m")
+
+    assert data_invalid is None
+
+    data_invalid = results.retrieve(species="co2", site="bsd", inlet="-1m")
+
+    assert data_invalid is None
+
+
+def test_retrieve_all_unranked():
+    results = search(site=["bsd", "tac"], species=["ch4", "co"], inlet=["100m", "108m"])
+
+    all_data = results.retrieve_all()
+
+    expected = [("tac", "ch4", "100m"), ("bsd", "ch4", "108m"), ("bsd", "co", "108m")]
+    for obs in all_data:
+        site = obs.metadata["site"]
+        species = obs.metadata["species"]
+        inlet = obs.metadata["inlet"]
+
+        assert (site, species, inlet) in expected
+
+
 def test_retrieve_complex_ranked():
-    # Clear the ObsSurface ranking data
     obs = ObsSurface.load()
     obs._rank_data.clear()
     obs.save()
 
     rank = rank_sources(site="bsd", species="co")
-
-    expected_res = {
-        "42m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"},
-        "108m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"},
-        "248m": {"rank_data": "NA", "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"},
-    }
-
-    assert rank.raw() == expected_res
 
     rank.set_rank(inlet="42m", rank=1, start_date="2014-01-01", end_date="2015-03-01")
     rank.set_rank(inlet="108m", rank=1, start_date="2015-03-02", end_date="2016-08-01")
@@ -56,30 +175,31 @@ def test_retrieve_complex_ranked():
     rank.set_rank(inlet="248m", rank=1, start_date="2017-03-02", end_date="2019-03-01")
     rank.set_rank(inlet="108m", rank=1, start_date="2019-03-02", end_date="2021-12-01")
 
+    rank = rank_sources(site="bsd", species="co")
     updated_res = rank.get_sources(site="bsd", species="co")
 
-    expected_updated_res = {
+    expected = {
         "42m": {
             "rank_data": {
                 "2014-01-01-00:00:00+00:00_2015-03-01-00:00:00+00:00": 1,
                 "2016-08-02-00:00:00+00:00_2017-03-01-00:00:00+00:00": 1,
             },
-            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
         },
         "108m": {
             "rank_data": {
                 "2015-03-02-00:00:00+00:00_2016-08-01-00:00:00+00:00": 1,
                 "2019-03-02-00:00:00+00:00_2021-12-01-00:00:00+00:00": 1,
             },
-            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
         },
         "248m": {
             "rank_data": {"2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": 1},
-            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
         },
     }
 
-    assert updated_res == expected_updated_res
+    assert updated_res == expected
 
     search_res = search(site="bsd", species="co")
 
@@ -116,3 +236,108 @@ def test_retrieve_complex_ranked():
         assert all_inlets[0] == inlet
 
     assert measurement_data.time.size == 126
+
+    # Now we test that retrieve_all works correctly with ranked data
+    results = search(site="bsd", species="co")
+
+    all_data = results.retrieve_all()
+
+    metadata = all_data.metadata
+
+    expected_ranking_data = {
+        "ranked": {
+            "2014-01-01-00:00:00+00:00_2015-03-01-00:00:00+00:00": "42m",
+            "2016-08-02-00:00:00+00:00_2017-03-01-00:00:00+00:00": "42m",
+            "2015-03-02-00:00:00+00:00_2016-08-01-00:00:00+00:00": "108m",
+            "2019-03-02-00:00:00+00:00_2021-12-01-00:00:00+00:00": "108m",
+            "2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": "248m",
+        },
+        "unranked": {},
+    }
+
+    assert metadata["rank_metadata"] == expected_ranking_data
+
+    ranking_data = results.rankings()
+
+    expected_rankings = {
+        "bsd": {
+            "co": {
+                "2014-01-01-00:00:00+00:00_2015-03-01-00:00:00+00:00": "42m",
+                "2016-08-02-00:00:00+00:00_2017-03-01-00:00:00+00:00": "42m",
+                "2015-03-02-00:00:00+00:00_2016-08-01-00:00:00+00:00": "108m",
+                "2019-03-02-00:00:00+00:00_2021-12-01-00:00:00+00:00": "108m",
+                "2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": "248m",
+            }
+        }
+    }
+
+    assert ranking_data == expected_rankings
+
+
+def test_inlet_gets_data_with_ranking():
+    # Clear the ObsSurface ranking data
+    obs = ObsSurface.load()
+    obs._rank_data.clear()
+    obs.save()
+
+    rank = rank_sources(site="bsd", species="co")
+
+    rank.set_rank(inlet="42m", rank=1, start_date="2014-01-01", end_date="2015-03-01")
+    rank.set_rank(inlet="108m", rank=1, start_date="2015-03-02", end_date="2016-08-01")
+    rank.set_rank(inlet="42m", rank=1, start_date="2016-08-02", end_date="2017-03-01")
+    rank.set_rank(inlet="248m", rank=1, start_date="2017-03-02", end_date="2019-03-01")
+    rank.set_rank(inlet="108m", rank=1, start_date="2019-03-02", end_date="2021-12-01")
+
+    results = search(species="co")
+
+    assert results.ranked_data is True
+
+    obsdata = results.retrieve(site="bsd", inlet="42m", species="co")
+
+    co_data = obsdata.data
+    metadata = obsdata.metadata
+
+    assert metadata["inlet"] == "42m"
+    assert metadata["site"] == "bsd"
+    assert metadata["species"] == "co"
+
+    assert co_data.time[0] == Timestamp("2014-01-30T11:12:30")
+    assert co_data.time[-1] == Timestamp("2020-12-01T22:31:30")
+
+
+def test_retrieve_empty_object():
+    empty = SearchResults(results={}, ranked_data=False, cloud=False)
+
+    result = empty.retrieve(site="test", species="hawk", inlet="888m")
+
+    assert result is None
+
+    result = empty.retrieve_all()
+
+    assert result is None
+
+    empty = SearchResults(results={}, ranked_data=True, cloud=False)
+
+    result_ranked = empty.retrieve(site="test", species="hawk")
+
+    assert result_ranked is None
+
+    result_ranked = empty.retrieve_all()
+
+    assert result_ranked is None
+
+
+def test_retrieve_cloud_raises():
+    results = search(site="bsd")
+
+    results.cloud = True
+
+    with pytest.raises(NotImplementedError):
+        _ = results.retrieve_all()
+
+
+def test_create_obsdata_no_data_raises():
+    empty = SearchResults(results={}, ranked_data=True, cloud=False)
+
+    with pytest.raises(ValueError):
+        _ = empty._create_obsdata(site="rome", inlet="-85m", species="ptarmigan")

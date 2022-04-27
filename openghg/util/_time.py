@@ -34,7 +34,7 @@ __all__ = [
 
 
 def find_duplicate_timestamps(data: Union[Dataset, DataFrame]) -> List:
-    """ Check for duplicates
+    """Check for duplicates
 
     Args:
         data: Data object to check. Should have a time attribute or index
@@ -640,14 +640,15 @@ def time_offset_definition() -> Dict[str, List]:
     Returns:
         dict: containing list of values of synonym values
     """
-    offset_naming = {"months": ["monthly", "months", "month", "MS"],
-                     "years": ["yearly", "years", "annual", "year", "AS", "YS"],
-                     "weeks": ["weekly", "weeks", "week", "W"],
-                     "days": ["daily", "days", "day", "D"],
-                     "hours": ["hourly", "hours", "hour", "hr", "h", "H"],
-                     "minutes": ["minutely", "minutes", "minute", "min", "m", "T"],
-                     "seconds": ["secondly", "seconds", "second", "sec", "s", "S"],
-                     }
+    offset_naming = {
+        "months": ["monthly", "months", "month", "MS"],
+        "years": ["yearly", "years", "annual", "year", "AS", "YS"],
+        "weeks": ["weekly", "weeks", "week", "W"],
+        "days": ["daily", "days", "day", "D"],
+        "hours": ["hourly", "hours", "hour", "hr", "h", "H"],
+        "minutes": ["minutely", "minutes", "minute", "min", "m", "T"],
+        "seconds": ["secondly", "seconds", "second", "sec", "s", "S"],
+    }
 
     return offset_naming
 
@@ -682,7 +683,9 @@ def parse_period(period: Union[str, tuple]) -> Tuple[Union[int, float], str]:
 
     if isinstance(period, tuple):
         if len(period) != 2:
-            raise ValueError("Input for period not recognised: {period}. For tuple input requires (value, unit).")
+            raise ValueError(
+                "Input for period not recognised: {period}. For tuple input requires (value, unit)."
+            )
         else:
             value_in = period[0]
             if isinstance(value_in, str):
@@ -716,9 +719,15 @@ def parse_period(period: Union[str, tuple]) -> Tuple[Union[int, float], str]:
     return value, unit
 
 
+<<<<<<< HEAD
 def create_frequency_str(value: Optional[Union[int, float]] = None,
                          unit: Optional[str] = None,
                          period: Optional[Union[str, tuple]] = None) -> str:
+=======
+def create_frequency_str(
+    value: Optional[int] = None, unit: Optional[str] = None, period: Optional[Union[str, tuple]] = None
+) -> str:
+>>>>>>> devel
     """
     Create a suitable frequency string based either a value and unit pair
     or a period value. The unit will be made singular if the value is 1.
@@ -753,6 +762,7 @@ def create_frequency_str(value: Optional[Union[int, float]] = None,
     return frequency_str
 
 
+<<<<<<< HEAD
 def time_offset(value: Optional[Union[int, float]] = None,
                 unit: Optional[str] = None,
                 period: Optional[Union[str, tuple]] = None) -> Timedelta:
@@ -784,6 +794,11 @@ def time_offset(value: Optional[Union[int, float]] = None,
 def relative_time_offset(value: Optional[Union[int, float]] = None,
                          unit: Optional[str] = None,
                          period: Optional[Union[str, tuple]] = None) -> Union[DateOffset, Timedelta]:
+=======
+def relative_time_offset(
+    value: Optional[int] = None, unit: Optional[str] = None, period: Optional[Union[str, tuple]] = None
+) -> Union[DateOffset, Timedelta]:
+>>>>>>> devel
     """
     Create relative time offset based on inputs. This is based on the pandas
     DateOffset and Timedelta functions.
