@@ -34,6 +34,7 @@ __all__ = [
 
 TupleTimeType = Tuple[Union[int, float], str]
 
+
 def find_duplicate_timestamps(data: Union[Dataset, DataFrame]) -> List:
     """Check for duplicates
 

@@ -13,6 +13,7 @@ from openghg.util import (
 
 TupleTimeType = Tuple[Union[int, float], str]
 
+
 def infer_date_range(time: DataArray,
                      filepath: Optional[Union[str, Path]] = None,
                      period: Optional[Union[str, tuple]] = None,
