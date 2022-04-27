@@ -1,3 +1,0 @@
-What's new?
-
-- Improved documentation and community facing documents such as issue and pull request templates.

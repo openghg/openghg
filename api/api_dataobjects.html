@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>dataobjects API detail &#8212; OpenGHG 0+untagged.1.g9160acf.dirty documentation</title>
+    <title>dataobjects API detail &#8212; OpenGHG 0+untagged.1.g20e766e.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -282,12 +282,14 @@ by the <code class="docutils literal notranslate"><span class="pre">search</span
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">SearchResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranked_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults" title="Permalink to this definition">#</a></dt>
-<dd><p>This class is used to return data from the search function</p>
+<dd><p>This class is used to return data from the search function. It
+has member functions to retrieve data from the object store.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>results</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Search results</p></li>
 <li><p><strong>ranked_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – True if results are ranked, else False</p></li>
+<li><p><strong>cloud</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – True if running in cloud</p></li>
 </ul>
 </dd>
 </dl>

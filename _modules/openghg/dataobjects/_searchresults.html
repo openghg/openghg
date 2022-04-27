@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._searchresults &#8212; OpenGHG 0+untagged.1.g9160acf.dirty documentation</title>
+    <title>openghg.dataobjects._searchresults &#8212; OpenGHG 0+untagged.1.g20e766e.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -184,11 +184,13 @@
 
 <div class="viewcode-block" id="SearchResults"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults">[docs]</a><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">SearchResults</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;This class is used to return data from the search function</span>
+    <span class="sd">&quot;&quot;&quot;This class is used to return data from the search function. It</span>
+<span class="sd">    has member functions to retrieve data from the object store.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        results: Search results</span>
 <span class="sd">        ranked_data: True if results are ranked, else False</span>
+<span class="sd">        cloud: True if running in cloud</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s2">&quot;SearchResults&quot;</span><span class="p">)</span>

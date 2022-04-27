@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Development &#8212; OpenGHG 0+untagged.1.g9160acf.dirty documentation</title>
+    <title>Development &#8212; OpenGHG 0+untagged.1.g20e766e.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -325,9 +325,11 @@ deactivate the environment and return to your system Python using;</p>
 </section>
 <section id="clone-openghg">
 <h3>Clone OpenGHG<a class="headerlink" href="#clone-openghg" title="Permalink to this headline">#</a></h3>
-<p>To get a copy of the repo and ensure you have all the required depdencies for development run</p>
+<p>As OpenGHG is currently in its very early stages and is not yet available on <code class="docutils literal notranslate"><span class="pre">pip</span></code> we need
+clone the OpenGHG repository and then move into it and install the required dependencies.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/openghg/openghg.git
 <span class="nb">cd</span> openghg
+pip install -r requirements.txt
 pip install -r requirements-dev.txt
 </pre></div>
 </div>
@@ -444,9 +446,8 @@ catch bugs.</p>
 </section>
 <section id="pre-commit">
 <h3>Pre-commit<a class="headerlink" href="#pre-commit" title="Permalink to this headline">#</a></h3>
-<p>This project uses <a class="reference external" href="https://pre-commit.com/">pre-commit</a> to ensure code is linted and formatted using tools such as flake8,
-black and others. This ensures errors are caught before the code is checked in the CI pipeline.</p>
-<p>To install the hook</p>
+<p>This project uses <a class="reference external" href="https://pre-commit.com/">pre-commit</a> to ensure code is linted and formatted. This ensures
+errors are caught before the code is checked in the CI pipeline. To install the hook</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit install
 </pre></div>
 </div>
