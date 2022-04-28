@@ -824,8 +824,8 @@ class ModelScenario:
         """
 
         try:
-            parameter = exec(f"self.{param}")
-        except ValueError:
+            parameter = getattr(self, param)
+        except AttributeError:
             raise ValueError(f"Did not recognise input for {param}")
 
         # Check if cached modelled observations exist
