@@ -23,6 +23,7 @@ flake8
 pytest >= 6.2.5
 pytest-tornasync
 pytest-cov
+pytest-mock
 requests-mock
 # For mypy
 mypy==0.930
