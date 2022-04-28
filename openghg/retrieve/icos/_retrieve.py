@@ -37,6 +37,7 @@ def retrieve(
         species=species,
         sampling_height=sampling_height,
         network="ICOS",
+        data_source="icoscp",
         start_date=start_date,
         end_date=end_date,
         skip_ranking=True,
@@ -151,6 +152,7 @@ def _retrieve_remote(
         # How should we handle this?
         metadata["instrument"] = "NA"
         metadata["data_type"] = "timeseries"
+        metadata["data_source"] = "icoscp"
 
         dataframe.columns = [x.lower() for x in dataframe.columns]
         dataframe = dataframe.dropna(axis="index")
