@@ -2,6 +2,7 @@ import os
 import tempfile
 import pytest
 from helpers import get_datapath, get_emissions_datapath, get_bc_datapath, get_footprint_datapath
+from openghg.objectstore import get_local_bucket
 from openghg.store import ObsSurface, Emissions, BoundaryConditions, Footprints
 
 
@@ -10,6 +11,7 @@ def data_read():
     """
     Data set up for running tests for these sets of modules.
     """
+    get_local_bucket(empty=True)
 
     # Files for creating forward model (mf_mod) for methane and carbon dioxide at TAC site
 

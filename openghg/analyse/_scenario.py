@@ -59,8 +59,6 @@ __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_reso
 # TODO: Add static methods for different ways of creating the class
 # e.g. from_existing_data(), from_search(), empty() , ...
 
-# TODO: Incorporate boundary conditions when possible
-
 ParamType = Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]
 
 
