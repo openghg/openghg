@@ -85,8 +85,9 @@ def _retrieve_remote(
     from icoscp.station import station  # type: ignore
     from icoscp.cpb.dobj import Dobj  # type: ignore
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import load_json
+    from openghg.util import load_json, download_data
     from pandas import to_datetime
+    import json
     import re
 
     if species is None:
@@ -145,12 +146,61 @@ def _retrieve_remote(
 
         metadata = _extract_metadata(meta=dobj_info, site_metadata=site_metadata)
 
+        # There's some extra metadata available from their API
+        # that isn't currently (2022-04-28) available using ICOS pylib
+        metadata_url = f"{dobj_url}/meta.json"
+        metadata_bytes = download_data(url=metadata_url)
+
+        if metadata_bytes is not None:
+            extra_metadata = json.loads(metadata_bytes)
+
+            to_add: Dict[str, Union[str, List, Dict]] = {}
+
+            try:
+                reference_data = extra_metadata["references"]
+            except KeyError:
+                to_add["citation_string"] = "NA"
+                to_add["licence"] = "NA"
+            else:
+                to_add["citation_string"] = reference_data.get("citationString", "NA")
+                to_add["licence"] = reference_data.get("licence", {}).get("baseLicence", "NA")
+
+            try:
+                instrument_metadata = extra_metadata["specificInfo"]["acquisition"]["instrument"]
+            except KeyError:
+                to_add["instrument"] = "NA"
+                to_add["instrument_data"] = "NA"
+            else:
+                # Do some tidying of the instrument metadata
+                instruments = set()
+                cleaned_instrument_metadata = []
+                for inst in instrument_metadata:
+                    cleaned = {}
+                    for k, v in inst.items():
+                        if v:
+                            cleaned[k] = v
+                        if k == "label":
+                            instruments.add(v)
+
+                    cleaned_instrument_metadata.append(cleaned)
+
+                if len(instruments) == 1:
+                    instrument = instruments.pop()
+                else:
+                    instrument = "multiple"
+
+                to_add["instrument"] = instrument
+                to_add["instrument_data"] = cleaned_instrument_metadata
+
+            metadata.update(to_add)
+
         # Add ICOS in directly here for now
         metadata["network"] = "ICOS"
         # The instrument doesn't seem to be in the
         # metadata returned from the ICOS CP,
         # How should we handle this?
-        metadata["instrument"] = "NA"
+        # TODO - should we extract the single instrument
+        metadata["instrument"] = "see_instrument_data"
         metadata["data_type"] = "timeseries"
         metadata["data_source"] = "icoscp"
 

@@ -1,4 +1,4 @@
-from typing import Dict, Set, List, Union, Tuple, Optional, overload
+from typing import Any, Dict, Set, List, Union, Tuple, Optional, overload
 
 __all__ = ["clean_string", "to_lowercase"]
 
@@ -89,7 +89,7 @@ def to_lowercase(d: Union[Dict, List, Tuple, Set, str]) -> Union[Dict, List, Tup
         return d
 
 
-def is_number(s: str) -> bool:
+def is_number(s: Any) -> bool:
     """Is it a number?
 
     https://stackoverflow.com/q/354038
@@ -105,7 +105,7 @@ def is_number(s: str) -> bool:
     try:
         float(s)
         return True
-    except ValueError:
+    except (ValueError, TypeError):
         return False
 
 

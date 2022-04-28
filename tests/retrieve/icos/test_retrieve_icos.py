@@ -41,6 +41,11 @@ def test_icos_retrieve_no_local(mocker):
 
     dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", return_value=mock_Dobj)
     get_mock = mocker.patch.object(Dobj, "get", return_value=sample_icos_data)
+
+    toh_metadata_path = get_icos_test_file(filename="toh_metadata.json")
+    toh_metadata = toh_metadata_path.read_bytes()
+
+    mocker.patch("openghg.util.download_data", return_value=toh_metadata)
     osbsurface_store = mocker.patch.object(ObsSurface, "store_data")
 
     retrieved_data = retrieve(site="TOH")
@@ -63,11 +68,56 @@ def test_icos_retrieve_no_local(mocker):
     # then check we get the data
     osbsurface_store.stop()
 
-    # Now we store the data
-    retrieved_data_once = retrieve(site="TOH")
+    # Now retrieve the data
+    toh_data = retrieve(site="TOH")
 
     assert dobj_mock.call_count == 24
     assert get_mock.call_count == 24
+
+    metadata = toh_data.metadata
+
+    expected_metadata = {
+        "dobj_pid": "https://meta.icos-cp.eu/objects/zyxccjfqcv0gmfmio4nturag",
+        "species": "co2",
+        "meas_type": "co2 mixing ratio (dry mole fraction)",
+        "units": "µmol mol-1",
+        "site": "toh",
+        "station_long_name": "torfhaus",
+        "sampling_height": "10m",
+        "sampling_height_units": "metres",
+        "inlet": "10m",
+        "station_latitude": "51.8088",
+        "station_longitude": "10.535",
+        "elevation": "801",
+        "data_owner": "dagmar kubistin",
+        "data_owner_email": "dagmar.kubistin@dwd.de",
+        "station_height_masl": 801.0,
+        "citation_string": "kubistin, d., plaß-dülmer, c., arnold, s., lindauer, m., müller-williams, j., schumacher, m., icos ri, 2021. icos atc co2 release, torfhaus (147.0 m), 2017-12-12–2021-01-31, https://hdl.handle.net/11676/y3-5_i70nw_f5pyn4i8m7wjo",
+        "licence": "https://creativecommons.org/licenses/by/4.0",
+        "instrument": "see_instrument_data",
+        "instrument_data": [
+            {
+                "label": "co2-ch4-h2o picarro analyzer",
+                "uri": "http://meta.icos-cp.eu/resources/instruments/atc_457",
+            },
+            {
+                "label": "co2-ch4-h2o picarro analyzer",
+                "uri": "http://meta.icos-cp.eu/resources/instruments/atc_271",
+            },
+        ],
+        "network": "icos",
+        "data_type": "timeseries",
+        "data_source": "icoscp",
+        "conditions_of_use": "ensure that you contact the data owner at the outset of your project.",
+        "source": "in situ measurements of air",
+        "conventions": "cf-1.8",
+        "processed_by": "openghg_cloud",
+        "calibration_scale": "unknown",
+        "sampling_period": "not_set",
+        "sampling_period_unit": "s",
+    }
+
+    assert expected_metadata.items() <= metadata.items()
 
 
 def test_icos_retrieve_invalid_site(mocker, capfd):

@@ -35,5 +35,4 @@ def test_is_number():
 
     assert not is_number(False)
 
-    with pytest.raises(TypeError):
-        is_number(["999"])
+    assert not is_number(["999"])
