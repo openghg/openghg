@@ -13,9 +13,12 @@ def retrieve(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     force_retrieval: bool = False,
+    data_level: int = 2,
 ) -> Union[ObsData, List[ObsData], None]:
-    """Retrieve ICOS data. If data is found in the object store it is returned. Otherwise
-    data will be retrieved from the ICOS Carbon Portal. This may take more time.
+    """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
+    data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
+    If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects
+    if returned, if nothing then None.
 
     Args:
         site: Site code
@@ -23,8 +26,9 @@ def retrieve(
         start_date: Start date
         end_date: End date
         force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
+        data_level: ICOS data level, see https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
     Returns:
-        ObsData or list
+        ObsData, list[ObsData] or None
     """
     from openghg.retrieve import search
     from openghg.store import ObsSurface
@@ -47,7 +51,7 @@ def retrieve(
         obs_data: Union[ObsData, List[ObsData]] = results.retrieve_all()
     else:
         # We'll also need to check we have current data
-        standardised_data = _retrieve_remote(site=site, species=species)
+        standardised_data = _retrieve_remote(site=site, species=species, data_level=data_level)
 
         if standardised_data is None:
             return None
@@ -69,6 +73,7 @@ def retrieve(
 
 def _retrieve_remote(
     site: str,
+    data_level: int,
     species: Optional[Union[str, List]] = None,
     sampling_height: Optional[str] = None,
 ) -> Optional[Dict]:
@@ -79,6 +84,7 @@ def _retrieve_remote(
         site: ICOS site code, for site codes see
         https://www.icos-cp.eu/observations/atmosphere/stations
         sampling_height: Sampling height in metres
+        data_level: ICOS data level, see https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
     Returns:
         dict or None: Dictionary of processed data and metadata if found
     """
@@ -105,10 +111,6 @@ def _retrieve_remote(
         print("Please check you have passed a valid ICOS site.")
         return None
 
-    # See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-    # - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
-    #  to be distributed through the Carbon Portal.
-    data_level = 2
     data_pids = stat.data(level=data_level)
 
     # We want to get the PIDs of the data for each species here
