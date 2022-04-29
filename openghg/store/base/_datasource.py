@@ -1,6 +1,7 @@
 from pandas import DataFrame, Timestamp
 from typing import DefaultDict, Dict, List, Optional, Tuple, Union, TypeVar, Type
 from xarray import Dataset
+import numpy as np
 
 dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
 
@@ -197,7 +198,29 @@ class Datasource:
 
                     print("NOTE: Combining overlapping data dateranges")
                     # Concatenate datasets along time dimension
-                    combined = xr_concat((ex, new), dim="time")
+                    try:
+                        combined = xr_concat((ex, new), dim="time")
+                    except (ValueError, KeyError):
+                        # If data variables in the two datasets are not identical,
+                        # xr_concat will raise an error
+                        dv_ex = set(ex.data_vars.keys())
+                        dv_new = set(new.data_vars.keys())
+
+                        # Check difference between datasets and fill any 
+                        # missing variables with NaN values.
+                        dv_not_in_new = dv_ex - dv_new
+                        for dv in dv_not_in_new:
+                            fill_values = np.zeros(len(new["time"])) * np.nan
+                            new = new.assign({dv: ("time", fill_values)})
+
+                        dv_not_in_ex = dv_new - dv_ex
+                        for dv in dv_not_in_ex:
+                            fill_values = np.zeros(len(ex["time"])) * np.nan
+                            ex = ex.assign({dv: ("time", fill_values)})
+
+                        # Should now be able to concatenate successfully
+                        combined = xr_concat((ex, new), dim="time")
+
                     combined = combined.sortby("time")
 
                     unique, index, count = np_unique(combined.time, return_counts=True, return_index=True)

@@ -362,20 +362,6 @@ def _read_obspack(
         units = processed_ds["value"].units
     except (KeyError, AttributeError):
         print("Unable to extract units from 'value' within input dataset")
-    else:
-        if units == "mol mol-1":
-            units = "1"
-        elif units == "millimol mol-1":
-            units = "1e-3"
-        elif units == "micromol mol-1":
-            units = "1e-6"
-        elif units in ["nmol mol-1", "nanomol mol-1"]:
-            units = "1e-9"
-        elif units == "pmol mol-1":
-            units = "1e-12"
-        else:
-            print(f"Using unit {units} directly")
-            # raise ValueError(f"Did not recognise input units from file: {units}")
 
     metadata = {}
     metadata["site"] = site
