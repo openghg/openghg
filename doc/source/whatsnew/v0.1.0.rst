@@ -1,0 +1,12 @@
+=======
+v0.1.0
+=======
+
+Features
+========
+
+- Ability to pull atmospheric measurements from ICOS using the ``openghg.client.retrieve_icos``
+command. See the documentation at [ADD DOCS] and tutorial [ADD TUTORIAL] for further information.
+
+Fixes
+=====
