@@ -721,9 +721,11 @@ def parse_period(period: Union[str, tuple]) -> TupleTimeType:
     return value, unit
 
 
-def create_frequency_str(value: Optional[Union[int, float]] = None,
-                         unit: Optional[str] = None,
-                         period: Optional[Union[str, tuple]] = None) -> str:
+def create_frequency_str(
+    value: Optional[Union[int, float]] = None,
+    unit: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+) -> str:
     """
     Create a suitable frequency string based either a value and unit pair
     or a period value. The unit will be made singular if the value is 1.
@@ -758,9 +760,11 @@ def create_frequency_str(value: Optional[Union[int, float]] = None,
     return frequency_str
 
 
-def time_offset(value: Optional[Union[int, float]] = None,
-                unit: Optional[str] = None,
-                period: Optional[Union[str, tuple]] = None) -> Timedelta:
+def time_offset(
+    value: Optional[Union[int, float]] = None,
+    unit: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+) -> Timedelta:
     """
     Create time offset based on inputs. This will return a Timedelta object
     and cannot create relative offsets (this includes "weeks", "months", "years").
@@ -779,16 +783,20 @@ def time_offset(value: Optional[Union[int, float]] = None,
         raise ValueError("If period is not included, both value and unit must be specified.")
 
     if unit in ("weeks", "months", "years"):
-        raise ValueError("Unable to calculate time offset with unit of {unit}. Try relative_time_offset() function instead")
+        raise ValueError(
+            "Unable to calculate time offset with unit of {unit}. Try relative_time_offset() function instead"
+        )
 
     time_delta = Timedelta(value, unit)
 
     return time_delta
 
 
-def relative_time_offset(value: Optional[Union[int, float]] = None,
-                         unit: Optional[str] = None,
-                         period: Optional[Union[str, tuple]] = None) -> Union[DateOffset, Timedelta]:
+def relative_time_offset(
+    value: Optional[Union[int, float]] = None,
+    unit: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+) -> Union[DateOffset, Timedelta]:
     """
     Create relative time offset based on inputs. This is based on the pandas
     DateOffset and Timedelta functions.

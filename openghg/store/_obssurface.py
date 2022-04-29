@@ -152,7 +152,7 @@ class ObsSurface(BaseStore):
 
                 progress_bar.update(1)
 
-        # Ensure we explicitly close the metadata store 
+        # Ensure we explicitly close the metadata store
         # as we're using the cached storage method
         metastore.close()
         # Save this object back to the object store

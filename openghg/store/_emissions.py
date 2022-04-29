@@ -104,11 +104,9 @@ class Emissions(BaseStore):
 
         em_time = em_data.time
 
-        start_date, end_date, period_str \
-            = infer_date_range(em_time,
-                               filepath=filepath,
-                               period=period,
-                               continuous=continuous)
+        start_date, end_date, period_str = infer_date_range(
+            em_time, filepath=filepath, period=period, continuous=continuous
+        )
 
         if date is None:
             # Check for how granular we should make the date label

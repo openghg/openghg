@@ -15,6 +15,4 @@ class BoundaryConditionsData(_BaseData):
     """
 
     def __str__(self) -> str:
-        return (
-            f"Data: {self.data}\nMetadata : {self.metadata}"
-        )
+        return f"Data: {self.data}\nMetadata : {self.metadata}"
