@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.gf6c61b9.dirty documentation</title>
+    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.gb477d70.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -318,7 +318,7 @@
 
                 <span class="n">progress_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="c1"># Ensure we explicitly close the metadata store </span>
+        <span class="c1"># Ensure we explicitly close the metadata store</span>
         <span class="c1"># as we&#39;re using the cached storage method</span>
         <span class="n">metastore</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="c1"># Save this object back to the object store</span>
@@ -401,6 +401,57 @@
         <span class="n">metastore</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">results</span></div>
+
+<div class="viewcode-block" id="ObsSurface.store_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.store_data">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">store_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;This expects already standardised data such as ICOS / CEDA</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            standardised_data: Dictionary of data in standard format</span>
+<span class="sd">            # TODO - add link to docs here</span>
+<span class="sd">            See the data spec under Development -&gt; Data specifications</span>
+<span class="sd">            in the documentation</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict or None:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">load_metastore</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">hash_retrieved_data</span>
+
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+        <span class="n">metastore</span> <span class="o">=</span> <span class="n">load_metastore</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">obs</span><span class="o">.</span><span class="n">_metakey</span><span class="p">)</span>
+
+        <span class="c1"># Very rudimentary hash of the data and associated metadata</span>
+        <span class="n">hashes</span> <span class="o">=</span> <span class="n">hash_retrieved_data</span><span class="p">(</span><span class="n">to_hash</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="c1"># Find the keys in data we&#39;ve seen before</span>
+        <span class="n">seen_before</span> <span class="o">=</span> <span class="p">{</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hashes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">obs</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">seen_before</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;There is no new data to process.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">keys_to_process</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">seen_before</span><span class="p">:</span>
+            <span class="c1"># TODO - add this to log</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;We&#39;ve seen </span><span class="si">{</span><span class="n">seen_before</span><span class="si">}</span><span class="s2"> before. Processing new data only.&quot;</span><span class="p">)</span>
+            <span class="n">keys_to_process</span> <span class="o">-=</span> <span class="n">seen_before</span>
+
+        <span class="n">to_process</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys_to_process</span><span class="p">}</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">_data</span> <span class="ow">in</span> <span class="n">to_process</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+
+        <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
+        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
+            <span class="n">data_dict</span><span class="o">=</span><span class="n">to_process</span><span class="p">,</span> <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Record the Datasources we&#39;ve created / appended to</span>
+        <span class="n">obs</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+
+        <span class="n">metastore</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">obs</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">datasource_uuids</span></div>
 
 <div class="viewcode-block" id="ObsSurface.datasource_lookup"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.datasource_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">datasource_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">metastore</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Find the Datasource we should assign the data to</span>
