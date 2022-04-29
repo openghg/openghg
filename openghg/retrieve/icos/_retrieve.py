@@ -300,5 +300,4 @@ def _get_value(df: DataFrame, col: str, index: int) -> str:
     try:
         return str(df[col][index]).lower()
     except (KeyError, TypeError):
-        print(f"DEBUG: line 190 _retrieve.py: Can't find {col} {index}")
         return "NA"
