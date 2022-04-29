@@ -158,22 +158,7 @@ class Datasource:
             period = None
 
         for _, data in year_group:
-            # Extract start and end dates from grouped data
-            start_date, end_date = self.get_dataset_daterange(data)
-
-            # If period is defined add this to the end date
-            # This ensure start-end range includes time period covered by data
-            if period is not None:
-                period_td = relative_time_offset(period=period)
-                end_date = (
-                    end_date + period_td - Timedelta(seconds=1)
-                )  # Subtract 1 second to make this exclusive end.
-
-            # If start and end times are identical add 1 second to ensure the range duration is > 0 seconds
-            if start_date == end_date:
-                end_date += Timedelta(seconds=1)
-
-            daterange_str = create_daterange_str(start=start_date, end=end_date)
+            daterange_str = self.get_representative_daterange_str(data, period=period)
             new_data[daterange_str] = data
 
         if self._data:
@@ -207,7 +192,9 @@ class Datasource:
                         print("NOTE: Dropping measurements at duplicate timestamps")
                         combined = combined.isel(time=index)
 
-                    combined_daterange = self.get_dataset_daterange_str(dataset=combined)
+                    # TODO: May need to find a way to find period for *last point* rather than *current point*
+                    # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
+                    combined_daterange = self.get_representative_daterange_str(dataset=combined, period=period)
                     combined_datasets[combined_daterange] = combined
 
                 self._data.update(combined_datasets)
@@ -280,6 +267,32 @@ class Datasource:
         end = str(end).replace(" ", "-")
 
         daterange_str: str = start + "_" + end
+
+        return daterange_str
+
+    def get_representative_daterange_str(self, dataset: Dataset, period: Optional[str] = None):
+        """
+        Get representative daterange which incorporates any period the data covers.
+        """
+        from openghg.util import create_daterange_str, relative_time_offset
+        from pandas import Timedelta
+
+        # Extract start and end dates from grouped data
+        start_date, end_date = self.get_dataset_daterange(dataset)
+
+        # If period is defined add this to the end date
+        # This ensure start-end range includes time period covered by data
+        if period is not None:
+            period_td = relative_time_offset(period=period)
+            end_date = (
+                end_date + period_td - Timedelta(seconds=1)
+            )  # Subtract 1 second to make this exclusive end.
+
+        # If start and end times are identical add 1 second to ensure the range duration is > 0 seconds
+        if start_date == end_date:
+            end_date += Timedelta(seconds=1)
+
+        daterange_str = create_daterange_str(start=start_date, end=end_date) 
 
         return daterange_str
 
