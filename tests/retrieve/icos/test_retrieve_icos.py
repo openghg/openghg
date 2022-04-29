@@ -94,16 +94,12 @@ def test_icos_retrieve_no_local(mocker):
         "station_height_masl": 801.0,
         "citation_string": "kubistin, d., plaß-dülmer, c., arnold, s., lindauer, m., müller-williams, j., schumacher, m., icos ri, 2021. icos atc co2 release, torfhaus (147.0 m), 2017-12-12–2021-01-31, https://hdl.handle.net/11676/y3-5_i70nw_f5pyn4i8m7wjo",
         "licence": "https://creativecommons.org/licenses/by/4.0",
-        "instrument": "see_instrument_data",
+        "instrument": "co2-ch4-h2o picarro analyzer",
         "instrument_data": [
-            {
-                "label": "co2-ch4-h2o picarro analyzer",
-                "uri": "http://meta.icos-cp.eu/resources/instruments/atc_457",
-            },
-            {
-                "label": "co2-ch4-h2o picarro analyzer",
-                "uri": "http://meta.icos-cp.eu/resources/instruments/atc_271",
-            },
+            "co2-ch4-h2o picarro analyzer",
+            "http://meta.icos-cp.eu/resources/instruments/atc_457",
+            "co2-ch4-h2o picarro analyzer",
+            "http://meta.icos-cp.eu/resources/instruments/atc_271",
         ],
         "network": "icos",
         "data_type": "timeseries",
@@ -149,7 +145,7 @@ def test_icos_retrieve_and_store(mocker):
     sample_icos_data = pd.read_csv(mock_dobj_file)
 
     metadata = []
-    for i, df_data in sorted(example_metadata.items()):
+    for _, df_data in sorted(example_metadata.items()):
         df = pd.read_json(df_data)
         metadata.append(df)
 
@@ -160,6 +156,11 @@ def test_icos_retrieve_and_store(mocker):
 
     dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", return_value=mock_Dobj)
     get_mock = mocker.patch.object(Dobj, "get", return_value=sample_icos_data)
+
+    toh_metadata_path = get_icos_test_file(filename="toh_metadata.json")
+    toh_metadata = toh_metadata_path.read_bytes()
+
+    mocker.patch("openghg.util.download_data", return_value=toh_metadata)
     # We patch this here so we can make sure we're getting the result from retrieve_all and not from
     # search
     retrieve_all = mocker.patch.object(

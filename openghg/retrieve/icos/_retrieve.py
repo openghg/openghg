@@ -174,15 +174,16 @@ def _retrieve_remote(
                 # Do some tidying of the instrument metadata
                 instruments = set()
                 cleaned_instrument_metadata = []
-                for inst in instrument_metadata:
-                    cleaned = {}
-                    for k, v in inst.items():
-                        if v:
-                            cleaned[k] = v
-                        if k == "label":
-                            instruments.add(v)
 
-                    cleaned_instrument_metadata.append(cleaned)
+                if not isinstance(instrument_metadata, list):
+                    instrument_metadata = [instrument_metadata]
+
+                for inst in instrument_metadata:
+                    instrument_name = inst["label"]
+                    instruments.add(instrument_name)
+                    uri = inst["uri"]
+
+                    cleaned_instrument_metadata.extend([instrument_name, uri])
 
                 if len(instruments) == 1:
                     instrument = instruments.pop()
@@ -196,11 +197,6 @@ def _retrieve_remote(
 
         # Add ICOS in directly here for now
         metadata["network"] = "ICOS"
-        # The instrument doesn't seem to be in the
-        # metadata returned from the ICOS CP,
-        # How should we handle this?
-        # TODO - should we extract the single instrument
-        metadata["instrument"] = "see_instrument_data"
         metadata["data_type"] = "timeseries"
         metadata["data_source"] = "icoscp"
 
