@@ -67,13 +67,18 @@ def get_obs_surface(
     if not obs_results:
         raise ValueError(f"Unable to find results for {species} at {site}")
 
-    retrieved_data: Union[ObsData, None] = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
-    
+    retrieved_data: Union[ObsData, List[ObsData], None] = obs_results.retrieve(site=site, species=species, inlet=inlet)
+
     if retrieved_data is None:
+        return None
+    elif isinstance(retrieved_data, list):
+        print("No data returned.")
+        print(f"Multiple entries found for current input parameters - site: '{site}', species: '{species}'")
+        print("Please supply additional parameters or set ranking.")
+        metadata_difference(retrieved_data, params=["inlet", "network", "instrument"])
         return None
 
     data = retrieved_data.data
-
 
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
@@ -337,7 +342,6 @@ def get_footprint(
     """
     from openghg.store import recombine_datasets
     from openghg.retrieve import search
-    from openghg.dataobjects import FootprintData
 
     results = search(
         site=site,
@@ -481,3 +485,52 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
     data.attrs["scale"] = to_scale
 
     return data
+
+
+multDataTypes = Union[List[ObsData], List[FootprintData], List[FluxData]]
+
+
+def metadata_difference(data: multDataTypes,
+                        params: Optional[list] = None,
+                        print_output: bool = True) -> list:
+    """
+    Check differences between metadata for returned data objects.
+
+    Args:
+        data : Multiple data objects e.g. multiple ObsData as a list
+        params : Specific metadata parameters to check. If None all parameters will be checked
+        print_output : Summarise and print output to screen.
+
+    Returns:
+        list : Keys from the metadata with differences
+
+        If print_output is True:
+            prints summarised output to screen
+    """
+    metadata = [d.metadata for d in data]
+    if params is not None:
+        metadata = [{param:m[param] for param in params} for m in metadata]
+
+    metadata0 = metadata[0]
+    difference = []
+    for metadata_compare in metadata[1:]:
+        metadata_diff = set(metadata0.items()) - set(metadata_compare.items())
+        difference.extend(list(metadata_diff))
+    param_difference = list(set([d[0] for d in difference]))
+
+    ignore_params = ["data_owner", "data_owner_email"]
+    for iparam in ignore_params:
+        try:
+            param_difference.remove(iparam)
+        except ValueError:
+            continue
+
+    if print_output:
+        print("Datasets contain:")
+        for param in param_difference:
+            print(f" {param}: ", end="")
+            for m in metadata:
+                print(f" '{m[param]}', ", end="")
+            print()  # print new line
+
+    return param_difference
